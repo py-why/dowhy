@@ -11,9 +11,10 @@ Much like machine learning libraries have done for prediction, **"DoWhy" is a Py
 For a quick introduction to causal inference, check out `this tutorial <https://github.com/amit-sharma/causal-inference-tutorial/>`_.
 Documentation for DoWhy is available at `causalinference.gitlab.io/dowhy <http://causalinference.gitlab.io/dowhy/>`_. 
 
-.. toctree::
-   :maxdepth: 4
-   :caption: Contents:
+.. i here comment toctree::
+.. i here comment   :maxdepth: 4
+.. i here comment   :caption: Contents:
+.. contents:: :depth=2
 
 The need for causal inference
 ----------------------------------
