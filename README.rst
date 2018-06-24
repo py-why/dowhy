@@ -72,7 +72,7 @@ DoWhy stresses on interpretability of its output. At any point in the analysis,
 you can inspect the untested assumptions, identified estimands (if any) and the
 estimate (if any). Here'a a sample output of the linear regression estimator.
 
-.. image:: docs/iamges/regression_output.png
+.. image:: docs/images/regression_output.png
 
 
 
