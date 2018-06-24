@@ -4,13 +4,11 @@ DoWhy | Making causal inference easy
 Amit Sharma (`amshar@microsoft.com <mailto:amshar@microsoft.com>`_),
 Emre Kiciman (`emrek@micosoft.com <mailto:emrek@microsoft.com>`_)
 
-As computing systems are more frequently and more actively intervening in societally critical domains such as healthcare, education and governance, it is critical to correctly predict and understand the causal effects of these interventions. Without an A/B test, conventional machine learning methods, built on pattern recognition and correlational analyses, are insufficient for causal reasoning. Much like machine learning libraries have done for prediction, **"DoWhy" is a Python library that aims to spark causal thinking and analysis**. DoWhy provides a unified interface for causal inference methods and automatically tests many assumptions, thus making inference accessible to non-experts. 
+As computing systems are more frequently and more actively intervening in societally critical domains such as healthcare, education and governance, it is critical to correctly predict and understand the causal effects of these interventions. Without an A/B test, conventional machine learning methods, built on pattern recognition and correlational analyses, are insufficient for causal reasoning. 
 
-.. image:: _static/dowhy_applications_resized.png
+Much like machine learning libraries have done for prediction, **"DoWhy" is a Python library that aims to spark causal thinking and analysis**. DoWhy provides a unified interface for causal inference methods and automatically tests many assumptions, thus making inference accessible to non-experts. 
 
-
-
-For a quick introduction to causal inference, read `this <link-to-intro.pdf>`_.
+For a quick introduction to causal inference, check out `this <https://github.com/amit-sharma/causal-inference-tutorial/>`_.
 
 .. toctree::
    :maxdepth: 4
@@ -74,7 +72,7 @@ DoWhy stresses on interpretability of its output. At any point in the analysis,
 you can inspect the untested assumptions, identified estimands (if any) and the
 estimate (if any). Here'a a sample output of the linear regression estimator.
 
-.. image:: _static/regression_output.png
+.. image:: docs/iamges/regression_output.png
 
 
 
@@ -184,6 +182,7 @@ implementations can be combined in any way.
 
 
 Below are more details about the current implementation of each of these verbs.
+
 Model a causal problem
 -----------------------
 DoWhy creates an underlying causal graphical model for each problem. This
