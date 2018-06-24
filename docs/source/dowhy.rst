@@ -68,18 +68,10 @@ dowhy.do\_why module
     :undoc-members:
     :show-inheritance:
 
-dowhy.response\_surface\_estimator module
------------------------------------------
+dowhy.plotter module
+--------------------
 
-.. automodule:: dowhy.response_surface_estimator
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-dowhy.treatment\_assignment\_estimator module
----------------------------------------------
-
-.. automodule:: dowhy.treatment_assignment_estimator
+.. automodule:: dowhy.plotter
     :members:
     :undoc-members:
     :show-inheritance:

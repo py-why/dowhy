@@ -8,8 +8,8 @@ As computing systems are more frequently and more actively intervening in societ
 
 Much like machine learning libraries have done for prediction, **"DoWhy" is a Python library that aims to spark causal thinking and analysis**. DoWhy provides a unified interface for causal inference methods and automatically tests many assumptions, thus making inference accessible to non-experts. 
 
-For a quick introduction to causal inference, check out `this <https://github.com/amit-sharma/causal-inference-tutorial/>`_.
-
+For a quick introduction to causal inference, check out `this tutorial <https://github.com/amit-sharma/causal-inference-tutorial/>`_.
+Documentation for DoWhy is available at `causalinference.gitlab.io/dowhy <http://causalinference.gitlab.io/dowhy/>`_. 
 .. toctree::
    :maxdepth: 4
    :caption: Contents:

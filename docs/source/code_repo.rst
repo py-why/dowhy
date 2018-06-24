@@ -1,17 +1,10 @@
 Code repository
 =================
 
-DoWhy is hosted on visualstudio.com. At present, the platform does not allow public access
-to the repo.
+DoWhy is hosted on GitHub.
 
-You can browse the code in a html-friendly format `here <dowhy.html>`_.
-
-To enable access to the code repository, raise a request at http://idweb/ to be added to the
-"dowhy" security group. You will be automatically added to the group and then
-should be able to access https://amshar.visualstudio.com/DoWhy.
-
-If there are any problems, please email us at `dowhy@microsoft.com
-<mailto:dowhy@microsoft.com>`_.
+You can browse the code in a html-friendly format `here
+<https://github.com/Microsoft/dowhy>`_.
 
 Installation
 ------------
