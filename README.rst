@@ -197,7 +197,7 @@ If you prefer, you can also specify common causes and/or instruments directly
 instead of providing a graph.
 
 
-.. image:: causal_model.png 
+.. i comment image:: causal_model.png 
 
 Identify a target estimand under the model
 ------------------------------------------
