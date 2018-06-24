@@ -29,9 +29,9 @@ Predictive models uncover patterns that connect the inputs and outcome in observ
     * How does the system interact with human behavior?
     * What is the effect of a system's recommendations on people's activity? 
 
-Answering these questions requires causal reasoning. While many methods exist forcausal inference, 
- it is hard to compare their assumptions and
-robustness of results. DoWhy makes three contributions,
+Answering these questions requires causal reasoning. While many methods exist
+for causal inference, it is hard to compare their assumptions and robustness of results. DoWhy makes three contributions,
+
 1. Provides a principled way of modeling a given problem as a causal graph so
    that all assumptions explicit.
 2. Provides a unified interface for many popular causal inference methods, combining the two major frameworks of graphical models and potential outcomes. 
