@@ -14,7 +14,7 @@ Documentation for DoWhy is available at `causalinference.gitlab.io/dowhy <http:/
 .. i here comment toctree::
 .. i here comment   :maxdepth: 4
 .. i here comment   :caption: Contents:
-.. contents:: :depth=2
+.. contents:: Contents
 
 The need for causal inference
 ----------------------------------
