@@ -42,7 +42,7 @@ setup(
     keywords='causality causal-inference statistics graphical-model',
 
     packages=find_packages(exclude=['docs', 'tests']),
-    python_requires='>=3.0'
+    python_requires='>=3.0',
 
     install_requires=['numpy', 'scikit-learn', 'matplotlib', 'scipy', 
             'pandas', 'pygraphviz', 'networkx', 'sympy'],  
