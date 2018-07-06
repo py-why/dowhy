@@ -113,7 +113,7 @@ Install DoWhy and its dependencies by running this from the top-most folder of
 the repo::
     python setupy.py install
 
-On Ubuntu WSL/Windows 10, the following lines will install dependencies::
+If you face any problems, try installing dependencies manually::
     
     pip3 install numpy
     pip3 install sklearn
@@ -126,10 +126,10 @@ On Ubuntu WSL/Windows 10, the following lines will install dependencies::
     pip3 install matplotlib
     pip3 install sympy
 
-Pygraphviz may have problems with installation on Ubuntu. This is not a
+Pygraphviz may have problems with installation. This is not a
 required library, so you can skip installing.  
 
-Otherwise, to install, use:
+Otherwise, to install, use (on Ubuntu or Ubuntu WSL):
 sudo apt install graphviz graphviz-dev libgraphviz-dev pkg-config
 pip3 install pygraphviz --install-option="--include-path=/usr/include/graphviz" --install-option="--library-path=/usr/lib/graphviz/"
 
