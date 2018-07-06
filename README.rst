@@ -46,7 +46,7 @@ Sample causal inference analysis in DoWhy
 -------------------------------------------
 Most DoWhy 
 analyses for causal inference take 4 lines to write, assuming a
-pandas dataframe df that contains the data.::
+pandas dataframe df that contains the data::
 
     import dowhy
     from dowhy.do_why import CausalModel
@@ -61,7 +61,7 @@ pandas dataframe df that contains the data.::
             treatment_is_binary=True)
 
 After loading in the data, we use the four main operations in DoWhy: *model*,
-*estimate*, *identify* and *refute*.::
+*estimate*, *identify* and *refute*::
     # Create a causal model from the data and given graph.  
     model=CausalModel(
             data = data["df"],
@@ -79,8 +79,7 @@ After loading in the data, we use the four main operations in DoWhy: *model*,
 
     # Refute the obtained estimate using multiple robustness checks.
     refute_results=model.refute_estimate(identified_estimand, estimate, 
-            method_names=["random_common_cause", "placebo_treatment_refuter",
-                          "data_subset_refuter"])
+            method_name="random_common_cause")
 
 DoWhy stresses on interpretability of its output. At any point in the analysis,
 you can inspect the untested assumptions, identified estimands (if any) and the
