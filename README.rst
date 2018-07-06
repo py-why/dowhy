@@ -50,6 +50,7 @@ pandas dataframe df that contains the data::
 
     import dowhy
     from dowhy.do_why import CausalModel
+    import dowhy.datasets
 
     # Load some sample data
     data=dowhy.datasets.linear_dataset(
@@ -84,6 +85,8 @@ you can inspect the untested assumptions, identified estimands (if any) and the
 estimate (if any). Here'a a sample output of the linear regression estimator.
 
 .. image:: docs/images/regression_output.png
+
+For more examples, check out `causalinference.gitlab.io/dowhy <http://causalinference.gitlab.io/dowhy/>`_.  
 
 
 
