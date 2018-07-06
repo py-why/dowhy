@@ -48,7 +48,16 @@ Most DoWhy
 analyses for causal inference take 4 lines to write, assuming a
 pandas dataframe df that contains the data::
 
-    from dowhy.do_why import CausalModel 
+    import dowhy
+    from dowhy.do_why import CausalModel
+
+    # Load some sample data
+    data=dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=5,
+            num_instruments = 2,
+            num_samples=10000,
+            treatment_is_binary=True)
 
     # Create a causal model from the data and given graph.  
     model=CausalModel(
@@ -97,12 +106,15 @@ DoWhy support Python 3+. It requires the following packages:
 * matplotlib (for general plotting)
 * sympy (for rendering symbolic expressions)
 
+Install DoWhy and its dependencies by running this from the top-most folder of
+the repo::
+    python setupy.py install
 
 On Ubuntu WSL/Windows 10, the following lines will install dependencies::
     
     pip3 install numpy
     pip3 install sklearn
-    pip3 instlal pandas
+    pip3 install pandas
     sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
     ## from https://github.com/pygraphviz/pygraphviz/issues/71
     pip3 install pygraphviz --install-option="--include-path=/usr/include/graphviz" \
