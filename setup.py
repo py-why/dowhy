@@ -16,17 +16,17 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='dowhy',  
+    name='dowhy',
 
-    version='0.1.0',  
+    version='0.1.0',
 
     description='A Python library for causal inference',  # Required
 
-    long_description=long_description,  
+    long_description=long_description,
 
     url='https://causalinference.gitlab.io/dowhy',  # Optional
 
-    author='Amit Sharma, Emre Kiciman',  
+    author='Amit Sharma, Emre Kiciman',
 
 
     classifiers=[  # Optional
@@ -44,7 +44,7 @@ setup(
     packages=find_packages(exclude=['docs', 'tests']),
     python_requires='>=3.0',
 
-    install_requires=['numpy', 'scikit-learn', 'matplotlib', 'scipy', 
-            'pandas', 'pygraphviz', 'networkx', 'sympy'],  
+    install_requires=['numpy', 'scikit-learn', 'matplotlib', 'scipy',
+                      'pandas', 'pygraphviz', 'networkx', 'sympy'],
 
 )
