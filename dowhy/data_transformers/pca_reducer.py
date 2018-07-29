@@ -3,7 +3,9 @@ from sklearn.preprocessing import scale
 
 from dowhy.data_transformer import DimensionalityReducer
 
+
 class PCAReducer(DimensionalityReducer):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._do_standardize = True
@@ -17,6 +19,3 @@ class PCAReducer(DimensionalityReducer):
         pca_model = PCA(n_components=self._ndims)
         reduced_data = pca_model.fit_transform(data)
         return reduced_data
-
-
-

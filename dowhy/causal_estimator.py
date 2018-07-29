@@ -1,16 +1,16 @@
-import abc
-import numpy as np
-import sympy as sp
 import logging
 
-class CausalEstimator:
+import numpy as np
+import sympy as sp
 
+
+class CausalEstimator:
     """Base class for an estimator of causal effect.
 
     """
 
     def __init__(self, data, identified_estimand, treatment, outcome,
-            test_significance, params=None):
+                 test_significance, params=None):
         """Initializes an estimator with data and names of relevant variables.
 
         More description.
@@ -35,9 +35,7 @@ class CausalEstimator:
             for key, value in params.items():
                 setattr(self, key, value)
 
-
         self.logger = logging.getLogger(__name__)
-
 
     def estimate_effect(self):
         """TODO.
@@ -51,7 +49,7 @@ class CausalEstimator:
         self._treatment = self._data[self._treatment_name]
         self._outcome = self._data[self._outcome_name]
         est = self._estimate_effect()
-        #self._estimate = est
+        # self._estimate = est
 
         if self._significance_test is not None:
             signif_dict = self.test_significance(est)
@@ -77,26 +75,24 @@ class CausalEstimator:
 
         sorted_null_estimates = np.sort(null_estimates)
         self.logger.debug("Null estimates: {0}".format(sorted_null_estimates))
-        median_estimate = sorted_null_estimates[int(num_simulations/2)]
+        median_estimate = sorted_null_estimates[int(num_simulations / 2)]
         # Doing a two-sided test
         if estimate.value > median_estimate:
             # Being conservative with the p-value reported
             estimate_index = np.searchsorted(sorted_null_estimates, estimate.value, side="left")
-            p_value = 1 - (estimate_index/num_simulations)
-        if estimate_index < num_simulations/2:
+            p_value = 1 - (estimate_index / num_simulations)
+        if estimate_index < num_simulations / 2:
             # Being conservative with the p-value reported
             estimate_index = np.searchsorted(sorted_null_estimates, estimate.value, side="right")
-            p_value = (estimate_index/num_simulations)
+            p_value = (estimate_index / num_simulations)
         signif_dict = {
-                'p_value': p_value,
-                'sorted_null_estimates': sorted_null_estimates
-                }
+            'p_value': p_value,
+            'sorted_null_estimates': sorted_null_estimates
+        }
         return signif_dict
 
 
-
 class CausalEstimate:
-
     """TODO.
 
     """
@@ -125,10 +121,12 @@ class CausalEstimate:
             s += "p-value: {0}\n".format(self.significance_test["p_value"])
         return s
 
+
 class RealizedEstimand(object):
+
     def __init__(self, identified_estimand, estimator_name):
         self.treatment_variable = identified_estimand.treatment_variable
-        self.outcome_variable =  identified_estimand.outcome_variable
+        self.outcome_variable = identified_estimand.outcome_variable
         self.backdoor_variables = identified_estimand.backdoor_variables
         self.instrumental_variables = identified_estimand.instrumental_variables
         self.estimand_type = identified_estimand.estimand_type
@@ -143,12 +141,11 @@ class RealizedEstimand(object):
         self.estimand_expression = estimand_expression
 
     def __str__(self):
-        s =  "Realized estimand: {0}\n".format(self.estimator_name)
+        s = "Realized estimand: {0}\n".format(self.estimator_name)
         s += "Realized estimand type: {0}\n".format(self.estimand_type)
         s += "Estimand expression:\n{0}\n".format(sp.pretty(self.estimand_expression))
         j = 1
         for ass_name, ass_str in self.assumptions.items():
             s += "Estimand assumption {0}, {1}: {2}\n".format(j, ass_name, ass_str)
-            j +=1
+            j += 1
         return s
-
