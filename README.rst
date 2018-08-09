@@ -112,7 +112,7 @@ DoWhy support Python 3+. It requires the following packages:
 
 Install DoWhy and its dependencies by running this from the top-most folder of
 the repo::
-    python setupy.py install
+    python setup.py install
 
 If you face any problems, try installing dependencies manually::
     
