@@ -36,7 +36,7 @@ class CausalGraph:
             agraph = nx.drawing.nx_agraph.to_agraph(self._graph)
             agraph.draw(out_filename, format="png", prog=layout)
         except:    
-            print("Error in loading pygraphviz library. Ensure that graphviz and pygraphviz are installed.")
+            print("Warning: Pygraphviz cannot be loaded. Check that graphviz and pygraphviz are installed.")
             print("Using Matplotlib for plotting")
             import matplotlib.pyplot as plt 
             plt.clf()
