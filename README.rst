@@ -2,7 +2,7 @@ DoWhy | Making causal inference easy
 ====================================
 
 Amit Sharma (`amshar@microsoft.com <mailto:amshar@microsoft.com>`_),
-Emre Kiciman (`emrek@micosoft.com <mailto:emrek@microsoft.com>`_)
+Emre Kiciman (`emrek@microsoft.com <mailto:emrek@microsoft.com>`_)
 
 As computing systems are more frequently and more actively intervening in societally critical domains such as healthcare, education and governance, it is critical to correctly predict and understand the causal effects of these interventions. Without an A/B test, conventional machine learning methods, built on pattern recognition and correlational analyses, are insufficient for causal reasoning. 
 
