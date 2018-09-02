@@ -45,6 +45,6 @@ setup(
     python_requires='>=3.0',
 
     install_requires=['numpy', 'scikit-learn', 'matplotlib', 'scipy',
-                      'pandas', 'pygraphviz', 'networkx', 'sympy'],
+                      'pandas', 'networkx', 'sympy'],
 
 )

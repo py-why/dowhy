@@ -105,7 +105,6 @@ DoWhy support Python 3+. It requires the following packages:
 * scipy
 * scikit-learn
 * pandas
-* pygraphviz (for plotting causal graphs)
 * networkx  (for analyzing causal graphs)
 * matplotlib (for general plotting)
 * sympy (for rendering symbolic expressions)
@@ -116,23 +115,18 @@ the repo::
 
 If you face any problems, try installing dependencies manually::
     
-    pip3 install numpy
-    pip3 install sklearn
-    pip3 install pandas
+    pip install numpy scipy pandas 
+    pip install networkx matplotlib
+    pip install sympy
+
+For better-looking graphs, you can optionally install pygraphviz. To proceed,
+first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL)::  
     sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
     ## from https://github.com/pygraphviz/pygraphviz/issues/71
-    pip3 install pygraphviz --install-option="--include-path=/usr/include/graphviz" \
+    pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" \
      --install-option="--library-path=/usr/lib/graphviz/"
-    pip3 install networkx
-    pip3 install matplotlib
-    pip3 install sympy
 
-Pygraphviz may have problems with installation. This is not a
-required library, so you can skip installing.  
-
-Otherwise, to install, use (on Ubuntu or Ubuntu WSL):
-sudo apt install graphviz graphviz-dev libgraphviz-dev pkg-config
-pip3 install pygraphviz --install-option="--include-path=/usr/include/graphviz" --install-option="--library-path=/usr/lib/graphviz/"
+Keep in mind that pygraphviz installation can be problematic on the latest versions of Python3. Tested to work with Python 3.5. 
 
 Graphical Models and Potential Outcomes: Best of both worlds
 ------------------------------------------------------------

@@ -68,14 +68,26 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
     dot_graph = dot_graph + " ".join([v + "-> " + outcome + ";" for v in common_causes])
     dot_graph = dot_graph + " ".join([v + "-> " + treatment + ";" for v in instruments])
     dot_graph = dot_graph + "}"
+    gml_graph = ('graph['
+                    'node[ id "{0}" label "{0}"]'
+                    'node[ id "{1}" label "{1}"]'
+                    'node[ id "{2}" label "{2}"]'
+                    'edge[source "{0}" target "{1}"]'
+                    'edge[source "{2}" target "{0}"]'
+                    'edge[source "{2}" target "{1}"]'
+                ).format(treatment, outcome, "Unobserved Confounders")
 
+    gml_graph = gml_graph + " ".join(['node[ id "{0}" label "{0}"] edge[ source "{0}" target "{1}"]'.format(v, treatment) for v in common_causes])
+    gml_graph = gml_graph + " ".join(['edge[ source "{0}" target "{1}"]'.format(v, outcome) for v in common_causes])
+    gml_graph = gml_graph + " ".join(['node[ id "{0}" label "{0}"] edge[ source "{0}" target "{1}"]'.format(v, treatment) for v in instruments])
+    gml_graph = gml_graph + ']'
     ret_dict = {
         "df": data,
         "treatment_name": treatment,
         "outcome_name": outcome,
         "common_causes_names": common_causes,
         "instrument_names": instruments,
-        "dot_graph": dot_graph,
+        "dot_graph": gml_graph,
         "ate": ate
     }
     return ret_dict

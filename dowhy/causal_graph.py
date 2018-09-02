@@ -1,7 +1,7 @@
 import logging
 
 import networkx as nx
-import pygraphviz as pgv
+
 
 
 class CausalGraph:
@@ -19,20 +19,29 @@ class CausalGraph:
                                   str(common_cause_names),
                                   str(instrument_names)])
         if graph is None:
-            self._graph = pgv.AGraph(strict=True, directed=True)
+            self._graph = nx.DiGraph()
             self._graph = self.build_graph(common_cause_names,
                                            instrument_names)
         else:
-            self._graph = pgv.AGraph(graph, strict=True, directed=True)
+            self._graph = nx.DiGraph(nx.parse_gml(graph))
 
-        self._graph = nx.drawing.nx_agraph.from_agraph(self._graph)
         self._graph = self.add_node_attributes(observed_node_names)
         self._graph = self.add_unobserved_common_cause(observed_node_names)
         self.logger = logging.getLogger(__name__)
 
     def view_graph(self, layout="dot"):
-        agraph = nx.drawing.nx_agraph.to_agraph(self._graph)
-        agraph.draw("causal_model.png", format="png", prog=layout)
+        try:
+            import pygraphviz as pgv
+            agraph = nx.drawing.nx_agraph.to_agraph(self._graph)
+            agraph.draw("causal_model.png", format="png", prog=layout)
+        except:    
+            print("Error in loading pygraphviz library. Ensure that graphviz and pygraphviz are installed.")
+            print("Using Matplotlib for plotting")
+            import matplotlib.pyplot as plt 
+            plt.ion()
+            nx.draw_networkx(self._graph, pos=nx.shell_layout(self._graph))
+            plt.draw()
+            #plt.show()
 
     def build_graph(self, common_cause_names, instrument_names):
         self._graph.add_node(self.treatment_name, observed="yes")
@@ -71,7 +80,7 @@ class CausalGraph:
 
         if create_new_common_cause:
             uc_label = "Unobserved Confounders"
-            self._graph.add_node('U', label=uc_label)
+            self._graph.add_node('U', label=uc_label, observed="no")
             self._graph.add_edge('U', self.treatment_name)
             self._graph.add_edge('U', self.outcome_name)
         return self._graph
@@ -105,18 +114,17 @@ class CausalGraph:
         return set(nx.descendants(self._graph, node_name))
 
     def all_observed(self, node_names):
-        agraph = nx.drawing.nx_agraph.to_agraph(self._graph)
         for node_name in node_names:
-            if agraph.get_node(node_name).attr["observed"] != "yes":
+            print(self._graph.nodes[node_name])
+            if self._graph.nodes[node_name]["observed"] != "yes":
                 return False
 
         return True
 
     def filter_unobserved_variables(self, node_names):
         observed_node_names = list()
-        agraph = nx.drawing.nx_agraph.to_agraph(self._graph)
         for node_name in node_names:
-            if agraph.get_node(node_name).attr["observed"] == "yes":
+            if self._graph.nodes[node_name]["observed"] == "yes":
                 observed_node_names.append(node_name)
 
         return observed_node_names
