@@ -48,6 +48,8 @@ Most DoWhy
 analyses for causal inference take 4 lines to write, assuming a
 pandas dataframe df that contains the data::
 
+.. code:: python
+
     import dowhy
     from dowhy.do_why import CausalModel
     import dowhy.datasets
