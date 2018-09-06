@@ -18,7 +18,7 @@ Documentation for DoWhy is available at `causalinference.gitlab.io/dowhy <http:/
 
 The need for causal inference
 ----------------------------------
-
+:
 Predictive models uncover patterns that connect the inputs and outcome in observed data. To intervene, however, we need to estimate the effect of changing an input from its current value, for which no data exists. Such questions, involving estimating a *counterfactual*, are common in decision-making scenarios.
 
 * Will it work?
@@ -46,14 +46,14 @@ Sample causal inference analysis in DoWhy
 -------------------------------------------
 Most DoWhy 
 analyses for causal inference take 4 lines to write, assuming a
-pandas dataframe df that contains the data::
+pandas dataframe df that contains the data:
 
 .. code:: python
 
     import dowhy
     from dowhy.do_why import CausalModel
     import dowhy.datasets
-
+    
     # Load some sample data
     data=dowhy.datasets.linear_dataset(
             beta=10,
@@ -63,7 +63,10 @@ pandas dataframe df that contains the data::
             treatment_is_binary=True)
 
 After loading in the data, we use the four main operations in DoWhy: *model*,
-*estimate*, *identify* and *refute*::
+*estimate*, *identify* and *refute*:
+
+.. code:: python
+
     # Create a causal model from the data and given graph.  
     model=CausalModel(
             data = data["df"],
@@ -115,8 +118,9 @@ Install DoWhy and its dependencies by running this from the top-most folder of
 the repo::
     python setup.py install
 
-If you face any problems, try installing dependencies manually::
+If you face any problems, try installing dependencies manually:
     
+.. code:: bash
     pip install numpy scipy pandas 
     pip install networkx matplotlib
     pip install sympy
