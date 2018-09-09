@@ -1,5 +1,5 @@
 import logging
-
+import re
 import networkx as nx
 
 
@@ -22,8 +22,41 @@ class CausalGraph:
             self._graph = nx.DiGraph()
             self._graph = self.build_graph(common_cause_names,
                                            instrument_names)
-        else:
+        elif re.match(r".*\.dot", graph):
+            # load dot file
+            try:
+                import pygraphviz as pgv
+                self._graph = nx.DiGraph(nx.drawing.nx_agraph.read_dot(graph))
+            except Exception as e:
+                print("Pygraphviz cannot be loaded. "+ str(e) + "\nTrying pydot...")
+                try:
+                    import pydot
+                    self._graph = nx.DiGraph(nx.drawing.nx_pydot.read_dot(graph))
+                except Exception as e:
+                    print("Error: Pydot cannot be loaded. " + str(e))
+                    raise e
+        elif re.match(r".*\.gml", graph):
+            self._graph = nx.DiGraph(nx.read_gml(graph))
+        elif re.match(r".*graph\s*\{.*\}\s*", graph):
+            try:
+                import pygraphviz as pgv
+                self._graph = pgv.AGraph(graph, strict=True, directed=True)
+                self._graph = nx.drawing.nx_agraph.from_agraph(self._graph) 
+            except Exception as e:
+                print("Error: Pygraphviz cannot be loaded. " + str(e) + "\nTrying pydot ...")
+                try:
+                    import pydot
+                    P_list = pydot.graph_from_dot_data(graph)
+                    self._graph = nx.drawing.nx_pydot.from_pydot(P_list[0])
+                except Exception as e:
+                    print("Error: Pydot cannot be loaded. " + str(e))
+                    raise e
+        elif re.match(".*graph\s*\[.*\]\s*", graph):
             self._graph = nx.DiGraph(nx.parse_gml(graph))
+        else: 
+            print("Error: Please provide graph (as string or text file) in dot or gml format.")
+            print("Error: Incorrect graph format")
+            raise ValueError 
 
         self._graph = self.add_node_attributes(observed_node_names)
         self._graph = self.add_unobserved_common_cause(observed_node_names)

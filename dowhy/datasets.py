@@ -87,7 +87,8 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         "outcome_name": outcome,
         "common_causes_names": common_causes,
         "instrument_names": instruments,
-        "dot_graph": gml_graph,
+        "dot_graph": dot_graph,
+        "gml_graph": gml_graph,
         "ate": ate
     }
     return ret_dict
@@ -130,6 +131,7 @@ def xy_dataset(num_samples, effect=True, sd_error=1):
         "time_val": time_var,
         "instrument_names": None,
         "dot_graph": None,
+        "gml_graph": None,
         "ate": None,
     }
     return ret_dict
