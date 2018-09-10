@@ -4,11 +4,14 @@ DoWhy | Making causal inference easy
 Amit Sharma (`amshar@microsoft.com <mailto:amshar@microsoft.com>`_),
 Emre Kiciman (`emrek@microsoft.com <mailto:emrek@microsoft.com>`_)
 
+`Blog Post <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Docs <http://causalinference.gitlab.io/dowhy/>`_
+
 As computing systems are more frequently and more actively intervening in societally critical domains such as healthcare, education and governance, it is critical to correctly predict and understand the causal effects of these interventions. Without an A/B test, conventional machine learning methods, built on pattern recognition and correlational analyses, are insufficient for causal reasoning. 
 
 Much like machine learning libraries have done for prediction, **"DoWhy" is a Python library that aims to spark causal thinking and analysis**. DoWhy provides a unified interface for causal inference methods and automatically tests many assumptions, thus making inference accessible to non-experts. 
 
-For a quick introduction to causal inference, check out `this tutorial <https://github.com/amit-sharma/causal-inference-tutorial/>`_.
+For a quick introduction to causal inference, check out `amit-sharma/causal-inference-tutorial <https://github.com/amit-sharma/causal-inference-tutorial/>`_. We also gave a more comprehensive tutorial at the ACM Knowledge Discovery and Data Mining (`KDD 2018 <http://www.kdd.org/kdd2018/>`_) conference. Check it out at `causalinference.gitlab.io/kdd-tutorial <http://causalinference.gitlab.io/kdd-tutorial/>`_. 
+
 Documentation for DoWhy is available at `causalinference.gitlab.io/dowhy <http://causalinference.gitlab.io/dowhy/>`_. 
 
 .. i here comment toctree::
@@ -18,7 +21,7 @@ Documentation for DoWhy is available at `causalinference.gitlab.io/dowhy <http:/
 
 The need for causal inference
 ----------------------------------
-:
+
 Predictive models uncover patterns that connect the inputs and outcome in observed data. To intervene, however, we need to estimate the effect of changing an input from its current value, for which no data exists. Such questions, involving estimating a *counterfactual*, are common in decision-making scenarios.
 
 * Will it work?
@@ -62,7 +65,7 @@ pandas dataframe df that contains the data:
             num_samples=10000,
             treatment_is_binary=True)
 
-After loading in the data, we use the four main operations in DoWhy: *model*,
+DoWhy supports two formats for providing the causal graph: `gml <http://www.fim.uni-passau.de/index.php?id=17297&L=1>`_ (preferred) and `dot <http://www.graphviz.org/documentation/>`_. After loading in the data, we use the four main operations in DoWhy: *model*,
 *estimate*, *identify* and *refute*:
 
 .. code:: python
@@ -96,9 +99,6 @@ For detailed code examples, check out `causalinference.gitlab.io/dowhy <http://c
 
 
 
-
-
-
 Installation 
 -------------
 
@@ -120,13 +120,18 @@ the repo::
 
 If you face any problems, try installing dependencies manually:
     
-.. code:: bash
+.. code:: Shell
     pip install numpy scipy pandas 
     pip install networkx matplotlib
     pip install sympy
 
+Optionally, if you wish to input graphs in the dot format, then install pydot (or pygraphviz). 
+
+
 For better-looking graphs, you can optionally install pygraphviz. To proceed,
-first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL)::  
+first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL).
+
+.. code:: Shell 
     sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
     ## from https://github.com/pygraphviz/pygraphviz/issues/71
     pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" \
@@ -209,7 +214,10 @@ complete---you can provide a partial graph, representing prior
 knowledge about some of the variables. DoWhy automatically considers the rest
 of the variables as potential confounders. 
 
-If you prefer, you can also specify common causes and/or instruments directly
+Currently, DoWhy supports two formats for graph input: `gml <http://www.fim.uni-passau.de/index.php?id=17297&L=1>`_ (preferred) and
+`dot <http://www.graphviz.org/documentation/>`_. We strongly suggest to use gml as the input format, as it works well with networkx. You can provide the graph either as a .gml file or as a string. If you prefer to use dot format, you will need to install additional packages (pydot or pygraphviz, see installation section above). Both .dot files and string format are supported. 
+
+While not recommended, you can also specify common causes and/or instruments directly
 instead of providing a graph.
 
 
