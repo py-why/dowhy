@@ -117,11 +117,11 @@ DoWhy support Python 3+. It requires the following packages:
 Install DoWhy and its dependencies by running this from the top-most folder of
 the repo::
     python setup.py install
-
+    
 If you face any problems, try installing dependencies manually::
-    pip install numpy scipy pandas 
-    pip install networkx matplotlib
-    pip install sympy
+     pip install numpy scipy pandas; 
+     pip install networkx matplotlib;
+     pip install sympy
 
 Optionally, if you wish to input graphs in the dot format, then install pydot (or pygraphviz). 
 
