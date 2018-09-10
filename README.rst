@@ -10,7 +10,7 @@ As computing systems are more frequently and more actively intervening in societ
 
 Much like machine learning libraries have done for prediction, **"DoWhy" is a Python library that aims to spark causal thinking and analysis**. DoWhy provides a unified interface for causal inference methods and automatically tests many assumptions, thus making inference accessible to non-experts. 
 
-For a quick introduction to causal inference, check out `amit-sharma/causal-inference-tutorial <https://github.com/amit-sharma/causal-inference-tutorial/>`_. We also gave a more comprehensive tutorial at the ACM Knowledge Discovery and Data Mining (`KDD 2018 <http://www.kdd.org/kdd2018/>`_) conference. Check it out at `causalinference.gitlab.io/kdd-tutorial <http://causalinference.gitlab.io/kdd-tutorial/>`_. 
+For a quick introduction to causal inference, check out `amit-sharma/causal-inference-tutorial <https://github.com/amit-sharma/causal-inference-tutorial/>`_. We also gave a more comprehensive tutorial at the ACM Knowledge Discovery and Data Mining (`KDD 2018 <http://www.kdd.org/kdd2018/>`_) conference: `causalinference.gitlab.io/kdd-tutorial <http://causalinference.gitlab.io/kdd-tutorial/>`_. 
 
 Documentation for DoWhy is available at `causalinference.gitlab.io/dowhy <http://causalinference.gitlab.io/dowhy/>`_. 
 
@@ -118,9 +118,7 @@ Install DoWhy and its dependencies by running this from the top-most folder of
 the repo::
     python setup.py install
 
-If you face any problems, try installing dependencies manually:
-    
-.. code:: Shell
+If you face any problems, try installing dependencies manually::
     pip install numpy scipy pandas 
     pip install networkx matplotlib
     pip install sympy
@@ -129,9 +127,7 @@ Optionally, if you wish to input graphs in the dot format, then install pydot (o
 
 
 For better-looking graphs, you can optionally install pygraphviz. To proceed,
-first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL).
-
-.. code:: Shell 
+first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL).::
     sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
     ## from https://github.com/pygraphviz/pygraphviz/issues/71
     pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" \
