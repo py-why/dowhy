@@ -15,6 +15,14 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
+# Get the required packages
+with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
+    install_requires = f.read().split('\n')
+
+    # Remove empty lines
+    while '' in install_requires:
+        install_requires.remove('')
+
 setup(
     name='dowhy',
 
@@ -44,7 +52,6 @@ setup(
     packages=find_packages(exclude=['docs', 'tests']),
     python_requires='>=3.0',
 
-    install_requires=['numpy', 'scikit-learn', 'matplotlib', 'scipy',
-                      'pandas', 'networkx', 'sympy'],
+    install_requires=install_requires
 
 )
