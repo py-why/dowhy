@@ -17,11 +17,8 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 # Get the required packages
 with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
-    install_requires = f.read().split('\n')
+    install_requires = f.read().splitlines()
 
-    # Remove empty lines
-    while '' in install_requires:
-        install_requires.remove('')
 
 setup(
     name='dowhy',
