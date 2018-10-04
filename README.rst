@@ -119,9 +119,7 @@ the repo::
     python setup.py install
     
 If you face any problems, try installing dependencies manually::
-     pip install numpy scipy pandas; 
-     pip install networkx matplotlib;
-     pip install sympy
+    pip install -r requirements.txt
 
 Optionally, if you wish to input graphs in the dot format, then install pydot (or pygraphviz). 
 
