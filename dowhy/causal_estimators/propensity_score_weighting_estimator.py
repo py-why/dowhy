@@ -39,7 +39,7 @@ class PropensityScoreWeightingEstimator(CausalEstimator):
         # icps ==> ps(y)/(1-ps(y)) / (sum of (ps(y)/(1-ps(y))) over all control units)
         # itps ==> ps(y)/(1-ps(y)) / (sum of (ps(y)/(1-ps(y))) over all treatment units)
         ipst_sum = sum(self._data[self._treatment_name] / self._data['ps'])
-        ipsc_sum = sum((1 -self._data[self._treatment_name])/ (1-self._data['ps']))
+        ipsc_sum = sum((1 - self._data[self._treatment_name]) / (1-self._data['ps']))
         self._data['ips_weight'] = (
             self._data[self._treatment_name] / self._data['ps'] / ipst_sum +
             (1 - self._data[self._treatment_name]) / (1 - self._data['ps']) / ipsc_sum

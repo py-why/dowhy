@@ -3,7 +3,6 @@ import re
 import networkx as nx
 
 
-
 class CausalGraph:
 
     def __init__(self,
@@ -28,7 +27,7 @@ class CausalGraph:
                 import pygraphviz as pgv
                 self._graph = nx.DiGraph(nx.drawing.nx_agraph.read_dot(graph))
             except Exception as e:
-                print("Pygraphviz cannot be loaded. "+ str(e) + "\nTrying pydot...")
+                print("Pygraphviz cannot be loaded. " + str(e) + "\nTrying pydot...")
                 try:
                     import pydot
                     self._graph = nx.DiGraph(nx.drawing.nx_pydot.read_dot(graph))
@@ -41,7 +40,7 @@ class CausalGraph:
             try:
                 import pygraphviz as pgv
                 self._graph = pgv.AGraph(graph, strict=True, directed=True)
-                self._graph = nx.drawing.nx_agraph.from_agraph(self._graph) 
+                self._graph = nx.drawing.nx_agraph.from_agraph(self._graph)
             except Exception as e:
                 print("Error: Pygraphviz cannot be loaded. " + str(e) + "\nTrying pydot ...")
                 try:
@@ -53,31 +52,30 @@ class CausalGraph:
                     raise e
         elif re.match(".*graph\s*\[.*\]\s*", graph):
             self._graph = nx.DiGraph(nx.parse_gml(graph))
-        else: 
+        else:
             print("Error: Please provide graph (as string or text file) in dot or gml format.")
             print("Error: Incorrect graph format")
-            raise ValueError 
+            raise ValueError
 
         self._graph = self.add_node_attributes(observed_node_names)
         self._graph = self.add_unobserved_common_cause(observed_node_names)
         self.logger = logging.getLogger(__name__)
 
     def view_graph(self, layout="dot"):
-        out_filename="causal_model.png"
+        out_filename = "causal_model.png"
         try:
             import pygraphviz as pgv
             agraph = nx.drawing.nx_agraph.to_agraph(self._graph)
             agraph.draw(out_filename, format="png", prog=layout)
-        except:    
+        except:
             print("Warning: Pygraphviz cannot be loaded. Check that graphviz and pygraphviz are installed.")
             print("Using Matplotlib for plotting")
-            import matplotlib.pyplot as plt 
+            import matplotlib.pyplot as plt
             plt.clf()
             nx.draw_networkx(self._graph, pos=nx.shell_layout(self._graph))
             plt.axis('off')
             plt.savefig(out_filename)
             plt.draw()
-            
 
     def build_graph(self, common_cause_names, instrument_names):
         self._graph.add_node(self.treatment_name, observed="yes")
