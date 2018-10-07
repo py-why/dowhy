@@ -91,7 +91,7 @@ DoWhy supports two formats for providing the causal graph: `gml <http://www.fim.
 
 DoWhy stresses on interpretability of its output. At any point in the analysis,
 you can inspect the untested assumptions, identified estimands (if any) and the
-estimate (if any). Here'a a sample output of the linear regression estimator.
+estimate (if any). Here's a sample output of the linear regression estimator.
 
 .. image:: docs/images/regression_output.png
 
@@ -192,7 +192,7 @@ DoWhy brings three key differences compared to available software for causal inf
     automatically run sensitivity and robustness checks on the obtained estimate.
 
 Finally, DoWhy is easily extensible, allowing other implementations of the 
-the four verbs to co-exist (we hope to integrate with external
+four verbs to co-exist (we hope to integrate with external
 implementations in the future). The four verbs are mutually independent, so their
 implementations can be combined in any way.
 
@@ -253,7 +253,7 @@ a key benefit of using DoWhy.
 DoWhy supports the following refutation methods. 
 
 * Placebo Treatment
-* Irrevelant Additional Confounder
+* Irrelevant Additional Confounder
 * Subset validation 
 
 
