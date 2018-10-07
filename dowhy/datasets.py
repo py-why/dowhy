@@ -68,7 +68,7 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
     dot_graph = dot_graph + " ".join([v + "-> " + outcome + ";" for v in common_causes])
     dot_graph = dot_graph + " ".join([v + "-> " + treatment + ";" for v in instruments])
     dot_graph = dot_graph + "}"
-    gml_graph = ('graph['
+    gml_graph = ('graph[directed 1'
                  'node[ id "{0}" label "{0}"]'
                  'node[ id "{1}" label "{1}"]'
                  'node[ id "{2}" label "{2}"]'
