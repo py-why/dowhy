@@ -14,6 +14,9 @@
    do_why_simple_example
    do_why_estimation_methods
    do_why_refutation_methods
+   load_graph_example
+   do_why_confounder_example
+   dowhy_lalonde_example
    code_repo
    dowhy
    modules
