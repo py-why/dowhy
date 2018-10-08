@@ -58,7 +58,7 @@ pandas dataframe df that contains the data:
     import dowhy.datasets
     
     # Load some sample data
-    data=dowhy.datasets.linear_dataset(
+    data = dowhy.datasets.linear_dataset(
             beta=10,
             num_common_causes=5,
             num_instruments = 2,
@@ -71,7 +71,7 @@ DoWhy supports two formats for providing the causal graph: `gml <http://www.fim.
 .. code:: python
 
     # Create a causal model from the data and given graph.  
-    model=CausalModel(
+    model = CausalModel(
             data = data["df"],
             treatment=data["treatment_name"],
             outcome=data["outcome_name"],
@@ -86,7 +86,7 @@ DoWhy supports two formats for providing the causal graph: `gml <http://www.fim.
             method_name="backdoor.propensity_score_matching")
 
     # Refute the obtained estimate using multiple robustness checks.
-    refute_results=model.refute_estimate(identified_estimand, estimate, 
+    refute_results = model.refute_estimate(identified_estimand, estimate, 
             method_name="random_common_cause")
 
 DoWhy stresses on interpretability of its output. At any point in the analysis,
