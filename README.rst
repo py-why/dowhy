@@ -56,38 +56,37 @@ pandas dataframe df that contains the data:
     import dowhy
     from dowhy.do_why import CausalModel
     import dowhy.datasets
-    
+
     # Load some sample data
     data = dowhy.datasets.linear_dataset(
-            beta=10,
-            num_common_causes=5,
-            num_instruments = 2,
-            num_samples=10000,
-            treatment_is_binary=True)
+        beta=10,
+        num_common_causes=5,
+        num_instruments=2,
+        num_samples=10000,
+        treatment_is_binary=True)
 
 DoWhy supports two formats for providing the causal graph: `gml <http://www.fim.uni-passau.de/index.php?id=17297&L=1>`_ (preferred) and `dot <http://www.graphviz.org/documentation/>`_. After loading in the data, we use the four main operations in DoWhy: *model*,
 *estimate*, *identify* and *refute*:
 
 .. code:: python
 
-    # Create a causal model from the data and given graph.  
+    # Create a causal model from the data and given graph.
     model = CausalModel(
-            data = data["df"],
-            treatment=data["treatment_name"],
-            outcome=data["outcome_name"],
-            graph=data["dot_graph"],
-            )
+        data=data["df"],
+        treatment=data["treatment_name"],
+        outcome=data["outcome_name"],
+        graph=data["dot_graph"])
 
     # Identify causal effect and return target estimands
     identified_estimand = model.identify_effect()
 
-    # Estimate the target estimand using a statistical method. 
+    # Estimate the target estimand using a statistical method.
     estimate = model.estimate_effect(identified_estimand,
-            method_name="backdoor.propensity_score_matching")
+                                     method_name="backdoor.propensity_score_matching")
 
     # Refute the obtained estimate using multiple robustness checks.
-    refute_results = model.refute_estimate(identified_estimand, estimate, 
-            method_name="random_common_cause")
+    refute_results = model.refute_estimate(identified_estimand, estimate,
+                                           method_name="random_common_cause")
 
 DoWhy stresses on interpretability of its output. At any point in the analysis,
 you can inspect the untested assumptions, identified estimands (if any) and the
