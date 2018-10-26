@@ -6,7 +6,7 @@ Emre Kiciman (`emrek@microsoft.com <mailto:emrek@microsoft.com>`_)
 
 `Blog Post <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Docs <http://causalinference.gitlab.io/dowhy/>`_
 
-As computing systems are more frequently and more actively intervening in societally critical domains such as healthcare, education and governance, it is critical to correctly predict and understand the causal effects of these interventions. Without an A/B test, conventional machine learning methods, built on pattern recognition and correlational analyses, are insufficient for causal reasoning. 
+As computing systems are more frequently and more actively intervening in societally critical domains such as healthcare, education, and governance, it is critical to correctly predict and understand the causal effects of these interventions. Without an A/B test, conventional machine learning methods, built on pattern recognition and correlational analyses, are insufficient for causal reasoning. 
 
 Much like machine learning libraries have done for prediction, **"DoWhy" is a Python library that aims to spark causal thinking and analysis**. DoWhy provides a unified interface for causal inference methods and automatically tests many assumptions, thus making inference accessible to non-experts. 
 
@@ -41,7 +41,7 @@ for causal inference, it is hard to compare their assumptions and robustness of 
    that all assumptions explicit.
 2. Provides a unified interface for many popular causal inference methods, combining the two major frameworks of graphical models and potential outcomes. 
 3. Automatically tests for the validity of assumptions if possible and assesses
-   robustness of the estimate to violations.
+   the robustness of the estimate to violations.
 
 
 
@@ -89,7 +89,7 @@ DoWhy supports two formats for providing the causal graph: `gml <http://www.fim.
     refute_results = model.refute_estimate(identified_estimand, estimate, 
             method_name="random_common_cause")
 
-DoWhy stresses on interpretability of its output. At any point in the analysis,
+DoWhy stresses on the interpretability of its output. At any point in the analysis,
 you can inspect the untested assumptions, identified estimands (if any) and the
 estimate (if any). Here's a sample output of the linear regression estimator.
 
@@ -149,7 +149,7 @@ inference may seem tricky, but almost all methods follow four key steps:
 1. Model a causal inference problem using assumptions.
 2. Identify an expression for the causal effect under these assumptions ("causal estimand"). 
 3. Estimate the expression using statistical methods such as matching or instrumental variables.
-4. Finally, verify validity of the estimate using a variety of robustness checks.
+4. Finally, verify the validity of the estimate using a variety of robustness checks.
 
 This workflow can be captured by four key verbs in DoWhy:
 
@@ -160,7 +160,7 @@ This workflow can be captured by four key verbs in DoWhy:
 
 Using these verbs, DoWhy implements a causal inference engine that can support
 a variety of methods. *model* encodes prior knowledge as a formal causal graph, *identify* uses 
-graph-based methods to identify causal effect, *estimate* uses  
+graph-based methods to identify the causal effect, *estimate* uses  
 statistical methods for estimating the identified estimand, and finally *refute* 
 tries to refute the obtained estimate by testing robustness to assumptions.
 
@@ -179,7 +179,7 @@ DoWhy brings three key differences compared to available software for causal inf
     
     DoWhy
     respects this boundary and treats them separately. This focuses the causal
-    inference effort on identification, and frees up estimation to use any
+    inference effort on identification, and frees up estimation using any
     available statistical estimator for a target estimand. In addition, multiple
     estimation methods can be used for a single identified_estimand and
     vice-versa.
@@ -209,7 +209,7 @@ knowledge about some of the variables. DoWhy automatically considers the rest
 of the variables as potential confounders. 
 
 Currently, DoWhy supports two formats for graph input: `gml <http://www.fim.uni-passau.de/index.php?id=17297&L=1>`_ (preferred) and
-`dot <http://www.graphviz.org/documentation/>`_. We strongly suggest to use gml as the input format, as it works well with networkx. You can provide the graph either as a .gml file or as a string. If you prefer to use dot format, you will need to install additional packages (pydot or pygraphviz, see installation section above). Both .dot files and string format are supported. 
+`dot <http://www.graphviz.org/documentation/>`_. We strongly suggest to use gml as the input format, as it works well with networkx. You can provide the graph either as a .gml file or as a string. If you prefer to use dot format, you will need to install additional packages (pydot or pygraphviz, see the installation section above). Both .dot files and string format are supported. 
 
 While not recommended, you can also specify common causes and/or instruments directly
 instead of providing a graph.
@@ -227,7 +227,7 @@ Estimate causal effect based on the identified estimand
 -------------------------------------------------------
 DoWhy supports methods based on both back-door criterion and instrumental 
 variables. It also provides a non-parametric permutation test for testing
-statistical significance of obtained estimate. 
+the statistical significance of obtained estimate. 
 
 Currently supported back-door criterion methods.
 
