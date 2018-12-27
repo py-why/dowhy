@@ -37,13 +37,15 @@ class CausalEstimator:
 
         self.logger = logging.getLogger(__name__)
 
-    def estimate_effect(self):
+    def estimate_effect(self, num_simulations=1000):
         """TODO.
 
         More description.
 
-        :param arg1:
-        :returns:
+        :param self: object instance of class Estimator
+        :param num_simulations (optional): number of bootstrap repetitions to estimate p-value
+        
+        :returns: point estimate of causal effect
 
         """
         self._treatment = self._data[self._treatment_name]
@@ -52,7 +54,7 @@ class CausalEstimator:
         # self._estimate = est
 
         if self._significance_test is not None:
-            signif_dict = self.test_significance(est)
+            signif_dict = self.test_significance(est, num_simulations)
             est.add_significance_test_results(signif_dict)
         return est
 
@@ -81,7 +83,7 @@ class CausalEstimator:
             # Being conservative with the p-value reported
             estimate_index = np.searchsorted(sorted_null_estimates, estimate.value, side="left")
             p_value = 1 - (estimate_index / num_simulations)
-        if estimate_index < num_simulations / 2:
+        if estimate.value < median_estimate:
             # Being conservative with the p-value reported
             estimate_index = np.searchsorted(sorted_null_estimates, estimate.value, side="right")
             p_value = (estimate_index / num_simulations)
