@@ -118,7 +118,10 @@ class CausalEstimate:
         s += "Value: {0}\n".format(self.value)
         if self.significance_test is not None:
             s += "\n## Statistical Significance\n"
-            s += "p-value: {0}\n".format(self.significance_test["p_value"])
+            if self.significance_test["p_value"]>0:
+                s += "p-value: {0}\n".format(self.significance_test["p_value"])
+            else:
+                s+= "p-value: <{0}\n".format(1/len(self.significance_test["sorted_null_estimates"]))
         return s
 
 
