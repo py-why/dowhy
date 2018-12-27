@@ -37,14 +37,12 @@ class CausalEstimator:
 
         self.logger = logging.getLogger(__name__)
 
-    def estimate_effect(self, num_simulations=1000):
+    def estimate_effect(self):
         """TODO.
 
         More description.
 
         :param self: object instance of class Estimator
-        :param num_simulations (optional): number of bootstrap repetitions to estimate p-value
-        
         :returns: point estimate of causal effect
 
         """
@@ -52,9 +50,8 @@ class CausalEstimator:
         self._outcome = self._data[self._outcome_name]
         est = self._estimate_effect()
         # self._estimate = est
-
         if self._significance_test is not None:
-            signif_dict = self.test_significance(est, num_simulations)
+            signif_dict = self.test_significance(est)
             est.add_significance_test_results(signif_dict)
         return est
 
@@ -69,24 +66,26 @@ class CausalEstimator:
         :returns:
 
         """
-        null_estimates = np.zeros(num_simulations)
-        for i in range(num_simulations):
+        if not hasattr(self,'num_simulations'):
+            self.num_simulations = num_simulations
+        null_estimates = np.zeros(self.num_simulations)
+        for i in range(self.num_simulations):
             self._outcome = np.random.permutation(self._outcome)
             est = self._estimate_effect()
             null_estimates[i] = est.value
 
         sorted_null_estimates = np.sort(null_estimates)
         self.logger.debug("Null estimates: {0}".format(sorted_null_estimates))
-        median_estimate = sorted_null_estimates[int(num_simulations / 2)]
+        median_estimate = sorted_null_estimates[int(self.num_simulations / 2)]
         # Doing a two-sided test
         if estimate.value > median_estimate:
             # Being conservative with the p-value reported
             estimate_index = np.searchsorted(sorted_null_estimates, estimate.value, side="left")
-            p_value = 1 - (estimate_index / num_simulations)
-        if estimate.value < median_estimate:
+            p_value = 1 - (estimate_index / self.num_simulations)
+        if estimate.value <= median_estimate:
             # Being conservative with the p-value reported
             estimate_index = np.searchsorted(sorted_null_estimates, estimate.value, side="right")
-            p_value = (estimate_index / num_simulations)
+            p_value = (estimate_index / self.num_simulations)
         signif_dict = {
             'p_value': p_value,
             'sorted_null_estimates': sorted_null_estimates
