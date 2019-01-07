@@ -1,5 +1,6 @@
 from sklearn import linear_model
 from sklearn.neighbors import NearestNeighbors
+import pandas as pd
 
 from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_estimator import CausalEstimator
@@ -13,6 +14,7 @@ class PropensityScoreMatchingEstimator(CausalEstimator):
                           ",".join(self._target_estimand.backdoor_variables))
         self._observed_common_causes_names = self._target_estimand.backdoor_variables
         self._observed_common_causes = self._data[self._observed_common_causes_names]
+        self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
         self.logger.info("INFO: Using Propensity Score Matching Estimator")
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)

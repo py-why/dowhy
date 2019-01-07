@@ -107,8 +107,11 @@ class CausalGraph:
         # Adding unobserved confounders
         current_common_causes = self.get_common_causes(self.treatment_name,
                                                        self.outcome_name)
+        print(current_common_causes)
         create_new_common_cause = True
         for node_name in current_common_causes:
+            print(self._graph.nodes[node_name]["observed"] )
+            print(self._graph.nodes[node_name])
             if self._graph.nodes[node_name]["observed"] == "no":
                 create_new_common_cause = False
 
