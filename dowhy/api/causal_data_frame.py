@@ -54,4 +54,4 @@ class CausalAccessor(object):
 
 
     def mean(self, *args, **kwargs):
-
+        pass
