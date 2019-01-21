@@ -56,7 +56,10 @@ class CausalEstimator:
             est.add_significance_test_results(signif_dict)
         return est
 
-    def estimate_outcome(self, x):
+    def _do(self, x):
+        raise NotImplementedError
+
+    def do(self, x):
         """TODO.
 
         More description.

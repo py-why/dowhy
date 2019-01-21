@@ -158,8 +158,7 @@ class CausalModel:
             )
         return estimate
 
-    def estimate_outcome(self, x, identified_estimand, method_name=None,
-                        test_significance=None, method_params=None):
+    def do(self, x, identified_estimand, method_name=None,  method_params=None):
         """Estimate the identified causal effect.
 
         If method_name is provided, uses the provided method. Else, finds a
@@ -191,14 +190,14 @@ class CausalModel:
                 self._data,
                 identified_estimand,
                 self._treatment, self._outcome,
-                test_significance=test_significance,
+                test_significance=False,
                 params=method_params
             )
-            estimate = causal_estimator.do(x)
-            estimate.add_params(
-                estimand_type=identified_estimand.estimand_type,
-                estimator_class=causal_estimator_class
-            )
+            try:
+                estimate = causal_estimator.do(x)
+            except NotImplementedError:
+                self.logger.error('Do Operation not implemented or not supported for this estimator.')
+                raise NotImplementedError
         return estimate
 
     def refute_estimate(self, estimand, estimate, method_name=None, **kwargs):
