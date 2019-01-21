@@ -12,7 +12,7 @@ class PropensityScoreWeightingEstimator(CausalEstimator):
     Straightforward application of the back-door criterion.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, min_ps_score=0.05, max_ps_score=0.95, **kwargs):
         super().__init__(*args, **kwargs)
         self.logger.debug("Back-door variables used:" +
                           ",".join(self._target_estimand.backdoor_variables))
@@ -22,8 +22,8 @@ class PropensityScoreWeightingEstimator(CausalEstimator):
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
         self.weighting_scheme = 'ips_weight'  # 'itps_weight' 'ips_weight' 'nips_weight'
-        self.min_ps_score = 0.05
-        self.max_ps_score = 0.95
+        self.min_ps_score = min_ps_score
+        self.max_ps_score = max_ps_score
 
     def _estimate_effect(self):
         psmodel = linear_model.LinearRegression()
