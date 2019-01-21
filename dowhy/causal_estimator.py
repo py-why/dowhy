@@ -51,7 +51,7 @@ class CausalEstimator:
         est = self._estimate_effect()
         # self._estimate = est
 
-        if self._significance_test is not None:
+        if self._significance_test:
             signif_dict = self.test_significance(est)
             est.add_significance_test_results(signif_dict)
         return est
