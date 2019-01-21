@@ -8,11 +8,12 @@ import dowhy.utils.cli_helpers as cli
 
 class CausalIdentifier:
 
-    def __init__(self, graph, estimand_type):
+    def __init__(self, graph, estimand_type, proceed_when_unidentifiable=False):
         self._graph = graph
         self.estimand_type = estimand_type
         self.treatment_name = graph.treatment_name
         self.outcome_name = graph.outcome_name
+        self._proceed_when_unidentifiable = proceed_when_unidentifiable
         self.logger = logging.getLogger(__name__)
 
     def identify_effect(self):
@@ -21,7 +22,7 @@ class CausalIdentifier:
         causes_of_outcome = self._graph.get_ancestors(self.outcome_name)
         common_causes = set(causes_of_treatment).intersection(causes_of_outcome)
         self.logger.info("Common causes of treatment and outcome:" + str(common_causes))
-        if self._graph.all_observed(common_causes):
+        if self._graph.all_observed(common_causes) or self._proceed_when_unidentifiable:
             print("All common causes are observed. Causal effect can be identified.")
         else:
             print("There are unobserved common causes. Causal effect cannot be identified.")
