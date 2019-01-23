@@ -20,19 +20,19 @@ class PropensityScoreMatchingEstimator(CausalEstimator):
         self.logger.info(self.symbolic_estimator)
 
     def _estimate_effect(self):
-        psmodel = linear_model.LinearRegression()
-        psmodel.fit(self._observed_common_causes, self._treatment)
-        self._data['ps'] = psmodel.predict(self._observed_common_causes)
+        propensity_score_model = linear_model.LinearRegression()
+        propensity_score_model.fit(self._observed_common_causes, self._treatment)
+        self._data['propensity_score'] = propensity_score_model.predict(self._observed_common_causes)
 
         # this assumes a binary treatment regime
         treated = self._data.loc[self._data[self._treatment_name] == 1]
         control = self._data.loc[self._data[self._treatment_name] == 0]
 
-        controlNeighbors = (
+        control_neighbors = (
             NearestNeighbors(n_neighbors=1, algorithm='ball_tree')
-            .fit(control['ps'].values.reshape(-1, 1))
+            .fit(control['propensity_score'].values.reshape(-1, 1))
         )
-        distances, indices = controlNeighbors.kneighbors(treated['ps'].values.reshape(-1, 1))
+        distances, indices = control_neighbors.kneighbors(treated['propensity_score'].values.reshape(-1, 1))
 
         # TODO remove neighbors that are more than a given radius apart
 

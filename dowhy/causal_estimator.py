@@ -42,14 +42,15 @@ class CausalEstimator:
 
         More description.
 
-        :param arg1:
-        :returns:
+        :param self: object instance of class Estimator
+        :returns: point estimate of causal effect
 
         """
         self._treatment = self._data[self._treatment_name]
         self._outcome = self._data[self._outcome_name]
         est = self._estimate_effect()
         # self._estimate = est
+
 
         if self._significance_test:
             signif_dict = self.test_significance(est)
@@ -67,24 +68,26 @@ class CausalEstimator:
         :returns:
 
         """
-        null_estimates = np.zeros(num_simulations)
-        for i in range(num_simulations):
+        if not hasattr(self,'num_simulations'):
+            self.num_simulations = num_simulations
+        null_estimates = np.zeros(self.num_simulations)
+        for i in range(self.num_simulations):
             self._outcome = np.random.permutation(self._outcome)
             est = self._estimate_effect()
             null_estimates[i] = est.value
 
         sorted_null_estimates = np.sort(null_estimates)
         self.logger.debug("Null estimates: {0}".format(sorted_null_estimates))
-        median_estimate = sorted_null_estimates[int(num_simulations / 2)]
+        median_estimate = sorted_null_estimates[int(self.num_simulations / 2)]
         # Doing a two-sided test
         if estimate.value > median_estimate:
             # Being conservative with the p-value reported
             estimate_index = np.searchsorted(sorted_null_estimates, estimate.value, side="left")
-            p_value = 1 - (estimate_index / num_simulations)
-        if estimate_index < num_simulations / 2:
+            p_value = 1 - (estimate_index / self.num_simulations)
+        if estimate.value <= median_estimate:
             # Being conservative with the p-value reported
             estimate_index = np.searchsorted(sorted_null_estimates, estimate.value, side="right")
-            p_value = (estimate_index / num_simulations)
+            p_value = (estimate_index / self.num_simulations)
         signif_dict = {
             'p_value': p_value,
             'sorted_null_estimates': sorted_null_estimates
@@ -118,7 +121,10 @@ class CausalEstimate:
         s += "Value: {0}\n".format(self.value)
         if self.significance_test is not None:
             s += "\n## Statistical Significance\n"
-            s += "p-value: {0}\n".format(self.significance_test["p_value"])
+            if self.significance_test["p_value"]>0:
+                s += "p-value: {0}\n".format(self.significance_test["p_value"])
+            else:
+                s+= "p-value: <{0}\n".format(1/len(self.significance_test["sorted_null_estimates"]))
         return s
 
 
@@ -149,3 +155,4 @@ class RealizedEstimand(object):
             s += "Estimand assumption {0}, {1}: {2}\n".format(j, ass_name, ass_str)
             j += 1
         return s
+
