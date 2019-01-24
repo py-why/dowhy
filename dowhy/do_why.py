@@ -162,6 +162,48 @@ class CausalModel:
             )
         return estimate
 
+    def do(self, x, identified_estimand, method_name=None,  method_params=None):
+        """Estimate the identified causal effect.
+
+        If method_name is provided, uses the provided method. Else, finds a
+        suitable method to be used.
+
+        :param identified_estimand: a probability expression
+            that represents the effect to be estimated. Output of
+            CausalModel.identify_effect method
+        :param method_name: (optional) name of the estimation method to be used.
+        :returns: an instance of the CausalEstimate class, containing the causal effect estimate
+            and other method-dependent information
+
+        """
+        if method_name is None:
+            pass
+        else:
+            str_arr = method_name.split(".")
+            identifier_name = str_arr[0]
+            estimator_name = str_arr[1]
+            identified_estimand.set_identifier_method(identifier_name)
+            causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
+
+        # Check if estimator's target estimand is identified
+        if identified_estimand.estimands[identifier_name] is None:
+            self.logger.warning("No valid identified estimand for using instrumental variables method")
+            estimate = CausalEstimate(None, None, None)
+        else:
+            causal_estimator = causal_estimator_class(
+                self._data,
+                identified_estimand,
+                self._treatment, self._outcome,
+                test_significance=False,
+                params=method_params
+            )
+            try:
+                estimate = causal_estimator.do(x)
+            except NotImplementedError:
+                self.logger.error('Do Operation not implemented or not supported for this estimator.')
+                raise NotImplementedError
+        return estimate
+
     def refute_estimate(self, estimand, estimate, method_name=None, **kwargs):
         """Refute an estimated causal effect.
 

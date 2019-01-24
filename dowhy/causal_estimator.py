@@ -57,6 +57,24 @@ class CausalEstimator:
             est.add_significance_test_results(signif_dict)
         return est
 
+    def _do(self, x):
+        raise NotImplementedError
+
+    def do(self, x):
+        """TODO.
+
+        More description.
+
+        :param arg1:
+        :returns:
+
+        """
+        self._treatment = self._data[self._treatment_name]
+        self._outcome = self._data[self._outcome_name]
+        est = self._do(x)
+
+        return est
+
     def test_significance(self, estimate, num_simulations=1000):
         """Test statistical significance of obtained estimate.
 
