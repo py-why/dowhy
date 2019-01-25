@@ -9,49 +9,62 @@ class CausalAccessor(object):
         self._obj = pandas_obj
         self.use_graph = True
 
-    @property
-    def center(self):
-        # return the geographic center point of this DataFrame
-        lat = self._obj.latitude
-        lon = self._obj.longitude
-        return (float(lon.mean()), float(lat.mean()))
-
-    def plot(self, *args, **kwargs):
-        if kwargs.get('method_name'):
-            method_name = kwargs.get('method_name')
-        else:
-            method_name = "backdoor.propensity_score_matching"
-        logging.info("Using {} for estimation.".format(method_name))
-
+    def _build_model(self, *args, **kwargs):
         if kwargs.get('common_causes'):
             self.use_graph = False
+            common_causes = kwargs.get('common_causes')
+            del kwargs['common_causes']
         elif kwargs.get('dot_graph'):
             self.use_graph = True
+            dot_graph = kwargs.get('dot_graph')
+            del kwargs['dot_graph']
         else:
             raise Exception("You must specify a method for determining a backdoor set.")
 
         if self.use_graph:
             model = CausalModel(data=self._obj,
-                                treatment=self._obj[kwargs["treatment_name"]],
-                                outcome=self._obj[kwargs["outcome_name"]],
-                                graph=args["dot_graph"])
+                                treatment=self._obj[kwargs["x"]],
+                                outcome=self._obj[kwargs["y"]],
+                                graph=dot_graph)
         else:
+            logging.info(self._obj[kwargs["x"]], self._obj[kwargs["y"]], common_causes )
             model = CausalModel(data=self._obj,
-                                treatment=self._obj[kwargs["treatment_name"]],
-                                outcome=self._obj[kwargs["outcome_name"]],
-                                common_causes=args["common_causes"])
-        if kwargs['kind'] == 'bar':
-            identified_estimand = model.identify_effect()
-            estimate = model.estimate_effect(identified_estimand,
-                                             method_name=method_name)
-        elif kwargs['kind'] == 'line' or not kwargs['kind'].get():
-            identified_estimand = model.identify_effect()
-            estimate = model.estimate_effect(identified_estimand,
-                                             method_name=method_name)
+                                treatment=kwargs["x"],
+                                outcome=kwargs["y"],
+                                common_causes=common_causes)
+        return model, args, kwargs
+
+    def _do(self, model, *args, **kwargs):
+        if kwargs.get('method_name'):
+            method_name = kwargs.get('method_name')
+            del kwargs['method_name']
+        else:
+            method_name = "backdoor.linear_regression"
+        logging.info("Using {} for estimation.".format(method_name))
+        identified_estimand = model.identify_effect()
+
+        df = self._obj.copy()
+        f = lambda x: model.do(x, identified_estimand=identified_estimand, method_name=method_name)
+
+        quantity = '$E[{}| do({})]$'.format(kwargs.get('y'), kwargs.get('x'))
+        df[quantity] = df[kwargs.get('x')].apply(f)
+        kwargs['y'] = quantity
+        return df, args, kwargs
+
+    def plot(self, *args, **kwargs):
+        model, args, kwargs = self._build_model(*args, **kwargs)
+        df, args, kwargs = self._do(model, *args, **kwargs)
+
+        if kwargs.get('kind') == 'bar':
+            agg = df.groupby(kwargs.get('x')).mean()
+            del kwargs['x']
+            agg.plot(*args, **kwargs)
+        elif kwargs.get('kind') == 'line' or not kwargs.get('kind'):
+            df.plot(*args, **kwargs)
         else:
             raise Exception("Plot type {} not supported for causal plots!".format(kwargs.get('kind')))
-        self._obj.plot(*args, **kwargs)
-
 
     def mean(self, *args, **kwargs):
-        pass
+        model, args, kwargs = self._build_model(*args, **kwargs)
+        df, args, kwargs = self._do(model, *args, **kwargs)
+        return df.groupby(kwargs.get('x')).mean()
