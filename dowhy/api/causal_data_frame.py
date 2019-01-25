@@ -23,8 +23,8 @@ class CausalAccessor(object):
 
         if self.use_graph:
             model = CausalModel(data=self._obj,
-                                treatment=self._obj[kwargs["x"]],
-                                outcome=self._obj[kwargs["y"]],
+                                treatment=kwargs["x"],
+                                outcome=kwargs["y"],
                                 graph=dot_graph)
         else:
             logging.info(self._obj[kwargs["x"]], self._obj[kwargs["y"]], common_causes )
