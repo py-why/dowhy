@@ -12,8 +12,8 @@ class PropensityScoreStratificationEstimator(CausalEstimator):
     Straightforward application of the back-door criterion.
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args, num_strata=50, clipping_threshold=10, **kwargs):
+        super().__init__(*args,  **kwargs)
         self.logger.debug("Back-door variables used:" +
                           ",".join(self._target_estimand.backdoor_variables))
         self._observed_common_causes_names = self._target_estimand.backdoor_variables
@@ -23,19 +23,19 @@ class PropensityScoreStratificationEstimator(CausalEstimator):
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
 
-        self.numStrata = 50
-        self.clippingThreshold = 10
+        self.num_strata = num_strata
+        self.clipping_threshold = clipping_threshold
 
     def _estimate_effect(self):
-        psmodel = linear_model.LinearRegression()
-        psmodel.fit(self._observed_common_causes, self._treatment)
-        self._data['ps'] = psmodel.predict(self._observed_common_causes)
+        propensity_score_model = linear_model.LinearRegression()
+        propensity_score_model.fit(self._observed_common_causes, self._treatment)
+        self._data['propensity_score'] = propensity_score_model.predict(self._observed_common_causes)
 
         # sort the dataframe by propensity score
         # create a column 'strata' for each element that marks what strata it belongs to
-        numrows = self._data[self._outcome_name].shape[0]
+        num_rows = self._data[self._outcome_name].shape[0]
         self._data['strata'] = (
-            (self._data['ps'].rank(ascending=True) / numrows) * self.numStrata
+            (self._data['propensity_score'].rank(ascending=True) / num_rows) * self.num_strata
         ).round(0)
 
         # for each strata, count how many treated and control units there are
@@ -49,27 +49,27 @@ class PropensityScoreStratificationEstimator(CausalEstimator):
         stratified = self._data.groupby('strata')
         clipped = stratified.filter(
             lambda strata: min(strata.loc[strata[self._treatment_name] == 1].shape[0],
-                               strata.loc[strata[self._treatment_name] == 0].shape[0]) > self.clippingThreshold
+                               strata.loc[strata[self._treatment_name] == 0].shape[0]) > self.clipping_threshold
         )
         # print("after clipping at threshold, now we have:" )
         # print(clipped.groupby(['strata',self._treatment_name])[self._outcome_name].count())
 
         # sum weighted outcomes over all strata  (weight by treated population)
-        weightedoutcomes = clipped.groupby('strata').agg({
+        weighted_outcomes = clipped.groupby('strata').agg({
             self._treatment_name: ['sum'],
             'dbar': ['sum'],
             'd_y': ['sum'],
             'dbar_y': ['sum']
         })
-        weightedoutcomes.columns = ["_".join(x) for x in weightedoutcomes.columns.ravel()]
+        weighted_outcomes.columns = ["_".join(x) for x in weighted_outcomes.columns.ravel()]
         treatment_sum_name = self._treatment_name + "_sum"
 
-        weightedoutcomes['d_y_mean'] = weightedoutcomes['d_y_sum'] / weightedoutcomes[treatment_sum_name]
-        weightedoutcomes['dbar_y_mean'] = weightedoutcomes['dbar_y_sum'] / weightedoutcomes['dbar_sum']
-        weightedoutcomes['effect'] = weightedoutcomes['d_y_mean'] - weightedoutcomes['dbar_y_mean']
-        totaltreatmentpopulation = weightedoutcomes[treatment_sum_name].sum()
+        weighted_outcomes['d_y_mean'] = weighted_outcomes['d_y_sum'] / weighted_outcomes[treatment_sum_name]
+        weighted_outcomes['dbar_y_mean'] = weighted_outcomes['dbar_y_sum'] / weighted_outcomes['dbar_sum']
+        weighted_outcomes['effect'] = weighted_outcomes['d_y_mean'] - weighted_outcomes['dbar_y_mean']
+        total_treatment_population = weighted_outcomes[treatment_sum_name].sum()
 
-        ate = (weightedoutcomes['effect'] * weightedoutcomes[treatment_sum_name]).sum() / totaltreatmentpopulation
+        ate = (weighted_outcomes['effect'] * weighted_outcomes[treatment_sum_name]).sum() / total_treatment_population
 
         # TODO - how can we add additional information into the returned estimate?
         #        such as how much clipping was done, or per-strata info for debugging?
