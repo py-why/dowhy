@@ -25,7 +25,7 @@ class CausalModel:
 
     def __init__(self, data, treatment, outcome, graph=None,
                  common_causes=None, instruments=None, estimand_type="ate",
-                 proceed_when_unidentifiable=False,
+                 proceed_when_unidentifiable=False, logging_level="INFO",
                  **kwargs):
         """Initialize data and create a causal graph instance.
 
@@ -52,10 +52,8 @@ class CausalModel:
         self._outcome = outcome
         self._estimand_type = estimand_type
         self._proceed_when_unidentifiable = proceed_when_unidentifiable
-        if 'logging_level' in kwargs:
-            logging.basicConfig(level=kwargs['logging_level'])
-        else:
-            logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging_level)
+
 
         # TODO: move the logging level argument to a json file. Tue 20 Feb 2018 06:56:27 PM DST
         self.logger = logging.getLogger(__name__)

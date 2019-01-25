@@ -1,5 +1,6 @@
 import string
 from importlib import import_module
+import logging
 
 from dowhy.causal_estimator import CausalEstimator
 
@@ -9,7 +10,6 @@ def get_class_object(method_name, *args, **kwargs):
     try:
         module_name = method_name
         class_name = string.capwords(method_name, "_").replace('_', '')
-        print(class_name)
 
         estimator_module = import_module('.' + module_name,
                                          package="dowhy.causal_estimators")

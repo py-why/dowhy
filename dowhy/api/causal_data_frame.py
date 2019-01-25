@@ -25,13 +25,14 @@ class CausalAccessor(object):
             model = CausalModel(data=self._obj,
                                 treatment=kwargs["x"],
                                 outcome=kwargs["y"],
-                                graph=dot_graph)
+                                graph=dot_graph,
+                                logging_level="ERROR")
         else:
-            logging.info(self._obj[kwargs["x"]], self._obj[kwargs["y"]], common_causes )
             model = CausalModel(data=self._obj,
                                 treatment=kwargs["x"],
                                 outcome=kwargs["y"],
-                                common_causes=common_causes)
+                                common_causes=common_causes,
+                                logging_level="ERROR")
         return model, args, kwargs
 
     def _do(self, model, *args, **kwargs):
