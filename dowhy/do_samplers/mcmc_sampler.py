@@ -4,29 +4,25 @@ import pymc3 as pm
 import networkx as nx
 
 
-#class MCMCSampler(DoSampler):
-#    g = causal_model._graph.get_unconfounded_observed_subgraph()
-#
-#    data_types = {'X0': 'c', 'v': 'b', 'y': 'c'}
-
-
-class CausalBayesianNetwork(DoSampler):
-    def __init__(self, *args, **kwargs):
+class McmcSampler(DoSampler):
+    def __init__(self, data, identified_estimand, treatments, outcomes, *args, params=None, variable_types=None,
+                 num_cores=1, keep_original_treatment=False, **kwargs):
         """
         g, df, data_types
 
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(data, identified_estimand, treatments, outcomes, params=params, variable_types=variable_types,
+                 num_cores=num_cores, keep_original_treatment=keep_original_treatment)
 
-        self.logger.info("Using CausalBayesianNetwork for do sampling.")
+        self.logger.info("Using McmcSampler for do sampling.")
+        self.point_sampler = False
         self.sampler = self._construct_sampler()
 
-        self.g = g
-        self.data_types = data_types
+        self.g = kwargs.get('causal_model', None)._graph.get_unconfounded_observed_subgraph()
         g_fit = nx.DiGraph(self.g)
         _, self.fit_trace = self.fit_causal_model(g_fit,
                                                   self._data,
-                                                  self.data_types)
+                                                  self._variable_types)
 
     def apply_data_types(self, g, data_types):
         for node in nx.topological_sort(g):
@@ -82,7 +78,7 @@ class CausalBayesianNetwork(DoSampler):
                 g = self.apply_parents(g)
                 g = self.apply_parameters(g, df, initialization_trace=initialization_trace)
                 g = self.build_bayesian_network(g, df)
-                trace = pm.sample(1000, tune=500)
+                trace = pm.sample(1000, tune=1000)
         else:
             raise Exception("Graph is not a DAG!")
         return g, trace
@@ -105,19 +101,34 @@ class CausalBayesianNetwork(DoSampler):
             g.nodes()[xi]["parent_names"] = []
         return g
 
-    def make_intervention_effective(self, df, x):
-        df_intervened = df.copy()
-        for k, v in x.items():
-            df_intervened[k] = v
-        return df_intervened
+    def make_intervention_effective(self, x):
+        if not self.keep_original_treatment:
+            for k, v in x.items():
+                self._df[k] = v
+        return self._df
 
-    def do(self, x):
+    def do_sample(self, x):
+        self.reset()
+        print(self._df.sample(10))
         g_for_surgery = nx.DiGraph(self.g)
         g_modified = self.do_x_surgery(g_for_surgery, x)
-        df_intervened = self.make_intervention_effective(self._data, x)
-        g_modified, trace = self.sample_prior_causal_model(g_modified,
-                                                           df_intervened,
-                                                           self.data_types,
-                                                           initialization_trace=self.fit_trace)
-        return trace
+        print(self._df.sample(10))
 
+        self._df = self.make_intervention_effective(x)
+        print(self._df.sample(10))
+
+        g_modified, trace = self.sample_prior_causal_model(g_modified,
+                                                           self._df,
+                                                           self._variable_types,
+                                                           initialization_trace=self.fit_trace)
+        print(self._df.sample(10))
+
+        for col in self._df:
+            if col in trace and col not in self._treatment_names:
+                self._df[col] = trace[col]
+        print(self._df.sample(10))
+
+        return self._df.copy()
+
+    def _construct_sampler(self):
+        pass

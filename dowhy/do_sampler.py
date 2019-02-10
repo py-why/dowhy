@@ -9,7 +9,7 @@ class DoSampler:
     """
 
     def __init__(self, data, identified_estimand, treatments, outcomes, params=None, variable_types=None,
-                 num_cores=1):
+                 num_cores=1, keep_original_treatment=False):
         """Initializes a do sampler with data and names of relevant variables.
 
         More description.
@@ -22,27 +22,28 @@ class DoSampler:
         :param params: (optional) additional method parameters
 
         """
-        self._data = data
+        self._data = data.copy()
         self._target_estimand = identified_estimand
-        self._treatment_names = treatments
-        self._outcome_names = outcomes
+        self._treatment_names = list(treatments)
+        self._outcome_names = list(outcomes)
         self._estimate = None
         self._variable_types = variable_types
         self.num_cores = num_cores
         self.point_sampler = True
         self.sampler = None
+        self.keep_original_treatment = keep_original_treatment
 
         if params is not None:
             for key, value in params.items():
                 setattr(self, key, value)
 
-        self._df = None
+        self._df = self._data.copy()
 
-        if not self._variable_types and kwargs.get('variables_types'):
-            self._variable_types = kwargs.get('variable_types')
-        elif not self._variable_types:
+        if not self._variable_types:
             self._infer_variable_types()
         self.dep_type = [self._variable_types[var] for var in self._outcome_names]
+        print('treatments', self._treatment_names)
+        print('backdoor', self._target_estimand.backdoor_variables)
         self.indep_type = [self._variable_types[var] for var in
                            self._treatment_names + self._target_estimand.backdoor_variables]
         self.density_types = [self._variable_types[var] for var in self._target_estimand.backdoor_variables]
@@ -59,7 +60,8 @@ class DoSampler:
         self._df = self._data.copy()
 
     def make_treatment_effective(self, x):
-        self._df[self._treatment_names] = x
+        if not self.keep_original_treatment:
+            self._df[self._treatment_names] = x
 
     def disrupt_causes(self):
         pass
@@ -92,3 +94,6 @@ class DoSampler:
         else:
             self.sample()
         return self._df
+
+    def _infer_variable_types(self):
+        raise NotImplementedError('Variable type inference not implemented. Use the variable_types kwarg.')
