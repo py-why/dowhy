@@ -20,7 +20,6 @@ class DoSampler:
         :param treatments: names of the treatment variables
         :param outcomes: names of the outcome variables
         :param params: (optional) additional method parameters
-        :returns: an instance of the estimator class.
 
         """
         self._data = data

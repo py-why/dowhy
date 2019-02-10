@@ -1,6 +1,16 @@
 import pandas as pd
 import logging
 from dowhy.do_why import CausalModel
+import dowhy.do_samplers as do_samplers
+
+
+class CausalDataFrame(pd.DataFrame):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._causal_model = None
+
+    def attach_causal_model(self, model):
+        self._causal_model = model
 
 
 @pd.api.extensions.register_dataframe_accessor("causal")
@@ -9,12 +19,25 @@ class CausalAccessor(object):
         self._obj = pandas_obj
         self.use_graph = True
 
-    @property
-    def center(self):
-        # return the geographic center point of this DataFrame
-        lat = self._obj.latitude
-        lon = self._obj.longitude
-        return (float(lon.mean()), float(lat.mean()))
+    def do(self, x, method=None, num_cores=1, variable_types={}, outcome=None, params=None, graph=None,
+           common_causes=None, instruments=None, estimand_type='ate', proceed_when_unidentifiable=False):
+        if not method:
+            raise Exception("You must specify a do sampling method.")
+        if not self._obj._causal_model:
+            self._obj._causal_model = CausalModel(self._obj, [xi for xi in x.keys()][0], outcome, graph=graph,
+                                             common_causes=common_causes, instruments=instruments,
+                                             estimand_type=estimand_type,
+                                             proceed_when_unidentifiable=proceed_when_unidentifiable)
+        identified_estimand = self._obj._causal_model.identify_effect()
+        do_sampler_class = do_samplers.get_class_object(method + "_sampler")
+        do_sampler = do_sampler_class(self.pandas_obj,
+                                      identified_estimand,
+                                      self._obj._causal_model.treatment,
+                                      self._obj._causal_model.outcome,
+                                      params=params,
+                                      variable_types=variable_types,
+                                      num_cores=num_cores)
+
 
     def plot(self, *args, **kwargs):
         if kwargs.get('method_name'):
