@@ -109,25 +109,16 @@ class McmcSampler(DoSampler):
 
     def do_sample(self, x):
         self.reset()
-        print(self._df.sample(10))
         g_for_surgery = nx.DiGraph(self.g)
         g_modified = self.do_x_surgery(g_for_surgery, x)
-        print(self._df.sample(10))
-
         self._df = self.make_intervention_effective(x)
-        print(self._df.sample(10))
-
         g_modified, trace = self.sample_prior_causal_model(g_modified,
                                                            self._df,
                                                            self._variable_types,
                                                            initialization_trace=self.fit_trace)
-        print(self._df.sample(10))
-
         for col in self._df:
             if col in trace and col not in self._treatment_names:
                 self._df[col] = trace[col]
-        print(self._df.sample(10))
-
         return self._df.copy()
 
     def _construct_sampler(self):
