@@ -122,6 +122,10 @@ class CausalGraph:
             self._graph.add_edge('U', self.outcome_name)
         return self._graph
 
+    def get_unconfounded_observed_subgraph(self):
+        observed_nodes = [node for node in self._graph.nodes() if self._graph.nodes[node]["observed"] == "yes"]
+        return self._graph.subgraph(observed_nodes)
+
     def do_surgery(self, node_names, remove_outgoing_edges=False,
                    remove_incoming_edges=False):
         new_graph = self._graph.copy()
