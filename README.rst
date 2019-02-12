@@ -4,7 +4,10 @@ DoWhy | Making causal inference easy
 Amit Sharma (`amshar@microsoft.com <mailto:amshar@microsoft.com>`_),
 Emre Kiciman (`emrek@microsoft.com <mailto:emrek@microsoft.com>`_)
 
-`Blog Post <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Docs <http://causalinference.gitlab.io/dowhy/>`_
+`Blog Post <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Docs <http://causalinference.gitlab.io/dowhy/>`_ | Try it in a web browser! |Binder|_
+
+.. |Binder| image:: https://mybinder.org/badge_logo.svg
+.. _Binder: https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F
 
 
 As computing systems are more frequently and more actively intervening in societally critical domains such as healthcare, education, and governance, it is critical to correctly predict and understand the causal effects of these interventions. Without an A/B test, conventional machine learning methods, built on pattern recognition and correlational analyses, are insufficient for causal reasoning. 
