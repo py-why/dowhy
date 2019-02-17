@@ -6,6 +6,7 @@ def propensity_score(covariates, treatment, method='logistic', variable_types=No
     if method == 'logistic':
         model = LogisticRegression()
         covariates = binarize_discrete(covariates, variable_types)
+        print(covariates.head())
         model = model.fit(covariates, treatment)
         scores = model.predict_proba(covariates)[:, 1]
         return scores

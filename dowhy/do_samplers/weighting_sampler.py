@@ -28,7 +28,8 @@ class WeightingSampler(DoSampler):
 
     def disrupt_causes(self):
         self._df['propensity_score'] = propensity_score(self._data[self._target_estimand.backdoor_variables],
-                                                        self._data[self._treatment_names])
+                                                        self._data[self._treatment_names],
+                                                        variable_types=self._variable_types)
         self._df['weight'] = self.compute_weights()
 
     def sample(self):
