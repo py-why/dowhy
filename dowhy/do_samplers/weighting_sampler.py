@@ -9,8 +9,9 @@ class WeightingSampler(DoSampler):
         g, df, data_types
 
         """
-        super().__init__(data, identified_estimand, treatments, outcomes, params=params, variable_types=variable_types,
-                 num_cores=num_cores, keep_original_treatment=keep_original_treatment)
+        super().__init__(data, identified_estimand, treatments, outcomes, params=params,
+                         variable_types=variable_types, num_cores=num_cores,
+                         keep_original_treatment=keep_original_treatment)
 
         self.logger.info("Using WeightingSampler for do sampling.")
         self.logger.info("Caution: do samplers assume iid data.")
