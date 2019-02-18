@@ -25,11 +25,9 @@ class CausalAccessor(object):
     def __init__(self, pandas_obj):
         self._obj = pandas_obj
 
-    def do(self, x, method=None, num_cores=1, variable_types={}, outcome=None, params=None, dot_graph=None,
+    def do(self, x, method='weighting', num_cores=1, variable_types={}, outcome=None, params=None, dot_graph=None,
            common_causes=None, instruments=None, estimand_type='ate', proceed_when_unidentifiable=False,
            keep_original_treatment=False, use_previous_sampler=False):
-        if not method:
-            raise Exception("You must specify a do sampling method.")
         if not self._obj._causal_model or not use_previous_sampler:
             self._obj._causal_model = CausalModel(self._obj,
                                                   [xi for xi in x.keys()][0],
@@ -52,5 +50,3 @@ class CausalAccessor(object):
                                                   causal_model=self._obj._causal_model,
                                                   keep_original_treatment=keep_original_treatment)
         return self._obj._sampler.do_sample(x)
-
-
