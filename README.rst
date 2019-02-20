@@ -101,6 +101,42 @@ estimate (if any). Here's a sample output of the linear regression estimator.
 For detailed code examples, check out `causalinference.gitlab.io/dowhy <http://causalinference.gitlab.io/dowhy/>`_.
 
 
+A High-level Pandas API
+-----------------------
+
+We've made an even simpler API for dowhy which is a light layer on top of the standard one. The goal
+was to make causal analysis much more like regular exploratory analysis. To use this API, simply
+import :code:`dowhy.api`. This will magically add the :code:`causal` namespace to your
+:code:`pandas.DataFrame` s. Then,
+you can use the namespace as follows.
+
+.. code:: python
+
+    import dowhy.api
+    import dowhy.datasets
+
+    data = dowhy.datasets.linear_dataset(beta=5,
+        num_common_causes=1,
+        num_instruments = 0,
+        num_samples=1000,
+        treatment_is_binary=True)
+
+    # data['df'] is just a regular pandas.DataFrame
+    data['df'].causal.do(x='v',
+                         variable_types={'v': 'b', 'y': 'c', 'X0': 'c'},
+                         outcome='y',
+                         common_causes=['X0']).groupby('v').mean().plot(y='y', kind='bar')
+
+.. image:: docs/images/do_barplot.png
+
+The :code:`do` method in the causal namespace generates a random sample from $P(outcome|do(X=x))$ of the
+same length as your data set, and returns this outcome as a new :code:`DataFrame`. You can continue to perform
+the usual :code:`DataFrame` operations with this sample, and so you can compute statistics and create plots
+for causal outcomes!
+
+The :code:`do` method is built on top of the lower-level :code:`dowhy` objects, so can still take a graph and perform
+identification automatically when you provide a graph instead of :code:`common_causes`.
+
 
 Installation
 -------------
