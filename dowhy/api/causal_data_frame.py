@@ -21,7 +21,8 @@ class CausalAccessor(object):
 
     def do(self, x, method='weighting', num_cores=1, variable_types={}, outcome=None, params=None, dot_graph=None,
            common_causes=None, instruments=None, estimand_type='ate', proceed_when_unidentifiable=False,
-           keep_original_treatment=False, stateful=False):
+           stateful=False):
+        x, keep_original_treatment = self.parse_x(x)
         if not stateful or method != self._method:
             self.reset()
         if not self._causal_model:
@@ -50,3 +51,12 @@ class CausalAccessor(object):
         if not stateful:
             self.reset()
         return result
+
+    def parse_x(self, x):
+        if type(x) == str:
+            return {x: None}, True
+        if type(x) == list:
+            return {xi: None for xi in x}, True
+        if type(x) == dict:
+            return x, False
+        raise Exception('x format not recognized: {}'.format(type(x)))
