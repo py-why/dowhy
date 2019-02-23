@@ -115,3 +115,11 @@ class CausalAccessor(object):
             return x, False
         raise Exception('x format not recognized: {}'.format(type(x)))
 
+    def parse_state(self, state):
+        if type(state) == str:
+            return [state]
+        if type(state) == list:
+            return state
+        if type(state) == dict:
+            return [xi for xi in state.keys()]
+        raise Exception('Input format for {} not recognized: {}'.format(state, type(state)))
