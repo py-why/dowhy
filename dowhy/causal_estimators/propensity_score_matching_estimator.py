@@ -52,8 +52,8 @@ class PropensityScoreMatchingEstimator(CausalEstimator):
         return estimate
 
     def construct_symbolic_estimator(self, estimand):
-        expr = "b: " + estimand.outcome_variable + "~"
+        expr = "b: " + ", ".join(estimand.outcome_variable) + "~"
         # TODO -- fix: we are actually conditioning on positive treatment (d=1)
-        var_list = [estimand.treatment_variable, ] + estimand.backdoor_variables
+        var_list = estimand.treatment_variable + estimand.backdoor_variables
         expr += "+".join(var_list)
         return expr
