@@ -6,8 +6,12 @@ Subpackages
 
 .. toctree::
 
+    dowhy.api
     dowhy.causal_estimators
     dowhy.causal_refuters
+    dowhy.data_transformers
+    dowhy.do_samplers
+    dowhy.utils
 
 Submodules
 ----------
@@ -56,6 +60,14 @@ dowhy.datasets module
 ---------------------
 
 .. automodule:: dowhy.datasets
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+dowhy.do\_sampler module
+------------------------
+
+.. automodule:: dowhy.do_sampler
     :members:
     :undoc-members:
     :show-inheritance:
