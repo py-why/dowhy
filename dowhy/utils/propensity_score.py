@@ -33,6 +33,7 @@ def state_propensity_score(data, covariates, treatments, variable_types=None):
                                                                              treatment,
                                                                              variable_types))
         elif variable_types[treatment] in ['c']:
+            logging.warn("Weighting for continuous causal states is still experimental! Inferences may be invalid.")
             log_propensities[treatment] = np.log(continuous_treatment_model(data.copy(),
                                                                             covariates + treatments[i+1:],
                                                                             treatment,
