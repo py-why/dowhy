@@ -5,6 +5,8 @@ import sympy.stats as spstats
 
 import dowhy.utils.cli_helpers as cli
 
+from dowhy.utils.api import parse_state
+
 
 class CausalIdentifier:
 
@@ -18,9 +20,7 @@ class CausalIdentifier:
 
     def identify_effect(self):
         estimands_dict = {}
-        causes_of_treatment = self._graph.get_ancestors(self.treatment_name)
-        causes_of_outcome = self._graph.get_ancestors(self.outcome_name)
-        common_causes = set(causes_of_treatment).intersection(causes_of_outcome)
+        common_causes = self._graph.get_common_causes(self.treatment_name, self.outcome_name)
         self.logger.info("Common causes of treatment and outcome:" + str(common_causes))
         if self._graph.all_observed(common_causes) or self._proceed_when_unidentifiable:
             print("All common causes are observed. Causal effect can be identified.")
@@ -74,6 +74,9 @@ class CausalIdentifier:
         # expressions Mon 19 Feb 2018 04:54:17 PM DST
         expr = None
         if estimand_type == "ate":
+            # [TODO: support multivariate states]
+            outcome_name = outcome_name[0]
+            treatment_name = treatment_name[0]
             num_expr_str = outcome_name + "|"
             num_expr_str += ",".join(common_causes)
             expr = "d(" + num_expr_str + ")/d" + treatment_name
@@ -102,6 +105,9 @@ class CausalIdentifier:
                               outcome_name, instrument_names):
         expr = None
         if estimand_type == "ate":
+            # [TODO: support multivariate states]
+            outcome_name = outcome_name[0]
+            treatment_name = treatment_name[0]
             sym_outcome = spstats.Normal(outcome_name, 0, 1)
             sym_treatment = spstats.Normal(treatment_name, 0, 1)
             sym_instrument = sp.Symbol(instrument_names[0])  # ",".join(instrument_names))
@@ -132,10 +138,10 @@ class IdentifiedEstimand:
     def __init__(self, treatment_variable, outcome_variable,
                  estimand_type=None, estimands=None,
                  backdoor_variables=None, instrumental_variables=None):
-        self.treatment_variable = treatment_variable
-        self.outcome_variable = outcome_variable
-        self.backdoor_variables = backdoor_variables
-        self.instrumental_variables = instrumental_variables
+        self.treatment_variable = parse_state(treatment_variable)
+        self.outcome_variable = parse_state(outcome_variable)
+        self.backdoor_variables = parse_state(backdoor_variables)
+        self.instrumental_variables = parse_state(instrumental_variables)
         self.estimand_type = estimand_type
         self.estimands = estimands
         self.identifier_method = None

@@ -1,7 +1,7 @@
 import pandas as pd
-import logging
 from dowhy.do_why import CausalModel
 import dowhy.do_samplers as do_samplers
+from dowhy.utils.api import parse_state
 
 
 @pd.api.extensions.register_dataframe_accessor("causal")
@@ -76,11 +76,12 @@ class CausalAccessor(object):
         :return: pandas.DataFrame: A DataFrame containing the sampled outcome
         """
         x, keep_original_treatment = self.parse_x(x)
+        outcome = parse_state(outcome)
         if not stateful or method != self._method:
             self.reset()
         if not self._causal_model:
             self._causal_model = CausalModel(self._obj,
-                                             [xi for xi in x.keys()][0],
+                                             [xi for xi in x.keys()],
                                              outcome,
                                              graph=dot_graph,
                                              common_causes=common_causes,
@@ -113,3 +114,4 @@ class CausalAccessor(object):
         if type(x) == dict:
             return x, False
         raise Exception('x format not recognized: {}'.format(type(x)))
+

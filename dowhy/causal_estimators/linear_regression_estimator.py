@@ -42,8 +42,8 @@ class LinearRegressionEstimator(CausalEstimator):
         return estimate
 
     def construct_symbolic_estimator(self, estimand):
-        expr = "b: " + estimand.outcome_variable + "~"
-        var_list = [estimand.treatment_variable, ] + estimand.backdoor_variables
+        expr = "b: " + ",".join(estimand.outcome_variable) + "~"
+        var_list = estimand.treatment_variable + estimand.backdoor_variables
         expr += "+".join(var_list)
         return expr
 

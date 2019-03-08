@@ -1,6 +1,8 @@
 import logging
 import re
 import networkx as nx
+from dowhy.utils.api import parse_state
+import itertools
 
 
 class CausalGraph:
@@ -11,12 +13,14 @@ class CausalGraph:
                  common_cause_names=None,
                  instrument_names=None,
                  observed_node_names=None):
-        self.treatment_name = treatment_name
-        self.outcome_name = outcome_name
-        self.fullname = "_".join([self.treatment_name,
-                                  self.outcome_name,
-                                  str(common_cause_names),
-                                  str(instrument_names)])
+        self.treatment_name = parse_state(treatment_name)
+        self.outcome_name = parse_state(outcome_name)
+        instrument_names = parse_state(instrument_names)
+        common_cause_names = parse_state(common_cause_names)
+        self.fullname = "_".join(self.treatment_name +
+                                 self.outcome_name +
+                                 common_cause_names +
+                                 instrument_names)
         if graph is None:
             self._graph = nx.DiGraph()
             self._graph = self.build_graph(common_cause_names,
@@ -78,21 +82,32 @@ class CausalGraph:
             plt.draw()
 
     def build_graph(self, common_cause_names, instrument_names):
-        self._graph.add_node(self.treatment_name, observed="yes")
-        self._graph.add_node(self.outcome_name, observed="yes")
-        self._graph.add_edge(self.treatment_name, self.outcome_name)
+        for treatment in self.treatment_name:
+            self._graph.add_node(treatment, observed="yes")
+        for outcome in self.outcome_name:
+            self._graph.add_node(outcome, observed="yes")
+        for treatment, outcome in itertools.product(self.treatment_name, self.outcome_name):
+            self._graph.add_edge(treatment, outcome)
 
         # Adding common causes
         if common_cause_names is not None:
             for node_name in common_cause_names:
-                self._graph.add_node(node_name, observed="yes")
-                self._graph.add_edge(node_name, self.treatment_name)
-                self._graph.add_edge(node_name, self.outcome_name)
+                for treatment, outcome in itertools.product(self.treatment_name, self.outcome_name):
+                    self._graph.add_node(node_name, observed="yes")
+                    self._graph.add_edge(node_name, treatment)
+                    self._graph.add_edge(node_name, outcome)
         # Adding instruments
-        if instrument_names is not None:
-            for node_name in instrument_names:
-                self._graph.add_node(node_name, observed="yes")
-                self._graph.add_edge(node_name, self.treatment_name)
+        if instrument_names:
+            if type(instrument_names[0]) != tuple:
+                if len(self.treatment_name) > 1:
+                    self.logger.info("Assuming Instrument points to all treatments! Use tuples for more granularity.")
+                for instrument, treatment in itertools.product(instrument_names, self.treatment_name):
+                    self._graph.add_node(instrument, observed="yes")
+                    self._graph.add_edge(instrument, treatment)
+            else:
+                for instrument, treatment in itertools.product(instrument_names):
+                    self._graph.add_node(instrument, observed="yes")
+                    self._graph.add_edge(instrument, treatment)
         return self._graph
 
     def add_node_attributes(self, observed_node_names):
@@ -118,8 +133,8 @@ class CausalGraph:
         if create_new_common_cause:
             uc_label = "Unobserved Confounders"
             self._graph.add_node('U', label=uc_label, observed="no")
-            self._graph.add_edge('U', self.treatment_name)
-            self._graph.add_edge('U', self.outcome_name)
+            for node in self.treatment_name + self.outcome_name:
+                self._graph.add_edge('U', node)
         return self._graph
 
     def get_unconfounded_observed_subgraph(self):
@@ -140,10 +155,14 @@ class CausalGraph:
                 new_graph.remove_edges_from(edges_bunch)
         return new_graph
 
-    def get_common_causes(self, node1, node2):
-        causes_node1 = self.get_ancestors(node1)
-        causes_node2 = self.get_ancestors(node2)
-        return list(causes_node1.intersection(causes_node2))
+    def get_common_causes(self, nodes1, nodes2):
+        causes_1 = set()
+        causes_2 = set()
+        for node in nodes1:
+            causes_1 = causes_1.union(self.get_ancestors(node))
+        for node in nodes2:
+            causes_2 = causes_2.union(self.get_ancestors(node))
+        return list(causes_1.intersection(causes_2))
 
     def get_parents(self, node_name):
         return set(self._graph.predecessors(node_name))
@@ -170,12 +189,17 @@ class CausalGraph:
 
         return observed_node_names
 
-    def get_instruments(self, treatment_node, outcome_node):
-        parents_treatment = self.get_parents(treatment_node)
-        g_no_parents_treatment = self.do_surgery([treatment_node, ],
+    def get_instruments(self, treatment_nodes, outcome_nodes):
+        parents_treatment = set()
+        for node in treatment_nodes:
+            parents_treatment = parents_treatment.union(self.get_parents(node))
+        g_no_parents_treatment = self.do_surgery(treatment_nodes,
                                                  remove_incoming_edges=True)
-        ancestors_outcome = nx.ancestors(g_no_parents_treatment, outcome_node)
+        ancestors_outcome = set()
+        for node in outcome_nodes:
+            ancestors_outcome = ancestors_outcome.union(nx.ancestors(g_no_parents_treatment, node))
 
+        # [TODO: double check these work with multivariate implementation:]
         # Exclusion
         candidate_instruments = parents_treatment.difference(ancestors_outcome)
         self.logger.debug("Candidate instruments after exclusion %s",

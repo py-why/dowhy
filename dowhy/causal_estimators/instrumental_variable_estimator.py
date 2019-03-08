@@ -57,8 +57,8 @@ class InstrumentalVariableEstimator(CausalEstimator):
         return estimate
 
     def construct_symbolic_estimator(self, estimand):
-        sym_outcome = (spstats.Normal(estimand.outcome_variable, 0, 1))
-        sym_treatment = (spstats.Normal(estimand.treatment_variable, 0, 1))
+        sym_outcome = (spstats.Normal(",".join(estimand.outcome_variable), 0, 1))
+        sym_treatment = (spstats.Normal(",".join(estimand.treatment_variable), 0, 1))
         sym_instrument = sp.Symbol(estimand.instrumental_variables[0])
         sym_outcome_derivative = sp.Derivative(sym_outcome, sym_instrument)
         sym_treatment_derivative = sp.Derivative(sym_treatment, sym_instrument)
