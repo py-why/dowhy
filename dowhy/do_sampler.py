@@ -49,7 +49,6 @@ class DoSampler:
         :param params: (optional) additional method parameters
 
         """
-        print(outcomes)
         self._data = data.copy()
         self._target_estimand = identified_estimand
         self._treatment_names = parse_state(treatments)
@@ -69,7 +68,6 @@ class DoSampler:
 
         if not self._variable_types:
             self._infer_variable_types()
-        print(self._outcome_names)
         self.dep_type = [self._variable_types[var] for var in self._outcome_names]
         print('treatments', self._treatment_names)
         print('backdoor', self._target_estimand.backdoor_variables)
