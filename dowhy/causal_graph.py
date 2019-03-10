@@ -156,6 +156,8 @@ class CausalGraph:
         return new_graph
 
     def get_common_causes(self, nodes1, nodes2):
+        nodes1 = parse_state(nodes1)
+        nodes2 = parse_state(nodes2)
         causes_1 = set()
         causes_2 = set()
         for node in nodes1:
@@ -190,6 +192,8 @@ class CausalGraph:
         return observed_node_names
 
     def get_instruments(self, treatment_nodes, outcome_nodes):
+        treatment_nodes = parse_state(treatment_nodes)
+        outcome_nodes = parse_state(outcome_nodes)
         parents_treatment = set()
         for node in treatment_nodes:
             parents_treatment = parents_treatment.union(self.get_parents(node))
