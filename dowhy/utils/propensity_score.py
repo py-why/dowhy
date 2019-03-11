@@ -8,9 +8,9 @@ import numpy as np
 
 def propensity_of_treatment_score(data, covariates, treatment, model='logistic', variable_types=None):
     if model == 'logistic':
-        model = LogisticRegression()
+        model = LogisticRegression(solver='lbfgs')
         data, covariates = binarize_discrete(data, covariates, variable_types)
-        model = model.fit(data[covariates], data[treatment])
+        model = model.fit(data[covariates], data[treatment].values.ravel())
         scores = model.predict_proba(data[covariates])[:, 1]
         return scores
     else:

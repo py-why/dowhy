@@ -67,8 +67,6 @@ class DoSampler:
         if not self._variable_types:
             self._infer_variable_types()
         self.dep_type = [self._variable_types[var] for var in self._outcome_names]
-        print('treatments', self._treatment_names)
-        print('backdoor', self._target_estimand.backdoor_variables)
         self.indep_type = [self._variable_types[var] for var in
                            self._treatment_names + self._target_estimand.backdoor_variables]
         self.density_types = [self._variable_types[var] for var in self._target_estimand.backdoor_variables]

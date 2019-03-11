@@ -242,4 +242,4 @@ class CausalModel:
         :returns: None
 
         """
-        print("Model to find the causal effect of treatment {0} on outcome {1}".format(self._treatment, self._outcome))
+        self.logger.info("Model to find the causal effect of treatment {0} on outcome {1}".format(self._treatment, self._outcome))

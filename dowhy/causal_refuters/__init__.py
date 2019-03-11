@@ -16,6 +16,5 @@ def get_class_object(method_name, *args, **kwargs):
         assert issubclass(refuter_class, CausalRefuter)
 
     except (AttributeError, AssertionError, ImportError):
-        print("No such refuter class exists!")
         raise ImportError('{} is not an existing causal refuter.'.format(method_name))
     return refuter_class
