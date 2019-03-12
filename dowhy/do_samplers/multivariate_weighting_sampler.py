@@ -31,7 +31,6 @@ class MultivariateWeightingSampler(DoSampler):
                                                               self._treatment_names,
                                                               variable_types=self._variable_types)
         self._df['weight'] = self.compute_weights()
-        print(self._df.head())
 
     def sample(self):
         self._df = self._df.sample(len(self._data), replace=True, weights=self._df['weight'])

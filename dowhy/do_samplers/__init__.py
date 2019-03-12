@@ -9,7 +9,6 @@ def get_class_object(method_name, *args, **kwargs):
     try:
         module_name = method_name
         class_name = string.capwords(method_name, "_").replace('_', '')
-        print(class_name)
 
         do_sampler_module = import_module('.' + module_name,
                                          package="dowhy.do_samplers")
@@ -17,6 +16,5 @@ def get_class_object(method_name, *args, **kwargs):
         assert issubclass(do_sampler_class, DoSampler)
 
     except (AttributeError, AssertionError, ImportError):
-        print("No such do sampler class exists!")
         raise ImportError('{} is not an existing do sampler.'.format(method_name))
     return do_sampler_class

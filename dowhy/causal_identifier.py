@@ -23,9 +23,9 @@ class CausalIdentifier:
         common_causes = self._graph.get_common_causes(self.treatment_name, self.outcome_name)
         self.logger.info("Common causes of treatment and outcome:" + str(common_causes))
         if self._graph.all_observed(common_causes) or self._proceed_when_unidentifiable:
-            print("All common causes are observed. Causal effect can be identified.")
+            self.logger.info("All common causes are observed. Causal effect can be identified.")
         else:
-            print("There are unobserved common causes. Causal effect cannot be identified.")
+            self.logger.warning("There are unobserved common causes. Causal effect cannot be identified.")
             cli.query_yes_no(
                 "WARN: Do you want to continue by ignoring these unobserved confounders?",
                 default=None
