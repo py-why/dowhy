@@ -2,6 +2,8 @@ import logging
 import numpy as np
 import pandas as pd
 
+from dowhy.utils.api import parse_state
+
 
 class DoSampler:
     """Base class for a sampler from the interventional distribution.
@@ -49,8 +51,8 @@ class DoSampler:
         """
         self._data = data.copy()
         self._target_estimand = identified_estimand
-        self._treatment_names = list(treatments)
-        self._outcome_names = list(outcomes)
+        self._treatment_names = parse_state(treatments)
+        self._outcome_names = parse_state(outcomes)
         self._estimate = None
         self._variable_types = variable_types
         self.num_cores = num_cores
