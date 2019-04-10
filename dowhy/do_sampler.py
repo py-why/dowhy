@@ -11,9 +11,6 @@ class DoSampler:
     """
 
     def __init__(self, data,
-                 #identified_estimand,
-                 #treatments,
-                 #outcomes,
                  params=None, variable_types=None,
                  num_cores=1, causal_model=None, keep_original_treatment=False):
         """
@@ -55,7 +52,7 @@ class DoSampler:
         """
         self._data = data.copy()
         self._causal_model = causal_model
-        self._target_estimand = self._causal_model.identify_effect()  # identified_estimand
+        self._target_estimand = self._causal_model.identify_effect()
         self._treatment_names = parse_state(self._causal_model._treatment)
         self._outcome_names = parse_state(self._causal_model._outcome)
         self._estimate = None

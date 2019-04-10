@@ -4,7 +4,6 @@ from dowhy.utils.propensity_score import state_propensity_score
 
 class MultivariateWeightingSampler(DoSampler):
     def __init__(self, data,
-                 #identified_estimand, treatments, outcomes,
                  *args, params=None, variable_types=None,
                  num_cores=1, keep_original_treatment=False,
                  causal_model=None,
@@ -14,7 +13,6 @@ class MultivariateWeightingSampler(DoSampler):
 
         """
         super().__init__(data,
-                         #identified_estimand, treatments, outcomes,
                          params=params,
                          variable_types=variable_types, num_cores=num_cores,
                          keep_original_treatment=keep_original_treatment,
