@@ -10,8 +10,9 @@ class DoSampler:
 
     """
 
-    def __init__(self, data, identified_estimand, treatments, outcomes, params=None, variable_types=None,
-                 num_cores=1, keep_original_treatment=False):
+    def __init__(self, data,
+                 params=None, variable_types=None,
+                 num_cores=1, causal_model=None, keep_original_treatment=False):
         """
         Initializes a do sampler with data and names of relevant variables.
 
@@ -50,9 +51,10 @@ class DoSampler:
 
         """
         self._data = data.copy()
-        self._target_estimand = identified_estimand
-        self._treatment_names = parse_state(treatments)
-        self._outcome_names = parse_state(outcomes)
+        self._causal_model = causal_model
+        self._target_estimand = self._causal_model.identify_effect()
+        self._treatment_names = parse_state(self._causal_model._treatment)
+        self._outcome_names = parse_state(self._causal_model._outcome)
         self._estimate = None
         self._variable_types = variable_types
         self.num_cores = num_cores

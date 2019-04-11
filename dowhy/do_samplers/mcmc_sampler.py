@@ -5,13 +5,15 @@ import networkx as nx
 
 
 class McmcSampler(DoSampler):
-    def __init__(self, data, identified_estimand, treatments, outcomes, *args, params=None, variable_types=None,
-                 num_cores=1, keep_original_treatment=False, **kwargs):
+    def __init__(self, data, *args, params=None, variable_types=None,
+                 num_cores=1, keep_original_treatment=False,
+                 causal_model=None,
+                 **kwargs):
         """
         g, df, data_types
 
         """
-        super().__init__(data, identified_estimand, treatments, outcomes, params=params, variable_types=variable_types,
+        super().__init__(data, params=params, variable_types=variable_types, causal_model=causal_model,
                  num_cores=num_cores, keep_original_treatment=keep_original_treatment)
 
         self.logger.info("Using McmcSampler for do sampling.")

@@ -88,14 +88,14 @@ class CausalAccessor(object):
                                              instruments=None,
                                              estimand_type=estimand_type,
                                              proceed_when_unidentifiable=proceed_when_unidentifiable)
-        self._identified_estimand = self._causal_model.identify_effect()
+        #self._identified_estimand = self._causal_model.identify_effect()
         if not self._sampler:
             self._method = method
             do_sampler_class = do_samplers.get_class_object(method + "_sampler")
             self._sampler = do_sampler_class(self._obj,
-                                             self._identified_estimand,
-                                             self._causal_model._treatment,
-                                             self._causal_model._outcome,
+                                             #self._identified_estimand,
+                                             #self._causal_model._treatment,
+                                             #self._causal_model._outcome,
                                              params=params,
                                              variable_types=variable_types,
                                              num_cores=num_cores,
