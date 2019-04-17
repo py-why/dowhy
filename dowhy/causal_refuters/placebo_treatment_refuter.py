@@ -23,7 +23,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         self.logger.debug(new_data[0:10])
         estimator_class = self._estimate.params['estimator_class']
         identified_estimand = copy.deepcopy(self._target_estimand)
-        identified_estimand.treatment_variable = "placebo"
+        identified_estimand.treatment_variable = ["placebo"]
 
         new_estimator = estimator_class(
             new_data,
