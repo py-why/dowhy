@@ -90,7 +90,6 @@ class CausalEstimator:
         null_estimates = np.zeros(self.num_simulations)
         for i in range(self.num_simulations):
             self._outcome = np.random.permutation(self._outcome)
-            self._significance_test=False
             est = self._estimate_effect()
             null_estimates[i] = est.value
 
