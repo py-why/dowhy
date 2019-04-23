@@ -46,20 +46,14 @@ class CausalEstimator:
         :returns: point estimate of causal effect
 
         """
-        print(f"NOTE: Entered **estimate_effect** of **CausalEstimator** in file **causal_estimator.py**")
         self._treatment = self._data[self._treatment_name]
         self._outcome = self._data[self._outcome_name]
-        print(f"NOTE: About to call **_estimate_effect()** in **CausalEstimator** in file **causal_estimator.py**")
         est = self._estimate_effect()
-        print(f"NOTE: Received **estimate** object from **_estimate_effect** (in **propensity_score_matching_estimator**) in **CausalEstimator** in file **causal_estimator.py** with value {est.value}.")
         # self._estimate = est
 
         if self._significance_test:
-            print(f"NOTE: About to call **test_significance()** on the received estimate **est** in file **causal_estimator.py** with {num_simulations} simulations.")
             signif_dict = self.test_significance(est, num_simulations=num_simulations)
-            print(f"NOTE: Received **signif_dif** from  **test_significance()** on the estimate **est** in file **causal_estimator.py**")
             est.add_significance_test_results(signif_dict)
-        print(f"NOTE: About to return **estimate** object to **do_why.py** variable **estimate**.")
         return est
 
     def _do(self, x):

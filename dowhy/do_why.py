@@ -135,7 +135,6 @@ class CausalModel:
             and other method-dependent information
 
         """
-        print(f"NOTE: Entered **estimate_effect** of **CausalModel** in file **do_why.py**")
         if method_name is None:
             pass
         else:
@@ -150,7 +149,6 @@ class CausalModel:
             self.logger.warning("No valid identified estimand for using instrumental variables method")
             estimate = CausalEstimate(None, None, None)
         else:
-            print(f"NOTE: causal_estimator_class: {causal_estimator_class}.")
             causal_estimator = causal_estimator_class(
                 self._data,
                 identified_estimand,
@@ -158,15 +156,12 @@ class CausalModel:
                 test_significance=test_significance,
                 params=method_params
             )
-            print(f"NOTE: causal_estimator: {causal_estimator}.")
-            print(f"NOTE: About to call **causal_estimator.estimate_effect()** in **CausalModel** in file **do_why.py** with {num_simulations} simulations.")
+            
             estimate = causal_estimator.estimate_effect(num_simulations)
-            print(f"NOTE: Received **estimate** object with value {estimate.value} from **CausalEstimator** in **causal_estimator.py**")
             estimate.add_params(
                 estimand_type=identified_estimand.estimand_type,
                 estimator_class=causal_estimator_class
             )
-            print(f"NOTE: FINAL STEP: About to pass the estimate object back to the assigned variable.")
         return estimate
 
     def do(self, x, identified_estimand, method_name=None,  method_params=None):
