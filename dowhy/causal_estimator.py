@@ -88,18 +88,15 @@ class CausalEstimator:
         if not hasattr(self,'num_simulations'):
             self.num_simulations = num_simulations
         null_estimates = np.zeros(self.num_simulations)
-        print(f"NOTE: About to create **null_estimates** array in file **causal_estimator.py**")
         for i in range(self.num_simulations):
             self._outcome = np.random.permutation(self._outcome)
             self._significance_test=False
-            print(f"NOTE: About to call **_estimate_effect()** in the **test_significance** method in file **causal_estimator.py** with _significance_test={self._significance_test}")
             est = self._estimate_effect()
             null_estimates[i] = est.value
 
         sorted_null_estimates = np.sort(null_estimates)
         self.logger.debug("Null estimates: {0}".format(sorted_null_estimates))
         median_estimate = sorted_null_estimates[int(self.num_simulations / 2)]
-        print(f"NOTE: About to create **null_estimates** array in file **causal_estimator.py**")
         # Doing a two-sided test
         if estimate.value > median_estimate:
             # Being conservative with the p-value reported
