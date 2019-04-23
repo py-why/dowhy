@@ -37,7 +37,7 @@ class CausalEstimator:
 
         self.logger = logging.getLogger(__name__)
 
-    def estimate_effect(self):
+    def estimate_effect(self, num_simulations):
         """TODO.
 
         More description.
@@ -46,15 +46,20 @@ class CausalEstimator:
         :returns: point estimate of causal effect
 
         """
+        print(f"NOTE: Entered **estimate_effect** of **CausalEstimator** in file **causal_estimator.py**")
         self._treatment = self._data[self._treatment_name]
         self._outcome = self._data[self._outcome_name]
+        print(f"NOTE: About to call **_estimate_effect()** in **CausalEstimator** in file **causal_estimator.py**")
         est = self._estimate_effect()
+        print(f"NOTE: Received **estimate** object from **_estimate_effect** (in **propensity_score_matching_estimator**) in **CausalEstimator** in file **causal_estimator.py** with value {est.value}.")
         # self._estimate = est
 
-
         if self._significance_test:
-            signif_dict = self.test_significance(est)
+            print(f"NOTE: About to call **test_significance()** on the received estimate **est** in file **causal_estimator.py** with {num_simulations} simulations.")
+            signif_dict = self.test_significance(est, num_simulations=num_simulations)
+            print(f"NOTE: Received **signif_dif** from  **test_significance()** on the estimate **est** in file **causal_estimator.py**")
             est.add_significance_test_results(signif_dict)
+        print(f"NOTE: About to return **estimate** object to **do_why.py** variable **estimate**.")
         return est
 
     def _do(self, x):
@@ -89,14 +94,18 @@ class CausalEstimator:
         if not hasattr(self,'num_simulations'):
             self.num_simulations = num_simulations
         null_estimates = np.zeros(self.num_simulations)
+        print(f"NOTE: About to create **null_estimates** array in file **causal_estimator.py**")
         for i in range(self.num_simulations):
             self._outcome = np.random.permutation(self._outcome)
+            self._significance_test=False
+            print(f"NOTE: About to call **_estimate_effect()** in the **test_significance** method in file **causal_estimator.py** with _significance_test={self._significance_test}")
             est = self._estimate_effect()
             null_estimates[i] = est.value
 
         sorted_null_estimates = np.sort(null_estimates)
         self.logger.debug("Null estimates: {0}".format(sorted_null_estimates))
         median_estimate = sorted_null_estimates[int(self.num_simulations / 2)]
+        print(f"NOTE: About to create **null_estimates** array in file **causal_estimator.py**")
         # Doing a two-sided test
         if estimate.value > median_estimate:
             # Being conservative with the p-value reported

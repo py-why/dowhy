@@ -20,6 +20,7 @@ class PropensityScoreMatchingEstimator(CausalEstimator):
         self.logger.info(self.symbolic_estimator)
 
     def _estimate_effect(self):
+        print(f"NOTE: Entered **_estimate_effect** of **PropensityScoreMatchingEstimator** in file **propensity_score_matching_estimator.py**")
         propensity_score_model = linear_model.LinearRegression()
         propensity_score_model.fit(self._observed_common_causes, self._treatment)
         self._data['propensity_score'] = propensity_score_model.predict(self._observed_common_causes)
@@ -45,10 +46,12 @@ class PropensityScoreMatchingEstimator(CausalEstimator):
             ate += treated_outcome - control_outcome
 
         ate /= numtreatedunits
-
+        print(f"NOTE: ATE: {ate}")
+        print(f"NOTE: About to call **CausalEstimate** in **PropenseityScoreMatchingEstimator** in file **propensity_score_matching_estimator.py**")
         estimate = CausalEstimate(estimate=ate,
                                   target_estimand=self._target_estimand,
                                   realized_estimand_expr=self.symbolic_estimator)
+        print(f"NOTE: Created **CausalEstimate** object in **_estimate_effect** in **PropensityScoreMatchingEstimator** in file **propensity_score_matching_estimator.py** with value {estimate.value}.")
         return estimate
 
     def construct_symbolic_estimator(self, estimand):
