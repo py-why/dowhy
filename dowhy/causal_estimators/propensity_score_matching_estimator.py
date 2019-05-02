@@ -20,9 +20,9 @@ class PropensityScoreMatchingEstimator(CausalEstimator):
         self.logger.info(self.symbolic_estimator)
 
     def _estimate_effect(self):
-        propensity_score_model = linear_model.LinearRegression()
+        propensity_score_model = linear_model.LogisticRegression()
         propensity_score_model.fit(self._observed_common_causes, self._treatment)
-        self._data['propensity_score'] = propensity_score_model.predict(self._observed_common_causes)
+        self._data['propensity_score'] = propensity_score_model.predict_proba(self._observed_common_causes)[:,1]
 
         # this assumes a binary treatment regime
         treated = self._data.loc[self._data[self._treatment_name] == 1]

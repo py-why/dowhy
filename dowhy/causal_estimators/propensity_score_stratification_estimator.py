@@ -28,10 +28,9 @@ class PropensityScoreStratificationEstimator(CausalEstimator):
             self.clipping_threshold = clipping_threshold
 
     def _estimate_effect(self):
-        propensity_score_model = linear_model.LinearRegression()
+        propensity_score_model = linear_model.LogisticRegression()
         propensity_score_model.fit(self._observed_common_causes, self._treatment)
-        self._data['propensity_score'] = propensity_score_model.predict(self._observed_common_causes)
-
+        self._data['propensity_score'] = propensity_score_model.predict_proba(self._observed_common_causes)[:,1]
         # sort the dataframe by propensity score
         # create a column 'strata' for each element that marks what strata it belongs to
         num_rows = self._data[self._outcome_name].shape[0]

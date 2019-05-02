@@ -26,9 +26,9 @@ class PropensityScoreWeightingEstimator(CausalEstimator):
         self.max_ps_score = max_ps_score
 
     def _estimate_effect(self):
-        psmodel = linear_model.LinearRegression()
+        psmodel = linear_model.LogisticRegression()
         psmodel.fit(self._observed_common_causes, self._treatment)
-        self._data['ps'] = psmodel.predict(self._observed_common_causes)
+        self._data['ps'] = psmodel.predict_proba(self._observed_common_causes)[:,1]
         self._data['ps'] = np.minimum(self.max_ps_score, self._data['ps'])
         self._data['ps'] = np.maximum(self.min_ps_score, self._data['ps'])
 
