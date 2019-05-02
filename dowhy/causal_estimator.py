@@ -26,11 +26,11 @@ class CausalEstimator:
         """
         self._data = data
         self._target_estimand = identified_estimand
-        self._treatment_name = treatment
-        self._outcome_name = outcome
+        # Currently estimation methods only support univariate treatment and outcome
+        self._treatment_name = treatment[0]
+        self._outcome_name = outcome[0]
         self._significance_test = test_significance
         self._estimate = None
-
         if params is not None:
             for key, value in params.items():
                 setattr(self, key, value)

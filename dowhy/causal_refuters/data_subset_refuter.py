@@ -20,6 +20,7 @@ class DataSubsetRefuter(CausalRefuter):
             test_significance=None
         )
         new_effect = new_estimator.estimate_effect()
+
         refute = CausalRefutation(
             self._estimate.value,
             new_effect.value,

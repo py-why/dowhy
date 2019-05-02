@@ -22,9 +22,10 @@ class PropensityScoreStratificationEstimator(CausalEstimator):
         self.logger.info("INFO: Using Propensity Score Stratification Estimator")
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
-
-        self.num_strata = num_strata
-        self.clipping_threshold = clipping_threshold
+        if not hasattr(self, 'num_strata'):
+            self.num_strata = num_strata
+        if not hasattr(self, 'clipping_threshold'):
+            self.clipping_threshold = clipping_threshold
 
     def _estimate_effect(self):
         propensity_score_model = linear_model.LinearRegression()
@@ -41,7 +42,7 @@ class PropensityScoreStratificationEstimator(CausalEstimator):
         # for each strata, count how many treated and control units there are
         # throw away strata that have insufficient treatment or control
         # print("before clipping, here is the distribution of treatment and control per strata")
-        # print(self._data.groupby(['strata',self._treatment_name])[self._outcome_name].count())
+        #print(self._data.groupby(['strata',self._treatment_name])[self._outcome_name].count())
 
         self._data['dbar'] = 1 - self._data[self._treatment_name]
         self._data['d_y'] = self._data[self._treatment_name] * self._data[self._outcome_name]
@@ -52,7 +53,7 @@ class PropensityScoreStratificationEstimator(CausalEstimator):
                                strata.loc[strata[self._treatment_name] == 0].shape[0]) > self.clipping_threshold
         )
         # print("after clipping at threshold, now we have:" )
-        # print(clipped.groupby(['strata',self._treatment_name])[self._outcome_name].count())
+        #print(clipped.groupby(['strata',self._treatment_name])[self._outcome_name].count())
 
         # sum weighted outcomes over all strata  (weight by treated population)
         weighted_outcomes = clipped.groupby('strata').agg({

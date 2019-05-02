@@ -28,7 +28,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         new_estimator = estimator_class(
             new_data,
             identified_estimand,
-            "placebo", self._outcome_name,
+            identified_estimand.treatment_variable, self._outcome_name,
             test_significance=None
         )
         new_effect = new_estimator.estimate_effect()
