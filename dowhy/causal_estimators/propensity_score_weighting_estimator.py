@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from sklearn import linear_model
 
 from dowhy.causal_estimator import CausalEstimate
@@ -6,8 +7,8 @@ from dowhy.causal_estimator import CausalEstimator
 
 
 class PropensityScoreWeightingEstimator(CausalEstimator):
-    """ Estimate effect of treatment by stratifying the data into bins with
-    identical common causes.
+    """ Estimate effect of treatment by weighing the data by
+    inverse probability of occurrence.
 
     Straightforward application of the back-door criterion.
     """
@@ -17,7 +18,15 @@ class PropensityScoreWeightingEstimator(CausalEstimator):
         self.logger.debug("Back-door variables used:" +
                           ",".join(self._target_estimand.backdoor_variables))
         self._observed_common_causes_names = self._target_estimand.backdoor_variables
-        self._observed_common_causes = self._data[self._observed_common_causes_names]
+        if len(self._observed_common_causes_names)>0:
+            self._observed_common_causes = self._data[self._observed_common_causes_names]
+            self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
+        else:
+            self._observed_common_causes= None
+            error_msg ="No common causes/confounders present. Propensity score based methods are not applicable"
+            self.logger.error(error_msg)
+            raise Exception(error_msg)
+
         self.logger.info("INFO: Using Propensity Score Weighting Estimator")
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
@@ -71,7 +80,8 @@ class PropensityScoreWeightingEstimator(CausalEstimator):
         # TODO - how can we add additional information into the returned estimate?
         estimate = CausalEstimate(estimate=ate,
                                   target_estimand=self._target_estimand,
-                                  realized_estimand_expr=self.symbolic_estimator)
+                                  realized_estimand_expr=self.symbolic_estimator,
+                                  propensity_scores = self._data["ps"])
         return estimate
 
     def construct_symbolic_estimator(self, estimand):

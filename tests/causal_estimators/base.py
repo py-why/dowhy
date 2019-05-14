@@ -10,12 +10,14 @@ class TestEstimator(object):
         self._Estimator = Estimator
         print(self._error_tolerance)
 
-    def average_treatment_effect_test(self):
-        data = dowhy.datasets.linear_dataset(beta=10,
-                                             num_common_causes=1,
-                                             num_instruments=1,
-                                             num_samples=10000,
-                                             treatment_is_binary=True)
+    def average_treatment_effect_test(self, dataset="linear", beta=10,
+            num_common_causes=1, num_instruments=1, num_samples=10000,
+            treatment_is_binary=True):
+        data = dowhy.datasets.linear_dataset(beta=beta,
+                                             num_common_causes=num_common_causes,
+                                             num_instruments=num_instruments,
+                                             num_samples=num_samples,
+                                             treatment_is_binary=treatment_is_binary)
 
         model = CausalModel(
             data=data['df'],
@@ -41,4 +43,9 @@ class TestEstimator(object):
         )
         res = True if (error < true_ate * self._error_tolerance) else False
         assert res
+
+    def average_treatment_effect_testsuite(self, tests_to_run="all"):
+        self.average_treatment_effect_test(num_common_causes=1)
+        self.average_treatment_effect_test(num_common_causes=0)
+
 

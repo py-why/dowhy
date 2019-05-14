@@ -20,7 +20,9 @@ class CausalIdentifier:
 
     def identify_effect(self):
         estimands_dict = {}
-        common_causes = self._graph.get_common_causes(self.treatment_name, self.outcome_name)
+        causes_t = self._graph.get_causes(self.treatment_name)
+        causes_y = self._graph.get_causes(self.outcome_name, remove_edges={'sources':self.treatment_name, 'targets':self.outcome_name})
+        common_causes = list(causes_t.intersection(causes_y))
         self.logger.info("Common causes of treatment and outcome:" + str(common_causes))
         if self._graph.all_observed(common_causes) or self._proceed_when_unidentifiable:
             self.logger.info("All common causes are observed. Causal effect can be identified.")
@@ -77,8 +79,9 @@ class CausalIdentifier:
             # [TODO: support multivariate states]
             outcome_name = outcome_name[0]
             treatment_name = treatment_name[0]
-            num_expr_str = outcome_name + "|"
-            num_expr_str += ",".join(common_causes)
+            num_expr_str = outcome_name
+            if len(common_causes)>0:
+                num_expr_str += "|" + ",".join(common_causes)
             expr = "d(" + num_expr_str + ")/d" + treatment_name
             sym_mu = sp.Symbol("mu")
             sym_sigma = sp.Symbol("sigma", positive=True)

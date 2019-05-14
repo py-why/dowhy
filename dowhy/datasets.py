@@ -16,6 +16,7 @@ def stochastically_convert_to_binary(x):
 
 def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
                    treatment_is_binary=True):
+    beta = float(beta)
     if num_common_causes > 0:
         range_c1 = beta*0.5
         range_c2 = beta*0.5
@@ -37,15 +38,17 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         cz = np.random.uniform(0, range_cz, num_instruments)
 
     # TODO - test all our methods with random noise added to covariates (instead of the stochastic treatment assignment)
-    t = 0
+    t = np.random.normal(0, 1)
     if num_common_causes > 0:
         t += X @ c1  # + np.random.normal(0, 0.01)
     if num_instruments > 0:
         t += Z @ cz
     if treatment_is_binary:
         t = np.vectorize(stochastically_convert_to_binary)(t)
+    y =  beta*t  # + np.random.normal(0,0.01)
+    if num_common_causes>0:
+        y += X @ c2
 
-    y = X @ c2 + beta*t  # + np.random.normal(0,0.01)
     data = np.column_stack((t, y))
     if num_common_causes > 0:
         data = np.column_stack((X, data))

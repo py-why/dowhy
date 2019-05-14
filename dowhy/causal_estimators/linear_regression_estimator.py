@@ -19,8 +19,11 @@ class LinearRegressionEstimator(CausalEstimator):
         self.logger.debug("Back-door variables used:" +
                           ",".join(self._target_estimand.backdoor_variables))
         self._observed_common_causes_names = self._target_estimand.backdoor_variables
-        self._observed_common_causes = self._data[self._observed_common_causes_names]
-        self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
+        if len(self._observed_common_causes_names)>0:
+            self._observed_common_causes = self._data[self._observed_common_causes_names]
+            self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
+        else:
+            self._observed_common_causes = None
         self.logger.info("INFO: Using Linear Regression Estimator")
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
@@ -28,8 +31,11 @@ class LinearRegressionEstimator(CausalEstimator):
 
     def _estimate_effect(self):
         treatment_2d = self._treatment.values.reshape(len(self._treatment), -1)
-        features = np.concatenate((treatment_2d, self._observed_common_causes),
+        if len(self._observed_common_causes_names)>0:
+            features = np.concatenate((treatment_2d, self._observed_common_causes),
                                   axis=1)
+        else:
+            features = treatment_2d
         self._linear_model = linear_model.LinearRegression()
         self._linear_model.fit(features, self._outcome)
         coefficients = self._linear_model.coef_

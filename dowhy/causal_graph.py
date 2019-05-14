@@ -154,6 +154,21 @@ class CausalGraph:
                 new_graph.remove_edges_from(edges_bunch)
         return new_graph
 
+    def get_causes(self, nodes, remove_edges = None):
+        nodes = parse_state(nodes)
+        new_graph=None
+        if remove_edges is not None:
+            new_graph = self._graph.copy()  # caution: shallow copy of the attributes
+            sources = parse_state(remove_edges["sources"])
+            targets = parse_state(remove_edges["targets"])
+            for s in sources:
+                for t in targets:
+                    new_graph.remove_edge(s, t)
+        causes = set()
+        for v in nodes:
+            causes = causes.union(self.get_ancestors(v, new_graph=new_graph))
+        return causes
+
     def get_common_causes(self, nodes1, nodes2):
         nodes1 = parse_state(nodes1)
         nodes2 = parse_state(nodes2)
@@ -168,8 +183,12 @@ class CausalGraph:
     def get_parents(self, node_name):
         return set(self._graph.predecessors(node_name))
 
-    def get_ancestors(self, node_name):
-        return set(nx.ancestors(self._graph, node_name))
+    def get_ancestors(self, node_name, new_graph=None):
+        if new_graph is None:
+            graph=self._graph
+        else:
+            graph=new_graph
+        return set(nx.ancestors(graph, node_name))
 
     def get_descendants(self, node_name):
         return set(nx.descendants(self._graph, node_name))

@@ -9,4 +9,4 @@ class TestPropensityScoreMatchingEstimator(object):
                              [(0.05, PropensityScoreMatchingEstimator),])
     def test_average_treatment_effect(self, error_tolerance, Estimator):
         estimator_tester = TestEstimator(error_tolerance, Estimator)
-        estimator_tester.average_treatment_effect_test()
+        estimator_tester.average_treatment_effect_testsuite()
