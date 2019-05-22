@@ -48,4 +48,30 @@ class TestEstimator(object):
         self.average_treatment_effect_test(num_common_causes=1)
         self.average_treatment_effect_test(num_common_causes=0)
 
+    def custom_data_average_treatment_effect_test(self, data):
+        model = CausalModel(
+            data=data['df'],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            proceed_when_unidentifiable=True,
+            test_significance=None
+        )
+        target_estimand = model.identify_effect()
+        estimator_ate = self._Estimator(
+            data['df'],
+            identified_estimand=target_estimand,
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            test_significance=None
+        )
+        true_ate = data["ate"]
+        ate_estimate = estimator_ate.estimate_effect()
+        error = ate_estimate.value - true_ate
+        print("Error in ATE estimate = {0} with tolerance {1}%. Estimated={2},True={3}".format(
+            error, self._error_tolerance * 100, ate_estimate.value, true_ate)
+        )
+        res = True if (error < true_ate * self._error_tolerance) else False
+        assert res
+
 
