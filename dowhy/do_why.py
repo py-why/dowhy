@@ -107,15 +107,18 @@ class CausalModel:
         self._other_variables = kwargs
         self.summary()
 
-    def identify_effect(self):
+    def identify_effect(self, proceed_when_unidentifiable=None):
         """Identify the causal effect to be estimated, using properties of the causal graph.
 
         :returns: a probability expression for the causal effect if identified, else NULL
 
         """
+        if proceed_when_unidentifiable is None:
+            proceed_unidentifiable = self._proceed_when_unidentifiable
+
         self.identifier = CausalIdentifier(self._graph,
                                            self._estimand_type,
-                                           proceed_when_unidentifiable=self._proceed_when_unidentifiable)
+                                           proceed_when_unidentifiable=proceed_when_unidentifiable)
         identified_estimand = self.identifier.identify_effect()
 
         return identified_estimand
