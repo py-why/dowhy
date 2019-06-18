@@ -1,8 +1,8 @@
 DoWhy | Making causal inference easy
 ====================================
 
-`Amit Sharma <www.amitsharma.in>`_,
-`Emre Kiciman <www.kiciman.org>`_
+`Amit Sharma <http://www.amitsharma.in>`_,
+`Emre Kiciman <http://www.kiciman.org>`_
 
 `Blog Post <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Docs <http://causalinference.gitlab.io/dowhy/>`_ | Try it in a web browser! |Binder|_
 
