@@ -1,0 +1,293 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>dowhy.causal_estimators.propensity_score_matching_estimator &mdash; DoWhy | Making Causal Inference Easy  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="DoWhy | Making Causal Inference Easy  documentation" href="../../../index.html"/>
+        <link rel="up" title="dowhy.causal_estimators" href="../causal_estimators.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> DoWhy | Making Causal Inference Easy
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">DoWhy | Making causal inference easy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../code_repo.html">Code repository</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dowhy.html">dowhy package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">dowhy</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">DoWhy | Making Causal Inference Easy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../causal_estimators.html">dowhy.causal_estimators</a> &raquo;</li>
+        
+      <li>dowhy.causal_estimators.propensity_score_matching_estimator</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for dowhy.causal_estimators.propensity_score_matching_estimator</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">sklearn</span> <span class="k">import</span> <span class="n">linear_model</span>
+<span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="k">import</span> <span class="n">NearestNeighbors</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">dowhy.causal_estimator</span> <span class="k">import</span> <span class="n">CausalEstimate</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_estimator</span> <span class="k">import</span> <span class="n">CausalEstimator</span>
+
+
+<div class="viewcode-block" id="PropensityScoreMatchingEstimator"><a class="viewcode-back" href="../../../dowhy.causal_estimators.html#dowhy.causal_estimators.propensity_score_matching_estimator.PropensityScoreMatchingEstimator">[docs]</a><span class="k">class</span> <span class="nc">PropensityScoreMatchingEstimator</span><span class="p">(</span><span class="n">CausalEstimator</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Back-door variables used:&quot;</span> <span class="o">+</span>
+                          <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">backdoor_variables</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">backdoor_variables</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes_names</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes_names</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span><span class="p">,</span> <span class="n">drop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span><span class="o">=</span> <span class="kc">None</span>
+            <span class="n">error_msg</span> <span class="o">=</span><span class="s2">&quot;No common causes/confounders present. Propensity score based methods are not applicable&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;INFO: Using Propensity Score Matching Estimator&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">construct_symbolic_estimator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolic_estimator</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_estimate_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">propensity_score_model</span> <span class="o">=</span> <span class="n">linear_model</span><span class="o">.</span><span class="n">LogisticRegression</span><span class="p">()</span>
+        <span class="n">propensity_score_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s1">&#39;propensity_score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">propensity_score_model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span><span class="p">)[:,</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># this assumes a binary treatment regime</span>
+        <span class="n">treated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">control</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">control_neighbors</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">NearestNeighbors</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s1">&#39;ball_tree&#39;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">control</span><span class="p">[</span><span class="s1">&#39;propensity_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="n">distances</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">control_neighbors</span><span class="o">.</span><span class="n">kneighbors</span><span class="p">(</span><span class="n">treated</span><span class="p">[</span><span class="s1">&#39;propensity_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="c1"># TODO remove neighbors that are more than a given radius apart</span>
+
+        <span class="c1"># estimate ATE on treated by summing over difference between matched neighbors</span>
+        <span class="n">ate</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">numtreatedunits</span> <span class="o">=</span> <span class="n">treated</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numtreatedunits</span><span class="p">):</span>
+            <span class="n">treated_outcome</span> <span class="o">=</span> <span class="n">treated</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+            <span class="n">control_outcome</span> <span class="o">=</span> <span class="n">control</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+            <span class="n">ate</span> <span class="o">+=</span> <span class="n">treated_outcome</span> <span class="o">-</span> <span class="n">control_outcome</span>
+
+        <span class="n">ate</span> <span class="o">/=</span> <span class="n">numtreatedunits</span>
+
+        <span class="n">estimate</span> <span class="o">=</span> <span class="n">CausalEstimate</span><span class="p">(</span><span class="n">estimate</span><span class="o">=</span><span class="n">ate</span><span class="p">,</span>
+                                  <span class="n">target_estimand</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="p">,</span>
+                                  <span class="n">realized_estimand_expr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolic_estimator</span><span class="p">,</span>
+                                  <span class="n">propensity_scores</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s2">&quot;propensity_score&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">estimate</span>
+
+<div class="viewcode-block" id="PropensityScoreMatchingEstimator.construct_symbolic_estimator"><a class="viewcode-back" href="../../../dowhy.causal_estimators.html#dowhy.causal_estimators.propensity_score_matching_estimator.PropensityScoreMatchingEstimator.construct_symbolic_estimator">[docs]</a>    <span class="k">def</span> <span class="nf">construct_symbolic_estimator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimand</span><span class="p">):</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="s2">&quot;b: &quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">estimand</span><span class="o">.</span><span class="n">outcome_variable</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;~&quot;</span>
+        <span class="c1"># TODO -- fix: we are actually conditioning on positive treatment (d=1)</span>
+        <span class="n">var_list</span> <span class="o">=</span> <span class="n">estimand</span><span class="o">.</span><span class="n">treatment_variable</span> <span class="o">+</span> <span class="n">estimand</span><span class="o">.</span><span class="n">backdoor_variables</span>
+        <span class="n">expr</span> <span class="o">+=</span> <span class="s2">&quot;+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">var_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">expr</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Microsoft.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

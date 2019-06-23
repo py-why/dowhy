@@ -1,0 +1,984 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>DoWhy: Different estimation methods for causal inference &mdash; DoWhy | Making Causal Inference Easy  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="DoWhy | Making Causal Inference Easy  documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> DoWhy | Making Causal Inference Easy
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="readme.html">DoWhy | Making causal inference easy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code_repo.html">Code repository</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy.html">dowhy package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">dowhy</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DoWhy | Making Causal Inference Easy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>DoWhy: Different estimation methods for causal inference</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/dowhy_estimation_methods.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="DoWhy:-Different-estimation-methods-for-causal-inference">
+<h1>DoWhy: Different estimation methods for causal inference<a class="headerlink" href="#DoWhy:-Different-estimation-methods-for-causal-inference" title="Permalink to this headline">¶</a></h1>
+<p>This is a quick introduction to the DoWhy causal inference library. We
+will load in a sample dataset and use different methods for estimating
+the causal effect of a (pre-specified)treatment variable on a
+(pre-specified) outcome variable.</p>
+<p>First, let us add the required path for Python to find the DoWhy code
+and load all required packages</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">dowhy</span>
+<span class="kn">from</span> <span class="nn">dowhy.do_why</span> <span class="k">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+</pre></div>
+</div>
+</div>
+<p>Now, let us load a dataset. For simplicity, we simulate a dataset with
+linear relationships between common causes and treatment, and common
+causes and outcome.</p>
+<p>Beta is the true causal effect.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">linear_dataset</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">num_common_causes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">num_instruments</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">num_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+        <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">]</span>
+
+</pre></div>
+</div>
+</div>
+<p>Note that we are using a pandas dataframe to load the data.</p>
+<div class="section" id="Identifying-the-causal-estimand">
+<h2>Identifying the causal estimand<a class="headerlink" href="#Identifying-the-causal-estimand" title="Permalink to this headline">¶</a></h2>
+<p>We now input a causal graph in the DOT graph format.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># With graph</span>
+<span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
+        <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
+        <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
+        <span class="n">graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;gml_graph&quot;</span><span class="p">],</span>
+        <span class="n">instruments</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;instrument_names&quot;</span><span class="p">],</span>
+        <span class="n">logging_level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.do_why:Model to find the causal effect of treatment [&#39;v&#39;] on outcome [&#39;y&#39;]
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="k">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/dowhy_estimation_methods_10_0.png" src="_images/dowhy_estimation_methods_10_0.png" />
+</div>
+</div>
+<p>We get a causal graph. Now identification and estimation is done.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;X2&#39;, &#39;Z0&#39;, &#39;X3&#39;, &#39;X4&#39;, &#39;X1&#39;, &#39;X0&#39;, &#39;Z1&#39;, &#39;Unobserved Confounders&#39;]
+WARNING:dowhy.causal_identifier:There are unobserved common causes. Causal effect cannot be identified.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARN: Do you want to continue by ignoring these unobserved confounders? [y/n] y
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[&#39;Z1&#39;, &#39;Z0&#39;]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Estimand type: ate
+### Estimand : 1
+Estimand name: iv
+Estimand expression:
+Expectation(Derivative(y, Z1)/Derivative(v, Z1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
+Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+### Estimand : 2
+Estimand name: backdoor
+Estimand expression:
+d
+──(Expectation(y|X2,Z0,X3,X4,X1,X0,Z1))
+dv
+Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X2,Z0,X3,X4,X1,X0,Z1,U) = P(y|v,X2,Z0,X3,X4,X1,X0,Z1)
+
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Method-1:-Regression">
+<h2>Method 1: Regression<a class="headerlink" href="#Method-1:-Regression" title="Permalink to this headline">¶</a></h2>
+<p>Use linear regression.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">causal_estimate_reg</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">,</span>
+        <span class="n">test_significance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_reg</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">causal_estimate_reg</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.causal_estimator:INFO: Using Linear Regression Estimator
+INFO:dowhy.causal_estimator:b: y~v+X2+Z0+X3+X4+X1+X0+Z1
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Target estimand
+Estimand type: ate
+### Estimand : 1
+Estimand name: iv
+Estimand expression:
+Expectation(Derivative(y, Z1)/Derivative(v, Z1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
+Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+### Estimand : 2
+Estimand name: backdoor
+Estimand expression:
+d
+──(Expectation(y|X2,Z0,X3,X4,X1,X0,Z1))
+dv
+Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X2,Z0,X3,X4,X1,X0,Z1,U) = P(y|v,X2,Z0,X3,X4,X1,X0,Z1)
+
+## Realized estimand
+b: y~v+X2+Z0+X3+X4+X1+X0+Z1
+## Estimate
+Value: 9.999999999999995
+
+## Statistical Significance
+p-value: &lt;0.001
+
+Causal Estimate is 10.0
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Method-2:-Stratification">
+<h2>Method 2: Stratification<a class="headerlink" href="#Method-2:-Stratification" title="Permalink to this headline">¶</a></h2>
+<p>We will be using propensity scores to stratify units in the data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">causal_estimate_strat</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_stratification&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_strat</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">causal_estimate_strat</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
+INFO:dowhy.causal_estimator:b: y~v+X2+Z0+X3+X4+X1+X0+Z1
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Target estimand
+Estimand type: ate
+### Estimand : 1
+Estimand name: iv
+Estimand expression:
+Expectation(Derivative(y, Z1)/Derivative(v, Z1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
+Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+### Estimand : 2
+Estimand name: backdoor
+Estimand expression:
+d
+──(Expectation(y|X2,Z0,X3,X4,X1,X0,Z1))
+dv
+Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X2,Z0,X3,X4,X1,X0,Z1,U) = P(y|v,X2,Z0,X3,X4,X1,X0,Z1)
+
+## Realized estimand
+b: y~v+X2+Z0+X3+X4+X1+X0+Z1
+## Estimate
+Value: 10.061716788484345
+
+Causal Estimate is 10.0617167885
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Method-3:-Matching">
+<h2>Method 3: Matching<a class="headerlink" href="#Method-3:-Matching" title="Permalink to this headline">¶</a></h2>
+<p>We will be using propensity scores to match units in the data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">causal_estimate_match</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_matching&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_match</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">causal_estimate_match</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v+X2+Z0+X3+X4+X1+X0+Z1
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Target estimand
+Estimand type: ate
+### Estimand : 1
+Estimand name: iv
+Estimand expression:
+Expectation(Derivative(y, Z1)/Derivative(v, Z1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
+Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+### Estimand : 2
+Estimand name: backdoor
+Estimand expression:
+d
+──(Expectation(y|X2,Z0,X3,X4,X1,X0,Z1))
+dv
+Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X2,Z0,X3,X4,X1,X0,Z1,U) = P(y|v,X2,Z0,X3,X4,X1,X0,Z1)
+
+## Realized estimand
+b: y~v+X2+Z0+X3+X4+X1+X0+Z1
+## Estimate
+Value: 7.391127134286239
+
+Causal Estimate is 7.391127134286239
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Method-4:-Weighting">
+<h2>Method 4: Weighting<a class="headerlink" href="#Method-4:-Weighting" title="Permalink to this headline">¶</a></h2>
+<p>We will be using (inverse) propensity scores to assign weights to units
+in the data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">causal_estimate_ipw</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_weighting&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_ipw</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">causal_estimate_ipw</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v+X2+Z0+X3+X4+X1+X0+Z1
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Target estimand
+Estimand type: ate
+### Estimand : 1
+Estimand name: iv
+Estimand expression:
+Expectation(Derivative(y, Z1)/Derivative(v, Z1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
+Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+### Estimand : 2
+Estimand name: backdoor
+Estimand expression:
+d
+──(Expectation(y|X2,Z0,X3,X4,X1,X0,Z1))
+dv
+Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X2,Z0,X3,X4,X1,X0,Z1,U) = P(y|v,X2,Z0,X3,X4,X1,X0,Z1)
+
+## Realized estimand
+b: y~v+X2+Z0+X3+X4+X1+X0+Z1
+## Estimate
+Value: 17.631870964903452
+
+Causal Estimate is 17.6318709649
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Method-5:-Instrumental-Variable">
+<h2>Method 5: Instrumental Variable<a class="headerlink" href="#Method-5:-Instrumental-Variable" title="Permalink to this headline">¶</a></h2>
+<p>We will be using the Wald estimator for the provided instrumental
+variable.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">causal_estimate_iv</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;iv.instrumental_variable&quot;</span><span class="p">,</span> <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;iv_instrument_name&#39;</span><span class="p">:</span><span class="s1">&#39;Z1&#39;</span><span class="p">})</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_iv</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">causal_estimate_iv</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.causal_estimator:INFO: Using Instrumental Variable Estimator
+INFO:dowhy.causal_estimator:Realized estimand: Wald Estimator
+Realized estimand type: ate
+Estimand expression:
+                                                             -1
+Expectation(Derivative(y, Z1))⋅Expectation(Derivative(v, Z1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
+Estimand assumption 2, treatment_effect_homogeneity: Each unit&#39;s treatment v isaffected in the same way by common causes of v and y
+Estimand assumption 3, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+Estimand assumption 4, outcome_effect_homogeneity: Each unit&#39;s outcome y isaffected in the same way by common causes of v and y
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Target estimand
+Estimand type: ate
+### Estimand : 1
+Estimand name: iv
+Estimand expression:
+Expectation(Derivative(y, Z1)/Derivative(v, Z1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
+Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+### Estimand : 2
+Estimand name: backdoor
+Estimand expression:
+d
+──(Expectation(y|X2,Z0,X3,X4,X1,X0,Z1))
+dv
+Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X2,Z0,X3,X4,X1,X0,Z1,U) = P(y|v,X2,Z0,X3,X4,X1,X0,Z1)
+
+## Realized estimand
+Realized estimand: Wald Estimator
+Realized estimand type: ate
+Estimand expression:
+                                                             -1
+Expectation(Derivative(y, Z1))⋅Expectation(Derivative(v, Z1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
+Estimand assumption 2, treatment_effect_homogeneity: Each unit&#39;s treatment v isaffected in the same way by common causes of v and y
+Estimand assumption 3, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+Estimand assumption 4, outcome_effect_homogeneity: Each unit&#39;s outcome y isaffected in the same way by common causes of v and y
+
+## Estimate
+Value: 12.992472396947559
+
+Causal Estimate is 12.9924723969
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Method-6:-Regression-Discontinuity">
+<h2>Method 6: Regression Discontinuity<a class="headerlink" href="#Method-6:-Regression-Discontinuity" title="Permalink to this headline">¶</a></h2>
+<p>We will be internally converting this to an equivalent instrumental
+variables problem.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">causal_estimate_regdist</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;iv.regression_discontinuity&quot;</span><span class="p">,</span>
+        <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;rd_variable_name&#39;</span><span class="p">:</span><span class="s1">&#39;Z1&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;rd_threshold_value&#39;</span><span class="p">:</span><span class="mf">0.5</span><span class="p">,</span>
+                       <span class="s1">&#39;rd_bandwidth&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">})</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_regdist</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">causal_estimate_regdist</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.causal_estimator:Using Regression Discontinuity Estimator
+INFO:dowhy.causal_estimator:
+INFO:dowhy.causal_estimator:INFO: Using Instrumental Variable Estimator
+INFO:dowhy.causal_estimator:Realized estimand: Wald Estimator
+Realized estimand type: ate
+Estimand expression:
+                                                             -1
+Expectation(Derivative(y, Z1))⋅Expectation(Derivative(v, Z1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
+Estimand assumption 2, treatment_effect_homogeneity: Each unit&#39;s treatment local_treatment isaffected in the same way by common causes of local_treatment and local_outcome
+Estimand assumption 3, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+Estimand assumption 4, outcome_effect_homogeneity: Each unit&#39;s outcome local_outcome isaffected in the same way by common causes of local_treatment and local_outcome
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Target estimand
+Estimand type: ate
+### Estimand : 1
+Estimand name: iv
+Estimand expression:
+Expectation(Derivative(y, Z1)/Derivative(v, Z1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
+Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+### Estimand : 2
+Estimand name: backdoor
+Estimand expression:
+d
+──(Expectation(y|X2,Z0,X3,X4,X1,X0,Z1))
+dv
+Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X2,Z0,X3,X4,X1,X0,Z1,U) = P(y|v,X2,Z0,X3,X4,X1,X0,Z1)
+
+## Realized estimand
+Realized estimand: Wald Estimator
+Realized estimand type: ate
+Estimand expression:
+                                                             -1
+Expectation(Derivative(y, Z1))⋅Expectation(Derivative(v, Z1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
+Estimand assumption 2, treatment_effect_homogeneity: Each unit&#39;s treatment local_treatment isaffected in the same way by common causes of local_treatment and local_outcome
+Estimand assumption 3, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+Estimand assumption 4, outcome_effect_homogeneity: Each unit&#39;s outcome local_outcome isaffected in the same way by common causes of local_treatment and local_outcome
+
+## Estimate
+Value: 12.84020418877542
+
+Causal Estimate is 12.8402041888
+</pre></div></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Microsoft.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
