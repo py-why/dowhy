@@ -11,12 +11,15 @@
    :caption: Contents:
    
    readme
-   do_why_simple_example
-   do_why_estimation_methods
-   do_why_refutation_methods
+   dowhy_simple_example
+   dowhy_estimation_methods
+   dowhy_refutation_methods
    load_graph_example
-   do_why_confounder_example
+   dowhy_confounder_example
+   dowhy_ihdp_data_example
    dowhy_lalonde_example
+   lalonde_pandas_api
+   do_sampler_demo
    code_repo
    dowhy
    modules

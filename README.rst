@@ -96,7 +96,7 @@ DoWhy stresses on the interpretability of its output. At any point in the analys
 you can inspect the untested assumptions, identified estimands (if any) and the
 estimate (if any). Here's a sample output of the linear regression estimator.
 
-.. image:: docs/images/regression_output.png
+.. image:: /docs/images/regression_output.png
 
 For detailed code examples, check out the Jupyter notebooks in `docs/source/ <docs/source/>`_, or try them online at `Binder <https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F>`_.
 
@@ -127,7 +127,7 @@ you can use the namespace as follows.
                          outcome='y',
                          common_causes=['X0']).groupby('v').mean().plot(y='y', kind='bar')
 
-.. image:: docs/images/do_barplot.png
+.. image:: /docs/images/do_barplot.png
 
 The :code:`do` method in the causal namespace generates a random sample from $P(outcome|do(X=x))$ of the
 same length as your data set, and returns this outcome as a new :code:`DataFrame`. You can continue to perform
