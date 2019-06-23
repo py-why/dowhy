@@ -98,7 +98,7 @@ estimate (if any). Here's a sample output of the linear regression estimator.
 
 .. image:: /docs/images/regression_output.png
 
-For detailed code examples, check out the Jupyter notebooks in `docs/source/ <docs/source/>`_, or try them online at `Binder <https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F>`_.
+For detailed code examples, check out the Jupyter notebooks in `docs/source/ <https://github.com/microsoft/dowhy/tree/master/docs/source/>`_, or try them online at `Binder <https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F>`_.
 
 
 A High-level Pandas API
