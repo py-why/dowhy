@@ -29,7 +29,7 @@ setup(
 
     long_description=long_description,
 
-    url='https://causalinference.gitlab.io/dowhy',  # Optional
+    url='https://github.com/microsoft/dowhy',  # Optional
 
     author='Amit Sharma, Emre Kiciman',
 
@@ -45,7 +45,7 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
 
-    keywords='causality causal-inference statistics graphical-model',
+    keywords='causality machine-learning causal-inference statistics graphical-model',
 
     packages=find_packages(exclude=['docs', 'tests']),
     python_requires='>=3.0',
