@@ -27,7 +27,7 @@ class PropensityScoreMatchingEstimator(CausalEstimator):
         self.logger.info(self.symbolic_estimator)
 
     def _estimate_effect(self):
-        propensity_score_model = linear_model.LogisticRegression()
+        propensity_score_model = linear_model.LogisticRegression(solver="lbfgs")
         propensity_score_model.fit(self._observed_common_causes, self._treatment)
         self._data['propensity_score'] = propensity_score_model.predict_proba(self._observed_common_causes)[:,1]
 
