@@ -96,7 +96,7 @@ DoWhy stresses on the interpretability of its output. At any point in the analys
 you can inspect the untested assumptions, identified estimands (if any) and the
 estimate (if any). Here's a sample output of the linear regression estimator.
 
-.. image:: /docs/images/regression_output.png
+.. image:: https://github.com/microsoft/dowhy/tree/master/docs/images/regression_output.png
 
 For detailed code examples, check out the Jupyter notebooks in `docs/source/ <https://github.com/microsoft/dowhy/tree/master/docs/source/>`_, or try them online at `Binder <https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F>`_.
 
@@ -127,7 +127,7 @@ you can use the namespace as follows.
                          outcome='y',
                          common_causes=['X0']).groupby('v').mean().plot(y='y', kind='bar')
 
-.. image:: /docs/images/do_barplot.png
+.. image:: https://github.com/microsoft/dowhy/tree/master/docs/images/do_barplot.png
 
 The :code:`do` method in the causal namespace generates a random sample from $P(outcome|do(X=x))$ of the
 same length as your data set, and returns this outcome as a new :code:`DataFrame`. You can continue to perform
@@ -154,21 +154,30 @@ DoWhy support Python 3+. It requires the following packages:
 * sympy (for rendering symbolic expressions)
 
 Install DoWhy and its dependencies by running this from the top-most folder of
-the repo::
+the repo.
+
+.. code:: shell
+    
     python setup.py install
 
-If you face any problems, try installing dependencies manually::
+If you face any problems, try installing dependencies manually.
+
+.. code:: shell
+    
     pip install -r requirements.txt
 
 Optionally, if you wish to input graphs in the dot format, then install pydot (or pygraphviz).
 
 
 For better-looking graphs, you can optionally install pygraphviz. To proceed,
-first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL).::
+first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL).
+
+.. code:: shell
+
     sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
     ## from https://github.com/pygraphviz/pygraphviz/issues/71
     pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" \
-     --install-option="--library-path=/usr/lib/graphviz/"
+    --install-option="--library-path=/usr/lib/graphviz/"
 
 Keep in mind that pygraphviz installation can be problematic on the latest versions of Python3. Tested to work with Python 3.5.
 
