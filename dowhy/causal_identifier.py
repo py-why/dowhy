@@ -24,14 +24,19 @@ class CausalIdentifier:
         causes_y = self._graph.get_causes(self.outcome_name, remove_edges={'sources':self.treatment_name, 'targets':self.outcome_name})
         common_causes = list(causes_t.intersection(causes_y))
         self.logger.info("Common causes of treatment and outcome:" + str(common_causes))
-        if self._graph.all_observed(common_causes) or self._proceed_when_unidentifiable:
+        if self._graph.all_observed(common_causes):
             self.logger.info("All common causes are observed. Causal effect can be identified.")
         else:
             self.logger.warning("There are unobserved common causes. Causal effect cannot be identified.")
-            cli.query_yes_no(
-                "WARN: Do you want to continue by ignoring these unobserved confounders?",
-                default=None
-            )
+            if self._proceed_when_unidentifiable:
+                self.logger.info(
+                    "Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True."
+                )
+            else:
+                cli.query_yes_no(
+                    "WARN: Do you want to continue by ignoring these unobserved confounders?",
+                    default=None
+                )
         observed_common_causes = self._graph.filter_unobserved_variables(common_causes)
         observed_common_causes = list(observed_common_causes)
 
