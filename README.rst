@@ -47,7 +47,54 @@ for causal inference, it is hard to compare their assumptions and robustness of 
 3. Automatically tests for the validity of assumptions if possible and assesses
    the robustness of the estimate to violations.
 
+Installation
+-------------
 
+**Requirements**
+
+DoWhy support Python 3+. It requires the following packages:
+
+* numpy
+* scipy
+* scikit-learn
+* pandas
+* networkx  (for analyzing causal graphs)
+* matplotlib (for general plotting)
+* sympy (for rendering symbolic expressions)
+
+Install the latest release using pip. 
+
+.. code:: shell
+   
+   pip install dowhy
+   
+If you prefer the latest dev version, clone this repository and run the following command from the top-most folder of
+the repository.
+
+.. code:: shell
+    
+    python setup.py install
+
+If you face any problems, try installing dependencies manually.
+
+.. code:: shell
+    
+    pip install -r requirements.txt
+
+Optionally, if you wish to input graphs in the dot format, then install pydot (or pygraphviz).
+
+
+For better-looking graphs, you can optionally install pygraphviz. To proceed,
+first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL).
+
+.. code:: shell
+
+    sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
+    ## from https://github.com/pygraphviz/pygraphviz/issues/71
+    pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" \
+    --install-option="--library-path=/usr/lib/graphviz/"
+
+Keep in mind that pygraphviz installation can be problematic on the latest versions of Python3. Tested to work with Python 3.5.
 
 Sample causal inference analysis in DoWhy
 -------------------------------------------
@@ -136,50 +183,6 @@ for causal outcomes!
 
 The :code:`do` method is built on top of the lower-level :code:`dowhy` objects, so can still take a graph and perform
 identification automatically when you provide a graph instead of :code:`common_causes`.
-
-
-Installation
--------------
-
-**Requirements**
-
-DoWhy support Python 3+. It requires the following packages:
-
-* numpy
-* scipy
-* scikit-learn
-* pandas
-* networkx  (for analyzing causal graphs)
-* matplotlib (for general plotting)
-* sympy (for rendering symbolic expressions)
-
-Install DoWhy and its dependencies by running this from the top-most folder of
-the repo.
-
-.. code:: shell
-    
-    python setup.py install
-
-If you face any problems, try installing dependencies manually.
-
-.. code:: shell
-    
-    pip install -r requirements.txt
-
-Optionally, if you wish to input graphs in the dot format, then install pydot (or pygraphviz).
-
-
-For better-looking graphs, you can optionally install pygraphviz. To proceed,
-first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL).
-
-.. code:: shell
-
-    sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
-    ## from https://github.com/pygraphviz/pygraphviz/issues/71
-    pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" \
-    --install-option="--library-path=/usr/lib/graphviz/"
-
-Keep in mind that pygraphviz installation can be problematic on the latest versions of Python3. Tested to work with Python 3.5.
 
 Graphical Models and Potential Outcomes: Best of both worlds
 ------------------------------------------------------------
