@@ -296,6 +296,10 @@ DoWhy supports the following refutation methods.
 * Subset validation
 
 
+Roadmap 
+-----------
+The `projects <https://github.com/microsoft/dowhy/projects>`_ page lists the next steps for DoWhy. If you would like to contribute, have a look at the current projects. If you have a specific request for DoWhy, please raise an issue `here <https://github.com/microsoft/dowhy/issues>`_.
+
 Contributing
 -------------
 
