@@ -1,3 +1,5 @@
+[![Build Status](https://dev.azure.com/ms/dowhy/_apis/build/status/microsoft.dowhy?branchName=master)](https://dev.azure.com/ms/dowhy/_build/latest?definitionId=179&branchName=master)
+
 DoWhy | Making causal inference easy
 ====================================
 
