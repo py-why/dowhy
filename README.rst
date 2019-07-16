@@ -1,4 +1,10 @@
-[![Build Status](https://dev.azure.com/ms/dowhy/_apis/build/status/microsoft.dowhy?branchName=master)](https://dev.azure.com/ms/dowhy/_build/latest?definitionId=179&branchName=master)
+|BuildStatus|_ | Try it in a web browser! |Binder|_
+
+.. |Binder| image:: https://mybinder.org/badge_logo.svg
+.. _Binder: https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F
+
+.. |BuildStatus| image:: https://dev.azure.com/ms/dowhy/_apis/build/status/microsoft.dowhy?branchName=master
+.. _BuildStatus: https://dev.azure.com/ms/dowhy/_build/latest?definitionId=179&branchName=master
 
 DoWhy | Making causal inference easy
 ====================================
@@ -6,10 +12,7 @@ DoWhy | Making causal inference easy
 `Amit Sharma <http://www.amitsharma.in>`_,
 `Emre Kiciman <http://www.kiciman.org>`_
 
-`Blog Post <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Docs <https://microsoft.github.io/dowhy/>`_ | Try it in a web browser! |Binder|_
-
-.. |Binder| image:: https://mybinder.org/badge_logo.svg
-.. _Binder: https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F
+`Blog Post <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Docs <https://microsoft.github.io/dowhy/>`_ | 
 
 
 As computing systems are more frequently and more actively intervening in societally critical domains such as healthcare, education, and governance, it is critical to correctly predict and understand the causal effects of these interventions. Without an A/B test, conventional machine learning methods, built on pattern recognition and correlational analyses, are insufficient for causal reasoning. 
