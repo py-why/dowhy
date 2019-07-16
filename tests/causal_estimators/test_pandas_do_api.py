@@ -9,7 +9,7 @@ from sklearn.linear_model import LinearRegression
 
 class TestPandasDoAPI(object):
     @pytest.mark.parametrize(["N", "error_tolerance"],
-                             [(1000, 0.05),])
+                             [(1000, 0.1),])
     def test_pandas_api_discrete_cause_continuous_confounder(self, N, error_tolerance):
         data = dowhy.datasets.linear_dataset(beta=10,
                                              num_common_causes=1,
@@ -46,7 +46,7 @@ class TestPandasDoAPI(object):
         assert res
 
     @pytest.mark.parametrize(["N", "error_tolerance"],
-                             [(1000, 0.05),])
+                             [(1000, 0.1),])
     def test_pandas_api_discrete_cause_discrete_confounder(self, N, error_tolerance):
         data = dowhy.datasets.linear_dataset(beta=10,
                                              num_common_causes=1,
@@ -84,7 +84,7 @@ class TestPandasDoAPI(object):
         assert res
 
     @pytest.mark.parametrize(["N", "error_tolerance"],
-                             [(1000, 0.05),])
+                             [(1000, 0.1),])
     def test_pandas_api_continuous_cause_discrete_confounder(self, N, error_tolerance):
         data = dowhy.datasets.linear_dataset(beta=10,
                                              num_common_causes=1,
@@ -121,7 +121,7 @@ class TestPandasDoAPI(object):
         assert res
 
     @pytest.mark.parametrize(["N", "error_tolerance"],
-                             [(1000, 0.05),])
+                             [(1000, 0.1),])
     def test_pandas_api_continuous_cause_continuous_confounder(self, N, error_tolerance):
         data = dowhy.datasets.linear_dataset(beta=10,
                                              num_common_causes=1,
