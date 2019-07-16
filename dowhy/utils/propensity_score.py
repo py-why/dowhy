@@ -58,7 +58,7 @@ def binary_treatment_model(data, covariates, treatment, variable_types):
 
 def categorical_treatment_model(data, covariates, treatment, variable_types):
     data, covariates = binarize_discrete(data, covariates, variable_types)
-    model = LogisticRegression(multi_class='auto', solver='lbfgs')
+    model = LogisticRegression(multi_class='ovr', solver='lbfgs')
     data[treatment], encoder = discrete_to_integer(data[treatment])
     model = model.fit(data[covariates], data[treatment])
     scores = model.predict_proba(data[covariates])

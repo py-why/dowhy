@@ -118,7 +118,7 @@ class CausalModel:
 
         self.identifier = CausalIdentifier(self._graph,
                                            self._estimand_type,
-                                           proceed_when_unidentifiable=proceed_when_unidentifiable)
+                                           proceed_when_unidentifiable=proceed_unidentifiable)
         identified_estimand = self.identifier.identify_effect()
 
         return identified_estimand

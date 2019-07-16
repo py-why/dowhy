@@ -19,16 +19,17 @@ def feature_matrix():
 
 
 class TestPCAReducer:
-    def test_reduce(self, feature_matrix):
+    def test_reduce(self, feature_matrix, show_plot=False):
         reducer = PCAReducer(feature_matrix, ndims=2, standardize=False)
         X_pca = reducer.reduce()
         print(feature_matrix)
         print(X_pca)
-        plt.scatter(feature_matrix[:, 0], feature_matrix[:, 1], c="g")
-        plt.xlabel("Dim 0")
-        plt.ylabel("Dim 1")
-        plt.scatter(X_pca[:, 0], X_pca[:, 1], alpha=0.5)
-        plt.show()
+        if show_plot:
+            plt.scatter(feature_matrix[:, 0], feature_matrix[:, 1], c="g")
+            plt.xlabel("Dim 0")
+            plt.ylabel("Dim 1")
+            plt.scatter(X_pca[:, 0], X_pca[:, 1], alpha=0.5)
+            plt.show()
 
         dist_origin = (
             np.square(feature_matrix[:, 0] - np.mean(feature_matrix[:, 0])) +

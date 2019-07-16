@@ -1,23 +1,16 @@
 import pytest
 import numpy as np
 
+import dowhy.datasets
 import dowhy.api
-from dowhy.causal_estimators.propensity_score_weighting_estimator import PropensityScoreWeightingEstimator
-from .base import TestEstimator
 
 from sklearn.linear_model import LinearRegression
 
 
-class TestPropensityScoreWeightingEstimator(object):
-    @pytest.mark.parametrize(["error_tolerance", "Estimator"],
-                             [(0.25, PropensityScoreWeightingEstimator),
-                              (0.3, PropensityScoreWeightingEstimator)])
-    def test_average_treatment_effect(self, error_tolerance, Estimator):
-        estimator_tester = TestEstimator(error_tolerance, Estimator)
-        estimator_tester.average_treatment_effect_testsuite(tests_to_run="atleast-one-common-cause")
-    """
-    def test_pandas_api_discrete_cause_continuous_confounder(self):
-        N = 10000
+class TestPandasDoAPI(object):
+    @pytest.mark.parametrize(["N", "error_tolerance"],
+                             [(1000, 0.05),])
+    def test_pandas_api_discrete_cause_continuous_confounder(self, N, error_tolerance):
         data = dowhy.datasets.linear_dataset(beta=10,
                                              num_common_causes=1,
                                              num_instruments=1,
@@ -46,15 +39,15 @@ class TestPropensityScoreWeightingEstimator(object):
         ate = (causal_df[causal_df.v == 1].mean() \
               - causal_df[causal_df.v == 0].mean())['y']
         error = np.abs(ate - data['ate'])
-        error_tolerance = 0.05
         res = True if (error < data['ate'] * error_tolerance) else False
         print("Error in ATE estimate = {0} with tolerance {1}%. Estimated={2},True={3}".format(
             error, error_tolerance * 100, ate, data['ate'])
         )
         assert res
 
-    def test_pandas_api_discrete_cause_discrete_confounder(self):
-        N = 10000
+    @pytest.mark.parametrize(["N", "error_tolerance"],
+                             [(1000, 0.05),])
+    def test_pandas_api_discrete_cause_discrete_confounder(self, N, error_tolerance):
         data = dowhy.datasets.linear_dataset(beta=10,
                                              num_common_causes=1,
                                              num_instruments=1,
@@ -84,15 +77,15 @@ class TestPropensityScoreWeightingEstimator(object):
               - causal_df[causal_df.v == 0].mean())['y']
         print('ate', ate)
         error = np.abs(ate - data['ate'])
-        error_tolerance = 0.05
         res = True if (error < data['ate'] * error_tolerance) else False
         print("Error in ATE estimate = {0} with tolerance {1}%. Estimated={2},True={3}".format(
             error, error_tolerance * 100, ate, data['ate'])
         )
         assert res
 
-    def test_pandas_api_continuous_cause_discrete_confounder(self):
-        N = 1000
+    @pytest.mark.parametrize(["N", "error_tolerance"],
+                             [(1000, 0.05),])
+    def test_pandas_api_continuous_cause_discrete_confounder(self, N, error_tolerance):
         data = dowhy.datasets.linear_dataset(beta=10,
                                              num_common_causes=1,
                                              num_instruments=1,
@@ -121,15 +114,15 @@ class TestPropensityScoreWeightingEstimator(object):
         ate = LinearRegression().fit(causal_df[['v']], causal_df['y']).coef_[0]
         print('ate', ate)
         error = np.abs(ate - data['ate'])
-        error_tolerance = 0.05
         res = True if (error < data['ate'] * error_tolerance) else False
         print("Error in ATE estimate = {0} with tolerance {1}%. Estimated={2},True={3}".format(
             error, error_tolerance * 100, ate, data['ate'])
         )
         assert res
 
-    def test_pandas_api_continuous_cause_continuous_confounder(self):
-        N = 1000
+    @pytest.mark.parametrize(["N", "error_tolerance"],
+                             [(1000, 0.05),])
+    def test_pandas_api_continuous_cause_continuous_confounder(self, N, error_tolerance):
         data = dowhy.datasets.linear_dataset(beta=10,
                                              num_common_causes=1,
                                              num_instruments=1,
@@ -158,10 +151,8 @@ class TestPropensityScoreWeightingEstimator(object):
         ate = LinearRegression().fit(causal_df[['v']], causal_df['y']).coef_[0]
         print('ate', ate)
         error = np.abs(ate - data['ate'])
-        error_tolerance = 0.05
         res = True if (error < data['ate'] * error_tolerance) else False
         print("Error in ATE estimate = {0} with tolerance {1}%. Estimated={2},True={3}".format(
             error, error_tolerance * 100, ate, data['ate'])
         )
         assert res
-    """

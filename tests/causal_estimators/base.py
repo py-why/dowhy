@@ -46,7 +46,8 @@ class TestEstimator(object):
 
     def average_treatment_effect_testsuite(self, tests_to_run="all"):
         self.average_treatment_effect_test(num_common_causes=1)
-        self.average_treatment_effect_test(num_common_causes=0)
+        if tests_to_run != "atleast-one-common-cause":
+            self.average_treatment_effect_test(num_common_causes=0)
 
     def custom_data_average_treatment_effect_test(self, data):
         model = CausalModel(
