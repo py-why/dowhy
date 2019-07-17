@@ -1,13 +1,10 @@
-|BuildStatus|_ |PyPiVersion|_ |PythonSupport|_ Try it in a web browser! |Binder|_
-
-.. |Binder| image:: https://mybinder.org/badge_logo.svg
-.. _Binder: https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F
+|BuildStatus|_ |PyPiVersion|_ |PythonSupport|_
 
 .. |PyPiVersion| image:: https://img.shields.io/pypi/v/dowhy.svg
 .. _PyPiVersion: https://pypi.org/project/dowhy/
 
 .. |PythonSupport| image:: https://img.shields.io/pypi/pyversions/dowhy.svg
-.. _PythonSupport https://pypi.org/project/dowhy/
+.. _PythonSupport: https://pypi.org/project/dowhy/
 
 .. |BuildStatus| image:: https://dev.azure.com/ms/dowhy/_apis/build/status/microsoft.dowhy?branchName=master
 .. _BuildStatus: https://dev.azure.com/ms/dowhy/_build/latest?definitionId=179&branchName=master
@@ -18,8 +15,12 @@ DoWhy | Making causal inference easy
 `Amit Sharma <http://www.amitsharma.in>`_,
 `Emre Kiciman <http://www.kiciman.org>`_
 
-`Blog Post <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Docs <https://microsoft.github.io/dowhy/>`_ | 
+`Docs <https://microsoft.github.io/dowhy/>`_ | Try it in a web browser! |Binder|_
 
+.. |Binder| image:: https://mybinder.org/badge_logo.svg
+.. _Binder: https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F
+
+Blog Posts: `Introducing DoWhy <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Using the Do-sampler <https://medium.com/@akelleh/introducing-the-do-sampler-for-causal-inference-a3296ea9e78d>`_
 
 As computing systems are more frequently and more actively intervening in societally critical domains such as healthcare, education, and governance, it is critical to correctly predict and understand the causal effects of these interventions. Without an A/B test, conventional machine learning methods, built on pattern recognition and correlational analyses, are insufficient for causal reasoning. 
 
