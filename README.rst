@@ -1,7 +1,13 @@
-|BuildStatus|_ | Try it in a web browser! |Binder|_
+|BuildStatus|_ |PyPiVersion|_ |PythonSupport|_ Try it in a web browser! |Binder|_
 
 .. |Binder| image:: https://mybinder.org/badge_logo.svg
 .. _Binder: https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F
+
+.. |PyPiVersion| image:: https://img.shields.io/pypi/v/dowhy.svg
+.. _PyPiVersion: https://pypi.org/project/dowhy/
+
+.. |PythonSupport| image:: https://img.shields.io/pypi/pyversions/dowhy.svg
+.. _PythonSupport https://pypi.org/project/dowhy/
 
 .. |BuildStatus| image:: https://dev.azure.com/ms/dowhy/_apis/build/status/microsoft.dowhy?branchName=master
 .. _BuildStatus: https://dev.azure.com/ms/dowhy/_build/latest?definitionId=179&branchName=master
