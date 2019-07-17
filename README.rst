@@ -23,7 +23,7 @@ DoWhy | Making causal inference easy
 .. |Binder| image:: https://mybinder.org/badge_logo.svg
 .. _Binder: https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F
 
-Blog Posts: `Introducing DoWhy <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Using the Do-sampler <https://medium.com/@akelleh/introducing-the-do-sampler-for-causal-inference-a3296ea9e78d>`_
+ Blog Posts: `Introducing DoWhy <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Using the Do-sampler <https://medium.com/@akelleh/introducing-the-do-sampler-for-causal-inference-a3296ea9e78d>`_
 
 As computing systems are more frequently and more actively intervening in societally critical domains such as healthcare, education, and governance, it is critical to correctly predict and understand the causal effects of these interventions. Without an A/B test, conventional machine learning methods, built on pattern recognition and correlational analyses, are insufficient for causal reasoning. 
 
