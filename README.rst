@@ -269,7 +269,7 @@ Below are more details about the current implementation of each of these verbs.
 Four steps of causal inference
 ------------------------------
 
-**Model a causal problem**
+I. **Model a causal problem**
 
 DoWhy creates an underlying causal graphical model for each problem. This
 serves to make each causal assumption explicit. This graph need not be
@@ -286,13 +286,13 @@ instead of providing a graph.
 
 .. i comment image:: causal_model.png
 
-**Identify a target estimand under the model**
+II. **Identify a target estimand under the model**
 
 Based on the causal graph, DoWhy finds all possible ways of identifying a desired causal effect based on
 the graphical model. It uses graph-based criteria and do-calculus to find
 potential ways find expressions that can identify the causal effect.
 
-**Estimate causal effect based on the identified estimand**
+III. **Estimate causal effect based on the identified estimand**
 
 DoWhy supports methods based on both back-door criterion and instrumental
 variables. It also provides a non-parametric permutation test for testing
@@ -314,7 +314,7 @@ Currently supported methods based on instrumental variables.
 * Regression discontinuity
 
 
-**Refute the obtained estimate**
+IV. **Refute the obtained estimate**
 
 Having access to multiple refutation methods to verify a causal inference is
 a key benefit of using DoWhy.
