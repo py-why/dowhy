@@ -15,7 +15,10 @@ DoWhy | Making causal inference easy
 `Amit Sharma <http://www.amitsharma.in>`_,
 `Emre Kiciman <http://www.kiciman.org>`_
 
-`Docs <https://microsoft.github.io/dowhy/>`_ | Try it in a web browser! |Binder|_
+ `Docs <https://microsoft.github.io/dowhy/>`_ | Try it online! |AzureNotebooks|_ |Binder|_ 
+
+.. |AzureNotebooks| image:: https://notebooks.azure.com/launch.svg
+.. _AzureNotebooks: https://notebooks.azure.com/amshar/projects/dowhy/tree/docs/source
 
 .. |Binder| image:: https://mybinder.org/badge_logo.svg
 .. _Binder: https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F
