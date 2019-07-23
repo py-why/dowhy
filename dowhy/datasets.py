@@ -35,7 +35,9 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
                 Z[:, i] = np.random.binomial(n=1, p=p[i], size=num_samples)
             else:
                 Z[:, i] = np.random.uniform(0, 1, size=num_samples)
-        cz = np.random.uniform(0, range_cz, num_instruments)
+        # Ensure that we do not generate weak instruments
+        cz = np.random.uniform(range_cz - (range_cz * 0.25),
+                range_cz + (range_cz * 0.25), num_instruments)
 
     # TODO - test all our methods with random noise added to covariates (instead of the stochastic treatment assignment)
     t = np.random.normal(0, 1)
