@@ -11,7 +11,7 @@ class TestEstimator(object):
         print(self._error_tolerance)
 
     def average_treatment_effect_test(self, dataset="linear", beta=10,
-            num_common_causes=1, num_instruments=1, num_samples=10000,
+            num_common_causes=1, num_instruments=1, num_samples=100000,
             treatment_is_binary=True):
         data = dowhy.datasets.linear_dataset(beta=beta,
                                              num_common_causes=num_common_causes,

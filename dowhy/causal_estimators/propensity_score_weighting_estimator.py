@@ -30,7 +30,8 @@ class PropensityScoreWeightingEstimator(CausalEstimator):
         self.logger.info("INFO: Using Propensity Score Weighting Estimator")
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
-        self.weighting_scheme = 'ips_weight'  # 'itps_weight' 'ips_weight' 'nips_weight'
+        if not hasattr(self, "weighting_scheme"):
+            self.weighting_scheme = 'ips_weight'  # 'itps_weight' 'ips_weight' 'nips_weight'
         self.min_ps_score = min_ps_score
         self.max_ps_score = max_ps_score
 
@@ -38,10 +39,11 @@ class PropensityScoreWeightingEstimator(CausalEstimator):
         psmodel = linear_model.LogisticRegression()
         psmodel.fit(self._observed_common_causes, self._treatment)
         self._data['ps'] = psmodel.predict_proba(self._observed_common_causes)[:,1]
+        # trim propensity score weights
         self._data['ps'] = np.minimum(self.max_ps_score, self._data['ps'])
         self._data['ps'] = np.maximum(self.min_ps_score, self._data['ps'])
 
-        # trim propensity score weights
+
 
         # ips ==> (isTreated(y)/ps(y)) + ((1-isTreated(y))/(1-ps(y)))
         # nips ==> ips / (sum of ips over all units)
@@ -49,11 +51,28 @@ class PropensityScoreWeightingEstimator(CausalEstimator):
         # itps ==> ps(y)/(1-ps(y)) / (sum of (ps(y)/(1-ps(y))) over all treatment units)
         ipst_sum = sum(self._data[self._treatment_name] / self._data['ps'])
         ipsc_sum = sum((1 - self._data[self._treatment_name]) / (1-self._data['ps']))
-        self._data['ips_weight'] = (
+        num_units = len(self._data[self._treatment_name])
+        # Vanilla IPS estimator
+
+        self._data['ips_weight'] = (1/num_units) * (
+            self._data[self._treatment_name] / self._data['ps'] +
+            (1 - self._data[self._treatment_name]) / (1 - self._data['ps'])
+        )
+
+        # Also known as the Hajek estimator
+        self._data['normalized_ips_weight'] = (
             self._data[self._treatment_name] / self._data['ps'] / ipst_sum +
             (1 - self._data[self._treatment_name]) / (1 - self._data['ps']) / ipsc_sum
         )
 
+        # Stabilized weights
+        p_treatment = sum(self._data[self._treatment_name])/num_units
+        self._data['stabilized_ips_weight'] = (1/num_units) * (
+            self._data[self._treatment_name] / self._data['ps'] * p_treatment +
+            (1 - self._data[self._treatment_name]) / (1 - self._data['ps']) * (1- p_treatment)
+        )
+
+        # Simple normalized estimator
         ips_sum = self._data['ips_weight'].sum()
         self._data['nips_weight'] = self._data['ips_weight'] / ips_sum
 
