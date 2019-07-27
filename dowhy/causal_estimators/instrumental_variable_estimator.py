@@ -47,7 +47,7 @@ class InstrumentalVariableEstimator(CausalEstimator):
         else:
             # Obtain estimate by 2SLS estimator: Cov(y,z) / Cov(x,z)
             num_yz = np.cov(self._outcome, instrument)[0, 1]
-            deno_xz = np.cov(self._outcome, instrument)[0, 1]
+            deno_xz = np.cov(self._treatment, instrument)[0, 1]
             iv_est = num_yz / deno_xz
 
         estimate = CausalEstimate(estimate=iv_est,
