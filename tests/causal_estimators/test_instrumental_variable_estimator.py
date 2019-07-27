@@ -10,4 +10,5 @@ class TestInstrumentalVariableEstimator(object):
                               (0.2, InstrumentalVariableEstimator)])
     def test_average_treatment_effect(self, error_tolerance, Estimator):
         estimator_tester = TestEstimator(error_tolerance, Estimator)
-        estimator_tester.average_treatment_effect_test()
+        estimator_tester.average_treatment_effect_test_binary()
+        estimator_tester.average_treatment_effect_test_continuous()

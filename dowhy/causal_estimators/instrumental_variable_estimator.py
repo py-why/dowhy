@@ -45,10 +45,9 @@ class InstrumentalVariableEstimator(CausalEstimator):
             deno = x1_z - x0_z
             iv_est = num / deno
         else:
-            # Obtain estimate by Pearl (1995) ratio estimator.
-            # y = x+ u; multiply both sides by z and take expectation.
-            num_yz = np.dot(self._outcome, instrument)
-            deno_xz = np.dot(self._treatment, instrument)
+            # Obtain estimate by 2SLS estimator: Cov(y,z) / Cov(x,z)
+            num_yz = np.cov(self._outcome, instrument)[0, 1]
+            deno_xz = np.cov(self._outcome, instrument)[0, 1]
             iv_est = num_yz / deno_xz
 
         estimate = CausalEstimate(estimate=iv_est,
