@@ -64,26 +64,3 @@ class AddUnobservedCommonCause(CausalRefuter):
             raise NotImplementedError("'" + self.effect_on_y+ "' method not supported for confounders' effect on outcome")
         return new_data
 
-if __name__=="__main__":
-    import dowhy.datasets
-    from dowhy.do_why import CausalModel
-    data =  dowhy.datasets.linear_dataset(beta=10,num_common_causes=5,
-            num_instruments = 2,
-            num_samples=1000,
-            treatment_is_binary=True)
-    df = data["df"]
-    # Without graph
-    model= CausalModel( data=df,
-            treatment=data["treatment_name"],
-            outcome=data["outcome_name"],
-            common_causes=data["common_causes_names"])
-    identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
-    estimate = model.estimate_effect(identified_estimand,
-            method_name="backdoor.propensity_score_matching")
-    print(estimate)
-    print("Causal Estimate is " + str(estimate.value))
-    res_unobserved=model.refute_estimate(identified_estimand, estimate,
-            method_name="add_unobserved_common_cause",
-            effect_strength_on_treatment =0.5,
-            effect_strength_on_outcome=0.5)
-    print(res_unobserved)
