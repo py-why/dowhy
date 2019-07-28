@@ -101,7 +101,7 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="code_repo.html">Code repository</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy.html">dowhy package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">dowhy</a></li>
@@ -508,7 +508,7 @@ print(identified_estimand)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;X2&#39;, &#39;Z0&#39;, &#39;X3&#39;, &#39;X4&#39;, &#39;X1&#39;, &#39;X0&#39;, &#39;Z1&#39;, &#39;Unobserved Confounders&#39;]
+INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;X0&#39;, &#39;X1&#39;, &#39;X4&#39;, &#39;X3&#39;, &#39;X2&#39;, &#39;Unobserved Confounders&#39;]
 WARNING:dowhy.causal_identifier:There are unobserved common causes. Causal effect cannot be identified.
 </pre></div></div>
 </div>
@@ -525,7 +525,7 @@ WARN: Do you want to continue by ignoring these unobserved confounders? [y/n] y
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[&#39;Z1&#39;, &#39;Z0&#39;]
+INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[&#39;Z0&#39;, &#39;Z1&#39;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -537,16 +537,16 @@ Estimand type: ate
 ### Estimand : 1
 Estimand name: iv
 Estimand expression:
-Expectation(Derivative(y, Z1)/Derivative(v, Z1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
-Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+Expectation(Derivative(y, Z0)/Derivative(v, Z0))
+Estimand assumption 1, Exclusion: If we remove {Z0,Z1}→v, then ¬(Z0,Z1→y)
+Estimand assumption 2, As-if-random: If U→→y then ¬(U →→Z0,Z1)
 ### Estimand : 2
 Estimand name: backdoor
 Estimand expression:
 d
-──(Expectation(y|X2,Z0,X3,X4,X1,X0,Z1))
+──(Expectation(y|X0,X1,X4,X3,X2))
 dv
-Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X2,Z0,X3,X4,X1,X0,Z1,U) = P(y|v,X2,Z0,X3,X4,X1,X0,Z1)
+Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X0,X1,X4,X3,X2,U) = P(y|v,X0,X1,X4,X3,X2)
 
 </pre></div></div>
 </div>
@@ -573,7 +573,7 @@ print(&quot;Causal Estimate is &quot; + str(causal_estimate_reg.value))
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Linear Regression Estimator
-INFO:dowhy.causal_estimator:b: y~v+X2+Z0+X3+X4+X1+X0+Z1
+INFO:dowhy.causal_estimator:b: y~v+X0+X1+X4+X3+X2
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -588,21 +588,21 @@ Estimand type: ate
 ### Estimand : 1
 Estimand name: iv
 Estimand expression:
-Expectation(Derivative(y, Z1)/Derivative(v, Z1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
-Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+Expectation(Derivative(y, Z0)/Derivative(v, Z0))
+Estimand assumption 1, Exclusion: If we remove {Z0,Z1}→v, then ¬(Z0,Z1→y)
+Estimand assumption 2, As-if-random: If U→→y then ¬(U →→Z0,Z1)
 ### Estimand : 2
 Estimand name: backdoor
 Estimand expression:
 d
-──(Expectation(y|X2,Z0,X3,X4,X1,X0,Z1))
+──(Expectation(y|X0,X1,X4,X3,X2))
 dv
-Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X2,Z0,X3,X4,X1,X0,Z1,U) = P(y|v,X2,Z0,X3,X4,X1,X0,Z1)
+Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X0,X1,X4,X3,X2,U) = P(y|v,X0,X1,X4,X3,X2)
 
 ## Realized estimand
-b: y~v+X2+Z0+X3+X4+X1+X0+Z1
+b: y~v+X0+X1+X4+X3+X2
 ## Estimate
-Value: 9.999999999999995
+Value: 9.999999999999075
 
 ## Statistical Significance
 p-value: &lt;0.001
@@ -632,7 +632,7 @@ print(&quot;Causal Estimate is &quot; + str(causal_estimate_strat.value))
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v+X2+Z0+X3+X4+X1+X0+Z1
+INFO:dowhy.causal_estimator:b: y~v+X0+X1+X4+X3+X2
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -647,23 +647,23 @@ Estimand type: ate
 ### Estimand : 1
 Estimand name: iv
 Estimand expression:
-Expectation(Derivative(y, Z1)/Derivative(v, Z1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
-Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+Expectation(Derivative(y, Z0)/Derivative(v, Z0))
+Estimand assumption 1, Exclusion: If we remove {Z0,Z1}→v, then ¬(Z0,Z1→y)
+Estimand assumption 2, As-if-random: If U→→y then ¬(U →→Z0,Z1)
 ### Estimand : 2
 Estimand name: backdoor
 Estimand expression:
 d
-──(Expectation(y|X2,Z0,X3,X4,X1,X0,Z1))
+──(Expectation(y|X0,X1,X4,X3,X2))
 dv
-Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X2,Z0,X3,X4,X1,X0,Z1,U) = P(y|v,X2,Z0,X3,X4,X1,X0,Z1)
+Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X0,X1,X4,X3,X2,U) = P(y|v,X0,X1,X4,X3,X2)
 
 ## Realized estimand
-b: y~v+X2+Z0+X3+X4+X1+X0+Z1
+b: y~v+X0+X1+X4+X3+X2
 ## Estimate
-Value: 10.061716788484345
+Value: 9.935979154269207
 
-Causal Estimate is 10.0617167885
+Causal Estimate is 9.93597915427
 </pre></div></div>
 </div>
 </div>
@@ -688,7 +688,7 @@ print(&quot;Causal Estimate is &quot; + str(causal_estimate_match.value))
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
-INFO:dowhy.causal_estimator:b: y~v+X2+Z0+X3+X4+X1+X0+Z1
+INFO:dowhy.causal_estimator:b: y~v+X0+X1+X4+X3+X2
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -703,36 +703,36 @@ Estimand type: ate
 ### Estimand : 1
 Estimand name: iv
 Estimand expression:
-Expectation(Derivative(y, Z1)/Derivative(v, Z1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
-Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+Expectation(Derivative(y, Z0)/Derivative(v, Z0))
+Estimand assumption 1, Exclusion: If we remove {Z0,Z1}→v, then ¬(Z0,Z1→y)
+Estimand assumption 2, As-if-random: If U→→y then ¬(U →→Z0,Z1)
 ### Estimand : 2
 Estimand name: backdoor
 Estimand expression:
 d
-──(Expectation(y|X2,Z0,X3,X4,X1,X0,Z1))
+──(Expectation(y|X0,X1,X4,X3,X2))
 dv
-Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X2,Z0,X3,X4,X1,X0,Z1,U) = P(y|v,X2,Z0,X3,X4,X1,X0,Z1)
+Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X0,X1,X4,X3,X2,U) = P(y|v,X0,X1,X4,X3,X2)
 
 ## Realized estimand
-b: y~v+X2+Z0+X3+X4+X1+X0+Z1
+b: y~v+X0+X1+X4+X3+X2
 ## Estimate
-Value: 7.391127134286239
+Value: 9.69335705963031
 
-Causal Estimate is 7.391127134286239
+Causal Estimate is 9.69335705963031
 </pre></div></div>
 </div>
 </div>
 <div class="section" id="Method-4:-Weighting">
 <h2>Method 4: Weighting<a class="headerlink" href="#Method-4:-Weighting" title="Permalink to this headline">¶</a></h2>
-<p>We will be using (inverse) propensity scores to assign weights to units in the data.</p>
+<p>We will be using (inverse) propensity scores to assign weights to units in the data. DoWhy supports a few different weighting schemes: 1. Vanilla Inverse Propensity Score weighting (IPS) 2. Self-normalized IPS weighting (also known as the Hajek estimator) 3. Stabilized IPS weighting</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span>causal_estimate_ipw = model.estimate_effect(identified_estimand,
-        method_name=&quot;backdoor.propensity_score_weighting&quot;)
+        method_name=&quot;backdoor.propensity_score_weighting&quot;, method_params={&quot;weighting_scheme&quot;:&quot;ips_weight&quot;})
 print(causal_estimate_ipw)
 print(&quot;Causal Estimate is &quot; + str(causal_estimate_ipw.value))
 </pre></div>
@@ -744,7 +744,7 @@ print(&quot;Causal Estimate is &quot; + str(causal_estimate_ipw.value))
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
-INFO:dowhy.causal_estimator:b: y~v+X2+Z0+X3+X4+X1+X0+Z1
+INFO:dowhy.causal_estimator:b: y~v+X0+X1+X4+X3+X2
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -759,23 +759,23 @@ Estimand type: ate
 ### Estimand : 1
 Estimand name: iv
 Estimand expression:
-Expectation(Derivative(y, Z1)/Derivative(v, Z1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
-Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+Expectation(Derivative(y, Z0)/Derivative(v, Z0))
+Estimand assumption 1, Exclusion: If we remove {Z0,Z1}→v, then ¬(Z0,Z1→y)
+Estimand assumption 2, As-if-random: If U→→y then ¬(U →→Z0,Z1)
 ### Estimand : 2
 Estimand name: backdoor
 Estimand expression:
 d
-──(Expectation(y|X2,Z0,X3,X4,X1,X0,Z1))
+──(Expectation(y|X0,X1,X4,X3,X2))
 dv
-Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X2,Z0,X3,X4,X1,X0,Z1,U) = P(y|v,X2,Z0,X3,X4,X1,X0,Z1)
+Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X0,X1,X4,X3,X2,U) = P(y|v,X0,X1,X4,X3,X2)
 
 ## Realized estimand
-b: y~v+X2+Z0+X3+X4+X1+X0+Z1
+b: y~v+X0+X1+X4+X3+X2
 ## Estimate
-Value: 17.631870964903452
+Value: 10.578537837065253
 
-Causal Estimate is 17.6318709649
+Causal Estimate is 10.5785378371
 </pre></div></div>
 </div>
 </div>
@@ -788,7 +788,7 @@ Causal Estimate is 17.6318709649
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span>causal_estimate_iv = model.estimate_effect(identified_estimand,
-        method_name=&quot;iv.instrumental_variable&quot;, method_params={&#39;iv_instrument_name&#39;:&#39;Z1&#39;})
+        method_name=&quot;iv.instrumental_variable&quot;, method_params={&#39;iv_instrument_name&#39;:&#39;Z0&#39;})
 print(causal_estimate_iv)
 print(&quot;Causal Estimate is &quot; + str(causal_estimate_iv.value))
 </pre></div>
@@ -804,10 +804,10 @@ INFO:dowhy.causal_estimator:Realized estimand: Wald Estimator
 Realized estimand type: ate
 Estimand expression:
                                                              -1
-Expectation(Derivative(y, Z1))⋅Expectation(Derivative(v, Z1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
-Estimand assumption 2, treatment_effect_homogeneity: Each unit&#39;s treatment v isaffected in the same way by common causes of v and y
-Estimand assumption 3, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+Expectation(Derivative(y, Z0))⋅Expectation(Derivative(v, Z0))
+Estimand assumption 1, treatment_effect_homogeneity: Each unit&#39;s treatment v isaffected in the same way by common causes of v and y
+Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→v, then ¬(Z0,Z1→y)
+Estimand assumption 3, As-if-random: If U→→y then ¬(U →→Z0,Z1)
 Estimand assumption 4, outcome_effect_homogeneity: Each unit&#39;s outcome y isaffected in the same way by common causes of v and y
 
 </pre></div></div>
@@ -824,32 +824,32 @@ Estimand type: ate
 ### Estimand : 1
 Estimand name: iv
 Estimand expression:
-Expectation(Derivative(y, Z1)/Derivative(v, Z1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
-Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+Expectation(Derivative(y, Z0)/Derivative(v, Z0))
+Estimand assumption 1, Exclusion: If we remove {Z0,Z1}→v, then ¬(Z0,Z1→y)
+Estimand assumption 2, As-if-random: If U→→y then ¬(U →→Z0,Z1)
 ### Estimand : 2
 Estimand name: backdoor
 Estimand expression:
 d
-──(Expectation(y|X2,Z0,X3,X4,X1,X0,Z1))
+──(Expectation(y|X0,X1,X4,X3,X2))
 dv
-Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X2,Z0,X3,X4,X1,X0,Z1,U) = P(y|v,X2,Z0,X3,X4,X1,X0,Z1)
+Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X0,X1,X4,X3,X2,U) = P(y|v,X0,X1,X4,X3,X2)
 
 ## Realized estimand
 Realized estimand: Wald Estimator
 Realized estimand type: ate
 Estimand expression:
                                                              -1
-Expectation(Derivative(y, Z1))⋅Expectation(Derivative(v, Z1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
-Estimand assumption 2, treatment_effect_homogeneity: Each unit&#39;s treatment v isaffected in the same way by common causes of v and y
-Estimand assumption 3, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+Expectation(Derivative(y, Z0))⋅Expectation(Derivative(v, Z0))
+Estimand assumption 1, treatment_effect_homogeneity: Each unit&#39;s treatment v isaffected in the same way by common causes of v and y
+Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→v, then ¬(Z0,Z1→y)
+Estimand assumption 3, As-if-random: If U→→y then ¬(U →→Z0,Z1)
 Estimand assumption 4, outcome_effect_homogeneity: Each unit&#39;s outcome y isaffected in the same way by common causes of v and y
 
 ## Estimate
-Value: 12.992472396947559
+Value: 10.049189320441235
 
-Causal Estimate is 12.9924723969
+Causal Estimate is 10.0491893204
 </pre></div></div>
 </div>
 </div>
@@ -883,10 +883,10 @@ INFO:dowhy.causal_estimator:Realized estimand: Wald Estimator
 Realized estimand type: ate
 Estimand expression:
                                                              -1
-Expectation(Derivative(y, Z1))⋅Expectation(Derivative(v, Z1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
-Estimand assumption 2, treatment_effect_homogeneity: Each unit&#39;s treatment local_treatment isaffected in the same way by common causes of local_treatment and local_outcome
-Estimand assumption 3, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+Expectation(Derivative(y, Z0))⋅Expectation(Derivative(v, Z0))
+Estimand assumption 1, treatment_effect_homogeneity: Each unit&#39;s treatment local_treatment isaffected in the same way by common causes of local_treatment and local_outcome
+Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→v, then ¬(Z0,Z1→y)
+Estimand assumption 3, As-if-random: If U→→y then ¬(U →→Z0,Z1)
 Estimand assumption 4, outcome_effect_homogeneity: Each unit&#39;s outcome local_outcome isaffected in the same way by common causes of local_treatment and local_outcome
 
 </pre></div></div>
@@ -903,32 +903,32 @@ Estimand type: ate
 ### Estimand : 1
 Estimand name: iv
 Estimand expression:
-Expectation(Derivative(y, Z1)/Derivative(v, Z1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
-Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+Expectation(Derivative(y, Z0)/Derivative(v, Z0))
+Estimand assumption 1, Exclusion: If we remove {Z0,Z1}→v, then ¬(Z0,Z1→y)
+Estimand assumption 2, As-if-random: If U→→y then ¬(U →→Z0,Z1)
 ### Estimand : 2
 Estimand name: backdoor
 Estimand expression:
 d
-──(Expectation(y|X2,Z0,X3,X4,X1,X0,Z1))
+──(Expectation(y|X0,X1,X4,X3,X2))
 dv
-Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X2,Z0,X3,X4,X1,X0,Z1,U) = P(y|v,X2,Z0,X3,X4,X1,X0,Z1)
+Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X0,X1,X4,X3,X2,U) = P(y|v,X0,X1,X4,X3,X2)
 
 ## Realized estimand
 Realized estimand: Wald Estimator
 Realized estimand type: ate
 Estimand expression:
                                                              -1
-Expectation(Derivative(y, Z1))⋅Expectation(Derivative(v, Z1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→Z1,Z0)
-Estimand assumption 2, treatment_effect_homogeneity: Each unit&#39;s treatment local_treatment isaffected in the same way by common causes of local_treatment and local_outcome
-Estimand assumption 3, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
+Expectation(Derivative(y, Z0))⋅Expectation(Derivative(v, Z0))
+Estimand assumption 1, treatment_effect_homogeneity: Each unit&#39;s treatment local_treatment isaffected in the same way by common causes of local_treatment and local_outcome
+Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→v, then ¬(Z0,Z1→y)
+Estimand assumption 3, As-if-random: If U→→y then ¬(U →→Z0,Z1)
 Estimand assumption 4, outcome_effect_homogeneity: Each unit&#39;s outcome local_outcome isaffected in the same way by common causes of local_treatment and local_outcome
 
 ## Estimate
-Value: 12.84020418877542
+Value: 1.0
 
-Causal Estimate is 12.8402041888
+Causal Estimate is 1.0
 </pre></div></div>
 </div>
 </div>

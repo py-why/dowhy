@@ -206,10 +206,9 @@
             <span class="n">deno</span> <span class="o">=</span> <span class="n">x1_z</span> <span class="o">-</span> <span class="n">x0_z</span>
             <span class="n">iv_est</span> <span class="o">=</span> <span class="n">num</span> <span class="o">/</span> <span class="n">deno</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Obtain estimate by Pearl (1995) ratio estimator.</span>
-            <span class="c1"># y = x+ u; multiply both sides by z and take expectation.</span>
-            <span class="n">num_yz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">,</span> <span class="n">instrument</span><span class="p">)</span>
-            <span class="n">deno_xz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">,</span> <span class="n">instrument</span><span class="p">)</span>
+            <span class="c1"># Obtain estimate by 2SLS estimator: Cov(y,z) / Cov(x,z)</span>
+            <span class="n">num_yz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">,</span> <span class="n">instrument</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">deno_xz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">,</span> <span class="n">instrument</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
             <span class="n">iv_est</span> <span class="o">=</span> <span class="n">num_yz</span> <span class="o">/</span> <span class="n">deno_xz</span>
 
         <span class="n">estimate</span> <span class="o">=</span> <span class="n">CausalEstimate</span><span class="p">(</span><span class="n">estimate</span><span class="o">=</span><span class="n">iv_est</span><span class="p">,</span>

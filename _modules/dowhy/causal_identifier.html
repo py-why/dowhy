@@ -183,14 +183,19 @@
         <span class="n">causes_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_causes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">remove_edges</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;sources&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span><span class="p">,</span> <span class="s1">&#39;targets&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span><span class="p">})</span>
         <span class="n">common_causes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">causes_t</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">causes_y</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Common causes of treatment and outcome:&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">common_causes</span><span class="p">))</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">all_observed</span><span class="p">(</span><span class="n">common_causes</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_proceed_when_unidentifiable</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">all_observed</span><span class="p">(</span><span class="n">common_causes</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;All common causes are observed. Causal effect can be identified.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;There are unobserved common causes. Causal effect cannot be identified.&quot;</span><span class="p">)</span>
-            <span class="n">cli</span><span class="o">.</span><span class="n">query_yes_no</span><span class="p">(</span>
-                <span class="s2">&quot;WARN: Do you want to continue by ignoring these unobserved confounders?&quot;</span><span class="p">,</span>
-                <span class="n">default</span><span class="o">=</span><span class="kc">None</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_proceed_when_unidentifiable</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s2">&quot;Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cli</span><span class="o">.</span><span class="n">query_yes_no</span><span class="p">(</span>
+                    <span class="s2">&quot;WARN: Do you want to continue by ignoring these unobserved confounders?&quot;</span><span class="p">,</span>
+                    <span class="n">default</span><span class="o">=</span><span class="kc">None</span>
+                <span class="p">)</span>
         <span class="n">observed_common_causes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">filter_unobserved_variables</span><span class="p">(</span><span class="n">common_causes</span><span class="p">)</span>
         <span class="n">observed_common_causes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">observed_common_causes</span><span class="p">)</span>
 
