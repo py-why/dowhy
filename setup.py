@@ -19,10 +19,14 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
     install_requires = f.read().splitlines()
 
+# Loading version number
+with open(path.join(here, 'VERSION')) as version_file:
+    version = version_file.read().strip()
+    print(version)
 
 setup(
     name='dowhy',
-    version='0.1.1',
+    version=version,
     description='DoWhy is a Python library for causal inference that supports explicit modeling and testing of causal assumptions.',  # Required
     license='MIT',
     long_description=long_description,
