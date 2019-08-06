@@ -466,18 +466,18 @@ print(data[&quot;gml_graph&quot;])
 <div class="output_area docutils container">
 <div class="highlight"><pre>
     Z0        Z1        X0        X1        X2        X3        X4    v  \
-0  0.0  0.178824  1.671661 -0.810141  0.079628  0.592632 -1.060488  1.0
-1  1.0  0.344522  0.214060 -1.233574 -0.979551  1.029885 -2.550625  1.0
-2  1.0  0.039714  0.820348 -1.401051  0.078819  0.922439  0.910735  1.0
-3  1.0  0.756778 -0.399205 -0.800899  0.576022  1.403112 -1.448543  1.0
-4  1.0  0.285025  0.400763 -0.818470  0.921414  1.826058 -1.341919  1.0
+0  1.0  0.644552 -0.313054 -0.043481 -0.035456 -1.633671 -1.428568  1.0
+1  1.0  0.166371  0.146926 -2.036680 -0.983486 -0.552480 -0.642626  0.0
+2  1.0  0.334068 -0.732279 -0.948639 -0.654771 -1.894756 -1.117160  0.0
+3  1.0  0.814735  1.736889 -2.419987  1.508327 -0.830098 -1.536257  1.0
+4  1.0  0.226584 -0.368021 -1.863268  1.147728  0.177494 -1.264160  1.0
 
            y
-0  12.974422
-1   6.022908
-2  17.436191
-3  11.022944
-4  15.547566
+0   2.091258
+1  -5.146495
+2 -11.044251
+3   6.337831
+4   7.642088
 digraph { v -&gt;y; U[label=&#34;Unobserved Confounders&#34;]; U-&gt;v; U-&gt;y;X0-&gt; v; X1-&gt; v; X2-&gt; v; X3-&gt; v; X4-&gt; v;X0-&gt; y; X1-&gt; y; X2-&gt; y; X3-&gt; y; X4-&gt; y;Z0-&gt; v; Z1-&gt; v;}
 
 
@@ -558,7 +558,7 @@ print(identified_estimand)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;X4&#39;, &#39;Unobserved Confounders&#39;, &#39;X1&#39;, &#39;X0&#39;, &#39;X3&#39;, &#39;X2&#39;]
+INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;X3&#39;, &#39;X1&#39;, &#39;X0&#39;, &#39;X4&#39;, &#39;Unobserved Confounders&#39;, &#39;X2&#39;]
 WARNING:dowhy.causal_identifier:There are unobserved common causes. Causal effect cannot be identified.
 </pre></div></div>
 </div>
@@ -588,9 +588,9 @@ Estimand type: ate
 Estimand name: backdoor
 Estimand expression:
 d
-──(Expectation(y|X4,X1,X0,X3,X2))
+──(Expectation(y|X3,X1,X0,X4,X2))
 dv
-Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X4,X1,X0,X3,X2,U) = P(y|v,X4,X1,X0,X3,X2)
+Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X3,X1,X0,X4,X2,U) = P(y|v,X3,X1,X0,X4,X2)
 ### Estimand : 2
 Estimand name: iv
 Estimand expression:
@@ -616,7 +616,7 @@ print(identified_estimand)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;X4&#39;, &#39;Unobserved Confounders&#39;, &#39;X1&#39;, &#39;X0&#39;, &#39;X3&#39;, &#39;X2&#39;]
+INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;X3&#39;, &#39;X1&#39;, &#39;X0&#39;, &#39;X4&#39;, &#39;Unobserved Confounders&#39;, &#39;X2&#39;]
 WARNING:dowhy.causal_identifier:There are unobserved common causes. Causal effect cannot be identified.
 INFO:dowhy.causal_identifier:Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True.
 INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[&#39;Z1&#39;, &#39;Z0&#39;]
@@ -632,9 +632,9 @@ Estimand type: ate
 Estimand name: backdoor
 Estimand expression:
 d
-──(Expectation(y|X4,X1,X0,X3,X2))
+──(Expectation(y|X3,X1,X0,X4,X2))
 dv
-Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X4,X1,X0,X3,X2,U) = P(y|v,X4,X1,X0,X3,X2)
+Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X3,X1,X0,X4,X2,U) = P(y|v,X3,X1,X0,X4,X2)
 ### Estimand : 2
 Estimand name: iv
 Estimand expression:
@@ -665,7 +665,7 @@ print(&quot;Causal Estimate is &quot; + str(causal_estimate.value))
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v+X4+X1+X0+X3+X2
+INFO:dowhy.causal_estimator:b: y~v+X3+X1+X0+X4+X2
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -681,9 +681,9 @@ Estimand type: ate
 Estimand name: backdoor
 Estimand expression:
 d
-──(Expectation(y|X4,X1,X0,X3,X2))
+──(Expectation(y|X3,X1,X0,X4,X2))
 dv
-Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X4,X1,X0,X3,X2,U) = P(y|v,X4,X1,X0,X3,X2)
+Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X3,X1,X0,X4,X2,U) = P(y|v,X3,X1,X0,X4,X2)
 ### Estimand : 2
 Estimand name: iv
 Estimand expression:
@@ -692,11 +692,11 @@ Estimand assumption 1, Exclusion: If we remove {Z1,Z0}→v, then ¬(Z1,Z0→y)
 Estimand assumption 2, As-if-random: If U→→y then ¬(U →→Z1,Z0)
 
 ## Realized estimand
-b: y~v+X4+X1+X0+X3+X2
+b: y~v+X3+X1+X0+X4+X2
 ## Estimate
-Value: 9.982922513256165
+Value: 9.926668762072646
 
-Causal Estimate is 9.982922513256165
+Causal Estimate is 9.926668762072646
 </pre></div></div>
 </div>
 </div>
@@ -740,32 +740,18 @@ INFO:dowhy.do_why:Model to find the causal effect of treatment [&#39;v&#39;] on 
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>identified_estimand = model.identify_effect()
+<span></span>identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;X4&#39;, &#39;X1&#39;, &#39;X0&#39;, &#39;U&#39;, &#39;X3&#39;, &#39;X2&#39;]
-WARNING:dowhy.causal_identifier:There are unobserved common causes. Causal effect cannot be identified.
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-WARN: Do you want to continue by ignoring these unobserved confounders? [y/n] y
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
+INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;X3&#39;, &#39;X1&#39;, &#39;X0&#39;, &#39;U&#39;, &#39;X4&#39;, &#39;X2&#39;]
+WARNING:dowhy.causal_identifier:There are unobserved common causes. Causal effect cannot be identified.
+INFO:dowhy.causal_identifier:Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True.
 INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[]
 </pre></div></div>
 </div>
@@ -790,7 +776,7 @@ print(&quot;Causal Estimate is &quot; + str(estimate.value))
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v+X4+X1+X0+X3+X2
+INFO:dowhy.causal_estimator:b: y~v+X3+X1+X0+X4+X2
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -806,19 +792,19 @@ Estimand type: ate
 Estimand name: backdoor
 Estimand expression:
 d
-──(Expectation(y|X4,X1,X0,X3,X2))
+──(Expectation(y|X3,X1,X0,X4,X2))
 dv
-Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X4,X1,X0,X3,X2,U) = P(y|v,X4,X1,X0,X3,X2)
+Estimand assumption 1, Unconfoundedness: If U→v and U→y then P(y|v,X3,X1,X0,X4,X2,U) = P(y|v,X3,X1,X0,X4,X2)
 ### Estimand : 2
 Estimand name: iv
 No such variable found!
 
 ## Realized estimand
-b: y~v+X4+X1+X0+X3+X2
+b: y~v+X3+X1+X0+X4+X2
 ## Estimate
-Value: 9.982922513256165
+Value: 9.926668762072646
 
-Causal Estimate is 9.982922513256165
+Causal Estimate is 9.926668762072646
 </pre></div></div>
 </div>
 </div>
@@ -828,7 +814,7 @@ Causal Estimate is 9.982922513256165
 <div class="section" id="Adding-a-random-common-cause-variable">
 <h3>Adding a random common cause variable<a class="headerlink" href="#Adding-a-random-common-cause-variable" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -843,7 +829,7 @@ print(res_random)
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v+X4+X1+X0+X3+X2+w_random
+INFO:dowhy.causal_estimator:b: y~v+X3+X1+X0+X4+X2+w_random
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -852,8 +838,8 @@ INFO:dowhy.causal_estimator:b: y~v+X4+X1+X0+X3+X2+w_random
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a Random Common Cause
-Estimated effect:(9.982922513256165,)
-New effect:(9.97278395090929,)
+Estimated effect:(9.926668762072646,)
+New effect:(9.82327794717962,)
 
 </pre></div></div>
 </div>
@@ -861,7 +847,7 @@ New effect:(9.97278395090929,)
 <div class="section" id="Adding-an-unobserved-common-cause-variable">
 <h3>Adding an unobserved common cause variable<a class="headerlink" href="#Adding-an-unobserved-common-cause-variable" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -878,7 +864,7 @@ print(res_unobserved)
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v+X4+X1+X0+X3+X2
+INFO:dowhy.causal_estimator:b: y~v+X3+X1+X0+X4+X2
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -887,8 +873,8 @@ INFO:dowhy.causal_estimator:b: y~v+X4+X1+X0+X3+X2
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add an Unobserved Common Cause
-Estimated effect:(9.982922513256165,)
-New effect:(9.195294142600252,)
+Estimated effect:(9.926668762072646,)
+New effect:(9.021594981360023,)
 
 </pre></div></div>
 </div>
@@ -896,7 +882,7 @@ New effect:(9.195294142600252,)
 <div class="section" id="Replacing-treatment-with-a-random-(placebo)-variable">
 <h3>Replacing treatment with a random (placebo) variable<a class="headerlink" href="#Replacing-treatment-with-a-random-(placebo)-variable" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -912,7 +898,7 @@ print(res_placebo)
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+X4+X1+X0+X3+X2
+INFO:dowhy.causal_estimator:b: y~placebo+X3+X1+X0+X4+X2
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -921,8 +907,8 @@ INFO:dowhy.causal_estimator:b: y~placebo+X4+X1+X0+X3+X2
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:(9.982922513256165,)
-New effect:(0.028713250928077496,)
+Estimated effect:(9.926668762072646,)
+New effect:(-0.015934840427471245,)
 
 </pre></div></div>
 </div>
@@ -930,7 +916,7 @@ New effect:(0.028713250928077496,)
 <div class="section" id="Removing-a-random-subset-of-the-data">
 <h3>Removing a random subset of the data<a class="headerlink" href="#Removing-a-random-subset-of-the-data" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -947,7 +933,7 @@ print(res_subset)
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v+X4+X1+X0+X3+X2
+INFO:dowhy.causal_estimator:b: y~v+X3+X1+X0+X4+X2
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -956,12 +942,43 @@ INFO:dowhy.causal_estimator:b: y~v+X4+X1+X0+X3+X2
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a subset of data
-Estimated effect:(9.982922513256165,)
-New effect:(9.998935965095226,)
+Estimated effect:(9.926668762072646,)
+New effect:(9.88091960254762,)
 
 </pre></div></div>
 </div>
-<p>As you can see, the propensity score stratification estimator is reasonably robust to refutations.</p>
+<p>As you can see, the propensity score stratification estimator is reasonably robust to refutations. For reproducibility, you can add a parameter “random_seed” to any refutation method, as shown below.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>res_subset=model.refute_estimate(identified_estimand, estimate,
+        method_name=&quot;data_subset_refuter&quot;, subset_fraction=0.9, random_seed = 1)
+print(res_subset)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
+INFO:dowhy.causal_estimator:b: y~v+X3+X1+X0+X4+X2
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Refute: Use a subset of data
+Estimated effect:(9.926668762072646,)
+New effect:(9.934794761280186,)
+
+</pre></div></div>
+</div>
 </div>
 </div>
 </div>
