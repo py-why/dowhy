@@ -59,7 +59,7 @@ class CausalAccessor(object):
 
         :param x: str, list, dict: The causal state on which to intervene, and (optional) its interventional value(s).
         :param method: The inference method to use with the sampler. Currently, `'mcmc'`, `'weighting'`, and
-        `'kernel_density'` are supported.
+        `'kernel_density'` are supported. The `mcmc` sampler requires `pymc3>=3.7`.
         :param num_cores: int: if the inference method only supports sampling a point at a time, this will parallelize
         sampling.
         :param variable_types: dict: The dictionary containing the variable types. Must contain the union of the causal
