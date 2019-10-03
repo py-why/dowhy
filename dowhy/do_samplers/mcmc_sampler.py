@@ -20,7 +20,7 @@ class McmcSampler(DoSampler):
         self.point_sampler = False
         self.sampler = self._construct_sampler()
 
-        self.g = kwargs.get('causal_model', None)._graph.get_unconfounded_observed_subgraph()
+        self.g = causal_model._graph.get_unconfounded_observed_subgraph()
         g_fit = nx.DiGraph(self.g)
         _, self.fit_trace = self.fit_causal_model(g_fit,
                                                   self._data,
