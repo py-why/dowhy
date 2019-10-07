@@ -119,8 +119,7 @@ pandas dataframe df that contains the data:
 
 .. code:: python
 
-    import dowhy
-    from dowhy.do_why import CausalModel
+    from dowhy import CausalModel
     import dowhy.datasets
 
     # Load some sample data
