@@ -1,6 +1,6 @@
 import dowhy.datasets
 
-from dowhy.do_why import CausalModel
+from dowhy import CausalModel
 
 
 class TestRefuter(object):
