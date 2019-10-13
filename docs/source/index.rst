@@ -11,15 +11,7 @@
    :caption: Contents:
    
    readme
-   dowhy_simple_example
-   dowhy_estimation_methods
-   dowhy_refutation_methods
-   load_graph_example
-   dowhy_confounder_example
-   dowhy_ihdp_data_example
-   dowhy_lalonde_example
-   lalonde_pandas_api
-   do_sampler_demo
+   example_notebooks/nb_index
    code_repo
    dowhy
    modules
