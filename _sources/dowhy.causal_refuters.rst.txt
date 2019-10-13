@@ -4,6 +4,14 @@ dowhy.causal\_refuters package
 Submodules
 ----------
 
+dowhy.causal\_refuters.add\_unobserved\_common\_cause module
+------------------------------------------------------------
+
+.. automodule:: dowhy.causal_refuters.add_unobserved_common_cause
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.causal\_refuters.data\_subset\_refuter module
 ---------------------------------------------------
 

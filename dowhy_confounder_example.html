@@ -106,7 +106,7 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="code_repo.html">Code repository</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy.html">dowhy package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">dowhy</a></li>
@@ -420,7 +420,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import math
 import dowhy
-from dowhy.do_why import CausalModel
+from dowhy import CausalModel
 import dowhy.datasets, dowhy.plotter
 </pre></div>
 </div>
@@ -446,11 +446,11 @@ print(df[[&quot;Treatment&quot;, &quot;Outcome&quot;, &quot;w0&quot;]].head())
 <div class="output_area docutils container">
 <div class="highlight"><pre>
    Treatment    Outcome        w0
-0   9.226765  17.942530  3.064244
-1   5.627733  11.675522 -0.379016
-2   9.593378  19.594728  3.692605
-3   6.347941  12.917889  0.480172
-4   2.806808   5.247733 -3.304526
+0   7.598026  15.812081  2.011138
+1   7.601832  15.305892  1.841549
+2  10.137274  19.918058  3.977756
+3   9.444259  19.138840  3.790387
+4   2.708849   5.403166 -3.191784
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -496,8 +496,8 @@ model.view_model(layout=&quot;dot&quot;)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-WARNING:dowhy.do_why:Causal Graph not provided. DoWhy will construct a graph based on data inputs.
-INFO:dowhy.do_why:Model to find the causal effect of treatment [&#39;Treatment&#39;] on outcome [&#39;Outcome&#39;]
+WARNING:dowhy.causal_model:Causal Graph not provided. DoWhy will construct a graph based on data inputs.
+INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;Treatment&#39;] on outcome [&#39;Outcome&#39;]
 </pre></div></div>
 </div>
 <p>Showing the causal model stored in the local file “causal_model.png”</p>
@@ -564,15 +564,15 @@ INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[]
 <div class="highlight"><pre>
 Estimand type: ate
 ### Estimand : 1
+Estimand name: iv
+No such variable found!
+### Estimand : 2
 Estimand name: backdoor
 Estimand expression:
     d
 ──────────(Expectation(Outcome|w0))
 dTreatment
 Estimand assumption 1, Unconfoundedness: If U→Treatment and U→Outcome then P(Outcome|Treatment,w0,U) = P(Outcome|Treatment,w0)
-### Estimand : 2
-Estimand name: iv
-No such variable found!
 
 </pre></div></div>
 </div>
@@ -609,8 +609,7 @@ INFO:dowhy.causal_estimator:b: Outcome~Treatment+w0
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Treatment
-Causal Estimate is 0.0051827863049
+Causal Estimate is 1.0099765763913107
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -638,8 +637,8 @@ print (&quot;Actual true causal effect was {0}&quot;.format(rvar))
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-DoWhy estimate is 0.0051827863049
-Actual true causal effect was 0
+DoWhy estimate is 1.0099765763913107
+Actual true causal effect was 1
 </pre></div></div>
 </div>
 </div>
@@ -673,11 +672,9 @@ INFO:dowhy.causal_estimator:b: Outcome~Treatment+w0+w_random
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&#39;Treatment&#39;]
-Treatment
 Refute: Add a Random Common Cause
-Estimated effect:(0.0051827863049019127,)
-New effect:(0.0052748828365418695,)
+Estimated effect:(1.0099765763913107,)
+New effect:(1.009944524944634,)
 
 </pre></div></div>
 </div>
@@ -709,11 +706,9 @@ INFO:dowhy.causal_estimator:b: Outcome~placebo+w0
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&#39;Treatment&#39;]
-placebo
 Refute: Use a Placebo Treatment
-Estimated effect:(0.0051827863049019127,)
-New effect:(0.0013214086372636913,)
+Estimated effect:(1.0099765763913107,)
+New effect:(-0.0004315715075086384,)
 
 </pre></div></div>
 </div>
@@ -746,31 +741,9 @@ INFO:dowhy.causal_estimator:b: Outcome~Treatment+w0
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&#39;Treatment&#39;]
-Treatment
-*** Causal Estimate ***
-
-## Target estimand
-Estimand type: ate
-### Estimand : 1
-Estimand name: backdoor
-Estimand expression:
-    d
-──────────(Expectation(Outcome|w0))
-dTreatment
-Estimand assumption 1, Unconfoundedness: If U→Treatment and U→Outcome then P(Outcome|Treatment,w0,U) = P(Outcome|Treatment,w0)
-### Estimand : 2
-Estimand name: iv
-No such variable found!
-
-## Realized estimand
-b: Outcome~Treatment+w0
-## Estimate
-Value: 0.0032596514859678217
-
 Refute: Use a subset of data
-Estimated effect:(0.0051827863049019127,)
-New effect:(0.0032596514859678217,)
+Estimated effect:(1.0099765763913107,)
+New effect:(1.007629285793896,)
 
 </pre></div></div>
 </div>

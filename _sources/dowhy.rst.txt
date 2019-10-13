@@ -40,6 +40,14 @@ dowhy.causal\_identifier module
    :undoc-members:
    :show-inheritance:
 
+dowhy.causal\_model module
+--------------------------
+
+.. automodule:: dowhy.causal_model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.causal\_refuter module
 ----------------------------
 
@@ -68,14 +76,6 @@ dowhy.do\_sampler module
 ------------------------
 
 .. automodule:: dowhy.do_sampler
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-dowhy.do\_why module
---------------------
-
-.. automodule:: dowhy.do_why
    :members:
    :undoc-members:
    :show-inheritance:

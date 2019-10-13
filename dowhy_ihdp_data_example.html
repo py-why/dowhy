@@ -108,7 +108,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="code_repo.html">Code repository</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy.html">dowhy package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">dowhy</a></li>
@@ -409,7 +409,7 @@ div.rendered_html tbody tr:hover {
 import os, sys
 sys.path.append(os.path.abspath(&quot;../../&quot;))
 import dowhy
-from dowhy.do_why import CausalModel
+from dowhy import CausalModel
 import pandas as pd
 import numpy as np
 </pre></div>
@@ -632,8 +632,8 @@ model=CausalModel(
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-WARNING:dowhy.do_why:Causal Graph not provided. DoWhy will construct a graph based on data inputs.
-INFO:dowhy.do_why:Model to find the causal effect of treatment [&#39;treatment&#39;] on outcome [&#39;y_factual&#39;]
+WARNING:dowhy.causal_model:Causal Graph not provided. DoWhy will construct a graph based on data inputs.
+INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;treatment&#39;] on outcome [&#39;y_factual&#39;]
 </pre></div></div>
 </div>
 </div>
@@ -654,7 +654,7 @@ identified_estimand = model.identify_effect()
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;&#39;, &#39;x21&#39;, &#39;x22&#39;, &#39;x9&#39;, &#39;x8&#39;, &#39;x11&#39;, &#39;x16&#39;, &#39;x25&#39;, &#39;x4&#39;, &#39;x5&#39;, &#39;x20&#39;, &#39;x10&#39;, &#39;x17&#39;, &#39;x13&#39;, &#39;x7&#39;, &#39;x2&#39;, &#39;x23&#39;, &#39;x3&#39;, &#39;x24&#39;, &#39;x1&#39;, &#39;x15&#39;, &#39;x14&#39;, &#39;x6&#39;, &#39;x19&#39;, &#39;x18&#39;, &#39;x12&#39;]
+INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;&#39;, &#39;x1&#39;, &#39;x7&#39;, &#39;x16&#39;, &#39;x6&#39;, &#39;x19&#39;, &#39;x17&#39;, &#39;x21&#39;, &#39;x14&#39;, &#39;x25&#39;, &#39;x10&#39;, &#39;x9&#39;, &#39;x12&#39;, &#39;x2&#39;, &#39;x5&#39;, &#39;x24&#39;, &#39;x15&#39;, &#39;x3&#39;, &#39;x20&#39;, &#39;x8&#39;, &#39;x23&#39;, &#39;x4&#39;, &#39;x22&#39;, &#39;x18&#39;, &#39;x11&#39;, &#39;x13&#39;]
 WARNING:dowhy.causal_identifier:There are unobserved common causes. Causal effect cannot be identified.
 </pre></div></div>
 </div>
@@ -706,7 +706,7 @@ print(&quot;ATE&quot;, np.mean(data_1[&quot;y_factual&quot;])- np.mean(data_0[&q
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Linear Regression Estimator
-INFO:dowhy.causal_estimator:b: y_factual~treatment+x21+x22+x9+x8+x11+x16+x25+x4+x5+x20+x10+x17+x13+x7+x2+x23+x3+x24+x1+x15+x14+x6+x19+x18+x12
+INFO:dowhy.causal_estimator:b: y_factual~treatment+x1+x7+x16+x6+x19+x17+x21+x14+x25+x10+x9+x12+x2+x5+x24+x15+x3+x20+x8+x23+x4+x22+x18+x11+x13
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -725,24 +725,24 @@ No such variable found!
 Estimand name: backdoor
 Estimand expression:
     d
-──────────(Expectation(y_factual|x21,x22,x9,x8,x11,x16,x25,x4,x5,x20,x10,x17,x
+──────────(Expectation(y_factual|x1,x7,x16,x6,x19,x17,x21,x14,x25,x10,x9,x12,x
 dtreatment
 
 
-13,x7,x2,x23,x3,x24,x1,x15,x14,x6,x19,x18,x12))
+2,x5,x24,x15,x3,x20,x8,x23,x4,x22,x18,x11,x13))
 
-Estimand assumption 1, Unconfoundedness: If U→treatment and U→y_factual then P(y_factual|treatment,x21,x22,x9,x8,x11,x16,x25,x4,x5,x20,x10,x17,x13,x7,x2,x23,x3,x24,x1,x15,x14,x6,x19,x18,x12,U) = P(y_factual|treatment,x21,x22,x9,x8,x11,x16,x25,x4,x5,x20,x10,x17,x13,x7,x2,x23,x3,x24,x1,x15,x14,x6,x19,x18,x12)
+Estimand assumption 1, Unconfoundedness: If U→treatment and U→y_factual then P(y_factual|treatment,x1,x7,x16,x6,x19,x17,x21,x14,x25,x10,x9,x12,x2,x5,x24,x15,x3,x20,x8,x23,x4,x22,x18,x11,x13,U) = P(y_factual|treatment,x1,x7,x16,x6,x19,x17,x21,x14,x25,x10,x9,x12,x2,x5,x24,x15,x3,x20,x8,x23,x4,x22,x18,x11,x13)
 
 ## Realized estimand
-b: y_factual~treatment+x21+x22+x9+x8+x11+x16+x25+x4+x5+x20+x10+x17+x13+x7+x2+x23+x3+x24+x1+x15+x14+x6+x19+x18+x12
+b: y_factual~treatment+x1+x7+x16+x6+x19+x17+x21+x14+x25+x10+x9+x12+x2+x5+x24+x15+x3+x20+x8+x23+x4+x22+x18+x11+x13
 ## Estimate
-Value: 3.928671750872715
+Value: 3.928671750872714
 
 ## Statistical Significance
 p-value: &lt;0.001
 
-Causal Estimate is 3.92867175087
-ATE 4.02112101243
+Causal Estimate is 3.928671750872714
+ATE 4.021121012430829
 </pre></div></div>
 </div>
 </div>
@@ -770,7 +770,7 @@ print(&quot;ATE&quot;, np.mean(data_1[&quot;y_factual&quot;])- np.mean(data_0[&q
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
-INFO:dowhy.causal_estimator:b: y_factual~treatment+x21+x22+x9+x8+x11+x16+x25+x4+x5+x20+x10+x17+x13+x7+x2+x23+x3+x24+x1+x15+x14+x6+x19+x18+x12
+INFO:dowhy.causal_estimator:b: y_factual~treatment+x1+x7+x16+x6+x19+x17+x21+x14+x25+x10+x9+x12+x2+x5+x24+x15+x3+x20+x8+x23+x4+x22+x18+x11+x13
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -778,20 +778,20 @@ INFO:dowhy.causal_estimator:b: y_factual~treatment+x21+x22+x9+x8+x11+x16+x25+x4+
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Causal Estimate is 3.8436503200364402
-ATE 4.02112101243
+Causal Estimate is 3.7137071218180533
+ATE 4.021121012430829
 </pre></div></div>
 </div>
 </div>
 <div class="section" id="3.3-Using-Propensity-Score-Stratification">
 <h3>3.3 Using Propensity Score Stratification<a class="headerlink" href="#3.3-Using-Propensity-Score-Stratification" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span>estimate = model.estimate_effect(identified_estimand,
-        method_name=&quot;backdoor.propensity_score_stratification&quot;, method_params={&#39;num_strata&#39;50, &#39;clipping_threshold&#39;:5}
+        method_name=&quot;backdoor.propensity_score_stratification&quot;, method_params={&#39;num_strata&#39;:50, &#39;clipping_threshold&#39;:5}
 )
 
 print(&quot;Causal Estimate is &quot; + str(estimate.value))
@@ -807,7 +807,7 @@ print(&quot;ATE&quot;, np.mean(data_1[&quot;y_factual&quot;])- np.mean(data_0[&q
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y_factual~treatment+x21+x22+x9+x8+x11+x16+x25+x4+x5+x20+x10+x17+x13+x7+x2+x23+x3+x24+x1+x15+x14+x6+x19+x18+x12
+INFO:dowhy.causal_estimator:b: y_factual~treatment+x1+x7+x16+x6+x19+x17+x21+x14+x25+x10+x9+x12+x2+x5+x24+x15+x3+x20+x8+x23+x4+x22+x18+x11+x13
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -815,15 +815,15 @@ INFO:dowhy.causal_estimator:b: y_factual~treatment+x21+x22+x9+x8+x11+x16+x25+x4+
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Causal Estimate is 4.0560672956
-ATE 4.02112101243
+Causal Estimate is 2.9866811987400976
+ATE 4.021121012430829
 </pre></div></div>
 </div>
 </div>
 <div class="section" id="3.4-Using-Propensity-Score-Weighting">
 <h3>3.4 Using Propensity Score Weighting<a class="headerlink" href="#3.4-Using-Propensity-Score-Weighting" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -844,7 +844,7 @@ print(&quot;ATE&quot;, np.mean(data_1[&quot;y_factual&quot;])- np.mean(data_0[&q
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
-INFO:dowhy.causal_estimator:b: y_factual~treatment+x21+x22+x9+x8+x11+x16+x25+x4+x5+x20+x10+x17+x13+x7+x2+x23+x3+x24+x1+x15+x14+x6+x19+x18+x12
+INFO:dowhy.causal_estimator:b: y_factual~treatment+x1+x7+x16+x6+x19+x17+x21+x14+x25+x10+x9+x12+x2+x5+x24+x15+x3+x20+x8+x23+x4+x22+x18+x11+x13
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -852,8 +852,8 @@ INFO:dowhy.causal_estimator:b: y_factual~treatment+x21+x22+x9+x8+x11+x16+x25+x4+
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Causal Estimate is 4.04761815345
-ATE 4.02112101243
+Causal Estimate is 3.3765676293790015
+ATE 4.021121012430829
 </pre></div></div>
 </div>
 </div>
@@ -861,7 +861,7 @@ ATE 4.02112101243
 <div class="section" id="4.-Refute">
 <h2>4. Refute<a class="headerlink" href="#4.-Refute" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -877,7 +877,7 @@ print(refute_results)
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
-INFO:dowhy.causal_estimator:b: y_factual~treatment+x21+x22+x9+x8+x11+x16+x25+x4+x5+x20+x10+x17+x13+x7+x2+x23+x3+x24+x1+x15+x14+x6+x19+x18+x12+w_random
+INFO:dowhy.causal_estimator:b: y_factual~treatment+x1+x7+x16+x6+x19+x17+x21+x14+x25+x10+x9+x12+x2+x5+x24+x15+x3+x20+x8+x23+x4+x22+x18+x11+x13+w_random
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -886,13 +886,13 @@ INFO:dowhy.causal_estimator:b: y_factual~treatment+x21+x22+x9+x8+x11+x16+x25+x4+
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a Random Common Cause
-Estimated effect:(4.0476181534545397,)
-New effect:(4.0480367100453618,)
+Estimated effect:(3.3765676293790015,)
+New effect:(3.406650074447194,)
 
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -908,7 +908,7 @@ print(res_placebo)
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
-INFO:dowhy.causal_estimator:b: y_factual~placebo+x21+x22+x9+x8+x11+x16+x25+x4+x5+x20+x10+x17+x13+x7+x2+x23+x3+x24+x1+x15+x14+x6+x19+x18+x12
+INFO:dowhy.causal_estimator:b: y_factual~placebo+x1+x7+x16+x6+x19+x17+x21+x14+x25+x10+x9+x12+x2+x5+x24+x15+x3+x20+x8+x23+x4+x22+x18+x11+x13
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -917,15 +917,15 @@ INFO:dowhy.causal_estimator:b: y_factual~placebo+x21+x22+x9+x8+x11+x16+x25+x4+x5
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:(4.0476181534545397,)
-New effect:(0.057511331649253705,)
+Estimated effect:(3.3765676293790015,)
+New effect:(-0.16630861858510526,)
 
 </pre></div></div>
 </div>
 <div class="section" id="4.3-Data-Subset-Refuter">
 <h3>4.3 Data Subset Refuter<a class="headerlink" href="#4.3-Data-Subset-Refuter" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -941,7 +941,7 @@ print(res_subset)
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
-INFO:dowhy.causal_estimator:b: y_factual~treatment+x21+x22+x9+x8+x11+x16+x25+x4+x5+x20+x10+x17+x13+x7+x2+x23+x3+x24+x1+x15+x14+x6+x19+x18+x12
+INFO:dowhy.causal_estimator:b: y_factual~treatment+x1+x7+x16+x6+x19+x17+x21+x14+x25+x10+x9+x12+x2+x5+x24+x15+x3+x20+x8+x23+x4+x22+x18+x11+x13
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -950,8 +950,8 @@ INFO:dowhy.causal_estimator:b: y_factual~treatment+x21+x22+x9+x8+x11+x16+x25+x4+
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a subset of data
-Estimated effect:(4.0476181534545397,)
-New effect:(4.0274748385128563,)
+Estimated effect:(3.3765676293790015,)
+New effect:(3.392689859662151,)
 
 </pre></div></div>
 </div>

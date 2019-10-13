@@ -108,11 +108,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-dowhy.causal_estimator">dowhy.causal_estimator module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-dowhy.causal_graph">dowhy.causal_graph module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-dowhy.causal_identifier">dowhy.causal_identifier module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-dowhy.causal_model">dowhy.causal_model module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-dowhy.causal_refuter">dowhy.causal_refuter module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-dowhy.data_transformer">dowhy.data_transformer module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-dowhy.datasets">dowhy.datasets module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-dowhy.do_sampler">dowhy.do_sampler module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-dowhy.do_why">dowhy.do_why module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-dowhy.plotter">dowhy.plotter module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-dowhy">Module contents</a></li>
 </ul>
@@ -231,6 +231,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy.causal_refuters.html">dowhy.causal_refuters package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="dowhy.causal_refuters.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.causal_refuters.html#module-dowhy.causal_refuters.add_unobserved_common_cause">dowhy.causal_refuters.add_unobserved_common_cause module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dowhy.causal_refuters.html#module-dowhy.causal_refuters.data_subset_refuter">dowhy.causal_refuters.data_subset_refuter module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dowhy.causal_refuters.html#module-dowhy.causal_refuters.placebo_treatment_refuter">dowhy.causal_refuters.placebo_treatment_refuter module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dowhy.causal_refuters.html#module-dowhy.causal_refuters.random_common_cause">dowhy.causal_refuters.random_common_cause module</a></li>
@@ -481,6 +482,110 @@ A general procedure. Individual estimators can override this method.</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-dowhy.causal_model">
+<span id="dowhy-causal-model-module"></span><h2>dowhy.causal_model module<a class="headerlink" href="#module-dowhy.causal_model" title="Permalink to this headline">¶</a></h2>
+<p>Module containing the main model class for the dowhy package.</p>
+<dl class="class">
+<dt id="dowhy.causal_model.CausalModel">
+<em class="property">class </em><code class="sig-prename descclassname">dowhy.causal_model.</code><code class="sig-name descname">CausalModel</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">treatment</em>, <em class="sig-param">outcome</em>, <em class="sig-param">graph=None</em>, <em class="sig-param">common_causes=None</em>, <em class="sig-param">instruments=None</em>, <em class="sig-param">estimand_type='ate'</em>, <em class="sig-param">proceed_when_unidentifiable=False</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_model.html#CausalModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_model.CausalModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Main class for storing the causal model state.</p>
+<dl class="method">
+<dt id="dowhy.causal_model.CausalModel.do">
+<code class="sig-name descname">do</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">identified_estimand</em>, <em class="sig-param">method_name=None</em>, <em class="sig-param">method_params=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_model.html#CausalModel.do"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_model.CausalModel.do" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the identified causal effect.</p>
+<p>If method_name is provided, uses the provided method. Else, finds a
+suitable method to be used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>identified_estimand</strong> – a probability expression
+that represents the effect to be estimated. Output of
+CausalModel.identify_effect method</p></li>
+<li><p><strong>method_name</strong> – (optional) name of the estimation method to be used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>an instance of the CausalEstimate class, containing the causal effect estimate
+and other method-dependent information</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="dowhy.causal_model.CausalModel.estimate_effect">
+<code class="sig-name descname">estimate_effect</code><span class="sig-paren">(</span><em class="sig-param">identified_estimand</em>, <em class="sig-param">method_name=None</em>, <em class="sig-param">test_significance=None</em>, <em class="sig-param">method_params=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_model.html#CausalModel.estimate_effect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_model.CausalModel.estimate_effect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the identified causal effect.</p>
+<p>If method_name is provided, uses the provided method. Else, finds a
+suitable method to be used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>identified_estimand</strong> – a probability expression
+that represents the effect to be estimated. Output of
+CausalModel.identify_effect method</p></li>
+<li><p><strong>method_name</strong> – (optional) name of the estimation method to be used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>an instance of the CausalEstimate class, containing the causal effect estimate
+and other method-dependent information</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="dowhy.causal_model.CausalModel.identify_effect">
+<code class="sig-name descname">identify_effect</code><span class="sig-paren">(</span><em class="sig-param">proceed_when_unidentifiable=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_model.html#CausalModel.identify_effect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_model.CausalModel.identify_effect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify the causal effect to be estimated, using properties of the causal graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a probability expression for the causal effect if identified, else NULL</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="dowhy.causal_model.CausalModel.refute_estimate">
+<code class="sig-name descname">refute_estimate</code><span class="sig-paren">(</span><em class="sig-param">estimand</em>, <em class="sig-param">estimate</em>, <em class="sig-param">method_name=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_model.html#CausalModel.refute_estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_model.CausalModel.refute_estimate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Refute an estimated causal effect.</p>
+<p>If method_name is provided, uses the provided method. Else, finds a
+suitable method to use.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>estimate</strong> – an instance of the CausalEstimate class.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>an instance of the RefuteResult class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="dowhy.causal_model.CausalModel.summary">
+<code class="sig-name descname">summary</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_model.html#CausalModel.summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_model.CausalModel.summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print a text summary of the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="dowhy.causal_model.CausalModel.view_model">
+<code class="sig-name descname">view_model</code><span class="sig-paren">(</span><em class="sig-param">layout='dot'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_model.html#CausalModel.view_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_model.CausalModel.view_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>View the causal DAG.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a visualization of the graph</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="module-dowhy.causal_refuter">
 <span id="dowhy-causal-refuter-module"></span><h2>dowhy.causal_refuter module<a class="headerlink" href="#module-dowhy.causal_refuter" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
@@ -651,110 +756,6 @@ initialization values by overriding this method.
 <dd><p>By default, this expects a sampler to be built on class initialization which contains a <cite>sample</cite> method.
 Override this method if you want to use a different approach to sampling.
 :return:</p>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-dowhy.do_why">
-<span id="dowhy-do-why-module"></span><h2>dowhy.do_why module<a class="headerlink" href="#module-dowhy.do_why" title="Permalink to this headline">¶</a></h2>
-<p>Module containing the main model class for the dowhy package.</p>
-<dl class="class">
-<dt id="dowhy.do_why.CausalModel">
-<em class="property">class </em><code class="sig-prename descclassname">dowhy.do_why.</code><code class="sig-name descname">CausalModel</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">treatment</em>, <em class="sig-param">outcome</em>, <em class="sig-param">graph=None</em>, <em class="sig-param">common_causes=None</em>, <em class="sig-param">instruments=None</em>, <em class="sig-param">estimand_type='ate'</em>, <em class="sig-param">proceed_when_unidentifiable=False</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_why.html#CausalModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.do_why.CausalModel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Main class for storing the causal model state.</p>
-<dl class="method">
-<dt id="dowhy.do_why.CausalModel.do">
-<code class="sig-name descname">do</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">identified_estimand</em>, <em class="sig-param">method_name=None</em>, <em class="sig-param">method_params=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_why.html#CausalModel.do"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.do_why.CausalModel.do" title="Permalink to this definition">¶</a></dt>
-<dd><p>Estimate the identified causal effect.</p>
-<p>If method_name is provided, uses the provided method. Else, finds a
-suitable method to be used.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>identified_estimand</strong> – a probability expression
-that represents the effect to be estimated. Output of
-CausalModel.identify_effect method</p></li>
-<li><p><strong>method_name</strong> – (optional) name of the estimation method to be used.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>an instance of the CausalEstimate class, containing the causal effect estimate
-and other method-dependent information</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="dowhy.do_why.CausalModel.estimate_effect">
-<code class="sig-name descname">estimate_effect</code><span class="sig-paren">(</span><em class="sig-param">identified_estimand</em>, <em class="sig-param">method_name=None</em>, <em class="sig-param">test_significance=None</em>, <em class="sig-param">method_params=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_why.html#CausalModel.estimate_effect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.do_why.CausalModel.estimate_effect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Estimate the identified causal effect.</p>
-<p>If method_name is provided, uses the provided method. Else, finds a
-suitable method to be used.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>identified_estimand</strong> – a probability expression
-that represents the effect to be estimated. Output of
-CausalModel.identify_effect method</p></li>
-<li><p><strong>method_name</strong> – (optional) name of the estimation method to be used.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>an instance of the CausalEstimate class, containing the causal effect estimate
-and other method-dependent information</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="dowhy.do_why.CausalModel.identify_effect">
-<code class="sig-name descname">identify_effect</code><span class="sig-paren">(</span><em class="sig-param">proceed_when_unidentifiable=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_why.html#CausalModel.identify_effect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.do_why.CausalModel.identify_effect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Identify the causal effect to be estimated, using properties of the causal graph.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>a probability expression for the causal effect if identified, else NULL</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="dowhy.do_why.CausalModel.refute_estimate">
-<code class="sig-name descname">refute_estimate</code><span class="sig-paren">(</span><em class="sig-param">estimand</em>, <em class="sig-param">estimate</em>, <em class="sig-param">method_name=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_why.html#CausalModel.refute_estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.do_why.CausalModel.refute_estimate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Refute an estimated causal effect.</p>
-<p>If method_name is provided, uses the provided method. Else, finds a
-suitable method to use.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>estimate</strong> – an instance of the CausalEstimate class.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>an instance of the RefuteResult class</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="dowhy.do_why.CausalModel.summary">
-<code class="sig-name descname">summary</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_why.html#CausalModel.summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.do_why.CausalModel.summary" title="Permalink to this definition">¶</a></dt>
-<dd><p>Print a text summary of the model.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="dowhy.do_why.CausalModel.view_model">
-<code class="sig-name descname">view_model</code><span class="sig-paren">(</span><em class="sig-param">layout='dot'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_why.html#CausalModel.view_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.do_why.CausalModel.view_model" title="Permalink to this definition">¶</a></dt>
-<dd><p>View the causal DAG.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>a visualization of the graph</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
