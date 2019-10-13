@@ -1,5 +1,5 @@
 from os import path
-from dowhy.do_why import CausalModel
+from dowhy.causal_model import CausalModel
 
 
 here = path.abspath(path.dirname(__file__))
