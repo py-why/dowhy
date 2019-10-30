@@ -21,7 +21,7 @@ def plot_treatment_outcome(treatment, outcome, time_var):
     plt.legend(loc="upper left", bbox_to_anchor=(0.4, 1))
     plt.xlabel("Time")
     fig.set_size_inches(8, 6)
-    fig.savefig("poster_obs_data" + datetime.now().strftime("%H-%M-%S") + ".png",
+    fig.savefig("obs_data" + datetime.now().strftime("%H-%M-%S") + ".png",
                 bbox_inches="tight")
 
 
@@ -45,5 +45,5 @@ def plot_causal_effect(estimate, treatment, outcome):
     plt.ylabel("Outcome")
 
     fig.set_size_inches(8, 6)
-    fig.savefig("poster_effect" + datetime.now().strftime("%H-%M-%S") + ".png",
+    fig.savefig("effect" + datetime.now().strftime("%H-%M-%S") + ".png",
                 bbox_inches='tight')
