@@ -37,6 +37,9 @@ class CausalEstimator:
 
         self.logger = logging.getLogger(__name__)
 
+    def _estimate_effect(self):
+        raise NotImplementedError
+
     def estimate_effect(self):
         """TODO.
 
@@ -74,6 +77,9 @@ class CausalEstimator:
         est = self._do(x)
 
         return est
+
+    def construct_symbolic_estimator(self, estimand):
+        raise NotImplementedError
 
     def test_significance(self, estimate, num_simulations=1000):
         """Test statistical significance of obtained estimate.
