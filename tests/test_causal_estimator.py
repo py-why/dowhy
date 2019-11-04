@@ -1,5 +1,23 @@
 import unittest
 
+import pytest
+
+from dowhy.causal_estimator import CausalEstimator
+
+
+class MockEstimator(CausalEstimator):
+    pass
+
+
+def test_causal_estimator_placeholder_methods():
+    estimator = MockEstimator(None, None, [None], [None], None)
+    with pytest.raises(NotImplementedError):
+        estimator._estimate_effect()
+    with pytest.raises(NotImplementedError):
+        estimator._do(None)
+    with pytest.raises(NotImplementedError):
+        estimator.construct_symbolic_estimator(None)
+
 
 class TestCausalEstimator(unittest.TestCase):
     def setUp(self):

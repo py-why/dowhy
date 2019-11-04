@@ -16,6 +16,9 @@ class CausalRefuter:
             np.random.seed(self._random_seed)
         self.logger = logging.getLogger(__name__)
 
+    def refute_estimate(self):
+        raise NotImplementedError
+
 
 class CausalRefutation:
 

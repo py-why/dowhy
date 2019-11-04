@@ -5,4 +5,4 @@ class DimensionalityReducer:
         self._ndims = ndims
 
     def reduce(self, target_dimensions=None):
-        pass
+        raise NotImplementedError
