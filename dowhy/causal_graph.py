@@ -17,11 +17,13 @@ class CausalGraph:
         self.outcome_name = parse_state(outcome_name)
         instrument_names = parse_state(instrument_names)
         common_cause_names = parse_state(common_cause_names)
-        self.fullname = "_".join(self.treatment_name +
-                                 self.outcome_name +
-                                 common_cause_names +
-                                 instrument_names)
-
+        #self.fullname = "_".join(self.treatment_name +
+                                 #self.outcome_name +
+                                 #common_cause_names +
+                                 #instrument_names)
+### Suggesting this change as the 'fullname' is not used in the system,
+### but it produces errors when you provide a list in 'common_cause_names'
+### or 'instrument_names'. For now commenting it out.
         self.logger = logging.getLogger(__name__)
 
         if graph is None:
