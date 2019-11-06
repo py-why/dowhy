@@ -124,7 +124,8 @@ class CausalModel:
         return identified_estimand
 
     def estimate_effect(self, identified_estimand, method_name=None,
-                        test_significance=None, method_params=None):
+                        test_significance=None, evaluate_effect_strength=True,
+                        method_params=None):
         """Estimate the identified causal effect.
 
         If method_name is provided, uses the provided method. Else, finds a
@@ -157,6 +158,7 @@ class CausalModel:
                 identified_estimand,
                 self._treatment, self._outcome,
                 test_significance=test_significance,
+                evaluate_effect_strength=evaluate_effect_strength,
                 params=method_params
             )
             estimate = causal_estimator.estimate_effect()

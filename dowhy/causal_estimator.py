@@ -10,7 +10,7 @@ class CausalEstimator:
     """
 
     def __init__(self, data, identified_estimand, treatment, outcome,
-                 test_significance, params=None):
+                 test_significance, evaluate_effect_strength=True, params=None):
         """Initializes an estimator with data and names of relevant variables.
 
         More description.
@@ -30,6 +30,7 @@ class CausalEstimator:
         self._treatment_name = treatment[0]
         self._outcome_name = outcome[0]
         self._significance_test = test_significance
+        self._effect_strength_eval = evaluate_effect_strength
         self._estimate = None
         if params is not None:
             for key, value in params.items():
@@ -52,13 +53,23 @@ class CausalEstimator:
         self._treatment = self._data[self._treatment_name]
         self._outcome = self._data[self._outcome_name]
         est = self._estimate_effect()
-        # self._estimate = est
+        self._estimate = est
 
 
         if self._significance_test:
             signif_dict = self.test_significance(est)
             est.add_significance_test_results(signif_dict)
+        if self._effect_strength_eval:
+            effect_strength_dict = self.evaluate_effect_strength(est)
+            est.add_effect_strength(effect_strength_dict)
+
         return est
+
+    def estimate_effect_naive(self):
+        df_treatment = self._data.loc[self._data[self._treatment_name] == 1]
+        df_notreatment = self._data.loc[self._data[self._treatment_name]== 0]
+        est = np.mean(df_treatment[self._outcome_name]) - np.mean(df_notreatment[self._outcome_name])
+        return CausalEstimate(est, None, None)
 
     def _do(self, x):
         raise NotImplementedError
@@ -118,6 +129,34 @@ class CausalEstimator:
         }
         return signif_dict
 
+    def evaluate_effect_strength(self, estimate):
+        fraction_effect_explained = self._evaluate_effect_strength(estimate, method="fraction-effect")
+        effect_r_squared = self._evaluate_effect_strength(estimate, method="r-squared")
+        strength_dict = {
+                'fraction-effect': fraction_effect_explained,
+                'r-squared': effect_r_squared
+                }
+        return strength_dict
+
+    def _evaluate_effect_strength(self, estimate, method="fraction-effect"):
+        supported_methods = ["fraction-effect", "r-squared"]
+        if method not in supported_methods:
+            raise NotImplementedError("This method is not supported for evaluating effect strength")
+        if method == "fraction-effect":
+            naive_obs_estimate = self.estimate_effect_naive()
+            fraction_effect_explained = estimate.value/naive_obs_estimate.value
+            return fraction_effect_explained
+        elif method == "r-squared":
+            outcome_mean = np.mean(self._outcome)
+            total_variance = np.sum(np.square(self._outcome - outcome_mean))
+            # Assuming a linear model with one variable: the treatment
+            # Currently only works for continuous y
+            causal_model = outcome_mean + estimate.value*self._treatment
+            squared_residual = np.sum(np.square(self._outcome - causal_model))
+            r_squared = 1 - (squared_residual/total_variance)
+            return r_squared
+        else:
+            return None
 
 class CausalEstimate:
     """TODO.
@@ -130,9 +169,13 @@ class CausalEstimate:
         self.realized_estimand_expr = realized_estimand_expr
         self.params = kwargs
         self.significance_test = None
+        self.effect_strength = None
 
     def add_significance_test_results(self, test_results):
         self.significance_test = test_results
+
+    def add_effect_strength(self, strength_dict):
+        self.effect_strength = strength_dict
 
     def add_params(self, **kwargs):
         self.params.update(kwargs)
@@ -149,6 +192,10 @@ class CausalEstimate:
                 s += "p-value: {0}\n".format(self.significance_test["p_value"])
             else:
                 s+= "p-value: <{0}\n".format(1/len(self.significance_test["sorted_null_estimates"]))
+        if self.effect_strength is not None:
+            s += "\n## Effect Strength\n"
+            s += "Change in outcome attributable to treatment: {}\n".format(self.effect_strength["fraction-effect"])
+            s += "Variance in outcome explained by treatment: {}\n".format(self.effect_strength["r-squared"])
         return s
 
 
