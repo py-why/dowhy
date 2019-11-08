@@ -131,30 +131,31 @@ class CausalEstimator:
 
     def evaluate_effect_strength(self, estimate):
         fraction_effect_explained = self._evaluate_effect_strength(estimate, method="fraction-effect")
-        effect_r_squared = self._evaluate_effect_strength(estimate, method="r-squared")
+        # Need to test r-squared before supporting
+        #effect_r_squared = self._evaluate_effect_strength(estimate, method="r-squared")
         strength_dict = {
-                'fraction-effect': fraction_effect_explained,
-                'r-squared': effect_r_squared
+                'fraction-effect': fraction_effect_explained
+         #       'r-squared': effect_r_squared
                 }
         return strength_dict
 
     def _evaluate_effect_strength(self, estimate, method="fraction-effect"):
-        supported_methods = ["fraction-effect", "r-squared"]
+        supported_methods = ["fraction-effect"]
         if method not in supported_methods:
             raise NotImplementedError("This method is not supported for evaluating effect strength")
         if method == "fraction-effect":
             naive_obs_estimate = self.estimate_effect_naive()
             fraction_effect_explained = estimate.value/naive_obs_estimate.value
             return fraction_effect_explained
-        elif method == "r-squared":
-            outcome_mean = np.mean(self._outcome)
-            total_variance = np.sum(np.square(self._outcome - outcome_mean))
+        #elif method == "r-squared":
+        #    outcome_mean = np.mean(self._outcome)
+        #    total_variance = np.sum(np.square(self._outcome - outcome_mean))
             # Assuming a linear model with one variable: the treatment
             # Currently only works for continuous y
-            causal_model = outcome_mean + estimate.value*self._treatment
-            squared_residual = np.sum(np.square(self._outcome - causal_model))
-            r_squared = 1 - (squared_residual/total_variance)
-            return r_squared
+        #    causal_model = outcome_mean + estimate.value*self._treatment
+        #    squared_residual = np.sum(np.square(self._outcome - causal_model))
+        #    r_squared = 1 - (squared_residual/total_variance)
+        #    return r_squared
         else:
             return None
 
@@ -195,7 +196,7 @@ class CausalEstimate:
         if self.effect_strength is not None:
             s += "\n## Effect Strength\n"
             s += "Change in outcome attributable to treatment: {}\n".format(self.effect_strength["fraction-effect"])
-            s += "Variance in outcome explained by treatment: {}\n".format(self.effect_strength["r-squared"])
+            #s += "Variance in outcome explained by treatment: {}\n".format(self.effect_strength["r-squared"])
         return s
 
 
