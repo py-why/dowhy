@@ -27,6 +27,7 @@ class CausalModel:
     def __init__(self, data, treatment, outcome, graph=None,
                  common_causes=None, instruments=None, estimand_type="ate",
                  proceed_when_unidentifiable=False,
+                 missing_nodes_as_confounders=False,
                  **kwargs):
         """Initialize data and create a causal graph instance.
 
@@ -53,6 +54,7 @@ class CausalModel:
         self._outcome = parse_state(outcome)
         self._estimand_type = estimand_type
         self._proceed_when_unidentifiable = proceed_when_unidentifiable
+        self._missing_nodes_as_confounders = missing_nodes_as_confounders
         if 'logging_level' in kwargs:
             logging.basicConfig(level=kwargs['logging_level'])
         else:
@@ -98,7 +100,8 @@ class CausalModel:
                 self._treatment,
                 self._outcome,
                 graph,
-                observed_node_names=self._data.columns.tolist()
+                observed_node_names=self._data.columns.tolist(),
+                missing_nodes_as_confounders = self._missing_nodes_as_confounders
             )
             self._common_causes = self._graph.get_common_causes(self._treatment, self._outcome)
             self._instruments = self._graph.get_instruments(self._treatment,

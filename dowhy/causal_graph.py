@@ -12,7 +12,8 @@ class CausalGraph:
                  graph=None,
                  common_cause_names=None,
                  instrument_names=None,
-                 observed_node_names=None):
+                 observed_node_names=None,
+                 missing_nodes_as_confounders=False):
         self.treatment_name = parse_state(treatment_name)
         self.outcome_name = parse_state(outcome_name)
         instrument_names = parse_state(instrument_names)
@@ -58,7 +59,8 @@ class CausalGraph:
             self.logger.error("Error: Please provide graph (as string or text file) in dot or gml format.")
             self.logger.error("Error: Incorrect graph format")
             raise ValueError
-
+        if missing_nodes_as_confounders:
+            self._graph = self.add_missing_nodes_as_common_causes(observed_node_names)
         self._graph = self.add_node_attributes(observed_node_names)
         self._graph = self.add_unobserved_common_cause(observed_node_names)
 
@@ -115,6 +117,15 @@ class CausalGraph:
                 self._graph.nodes[node_name]["observed"] = "no"
         return self._graph
 
+    def add_missing_nodes_as_common_causes(self, observed_node_names):
+        # Adding unobserved confounders
+        for node_name in observed_node_names:
+            if node_name not in self._graph:
+                self._graph.add_node(node_name, observed="yes")
+                for treatment_outcome_node in self.treatment_name + self.outcome_name:
+                    self._graph.add_edge(node_name, treatment_outcome_node)
+        return self._graph
+
     def add_unobserved_common_cause(self, observed_node_names):
         # Adding unobserved confounders
         current_common_causes = self.get_common_causes(self.treatment_name,
@@ -165,6 +176,9 @@ class CausalGraph:
         return causes
 
     def get_common_causes(self, nodes1, nodes2):
+        """
+        Assume that nodes1 causes nodes2 (e.g., nodes1 are the treatments and nodes2 are the outcomes)
+        """
         nodes1 = parse_state(nodes1)
         nodes2 = parse_state(nodes2)
         causes_1 = set()
@@ -172,7 +186,12 @@ class CausalGraph:
         for node in nodes1:
             causes_1 = causes_1.union(self.get_ancestors(node))
         for node in nodes2:
-            causes_2 = causes_2.union(self.get_ancestors(node))
+            # Cannot simply compute ancestors, since that will also include nodes1 and its parents (e.g. instruments)
+            parents_2 = self.get_parents(node)
+            for parent in parents_2:
+                if parent not in nodes1:
+                    causes_2 = causes_2.union(set([parent,]))
+                    causes_2 = causes_2.union(self.get_ancestors(parent))
         return list(causes_1.intersection(causes_2))
 
     def get_parents(self, node_name):
