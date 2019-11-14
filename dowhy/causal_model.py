@@ -128,6 +128,7 @@ class CausalModel:
 
     def estimate_effect(self, identified_estimand, method_name=None,
                         test_significance=None, evaluate_effect_strength=True,
+                        target_units="ate", heterogeneous_effect_vars=None,
                         method_params=None):
         """Estimate the identified causal effect.
 
@@ -162,6 +163,8 @@ class CausalModel:
                 self._treatment, self._outcome,
                 test_significance=test_significance,
                 evaluate_effect_strength=evaluate_effect_strength,
+                target_units = target_units,
+                heterogeneous_effect_vars = heterogeneous_effect_vars,
                 params=method_params
             )
             estimate = causal_estimator.estimate_effect()

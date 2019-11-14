@@ -10,7 +10,9 @@ class CausalEstimator:
     """
 
     def __init__(self, data, identified_estimand, treatment, outcome,
-                 test_significance, evaluate_effect_strength=True, params=None):
+                 test_significance, evaluate_effect_strength=True,
+                 target_units=None, heterogeneous_effect_vars=None,
+                 params=None):
         """Initializes an estimator with data and names of relevant variables.
 
         More description.
@@ -20,6 +22,10 @@ class CausalEstimator:
             representing the target identified estimand to estimate.
         :param treatment: name of the treatment variable
         :param outcome: name of the outcome variable
+        :param test_significance: whether to test significance
+        :param evaluate_effect_strength: whether to evaluate the strength of effect
+        :param target_units: ATE, ATT or another subset of units (not implemented)
+        :param heterogeneous_effect_vars: variables on which to compute separate effects, or return a heterogeneous effect function (not implemented)
         :param params: (optional) additional method parameters
         :returns: an instance of the estimator class.
 
@@ -31,6 +37,8 @@ class CausalEstimator:
         self._outcome_name = outcome[0]
         self._significance_test = test_significance
         self._effect_strength_eval = evaluate_effect_strength
+        self._target_units = target_units
+        self.heterogeneous_effect_vars = heterogeneous_effect_vars
         self._estimate = None
         if params is not None:
             for key, value in params.items():
