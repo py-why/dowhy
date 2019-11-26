@@ -54,10 +54,27 @@ class EconmlCateEstimator(CausalEstimator):
             W = np.ndarray(shape=(n_samples,1), buffer=np.array(self._observed_common_causes))
 
         # Calling the econml estimator's fit method
-        est = self.estimator.fit(Y,T, X, W, **self.method_params["fit_params"])
-        estimate = CausalEstimate(estimate=est,
+        self.estimator.fit(Y,T, X, W, **self.method_params["fit_params"])
+
+        X_test = X
+        n_target_units = n_samples
+        if X is not None:
+            X_test = X[self._target_units]
+            n_target_units = X_test.shape[0]
+            print(n_target_units)
+        T0_test = np.zeros((n_target_units, 1)) # single-dimensional treatment
+        T1_test = np.ones((n_target_units, 1))
+        est = self.estimator.effect(X_test, T0 = T0_test, T1 = T1_test)
+        ate = np.mean(est)
+
+        est_interval = None
+        if self._confidence_intervals:
+            est_interval = self.estimator.effect_interval(X_test, T0 = T0_test, T1 = T1_test)
+        estimate = CausalEstimate(estimate=ate,
                                   target_estimand=self._target_estimand,
-                                  realized_estimand_expr=self.symbolic_estimator)
+                                  realized_estimand_expr=self.symbolic_estimator,
+                                  cate_estimates=est,
+                                  effect_intervals=est_interval)
         return estimate
 
 

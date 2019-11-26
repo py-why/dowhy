@@ -106,6 +106,7 @@ class CausalModel:
             self._common_causes = self._graph.get_common_causes(self._treatment, self._outcome)
             self._instruments = self._graph.get_instruments(self._treatment,
                                                             self._outcome)
+            self._effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
 
         self._other_variables = kwargs
         self.summary()
@@ -127,7 +128,8 @@ class CausalModel:
         return identified_estimand
 
     def estimate_effect(self, identified_estimand, method_name=None,
-                        test_significance=None, evaluate_effect_strength=True,
+                        test_significance=None, evaluate_effect_strength=False,
+                        confidence_intervals=False,
                         target_units="ate", effect_modifiers=None,
                         method_params=None):
         """Estimate the identified causal effect.
@@ -143,6 +145,9 @@ class CausalModel:
             and other method-dependent information
 
         """
+        if effect_modifiers is None:
+            effect_modifiers = self._effect_modifiers
+
         if method_name is None:
             #TODO add propensity score as default backdoor method, iv as default iv method, add an informational message to show which method has been selected.
             pass
@@ -170,6 +175,7 @@ class CausalModel:
                 self._treatment, self._outcome, #names of treatment and outcome
                 test_significance=test_significance,
                 evaluate_effect_strength=evaluate_effect_strength,
+                confidence_intervals = confidence_intervals,
                 target_units = target_units,
                 effect_modifiers = effect_modifiers,
                 params=method_params
