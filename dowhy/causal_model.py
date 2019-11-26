@@ -128,7 +128,7 @@ class CausalModel:
 
     def estimate_effect(self, identified_estimand, method_name=None,
                         test_significance=None, evaluate_effect_strength=True,
-                        target_units="ate", heterogeneous_effect_vars=None,
+                        target_units="ate", effect_modifiers=None,
                         method_params=None):
         """Estimate the identified causal effect.
 
@@ -144,13 +144,20 @@ class CausalModel:
 
         """
         if method_name is None:
+            #TODO add propensity score as default backdoor method, iv as default iv method, add an informational message to show which method has been selected.
             pass
         else:
-            str_arr = method_name.split(".")
+            str_arr = method_name.split(".", maxsplit=1)
             identifier_name = str_arr[0]
             estimator_name = str_arr[1]
             identified_estimand.set_identifier_method(identifier_name)
-            causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
+            if estimator_name.startswith("econml"):
+                causal_estimator_class =causal_estimators.get_class_object("econml_cate_estimator")
+                if method_params is None:
+                    method_params = {}
+                method_params["_econml_methodname"] = estimator_name
+            else:
+                causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
 
         # Check if estimator's target estimand is identified
         if identified_estimand.estimands[identifier_name] is None:
@@ -160,11 +167,11 @@ class CausalModel:
             causal_estimator = causal_estimator_class(
                 self._data,
                 identified_estimand,
-                self._treatment, self._outcome,
+                self._treatment, self._outcome, #names of treatment and outcome
                 test_significance=test_significance,
                 evaluate_effect_strength=evaluate_effect_strength,
                 target_units = target_units,
-                heterogeneous_effect_vars = heterogeneous_effect_vars,
+                effect_modifiers = effect_modifiers,
                 params=method_params
             )
             estimate = causal_estimator.estimate_effect()
@@ -191,7 +198,8 @@ class CausalModel:
         if method_name is None:
             pass
         else:
-            str_arr = method_name.split(".")
+            str_arr = method_name.split(".", maxsplit=1)
+            print(str_arr)
             identifier_name = str_arr[0]
             estimator_name = str_arr[1]
             identified_estimand.set_identifier_method(identifier_name)
