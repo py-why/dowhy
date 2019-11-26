@@ -181,9 +181,16 @@ class CausalModel:
                 params=method_params
             )
             estimate = causal_estimator.estimate_effect()
+            # Store parameters inside estimate object for refutation methods
             estimate.add_params(
                 estimand_type=identified_estimand.estimand_type,
-                estimator_class=causal_estimator_class
+                estimator_class=causal_estimator_class,
+                test_significance=test_significance,
+                evaluate_effect_strength=evaluate_effect_strength,
+                confidence_intervals=confidence_intervals,
+                target_units=target_units,
+                effect_modifiers=effect_modifiers,
+                method_params=method_params
             )
         return estimate
 
