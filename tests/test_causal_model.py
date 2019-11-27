@@ -34,5 +34,5 @@ class TestCausalModel(object):
             test_significance=None,
             missing_nodes_as_confounders=True
         )
-        assert all(node_name in model._common_causes for node_name in ["X3", "X4"])
+        assert all(node_name in model._common_causes for node_name in ["X1", "X2"])
 
