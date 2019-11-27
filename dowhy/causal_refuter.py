@@ -16,6 +16,22 @@ class CausalRefuter:
             np.random.seed(self._random_seed)
         self.logger = logging.getLogger(__name__)
 
+    @staticmethod
+    def get_estimator_object(new_data, identified_estimand, estimate):
+        estimator_class = estimate.params['estimator_class']
+        new_estimator = estimator_class(
+                new_data,
+                identified_estimand,
+                identified_estimand.treatment_variable, identified_estimand.outcome_variable, #names of treatment and outcome
+                test_significance=None,
+                evaluate_effect_strength=False,
+                confidence_intervals = estimate.params["confidence_intervals"],
+                target_units = estimate.params["target_units"],
+                effect_modifiers = estimate.params["effect_modifiers"],
+                params = estimate.params["method_params"]
+                )
+        return new_estimator
+
     def refute_estimate(self):
         raise NotImplementedError
 

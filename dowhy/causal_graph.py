@@ -201,7 +201,7 @@ class CausalGraph:
         modifiers = modifiers.difference(nodes1)
         for node in nodes1:
             modifiers = modifiers.difference(self.get_ancestors(node))
-        return modifiers
+        return list(modifiers)
 
     def get_parents(self, node_name):
         return set(self._graph.predecessors(node_name))

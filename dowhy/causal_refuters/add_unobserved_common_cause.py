@@ -27,13 +27,7 @@ class AddUnobservedCommonCause(CausalRefuter):
         new_data = copy.deepcopy(self._data)
         new_data = self.include_confounders_effect(new_data)
 
-        estimator_class = self._estimate.params['estimator_class']
-        new_estimator = estimator_class(
-            new_data,
-            self._target_estimand,
-            self._treatment_name, self._outcome_name,
-            test_significance=None
-        )
+        new_estimator = self.get_estimator_object(new_data, self._target_estimand, self._estimate)
         new_effect = new_estimator.estimate_effect()
         refute = CausalRefutation(self._estimate.value, new_effect.value,
                                   refutation_type="Refute: Add an Unobserved Common Cause")

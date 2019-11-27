@@ -25,12 +25,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         identified_estimand = copy.deepcopy(self._target_estimand)
         identified_estimand.treatment_variable = ["placebo"]
 
-        new_estimator = estimator_class(
-            new_data,
-            identified_estimand,
-            identified_estimand.treatment_variable, self._outcome_name,
-            test_significance=None
-        )
+        new_estimator = self.get_estimator_object(new_data, identified_estimand, self._estimate)
         new_effect = new_estimator.estimate_effect()
         refute = CausalRefutation(self._estimate.value, new_effect.value,
                                   refutation_type="Refute: Use a Placebo Treatment")

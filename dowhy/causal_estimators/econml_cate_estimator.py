@@ -24,7 +24,6 @@ class EconmlCateEstimator(CausalEstimator):
             raise Exception(error_msg)
 
         estimator_class = self._get_econml_class_object(self._econml_methodname+ "Estimator")
-        del self.method_params["_econml_methodname"] # removing the name of the econml method, before passing to econml
         self.estimator = estimator_class(**self.method_params["init_params"])
         self.logger.info("INFO: Using EconML Estimator")
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
@@ -59,9 +58,10 @@ class EconmlCateEstimator(CausalEstimator):
         X_test = X
         n_target_units = n_samples
         if X is not None:
-            X_test = X[self._target_units]
+            filtered_rows = self._data.where(self._target_units)
+            boolean_criterion = np.array(filtered_rows.notnull().iloc[:,0])
+            X_test = X[boolean_criterion]
             n_target_units = X_test.shape[0]
-            print(n_target_units)
         T0_test = np.zeros((n_target_units, 1)) # single-dimensional treatment
         T1_test = np.ones((n_target_units, 1))
         est = self.estimator.effect(X_test, T0 = T0_test, T1 = T1_test)
