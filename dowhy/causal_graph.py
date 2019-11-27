@@ -194,6 +194,15 @@ class CausalGraph:
                     causes_2 = causes_2.union(self.get_ancestors(parent))
         return list(causes_1.intersection(causes_2))
 
+    def get_effect_modifiers(self, nodes1, nodes2):
+        modifiers = set()
+        for node in nodes2:
+            modifiers = modifiers.union(self.get_ancestors(node))
+        modifiers = modifiers.difference(nodes1)
+        for node in nodes1:
+            modifiers = modifiers.difference(self.get_ancestors(node))
+        return list(modifiers)
+
     def get_parents(self, node_name):
         return set(self._graph.predecessors(node_name))
 

@@ -10,8 +10,9 @@ class CausalEstimator:
     """
 
     def __init__(self, data, identified_estimand, treatment, outcome,
-                 test_significance, evaluate_effect_strength=True,
-                 target_units=None, heterogeneous_effect_vars=None,
+                 test_significance, evaluate_effect_strength=False,
+                 confidence_intervals = False,
+                 target_units=None, effect_modifiers=None,
                  params=None):
         """Initializes an estimator with data and names of relevant variables.
 
@@ -24,8 +25,8 @@ class CausalEstimator:
         :param outcome: name of the outcome variable
         :param test_significance: whether to test significance
         :param evaluate_effect_strength: whether to evaluate the strength of effect
-        :param target_units: ATE, ATT or another subset of units (not implemented)
-        :param heterogeneous_effect_vars: variables on which to compute separate effects, or return a heterogeneous effect function (not implemented)
+        :param target_units: ATE, ATT or another subset of units (preview feature)
+        :param effect_modifiers: variables on which to compute separate effects, or return a heterogeneous effect function (not implemented)
         :param params: (optional) additional method parameters
         :returns: an instance of the estimator class.
 
@@ -38,8 +39,11 @@ class CausalEstimator:
         self._significance_test = test_significance
         self._effect_strength_eval = evaluate_effect_strength
         self._target_units = target_units
-        self.heterogeneous_effect_vars = heterogeneous_effect_vars
+        self._effect_modifier_names = effect_modifiers
+        self._confidence_intervals = confidence_intervals
         self._estimate = None
+        self._effect_modifiers = None
+        self.method_params = params
         if params is not None:
             for key, value in params.items():
                 setattr(self, key, value)
@@ -60,9 +64,15 @@ class CausalEstimator:
         """
         self._treatment = self._data[self._treatment_name]
         self._outcome = self._data[self._outcome_name]
+
+        # Now saving the effect modifiers
+        if self._effect_modifier_names:
+            self._effect_modifiers = self._data[self._effect_modifier_names]
+            self.logger.debug("Effect modifiers: " +
+                          ",".join(self._effect_modifier_names))
+
         est = self._estimate_effect()
         self._estimate = est
-
 
         if self._significance_test:
             signif_dict = self.test_significance(est)
@@ -74,9 +84,10 @@ class CausalEstimator:
         return est
 
     def estimate_effect_naive(self):
-        df_treatment = self._data.loc[self._data[self._treatment_name] == 1]
+        #TODO Only works for binary treatment
+        df_withtreatment = self._data.loc[self._data[self._treatment_name] == 1]
         df_notreatment = self._data.loc[self._data[self._treatment_name]== 0]
-        est = np.mean(df_treatment[self._outcome_name]) - np.mean(df_notreatment[self._outcome_name])
+        est = np.mean(df_withtreatment[self._outcome_name]) - np.mean(df_notreatment[self._outcome_name])
         return CausalEstimate(est, None, None)
 
     def _do(self, x):
@@ -153,6 +164,7 @@ class CausalEstimator:
             raise NotImplementedError("This method is not supported for evaluating effect strength")
         if method == "fraction-effect":
             naive_obs_estimate = self.estimate_effect_naive()
+            print(estimate.value, naive_obs_estimate.value)
             fraction_effect_explained = estimate.value/naive_obs_estimate.value
             return fraction_effect_explained
         #elif method == "r-squared":
@@ -177,6 +189,10 @@ class CausalEstimate:
         self.target_estimand = target_estimand
         self.realized_estimand_expr = realized_estimand_expr
         self.params = kwargs
+        if self.params is not None:
+            for key, value in self.params.items():
+                setattr(self, key, value)
+
         self.significance_test = None
         self.effect_strength = None
 
