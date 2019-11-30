@@ -4,6 +4,14 @@ dowhy.causal\_estimators package
 Submodules
 ----------
 
+dowhy.causal\_estimators.econml\_cate\_estimator module
+-------------------------------------------------------
+
+.. automodule:: dowhy.causal_estimators.econml_cate_estimator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.causal\_estimators.instrumental\_variable\_estimator module
 -----------------------------------------------------------------
 
