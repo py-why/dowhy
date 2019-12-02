@@ -4,6 +4,7 @@ import pandas as pd
 from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_estimator import CausalEstimator
 
+import statsmodels.api as sm
 
 class LinearRegressionEstimator(CausalEstimator):
     """Compute effect of treatment using linear regression.
@@ -30,21 +31,24 @@ class LinearRegressionEstimator(CausalEstimator):
         self._linear_model = None
 
     def _estimate_effect(self):
-        treatment_2d = self._treatment.values.reshape(len(self._treatment), -1)
-        if len(self._observed_common_causes_names)>0:
-            features = np.concatenate((treatment_2d, self._observed_common_causes),
-                                  axis=1)
-        else:
-            features = treatment_2d
-        self._linear_model = linear_model.LinearRegression()
-        self._linear_model.fit(features, self._outcome)
-        coefficients = self._linear_model.coef_
-        self.logger.debug("Coefficients of the fitted linear model: " +
-                          ",".join(map(str, coefficients)))
-        estimate = CausalEstimate(estimate=coefficients[0],
+        if self._effect_modifiers is None:
+            treatment_2d = self._treatment.values.reshape(len(self._treatment), -1)
+            if len(self._observed_common_causes_names)>0:
+                features = np.concatenate((treatment_2d, self._observed_common_causes),
+                                      axis=1)
+            else:
+                features = treatment_2d
+            self._linear_model = linear_model.LinearRegression()
+            self._linear_model.fit(features, self._outcome)
+            coefficients = self._linear_model.coef_
+            self.logger.debug("Coefficients of the fitted linear model: " +
+                              ",".join(map(str, coefficients)))
+            estimate = CausalEstimate(estimate=coefficients[0],
                                   target_estimand=self._target_estimand,
                                   realized_estimand_expr=self.symbolic_estimator,
                                   intercept=self._linear_model.intercept_)
+        else:
+            pass #TODO
         return estimate
 
     def construct_symbolic_estimator(self, estimand):

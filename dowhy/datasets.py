@@ -51,6 +51,7 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         t += W @ c1  # + np.random.normal(0, 0.01)
     if num_instruments > 0:
         t += Z @ cz
+    # Converting treatment to binary if required
     if treatment_is_binary:
         t = np.vectorize(stochastically_convert_to_binary)(t)
     y =  beta*t  # + np.random.normal(0,0.01)
@@ -76,6 +77,11 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
     other_variables = None
     col_names = effect_modifiers + instruments + common_causes + [treatment, outcome]
     data = pd.DataFrame(data, columns=col_names)
+    # Specifying the correct dtypes
+    if treatment_is_binary:
+        data = data.astype({treatment:'bool'}, copy=False)
+
+    # Now specifying the corresponding graph strings
     dot_graph = ('digraph {{ {0} ->{1};'
                  ' U[label="Unobserved Confounders"];'
                  ' U->{0}; U->{1};'

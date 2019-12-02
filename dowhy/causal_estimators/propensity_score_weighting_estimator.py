@@ -15,6 +15,11 @@ class PropensityScoreWeightingEstimator(CausalEstimator):
 
     def __init__(self, *args, min_ps_score=0.05, max_ps_score=0.95, **kwargs):
         super().__init__(*args, **kwargs)
+        # Checking if treatment is binary
+        if not pd.api.types.is_bool_dtype(self._data[self._treatment_name]):
+            error_msg = "Propensity Score Weighting method is only applicable for binary treatments. Try explictly setting dtype=bool for the treatment column."
+            raise Exception(error_msg)
+
         self.logger.debug("Back-door variables used:" +
                           ",".join(self._target_estimand.backdoor_variables))
         self._observed_common_causes_names = self._target_estimand.backdoor_variables

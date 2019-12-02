@@ -10,6 +10,12 @@ class PropensityScoreMatchingEstimator(CausalEstimator):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Checking if treatment is binary
+        if not pd.api.types.is_bool_dtype(self._data[self._treatment_name]):
+            error_msg = "Propensity Score Matching method is only applicable for binary treatments. Try explictly setting dtype=bool for the treatment column."
+            raise Exception(error_msg)
+
         self.logger.debug("Back-door variables used:" +
                           ",".join(self._target_estimand.backdoor_variables))
         self._observed_common_causes_names = self._target_estimand.backdoor_variables
@@ -21,6 +27,8 @@ class PropensityScoreMatchingEstimator(CausalEstimator):
             error_msg ="No common causes/confounders present. Propensity score based methods are not applicable"
             self.logger.error(error_msg)
             raise Exception(error_msg)
+
+
 
         self.logger.info("INFO: Using Propensity Score Matching Estimator")
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)

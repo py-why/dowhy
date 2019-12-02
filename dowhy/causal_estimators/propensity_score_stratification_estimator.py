@@ -14,6 +14,11 @@ class PropensityScoreStratificationEstimator(CausalEstimator):
 
     def __init__(self, *args, num_strata=50, clipping_threshold=10, **kwargs):
         super().__init__(*args,  **kwargs)
+        # Checking if treatment is binary
+        if not pd.api.types.is_bool_dtype(self._data[self._treatment_name]):
+            error_msg = "Propensity Score Stratification method is only applicable for binary treatments. Try explictly setting dtype=bool for the treatment column."
+            raise Exception(error_msg)
+
         self.logger.debug("Back-door variables used:" +
                           ",".join(self._target_estimand.backdoor_variables))
         self._observed_common_causes_names = self._target_estimand.backdoor_variables
