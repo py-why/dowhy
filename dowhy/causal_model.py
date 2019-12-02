@@ -25,7 +25,9 @@ class CausalModel:
     """
 
     def __init__(self, data, treatment, outcome, graph=None,
-                 common_causes=None, instruments=None, estimand_type="ate",
+                 common_causes=None, instruments=None,
+                 effect_modifiers=None,
+                 estimand_type="ate",
                  proceed_when_unidentifiable=False,
                  missing_nodes_as_confounders=False,
                  **kwargs):
@@ -46,6 +48,7 @@ class CausalModel:
         :param common_causes: names of common causes of treatment and _outcome
         :param instruments: names of instrumental variables for the effect of
         treatment on outcome
+        :param effect_modifiers: names of variables that can modify the treatment effect (useful for heterogeneous treatment effect estimation)
         :returns: an instance of CausalModel class
 
         """
@@ -67,12 +70,14 @@ class CausalModel:
             self.logger.warning("Causal Graph not provided. DoWhy will construct a graph based on data inputs.")
             self._common_causes = parse_state(common_causes)
             self._instruments = parse_state(instruments)
+            self._effect_modifiers = parse_state(effect_modifiers)
             if common_causes is not None and instruments is not None:
                 self._graph = CausalGraph(
                     self._treatment,
                     self._outcome,
                     common_cause_names=self._common_causes,
                     instrument_names=self._instruments,
+                    effect_modifier_names = self._effect_modifiers,
                     observed_node_names=self._data.columns.tolist()
                 )
             elif common_causes is not None:
@@ -80,6 +85,7 @@ class CausalModel:
                     self._treatment,
                     self._outcome,
                     common_cause_names=self._common_causes,
+                    effect_modifier_names = self._effect_modifiers,
                     observed_node_names=self._data.columns.tolist()
                 )
             elif instruments is not None:
@@ -87,6 +93,7 @@ class CausalModel:
                     self._treatment,
                     self._outcome,
                     instrument_names=self._instruments,
+                    effect_modifier_names = self._effect_modifiers,
                     observed_node_names=self._data.columns.tolist()
                 )
             else:

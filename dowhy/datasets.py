@@ -105,6 +105,7 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         "outcome_name": outcome,
         "common_causes_names": common_causes,
         "instrument_names": instruments,
+        "effect_modifier_names": effect_modifiers,
         "dot_graph": dot_graph,
         "gml_graph": gml_graph,
         "ate": ate
