@@ -50,6 +50,17 @@ class CausalEstimator:
 
         self.logger = logging.getLogger(__name__)
 
+        # Setting more values
+        if self._data is not None:
+            self._treatment = self._data[self._treatment_name]
+            self._outcome = self._data[self._outcome_name]
+
+        # Now saving the effect modifiers
+        if self._effect_modifier_names:
+            self._effect_modifiers = self._data[self._effect_modifier_names]
+            self.logger.debug("Effect modifiers: " +
+                          ",".join(self._effect_modifier_names))
+
     def _estimate_effect(self):
         raise NotImplementedError
 
@@ -62,14 +73,6 @@ class CausalEstimator:
         :returns: point estimate of causal effect
 
         """
-        self._treatment = self._data[self._treatment_name]
-        self._outcome = self._data[self._outcome_name]
-
-        # Now saving the effect modifiers
-        if self._effect_modifier_names:
-            self._effect_modifiers = self._data[self._effect_modifier_names]
-            self.logger.debug("Effect modifiers: " +
-                          ",".join(self._effect_modifier_names))
 
         est = self._estimate_effect()
         self._estimate = est
@@ -102,10 +105,7 @@ class CausalEstimator:
         :returns:
 
         """
-        self._treatment = self._data[self._treatment_name]
-        self._outcome = self._data[self._outcome_name]
         est = self._do(x)
-
         return est
 
     def construct_symbolic_estimator(self, estimand):

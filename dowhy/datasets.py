@@ -16,6 +16,7 @@ def stochastically_convert_to_binary(x):
 
 def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
                    num_effect_modifiers=0, treatment_is_binary=True):
+    W, X, Z, c1, c2, ce, cz = [None]*7
     beta = float(beta)
     if num_common_causes > 0:
         range_c1 = beta*0.5
@@ -46,7 +47,7 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         ce = np.random.uniform(0, range_ce, num_effect_modifiers)
     # TODO - test all our methods with random noise added to covariates (instead of the stochastic treatment assignment)
 
-    t = np.random.normal(0, 1)
+    t = np.random.normal(0, 1, num_samples)
     if num_common_causes > 0:
         t += W @ c1  # + np.random.normal(0, 0.01)
     if num_instruments > 0:
@@ -54,11 +55,15 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
     # Converting treatment to binary if required
     if treatment_is_binary:
         t = np.vectorize(stochastically_convert_to_binary)(t)
-    y =  beta*t  # + np.random.normal(0,0.01)
-    if num_common_causes > 0:
-        y += W @ c2
-    if num_effect_modifiers > 0:
-        y += X @ ce
+
+    def _compute_y(t, W, X, beta, c2, ce):
+        y =  beta*t  # + np.random.normal(0,0.01)
+        if num_common_causes > 0:
+            y += W @ c2
+        if num_effect_modifiers > 0:
+            y += (X @ ce) * t
+        return y
+    y = _compute_y(t, W, X, beta, c2, ce)
 
     data = np.column_stack((t, y))
     if num_common_causes > 0:
@@ -71,7 +76,7 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
     treatment = "v"
     outcome = "y"
     common_causes = [("W" + str(i)) for i in range(0, num_common_causes)]
-    ate = beta
+    ate = np.mean(_compute_y(np.ones(num_samples), W, X, beta, c2, ce) - _compute_y(np.zeros(num_samples), W, X, beta, c2, ce))
     instruments = [("Z" + str(i)) for i in range(0, num_instruments)]
     effect_modifiers =[("X" + str(i)) for i in range(0, num_effect_modifiers)]
     other_variables = None
@@ -117,7 +122,6 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         "ate": ate
     }
     return ret_dict
-
 
 def xy_dataset(num_samples, effect=True, sd_error=1):
     treatment = 'Treatment'

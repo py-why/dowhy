@@ -31,24 +31,15 @@ class LinearRegressionEstimator(CausalEstimator):
         self._linear_model = None
 
     def _estimate_effect(self):
-        if self._effect_modifiers is None:
-            treatment_2d = self._treatment.values.reshape(len(self._treatment), -1)
-            if len(self._observed_common_causes_names)>0:
-                features = np.concatenate((treatment_2d, self._observed_common_causes),
-                                      axis=1)
-            else:
-                features = treatment_2d
-            self._linear_model = linear_model.LinearRegression()
-            self._linear_model.fit(features, self._outcome)
-            coefficients = self._linear_model.coef_
-            self.logger.debug("Coefficients of the fitted linear model: " +
-                              ",".join(map(str, coefficients)))
-            estimate = CausalEstimate(estimate=coefficients[0],
-                                  target_estimand=self._target_estimand,
-                                  realized_estimand_expr=self.symbolic_estimator,
-                                  intercept=self._linear_model.intercept_)
-        else:
-            pass #TODO
+        features, self._linear_model = self._build_linear_model()
+        coefficients = self._linear_model.coef_
+        self.logger.debug("Coefficients of the fitted linear model: " +
+                          ",".join(map(str, coefficients)))
+        effect_estimate = self._do(1) - self._do(0)
+        estimate = CausalEstimate(estimate=effect_estimate,
+                              target_estimand=self._target_estimand,
+                              realized_estimand_expr=self.symbolic_estimator,
+                              intercept=self._linear_model.intercept_)
         return estimate
 
     def construct_symbolic_estimator(self, estimand):
@@ -57,19 +48,31 @@ class LinearRegressionEstimator(CausalEstimator):
         expr += "+".join(var_list)
         return expr
 
-    def _build_linear_model(self):
+    def _build_features(self):
         treatment_2d = self._treatment.values.reshape(len(self._treatment), -1)
-        features = np.concatenate((treatment_2d, self._observed_common_causes),
+        if len(self._observed_common_causes_names)>0:
+            features = np.concatenate((treatment_2d, self._observed_common_causes),
                                   axis=1)
+        else:
+            features = treatment_2d
+        if self._effect_modifier_names:
+            for i in range(treatment_2d.shape[1]):
+                curr_treatment = treatment_2d[:,i]
+                new_features = curr_treatment[:, np.newaxis] * self._effect_modifiers.to_numpy()
+                features = np.concatenate((features, new_features), axis=1)
+        return features
+
+    def _build_linear_model(self):
+        features = self._build_features()
         model = linear_model.LinearRegression()
         model.fit(features, self._outcome)
-        self._linear_model = model
+        return (features, model)
 
     def _do(self, x):
         if not self._linear_model:
-            self._build_linear_model()
+            _, self._linear_model = self._build_linear_model()
         interventional_treatment_2d = np.full(self._treatment.shape, x).reshape(len(self._treatment), -1)
-        features = np.concatenate((interventional_treatment_2d, self._observed_common_causes),
-                                  axis=1)
-        interventional_outcomes = self._linear_model.predict(features)
+        features = self._build_features()#np.concatenate((interventional_treatment_2d, self._observed_common_causes),axis=1)
+        new_features = np.concatenate((interventional_treatment_2d, features[:,1: ]), axis=1)
+        interventional_outcomes = self._linear_model.predict(new_features)
         return interventional_outcomes.mean()
