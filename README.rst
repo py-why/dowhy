@@ -324,6 +324,21 @@ DoWhy supports the following refutation methods.
 * Irrelevant Additional Confounder
 * Subset validation
 
+Citing this package
+-------------------
+If you find DoWhy useful for your research work, please cite us as follows:
+
+Amit Sharma, Emre Kiciman, et al. DoWhy: A Python package for causal inference. 2019. https://github.com/microsoft/dowhy
+
+Bibtex::
+
+  @misc{dowhy,
+  authors={Sharma, Amit and Kiciman, Emre and others},
+  title={Do{W}hy: {A Python package for causal inference}},
+  howpublished={https://github.com/microsoft/dowhy}
+  year={2019}
+  }
+
 
 Roadmap 
 -----------
