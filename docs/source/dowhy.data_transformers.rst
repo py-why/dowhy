@@ -1,13 +1,6 @@
 dowhy.data\_transformers package
 ================================
 
-Subpackages
------------
-
-.. toctree::
-
-   dowhy.data_transformers.dimensionality_reducers
-
 Submodules
 ----------
 
