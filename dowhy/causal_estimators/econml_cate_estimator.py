@@ -10,6 +10,7 @@ class EconmlCateEstimator(CausalEstimator):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.identifier_method = self._target_estimand.identifier_method
         self.logger.debug("Back-door variables used:" +
                           ",".join(self._target_estimand.backdoor_variables))
 
@@ -23,7 +24,15 @@ class EconmlCateEstimator(CausalEstimator):
             self.logger.error(error_msg)
             raise Exception(error_msg)
 
-        estimator_class = self._get_econml_class_object(self._econml_methodname+ "Estimator")
+        # Instrumental variables names, if present
+        self._instrumental_variable_names = self._target_estimand.instrumental_variables
+        if self._instrumental_variable_names:
+            self._instrumental_variables = self._data[self._instrumental_variable_names]
+            self._instrumental_variables = pd.get_dummies(self._instrumental_variables, drop_first=True)
+        else:
+            self._instrumental_variables = None
+
+        estimator_class = self._get_econml_class_object(self._econml_methodname)
         self.estimator = estimator_class(**self.method_params["init_params"])
         self.logger.info("INFO: Using EconML Estimator")
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
@@ -51,9 +60,14 @@ class EconmlCateEstimator(CausalEstimator):
             X = np.ndarray(shape=(n_samples,1), buffer=np.array(self._effect_modifiers))
         if self._observed_common_causes_names:
             W = np.ndarray(shape=(n_samples,1), buffer=np.array(self._observed_common_causes))
+        if self._instrumental_variable_names:
+            Z = np.ndarray(shape=(n_samples, 1), buffer=np.array(self._instrumental_variables))
 
         # Calling the econml estimator's fit method
-        self.estimator.fit(Y,T, X, W, **self.method_params["fit_params"])
+        if self.identifier_method == "backdoor":
+            self.estimator.fit(Y, T, X, W, **self.method_params["fit_params"])
+        else:
+            self.estimator.fit(Y, T, X, Z, **self.method_params["fit_params"])
 
         X_test = X
         n_target_units = n_samples
