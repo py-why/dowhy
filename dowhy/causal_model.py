@@ -135,6 +135,8 @@ class CausalModel:
         return identified_estimand
 
     def estimate_effect(self, identified_estimand, method_name=None,
+                        control_value = 0,
+                        treatment_value = 1,
                         test_significance=None, evaluate_effect_strength=False,
                         confidence_intervals=False,
                         target_units="ate", effect_modifiers=None,
@@ -180,6 +182,8 @@ class CausalModel:
                 self._data,
                 identified_estimand,
                 self._treatment, self._outcome, #names of treatment and outcome
+                control_value = control_value,
+                treatment_value = treatment_value,
                 test_significance=test_significance,
                 evaluate_effect_strength=evaluate_effect_strength,
                 confidence_intervals = confidence_intervals,

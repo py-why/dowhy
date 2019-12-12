@@ -76,8 +76,8 @@ class EconmlCateEstimator(CausalEstimator):
             boolean_criterion = np.array(filtered_rows.notnull().iloc[:,0])
             X_test = X[boolean_criterion]
             n_target_units = X_test.shape[0]
-        T0_test = np.zeros((n_target_units, 1)) # single-dimensional treatment
-        T1_test = np.ones((n_target_units, 1))
+        T0_test = np.repeat([[self._control_value]], n_target_units, axis=0)
+        T1_test = np.repeat([[self._treatment_value]], n_target_units, axis=0)
         est = self.estimator.effect(X_test, T0 = T0_test, T1 = T1_test)
         ate = np.mean(est)
 

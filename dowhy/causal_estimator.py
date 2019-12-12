@@ -10,7 +10,8 @@ class CausalEstimator:
     """
 
     def __init__(self, data, identified_estimand, treatment, outcome,
-                 test_significance, evaluate_effect_strength=False,
+                 control_value=0, treatment_value=1,
+                 test_significance=False, evaluate_effect_strength=False,
                  confidence_intervals = False,
                  target_units=None, effect_modifiers=None,
                  params=None):
@@ -36,6 +37,8 @@ class CausalEstimator:
         # Currently estimation methods only support univariate treatment and outcome
         self._treatment_name = treatment[0]
         self._outcome_name = outcome[0]
+        self._control_value = control_value
+        self._treatment_value = treatment_value
         self._significance_test = test_significance
         self._effect_strength_eval = evaluate_effect_strength
         self._target_units = target_units

@@ -35,7 +35,7 @@ class LinearRegressionEstimator(CausalEstimator):
         coefficients = self._linear_model.coef_
         self.logger.debug("Coefficients of the fitted linear model: " +
                           ",".join(map(str, coefficients)))
-        effect_estimate = self._do(1) - self._do(0)
+        effect_estimate = self._do(self._treatment_value) - self._do(self._control_value)
         estimate = CausalEstimate(estimate=effect_estimate,
                               target_estimand=self._target_estimand,
                               realized_estimand_expr=self.symbolic_estimator,
