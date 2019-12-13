@@ -14,8 +14,12 @@ class PropensityScoreStratificationEstimator(CausalEstimator):
 
     def __init__(self, *args, num_strata=50, clipping_threshold=10, **kwargs):
         super().__init__(*args,  **kwargs)
+        # Checking if treatment is one-dimensional
+        if len(self._treatment_name) > 1:
+            error_msg = self.__class__ + "Cannot handle more than one treatment variable."
+            raise Exception(error_msg)
         # Checking if treatment is binary
-        if not pd.api.types.is_bool_dtype(self._data[self._treatment_name]):
+        if not pd.api.types.is_bool_dtype(self._data[self._treatment_name[0]]):
             error_msg = "Propensity Score Stratification method is only applicable for binary treatments. Try explictly setting dtype=bool for the treatment column."
             raise Exception(error_msg)
 
@@ -55,26 +59,26 @@ class PropensityScoreStratificationEstimator(CausalEstimator):
         # print("before clipping, here is the distribution of treatment and control per strata")
         #print(self._data.groupby(['strata',self._treatment_name])[self._outcome_name].count())
 
-        self._data['dbar'] = 1 - self._data[self._treatment_name]
-        self._data['d_y'] = self._data[self._treatment_name] * self._data[self._outcome_name]
+        self._data['dbar'] = 1 - self._data[self._treatment_name[0]]
+        self._data['d_y'] = self._data[self._treatment_name[0]] * self._data[self._outcome_name]
         self._data['dbar_y'] = self._data['dbar'] * self._data[self._outcome_name]
         stratified = self._data.groupby('strata')
         clipped = stratified.filter(
-            lambda strata: min(strata.loc[strata[self._treatment_name] == 1].shape[0],
-                               strata.loc[strata[self._treatment_name] == 0].shape[0]) > self.clipping_threshold
+            lambda strata: min(strata.loc[strata[self._treatment_name[0]] == 1].shape[0],
+                               strata.loc[strata[self._treatment_name[0]] == 0].shape[0]) > self.clipping_threshold
         )
         # print("after clipping at threshold, now we have:" )
         #print(clipped.groupby(['strata',self._treatment_name])[self._outcome_name].count())
 
         # sum weighted outcomes over all strata  (weight by treated population)
         weighted_outcomes = clipped.groupby('strata').agg({
-            self._treatment_name: ['sum'],
+            self._treatment_name[0]: ['sum'],
             'dbar': ['sum'],
             'd_y': ['sum'],
             'dbar_y': ['sum']
         })
         weighted_outcomes.columns = ["_".join(x) for x in weighted_outcomes.columns.ravel()]
-        treatment_sum_name = self._treatment_name + "_sum"
+        treatment_sum_name = self._treatment_name[0] + "_sum"
 
         weighted_outcomes['d_y_mean'] = weighted_outcomes['d_y_sum'] / weighted_outcomes[treatment_sum_name]
         weighted_outcomes['dbar_y_mean'] = weighted_outcomes['dbar_y_sum'] / weighted_outcomes['dbar_sum']

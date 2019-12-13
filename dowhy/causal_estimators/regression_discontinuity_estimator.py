@@ -25,7 +25,7 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
         lower_limit = self.rd_threshold_value - self.rd_bandwidth
         rows_filter = np.s_[(self.rd_variable >= lower_limit) & (self.rd_variable <= upper_limit)]
         local_rd_variable = self.rd_variable[rows_filter]
-        local_treatment_variable = self._treatment[rows_filter]
+        local_treatment_variable = self._treatment[self._treatment_name[0]][rows_filter] # indexing by treatment name again since this method assumes a single-dimensional treatment
         local_outcome_variable = self._outcome[rows_filter]
         local_df = pd.DataFrame(data={
             'local_rd_variable': local_rd_variable,

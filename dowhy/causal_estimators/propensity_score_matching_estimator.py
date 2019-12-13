@@ -10,9 +10,12 @@ class PropensityScoreMatchingEstimator(CausalEstimator):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
+        # Checking if treatment is one-dimensional
+        if len(self._treatment_name) > 1:
+            error_msg = self.__class__ + "Cannot handle more than one treatment variable."
+            raise Exception(error_msg)
         # Checking if treatment is binary
-        if not pd.api.types.is_bool_dtype(self._data[self._treatment_name]):
+        if not pd.api.types.is_bool_dtype(self._data[self._treatment_name[0]]):
             error_msg = "Propensity Score Matching method is only applicable for binary treatments. Try explictly setting dtype=bool for the treatment column."
             raise Exception(error_msg)
 
@@ -36,12 +39,12 @@ class PropensityScoreMatchingEstimator(CausalEstimator):
 
     def _estimate_effect(self):
         propensity_score_model = linear_model.LogisticRegression(solver="lbfgs")
-        propensity_score_model.fit(self._observed_common_causes, self._treatment)
+        propensity_score_model.fit(self._observed_common_causes, self._treatment.to_numpy())
         self._data['propensity_score'] = propensity_score_model.predict_proba(self._observed_common_causes)[:,1]
 
         # this assumes a binary treatment regime
-        treated = self._data.loc[self._data[self._treatment_name] == 1]
-        control = self._data.loc[self._data[self._treatment_name] == 0]
+        treated = self._data.loc[self._data[self._treatment_name[0]] == 1]
+        control = self._data.loc[self._data[self._treatment_name[0]] == 0]
 
         control_neighbors = (
             NearestNeighbors(n_neighbors=1, algorithm='ball_tree')

@@ -54,14 +54,14 @@ class EconmlCateEstimator(CausalEstimator):
         n_samples = self._treatment.shape[0]
         X = None  # Effect modifiers
         W = None  # common causes/ confounders
-        Y = np.ndarray(shape=(n_samples,1), buffer=np.array(self._outcome))
-        T = np.ndarray(shape=(n_samples,1), buffer=np.array(self._treatment))
+        Y = np.reshape(np.array(self._outcome),(n_samples, 1))
+        T = np.reshape(np.array(self._treatment), (n_samples, len(self._treatment_name)))
         if self._effect_modifier_names:
-            X = np.ndarray(shape=(n_samples,1), buffer=np.array(self._effect_modifiers))
+            X = np.reshape(np.array(self._effect_modifiers), (n_samples, len(self._effect_modifier_names)))
         if self._observed_common_causes_names:
-            W = np.ndarray(shape=(n_samples,1), buffer=np.array(self._observed_common_causes))
+            W = np.reshape(np.array(self._observed_common_causes), (n_samples,len(self._observed_common_causes_names)))
         if self._instrumental_variable_names:
-            Z = np.ndarray(shape=(n_samples, 1), buffer=np.array(self._instrumental_variables))
+            Z = np.reshape(np.array(self._instrumental_variables), (n_samples, len(self._instrumental_variable_names)))
 
         # Calling the econml estimator's fit method
         if self.identifier_method == "backdoor":
@@ -76,8 +76,14 @@ class EconmlCateEstimator(CausalEstimator):
             boolean_criterion = np.array(filtered_rows.notnull().iloc[:,0])
             X_test = X[boolean_criterion]
             n_target_units = X_test.shape[0]
-        T0_test = np.repeat([[self._control_value]], n_target_units, axis=0)
-        T1_test = np.repeat([[self._treatment_value]], n_target_units, axis=0)
+
+        # Changing shape to a list for a singleton value
+        if type(self._control_value) is not list:
+            self._control_value = [self._control_value]
+        if type(self._treatment_value) is not list:
+            self._treatment_value = [self._treatment_value]
+        T0_test = np.repeat([self._control_value], n_target_units, axis=0)
+        T1_test = np.repeat([self._treatment_value], n_target_units, axis=0)
         est = self.estimator.effect(X_test, T0 = T0_test, T1 = T1_test)
         ate = np.mean(est)
 
@@ -88,7 +94,8 @@ class EconmlCateEstimator(CausalEstimator):
                                   target_estimand=self._target_estimand,
                                   realized_estimand_expr=self.symbolic_estimator,
                                   cate_estimates=est,
-                                  effect_intervals=est_interval)
+                                  effect_intervals=est_interval,
+                                  _estimator_object = self.estimator)
         return estimate
 
 

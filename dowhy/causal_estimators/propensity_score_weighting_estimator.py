@@ -15,8 +15,12 @@ class PropensityScoreWeightingEstimator(CausalEstimator):
 
     def __init__(self, *args, min_ps_score=0.05, max_ps_score=0.95, **kwargs):
         super().__init__(*args, **kwargs)
+        # Checking if treatment is one-dimensional
+        if len(self._treatment_name) > 1:
+            error_msg = self.__class__ + "Cannot handle more than one treatment variable."
+            raise Exception(error_msg)
         # Checking if treatment is binary
-        if not pd.api.types.is_bool_dtype(self._data[self._treatment_name]):
+        if not pd.api.types.is_bool_dtype(self._data[self._treatment_name[0]]):
             error_msg = "Propensity Score Weighting method is only applicable for binary treatments. Try explictly setting dtype=bool for the treatment column."
             raise Exception(error_msg)
 
@@ -54,27 +58,27 @@ class PropensityScoreWeightingEstimator(CausalEstimator):
         # nips ==> ips / (sum of ips over all units)
         # icps ==> ps(y)/(1-ps(y)) / (sum of (ps(y)/(1-ps(y))) over all control units)
         # itps ==> ps(y)/(1-ps(y)) / (sum of (ps(y)/(1-ps(y))) over all treatment units)
-        ipst_sum = sum(self._data[self._treatment_name] / self._data['ps'])
-        ipsc_sum = sum((1 - self._data[self._treatment_name]) / (1-self._data['ps']))
-        num_units = len(self._data[self._treatment_name])
+        ipst_sum = sum(self._data[self._treatment_name[0]] / self._data['ps'])
+        ipsc_sum = sum((1 - self._data[self._treatment_name[0]]) / (1-self._data['ps']))
+        num_units = len(self._data[self._treatment_name[0]])
         # Vanilla IPS estimator
 
         self._data['ips_weight'] = (1/num_units) * (
-            self._data[self._treatment_name] / self._data['ps'] +
-            (1 - self._data[self._treatment_name]) / (1 - self._data['ps'])
+            self._data[self._treatment_name[0]] / self._data['ps'] +
+            (1 - self._data[self._treatment_name[0]]) / (1 - self._data['ps'])
         )
 
         # Also known as the Hajek estimator
         self._data['normalized_ips_weight'] = (
-            self._data[self._treatment_name] / self._data['ps'] / ipst_sum +
-            (1 - self._data[self._treatment_name]) / (1 - self._data['ps']) / ipsc_sum
+            self._data[self._treatment_name[0]] / self._data['ps'] / ipst_sum +
+            (1 - self._data[self._treatment_name[0]]) / (1 - self._data['ps']) / ipsc_sum
         )
 
         # Stabilized weights
-        p_treatment = sum(self._data[self._treatment_name])/num_units
+        p_treatment = sum(self._data[self._treatment_name[0]])/num_units
         self._data['stabilized_ips_weight'] = (1/num_units) * (
-            self._data[self._treatment_name] / self._data['ps'] * p_treatment +
-            (1 - self._data[self._treatment_name]) / (1 - self._data['ps']) * (1- p_treatment)
+            self._data[self._treatment_name[0]] / self._data['ps'] * p_treatment +
+            (1 - self._data[self._treatment_name[0]]) / (1 - self._data['ps']) * (1- p_treatment)
         )
 
         # Simple normalized estimator
@@ -82,20 +86,20 @@ class PropensityScoreWeightingEstimator(CausalEstimator):
         self._data['nips_weight'] = self._data['ips_weight'] / ips_sum
 
         self._data['ips2'] = self._data['ps'] / (1 - self._data['ps'])
-        treated_ips_sum = (self._data['ips2'] * self._data[self._treatment_name]).sum()
-        control_ips_sum = (self._data['ips2'] * (1 - self._data[self._treatment_name])).sum()
+        treated_ips_sum = (self._data['ips2'] * self._data[self._treatment_name[0]]).sum()
+        control_ips_sum = (self._data['ips2'] * (1 - self._data[self._treatment_name[0]])).sum()
 
         self._data['itps_weight'] = self._data['ips2'] / treated_ips_sum
         self._data['icps_weight'] = self._data['ips2'] / control_ips_sum
 
         self._data['d_y'] = (
             self._data[self.weighting_scheme] *
-            self._data[self._treatment_name] *
+            self._data[self._treatment_name[0]] *
             self._data[self._outcome_name]
         )
         self._data['dbar_y'] = (
             self._data[self.weighting_scheme] *
-            (1 - self._data[self._treatment_name]) *
+            (1 - self._data[self._treatment_name[0]]) *
             self._data[self._outcome_name]
         )
 

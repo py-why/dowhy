@@ -35,8 +35,8 @@ class CausalEstimator:
         self._data = data
         self._target_estimand = identified_estimand
         # Currently estimation methods only support univariate treatment and outcome
-        self._treatment_name = treatment[0]
-        self._outcome_name = outcome[0]
+        self._treatment_name = treatment
+        self._outcome_name = outcome[0] # assuming one-dimensional outcome
         self._control_value = control_value
         self._treatment_value = treatment_value
         self._significance_test = test_significance
@@ -183,7 +183,7 @@ class CausalEstimator:
             return None
 
 class CausalEstimate:
-    """TODO.
+    """Class for the estimate object that every causal estimator returns
 
     """
 
