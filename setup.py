@@ -48,5 +48,6 @@ setup(
     packages=find_packages(exclude=['docs', 'tests']),
     python_requires='>=3.0',
     install_requires=install_requires,
-    include_package_data=True
+    include_package_data=True,
+    package_data={'dowhy':['VERSION']}
 )
