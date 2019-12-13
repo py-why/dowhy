@@ -20,7 +20,7 @@ with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
     install_requires = f.read().splitlines()
 
 # Loading version number
-with open(path.join(here, 'VERSION')) as version_file:
+with open(path.join(here, 'dowhy', 'VERSION')) as version_file:
     version = version_file.read().strip()
     print(version)
 
