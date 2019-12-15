@@ -72,9 +72,12 @@ class EconmlCateEstimator(CausalEstimator):
         X_test = X
         n_target_units = n_samples
         if X is not None:
-            filtered_rows = self._data.where(self._target_units)
-            boolean_criterion = np.array(filtered_rows.notnull().iloc[:,0])
-            X_test = X[boolean_criterion]
+            if type(self._target_units) is pd.DataFrame:
+                X_test = self._target_units
+            elif callable(self._target_units):
+                filtered_rows = self._data.where(self._target_units)
+                boolean_criterion = np.array(filtered_rows.notnull().iloc[:,0])
+                X_test = X[boolean_criterion]
             n_target_units = X_test.shape[0]
 
         # Changing shape to a list for a singleton value
@@ -98,6 +101,8 @@ class EconmlCateEstimator(CausalEstimator):
                                   _estimator_object = self.estimator)
         return estimate
 
+    def _do(self, x):
+        raise NotImplementedError
 
     def construct_symbolic_estimator(self, estimand):
         expr = "b: " + ", ".join(estimand.outcome_variable) + "~"
