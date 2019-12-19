@@ -17,7 +17,7 @@ class PropensityScoreWeightingEstimator(CausalEstimator):
         super().__init__(*args, **kwargs)
         # Checking if treatment is one-dimensional
         if len(self._treatment_name) > 1:
-            error_msg = self.__class__ + "Cannot handle more than one treatment variable."
+            error_msg = str(self.__class__) + " cannot handle more than one treatment variable."
             raise Exception(error_msg)
         # Checking if treatment is binary
         if not pd.api.types.is_bool_dtype(self._data[self._treatment_name[0]]):
