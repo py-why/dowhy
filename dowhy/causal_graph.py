@@ -180,6 +180,7 @@ class CausalGraph:
             self._graph.add_node('U', label=uc_label, observed="no")
             for node in self.treatment_name + self.outcome_name:
                 self._graph.add_edge('U', node)
+            self.logger.info('If this is observed data (not from a randomized experiment), there might always be missing confounders. Adding a node named "Unobserved Confounders" to reflect this.')
         return self._graph
 
     def get_unconfounded_observed_subgraph(self):

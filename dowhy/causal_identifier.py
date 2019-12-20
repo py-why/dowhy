@@ -27,14 +27,14 @@ class CausalIdentifier:
         if self._graph.all_observed(common_causes):
             self.logger.info("All common causes are observed. Causal effect can be identified.")
         else:
-            self.logger.warning("There are unobserved common causes. Causal effect cannot be identified.")
+            self.logger.warning("If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.")
             if self._proceed_when_unidentifiable:
                 self.logger.info(
                     "Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True."
                 )
             else:
                 cli.query_yes_no(
-                    "WARN: Do you want to continue by ignoring these unobserved confounders?",
+                    "WARN: Do you want to continue by ignoring any unobserved confounders? (use proceed_when_unidentifiable=True to disable this prompt)",
                     default=None
                 )
         observed_common_causes = self._graph.filter_unobserved_variables(common_causes)
