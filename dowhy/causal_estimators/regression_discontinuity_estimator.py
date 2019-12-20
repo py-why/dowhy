@@ -32,6 +32,7 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
             'local_treatment': local_treatment_variable,
             'local_outcome': local_outcome_variable
         })
+        print(local_df)
         iv_estimator = InstrumentalVariableEstimator(
             local_df,
             self._target_estimand,

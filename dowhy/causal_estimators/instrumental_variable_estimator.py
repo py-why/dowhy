@@ -28,7 +28,10 @@ class InstrumentalVariableEstimator(CausalEstimator):
             self.estimating_instrument_names = parse_state(self.iv_instrument_name)
 
         if not self.estimating_instrument_names:
-            raise Exception("No valid instruments found. IV Method not applicable")
+            raise ValueError("No valid instruments found. IV Method not applicable")
+        if len(self.estimating_instrument_names) < len(self._treatment_name):
+            # TODO move this to the identification step
+            raise ValueError("Number of instruments fewer than number of treatments. 2SLS requires at least as many instruments as treatments.")
         self._estimating_instruments = self._data[self.estimating_instrument_names]
         self.logger.info("INFO: Using Instrumental Variable Estimator")
 

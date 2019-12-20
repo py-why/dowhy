@@ -1,15 +1,15 @@
-from dowhy.causal_estimators.propensity_score_matching_estimator import PropensityScoreMatchingEstimator
 import pytest
 
+from dowhy.causal_estimators.regression_discontinuity_estimator import RegressionDiscontinuityEstimator
 from .base import TestEstimator
 
 
-class TestPropensityScoreMatchingEstimator(object):
+class TestRegressionDiscontinuityEstimator(object):
     @pytest.mark.parametrize(["error_tolerance", "Estimator",
         "num_common_causes", "num_instruments",
         "num_effect_modifiers", "num_treatments",
         "treatment_is_binary", "outcome_is_binary"],
-                             [(0.1, PropensityScoreMatchingEstimator, [1,2], [0], [0,], [1,], [True,], [False,]),])
+                             [(0.4, RegressionDiscontinuityEstimator, [0,1], [2,], [0,1], [1,], [True,], [False,]),])
     def test_average_treatment_effect(self, error_tolerance, Estimator,
             num_common_causes, num_instruments, num_effect_modifiers,
             num_treatments, treatment_is_binary, outcome_is_binary
@@ -21,5 +21,7 @@ class TestPropensityScoreMatchingEstimator(object):
                 num_effect_modifiers = num_effect_modifiers,
                 num_treatments=num_treatments,
                 treatment_is_binary=treatment_is_binary,
-                outcome_is_binary=outcome_is_binary
-                )
+                outcome_is_binary=outcome_is_binary,
+                method_params ={'rd_variable_name':'Z1',
+                    'rd_threshold_value':0.5,
+                    'rd_bandwidth': 0.2})
