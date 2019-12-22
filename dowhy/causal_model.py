@@ -49,6 +49,10 @@ class CausalModel:
         :param instruments: names of instrumental variables for the effect of
         treatment on outcome
         :param effect_modifiers: names of variables that can modify the treatment effect (useful for heterogeneous treatment effect estimation)
+        :param estimand_type: the type of estimand requested (can be "ate" for average treatment effect, "att" for average treatment effect on the treated", and "atc", for average treatment effect on the control population.
+        :proceed_when_unidentifiable: does the identification proceed by ignoring potential unobserved confounders. Binary flag.
+        :missing_nodes_as_confounders: Binary flag indicating whether variables in the dataframe that are not included in the causal graph, should be  automatically included as confounder nodes.
+
         :returns: an instance of CausalModel class
 
         """
@@ -121,7 +125,8 @@ class CausalModel:
     def identify_effect(self, proceed_when_unidentifiable=None):
         """Identify the causal effect to be estimated, using properties of the causal graph.
 
-        :returns: a probability expression for the causal effect if identified, else NULL
+        :param proceed_when_unidentifiable: Binary flag indicating whether identification should proceed in the presence of (potential) unobserved confounders.
+        :returns: a probability expression (estimand) for the causal effect if identified, else NULL
 
         """
         if proceed_when_unidentifiable is None:
@@ -143,14 +148,22 @@ class CausalModel:
                         method_params=None):
         """Estimate the identified causal effect.
 
-        If method_name is provided, uses the provided method. Else, finds a
-        suitable method to be used.
+        Currently requires an explicit method name to be specified.
 
         :param identified_estimand: a probability expression
             that represents the effect to be estimated. Output of
             CausalModel.identify_effect method
         :param method_name: (optional) name of the estimation method to be used.
-        :returns: an instance of the CausalEstimate class, containing the causal effect estimate
+        :param control_value: Value of the treatment in the control group, for effect estimation.  If treatment is multi-variate, this can be a list.
+        :param treatment_value: Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.
+        :param test_significance: Binary flag on whether to additionally do a statistical signficance test for the estimate.
+        :param evaluate_effect_strength: Binary flag on whether to estimate the relative strength of the treatment's effect. This measure can be used to compare different treatments for the same outcome (by running this method with different treatments sequentially).
+        :param confidence_intervals: Binary flag indicating whether confidence intervals should be computed.
+        :param target_units: The units for which the treatment effect should be estimated. This can be a string for common specifications of target units (namely, "ate", "att" and "atc"). It can also be a lambda function that can be used as an index for the data (pandas DataFrame). Alternatively, it can be a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
+        :param effect_modifiers: Effect modifiers can be (optionally) specified here too, since they do not affect identification. If None, the effect_modifiers from the CausalModel are used.
+        :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method.
+
+        :returns: An instance of the CausalEstimate class, containing the causal effect estimate
             and other method-dependent information
 
         """
@@ -206,15 +219,15 @@ class CausalModel:
         return estimate
 
     def do(self, x, identified_estimand, method_name=None,  method_params=None):
-        """Estimate the identified causal effect.
+        """Do operator for estimating values of the outcome after intervening on treatment.
 
-        If method_name is provided, uses the provided method. Else, finds a
-        suitable method to be used.
 
         :param identified_estimand: a probability expression
             that represents the effect to be estimated. Output of
             CausalModel.identify_effect method
-        :param method_name: (optional) name of the estimation method to be used.
+        :param method_name: ame of the estimation method to be used.
+        :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method.
+
         :returns: an instance of the CausalEstimate class, containing the causal effect estimate
             and other method-dependent information
 

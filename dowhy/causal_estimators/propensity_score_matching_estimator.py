@@ -46,25 +46,49 @@ class PropensityScoreMatchingEstimator(CausalEstimator):
         treated = self._data.loc[self._data[self._treatment_name[0]] == 1]
         control = self._data.loc[self._data[self._treatment_name[0]] == 0]
 
+
+        # TODO remove neighbors that are more than a given radius apart
+
+        # estimate ATT on treated by summing over difference between matched neighbors
         control_neighbors = (
             NearestNeighbors(n_neighbors=1, algorithm='ball_tree')
             .fit(control['propensity_score'].values.reshape(-1, 1))
         )
         distances, indices = control_neighbors.kneighbors(treated['propensity_score'].values.reshape(-1, 1))
-
-        # TODO remove neighbors that are more than a given radius apart
-
-        # estimate ATE on treated by summing over difference between matched neighbors
-        ate = 0
+        att = 0
         numtreatedunits = treated.shape[0]
         for i in range(numtreatedunits):
             treated_outcome = treated.iloc[i][self._outcome_name].item()
             control_outcome = control.iloc[indices[i]][self._outcome_name].item()
-            ate += treated_outcome - control_outcome
+            att += treated_outcome - control_outcome
 
-        ate /= numtreatedunits
+        att /= numtreatedunits
 
-        estimate = CausalEstimate(estimate=ate,
+        #Now computing ATC
+        treated_neighbors = (
+            NearestNeighbors(n_neighbors=1, algorithm='ball_tree')
+            .fit(treated['propensity_score'].values.reshape(-1, 1))
+        )
+        distances, indices = treated_neighbors.kneighbors(control['propensity_score'].values.reshape(-1, 1))
+        atc = 0
+        numcontrolunits = control.shape[0]
+        for i in range(numcontrolunits):
+            control_outcome = control.iloc[i][self._outcome_name].item()
+            treated_outcome = treated.iloc[indices[i]][self._outcome_name].item()
+            atc += treated_outcome - control_outcome
+
+        atc /= numcontrolunits
+
+        if self._target_units == "att":
+            est = att
+        elif self._target_units == "atc":
+            est = atc
+        elif self._target_units == "ate":
+            est = (att*numtreatedunits + atc*numcontrolunits)/(numtreatedunits+numcontrolunits)
+        else:
+            raise ValueError("Target units string value not supported")
+
+        estimate = CausalEstimate(estimate=est,
                                   target_estimand=self._target_estimand,
                                   realized_estimand_expr=self.symbolic_estimator,
                                   propensity_scores=self._data["propensity_score"])

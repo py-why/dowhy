@@ -59,7 +59,7 @@ class PropensityScoreStratificationEstimator(CausalEstimator):
         # print("before clipping, here is the distribution of treatment and control per strata")
         #print(self._data.groupby(['strata',self._treatment_name])[self._outcome_name].count())
 
-        self._data['dbar'] = 1 - self._data[self._treatment_name[0]]
+        self._data['dbar'] = 1 - self._data[self._treatment_name[0]] # 1-Treatment
         self._data['d_y'] = self._data[self._treatment_name[0]] * self._data[self._outcome_name]
         self._data['dbar_y'] = self._data['dbar'] * self._data[self._outcome_name]
         stratified = self._data.groupby('strata')
@@ -79,17 +79,27 @@ class PropensityScoreStratificationEstimator(CausalEstimator):
         })
         weighted_outcomes.columns = ["_".join(x) for x in weighted_outcomes.columns.ravel()]
         treatment_sum_name = self._treatment_name[0] + "_sum"
+        control_sum_name = "dbar_sum"
 
         weighted_outcomes['d_y_mean'] = weighted_outcomes['d_y_sum'] / weighted_outcomes[treatment_sum_name]
         weighted_outcomes['dbar_y_mean'] = weighted_outcomes['dbar_y_sum'] / weighted_outcomes['dbar_sum']
         weighted_outcomes['effect'] = weighted_outcomes['d_y_mean'] - weighted_outcomes['dbar_y_mean']
         total_treatment_population = weighted_outcomes[treatment_sum_name].sum()
+        total_control_population = weighted_outcomes[control_sum_name].sum()
+        total_population = total_treatment_population + total_control_population
 
-        ate = (weighted_outcomes['effect'] * weighted_outcomes[treatment_sum_name]).sum() / total_treatment_population
+        if self._target_units=="att":
+            est = (weighted_outcomes['effect'] * weighted_outcomes[treatment_sum_name]).sum() / total_treatment_population
+        elif self._target_units=="atc":
+            est = (weighted_outcomes['effect'] * weighted_outcomes[control_sum_name]).sum() / total_control_population
+        elif self._target_units == "ate":
+            est = (weighted_outcomes['effect'] * (weighted_outcomes[control_sum_name]+weighted_outcomes[treatment_sum_name])).sum() / total_population
+        else:
+            raise ValueError("Target units string value not supported")
 
         # TODO - how can we add additional information into the returned estimate?
         #        such as how much clipping was done, or per-strata info for debugging?
-        estimate = CausalEstimate(estimate=ate,
+        estimate = CausalEstimate(estimate=est,
                                   target_estimand=self._target_estimand,
                                   realized_estimand_expr=self.symbolic_estimator,
                                   propensity_scores = self._data["propensity_score"])
