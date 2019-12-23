@@ -79,29 +79,32 @@ class CausalIdentifier:
                                     outcome_name, common_causes):
         # TODO: outputs string for now, but ideally should do symbolic
         # expressions Mon 19 Feb 2018 04:54:17 PM DST
+        # TODO Better support for multivariate treatments
+
         expr = None
-        if estimand_type == "ate":
-            # [TODO: support multivariate states]
+        if estimand_type == "nonparametric-ate":
             outcome_name = outcome_name[0]
-            treatment_name = treatment_name[0]
             num_expr_str = outcome_name
             if len(common_causes)>0:
                 num_expr_str += "|" + ",".join(common_causes)
-            expr = "d(" + num_expr_str + ")/d" + treatment_name
+            expr = "d(" + num_expr_str + ")/d" + ",".join(treatment_name)
             sym_mu = sp.Symbol("mu")
             sym_sigma = sp.Symbol("sigma", positive=True)
             sym_outcome = spstats.Normal(num_expr_str, sym_mu, sym_sigma)
             # sym_common_causes = [sp.stats.Normal(common_cause, sym_mu, sym_sigma) for common_cause in common_causes]
-            sym_treatment = sp.Symbol(treatment_name)
+            sym_treatment_symbols = [sp.Symbol(t) for t in treatment_name]
+            sym_treatment = sp.Array(sym_treatment_symbols)
             sym_conditional_outcome = spstats.Expectation(sym_outcome)
             sym_effect = sp.Derivative(sym_conditional_outcome, sym_treatment)
 
             sym_assumptions = {
                 'Unconfoundedness': (
-                    u"If U\N{RIGHTWARDS ARROW}{0} and U\N{RIGHTWARDS ARROW}{1}"
+                    u"If U\N{RIGHTWARDS ARROW}{{{0}}} and U\N{RIGHTWARDS ARROW}{1}"
                     " then P({1}|{0},{2},U) = P({1}|{0},{2})"
-                ).format(treatment_name, outcome_name, ",".join(common_causes))
+                ).format(",".join(treatment_name), outcome_name, ",".join(common_causes))
             }
+        else:
+            raise ValueError("Estimand type not supported. Supported estimand types are 'non-parametric-ate'.")
 
         estimand = {
             'estimand': sym_effect,
@@ -111,13 +114,14 @@ class CausalIdentifier:
 
     def construct_iv_estimand(self, estimand_type, treatment_name,
                               outcome_name, instrument_names):
+        # TODO: support multivariate treatments better.
         expr = None
-        if estimand_type == "ate":
-            # [TODO: support multivariate states]
+        if estimand_type == "nonparametric-ate":
             outcome_name = outcome_name[0]
-            treatment_name = treatment_name[0]
             sym_outcome = spstats.Normal(outcome_name, 0, 1)
-            sym_treatment = spstats.Normal(treatment_name, 0, 1)
+            sym_treatment_symbols = [spstats.Normal(t, 0, 1) for t in treatment_name]
+            sym_treatment = sp.Array(sym_treatment_symbols)
+            #sym_treatment = spstats.Normal(treatment_name, 0, 1)
             sym_instrument = sp.Symbol(instrument_names[0])  # ",".join(instrument_names))
             sym_outcome_derivative = sp.Derivative(sym_outcome, sym_instrument)
             sym_treatment_derivative = sp.Derivative(sym_treatment, sym_instrument)
@@ -128,11 +132,13 @@ class CausalIdentifier:
                     "\N{NOT SIGN}(U \N{RIGHTWARDS ARROW}\N{RIGHTWARDS ARROW}{1})"
                 ).format(outcome_name, ",".join(instrument_names)),
                 "Exclusion": (
-                    u"If we remove {{{0}}}\N{RIGHTWARDS ARROW}{1}, then "
-                    u"\N{NOT SIGN}({0}\N{RIGHTWARDS ARROW}{2})"
-                ).format(",".join(instrument_names), treatment_name,
+                    u"If we remove {{{0}}}\N{RIGHTWARDS ARROW}{{{1}}}, then "
+                    u"\N{NOT SIGN}({{{0}}}\N{RIGHTWARDS ARROW}{2})"
+                ).format(",".join(instrument_names), ",".join(treatment_name),
                          outcome_name)
             }
+        else:
+            raise ValueError("Estimand type not supported. Supported estimand types are 'non-parametric-ate'.")
 
         estimand = {
             'estimand': sym_effect,

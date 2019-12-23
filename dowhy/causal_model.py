@@ -27,7 +27,7 @@ class CausalModel:
     def __init__(self, data, treatment, outcome, graph=None,
                  common_causes=None, instruments=None,
                  effect_modifiers=None,
-                 estimand_type="ate",
+                 estimand_type="nonparametric-ate",
                  proceed_when_unidentifiable=False,
                  missing_nodes_as_confounders=False,
                  **kwargs):
@@ -49,7 +49,7 @@ class CausalModel:
         :param instruments: names of instrumental variables for the effect of
         treatment on outcome
         :param effect_modifiers: names of variables that can modify the treatment effect (useful for heterogeneous treatment effect estimation)
-        :param estimand_type: the type of estimand requested (can be "ate" for average treatment effect, "att" for average treatment effect on the treated", and "atc", for average treatment effect on the control population.
+        :param estimand_type: the type of estimand requested (currently only "nonparametric-ate" is supported). In the future, may support other specific parametric forms of identification.
         :proceed_when_unidentifiable: does the identification proceed by ignoring potential unobserved confounders. Binary flag.
         :missing_nodes_as_confounders: Binary flag indicating whether variables in the dataframe that are not included in the causal graph, should be  automatically included as confounder nodes.
 

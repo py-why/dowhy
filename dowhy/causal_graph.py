@@ -71,6 +71,7 @@ class CausalGraph:
         if missing_nodes_as_confounders:
             self._graph = self.add_missing_nodes_as_common_causes(observed_node_names)
         self._graph = self.add_node_attributes(observed_node_names)
+        #TODO do not add it here. CausalIdentifier should call causal_graph to add an unobserved common cause if needed. This also ensures that we do not need get_common_causes in this class.
         self._graph = self.add_unobserved_common_cause(observed_node_names)
 
     def view_graph(self, layout="dot"):
@@ -220,6 +221,7 @@ class CausalGraph:
         """
         Assume that nodes1 causes nodes2 (e.g., nodes1 are the treatments and nodes2 are the outcomes)
         """
+        # TODO Refactor to remove this from here and only implement this logic in causalIdentifier. Unnecessary assumption of nodes1 to be causing nodes2.
         nodes1 = parse_state(nodes1)
         nodes2 = parse_state(nodes2)
         causes_1 = set()
