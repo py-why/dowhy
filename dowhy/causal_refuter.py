@@ -3,6 +3,12 @@ import numpy as np
 
 
 class CausalRefuter:
+    
+    """Base class for different refutation methods. 
+
+    Subclasses implement specific refutations methods. 
+
+    """
 
     def __init__(self, data, identified_estimand, estimate, **kwargs):
         self._data = data
@@ -37,6 +43,9 @@ class CausalRefuter:
 
 
 class CausalRefutation:
+    """Class for storing the result of a refutation method.
+
+    """
 
     def __init__(self, estimated_effect, new_effect, refutation_type):
         self.estimated_effect = estimated_effect,

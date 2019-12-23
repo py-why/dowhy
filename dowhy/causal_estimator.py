@@ -7,6 +7,8 @@ import sympy as sp
 class CausalEstimator:
     """Base class for an estimator of causal effect.
 
+    Subclasses implement different estimation methods. All estimation methods are in the package "dowhy.causal_estimators" 
+
     """
 
     def __init__(self, data, identified_estimand, treatment, outcome,
@@ -24,10 +26,13 @@ class CausalEstimator:
             representing the target identified estimand to estimate.
         :param treatment: name of the treatment variable
         :param outcome: name of the outcome variable
+        :param control_value: Value of the treatment in the control group, for effect estimation.  If treatment is multi-variate, this can be a list.
+        :param treatment_value: Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.
         :param test_significance: whether to test significance
-        :param evaluate_effect_strength: whether to evaluate the strength of effect
-        :param target_units: ATE, ATT or another subset of units (preview feature)
-        :param effect_modifiers: variables on which to compute separate effects, or return a heterogeneous effect function (not implemented)
+        :param evaluate_effect_strength: (Experimental) whether to evaluate the strength of effect
+        :param confidence_intervals: (Experimental) Binary flag indicating whether confidence intervals should be computed.
+        :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be a string for common specifications of target units (namely, "ate", "att" and "atc"). It can also be a lambda function that can be used as an index for the data (pandas DataFrame). Alternatively, it can be a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
+        :param effect_modifiers: variables on which to compute separate effects, or return a heterogeneous effect function. Not all methods support this currently. 
         :param params: (optional) additional method parameters
         :returns: an instance of the estimator class.
 
@@ -68,10 +73,12 @@ class CausalEstimator:
         raise NotImplementedError
 
     def estimate_effect(self):
-        """TODO.
+        """Base estimation method that calls the estimate_effect method of its calling subclass.
 
-        More description.
-
+        Can optionally also test significance and estimate effect strength for any returned estimate.  
+        
+        TODO: Enable methods to return a confidence interval in addition to the point estimate. 
+        
         :param self: object instance of class Estimator
         :returns: point estimate of causal effect
 
@@ -100,12 +107,12 @@ class CausalEstimator:
         raise NotImplementedError
 
     def do(self, x):
-        """TODO.
+        """Method that implements the do-operator. 
 
-        More description.
+        Given a value x for the treatment, returns the expected value of the outcome when the treatment is intervened to a value x. 
 
-        :param arg1:
-        :returns:
+        :param x: Value of the treatment
+        :returns: Value of the outcome when treatment is intervened/set to x. 
 
         """
         est = self._do(x)
@@ -122,6 +129,7 @@ class CausalEstimator:
 
         :param self: object instance of class Estimator
         :param estimate: obtained estimate
+        :param num_simulations: (optional) number of simulations to run
         :returns:
 
         """

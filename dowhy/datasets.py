@@ -1,9 +1,12 @@
+"""Module for generating some sample datasets. 
+
+"""
+
 import math
 
 import numpy as np
 import pandas as pd
 from numpy.random import choice
-
 
 def sigmoid(x):
     return 1 / (1 + math.exp(-x))

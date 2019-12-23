@@ -9,6 +9,15 @@ from dowhy.utils.api import parse_state
 
 
 class CausalIdentifier:
+    
+    """Class that implements different identification methods. 
+
+    Currently supports backdoor and instrumental variable identification methods. The identification is based on the causal graph provided. 
+
+    Other specific ways of identification, such as the ID* algorithm, minimal adjustment criteria, etc. will be added in the future. 
+    If you'd like to contribute, please raise an issue or a pull request on Github.  
+
+    """
 
     def __init__(self, graph, estimand_type, proceed_when_unidentifiable=False):
         self._graph = graph
@@ -18,7 +27,15 @@ class CausalIdentifier:
         self._proceed_when_unidentifiable = proceed_when_unidentifiable
         self.logger = logging.getLogger(__name__)
 
-    def identify_effect(self):
+    def identify_effect(self): 
+        """Main method that returns an identified estimand (if one exists). 
+
+        Uses both backdoor and instrumental variable methods to check if an identified estimand exists, based on the causal graph. 
+
+        :param self: instance of the CausalEstimator class (or its subclass)
+        :returns:  target estimand, an instance of the IdentifiedEstimand class
+        """
+
         estimands_dict = {}
         causes_t = self._graph.get_causes(self.treatment_name)
         causes_y = self._graph.get_causes(self.outcome_name, remove_edges={'sources':self.treatment_name, 'targets':self.outcome_name})
@@ -148,6 +165,10 @@ class CausalIdentifier:
 
 
 class IdentifiedEstimand:
+
+    """Class for storing a causal estimand, typically as a result of the identification step. 
+
+    """
 
     def __init__(self, treatment_variable, outcome_variable,
                  estimand_type=None, estimands=None,

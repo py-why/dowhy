@@ -157,9 +157,9 @@ class CausalModel:
         :param control_value: Value of the treatment in the control group, for effect estimation.  If treatment is multi-variate, this can be a list.
         :param treatment_value: Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.
         :param test_significance: Binary flag on whether to additionally do a statistical signficance test for the estimate.
-        :param evaluate_effect_strength: Binary flag on whether to estimate the relative strength of the treatment's effect. This measure can be used to compare different treatments for the same outcome (by running this method with different treatments sequentially).
-        :param confidence_intervals: Binary flag indicating whether confidence intervals should be computed.
-        :param target_units: The units for which the treatment effect should be estimated. This can be a string for common specifications of target units (namely, "ate", "att" and "atc"). It can also be a lambda function that can be used as an index for the data (pandas DataFrame). Alternatively, it can be a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
+        :param evaluate_effect_strength: (Experimental) Binary flag on whether to estimate the relative strength of the treatment's effect. This measure can be used to compare different treatments for the same outcome (by running this method with different treatments sequentially).
+        :param confidence_intervals: (Experimental) Binary flag indicating whether confidence intervals should be computed.
+        :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be a string for common specifications of target units (namely, "ate", "att" and "atc"). It can also be a lambda function that can be used as an index for the data (pandas DataFrame). Alternatively, it can be a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
         :param effect_modifiers: Effect modifiers can be (optionally) specified here too, since they do not affect identification. If None, the effect_modifiers from the CausalModel are used.
         :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method.
 
