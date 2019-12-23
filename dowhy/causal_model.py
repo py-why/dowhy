@@ -264,10 +264,13 @@ class CausalModel:
     def refute_estimate(self, estimand, estimate, method_name=None, **kwargs):
         """Refute an estimated causal effect.
 
-        If method_name is provided, uses the provided method. Else, finds a
-        suitable method to use.
+        If method_name is provided, uses the provided method. In the future, we may support automatic selection of suitable refutation tests.
 
-        :param estimate: an instance of the CausalEstimate class.
+        :param estimand: target estimand, an instance of the IdentifiedEstimand class (typically, the output of identify_effect)
+        :param estimate: estimate to be refuted, an instance of the CausalEstimate class (typically, the output of estimate_effect)
+        :param method_name: name of the refutation method
+        :param **kwargs:  (optional) additional method-specific arguments that are passed directly to the refutation method
+
         :returns: an instance of the RefuteResult class
 
         """
@@ -287,6 +290,8 @@ class CausalModel:
 
     def view_model(self, layout="dot"):
         """View the causal DAG.
+
+        :param layout: string specifying the layout of the graph.
 
         :returns: a visualization of the graph
 

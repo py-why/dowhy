@@ -42,9 +42,9 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
                 Z[:, i] = np.random.binomial(n=1, p=p[i], size=num_samples)
             else:
                 Z[:, i] = np.random.uniform(0, 1, size=num_samples)
-        # Ensure that we do not generate weak instruments
-        cz = np.random.uniform(range_cz - (range_cz * 0.25),
-                range_cz + (range_cz * 0.25), (num_instruments, num_treatments))
+        # TODO Ensure that we do not generate weak instruments
+        cz = np.random.uniform(range_cz - (range_cz * 0.05),
+                range_cz + (range_cz * 0.05), (num_instruments, num_treatments))
     if num_effect_modifiers >0:
         range_ce = beta*0.5
         means = np.random.uniform(-1, 1, num_effect_modifiers)
