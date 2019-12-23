@@ -1,6 +1,8 @@
 import numpy as np
 from sklearn import linear_model
 import pandas as pd
+import itertools
+
 from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_estimator import CausalEstimator
 
@@ -49,7 +51,10 @@ class LinearRegressionEstimator(CausalEstimator):
         expr = "b: " + ",".join(estimand.outcome_variable) + "~"
         var_list = estimand.treatment_variable + estimand.backdoor_variables
         expr += "+".join(var_list)
-        return expr
+        if self._effect_modifier_names:
+            interaction_terms = ["{0}*{1}".format(x[0], x[1]) for x in itertools.product(estimand.treatment_variable, self._effect_modifier_names)]
+            expr += "+" + "+".join(interaction_terms)
+        return expr 
 
     def _build_features(self):
         n_samples = self._treatment.shape[0]
