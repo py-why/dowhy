@@ -121,15 +121,15 @@ class CausalIdentifier:
             sym_outcome = spstats.Normal(outcome_name, 0, 1)
             sym_treatment_symbols = [spstats.Normal(t, 0, 1) for t in treatment_name]
             sym_treatment = sp.Array(sym_treatment_symbols)
-            #sym_treatment = spstats.Normal(treatment_name, 0, 1)
-            sym_instrument = sp.Symbol(instrument_names[0])  # ",".join(instrument_names))
+            sym_instrument_symbols = [sp.Symbol(inst) for inst in instrument_names]
+            sym_instrument = sp.Array(sym_instrument_symbols)  # ",".join(instrument_names))
             sym_outcome_derivative = sp.Derivative(sym_outcome, sym_instrument)
             sym_treatment_derivative = sp.Derivative(sym_treatment, sym_instrument)
             sym_effect = spstats.Expectation(sym_outcome_derivative / sym_treatment_derivative)
             sym_assumptions = {
                 "As-if-random": (
                     "If U\N{RIGHTWARDS ARROW}\N{RIGHTWARDS ARROW}{0} then "
-                    "\N{NOT SIGN}(U \N{RIGHTWARDS ARROW}\N{RIGHTWARDS ARROW}{1})"
+                    "\N{NOT SIGN}(U \N{RIGHTWARDS ARROW}\N{RIGHTWARDS ARROW}{{{1}}})"
                 ).format(outcome_name, ",".join(instrument_names)),
                 "Exclusion": (
                     u"If we remove {{{0}}}\N{RIGHTWARDS ARROW}{{{1}}}, then "

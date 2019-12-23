@@ -75,7 +75,7 @@ class InstrumentalVariableEstimator(CausalEstimator):
     def construct_symbolic_estimator(self, estimand):
         sym_outcome = (spstats.Normal(",".join(estimand.outcome_variable), 0, 1))
         sym_treatment = (spstats.Normal(",".join(estimand.treatment_variable), 0, 1))
-        sym_instrument = sp.Symbol(estimand.instrumental_variables[0])
+        sym_instrument = sp.Symbol(",".join(self.estimating_instrument_names))
         sym_outcome_derivative = sp.Derivative(sym_outcome, sym_instrument)
         sym_treatment_derivative = sp.Derivative(sym_treatment, sym_instrument)
         sym_effect = (
@@ -84,12 +84,12 @@ class InstrumentalVariableEstimator(CausalEstimator):
         )
         estimator_assumptions = {
             "treatment_effect_homogeneity": (
-                "Each unit's treatment {0} is".format(self._treatment_name) +
+                "Each unit's treatment {0} is ".format(self._treatment_name) +
                 "affected in the same way by common causes of "
                 "{0} and {1}".format(self._treatment_name, self._outcome_name)
             ),
             "outcome_effect_homogeneity": (
-                "Each unit's outcome {0} is".format(self._outcome_name) +
+                "Each unit's outcome {0} is ".format(self._outcome_name) +
                 "affected in the same way by common causes of "
                 "{0} and {1}".format(self._treatment_name, self._outcome_name)
             ),
