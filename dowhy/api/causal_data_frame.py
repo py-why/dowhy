@@ -30,7 +30,7 @@ class CausalAccessor(object):
         self._method = None
 
     def do(self, x, method='weighting', num_cores=1, variable_types={}, outcome=None, params=None, dot_graph=None,
-           common_causes=None, estimand_type='ate', proceed_when_unidentifiable=False, stateful=False):
+           common_causes=None, estimand_type='nonparametric-ate', proceed_when_unidentifiable=False, stateful=False):
         """
         The do-operation implemented with sampling. This will return a pandas.DataFrame with the outcome
         variable(s) replaced with samples from P(Y|do(X=x)).
@@ -68,8 +68,7 @@ class CausalAccessor(object):
         :param params: dict: extra parameters to set as attributes on the sampler object
         :param dot_graph: str: A string specifying the causal graph.
         :param common_causes: list: A list of strings containing the variable names to control for.
-        :param estimand_type: str: 'ate' is the only one currently supported. Others may be added later, to allow for
-        CATE estimation.
+        :param estimand_type: str: 'nonparametric-ate' is the only one currently supported. Others may be added later, to allow for specific, parametric estimands.
         :param proceed_when_unidentifiable: bool: A flag to over-ride user prompts to proceed when effects aren't
         identifiable with the assumptions provided.
         :param stateful: bool: Whether to retain state. By default, the do operation is stateless.
