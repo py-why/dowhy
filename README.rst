@@ -130,7 +130,7 @@ pandas dataframe df that contains the data:
         num_samples=10000,
         treatment_is_binary=True)
 
-DoWhy supports two formats for providing the causal graph: `gml <http://www.fim.uni-passau.de/index.php?id=17297&L=1>`_ (preferred) and `dot <http://www.graphviz.org/documentation/>`_. After loading in the data, we use the four main operations in DoWhy: *model*,
+DoWhy supports two formats for providing the causal graph: `gml <https://github.com/GunterMueller/UNI_PASSAU_FMI_Graph_Drawing>`_ (preferred) and `dot <http://www.graphviz.org/documentation/>`_. After loading in the data, we use the four main operations in DoWhy: *model*,
 *estimate*, *identify* and *refute*:
 
 .. code:: python
@@ -276,7 +276,7 @@ complete---you can provide a partial graph, representing prior
 knowledge about some of the variables. DoWhy automatically considers the rest
 of the variables as potential confounders.
 
-Currently, DoWhy supports two formats for graph input: `gml <http://www.fim.uni-passau.de/index.php?id=17297&L=1>`_ (preferred) and
+Currently, DoWhy supports two formats for graph input: `gml <https://github.com/GunterMueller/UNI_PASSAU_FMI_Graph_Drawing>`_ (preferred) and
 `dot <http://www.graphviz.org/documentation/>`_. We strongly suggest to use gml as the input format, as it works well with networkx. You can provide the graph either as a .gml file or as a string. If you prefer to use dot format, you will need to install additional packages (pydot or pygraphviz, see the installation section above). Both .dot files and string format are supported. 
 
 While not recommended, you can also specify common causes and/or instruments directly
