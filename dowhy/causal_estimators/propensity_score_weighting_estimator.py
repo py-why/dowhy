@@ -40,7 +40,7 @@ class PropensityScoreWeightingEstimator(CausalEstimator):
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
         if not hasattr(self, "weighting_scheme"):
-            self.weighting_scheme = 'ips_weight'  # 'itps_weight' 'ips_weight' 'nips_weight'
+            self.weighting_scheme = 'ips_weight'  # 'ips_weight', 'ips_normalized_weight', 'ips_stabilized_weight'
         self.min_ps_score = min_ps_score
         self.max_ps_score = max_ps_score
 
