@@ -1,4 +1,4 @@
-"""Module for generating some sample datasets. 
+"""Module for generating some sample datasets.
 
 """
 
@@ -37,7 +37,7 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         c2 = np.random.uniform(0, range_c2, num_common_causes)
 
     if num_instruments > 0:
-        range_cz = beta*0.5
+        range_cz = beta
         p = np.random.uniform(0, 1, num_instruments)
         Z = np.zeros((num_samples, num_instruments))
         for i in range(num_instruments):
@@ -100,6 +100,88 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         data = data.astype({outcome: 'bool'}, copy=False)
 
     # Now specifying the corresponding graph strings
+    dot_graph = create_dot_graph(treatments, outcome, common_causes, instruments, effect_modifiers)
+    # Now writing the gml graph
+    gml_graph = create_gml_graph(treatments, outcome, common_causes, instruments, effect_modifiers)
+    ret_dict = {
+        "df": data,
+        "treatment_name": treatments,
+        "outcome_name": outcome,
+        "common_causes_names": common_causes,
+        "instrument_names": instruments,
+        "effect_modifier_names": effect_modifiers,
+        "dot_graph": dot_graph,
+        "gml_graph": gml_graph,
+        "ate": ate
+    }
+    return ret_dict
+
+def simple_iv_dataset(beta, num_samples,
+                   num_treatments = 1,
+                   treatment_is_binary=True,
+                   outcome_is_binary=False):
+    """ Simple instrumental variable dataset with a single IV and a single confounder.
+    """
+    W, Z, c1, c2,  cz = [None]*5
+    num_instruments = 1
+    num_common_causes = 1
+    beta = float(beta)
+    # Making beta an array
+    if type(beta) not in [list, np.ndarray]:
+        beta = np.repeat(beta, num_treatments)
+
+    c1 = np.random.uniform(0,1, (num_common_causes, num_treatments))
+    c2 = np.random.uniform(0,1, num_common_causes)
+    range_cz = beta # cz is much higher than c1 and c2
+    cz = np.random.uniform(range_cz - (range_cz * 0.05),
+                range_cz + (range_cz * 0.05), (num_instruments, num_treatments))
+    W = np.random.uniform(0, 1, (num_samples, num_common_causes))
+    Z = np.random.normal(0, 1, (num_samples, num_instruments))
+    t = np.random.normal(0, 1, (num_samples, num_treatments)) + Z @ cz + W @ c1
+    if treatment_is_binary:
+        t = np.vectorize(stochastically_convert_to_binary)(t)
+
+    def _compute_y(t, W, beta, c2):
+        y = t @ beta + W @ c2
+        return y
+    y = _compute_y(t, W, beta, c2)
+
+    # creating data frame
+    data = np.column_stack((Z, W, t, y))
+    treatments = [("v" + str(i)) for i in range(0, num_treatments)]
+    outcome = "y"
+    common_causes = [("W" + str(i)) for i in range(0, num_common_causes)]
+    ate = np.mean(_compute_y(np.ones((num_samples, num_treatments)), W, beta, c2 ) - _compute_y(np.zeros((num_samples, num_treatments)), W, beta, c2))
+    instruments = [("Z" + str(i)) for i in range(0, num_instruments)]
+    other_variables = None
+    col_names = instruments + common_causes + treatments + [outcome]
+    data = pd.DataFrame(data, columns=col_names)
+
+    # Specifying the correct dtypes
+    if treatment_is_binary:
+        data = data.astype({tname:'bool' for tname in treatments}, copy=False)
+    if outcome_is_binary:
+        data = data.astype({outcome: 'bool'}, copy=False)
+
+    # Now specifying the corresponding graph strings
+    dot_graph = create_dot_graph(treatments, outcome, common_causes, instruments)
+    # Now writing the gml graph
+    gml_graph = create_gml_graph(treatments, outcome, common_causes, instruments)
+    ret_dict = {
+        "df": data,
+        "treatment_name": treatments,
+        "outcome_name": outcome,
+        "common_causes_names": common_causes,
+        "instrument_names": instruments,
+        "effect_modifier_names": None,
+        "dot_graph": dot_graph,
+        "gml_graph": gml_graph,
+        "ate": ate
+    }
+    return ret_dict
+
+def create_dot_graph(treatments, outcome, common_causes,
+        instruments, effect_modifiers=[]):
     dot_graph = ('digraph {{'
                  ' U[label="Unobserved Confounders"];'
                  ' U->{0};'
@@ -112,7 +194,10 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
     dot_graph += " ".join([v + "-> " + outcome + ";" for v in common_causes])
     dot_graph += " ".join([v + "-> " + outcome + ";" for v in effect_modifiers])
     dot_graph = dot_graph + "}"
-    # Now writing the gml graph
+    return dot_graph
+
+def create_gml_graph(treatments, outcome, common_causes,
+        instruments, effect_modifiers=[]):
     gml_graph = ('graph[directed 1'
                  'node[ id "{0}" label "{0}"]'
                  'node[ id "{1}" label "{1}"]'
@@ -132,18 +217,7 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
     gml_graph = gml_graph + " ".join(['edge[ source "{0}" target "{1}"]'.format(v, outcome) for v in common_causes])
     gml_graph = gml_graph + " ".join(['node[ id "{0}" label "{0}"] edge[ source "{0}" target "{1}"]'.format(v, outcome) for v in effect_modifiers])
     gml_graph = gml_graph + ']'
-    ret_dict = {
-        "df": data,
-        "treatment_name": treatments,
-        "outcome_name": outcome,
-        "common_causes_names": common_causes,
-        "instrument_names": instruments,
-        "effect_modifier_names": effect_modifiers,
-        "dot_graph": dot_graph,
-        "gml_graph": gml_graph,
-        "ate": ate
-    }
-    return ret_dict
+    return gml_graph
 
 def xy_dataset(num_samples, effect=True, sd_error=1):
     treatment = 'Treatment'

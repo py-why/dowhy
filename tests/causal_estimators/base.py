@@ -18,7 +18,8 @@ class TestEstimator(object):
             treatment_is_binary=True,
             outcome_is_binary=False,
             method_params=None):
-        data = dowhy.datasets.linear_dataset(beta=beta,
+        if dataset == "linear":
+            data = dowhy.datasets.linear_dataset(beta=beta,
                                              num_common_causes=num_common_causes,
                                              num_instruments=num_instruments,
                                              num_effect_modifiers = num_effect_modifiers,
@@ -26,6 +27,14 @@ class TestEstimator(object):
                                              num_samples=num_samples,
                                              treatment_is_binary=treatment_is_binary,
                                              outcome_is_binary = outcome_is_binary)
+        elif dataset == "simple-iv":
+            data = dowhy.datasets.simple_iv_dataset(beta=beta,
+                    num_treatments = num_treatments,
+                    num_samples = num_samples,
+                    treatment_is_binary=treatment_is_binary,
+                    outcome_is_binary = outcome_is_binary)
+        else:
+            raise ValueError("Dataset type not supported.")
 
         model = CausalModel(
             data=data['df'],
@@ -64,6 +73,7 @@ class TestEstimator(object):
             num_effect_modifiers=[0,], num_treatments=[1,],
             treatment_is_binary=[True,],
             outcome_is_binary=[False,],
+            dataset = "linear",
             method_params=None):
         args_dict = {
                 'num_common_causes': num_common_causes,
@@ -77,6 +87,7 @@ class TestEstimator(object):
         configs = [dict(zip(keys, v)) for v in itertools.product(*values)]
         for cfg in configs:
             print("\nConfig:", cfg)
+            cfg['dataset'] = dataset
             cfg['method_params']= method_params
             self.average_treatment_effect_test(**cfg)
 
