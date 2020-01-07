@@ -7,7 +7,7 @@ import sympy as sp
 class CausalEstimator:
     """Base class for an estimator of causal effect.
 
-    Subclasses implement different estimation methods. All estimation methods are in the package "dowhy.causal_estimators" 
+    Subclasses implement different estimation methods. All estimation methods are in the package "dowhy.causal_estimators"
 
     """
 
@@ -32,7 +32,7 @@ class CausalEstimator:
         :param evaluate_effect_strength: (Experimental) whether to evaluate the strength of effect
         :param confidence_intervals: (Experimental) Binary flag indicating whether confidence intervals should be computed.
         :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be a string for common specifications of target units (namely, "ate", "att" and "atc"). It can also be a lambda function that can be used as an index for the data (pandas DataFrame). Alternatively, it can be a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
-        :param effect_modifiers: variables on which to compute separate effects, or return a heterogeneous effect function. Not all methods support this currently. 
+        :param effect_modifiers: variables on which to compute separate effects, or return a heterogeneous effect function. Not all methods support this currently.
         :param params: (optional) additional method parameters
         :returns: an instance of the estimator class.
 
@@ -56,6 +56,9 @@ class CausalEstimator:
             for key, value in params.items():
                 setattr(self, key, value)
 
+        # Checking if some parameters were set, otherwise setting to default values
+        if not hasattr(self, 'num_simulations'):
+            self.num_simulations = 1000
         self.logger = logging.getLogger(__name__)
 
         # Setting more values
@@ -75,10 +78,10 @@ class CausalEstimator:
     def estimate_effect(self):
         """Base estimation method that calls the estimate_effect method of its calling subclass.
 
-        Can optionally also test significance and estimate effect strength for any returned estimate.  
-        
-        TODO: Enable methods to return a confidence interval in addition to the point estimate. 
-        
+        Can optionally also test significance and estimate effect strength for any returned estimate.
+
+        TODO: Enable methods to return a confidence interval in addition to the point estimate.
+
         :param self: object instance of class Estimator
         :returns: point estimate of causal effect
 
@@ -107,12 +110,12 @@ class CausalEstimator:
         raise NotImplementedError
 
     def do(self, x):
-        """Method that implements the do-operator. 
+        """Method that implements the do-operator.
 
-        Given a value x for the treatment, returns the expected value of the outcome when the treatment is intervened to a value x. 
+        Given a value x for the treatment, returns the expected value of the outcome when the treatment is intervened to a value x.
 
         :param x: Value of the treatment
-        :returns: Value of the outcome when treatment is intervened/set to x. 
+        :returns: Value of the outcome when treatment is intervened/set to x.
 
         """
         est = self._do(x)
@@ -121,7 +124,7 @@ class CausalEstimator:
     def construct_symbolic_estimator(self, estimand):
         raise NotImplementedError
 
-    def test_significance(self, estimate, num_simulations=1000):
+    def test_significance(self, estimate, num_simulations=None):
         """Test statistical significance of obtained estimate.
 
         Uses resampling to create a non-parametric significance test.
@@ -133,26 +136,26 @@ class CausalEstimator:
         :returns:
 
         """
-        if not hasattr(self,'num_simulations'):
-            self.num_simulations = num_simulations
-        null_estimates = np.zeros(self.num_simulations)
-        for i in range(self.num_simulations):
+        if num_simulations is None:
+            num_simulations = self.num_simulations
+        null_estimates = np.zeros(num_simulations)
+        for i in range(num_simulations):
             self._outcome = np.random.permutation(self._outcome)
             est = self._estimate_effect()
             null_estimates[i] = est.value
 
         sorted_null_estimates = np.sort(null_estimates)
         self.logger.debug("Null estimates: {0}".format(sorted_null_estimates))
-        median_estimate = sorted_null_estimates[int(self.num_simulations / 2)]
+        median_estimate = sorted_null_estimates[int(num_simulations / 2)]
         # Doing a two-sided test
         if estimate.value > median_estimate:
             # Being conservative with the p-value reported
             estimate_index = np.searchsorted(sorted_null_estimates, estimate.value, side="left")
-            p_value = 1 - (estimate_index / self.num_simulations)
+            p_value = 1 - (estimate_index / num_simulations)
         if estimate.value <= median_estimate:
             # Being conservative with the p-value reported
             estimate_index = np.searchsorted(sorted_null_estimates, estimate.value, side="right")
-            p_value = (estimate_index / self.num_simulations)
+            p_value = (estimate_index / num_simulations)
         signif_dict = {
             'p_value': p_value,
             'sorted_null_estimates': sorted_null_estimates
