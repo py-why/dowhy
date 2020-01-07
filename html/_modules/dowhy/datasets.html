@@ -159,7 +159,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for dowhy.datasets</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Module for generating some sample datasets. </span>
+<span></span><span class="sd">&quot;&quot;&quot;Module for generating some sample datasets.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -198,7 +198,7 @@
         <span class="n">c2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">range_c2</span><span class="p">,</span> <span class="n">num_common_causes</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">num_instruments</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">range_cz</span> <span class="o">=</span> <span class="n">beta</span><span class="o">*</span><span class="mf">0.5</span>
+        <span class="n">range_cz</span> <span class="o">=</span> <span class="n">beta</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_instruments</span><span class="p">)</span>
         <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">num_instruments</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_instruments</span><span class="p">):</span>
@@ -261,6 +261,88 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="n">outcome</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">},</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="c1"># Now specifying the corresponding graph strings</span>
+    <span class="n">dot_graph</span> <span class="o">=</span> <span class="n">create_dot_graph</span><span class="p">(</span><span class="n">treatments</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">common_causes</span><span class="p">,</span> <span class="n">instruments</span><span class="p">,</span> <span class="n">effect_modifiers</span><span class="p">)</span>
+    <span class="c1"># Now writing the gml graph</span>
+    <span class="n">gml_graph</span> <span class="o">=</span> <span class="n">create_gml_graph</span><span class="p">(</span><span class="n">treatments</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">common_causes</span><span class="p">,</span> <span class="n">instruments</span><span class="p">,</span> <span class="n">effect_modifiers</span><span class="p">)</span>
+    <span class="n">ret_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;df&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
+        <span class="s2">&quot;treatment_name&quot;</span><span class="p">:</span> <span class="n">treatments</span><span class="p">,</span>
+        <span class="s2">&quot;outcome_name&quot;</span><span class="p">:</span> <span class="n">outcome</span><span class="p">,</span>
+        <span class="s2">&quot;common_causes_names&quot;</span><span class="p">:</span> <span class="n">common_causes</span><span class="p">,</span>
+        <span class="s2">&quot;instrument_names&quot;</span><span class="p">:</span> <span class="n">instruments</span><span class="p">,</span>
+        <span class="s2">&quot;effect_modifier_names&quot;</span><span class="p">:</span> <span class="n">effect_modifiers</span><span class="p">,</span>
+        <span class="s2">&quot;dot_graph&quot;</span><span class="p">:</span> <span class="n">dot_graph</span><span class="p">,</span>
+        <span class="s2">&quot;gml_graph&quot;</span><span class="p">:</span> <span class="n">gml_graph</span><span class="p">,</span>
+        <span class="s2">&quot;ate&quot;</span><span class="p">:</span> <span class="n">ate</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">ret_dict</span></div>
+
+<div class="viewcode-block" id="simple_iv_dataset"><a class="viewcode-back" href="../../dowhy.html#dowhy.datasets.simple_iv_dataset">[docs]</a><span class="k">def</span> <span class="nf">simple_iv_dataset</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">,</span>
+                   <span class="n">num_treatments</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                   <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                   <span class="n">outcome_is_binary</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Simple instrumental variable dataset with a single IV and a single confounder.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">W</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span>  <span class="n">cz</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="mi">5</span>
+    <span class="n">num_instruments</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">num_common_causes</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>
+    <span class="c1"># Making beta an array</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">num_treatments</span><span class="p">)</span>
+
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">num_common_causes</span><span class="p">,</span> <span class="n">num_treatments</span><span class="p">))</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_common_causes</span><span class="p">)</span>
+    <span class="n">range_cz</span> <span class="o">=</span> <span class="n">beta</span> <span class="c1"># cz is much higher than c1 and c2</span>
+    <span class="n">cz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">range_cz</span> <span class="o">-</span> <span class="p">(</span><span class="n">range_cz</span> <span class="o">*</span> <span class="mf">0.05</span><span class="p">),</span>
+                <span class="n">range_cz</span> <span class="o">+</span> <span class="p">(</span><span class="n">range_cz</span> <span class="o">*</span> <span class="mf">0.05</span><span class="p">),</span> <span class="p">(</span><span class="n">num_instruments</span><span class="p">,</span> <span class="n">num_treatments</span><span class="p">))</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">num_common_causes</span><span class="p">))</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">num_instruments</span><span class="p">))</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">num_treatments</span><span class="p">))</span> <span class="o">+</span> <span class="n">Z</span> <span class="o">@</span> <span class="n">cz</span> <span class="o">+</span> <span class="n">W</span> <span class="o">@</span> <span class="n">c1</span>
+    <span class="k">if</span> <span class="n">treatment_is_binary</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">stochastically_convert_to_binary</span><span class="p">)(</span><span class="n">t</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_compute_y</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">c2</span><span class="p">):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">t</span> <span class="o">@</span> <span class="n">beta</span> <span class="o">+</span> <span class="n">W</span> <span class="o">@</span> <span class="n">c2</span>
+        <span class="k">return</span> <span class="n">y</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">_compute_y</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">c2</span><span class="p">)</span>
+
+    <span class="c1"># creating data frame</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">Z</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+    <span class="n">treatments</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;v&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_treatments</span><span class="p">)]</span>
+    <span class="n">outcome</span> <span class="o">=</span> <span class="s2">&quot;y&quot;</span>
+    <span class="n">common_causes</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;W&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_common_causes</span><span class="p">)]</span>
+    <span class="n">ate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">_compute_y</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">num_treatments</span><span class="p">)),</span> <span class="n">W</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">c2</span> <span class="p">)</span> <span class="o">-</span> <span class="n">_compute_y</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">num_treatments</span><span class="p">)),</span> <span class="n">W</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">c2</span><span class="p">))</span>
+    <span class="n">instruments</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;Z&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_instruments</span><span class="p">)]</span>
+    <span class="n">other_variables</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">col_names</span> <span class="o">=</span> <span class="n">instruments</span> <span class="o">+</span> <span class="n">common_causes</span> <span class="o">+</span> <span class="n">treatments</span> <span class="o">+</span> <span class="p">[</span><span class="n">outcome</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">col_names</span><span class="p">)</span>
+
+    <span class="c1"># Specifying the correct dtypes</span>
+    <span class="k">if</span> <span class="n">treatment_is_binary</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="n">tname</span><span class="p">:</span><span class="s1">&#39;bool&#39;</span> <span class="k">for</span> <span class="n">tname</span> <span class="ow">in</span> <span class="n">treatments</span><span class="p">},</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">outcome_is_binary</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="n">outcome</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">},</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Now specifying the corresponding graph strings</span>
+    <span class="n">dot_graph</span> <span class="o">=</span> <span class="n">create_dot_graph</span><span class="p">(</span><span class="n">treatments</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">common_causes</span><span class="p">,</span> <span class="n">instruments</span><span class="p">)</span>
+    <span class="c1"># Now writing the gml graph</span>
+    <span class="n">gml_graph</span> <span class="o">=</span> <span class="n">create_gml_graph</span><span class="p">(</span><span class="n">treatments</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">common_causes</span><span class="p">,</span> <span class="n">instruments</span><span class="p">)</span>
+    <span class="n">ret_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;df&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
+        <span class="s2">&quot;treatment_name&quot;</span><span class="p">:</span> <span class="n">treatments</span><span class="p">,</span>
+        <span class="s2">&quot;outcome_name&quot;</span><span class="p">:</span> <span class="n">outcome</span><span class="p">,</span>
+        <span class="s2">&quot;common_causes_names&quot;</span><span class="p">:</span> <span class="n">common_causes</span><span class="p">,</span>
+        <span class="s2">&quot;instrument_names&quot;</span><span class="p">:</span> <span class="n">instruments</span><span class="p">,</span>
+        <span class="s2">&quot;effect_modifier_names&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;dot_graph&quot;</span><span class="p">:</span> <span class="n">dot_graph</span><span class="p">,</span>
+        <span class="s2">&quot;gml_graph&quot;</span><span class="p">:</span> <span class="n">gml_graph</span><span class="p">,</span>
+        <span class="s2">&quot;ate&quot;</span><span class="p">:</span> <span class="n">ate</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">ret_dict</span></div>
+
+<div class="viewcode-block" id="create_dot_graph"><a class="viewcode-back" href="../../dowhy.html#dowhy.datasets.create_dot_graph">[docs]</a><span class="k">def</span> <span class="nf">create_dot_graph</span><span class="p">(</span><span class="n">treatments</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">common_causes</span><span class="p">,</span>
+        <span class="n">instruments</span><span class="p">,</span> <span class="n">effect_modifiers</span><span class="o">=</span><span class="p">[]):</span>
     <span class="n">dot_graph</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;digraph {{&#39;</span>
                  <span class="s1">&#39; U[label=&quot;Unobserved Confounders&quot;];&#39;</span>
                  <span class="s1">&#39; U-&gt;</span><span class="si">{0}</span><span class="s1">;&#39;</span>
@@ -273,7 +355,10 @@
     <span class="n">dot_graph</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">v</span> <span class="o">+</span> <span class="s2">&quot;-&gt; &quot;</span> <span class="o">+</span> <span class="n">outcome</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">common_causes</span><span class="p">])</span>
     <span class="n">dot_graph</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">v</span> <span class="o">+</span> <span class="s2">&quot;-&gt; &quot;</span> <span class="o">+</span> <span class="n">outcome</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">effect_modifiers</span><span class="p">])</span>
     <span class="n">dot_graph</span> <span class="o">=</span> <span class="n">dot_graph</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
-    <span class="c1"># Now writing the gml graph</span>
+    <span class="k">return</span> <span class="n">dot_graph</span></div>
+
+<div class="viewcode-block" id="create_gml_graph"><a class="viewcode-back" href="../../dowhy.html#dowhy.datasets.create_gml_graph">[docs]</a><span class="k">def</span> <span class="nf">create_gml_graph</span><span class="p">(</span><span class="n">treatments</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">common_causes</span><span class="p">,</span>
+        <span class="n">instruments</span><span class="p">,</span> <span class="n">effect_modifiers</span><span class="o">=</span><span class="p">[]):</span>
     <span class="n">gml_graph</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;graph[directed 1&#39;</span>
                  <span class="s1">&#39;node[ id &quot;</span><span class="si">{0}</span><span class="s1">&quot; label &quot;</span><span class="si">{0}</span><span class="s1">&quot;]&#39;</span>
                  <span class="s1">&#39;node[ id &quot;</span><span class="si">{1}</span><span class="s1">&quot; label &quot;</span><span class="si">{1}</span><span class="s1">&quot;]&#39;</span>
@@ -293,18 +378,7 @@
     <span class="n">gml_graph</span> <span class="o">=</span> <span class="n">gml_graph</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;edge[ source &quot;</span><span class="si">{0}</span><span class="s1">&quot; target &quot;</span><span class="si">{1}</span><span class="s1">&quot;]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">outcome</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">common_causes</span><span class="p">])</span>
     <span class="n">gml_graph</span> <span class="o">=</span> <span class="n">gml_graph</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;node[ id &quot;</span><span class="si">{0}</span><span class="s1">&quot; label &quot;</span><span class="si">{0}</span><span class="s1">&quot;] edge[ source &quot;</span><span class="si">{0}</span><span class="s1">&quot; target &quot;</span><span class="si">{1}</span><span class="s1">&quot;]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">outcome</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">effect_modifiers</span><span class="p">])</span>
     <span class="n">gml_graph</span> <span class="o">=</span> <span class="n">gml_graph</span> <span class="o">+</span> <span class="s1">&#39;]&#39;</span>
-    <span class="n">ret_dict</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;df&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
-        <span class="s2">&quot;treatment_name&quot;</span><span class="p">:</span> <span class="n">treatments</span><span class="p">,</span>
-        <span class="s2">&quot;outcome_name&quot;</span><span class="p">:</span> <span class="n">outcome</span><span class="p">,</span>
-        <span class="s2">&quot;common_causes_names&quot;</span><span class="p">:</span> <span class="n">common_causes</span><span class="p">,</span>
-        <span class="s2">&quot;instrument_names&quot;</span><span class="p">:</span> <span class="n">instruments</span><span class="p">,</span>
-        <span class="s2">&quot;effect_modifier_names&quot;</span><span class="p">:</span> <span class="n">effect_modifiers</span><span class="p">,</span>
-        <span class="s2">&quot;dot_graph&quot;</span><span class="p">:</span> <span class="n">dot_graph</span><span class="p">,</span>
-        <span class="s2">&quot;gml_graph&quot;</span><span class="p">:</span> <span class="n">gml_graph</span><span class="p">,</span>
-        <span class="s2">&quot;ate&quot;</span><span class="p">:</span> <span class="n">ate</span>
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="n">ret_dict</span></div>
+    <span class="k">return</span> <span class="n">gml_graph</span></div>
 
 <div class="viewcode-block" id="xy_dataset"><a class="viewcode-back" href="../../dowhy.html#dowhy.datasets.xy_dataset">[docs]</a><span class="k">def</span> <span class="nf">xy_dataset</span><span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">effect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sd_error</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     <span class="n">treatment</span> <span class="o">=</span> <span class="s1">&#39;Treatment&#39;</span>

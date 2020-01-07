@@ -393,17 +393,17 @@ div.rendered_html tbody tr:hover {
 <h1>Demo for the DoWhy causal API<a class="headerlink" href="#Demo-for-the-DoWhy-causal-API" title="Permalink to this headline">¶</a></h1>
 <p>We show a simple example of adding a causal extension to any dataframe.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../&quot;</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -417,8 +417,8 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -429,20 +429,125 @@ div.rendered_html tbody tr:hover {
         <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span>
 <span class="n">df</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span> <span class="c1"># Adding noise to data. Without noise, the variance in Y|X, Z is zero, and mcmc fails.</span>
-<span class="n">data</span><span class="p">[</span><span class="s1">&#39;dot_graph&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;digraph { v -&gt;y;X0-&gt; v;X0-&gt; y;}&#39;</span>
+<span class="c1">#data[&#39;dot_graph&#39;] = &#39;digraph { v -&gt;y;X0-&gt; v;X0-&gt; y;}&#39;</span>
+
+<span class="n">treatment</span><span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">outcome</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">common_cause</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;common_causes_names&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">df</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>W0</th>
+      <th>v0</th>
+      <th>y</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.230046</td>
+      <td>False</td>
+      <td>0.328777</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>-0.625509</td>
+      <td>True</td>
+      <td>3.794958</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>-2.600417</td>
+      <td>False</td>
+      <td>-5.214096</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.146942</td>
+      <td>False</td>
+      <td>1.361876</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-0.919551</td>
+      <td>False</td>
+      <td>-2.228864</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>995</th>
+      <td>-0.063647</td>
+      <td>False</td>
+      <td>0.117779</td>
+    </tr>
+    <tr>
+      <th>996</th>
+      <td>-1.962547</td>
+      <td>False</td>
+      <td>-4.034488</td>
+    </tr>
+    <tr>
+      <th>997</th>
+      <td>-0.089728</td>
+      <td>True</td>
+      <td>5.780041</td>
+    </tr>
+    <tr>
+      <th>998</th>
+      <td>-0.334302</td>
+      <td>True</td>
+      <td>3.872871</td>
+    </tr>
+    <tr>
+      <th>999</th>
+      <td>-2.410448</td>
+      <td>False</td>
+      <td>-4.524930</td>
+    </tr>
+  </tbody>
+</table>
+<p>1000 rows × 3 columns</p>
+</div></div>
+</div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># data[&#39;df&#39;] is just a regular pandas.DataFrame</span>
-<span class="n">df</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span>
-                     <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;X0&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
-                     <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span>
-                     <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;X0&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">treatment</span><span class="p">,</span>
+                     <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">outcome</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">common_cause</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
+                     <span class="n">outcome</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span>
+                     <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="n">common_cause</span><span class="p">])</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">treatment</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -452,11 +557,10 @@ div.rendered_html tbody tr:hover {
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 WARNING:dowhy.causal_model:Causal Graph not provided. DoWhy will construct a graph based on data inputs.
-INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v&#39;] on outcome [&#39;y&#39;]
-/home/amit/python-virtual-envs/env/lib/python3.5/site-packages/sklearn/ensemble/weight_boosting.py:29: DeprecationWarning: numpy.core.umath_tests is an internal NumPy module and should not be imported. It will be removed in a future NumPy release.
-  from numpy.core.umath_tests import inner1d
-INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;U&#39;, &#39;X0&#39;]
-WARNING:dowhy.causal_identifier:There are unobserved common causes. Causal effect cannot be identified.
+INFO:dowhy.causal_graph:If this is observed data (not from a randomized experiment), there might always be missing confounders. Adding a node named &#34;Unobserved Confounders&#34; to reflect this.
+INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#39;] on outcome [&#39;y&#39;]
+INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;W0&#39;, &#39;U&#39;]
+WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -464,7 +568,7 @@ WARNING:dowhy.causal_identifier:There are unobserved common causes. Causal effec
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-WARN: Do you want to continue by ignoring these unobserved confounders? [y/n] y
+WARN: Do you want to continue by ignoring any unobserved confounders? (use proceed_when_unidentifiable=True to disable this prompt) [y/n] y
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -477,26 +581,33 @@ INFO:dowhy.do_sampler:Using WeightingSampler for do sampling.
 INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 </pre></div></div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.axes._subplots.AxesSubplot at 0x7f713cd89390&gt;
+&lt;matplotlib.axes._subplots.AxesSubplot at 0x7f0f4a609e80&gt;
 </pre></div></div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_dowhy_causal_api_4_4.png" src="../_images/example_notebooks_dowhy_causal_api_4_4.png" />
+</div>
+</div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">df</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-              <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;X0&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
-              <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span>
+<span></span><span class="n">df</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+              <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">outcome</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">common_cause</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
+              <span class="n">outcome</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span>
               <span class="n">method</span><span class="o">=</span><span class="s1">&#39;weighting&#39;</span><span class="p">,</span>
-              <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;X0&#39;</span><span class="p">],</span>
-              <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+              <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="n">common_cause</span><span class="p">],</span>
+              <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">treatment</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -506,9 +617,10 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 WARNING:dowhy.causal_model:Causal Graph not provided. DoWhy will construct a graph based on data inputs.
-INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v&#39;] on outcome [&#39;y&#39;]
-INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;U&#39;, &#39;X0&#39;]
-WARNING:dowhy.causal_identifier:There are unobserved common causes. Causal effect cannot be identified.
+INFO:dowhy.causal_graph:If this is observed data (not from a randomized experiment), there might always be missing confounders. Adding a node named &#34;Unobserved Confounders&#34; to reflect this.
+INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#39;] on outcome [&#39;y&#39;]
+INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;W0&#39;, &#39;U&#39;]
+WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
 INFO:dowhy.causal_identifier:Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True.
 INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[]
 INFO:dowhy.do_sampler:Using WeightingSampler for do sampling.
@@ -516,12 +628,12 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.axes._subplots.AxesSubplot at 0x7f711416e208&gt;
+&lt;matplotlib.axes._subplots.AxesSubplot at 0x7f0f48316358&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -532,21 +644,22 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">cdf_1</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-              <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;X0&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
-              <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span>
+<span></span><span class="n">cdf_1</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+              <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">outcome</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">common_cause</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
+              <span class="n">outcome</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span>
               <span class="n">dot_graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dot_graph&#39;</span><span class="p">],</span>
               <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="n">cdf_0</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
-              <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;X0&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
-              <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span>
+<span class="n">cdf_0</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+              <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">outcome</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">common_cause</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
+              <span class="n">outcome</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span>
               <span class="n">dot_graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dot_graph&#39;</span><span class="p">],</span>
               <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
 </pre></div>
 </div>
 </div>
@@ -555,16 +668,16 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v&#39;] on outcome [&#39;y&#39;]
-INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;U&#39;, &#39;X0&#39;]
-WARNING:dowhy.causal_identifier:There are unobserved common causes. Causal effect cannot be identified.
+INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#39;] on outcome [&#39;y&#39;]
+INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;W0&#39;, &#39;U&#39;]
+WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
 INFO:dowhy.causal_identifier:Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True.
 INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[]
 INFO:dowhy.do_sampler:Using WeightingSampler for do sampling.
 INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
-INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v&#39;] on outcome [&#39;y&#39;]
-INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;U&#39;, &#39;X0&#39;]
-WARNING:dowhy.causal_identifier:There are unobserved common causes. Causal effect cannot be identified.
+INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#39;] on outcome [&#39;y&#39;]
+INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;W0&#39;, &#39;U&#39;]
+WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
 INFO:dowhy.causal_identifier:Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True.
 INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[]
 INFO:dowhy.do_sampler:Using WeightingSampler for do sampling.
@@ -572,7 +685,7 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -581,6 +694,139 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 </div>
 </div>
 <div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>W0</th>
+      <th>v0</th>
+      <th>y</th>
+      <th>propensity_score</th>
+      <th>weight</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>-0.583286</td>
+      <td>False</td>
+      <td>-2.456860</td>
+      <td>0.574597</td>
+      <td>1.740350</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>-1.853274</td>
+      <td>False</td>
+      <td>-3.699267</td>
+      <td>0.754520</td>
+      <td>1.325346</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>-1.530711</td>
+      <td>False</td>
+      <td>-4.384006</td>
+      <td>0.713824</td>
+      <td>1.400906</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-0.036469</td>
+      <td>False</td>
+      <td>-2.269524</td>
+      <td>0.486654</td>
+      <td>2.054847</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-1.749115</td>
+      <td>False</td>
+      <td>-3.311137</td>
+      <td>0.741816</td>
+      <td>1.348043</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>995</th>
+      <td>-1.227516</td>
+      <td>False</td>
+      <td>-0.875867</td>
+      <td>0.672107</td>
+      <td>1.487859</td>
+    </tr>
+    <tr>
+      <th>996</th>
+      <td>-0.405553</td>
+      <td>False</td>
+      <td>-1.427872</td>
+      <td>0.546258</td>
+      <td>1.830637</td>
+    </tr>
+    <tr>
+      <th>997</th>
+      <td>0.230046</td>
+      <td>False</td>
+      <td>0.328777</td>
+      <td>0.443752</td>
+      <td>2.253509</td>
+    </tr>
+    <tr>
+      <th>998</th>
+      <td>-2.157752</td>
+      <td>False</td>
+      <td>-4.830362</td>
+      <td>0.789181</td>
+      <td>1.267136</td>
+    </tr>
+    <tr>
+      <th>999</th>
+      <td>-0.453149</td>
+      <td>False</td>
+      <td>-2.167928</td>
+      <td>0.553884</td>
+      <td>1.805431</td>
+    </tr>
+  </tbody>
+</table>
+<p>1000 rows × 5 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">cdf_1</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
@@ -603,8 +849,8 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>X0</th>
-      <th>v</th>
+      <th>W0</th>
+      <th>v0</th>
       <th>y</th>
       <th>propensity_score</th>
       <th>weight</th>
@@ -613,243 +859,43 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.403928</td>
-      <td>0.0</td>
-      <td>2.432356</td>
-      <td>0.589028</td>
-      <td>1.697711</td>
+      <td>-0.229733</td>
+      <td>True</td>
+      <td>4.754793</td>
+      <td>0.482075</td>
+      <td>2.074366</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>0.279008</td>
-      <td>0.0</td>
-      <td>-1.216479</td>
-      <td>0.607379</td>
-      <td>1.646418</td>
+      <td>-0.238390</td>
+      <td>True</td>
+      <td>4.487643</td>
+      <td>0.480676</td>
+      <td>2.080404</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-1.063192</td>
-      <td>0.0</td>
-      <td>-1.102948</td>
-      <td>0.778464</td>
-      <td>1.284582</td>
+      <td>-2.161507</td>
+      <td>True</td>
+      <td>-1.700668</td>
+      <td>0.210415</td>
+      <td>4.752520</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-0.460479</td>
-      <td>0.0</td>
-      <td>-1.001995</td>
-      <td>0.708544</td>
-      <td>1.411345</td>
+      <td>-1.639879</td>
+      <td>True</td>
+      <td>2.173829</td>
+      <td>0.271959</td>
+      <td>3.677028</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-0.384204</td>
-      <td>0.0</td>
-      <td>1.008581</td>
-      <td>0.698823</td>
-      <td>1.430977</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>0.486305</td>
-      <td>0.0</td>
-      <td>-1.399648</td>
-      <td>0.576787</td>
-      <td>1.733743</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>0.952612</td>
-      <td>0.0</td>
-      <td>0.666174</td>
-      <td>0.506141</td>
-      <td>1.975735</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>1.734657</td>
-      <td>0.0</td>
-      <td>1.136252</td>
-      <td>0.388537</td>
-      <td>2.573756</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>0.162469</td>
-      <td>0.0</td>
-      <td>-0.436301</td>
-      <td>0.624230</td>
-      <td>1.601972</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>0.454948</td>
-      <td>0.0</td>
-      <td>1.149705</td>
-      <td>0.581459</td>
-      <td>1.719813</td>
-    </tr>
-    <tr>
-      <th>10</th>
-      <td>2.418322</td>
-      <td>0.0</td>
-      <td>4.043232</td>
-      <td>0.294972</td>
-      <td>3.390156</td>
-    </tr>
-    <tr>
-      <th>11</th>
-      <td>-0.225459</td>
-      <td>0.0</td>
-      <td>-0.895094</td>
-      <td>0.678016</td>
-      <td>1.474892</td>
-    </tr>
-    <tr>
-      <th>12</th>
-      <td>-0.232126</td>
-      <td>0.0</td>
-      <td>-0.967473</td>
-      <td>0.678905</td>
-      <td>1.472961</td>
-    </tr>
-    <tr>
-      <th>13</th>
-      <td>1.168640</td>
-      <td>0.0</td>
-      <td>3.631667</td>
-      <td>0.473155</td>
-      <td>2.113473</td>
-    </tr>
-    <tr>
-      <th>14</th>
-      <td>1.159903</td>
-      <td>0.0</td>
-      <td>0.663069</td>
-      <td>0.474486</td>
-      <td>2.107542</td>
-    </tr>
-    <tr>
-      <th>15</th>
-      <td>-2.573709</td>
-      <td>0.0</td>
-      <td>-3.825602</td>
-      <td>0.898443</td>
-      <td>1.113036</td>
-    </tr>
-    <tr>
-      <th>16</th>
-      <td>-1.947548</td>
-      <td>0.0</td>
-      <td>-3.231881</td>
-      <td>0.857820</td>
-      <td>1.165745</td>
-    </tr>
-    <tr>
-      <th>17</th>
-      <td>2.066918</td>
-      <td>0.0</td>
-      <td>2.767655</td>
-      <td>0.341513</td>
-      <td>2.928150</td>
-    </tr>
-    <tr>
-      <th>18</th>
-      <td>-0.099689</td>
-      <td>0.0</td>
-      <td>-2.493016</td>
-      <td>0.661008</td>
-      <td>1.512841</td>
-    </tr>
-    <tr>
-      <th>19</th>
-      <td>0.067214</td>
-      <td>0.0</td>
-      <td>0.407400</td>
-      <td>0.637786</td>
-      <td>1.567923</td>
-    </tr>
-    <tr>
-      <th>20</th>
-      <td>0.355654</td>
-      <td>0.0</td>
-      <td>-0.622093</td>
-      <td>0.596152</td>
-      <td>1.677424</td>
-    </tr>
-    <tr>
-      <th>21</th>
-      <td>0.058065</td>
-      <td>0.0</td>
-      <td>0.518388</td>
-      <td>0.639077</td>
-      <td>1.564756</td>
-    </tr>
-    <tr>
-      <th>22</th>
-      <td>2.110771</td>
-      <td>0.0</td>
-      <td>1.983026</td>
-      <td>0.335510</td>
-      <td>2.980534</td>
-    </tr>
-    <tr>
-      <th>23</th>
-      <td>0.550294</td>
-      <td>0.0</td>
-      <td>1.993742</td>
-      <td>0.567212</td>
-      <td>1.763010</td>
-    </tr>
-    <tr>
-      <th>24</th>
-      <td>1.114494</td>
-      <td>0.0</td>
-      <td>0.646450</td>
-      <td>0.481412</td>
-      <td>2.077224</td>
-    </tr>
-    <tr>
-      <th>25</th>
-      <td>-1.904864</td>
-      <td>0.0</td>
-      <td>-2.301250</td>
-      <td>0.854608</td>
-      <td>1.170127</td>
-    </tr>
-    <tr>
-      <th>26</th>
-      <td>1.426611</td>
-      <td>0.0</td>
-      <td>0.676993</td>
-      <td>0.434093</td>
-      <td>2.303653</td>
-    </tr>
-    <tr>
-      <th>27</th>
-      <td>0.430236</td>
-      <td>0.0</td>
-      <td>0.762308</td>
-      <td>0.585130</td>
-      <td>1.709022</td>
-    </tr>
-    <tr>
-      <th>28</th>
-      <td>-0.364460</td>
-      <td>0.0</td>
-      <td>-0.605725</td>
-      <td>0.696277</td>
-      <td>1.436210</td>
-    </tr>
-    <tr>
-      <th>29</th>
-      <td>-0.016650</td>
-      <td>0.0</td>
-      <td>-0.803179</td>
-      <td>0.649543</td>
-      <td>1.539544</td>
+      <td>0.030840</td>
+      <td>True</td>
+      <td>4.465655</td>
+      <td>0.524224</td>
+      <td>1.907580</td>
     </tr>
     <tr>
       <th>...</th>
@@ -860,777 +906,44 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
       <td>...</td>
     </tr>
     <tr>
-      <th>970</th>
-      <td>1.858503</td>
-      <td>0.0</td>
-      <td>3.169293</td>
-      <td>0.370711</td>
-      <td>2.697516</td>
-    </tr>
-    <tr>
-      <th>971</th>
-      <td>0.512087</td>
-      <td>0.0</td>
-      <td>-0.373805</td>
-      <td>0.572935</td>
-      <td>1.745398</td>
-    </tr>
-    <tr>
-      <th>972</th>
-      <td>0.535486</td>
-      <td>0.0</td>
-      <td>1.478740</td>
-      <td>0.569432</td>
-      <td>1.756136</td>
-    </tr>
-    <tr>
-      <th>973</th>
-      <td>-1.594649</td>
-      <td>0.0</td>
-      <td>-1.892352</td>
-      <td>0.829430</td>
-      <td>1.205648</td>
-    </tr>
-    <tr>
-      <th>974</th>
-      <td>0.451503</td>
-      <td>0.0</td>
-      <td>0.266634</td>
-      <td>0.581971</td>
-      <td>1.718299</td>
-    </tr>
-    <tr>
-      <th>975</th>
-      <td>0.787764</td>
-      <td>0.0</td>
-      <td>2.118886</td>
-      <td>0.531291</td>
-      <td>1.882207</td>
-    </tr>
-    <tr>
-      <th>976</th>
-      <td>0.965489</td>
-      <td>0.0</td>
-      <td>0.184147</td>
-      <td>0.504173</td>
-      <td>1.983445</td>
-    </tr>
-    <tr>
-      <th>977</th>
-      <td>-1.571637</td>
-      <td>0.0</td>
-      <td>-1.838201</td>
-      <td>0.827431</td>
-      <td>1.208561</td>
-    </tr>
-    <tr>
-      <th>978</th>
-      <td>1.445333</td>
-      <td>0.0</td>
-      <td>1.422265</td>
-      <td>0.431284</td>
-      <td>2.318657</td>
-    </tr>
-    <tr>
-      <th>979</th>
-      <td>-1.001572</td>
-      <td>0.0</td>
-      <td>-0.522836</td>
-      <td>0.771900</td>
-      <td>1.295505</td>
-    </tr>
-    <tr>
-      <th>980</th>
-      <td>-0.346370</td>
-      <td>0.0</td>
-      <td>0.304536</td>
-      <td>0.693934</td>
-      <td>1.441060</td>
-    </tr>
-    <tr>
-      <th>981</th>
-      <td>2.244912</td>
-      <td>0.0</td>
-      <td>2.894537</td>
-      <td>0.317483</td>
-      <td>3.149770</td>
-    </tr>
-    <tr>
-      <th>982</th>
-      <td>0.910378</td>
-      <td>0.0</td>
-      <td>-0.891502</td>
-      <td>0.512592</td>
-      <td>1.950868</td>
-    </tr>
-    <tr>
-      <th>983</th>
-      <td>0.421260</td>
-      <td>0.0</td>
-      <td>0.879862</td>
-      <td>0.586462</td>
-      <td>1.705142</td>
-    </tr>
-    <tr>
-      <th>984</th>
-      <td>0.898803</td>
-      <td>0.0</td>
-      <td>1.197624</td>
-      <td>0.514360</td>
-      <td>1.944164</td>
-    </tr>
-    <tr>
-      <th>985</th>
-      <td>0.486305</td>
-      <td>0.0</td>
-      <td>-1.399648</td>
-      <td>0.576787</td>
-      <td>1.733743</td>
-    </tr>
-    <tr>
-      <th>986</th>
-      <td>1.381629</td>
-      <td>0.0</td>
-      <td>0.833731</td>
-      <td>0.440860</td>
-      <td>2.268296</td>
-    </tr>
-    <tr>
-      <th>987</th>
-      <td>0.964047</td>
-      <td>0.0</td>
-      <td>1.859069</td>
-      <td>0.504393</td>
-      <td>1.982579</td>
-    </tr>
-    <tr>
-      <th>988</th>
-      <td>0.044596</td>
-      <td>0.0</td>
-      <td>0.087691</td>
-      <td>0.640974</td>
-      <td>1.560126</td>
-    </tr>
-    <tr>
-      <th>989</th>
-      <td>0.511136</td>
-      <td>0.0</td>
-      <td>1.715394</td>
-      <td>0.573078</td>
-      <td>1.744964</td>
-    </tr>
-    <tr>
-      <th>990</th>
-      <td>1.488634</td>
-      <td>0.0</td>
-      <td>-0.646628</td>
-      <td>0.424804</td>
-      <td>2.354025</td>
-    </tr>
-    <tr>
-      <th>991</th>
-      <td>-0.744944</td>
-      <td>0.0</td>
-      <td>-2.830292</td>
-      <td>0.743112</td>
-      <td>1.345693</td>
-    </tr>
-    <tr>
-      <th>992</th>
-      <td>2.189711</td>
-      <td>0.0</td>
-      <td>1.736144</td>
-      <td>0.324840</td>
-      <td>3.078443</td>
-    </tr>
-    <tr>
-      <th>993</th>
-      <td>-0.686813</td>
-      <td>0.0</td>
-      <td>-1.729886</td>
-      <td>0.736270</td>
-      <td>1.358197</td>
-    </tr>
-    <tr>
-      <th>994</th>
-      <td>0.120585</td>
-      <td>0.0</td>
-      <td>0.793797</td>
-      <td>0.630216</td>
-      <td>1.586756</td>
-    </tr>
-    <tr>
       <th>995</th>
-      <td>-0.287980</td>
-      <td>0.0</td>
-      <td>-0.591574</td>
-      <td>0.686301</td>
-      <td>1.457086</td>
+      <td>-1.688769</td>
+      <td>True</td>
+      <td>2.404017</td>
+      <td>0.265737</td>
+      <td>3.763121</td>
     </tr>
     <tr>
       <th>996</th>
-      <td>1.073967</td>
-      <td>0.0</td>
-      <td>3.002727</td>
-      <td>0.487599</td>
-      <td>2.050866</td>
+      <td>-0.910527</td>
+      <td>True</td>
+      <td>2.528176</td>
+      <td>0.374608</td>
+      <td>2.669460</td>
     </tr>
     <tr>
       <th>997</th>
-      <td>0.937557</td>
-      <td>0.0</td>
-      <td>1.944627</td>
-      <td>0.508441</td>
-      <td>1.966797</td>
+      <td>-2.838431</td>
+      <td>True</td>
+      <td>-0.226373</td>
+      <td>0.146704</td>
+      <td>6.816457</td>
     </tr>
     <tr>
       <th>998</th>
-      <td>-0.459117</td>
-      <td>0.0</td>
-      <td>-1.872491</td>
-      <td>0.708372</td>
-      <td>1.411687</td>
+      <td>0.429132</td>
+      <td>True</td>
+      <td>6.865883</td>
+      <td>0.587791</td>
+      <td>1.701285</td>
     </tr>
     <tr>
       <th>999</th>
-      <td>0.964047</td>
-      <td>0.0</td>
-      <td>1.859069</td>
-      <td>0.504393</td>
-      <td>1.982579</td>
-    </tr>
-  </tbody>
-</table>
-<p>1000 rows × 5 columns</p>
-</div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">cdf_1</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
-</div>
-<div class="output_area rendered_html docutils container">
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>X0</th>
-      <th>v</th>
-      <th>y</th>
-      <th>propensity_score</th>
-      <th>weight</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>0.290789</td>
-      <td>1.0</td>
-      <td>3.979893</td>
-      <td>0.394340</td>
-      <td>2.535886</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>0.512625</td>
-      <td>1.0</td>
-      <td>4.475797</td>
-      <td>0.427145</td>
-      <td>2.341125</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>1.062969</td>
-      <td>1.0</td>
-      <td>6.673199</td>
-      <td>0.510721</td>
-      <td>1.958015</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>-0.624970</td>
-      <td>1.0</td>
-      <td>4.060173</td>
-      <td>0.271135</td>
-      <td>3.688195</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>-0.148206</td>
-      <td>1.0</td>
-      <td>4.703679</td>
-      <td>0.332379</td>
-      <td>3.008615</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>1.719316</td>
-      <td>1.0</td>
-      <td>5.756267</td>
-      <td>0.609233</td>
-      <td>1.641409</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>-0.619271</td>
-      <td>1.0</td>
-      <td>5.680458</td>
-      <td>0.271824</td>
-      <td>3.678846</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>0.977741</td>
-      <td>1.0</td>
-      <td>4.057646</td>
-      <td>0.497699</td>
-      <td>2.009247</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>-0.307030</td>
-      <td>1.0</td>
-      <td>4.414821</td>
-      <td>0.311197</td>
-      <td>3.213395</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>0.277186</td>
-      <td>1.0</td>
-      <td>5.519333</td>
-      <td>0.392355</td>
-      <td>2.548710</td>
-    </tr>
-    <tr>
-      <th>10</th>
-      <td>-0.857098</td>
-      <td>1.0</td>
-      <td>4.012558</td>
-      <td>0.244021</td>
-      <td>4.098008</td>
-    </tr>
-    <tr>
-      <th>11</th>
-      <td>1.770647</td>
-      <td>1.0</td>
-      <td>7.226577</td>
-      <td>0.616676</td>
-      <td>1.621597</td>
-    </tr>
-    <tr>
-      <th>12</th>
-      <td>1.291454</td>
-      <td>1.0</td>
-      <td>5.838120</td>
-      <td>0.545512</td>
-      <td>1.833139</td>
-    </tr>
-    <tr>
-      <th>13</th>
-      <td>1.144755</td>
-      <td>1.0</td>
-      <td>7.049113</td>
-      <td>0.523204</td>
-      <td>1.911299</td>
-    </tr>
-    <tr>
-      <th>14</th>
-      <td>1.138345</td>
-      <td>1.0</td>
-      <td>6.424092</td>
-      <td>0.522227</td>
-      <td>1.914877</td>
-    </tr>
-    <tr>
-      <th>15</th>
-      <td>1.052117</td>
-      <td>1.0</td>
-      <td>6.936858</td>
-      <td>0.509064</td>
-      <td>1.964391</td>
-    </tr>
-    <tr>
-      <th>16</th>
-      <td>0.637922</td>
-      <td>1.0</td>
-      <td>5.555444</td>
-      <td>0.445981</td>
-      <td>2.242246</td>
-    </tr>
-    <tr>
-      <th>17</th>
-      <td>0.649826</td>
-      <td>1.0</td>
-      <td>6.410330</td>
-      <td>0.447780</td>
-      <td>2.233239</td>
-    </tr>
-    <tr>
-      <th>18</th>
-      <td>2.460420</td>
-      <td>1.0</td>
-      <td>8.792864</td>
-      <td>0.710351</td>
-      <td>1.407754</td>
-    </tr>
-    <tr>
-      <th>19</th>
-      <td>0.243835</td>
-      <td>1.0</td>
-      <td>5.075650</td>
-      <td>0.387506</td>
-      <td>2.580606</td>
-    </tr>
-    <tr>
-      <th>20</th>
-      <td>0.807812</td>
-      <td>1.0</td>
-      <td>4.731404</td>
-      <td>0.471762</td>
-      <td>2.119715</td>
-    </tr>
-    <tr>
-      <th>21</th>
-      <td>1.298341</td>
-      <td>1.0</td>
-      <td>7.758199</td>
-      <td>0.546556</td>
-      <td>1.829639</td>
-    </tr>
-    <tr>
-      <th>22</th>
-      <td>0.240623</td>
-      <td>1.0</td>
-      <td>6.008571</td>
-      <td>0.387040</td>
-      <td>2.583712</td>
-    </tr>
-    <tr>
-      <th>23</th>
-      <td>1.058440</td>
-      <td>1.0</td>
-      <td>6.897561</td>
-      <td>0.510030</td>
-      <td>1.960671</td>
-    </tr>
-    <tr>
-      <th>24</th>
-      <td>0.069249</td>
-      <td>1.0</td>
-      <td>7.055973</td>
-      <td>0.362501</td>
-      <td>2.758612</td>
-    </tr>
-    <tr>
-      <th>25</th>
-      <td>1.407864</td>
-      <td>1.0</td>
-      <td>4.980558</td>
-      <td>0.563090</td>
-      <td>1.775916</td>
-    </tr>
-    <tr>
-      <th>26</th>
-      <td>-0.692247</td>
-      <td>1.0</td>
-      <td>4.488188</td>
-      <td>0.263085</td>
-      <td>3.801047</td>
-    </tr>
-    <tr>
-      <th>27</th>
-      <td>0.400927</td>
-      <td>1.0</td>
-      <td>5.207265</td>
-      <td>0.410528</td>
-      <td>2.435890</td>
-    </tr>
-    <tr>
-      <th>28</th>
-      <td>-1.033904</td>
-      <td>1.0</td>
-      <td>2.990824</td>
-      <td>0.224639</td>
-      <td>4.451583</td>
-    </tr>
-    <tr>
-      <th>29</th>
-      <td>-0.776183</td>
-      <td>1.0</td>
-      <td>5.405714</td>
-      <td>0.253260</td>
-      <td>3.948510</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>970</th>
-      <td>1.304562</td>
-      <td>1.0</td>
-      <td>6.541645</td>
-      <td>0.547498</td>
-      <td>1.826490</td>
-    </tr>
-    <tr>
-      <th>971</th>
-      <td>-0.262312</td>
-      <td>1.0</td>
-      <td>5.762821</td>
-      <td>0.317087</td>
-      <td>3.153713</td>
-    </tr>
-    <tr>
-      <th>972</th>
-      <td>1.147639</td>
-      <td>1.0</td>
-      <td>5.315407</td>
-      <td>0.523644</td>
-      <td>1.909694</td>
-    </tr>
-    <tr>
-      <th>973</th>
-      <td>0.184374</td>
-      <td>1.0</td>
-      <td>4.284324</td>
-      <td>0.378915</td>
-      <td>2.639111</td>
-    </tr>
-    <tr>
-      <th>974</th>
-      <td>-0.714900</td>
-      <td>1.0</td>
-      <td>4.892138</td>
-      <td>0.260410</td>
-      <td>3.840102</td>
-    </tr>
-    <tr>
-      <th>975</th>
-      <td>1.098240</td>
-      <td>1.0</td>
-      <td>4.752127</td>
-      <td>0.516107</td>
-      <td>1.937582</td>
-    </tr>
-    <tr>
-      <th>976</th>
-      <td>0.400927</td>
-      <td>1.0</td>
-      <td>5.207265</td>
-      <td>0.410528</td>
-      <td>2.435890</td>
-    </tr>
-    <tr>
-      <th>977</th>
-      <td>-0.061028</td>
-      <td>1.0</td>
-      <td>3.880924</td>
-      <td>0.344307</td>
-      <td>2.904381</td>
-    </tr>
-    <tr>
-      <th>978</th>
-      <td>1.612085</td>
-      <td>1.0</td>
-      <td>7.568635</td>
-      <td>0.593521</td>
-      <td>1.684859</td>
-    </tr>
-    <tr>
-      <th>979</th>
-      <td>1.329355</td>
-      <td>1.0</td>
-      <td>6.351310</td>
-      <td>0.551250</td>
-      <td>1.814060</td>
-    </tr>
-    <tr>
-      <th>980</th>
-      <td>0.648052</td>
-      <td>1.0</td>
-      <td>4.170338</td>
-      <td>0.447512</td>
-      <td>2.234577</td>
-    </tr>
-    <tr>
-      <th>981</th>
-      <td>1.148671</td>
-      <td>1.0</td>
-      <td>5.878938</td>
-      <td>0.523801</td>
-      <td>1.909120</td>
-    </tr>
-    <tr>
-      <th>982</th>
-      <td>-0.749465</td>
-      <td>1.0</td>
-      <td>3.798001</td>
-      <td>0.256361</td>
-      <td>3.900747</td>
-    </tr>
-    <tr>
-      <th>983</th>
-      <td>-0.776183</td>
-      <td>1.0</td>
-      <td>5.405714</td>
-      <td>0.253260</td>
-      <td>3.948510</td>
-    </tr>
-    <tr>
-      <th>984</th>
-      <td>0.323076</td>
-      <td>1.0</td>
-      <td>5.351432</td>
-      <td>0.399063</td>
-      <td>2.505872</td>
-    </tr>
-    <tr>
-      <th>985</th>
-      <td>-0.743046</td>
-      <td>1.0</td>
-      <td>3.011968</td>
-      <td>0.257110</td>
-      <td>3.889387</td>
-    </tr>
-    <tr>
-      <th>986</th>
-      <td>-0.375397</td>
-      <td>1.0</td>
-      <td>5.369006</td>
-      <td>0.302311</td>
-      <td>3.307852</td>
-    </tr>
-    <tr>
-      <th>987</th>
-      <td>-0.379267</td>
-      <td>1.0</td>
-      <td>4.455194</td>
-      <td>0.301812</td>
-      <td>3.313317</td>
-    </tr>
-    <tr>
-      <th>988</th>
-      <td>1.768568</td>
-      <td>1.0</td>
-      <td>6.877053</td>
-      <td>0.616376</td>
-      <td>1.622387</td>
-    </tr>
-    <tr>
-      <th>989</th>
-      <td>1.076537</td>
-      <td>1.0</td>
-      <td>5.635090</td>
-      <td>0.512794</td>
-      <td>1.950102</td>
-    </tr>
-    <tr>
-      <th>990</th>
-      <td>1.836512</td>
-      <td>1.0</td>
-      <td>8.447551</td>
-      <td>0.626147</td>
-      <td>1.597068</td>
-    </tr>
-    <tr>
-      <th>991</th>
-      <td>1.546945</td>
-      <td>1.0</td>
-      <td>7.857669</td>
-      <td>0.583881</td>
-      <td>1.712678</td>
-    </tr>
-    <tr>
-      <th>992</th>
-      <td>1.138345</td>
-      <td>1.0</td>
-      <td>6.424092</td>
-      <td>0.522227</td>
-      <td>1.914877</td>
-    </tr>
-    <tr>
-      <th>993</th>
-      <td>0.959500</td>
-      <td>1.0</td>
-      <td>5.087669</td>
-      <td>0.494912</td>
-      <td>2.020562</td>
-    </tr>
-    <tr>
-      <th>994</th>
-      <td>-0.727181</td>
-      <td>1.0</td>
-      <td>3.334014</td>
-      <td>0.258967</td>
-      <td>3.861503</td>
-    </tr>
-    <tr>
-      <th>995</th>
-      <td>-0.692247</td>
-      <td>1.0</td>
-      <td>4.488188</td>
-      <td>0.263085</td>
-      <td>3.801047</td>
-    </tr>
-    <tr>
-      <th>996</th>
-      <td>1.336478</td>
-      <td>1.0</td>
-      <td>7.996413</td>
-      <td>0.552327</td>
-      <td>1.810523</td>
-    </tr>
-    <tr>
-      <th>997</th>
-      <td>0.722018</td>
-      <td>1.0</td>
-      <td>6.028093</td>
-      <td>0.458715</td>
-      <td>2.180002</td>
-    </tr>
-    <tr>
-      <th>998</th>
-      <td>0.231477</td>
-      <td>1.0</td>
-      <td>5.734336</td>
-      <td>0.385715</td>
-      <td>2.592590</td>
-    </tr>
-    <tr>
-      <th>999</th>
-      <td>-0.329909</td>
-      <td>1.0</td>
-      <td>4.198863</td>
-      <td>0.308208</td>
-      <td>3.244566</td>
+      <td>-1.509348</td>
+      <td>True</td>
+      <td>2.153207</td>
+      <td>0.289010</td>
+      <td>3.460088</td>
     </tr>
   </tbody>
 </table>
@@ -1641,7 +954,7 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 <h2>Comparing the estimate to Linear Regression<a class="headerlink" href="#Comparing-the-estimate-to-Linear-Regression" title="Permalink to this headline">¶</a></h2>
 <p>First, estimating the effect using the causal data frame, and the 95% confidence interval.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1650,15 +963,15 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 4.888240895329525$</div></div>
+$\displaystyle 5.006194579687894$</div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1667,52 +980,52 @@ $\displaystyle 4.888240895329525$</div></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 0.1313720303264358$</div></div>
+$\displaystyle 0.2245958282589085$</div></div>
 </div>
 <p>Comparing to the estimate from OLS.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">model</span> <span class="o">=</span> <span class="n">OLS</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;X0&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">]])</span>
+<span></span><span class="n">model</span> <span class="o">=</span> <span class="n">OLS</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">outcome</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="n">common_cause</span><span class="p">,</span> <span class="n">treatment</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
 <span class="n">result</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
 <table class="simpletable">
 <caption>OLS Regression Results</caption>
 <tr>
-  <th>Dep. Variable:</th>            <td>y</td>        <th>  R-squared (uncentered):</th>      <td>   0.939</td>
+  <th>Dep. Variable:</th>            <td>y</td>        <th>  R-squared (uncentered):</th>      <td>   0.938</td>
 </tr>
 <tr>
   <th>Model:</th>                   <td>OLS</td>       <th>  Adj. R-squared (uncentered):</th> <td>   0.938</td>
 </tr>
 <tr>
-  <th>Method:</th>             <td>Least Squares</td>  <th>  F-statistic:       </th>          <td>   7629.</td>
+  <th>Method:</th>             <td>Least Squares</td>  <th>  F-statistic:       </th>          <td>   7544.</td>
 </tr>
 <tr>
-  <th>Date:</th>             <td>Sun, 13 Oct 2019</td> <th>  Prob (F-statistic):</th>           <td>  0.00</td>
+  <th>Date:</th>             <td>Tue, 07 Jan 2020</td> <th>  Prob (F-statistic):</th>           <td>  0.00</td>
 </tr>
 <tr>
-  <th>Time:</th>                 <td>18:13:18</td>     <th>  Log-Likelihood:    </th>          <td> -1401.9</td>
+  <th>Time:</th>                 <td>11:54:35</td>     <th>  Log-Likelihood:    </th>          <td> -1408.7</td>
 </tr>
 <tr>
-  <th>No. Observations:</th>      <td>  1000</td>      <th>  AIC:               </th>          <td>   2808.</td>
+  <th>No. Observations:</th>      <td>  1000</td>      <th>  AIC:               </th>          <td>   2821.</td>
 </tr>
 <tr>
-  <th>Df Residuals:</th>          <td>   998</td>      <th>  BIC:               </th>          <td>   2818.</td>
+  <th>Df Residuals:</th>          <td>   998</td>      <th>  BIC:               </th>          <td>   2831.</td>
 </tr>
 <tr>
   <th>Df Model:</th>              <td>     2</td>      <th>                     </th>              <td> </td>
@@ -1726,24 +1039,24 @@ $\displaystyle 0.1313720303264358$</div></div>
    <td></td>     <th>coef</th>     <th>std err</th>      <th>t</th>      <th>P>|t|</th>  <th>[0.025</th>    <th>0.975]</th>
 </tr>
 <tr>
-  <th>X0</th> <td>    1.1797</td> <td>    0.032</td> <td>   37.032</td> <td> 0.000</td> <td>    1.117</td> <td>    1.242</td>
+  <th>x1</th> <td>    2.2679</td> <td>    0.025</td> <td>   89.049</td> <td> 0.000</td> <td>    2.218</td> <td>    2.318</td>
 </tr>
 <tr>
-  <th>v</th>  <td>    4.9677</td> <td>    0.053</td> <td>   93.266</td> <td> 0.000</td> <td>    4.863</td> <td>    5.072</td>
+  <th>x2</th> <td>    5.0091</td> <td>    0.050</td> <td>  100.297</td> <td> 0.000</td> <td>    4.911</td> <td>    5.107</td>
 </tr>
 </table>
 <table class="simpletable">
 <tr>
-  <th>Omnibus:</th>       <td> 4.477</td> <th>  Durbin-Watson:     </th> <td>   2.009</td>
+  <th>Omnibus:</th>       <td> 2.664</td> <th>  Durbin-Watson:     </th> <td>   2.034</td>
 </tr>
 <tr>
-  <th>Prob(Omnibus):</th> <td> 0.107</td> <th>  Jarque-Bera (JB):  </th> <td>   3.874</td>
+  <th>Prob(Omnibus):</th> <td> 0.264</td> <th>  Jarque-Bera (JB):  </th> <td>   2.431</td>
 </tr>
 <tr>
-  <th>Skew:</th>          <td>-0.076</td> <th>  Prob(JB):          </th> <td>   0.144</td>
+  <th>Skew:</th>          <td>-0.049</td> <th>  Prob(JB):          </th> <td>   0.297</td>
 </tr>
 <tr>
-  <th>Kurtosis:</th>      <td> 2.736</td> <th>  Cond. No.          </th> <td>    1.97</td>
+  <th>Kurtosis:</th>      <td> 2.779</td> <th>  Cond. No.          </th> <td>    2.03</td>
 </tr>
 </table><br/><br/>Warnings:<br/>[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.</div>
 </div>
