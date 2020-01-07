@@ -183,10 +183,10 @@ you can use the namespace as follows.
         treatment_is_binary=True)
 
     # data['df'] is just a regular pandas.DataFrame
-    data['df'].causal.do(x='v',
-                         variable_types={'v': 'b', 'y': 'c', 'X0': 'c'},
+    data['df'].causal.do(x='v0', # name of treatment variable
+                         variable_types={'v0': 'b', 'y': 'c', 'W0': 'c'},
                          outcome='y',
-                         common_causes=['X0']).groupby('v').mean().plot(y='y', kind='bar')
+                         common_causes=['W0']).groupby('v0').mean().plot(y='y', kind='bar')
 
 .. image:: https://raw.githubusercontent.com/microsoft/dowhy/master/docs/images/do_barplot.png
 
