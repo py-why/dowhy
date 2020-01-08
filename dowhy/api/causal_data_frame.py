@@ -88,6 +88,9 @@ class CausalAccessor(object):
                                              estimand_type=estimand_type,
                                              proceed_when_unidentifiable=proceed_when_unidentifiable)
         #self._identified_estimand = self._causal_model.identify_effect()
+        if not bool(variable_types): #check if the variables dictionary is empty
+            variable_types=dict(self._obj.dtypes) #Convert the series containing data types to a dictionary
+
         if not self._sampler:
             self._method = method
             do_sampler_class = do_samplers.get_class_object(method + "_sampler")
