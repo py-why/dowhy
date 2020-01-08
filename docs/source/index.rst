@@ -14,7 +14,6 @@
    example_notebooks/nb_index
    code_repo
    dowhy
-   modules
 
    
 
