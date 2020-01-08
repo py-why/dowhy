@@ -7,7 +7,13 @@ from dowhy.causal_refuter import CausalRefuter
 
 
 class PlaceboTreatmentRefuter(CausalRefuter):
+    """Refute an estimate by replacing treatment with a randomly-generated placebo variable.
 
+    Supports additional parameters that can be specified in the refute_estimate() method.
+
+    - '_placebo_type': Default is to generate random values for the treatment. If placebo_type is "permute", then the original treatment values are permuted by row.
+
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._placebo_type = kwargs["placebo_type"]

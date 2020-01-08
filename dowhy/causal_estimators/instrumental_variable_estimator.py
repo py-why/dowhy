@@ -12,7 +12,13 @@ from dowhy.utils.api import parse_state
 class InstrumentalVariableEstimator(CausalEstimator):
     """Compute effect of treatment using the instrumental variables method.
 
-    This is a superclass that is inherited by other specific methods.
+    This is also a superclass that can be inherited by other specific methods.
+
+
+    Supports additional parameters that can be specified in the estimate_effect() method.
+
+    - 'iv_instrument_name': Name of the specific instrumental variable to be used. Needs to be one of the IVs identified in the identification step. Default is to use all the IV variables from the identification step.
+
     """
 
     def __init__(self, *args, **kwargs):

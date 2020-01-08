@@ -2,6 +2,13 @@ from dowhy.causal_refuter import CausalRefuter, CausalRefutation
 
 
 class DataSubsetRefuter(CausalRefuter):
+    """Refute an estimate by rerunning it on a random subset of the original data.
+
+    Supports additional parameters that can be specified in the refute_estimate() method.
+
+    - 'subset_fraction': Fraction of the data to be used for re-estimation.
+
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

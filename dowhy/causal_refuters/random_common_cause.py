@@ -7,6 +7,10 @@ from dowhy.causal_refuter import CausalRefuter
 
 
 class RandomCommonCause(CausalRefuter):
+    """Refute an estimate by introducing a randomly generated confounder
+    (that may have been unobserved).
+
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

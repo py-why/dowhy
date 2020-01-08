@@ -10,6 +10,13 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
 
     Estimates effect by transforming the problem to an instrumental variables
     problem.
+
+    Supports additional parameters that can be specified in the estimate_effect() method.
+
+    * 'rd_variable_name': name of the variable on which the discontinuity occurs. This is the instrument.
+    * 'rd_threshold_value': Threshold at which the discontinuity occurs.
+    * 'rd_bandwidth': Distance from the threshold within which confounders can be considered the same between treatment and control. Considered band is (threshold +- bandwidth)
+
     """
 
     def __init__(self, *args, **kwargs):

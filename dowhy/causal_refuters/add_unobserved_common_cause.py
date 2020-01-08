@@ -11,6 +11,13 @@ class AddUnobservedCommonCause(CausalRefuter):
 
     """Add an unobserved confounder for refutation.
 
+    Supports additional parameters that can be specified in the refute_estimate() method.
+
+    - 'confounders_effect_on_treatment': how the simulated confounder affects the value of treatment. This can be linear (for continuous treatment) or binary_flip (for binary treatment)
+    - 'confounders_effect_on_outcome': how the simulated confounder affects the value of outcome. This can be linear (for continuous outcome) or binary_flip (for binary outcome)
+    - 'effect_strength_on_treatment': parameter for the strength of the effect of simulated confounder on treatment. For linear effect, it is the regression coeffient. For binary_flip, it is the probability that simulated confounder's effect flips the value of treatment from 0 to 1 (or vice-versa).
+    - 'effect_strength_on_outcome': parameter for the strength of the effect of simulated confounder on outcome. For linear effect, it is the regression coeffient. For binary_flip, it is the probability that simulated confounder's effect flips the value of outcome from 0 to 1 (or vice-versa).
+
     TODO: Needs scaled version of the parameters and an interpretation module
     (e.g., in comparison to biggest effect of known confounder)
     """

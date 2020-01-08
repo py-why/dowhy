@@ -11,6 +11,11 @@ class PropensityScoreWeightingEstimator(CausalEstimator):
     inverse probability of occurrence.
 
     Straightforward application of the back-door criterion.
+
+    Supports additional parameters that can be specified in the estimate_effect() method.
+
+    - 'weighting_scheme': This is the name of weighting method to use. Can be inverse propensity score ("ips_weight", default), stabilized IPS score ("ips_stabilized_weight"), or normalized IPS score ("ips_normalized_weight")
+
     """
 
     def __init__(self, *args, min_ps_score=0.05, max_ps_score=0.95, **kwargs):
