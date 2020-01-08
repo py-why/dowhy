@@ -90,10 +90,6 @@
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Linear-Model">Linear Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#EconML-methods">EconML methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Works-with-any-EconML-method">Works with any EconML method</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Refuting-the-estimate">Refuting the estimate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/load_graph_example.html">Different ways to load an input graph</a></li>
@@ -235,6 +231,13 @@
 <em class="property">class </em><code class="sig-prename descclassname">dowhy.causal_refuters.add_unobserved_common_cause.</code><code class="sig-name descname">AddUnobservedCommonCause</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/add_unobserved_common_cause.html#AddUnobservedCommonCause"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_refuters.add_unobserved_common_cause.AddUnobservedCommonCause" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="dowhy.html#dowhy.causal_refuter.CausalRefuter" title="dowhy.causal_refuter.CausalRefuter"><code class="xref py py-class docutils literal notranslate"><span class="pre">dowhy.causal_refuter.CausalRefuter</span></code></a></p>
 <p>Add an unobserved confounder for refutation.</p>
+<p>Supports additional parameters that can be specified in the refute_estimate() method.</p>
+<ul class="simple">
+<li><p>‘confounders_effect_on_treatment’: how the simulated confounder affects the value of treatment. This can be linear (for continuous treatment) or binary_flip (for binary treatment)</p></li>
+<li><p>‘confounders_effect_on_outcome’: how the simulated confounder affects the value of outcome. This can be linear (for continuous outcome) or binary_flip (for binary outcome)</p></li>
+<li><p>‘effect_strength_on_treatment’: parameter for the strength of the effect of simulated confounder on treatment. For linear effect, it is the regression coeffient. For binary_flip, it is the probability that simulated confounder’s effect flips the value of treatment from 0 to 1 (or vice-versa).</p></li>
+<li><p>‘effect_strength_on_outcome’: parameter for the strength of the effect of simulated confounder on outcome. For linear effect, it is the regression coeffient. For binary_flip, it is the probability that simulated confounder’s effect flips the value of outcome from 0 to 1 (or vice-versa).</p></li>
+</ul>
 <p>TODO: Needs scaled version of the parameters and an interpretation module
 (e.g., in comparison to biggest effect of known confounder)</p>
 <dl class="method">
@@ -256,6 +259,11 @@
 <dt id="dowhy.causal_refuters.data_subset_refuter.DataSubsetRefuter">
 <em class="property">class </em><code class="sig-prename descclassname">dowhy.causal_refuters.data_subset_refuter.</code><code class="sig-name descname">DataSubsetRefuter</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/data_subset_refuter.html#DataSubsetRefuter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_refuters.data_subset_refuter.DataSubsetRefuter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="dowhy.html#dowhy.causal_refuter.CausalRefuter" title="dowhy.causal_refuter.CausalRefuter"><code class="xref py py-class docutils literal notranslate"><span class="pre">dowhy.causal_refuter.CausalRefuter</span></code></a></p>
+<p>Refute an estimate by rerunning it on a random subset of the original data.</p>
+<p>Supports additional parameters that can be specified in the refute_estimate() method.</p>
+<ul class="simple">
+<li><p>‘subset_fraction’: Fraction of the data to be used for re-estimation.</p></li>
+</ul>
 <dl class="method">
 <dt id="dowhy.causal_refuters.data_subset_refuter.DataSubsetRefuter.refute_estimate">
 <code class="sig-name descname">refute_estimate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/data_subset_refuter.html#DataSubsetRefuter.refute_estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_refuters.data_subset_refuter.DataSubsetRefuter.refute_estimate" title="Permalink to this definition">¶</a></dt>
@@ -270,6 +278,11 @@
 <dt id="dowhy.causal_refuters.placebo_treatment_refuter.PlaceboTreatmentRefuter">
 <em class="property">class </em><code class="sig-prename descclassname">dowhy.causal_refuters.placebo_treatment_refuter.</code><code class="sig-name descname">PlaceboTreatmentRefuter</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/placebo_treatment_refuter.html#PlaceboTreatmentRefuter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_refuters.placebo_treatment_refuter.PlaceboTreatmentRefuter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="dowhy.html#dowhy.causal_refuter.CausalRefuter" title="dowhy.causal_refuter.CausalRefuter"><code class="xref py py-class docutils literal notranslate"><span class="pre">dowhy.causal_refuter.CausalRefuter</span></code></a></p>
+<p>Refute an estimate by replacing treatment with a randomly-generated placebo variable.</p>
+<p>Supports additional parameters that can be specified in the refute_estimate() method.</p>
+<ul class="simple">
+<li><p>‘_placebo_type’: Default is to generate random values for the treatment. If placebo_type is “permute”, then the original treatment values are permuted by row.</p></li>
+</ul>
 <dl class="method">
 <dt id="dowhy.causal_refuters.placebo_treatment_refuter.PlaceboTreatmentRefuter.refute_estimate">
 <code class="sig-name descname">refute_estimate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/placebo_treatment_refuter.html#PlaceboTreatmentRefuter.refute_estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_refuters.placebo_treatment_refuter.PlaceboTreatmentRefuter.refute_estimate" title="Permalink to this definition">¶</a></dt>
@@ -284,6 +297,8 @@
 <dt id="dowhy.causal_refuters.random_common_cause.RandomCommonCause">
 <em class="property">class </em><code class="sig-prename descclassname">dowhy.causal_refuters.random_common_cause.</code><code class="sig-name descname">RandomCommonCause</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/random_common_cause.html#RandomCommonCause"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_refuters.random_common_cause.RandomCommonCause" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="dowhy.html#dowhy.causal_refuter.CausalRefuter" title="dowhy.causal_refuter.CausalRefuter"><code class="xref py py-class docutils literal notranslate"><span class="pre">dowhy.causal_refuter.CausalRefuter</span></code></a></p>
+<p>Refute an estimate by introducing a randomly generated confounder
+(that may have been unobserved).</p>
 <dl class="method">
 <dt id="dowhy.causal_refuters.random_common_cause.RandomCommonCause.refute_estimate">
 <code class="sig-name descname">refute_estimate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/random_common_cause.html#RandomCommonCause.refute_estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_refuters.random_common_cause.RandomCommonCause.refute_estimate" title="Permalink to this definition">¶</a></dt>

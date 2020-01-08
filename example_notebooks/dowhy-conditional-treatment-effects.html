@@ -89,20 +89,27 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#Linear-Model">Linear Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#EconML-methods">EconML methods</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#CATE-Object-and-Confidence-Intervals">CATE Object and Confidence Intervals</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Can-provide-a-new-inputs-as-target-units-and-estimate-CATE-on-them.">Can provide a new inputs as target units and estimate CATE on them.</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Can-also-retrieve-the-raw-EconML-estimator-object-for-any-further-operations">Can also retrieve the raw EconML estimator object for any further operations</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Linear-Model">Linear Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#EconML-methods">EconML methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#CATE-Object-and-Confidence-Intervals">CATE Object and Confidence Intervals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Can-provide-a-new-inputs-as-target-units-and-estimate-CATE-on-them.">Can provide a new inputs as target units and estimate CATE on them.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Can-also-retrieve-the-raw-EconML-estimator-object-for-any-further-operations">Can also retrieve the raw EconML estimator object for any further operations</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#Works-with-any-EconML-method">Works with any EconML method</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#Refuting-the-estimate">Refuting the estimate</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#Random">Random</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Adding-an-unobserved-common-cause-variable">Adding an unobserved common cause variable</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Replacing-treatment-with-a-random-(placebo)-variable">Replacing treatment with a random (placebo) variable</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Removing-a-random-subset-of-the-data">Removing a random subset of the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Works-with-any-EconML-method">Works with any EconML method</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Continuous-treatment,-Continuous-outcome">Continuous treatment, Continuous outcome</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Binary-treatment,-Binary-outcome">Binary treatment, Binary outcome</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Instrumental-Variable-Method">Instrumental Variable Method</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Refuting-the-estimate">Refuting the estimate</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Random">Random</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Adding-an-unobserved-common-cause-variable">Adding an unobserved common cause variable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Replacing-treatment-with-a-random-(placebo)-variable">Replacing treatment with a random (placebo) variable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Removing-a-random-subset-of-the-data">Removing a random subset of the data</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
@@ -648,9 +655,8 @@ Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}�
 
 </pre></div></div>
 </div>
-</div>
 <div class="section" id="Linear-Model">
-<h1>Linear Model<a class="headerlink" href="#Linear-Model" title="Permalink to this headline">¶</a></h1>
+<h2>Linear Model<a class="headerlink" href="#Linear-Model" title="Permalink to this headline">¶</a></h2>
 <p>First, let us build some intuition using a linear model for estimating CATE. The effect modifiers (that lead to a heterogeneous treatment effect) can be modeled as interaction terms with the treatment. Thus, their value modulates the effect of treatment.</p>
 <p>Below the estimated effect of changing treatment from 0 to 1.</p>
 <div class="nbinput docutils container">
@@ -707,7 +713,7 @@ Value: 10.000000000000007
 </div>
 </div>
 <div class="section" id="EconML-methods">
-<h1>EconML methods<a class="headerlink" href="#EconML-methods" title="Permalink to this headline">¶</a></h1>
+<h2>EconML methods<a class="headerlink" href="#EconML-methods" title="Permalink to this headline">¶</a></h2>
 <p>We now move to the more advanced methods from the EconML package for estimating CATE.</p>
 <p>First, let us look at the double machine learning estimator. Method_name corresponds to the fully qualified name of the class that we want to use. For double ML, it is “econml.dml.DMLCateEstimator”.</p>
 <p>Target units defines the units over which the causal estimate is to be computed. This can be a lambda function filter on the original dataframe, a new Pandas dataframe, or a string corresponding to the three main kinds of target units (“ate”, “att” and “atc”). Below we show an example of a lambda function.</p>
@@ -849,7 +855,7 @@ Value: 6.478668642785378
 </pre></div></div>
 </div>
 <div class="section" id="CATE-Object-and-Confidence-Intervals">
-<h2>CATE Object and Confidence Intervals<a class="headerlink" href="#CATE-Object-and-Confidence-Intervals" title="Permalink to this headline">¶</a></h2>
+<h3>CATE Object and Confidence Intervals<a class="headerlink" href="#CATE-Object-and-Confidence-Intervals" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
@@ -953,7 +959,7 @@ Value: 8.59526782752452
 </div>
 </div>
 <div class="section" id="Can-provide-a-new-inputs-as-target-units-and-estimate-CATE-on-them.">
-<h2>Can provide a new inputs as target units and estimate CATE on them.<a class="headerlink" href="#Can-provide-a-new-inputs-as-target-units-and-estimate-CATE-on-them." title="Permalink to this headline">¶</a></h2>
+<h3>Can provide a new inputs as target units and estimate CATE on them.<a class="headerlink" href="#Can-provide-a-new-inputs-as-target-units-and-estimate-CATE-on-them." title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
@@ -1004,7 +1010,7 @@ INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2
 </div>
 </div>
 <div class="section" id="Can-also-retrieve-the-raw-EconML-estimator-object-for-any-further-operations">
-<h2>Can also retrieve the raw EconML estimator object for any further operations<a class="headerlink" href="#Can-also-retrieve-the-raw-EconML-estimator-object-for-any-further-operations" title="Permalink to this headline">¶</a></h2>
+<h3>Can also retrieve the raw EconML estimator object for any further operations<a class="headerlink" href="#Can-also-retrieve-the-raw-EconML-estimator-object-for-any-further-operations" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
@@ -1035,8 +1041,10 @@ INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2
 </div>
 </div>
 <div class="section" id="Works-with-any-EconML-method">
-<h1>Works with any EconML method<a class="headerlink" href="#Works-with-any-EconML-method" title="Permalink to this headline">¶</a></h1>
+<h2>Works with any EconML method<a class="headerlink" href="#Works-with-any-EconML-method" title="Permalink to this headline">¶</a></h2>
 <p>In addition to double machine learning, below we example analyses using orthogonal forests, DRLearner (bug to fix), and neural network-based instrumental variables.</p>
+<div class="section" id="Continuous-treatment,-Continuous-outcome">
+<h3>Continuous treatment, Continuous outcome<a class="headerlink" href="#Continuous-treatment,-Continuous-outcome" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
@@ -1114,6 +1122,9 @@ Value: 8.331353134942322
 [Parallel(n_jobs=-1)]: Done 1483 out of 1483 | elapsed: 11.6min finished
 </pre></div></div>
 </div>
+</div>
+<div class="section" id="Binary-treatment,-Binary-outcome">
+<h3>Binary treatment, Binary outcome<a class="headerlink" href="#Binary-treatment,-Binary-outcome" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
@@ -1294,6 +1305,9 @@ INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2
 <span class="ansi-red-fg">AssertionError</span>: Can only accept single dimensional outcomes Y! Use Y.ravel().
 </pre></div></div>
 </div>
+</div>
+<div class="section" id="Instrumental-Variable-Method">
+<h3>Instrumental Variable Method<a class="headerlink" href="#Instrumental-Variable-Method" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
@@ -1479,10 +1493,11 @@ Value: 6.484096527099609
 </pre></div></div>
 </div>
 </div>
+</div>
 <div class="section" id="Refuting-the-estimate">
-<h1>Refuting the estimate<a class="headerlink" href="#Refuting-the-estimate" title="Permalink to this headline">¶</a></h1>
+<h2>Refuting the estimate<a class="headerlink" href="#Refuting-the-estimate" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="Random">
-<h2>Random<a class="headerlink" href="#Random" title="Permalink to this headline">¶</a></h2>
+<h3>Random<a class="headerlink" href="#Random" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
@@ -1515,7 +1530,7 @@ New effect:(13.248034250593435,)
 </div>
 </div>
 <div class="section" id="Adding-an-unobserved-common-cause-variable">
-<h2>Adding an unobserved common cause variable<a class="headerlink" href="#Adding-an-unobserved-common-cause-variable" title="Permalink to this headline">¶</a></h2>
+<h3>Adding an unobserved common cause variable<a class="headerlink" href="#Adding-an-unobserved-common-cause-variable" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
@@ -1550,7 +1565,7 @@ New effect:(13.196059198878597,)
 </div>
 </div>
 <div class="section" id="Replacing-treatment-with-a-random-(placebo)-variable">
-<h2>Replacing treatment with a random (placebo) variable<a class="headerlink" href="#Replacing-treatment-with-a-random-(placebo)-variable" title="Permalink to this headline">¶</a></h2>
+<h3>Replacing treatment with a random (placebo) variable<a class="headerlink" href="#Replacing-treatment-with-a-random-(placebo)-variable" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
@@ -1584,7 +1599,7 @@ New effect:(0.0,)
 </div>
 </div>
 <div class="section" id="Removing-a-random-subset-of-the-data">
-<h2>Removing a random subset of the data<a class="headerlink" href="#Removing-a-random-subset-of-the-data" title="Permalink to this headline">¶</a></h2>
+<h3>Removing a random subset of the data<a class="headerlink" href="#Removing-a-random-subset-of-the-data" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
@@ -1617,6 +1632,7 @@ New effect:(13.150007335670214,)
 </pre></div></div>
 </div>
 <p>More refutation methods to come, especially specific to the CATE estimators.</p>
+</div>
 </div>
 </div>
 

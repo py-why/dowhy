@@ -90,10 +90,6 @@
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Linear-Model">Linear Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#EconML-methods">EconML methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Works-with-any-EconML-method">Works with any EconML method</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Refuting-the-estimate">Refuting the estimate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/load_graph_example.html">Different ways to load an input graph</a></li>
@@ -252,7 +248,11 @@
 <em class="property">class </em><code class="sig-prename descclassname">dowhy.causal_estimators.instrumental_variable_estimator.</code><code class="sig-name descname">InstrumentalVariableEstimator</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimators/instrumental_variable_estimator.html#InstrumentalVariableEstimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_estimators.instrumental_variable_estimator.InstrumentalVariableEstimator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="dowhy.html#dowhy.causal_estimator.CausalEstimator" title="dowhy.causal_estimator.CausalEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">dowhy.causal_estimator.CausalEstimator</span></code></a></p>
 <p>Compute effect of treatment using the instrumental variables method.</p>
-<p>This is a superclass that is inherited by other specific methods.</p>
+<p>This is also a superclass that can be inherited by other specific methods.</p>
+<p>Supports additional parameters that can be specified in the estimate_effect() method.</p>
+<ul class="simple">
+<li><p>‘iv_instrument_name’: Name of the specific instrumental variable to be used. Needs to be one of the IVs identified in the identification step. Default is to use all the IV variables from the identification step.</p></li>
+</ul>
 <dl class="method">
 <dt id="dowhy.causal_estimators.instrumental_variable_estimator.InstrumentalVariableEstimator.construct_symbolic_estimator">
 <code class="sig-name descname">construct_symbolic_estimator</code><span class="sig-paren">(</span><em class="sig-param">estimand</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimators/instrumental_variable_estimator.html#InstrumentalVariableEstimator.construct_symbolic_estimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_estimators.instrumental_variable_estimator.InstrumentalVariableEstimator.construct_symbolic_estimator" title="Permalink to this definition">¶</a></dt>
@@ -319,6 +319,10 @@ identical common causes.</p>
 <p>Estimate effect of treatment by weighing the data by
 inverse probability of occurrence.</p>
 <p>Straightforward application of the back-door criterion.</p>
+<p>Supports additional parameters that can be specified in the estimate_effect() method.</p>
+<ul class="simple">
+<li><p>‘weighting_scheme’: This is the name of weighting method to use. Can be inverse propensity score (“ips_weight”, default), stabilized IPS score (“ips_stabilized_weight”), or normalized IPS score (“ips_normalized_weight”)</p></li>
+</ul>
 <dl class="method">
 <dt id="dowhy.causal_estimators.propensity_score_weighting_estimator.PropensityScoreWeightingEstimator.construct_symbolic_estimator">
 <code class="sig-name descname">construct_symbolic_estimator</code><span class="sig-paren">(</span><em class="sig-param">estimand</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimators/propensity_score_weighting_estimator.html#PropensityScoreWeightingEstimator.construct_symbolic_estimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_estimators.propensity_score_weighting_estimator.PropensityScoreWeightingEstimator.construct_symbolic_estimator" title="Permalink to this definition">¶</a></dt>
@@ -336,6 +340,12 @@ inverse probability of occurrence.</p>
 <p>Compute effect of treatment using the regression discontinuity method.</p>
 <p>Estimates effect by transforming the problem to an instrumental variables
 problem.</p>
+<p>Supports additional parameters that can be specified in the estimate_effect() method.</p>
+<ul class="simple">
+<li><p>‘rd_variable_name’: name of the variable on which the discontinuity occurs. This is the instrument.</p></li>
+<li><p>‘rd_threshold_value’: Threshold at which the discontinuity occurs.</p></li>
+<li><p>‘rd_bandwidth’: Distance from the threshold within which confounders can be considered the same between treatment and control. Considered band is (threshold +- bandwidth)</p></li>
+</ul>
 <dl class="method">
 <dt id="dowhy.causal_estimators.regression_discontinuity_estimator.RegressionDiscontinuityEstimator.construct_symbolic_estimator">
 <code class="sig-name descname">construct_symbolic_estimator</code><span class="sig-paren">(</span><em class="sig-param">estimand</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimators/regression_discontinuity_estimator.html#RegressionDiscontinuityEstimator.construct_symbolic_estimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_estimators.regression_discontinuity_estimator.RegressionDiscontinuityEstimator.construct_symbolic_estimator" title="Permalink to this definition">¶</a></dt>

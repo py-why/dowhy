@@ -88,10 +88,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-conditional-treatment-effects.html#Linear-Model">Linear Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-conditional-treatment-effects.html#EconML-methods">EconML methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-conditional-treatment-effects.html#Works-with-any-EconML-method">Works with any EconML method</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-conditional-treatment-effects.html#Refuting-the-estimate">Refuting the estimate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/load_graph_example.html">Different ways to load an input graph</a></li>
@@ -314,20 +310,30 @@
                         <span class="n">method_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Estimate the identified causal effect.</span>
 
-<span class="sd">        Currently requires an explicit method name to be specified.</span>
+<span class="sd">        Currently requires an explicit method name to be specified. Method names follow the convention of identification method followed by the specific estimation method: &quot;[backdoor/iv].estimation_method_name&quot;. Following methods are supported.</span>
+<span class="sd">            * Propensity Score Matching: &quot;backdoor.propensity_score_matching&quot;</span>
+<span class="sd">            * Propensity Score Stratification: &quot;backdoor.propensity_score_stratification&quot;</span>
+<span class="sd">            * Propensity Score-based Inverse Weighting: &quot;backdoor.propensity_score_weighting&quot;</span>
+<span class="sd">            * Linear Regression: &quot;backdoor.linear_regression&quot;</span>
+<span class="sd">            * Instrumental Variables: &quot;iv.instrumental_variable&quot;</span>
+<span class="sd">            * Regression Discontinuity: &quot;iv.regression_discontinuity&quot;</span>
+
+<span class="sd">        In addition, you can directly call any of the EconML estimation methods. The convention is &quot;backdoor.econml.path-to-estimator-class&quot;. For example, for the double machine learning estimator (&quot;DMLCateEstimator&quot; class) that is located inside &quot;dml&quot; module of EconML, you can use the method name, &quot;backdoor.econml.dml.DMLCateEstimator&quot;.</span>
+
+
 
 <span class="sd">        :param identified_estimand: a probability expression</span>
 <span class="sd">            that represents the effect to be estimated. Output of</span>
 <span class="sd">            CausalModel.identify_effect method</span>
-<span class="sd">        :param method_name: (optional) name of the estimation method to be used.</span>
+<span class="sd">        :param method_name: name of the estimation method to be used.</span>
 <span class="sd">        :param control_value: Value of the treatment in the control group, for effect estimation.  If treatment is multi-variate, this can be a list.</span>
 <span class="sd">        :param treatment_value: Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.</span>
 <span class="sd">        :param test_significance: Binary flag on whether to additionally do a statistical signficance test for the estimate.</span>
 <span class="sd">        :param evaluate_effect_strength: (Experimental) Binary flag on whether to estimate the relative strength of the treatment&#39;s effect. This measure can be used to compare different treatments for the same outcome (by running this method with different treatments sequentially).</span>
 <span class="sd">        :param confidence_intervals: (Experimental) Binary flag indicating whether confidence intervals should be computed.</span>
-<span class="sd">        :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be a string for common specifications of target units (namely, &quot;ate&quot;, &quot;att&quot; and &quot;atc&quot;). It can also be a lambda function that can be used as an index for the data (pandas DataFrame). Alternatively, it can be a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.</span>
-<span class="sd">        :param effect_modifiers: Effect modifiers can be (optionally) specified here too, since they do not affect identification. If None, the effect_modifiers from the CausalModel are used.</span>
-<span class="sd">        :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method.</span>
+<span class="sd">        :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be of three types. (1) a string for common specifications of target units (namely, &quot;ate&quot;, &quot;att&quot; and &quot;atc&quot;), (2) a lambda function that can be used as an index for the data (pandas DataFrame), or (3) a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.</span>
+<span class="sd">        :param effect_modifiers: Names of effect modifier variables can be (optionally) specified here too, since they do not affect identification. If None, the effect_modifiers from the CausalModel are used.</span>
+<span class="sd">        :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method. See the docs for each estimation method for allowed method-specific params.</span>
 
 <span class="sd">        :returns: An instance of the CausalEstimate class, containing the causal effect estimate</span>
 <span class="sd">            and other method-dependent information</span>
@@ -391,7 +397,7 @@
 <span class="sd">        :param identified_estimand: a probability expression</span>
 <span class="sd">            that represents the effect to be estimated. Output of</span>
 <span class="sd">            CausalModel.identify_effect method</span>
-<span class="sd">        :param method_name: ame of the estimation method to be used.</span>
+<span class="sd">        :param method_name: any of the estimation method to be used. See docs for estimate_effect method for a list of supported estimation methods.</span>
 <span class="sd">        :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method.</span>
 
 <span class="sd">        :returns: an instance of the CausalEstimate class, containing the causal effect estimate</span>
@@ -430,12 +436,16 @@
 <div class="viewcode-block" id="CausalModel.refute_estimate"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_model.CausalModel.refute_estimate">[docs]</a>    <span class="k">def</span> <span class="nf">refute_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Refute an estimated causal effect.</span>
 
-<span class="sd">        If method_name is provided, uses the provided method. In the future, we may support automatic selection of suitable refutation tests.</span>
+<span class="sd">        If method_name is provided, uses the provided method. In the future, we may support automatic selection of suitable refutation tests. Following refutation methods are supported.</span>
+<span class="sd">            * Adding a randomly-generated confounder: &quot;random_common_cause&quot;</span>
+<span class="sd">            * Adding a confounder that is associated with both treatment and outcome: &quot;add_unobserved_common_cause&quot;</span>
+<span class="sd">            * Replacing the treatment with a placebo (random) variable): &quot;placebo_treatment_refuter&quot;</span>
+<span class="sd">            * Removing a random subset of the data: &quot;data_subset_refuter&quot;</span>
 
 <span class="sd">        :param estimand: target estimand, an instance of the IdentifiedEstimand class (typically, the output of identify_effect)</span>
 <span class="sd">        :param estimate: estimate to be refuted, an instance of the CausalEstimate class (typically, the output of estimate_effect)</span>
 <span class="sd">        :param method_name: name of the refutation method</span>
-<span class="sd">        :param **kwargs:  (optional) additional method-specific arguments that are passed directly to the refutation method</span>
+<span class="sd">        :param **kwargs:  (optional) additional arguments that are passed directly to the refutation method. Can specify a random seed here to ensure reproducible results (&#39;random_seed&#39; parameter). For method-specific parameters, consult the documentation for the specific method. All refutation methods are in the causal_refuters subpackage.</span>
 
 <span class="sd">        :returns: an instance of the RefuteResult class</span>
 
