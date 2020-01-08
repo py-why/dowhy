@@ -148,20 +148,30 @@ class CausalModel:
                         method_params=None):
         """Estimate the identified causal effect.
 
-        Currently requires an explicit method name to be specified.
+        Currently requires an explicit method name to be specified. Method names follow the convention of identification method followed by the specific estimation method: "[backdoor/iv].estimation_method_name". Following methods are supported:
+            * Propensity Score Matching: "backdoor.propensity_score_matching"
+            * Propensity Score Stratification: "backdoor.propensity_score_stratification"
+            * Propensity Score-based Inverse Weighting: "backdoor.propensity_score_weighting"
+            * Linear Regression: "backdoor.linear_regression"
+            * Instrumental Variables: "iv.instrumental_variable"
+            * Regression Discontinuity: "iv.regression_discontinuity"
+
+        In addition, you can directly call any of the EconML estimation methods. The convention is "backdoor.econml.path-to-estimator-class". For example, for the double machine learning estimator ("DMLCateEstimator" class) that is located inside "dml" module of EconML, you can use the method name, "backdoor.econml.dml.DMLCateEstimator".
+
+
 
         :param identified_estimand: a probability expression
             that represents the effect to be estimated. Output of
             CausalModel.identify_effect method
-        :param method_name: (optional) name of the estimation method to be used.
+        :param method_name: name of the estimation method to be used.
         :param control_value: Value of the treatment in the control group, for effect estimation.  If treatment is multi-variate, this can be a list.
         :param treatment_value: Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.
         :param test_significance: Binary flag on whether to additionally do a statistical signficance test for the estimate.
         :param evaluate_effect_strength: (Experimental) Binary flag on whether to estimate the relative strength of the treatment's effect. This measure can be used to compare different treatments for the same outcome (by running this method with different treatments sequentially).
         :param confidence_intervals: (Experimental) Binary flag indicating whether confidence intervals should be computed.
-        :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be a string for common specifications of target units (namely, "ate", "att" and "atc"). It can also be a lambda function that can be used as an index for the data (pandas DataFrame). Alternatively, it can be a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
-        :param effect_modifiers: Effect modifiers can be (optionally) specified here too, since they do not affect identification. If None, the effect_modifiers from the CausalModel are used.
-        :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method.
+        :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be of three types. (1) a string for common specifications of target units (namely, "ate", "att" and "atc"), (2) a lambda function that can be used as an index for the data (pandas DataFrame), or (3) a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
+        :param effect_modifiers: Names of effect modifier variables can be (optionally) specified here too, since they do not affect identification. If None, the effect_modifiers from the CausalModel are used.
+        :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method. See the docs for each estimation method for allowed method-specific params.
 
         :returns: An instance of the CausalEstimate class, containing the causal effect estimate
             and other method-dependent information
@@ -225,7 +235,7 @@ class CausalModel:
         :param identified_estimand: a probability expression
             that represents the effect to be estimated. Output of
             CausalModel.identify_effect method
-        :param method_name: ame of the estimation method to be used.
+        :param method_name: any of the estimation method to be used. See docs for estimate_effect method for a list of supported estimation methods.
         :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method.
 
         :returns: an instance of the CausalEstimate class, containing the causal effect estimate
@@ -264,12 +274,16 @@ class CausalModel:
     def refute_estimate(self, estimand, estimate, method_name=None, **kwargs):
         """Refute an estimated causal effect.
 
-        If method_name is provided, uses the provided method. In the future, we may support automatic selection of suitable refutation tests.
+        If method_name is provided, uses the provided method. In the future, we may support automatic selection of suitable refutation tests. Following refutation methods are supported:
+            * Adding a randomly-generated confounder: "random_common_cause"
+            * Adding a confounder that is associated with both treatment and outcome: "add_unobserved_common_cause"
+            * Replacing the treatment with a placebo (random) variable): "placebo_treatment_refuter"
+            * Removing a random subset of the data: "data_subset_refuter"
 
         :param estimand: target estimand, an instance of the IdentifiedEstimand class (typically, the output of identify_effect)
         :param estimate: estimate to be refuted, an instance of the CausalEstimate class (typically, the output of estimate_effect)
         :param method_name: name of the refutation method
-        :param **kwargs:  (optional) additional method-specific arguments that are passed directly to the refutation method
+        :param **kwargs:  (optional) additional method-specific arguments that are passed directly to the refutation method. For method-specific parameters, consult the documentation for the specific method. All refutation methods are in the causal_refuters subpackage.
 
         :returns: an instance of the RefuteResult class
 
