@@ -81,18 +81,18 @@
      "output_type": "stream",
      "text": [
       "         X0   Z0        Z1        W0        W1        W2        W3        W4  \\\n",
-      "0  0.262340  0.0  0.970873 -0.931370  1.534707  0.212227  0.656675 -0.163708   \n",
-      "1  1.357854  1.0  0.809297  0.418757 -0.368615  0.550052  1.382726 -0.073969   \n",
-      "2  0.319958  0.0  0.483138  1.101497 -0.700813  0.321933  0.356162  0.361954   \n",
-      "3  0.309237  0.0  0.262257 -0.008878  0.921562  1.102873  1.271079 -2.435455   \n",
-      "4  0.404030  0.0  0.179699  2.122864  1.004447  1.222506  0.880357 -1.621326   \n",
+      "0  2.583198  1.0  0.183011 -2.490799 -0.270172 -0.013538  0.979027 -0.033464   \n",
+      "1  0.712234  1.0  0.150498 -0.892550  0.878099  0.137869  0.872547  1.138340   \n",
+      "2  0.431597  0.0  0.680770 -1.194290 -0.743686  0.409159 -0.410003  0.378746   \n",
+      "3  0.715099  1.0  0.129770 -0.260848 -0.779302  1.038961  1.078510 -0.430214   \n",
+      "4 -0.285593  1.0  0.480503  0.933601 -0.287256  0.524709  0.602599 -0.139902   \n",
       "\n",
-      "      v0          y  \n",
-      "0   True  11.076007  \n",
-      "1   True  18.942833  \n",
-      "2   True  16.081703  \n",
-      "3  False   2.038722  \n",
-      "4   True  21.821949  \n",
+      "     v0          y  \n",
+      "0  True   2.320453  \n",
+      "1  True  13.069987  \n",
+      "2  True   2.154850  \n",
+      "3  True  14.552760  \n",
+      "4  True  17.646749  \n",
       "digraph { U[label=\"Unobserved Confounders\"]; U->y;v0->y; U->v0;W0-> v0; W1-> v0; W2-> v0; W3-> v0; W4-> v0;Z0-> v0; Z1-> v0;W0-> y; W1-> y; W2-> y; W3-> y; W4-> y;X0-> y;}\n",
       "\n",
       "\n",
@@ -221,7 +221,7 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "INFO:dowhy.causal_identifier:Common causes of treatment and outcome:['W0', 'Unobserved Confounders', 'W4', 'W1', 'W3', 'W2']\n",
+      "INFO:dowhy.causal_identifier:Common causes of treatment and outcome:['W0', 'W1', 'W4', 'Unobserved Confounders', 'W2', 'W3']\n",
       "WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.\n"
      ]
     },
@@ -248,9 +248,9 @@
       "Estimand name: backdoor\n",
       "Estimand expression:\n",
       "  d                                 \n",
-      "─────(Expectation(y|W0,W4,W1,W3,W2))\n",
+      "─────(Expectation(y|W0,W1,W4,W2,W3))\n",
       "d[v₀]                               \n",
-      "Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W4,W1,W3,W2,U) = P(y|v0,W0,W4,W1,W3,W2)\n",
+      "Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W1,W4,W2,W3,U) = P(y|v0,W0,W1,W4,W2,W3)\n",
       "### Estimand : 2\n",
       "Estimand name: iv\n",
       "Estimand expression:\n",
@@ -282,7 +282,7 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "INFO:dowhy.causal_identifier:Common causes of treatment and outcome:['W0', 'Unobserved Confounders', 'W4', 'W1', 'W3', 'W2']\n",
+      "INFO:dowhy.causal_identifier:Common causes of treatment and outcome:['W0', 'W1', 'W4', 'Unobserved Confounders', 'W2', 'W3']\n",
       "WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.\n",
       "INFO:dowhy.causal_identifier:Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True.\n",
       "INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:['Z1', 'Z0']\n"
@@ -297,9 +297,9 @@
       "Estimand name: backdoor\n",
       "Estimand expression:\n",
       "  d                                 \n",
-      "─────(Expectation(y|W0,W4,W1,W3,W2))\n",
+      "─────(Expectation(y|W0,W1,W4,W2,W3))\n",
       "d[v₀]                               \n",
-      "Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W4,W1,W3,W2,U) = P(y|v0,W0,W4,W1,W3,W2)\n",
+      "Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W1,W4,W2,W3,U) = P(y|v0,W0,W1,W4,W2,W3)\n",
       "### Estimand : 2\n",
       "Estimand name: iv\n",
       "Estimand expression:\n",
@@ -332,7 +332,7 @@
      "output_type": "stream",
      "text": [
       "INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator\n",
-      "INFO:dowhy.causal_estimator:b: y~v0+W0+W4+W1+W3+W2\n",
+      "INFO:dowhy.causal_estimator:b: y~v0+W0+W1+W4+W2+W3\n",
       "/home/amshar/python-environments/vpy36/lib/python3.6/site-packages/sklearn/utils/validation.py:744: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().\n",
       "  y = column_or_1d(y, warn=True)\n"
      ]
@@ -349,9 +349,9 @@
       "Estimand name: backdoor\n",
       "Estimand expression:\n",
       "  d                                 \n",
-      "─────(Expectation(y|W0,W4,W1,W3,W2))\n",
+      "─────(Expectation(y|W0,W1,W4,W2,W3))\n",
       "d[v₀]                               \n",
-      "Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W4,W1,W3,W2,U) = P(y|v0,W0,W4,W1,W3,W2)\n",
+      "Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W1,W4,W2,W3,U) = P(y|v0,W0,W1,W4,W2,W3)\n",
       "### Estimand : 2\n",
       "Estimand name: iv\n",
       "Estimand expression:\n",
@@ -360,11 +360,11 @@
       "Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→{v0}, then ¬({Z1,Z0}→y)\n",
       "\n",
       "## Realized estimand\n",
-      "b: y~v0+W0+W4+W1+W3+W2\n",
+      "b: y~v0+W0+W1+W4+W2+W3\n",
       "## Estimate\n",
-      "Value: 10.646781689585207\n",
+      "Value: 9.86863892333762\n",
       "\n",
-      "Causal Estimate is 10.646781689585207\n"
+      "Causal Estimate is 9.86863892333762\n"
      ]
     }
    ],
@@ -379,12 +379,74 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "## Interface 2: Specify common causes and instruments"
+    "You can input additional parameters to the estimate_effect method. For instance, to estimate the effect on any subset of the units, you can specify the \"target_units\" parameter which can be a string (\"ate\", \"att\", or \"atc\"), lambda function that filters rows of the data frame, or a new dataframe on which to compute the effect. You can also specify \"effect modifiers\" to estimate heterogeneous effects across these variables. See `help(CausalModel.estimate_effect)`. "
    ]
   },
   {
    "cell_type": "code",
    "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator\n",
+      "INFO:dowhy.causal_estimator:b: y~v0+W0+W1+W4+W2+W3\n",
+      "/home/amshar/python-environments/vpy36/lib/python3.6/site-packages/sklearn/utils/validation.py:744: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().\n",
+      "  y = column_or_1d(y, warn=True)\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "*** Causal Estimate ***\n",
+      "\n",
+      "## Target estimand\n",
+      "Estimand type: nonparametric-ate\n",
+      "### Estimand : 1\n",
+      "Estimand name: backdoor\n",
+      "Estimand expression:\n",
+      "  d                                 \n",
+      "─────(Expectation(y|W0,W1,W4,W2,W3))\n",
+      "d[v₀]                               \n",
+      "Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W1,W4,W2,W3,U) = P(y|v0,W0,W1,W4,W2,W3)\n",
+      "### Estimand : 2\n",
+      "Estimand name: iv\n",
+      "Estimand expression:\n",
+      "Expectation(Derivative(y, [Z1, Z0])*Derivative([v0], [Z1, Z0])**(-1))\n",
+      "Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z1,Z0})\n",
+      "Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→{v0}, then ¬({Z1,Z0}→y)\n",
+      "\n",
+      "## Realized estimand\n",
+      "b: y~v0+W0+W1+W4+W2+W3\n",
+      "## Estimate\n",
+      "Value: 10.280769761076874\n",
+      "\n",
+      "Causal Estimate is 10.280769761076874\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Causal effect on the control group (ATC)\n",
+    "causal_estimate_att = model.estimate_effect(identified_estimand,\n",
+    "        method_name=\"backdoor.propensity_score_stratification\",\n",
+    "        target_units = \"atc\")\n",
+    "print(causal_estimate_att)\n",
+    "print(\"Causal Estimate is \" + str(causal_estimate_att.value))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Interface 2: Specify common causes and instruments"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
    "metadata": {
     "scrolled": true
    },
@@ -411,7 +473,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 12,
+   "execution_count": 13,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -420,7 +482,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 13,
+   "execution_count": 14,
    "metadata": {},
    "outputs": [
     {
@@ -448,14 +510,14 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 14,
+   "execution_count": 15,
    "metadata": {},
    "outputs": [
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "INFO:dowhy.causal_identifier:Common causes of treatment and outcome:['U', 'W0', 'W1', 'W4', 'W3', 'W2']\n",
+      "INFO:dowhy.causal_identifier:Common causes of treatment and outcome:['W0', 'W1', 'W4', 'U', 'W2', 'W3']\n",
       "WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.\n",
       "INFO:dowhy.causal_identifier:Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True.\n",
       "INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[]\n"
@@ -475,7 +537,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 15,
+   "execution_count": 16,
    "metadata": {},
    "outputs": [
     {
@@ -483,7 +545,7 @@
      "output_type": "stream",
      "text": [
       "INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator\n",
-      "INFO:dowhy.causal_estimator:b: y~v0+W0+W1+W4+W3+W2\n",
+      "INFO:dowhy.causal_estimator:b: y~v0+W0+W1+W4+W2+W3\n",
       "/home/amshar/python-environments/vpy36/lib/python3.6/site-packages/sklearn/utils/validation.py:744: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().\n",
       "  y = column_or_1d(y, warn=True)\n"
      ]
@@ -500,19 +562,19 @@
       "Estimand name: backdoor\n",
       "Estimand expression:\n",
       "  d                                 \n",
-      "─────(Expectation(y|W0,W1,W4,W3,W2))\n",
+      "─────(Expectation(y|W0,W1,W4,W2,W3))\n",
       "d[v₀]                               \n",
-      "Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W1,W4,W3,W2,U) = P(y|v0,W0,W1,W4,W3,W2)\n",
+      "Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W1,W4,W2,W3,U) = P(y|v0,W0,W1,W4,W2,W3)\n",
       "### Estimand : 2\n",
       "Estimand name: iv\n",
       "No such variable found!\n",
       "\n",
       "## Realized estimand\n",
-      "b: y~v0+W0+W1+W4+W3+W2\n",
+      "b: y~v0+W0+W1+W4+W2+W3\n",
       "## Estimate\n",
-      "Value: 10.646781689585207\n",
+      "Value: 9.86863892333762\n",
       "\n",
-      "Causal Estimate is 10.646781689585207\n"
+      "Causal Estimate is 9.86863892333762\n"
      ]
     }
    ],
@@ -541,7 +603,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 16,
+   "execution_count": 17,
    "metadata": {},
    "outputs": [
     {
@@ -549,7 +611,7 @@
      "output_type": "stream",
      "text": [
       "INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator\n",
-      "INFO:dowhy.causal_estimator:b: y~v0+W0+W1+W4+W3+W2+w_random\n",
+      "INFO:dowhy.causal_estimator:b: y~v0+W0+W1+W4+W2+W3+w_random\n",
       "/home/amshar/python-environments/vpy36/lib/python3.6/site-packages/sklearn/utils/validation.py:744: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().\n",
       "  y = column_or_1d(y, warn=True)\n"
      ]
@@ -559,8 +621,8 @@
      "output_type": "stream",
      "text": [
       "Refute: Add a Random Common Cause\n",
-      "Estimated effect:(10.646781689585207,)\n",
-      "New effect:(10.644077917244749,)\n",
+      "Estimated effect:(9.86863892333762,)\n",
+      "New effect:(9.92981702371751,)\n",
       "\n"
      ]
     }
@@ -579,7 +641,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 17,
+   "execution_count": 18,
    "metadata": {},
    "outputs": [
     {
@@ -587,7 +649,7 @@
      "output_type": "stream",
      "text": [
       "INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator\n",
-      "INFO:dowhy.causal_estimator:b: y~v0+W0+W1+W4+W3+W2\n",
+      "INFO:dowhy.causal_estimator:b: y~v0+W0+W1+W4+W2+W3\n",
       "/home/amshar/python-environments/vpy36/lib/python3.6/site-packages/sklearn/utils/validation.py:744: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().\n",
       "  y = column_or_1d(y, warn=True)\n"
      ]
@@ -597,8 +659,8 @@
      "output_type": "stream",
      "text": [
       "Refute: Add an Unobserved Common Cause\n",
-      "Estimated effect:(10.646781689585207,)\n",
-      "New effect:(9.937718916281279,)\n",
+      "Estimated effect:(9.86863892333762,)\n",
+      "New effect:(8.764065117773479,)\n",
       "\n"
      ]
     }
@@ -619,7 +681,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 18,
+   "execution_count": 19,
    "metadata": {},
    "outputs": [
     {
@@ -627,7 +689,7 @@
      "output_type": "stream",
      "text": [
       "INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator\n",
-      "INFO:dowhy.causal_estimator:b: y~placebo+W0+W1+W4+W3+W2\n",
+      "INFO:dowhy.causal_estimator:b: y~placebo+W0+W1+W4+W2+W3\n",
       "/home/amshar/python-environments/vpy36/lib/python3.6/site-packages/sklearn/utils/validation.py:744: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().\n",
       "  y = column_or_1d(y, warn=True)\n"
      ]
@@ -637,8 +699,8 @@
      "output_type": "stream",
      "text": [
       "Refute: Use a Placebo Treatment\n",
-      "Estimated effect:(10.646781689585207,)\n",
-      "New effect:(-0.01541340253555656,)\n",
+      "Estimated effect:(9.86863892333762,)\n",
+      "New effect:(0.786272901449524,)\n",
       "\n"
      ]
     }
@@ -658,7 +720,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 19,
+   "execution_count": 20,
    "metadata": {},
    "outputs": [
     {
@@ -666,7 +728,7 @@
      "output_type": "stream",
      "text": [
       "INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator\n",
-      "INFO:dowhy.causal_estimator:b: y~v0+W0+W1+W4+W3+W2\n",
+      "INFO:dowhy.causal_estimator:b: y~v0+W0+W1+W4+W2+W3\n",
       "/home/amshar/python-environments/vpy36/lib/python3.6/site-packages/sklearn/utils/validation.py:744: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().\n",
       "  y = column_or_1d(y, warn=True)\n"
      ]
@@ -676,8 +738,8 @@
      "output_type": "stream",
      "text": [
       "Refute: Use a subset of data\n",
-      "Estimated effect:(10.646781689585207,)\n",
-      "New effect:(10.644229843118644,)\n",
+      "Estimated effect:(9.86863892333762,)\n",
+      "New effect:(10.302546340220411,)\n",
       "\n"
      ]
     }
@@ -698,7 +760,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 20,
+   "execution_count": 21,
    "metadata": {},
    "outputs": [
     {
@@ -706,7 +768,7 @@
      "output_type": "stream",
      "text": [
       "INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator\n",
-      "INFO:dowhy.causal_estimator:b: y~v0+W0+W1+W4+W3+W2\n",
+      "INFO:dowhy.causal_estimator:b: y~v0+W0+W1+W4+W2+W3\n",
       "/home/amshar/python-environments/vpy36/lib/python3.6/site-packages/sklearn/utils/validation.py:744: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().\n",
       "  y = column_or_1d(y, warn=True)\n"
      ]
@@ -716,8 +778,8 @@
      "output_type": "stream",
      "text": [
       "Refute: Use a subset of data\n",
-      "Estimated effect:(10.646781689585207,)\n",
-      "New effect:(10.740850048405411,)\n",
+      "Estimated effect:(9.86863892333762,)\n",
+      "New effect:(9.915759961476407,)\n",
       "\n"
      ]
     }

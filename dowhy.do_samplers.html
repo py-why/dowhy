@@ -25,6 +25,7 @@
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
         <script type="text/javascript" src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
@@ -38,7 +39,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="dowhy.utils package" href="dowhy.utils.html" />
-    <link rel="prev" title="dowhy.data_transformers.dimensionality_reducers package" href="dowhy.data_transformers.dimensionality_reducers.html" /> 
+    <link rel="prev" title="dowhy.data_transformers package" href="dowhy.data_transformers.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -88,12 +89,18 @@
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Linear-Model">Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#EconML-methods">EconML methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Works-with-any-EconML-method">Works with any EconML method</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Refuting-the-estimate">Refuting the estimate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="code_repo.html">Code repository &amp; Versions</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="dowhy.html">dowhy package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="dowhy.html#subpackages">Subpackages</a><ul class="current">
@@ -104,7 +111,7 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">dowhy.do_samplers package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dowhy.do_samplers.kernel_density_sampler">dowhy.do_samplers.kernel_density_sampler module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dowhy-do-samplers-mcmc-sampler-module">dowhy.do_samplers.mcmc_sampler module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-dowhy.do_samplers.mcmc_sampler">dowhy.do_samplers.mcmc_sampler module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dowhy.do_samplers.multivariate_weighting_sampler">dowhy.do_samplers.multivariate_weighting_sampler module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dowhy.do_samplers.weighting_sampler">dowhy.do_samplers.weighting_sampler module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dowhy.do_samplers">Module contents</a></li>
@@ -198,13 +205,13 @@
 /* CSS overrides for sphinx_rtd_theme */
 
 /* 24px margin */
-.nbinput.nblast,
-.nboutput.nblast {
+.nbinput.nblast.container,
+.nboutput.nblast.container {
     margin-bottom: 19px;  /* padding has already 5px */
 }
 
 /* ... except between code cells! */
-.nblast + .nbinput {
+.nblast.container + .nbinput.container {
     margin-top: -19px;
 }
 
@@ -242,8 +249,59 @@
 </dd></dl>
 
 </div>
-<div class="section" id="dowhy-do-samplers-mcmc-sampler-module">
-<h2>dowhy.do_samplers.mcmc_sampler module<a class="headerlink" href="#dowhy-do-samplers-mcmc-sampler-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-dowhy.do_samplers.mcmc_sampler">
+<span id="dowhy-do-samplers-mcmc-sampler-module"></span><h2>dowhy.do_samplers.mcmc_sampler module<a class="headerlink" href="#module-dowhy.do_samplers.mcmc_sampler" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dowhy.do_samplers.mcmc_sampler.McmcSampler">
+<em class="property">class </em><code class="sig-prename descclassname">dowhy.do_samplers.mcmc_sampler.</code><code class="sig-name descname">McmcSampler</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">*args</em>, <em class="sig-param">params=None</em>, <em class="sig-param">variable_types=None</em>, <em class="sig-param">num_cores=1</em>, <em class="sig-param">keep_original_treatment=False</em>, <em class="sig-param">causal_model=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_samplers/mcmc_sampler.html#McmcSampler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.do_samplers.mcmc_sampler.McmcSampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dowhy.html#dowhy.do_sampler.DoSampler" title="dowhy.do_sampler.DoSampler"><code class="xref py py-class docutils literal notranslate"><span class="pre">dowhy.do_sampler.DoSampler</span></code></a></p>
+<dl class="method">
+<dt id="dowhy.do_samplers.mcmc_sampler.McmcSampler.apply_data_types">
+<code class="sig-name descname">apply_data_types</code><span class="sig-paren">(</span><em class="sig-param">g</em>, <em class="sig-param">data_types</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_samplers/mcmc_sampler.html#McmcSampler.apply_data_types"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.do_samplers.mcmc_sampler.McmcSampler.apply_data_types" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dowhy.do_samplers.mcmc_sampler.McmcSampler.apply_parameters">
+<code class="sig-name descname">apply_parameters</code><span class="sig-paren">(</span><em class="sig-param">g</em>, <em class="sig-param">df</em>, <em class="sig-param">initialization_trace=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_samplers/mcmc_sampler.html#McmcSampler.apply_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.do_samplers.mcmc_sampler.McmcSampler.apply_parameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dowhy.do_samplers.mcmc_sampler.McmcSampler.apply_parents">
+<code class="sig-name descname">apply_parents</code><span class="sig-paren">(</span><em class="sig-param">g</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_samplers/mcmc_sampler.html#McmcSampler.apply_parents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.do_samplers.mcmc_sampler.McmcSampler.apply_parents" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dowhy.do_samplers.mcmc_sampler.McmcSampler.build_bayesian_network">
+<code class="sig-name descname">build_bayesian_network</code><span class="sig-paren">(</span><em class="sig-param">g</em>, <em class="sig-param">df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_samplers/mcmc_sampler.html#McmcSampler.build_bayesian_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.do_samplers.mcmc_sampler.McmcSampler.build_bayesian_network" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dowhy.do_samplers.mcmc_sampler.McmcSampler.do_sample">
+<code class="sig-name descname">do_sample</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_samplers/mcmc_sampler.html#McmcSampler.do_sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.do_samplers.mcmc_sampler.McmcSampler.do_sample" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dowhy.do_samplers.mcmc_sampler.McmcSampler.do_x_surgery">
+<code class="sig-name descname">do_x_surgery</code><span class="sig-paren">(</span><em class="sig-param">g</em>, <em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_samplers/mcmc_sampler.html#McmcSampler.do_x_surgery"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.do_samplers.mcmc_sampler.McmcSampler.do_x_surgery" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dowhy.do_samplers.mcmc_sampler.McmcSampler.fit_causal_model">
+<code class="sig-name descname">fit_causal_model</code><span class="sig-paren">(</span><em class="sig-param">g</em>, <em class="sig-param">df</em>, <em class="sig-param">data_types</em>, <em class="sig-param">initialization_trace=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_samplers/mcmc_sampler.html#McmcSampler.fit_causal_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.do_samplers.mcmc_sampler.McmcSampler.fit_causal_model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dowhy.do_samplers.mcmc_sampler.McmcSampler.make_intervention_effective">
+<code class="sig-name descname">make_intervention_effective</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_samplers/mcmc_sampler.html#McmcSampler.make_intervention_effective"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.do_samplers.mcmc_sampler.McmcSampler.make_intervention_effective" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dowhy.do_samplers.mcmc_sampler.McmcSampler.sample_prior_causal_model">
+<code class="sig-name descname">sample_prior_causal_model</code><span class="sig-paren">(</span><em class="sig-param">g</em>, <em class="sig-param">df</em>, <em class="sig-param">data_types</em>, <em class="sig-param">initialization_trace</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_samplers/mcmc_sampler.html#McmcSampler.sample_prior_causal_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.do_samplers.mcmc_sampler.McmcSampler.sample_prior_causal_model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-dowhy.do_samplers.multivariate_weighting_sampler">
 <span id="dowhy-do-samplers-multivariate-weighting-sampler-module"></span><h2>dowhy.do_samplers.multivariate_weighting_sampler module<a class="headerlink" href="#module-dowhy.do_samplers.multivariate_weighting_sampler" title="Permalink to this headline">¶</a></h2>
@@ -342,7 +400,7 @@ Override this method if you want to use a different approach to sampling.
         <a href="dowhy.utils.html" class="btn btn-neutral float-right" title="dowhy.utils package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="dowhy.data_transformers.dimensionality_reducers.html" class="btn btn-neutral float-left" title="dowhy.data_transformers.dimensionality_reducers package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="dowhy.data_transformers.html" class="btn btn-neutral float-left" title="dowhy.data_transformers package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

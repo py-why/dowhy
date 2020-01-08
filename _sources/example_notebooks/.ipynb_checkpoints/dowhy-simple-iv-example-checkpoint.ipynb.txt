@@ -1,0 +1,292 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Simple example on using Instrumental Variables method for estimation"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import patsy as ps\n",
+    "\n",
+    "from statsmodels.sandbox.regression.gmm import IV2SLS\n",
+    "import os, sys\n",
+    "sys.path.append(os.path.abspath(\"../../../\"))\n",
+    "from dowhy import CausalModel"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "n_points = 1000\n",
+    "education_abilty = 1\n",
+    "education_voucher = 0.5\n",
+    "income_abilty = 2\n",
+    "income_education = 4\n",
+    "\n",
+    "\n",
+    "# confounder\n",
+    "ability = np.random.normal(0, 3, size=n_points)\n",
+    "\n",
+    "# instrument\n",
+    "voucher = np.random.normal(2, 1, size=n_points) \n",
+    "\n",
+    "# treatment\n",
+    "education = np.random.normal(5, 1, size=n_points) + education_abilty * ability +\\\n",
+    "            education_voucher * voucher\n",
+    "\n",
+    "# outcome\n",
+    "income = np.random.normal(10, 3, size=n_points) +\\\n",
+    "         income_abilty * ability + income_education * education\n",
+    "\n",
+    "# build dataset\n",
+    "data = np.stack([ability, education, income, voucher]).T\n",
+    "df = pd.DataFrame(data, columns = ['ability', 'education', 'income', 'voucher'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<table class=\"simpletable\">\n",
+       "<caption>IV2SLS Regression Results</caption>\n",
+       "<tr>\n",
+       "  <th>Dep. Variable:</th>         <td>income</td>      <th>  R-squared:         </th> <td>   0.899</td>\n",
+       "</tr>\n",
+       "<tr>\n",
+       "  <th>Model:</th>                 <td>IV2SLS</td>      <th>  Adj. R-squared:    </th> <td>   0.899</td>\n",
+       "</tr>\n",
+       "<tr>\n",
+       "  <th>Method:</th>               <td>Two Stage</td>    <th>  F-statistic:       </th> <td>   160.6</td>\n",
+       "</tr>\n",
+       "<tr>\n",
+       "  <th></th>                    <td>Least Squares</td>  <th>  Prob (F-statistic):</th> <td>3.05e-34</td>\n",
+       "</tr>\n",
+       "<tr>\n",
+       "  <th>Date:</th>             <td>Tue, 07 Jan 2020</td> <th>                     </th>     <td> </td>   \n",
+       "</tr>\n",
+       "<tr>\n",
+       "  <th>Time:</th>                 <td>14:32:06</td>     <th>                     </th>     <td> </td>   \n",
+       "</tr>\n",
+       "<tr>\n",
+       "  <th>No. Observations:</th>      <td>  1000</td>      <th>                     </th>     <td> </td>   \n",
+       "</tr>\n",
+       "<tr>\n",
+       "  <th>Df Residuals:</th>          <td>   998</td>      <th>                     </th>     <td> </td>   \n",
+       "</tr>\n",
+       "<tr>\n",
+       "  <th>Df Model:</th>              <td>     1</td>      <th>                     </th>     <td> </td>   \n",
+       "</tr>\n",
+       "</table>\n",
+       "<table class=\"simpletable\">\n",
+       "<tr>\n",
+       "      <td></td>         <th>coef</th>     <th>std err</th>      <th>t</th>      <th>P>|t|</th>  <th>[0.025</th>    <th>0.975]</th>  \n",
+       "</tr>\n",
+       "<tr>\n",
+       "  <th>Intercept</th> <td>    8.3670</td> <td>    1.987</td> <td>    4.211</td> <td> 0.000</td> <td>    4.468</td> <td>   12.266</td>\n",
+       "</tr>\n",
+       "<tr>\n",
+       "  <th>education</th> <td>    4.2607</td> <td>    0.336</td> <td>   12.674</td> <td> 0.000</td> <td>    3.601</td> <td>    4.920</td>\n",
+       "</tr>\n",
+       "</table>\n",
+       "<table class=\"simpletable\">\n",
+       "<tr>\n",
+       "  <th>Omnibus:</th>       <td> 0.871</td> <th>  Durbin-Watson:     </th> <td>   2.058</td>\n",
+       "</tr>\n",
+       "<tr>\n",
+       "  <th>Prob(Omnibus):</th> <td> 0.647</td> <th>  Jarque-Bera (JB):  </th> <td>   0.953</td>\n",
+       "</tr>\n",
+       "<tr>\n",
+       "  <th>Skew:</th>          <td> 0.059</td> <th>  Prob(JB):          </th> <td>   0.621</td>\n",
+       "</tr>\n",
+       "<tr>\n",
+       "  <th>Kurtosis:</th>      <td> 2.904</td> <th>  Cond. No.          </th> <td>    14.3</td>\n",
+       "</tr>\n",
+       "</table>"
+      ],
+      "text/plain": [
+       "<class 'statsmodels.iolib.summary.Summary'>\n",
+       "\"\"\"\n",
+       "                          IV2SLS Regression Results                           \n",
+       "==============================================================================\n",
+       "Dep. Variable:                 income   R-squared:                       0.899\n",
+       "Model:                         IV2SLS   Adj. R-squared:                  0.899\n",
+       "Method:                     Two Stage   F-statistic:                     160.6\n",
+       "                        Least Squares   Prob (F-statistic):           3.05e-34\n",
+       "Date:                Tue, 07 Jan 2020                                         \n",
+       "Time:                        14:32:06                                         \n",
+       "No. Observations:                1000                                         \n",
+       "Df Residuals:                     998                                         \n",
+       "Df Model:                           1                                         \n",
+       "==============================================================================\n",
+       "                 coef    std err          t      P>|t|      [0.025      0.975]\n",
+       "------------------------------------------------------------------------------\n",
+       "Intercept      8.3670      1.987      4.211      0.000       4.468      12.266\n",
+       "education      4.2607      0.336     12.674      0.000       3.601       4.920\n",
+       "==============================================================================\n",
+       "Omnibus:                        0.871   Durbin-Watson:                   2.058\n",
+       "Prob(Omnibus):                  0.647   Jarque-Bera (JB):                0.953\n",
+       "Skew:                           0.059   Prob(JB):                        0.621\n",
+       "Kurtosis:                       2.904   Cond. No.                         14.3\n",
+       "==============================================================================\n",
+       "\"\"\""
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "income_vec, endog = ps.dmatrices(\"income ~ education\", data=df)\n",
+    "exog = ps.dmatrix(\"voucher\", data=df)\n",
+    "\n",
+    "m = IV2SLS(income_vec, endog, exog).fit()\n",
+    "m.summary()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "WARNING:dowhy.causal_model:Causal Graph not provided. DoWhy will construct a graph based on data inputs.\n",
+      "INFO:dowhy.causal_graph:If this is observed data (not from a randomized experiment), there might always be missing confounders. Adding a node named \"Unobserved Confounders\" to reflect this.\n",
+      "INFO:dowhy.causal_model:Model to find the causal effect of treatment ['education'] on outcome ['income']\n",
+      "INFO:dowhy.causal_identifier:Common causes of treatment and outcome:['U', 'ability']\n",
+      "WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "WARN: Do you want to continue by ignoring any unobserved confounders? (use proceed_when_unidentifiable=True to disable this prompt) [y/n] y\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:['voucher']\n",
+      "INFO:dowhy.causal_estimator:INFO: Using Instrumental Variable Estimator\n",
+      "INFO:dowhy.causal_estimator:Realized estimand: Wald Estimator\n",
+      "Realized estimand type: nonparametric-ate\n",
+      "Estimand expression:\n",
+      "                                                                              \n",
+      "Expectation(Derivative(income, voucher))⋅Expectation(Derivative(education, vou\n",
+      "\n",
+      "      -1\n",
+      "cher))  \n",
+      "Estimand assumption 1, As-if-random: If U→→income then ¬(U →→{voucher})\n",
+      "Estimand assumption 2, Exclusion: If we remove {voucher}→{education}, then ¬({voucher}→income)\n",
+      "Estimand assumption 3, treatment_effect_homogeneity: Each unit's treatment ['education'] is affected in the same way by common causes of ['education'] and income\n",
+      "Estimand assumption 4, outcome_effect_homogeneity: Each unit's outcome income is affected in the same way by common causes of ['education'] and income\n",
+      "\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "*** Causal Estimate ***\n",
+      "\n",
+      "## Target estimand\n",
+      "Estimand type: nonparametric-ate\n",
+      "### Estimand : 1\n",
+      "Estimand name: backdoor\n",
+      "Estimand expression:\n",
+      "     d                                   \n",
+      "────────────(Expectation(income|ability))\n",
+      "d[education]                             \n",
+      "Estimand assumption 1, Unconfoundedness: If U→{education} and U→income then P(income|education,ability,U) = P(income|education,ability)\n",
+      "### Estimand : 2\n",
+      "Estimand name: iv\n",
+      "Estimand expression:\n",
+      "Expectation(Derivative(income, [voucher])*Derivative([education], [voucher])**\n",
+      "(-1))\n",
+      "Estimand assumption 1, As-if-random: If U→→income then ¬(U →→{voucher})\n",
+      "Estimand assumption 2, Exclusion: If we remove {voucher}→{education}, then ¬({voucher}→income)\n",
+      "\n",
+      "## Realized estimand\n",
+      "Realized estimand: Wald Estimator\n",
+      "Realized estimand type: nonparametric-ate\n",
+      "Estimand expression:\n",
+      "                                                                              \n",
+      "Expectation(Derivative(income, voucher))⋅Expectation(Derivative(education, vou\n",
+      "\n",
+      "      -1\n",
+      "cher))  \n",
+      "Estimand assumption 1, As-if-random: If U→→income then ¬(U →→{voucher})\n",
+      "Estimand assumption 2, Exclusion: If we remove {voucher}→{education}, then ¬({voucher}→income)\n",
+      "Estimand assumption 3, treatment_effect_homogeneity: Each unit's treatment ['education'] is affected in the same way by common causes of ['education'] and income\n",
+      "Estimand assumption 4, outcome_effect_homogeneity: Each unit's outcome income is affected in the same way by common causes of ['education'] and income\n",
+      "\n",
+      "## Estimate\n",
+      "Value: 4.2606685045720365\n",
+      "\n",
+      "## Statistical Significance\n",
+      "p-value: <0.001\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "model=CausalModel(\n",
+    "        data = df,\n",
+    "        treatment='education',\n",
+    "        outcome='income',\n",
+    "        common_causes=['ability'],\n",
+    "        instruments=['voucher']\n",
+    "        )\n",
+    "\n",
+    "identified_estimand = model.identify_effect()\n",
+    "\n",
+    "estimate = model.estimate_effect(identified_estimand,\n",
+    "        method_name=\"iv.instrumental_variable\", test_significance=True\n",
+    ")\n",
+    "print(estimate)\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.9"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

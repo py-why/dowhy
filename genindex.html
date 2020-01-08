@@ -26,6 +26,7 @@
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
         <script type="text/javascript" src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
@@ -87,12 +88,18 @@
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Linear-Model">Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#EconML-methods">EconML methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Works-with-any-EconML-method">Works with any EconML method</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Refuting-the-estimate">Refuting the estimate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="code_repo.html">Code repository &amp; Versions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy.html">dowhy package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">dowhy</a></li>
@@ -187,6 +194,10 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dowhy.html#dowhy.causal_estimator.CausalEstimate.add_effect_strength">add_effect_strength() (dowhy.causal_estimator.CausalEstimate method)</a>
+</li>
+      <li><a href="dowhy.html#dowhy.causal_graph.CausalGraph.add_missing_nodes_as_common_causes">add_missing_nodes_as_common_causes() (dowhy.causal_graph.CausalGraph method)</a>
+</li>
       <li><a href="dowhy.html#dowhy.causal_graph.CausalGraph.add_node_attributes">add_node_attributes() (dowhy.causal_graph.CausalGraph method)</a>
 </li>
       <li><a href="dowhy.html#dowhy.causal_estimator.CausalEstimate.add_params">add_params() (dowhy.causal_estimator.CausalEstimate method)</a>
@@ -201,6 +212,12 @@
 </li>
       <li><a href="dowhy.html#dowhy.causal_graph.CausalGraph.all_observed">all_observed() (dowhy.causal_graph.CausalGraph method)</a>
 </li>
+      <li><a href="dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler.apply_data_types">apply_data_types() (dowhy.do_samplers.mcmc_sampler.McmcSampler method)</a>
+</li>
+      <li><a href="dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler.apply_parameters">apply_parameters() (dowhy.do_samplers.mcmc_sampler.McmcSampler method)</a>
+</li>
+      <li><a href="dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler.apply_parents">apply_parents() (dowhy.do_samplers.mcmc_sampler.McmcSampler method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -209,9 +226,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dowhy.utils.html#dowhy.utils.propensity_score.binarize_discrete">binarize_discrete() (in module dowhy.utils.propensity_score)</a>
 </li>
+      <li><a href="dowhy.utils.html#dowhy.utils.propensity_score.binary_treatment_model">binary_treatment_model() (in module dowhy.utils.propensity_score)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dowhy.utils.html#dowhy.utils.propensity_score.binary_treatment_model">binary_treatment_model() (in module dowhy.utils.propensity_score)</a>
+      <li><a href="dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler.build_bayesian_network">build_bayesian_network() (dowhy.do_samplers.mcmc_sampler.McmcSampler method)</a>
 </li>
       <li><a href="dowhy.html#dowhy.causal_graph.CausalGraph.build_graph">build_graph() (dowhy.causal_graph.CausalGraph method)</a>
 </li>
@@ -241,21 +260,25 @@
 </li>
       <li><a href="dowhy.html#dowhy.datasets.choice">choice() (in module dowhy.datasets)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dowhy.do_samplers.html#dowhy.do_samplers.multivariate_weighting_sampler.MultivariateWeightingSampler.compute_weights">compute_weights() (dowhy.do_samplers.multivariate_weighting_sampler.MultivariateWeightingSampler method)</a>
 
       <ul>
         <li><a href="dowhy.do_samplers.html#dowhy.do_samplers.weighting_sampler.WeightingSampler.compute_weights">(dowhy.do_samplers.weighting_sampler.WeightingSampler method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dowhy.html#dowhy.causal_identifier.CausalIdentifier.construct_backdoor_estimand">construct_backdoor_estimand() (dowhy.causal_identifier.CausalIdentifier method)</a>
 </li>
       <li><a href="dowhy.html#dowhy.causal_identifier.CausalIdentifier.construct_iv_estimand">construct_iv_estimand() (dowhy.causal_identifier.CausalIdentifier method)</a>
 </li>
-      <li><a href="dowhy.causal_estimators.html#dowhy.causal_estimators.instrumental_variable_estimator.InstrumentalVariableEstimator.construct_symbolic_estimator">construct_symbolic_estimator() (dowhy.causal_estimators.instrumental_variable_estimator.InstrumentalVariableEstimator method)</a>
+      <li><a href="dowhy.html#dowhy.causal_estimator.CausalEstimator.construct_symbolic_estimator">construct_symbolic_estimator() (dowhy.causal_estimator.CausalEstimator method)</a>
 
       <ul>
+        <li><a href="dowhy.causal_estimators.html#dowhy.causal_estimators.econml_cate_estimator.EconmlCateEstimator.construct_symbolic_estimator">(dowhy.causal_estimators.econml_cate_estimator.EconmlCateEstimator method)</a>
+</li>
+        <li><a href="dowhy.causal_estimators.html#dowhy.causal_estimators.instrumental_variable_estimator.InstrumentalVariableEstimator.construct_symbolic_estimator">(dowhy.causal_estimators.instrumental_variable_estimator.InstrumentalVariableEstimator method)</a>
+</li>
         <li><a href="dowhy.causal_estimators.html#dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator.construct_symbolic_estimator">(dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator method)</a>
 </li>
         <li><a href="dowhy.causal_estimators.html#dowhy.causal_estimators.propensity_score_matching_estimator.PropensityScoreMatchingEstimator.construct_symbolic_estimator">(dowhy.causal_estimators.propensity_score_matching_estimator.PropensityScoreMatchingEstimator method)</a>
@@ -269,6 +292,10 @@
       </ul></li>
       <li><a href="dowhy.utils.html#dowhy.utils.propensity_score.continuous_treatment_model">continuous_treatment_model() (in module dowhy.utils.propensity_score)</a>
 </li>
+      <li><a href="dowhy.html#dowhy.datasets.create_dot_graph">create_dot_graph() (in module dowhy.datasets)</a>
+</li>
+      <li><a href="dowhy.html#dowhy.datasets.create_gml_graph">create_gml_graph() (in module dowhy.datasets)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -278,11 +305,7 @@
       <li><a href="dowhy.causal_refuters.html#dowhy.causal_refuters.data_subset_refuter.DataSubsetRefuter">DataSubsetRefuter (class in dowhy.causal_refuters.data_subset_refuter)</a>
 </li>
       <li><a href="dowhy.html#dowhy.data_transformer.DimensionalityReducer">DimensionalityReducer (class in dowhy.data_transformer)</a>
-
-      <ul>
-        <li><a href="dowhy.data_transformers.dimensionality_reducers.html#dowhy.data_transformers.dimensionality_reducers.dimensionality_reducer.DimensionalityReducer">(class in dowhy.data_transformers.dimensionality_reducers.dimensionality_reducer)</a>
 </li>
-      </ul></li>
       <li><a href="dowhy.utils.html#dowhy.utils.propensity_score.discrete_to_integer">discrete_to_integer() (in module dowhy.utils.propensity_score)</a>
 </li>
       <li><a href="dowhy.html#dowhy.do_sampler.DoSampler.disrupt_causes">disrupt_causes() (dowhy.do_sampler.DoSampler method)</a>
@@ -302,8 +325,14 @@
 </li>
       </ul></li>
       <li><a href="dowhy.html#dowhy.do_sampler.DoSampler.do_sample">do_sample() (dowhy.do_sampler.DoSampler method)</a>
+
+      <ul>
+        <li><a href="dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler.do_sample">(dowhy.do_samplers.mcmc_sampler.McmcSampler method)</a>
 </li>
+      </ul></li>
       <li><a href="dowhy.html#dowhy.causal_graph.CausalGraph.do_surgery">do_surgery() (dowhy.causal_graph.CausalGraph method)</a>
+</li>
+      <li><a href="dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler.do_x_surgery">do_x_surgery() (dowhy.do_samplers.mcmc_sampler.McmcSampler method)</a>
 </li>
       <li><a href="dowhy.html#dowhy.do_sampler.DoSampler">DoSampler (class in dowhy.do_sampler)</a>
 </li>
@@ -317,6 +346,8 @@
 </li>
       <li><a href="dowhy.causal_estimators.html#module-dowhy.causal_estimators">dowhy.causal_estimators (module)</a>
 </li>
+      <li><a href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.econml_cate_estimator">dowhy.causal_estimators.econml_cate_estimator (module)</a>
+</li>
       <li><a href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.instrumental_variable_estimator">dowhy.causal_estimators.instrumental_variable_estimator (module)</a>
 </li>
       <li><a href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.linear_regression_estimator">dowhy.causal_estimators.linear_regression_estimator (module)</a>
@@ -327,10 +358,10 @@
 </li>
       <li><a href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.propensity_score_weighting_estimator">dowhy.causal_estimators.propensity_score_weighting_estimator (module)</a>
 </li>
-      <li><a href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.regression_discontinuity_estimator">dowhy.causal_estimators.regression_discontinuity_estimator (module)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.regression_discontinuity_estimator">dowhy.causal_estimators.regression_discontinuity_estimator (module)</a>
+</li>
       <li><a href="dowhy.html#module-dowhy.causal_graph">dowhy.causal_graph (module)</a>
 </li>
       <li><a href="dowhy.html#module-dowhy.causal_identifier">dowhy.causal_identifier (module)</a>
@@ -353,10 +384,6 @@
 </li>
       <li><a href="dowhy.data_transformers.html#module-dowhy.data_transformers">dowhy.data_transformers (module)</a>
 </li>
-      <li><a href="dowhy.data_transformers.dimensionality_reducers.html#module-dowhy.data_transformers.dimensionality_reducers">dowhy.data_transformers.dimensionality_reducers (module)</a>
-</li>
-      <li><a href="dowhy.data_transformers.dimensionality_reducers.html#module-dowhy.data_transformers.dimensionality_reducers.dimensionality_reducer">dowhy.data_transformers.dimensionality_reducers.dimensionality_reducer (module)</a>
-</li>
       <li><a href="dowhy.data_transformers.html#module-dowhy.data_transformers.pca_reducer">dowhy.data_transformers.pca_reducer (module)</a>
 </li>
       <li><a href="dowhy.html#module-dowhy.datasets">dowhy.datasets (module)</a>
@@ -366,6 +393,8 @@
       <li><a href="dowhy.do_samplers.html#module-dowhy.do_samplers">dowhy.do_samplers (module)</a>
 </li>
       <li><a href="dowhy.do_samplers.html#module-dowhy.do_samplers.kernel_density_sampler">dowhy.do_samplers.kernel_density_sampler (module)</a>
+</li>
+      <li><a href="dowhy.do_samplers.html#module-dowhy.do_samplers.mcmc_sampler">dowhy.do_samplers.mcmc_sampler (module)</a>
 </li>
       <li><a href="dowhy.do_samplers.html#module-dowhy.do_samplers.multivariate_weighting_sampler">dowhy.do_samplers.multivariate_weighting_sampler (module)</a>
 </li>
@@ -387,6 +416,8 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dowhy.causal_estimators.html#dowhy.causal_estimators.econml_cate_estimator.EconmlCateEstimator">EconmlCateEstimator (class in dowhy.causal_estimators.econml_cate_estimator)</a>
+</li>
       <li><a href="dowhy.html#dowhy.causal_estimator.CausalEstimator.estimate_effect">estimate_effect() (dowhy.causal_estimator.CausalEstimator method)</a>
 
       <ul>
@@ -394,12 +425,22 @@
 </li>
       </ul></li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dowhy.html#dowhy.causal_estimator.CausalEstimator.estimate_effect_naive">estimate_effect_naive() (dowhy.causal_estimator.CausalEstimator method)</a>
+</li>
+      <li><a href="dowhy.html#dowhy.causal_estimator.CausalEstimator.evaluate_effect_strength">evaluate_effect_strength() (dowhy.causal_estimator.CausalEstimator method)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dowhy.html#dowhy.causal_graph.CausalGraph.filter_unobserved_variables">filter_unobserved_variables() (dowhy.causal_graph.CausalGraph method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler.fit_causal_model">fit_causal_model() (dowhy.do_samplers.mcmc_sampler.McmcSampler method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -419,11 +460,15 @@
         <li><a href="dowhy.do_samplers.html#dowhy.do_samplers.get_class_object">(in module dowhy.do_samplers)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dowhy.html#dowhy.causal_graph.CausalGraph.get_common_causes">get_common_causes() (dowhy.causal_graph.CausalGraph method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dowhy.html#dowhy.causal_graph.CausalGraph.get_descendants">get_descendants() (dowhy.causal_graph.CausalGraph method)</a>
+</li>
+      <li><a href="dowhy.html#dowhy.causal_graph.CausalGraph.get_effect_modifiers">get_effect_modifiers() (dowhy.causal_graph.CausalGraph method)</a>
+</li>
+      <li><a href="dowhy.html#dowhy.causal_refuter.CausalRefuter.get_estimator_object">get_estimator_object() (dowhy.causal_refuter.CausalRefuter static method)</a>
 </li>
       <li><a href="dowhy.html#dowhy.causal_graph.CausalGraph.get_instruments">get_instruments() (dowhy.causal_graph.CausalGraph method)</a>
 </li>
@@ -483,6 +528,8 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler.make_intervention_effective">make_intervention_effective() (dowhy.do_samplers.mcmc_sampler.McmcSampler method)</a>
+</li>
       <li><a href="dowhy.html#dowhy.do_sampler.DoSampler.make_treatment_effective">make_treatment_effective() (dowhy.do_sampler.DoSampler method)</a>
 
       <ul>
@@ -493,6 +540,8 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler">McmcSampler (class in dowhy.do_samplers.mcmc_sampler)</a>
+</li>
       <li><a href="dowhy.do_samplers.html#dowhy.do_samplers.multivariate_weighting_sampler.MultivariateWeightingSampler">MultivariateWeightingSampler (class in dowhy.do_samplers.multivariate_weighting_sampler)</a>
 </li>
   </ul></td>
@@ -552,6 +601,8 @@
       <li><a href="dowhy.html#dowhy.causal_model.CausalModel.refute_estimate">refute_estimate() (dowhy.causal_model.CausalModel method)</a>
 
       <ul>
+        <li><a href="dowhy.html#dowhy.causal_refuter.CausalRefuter.refute_estimate">(dowhy.causal_refuter.CausalRefuter method)</a>
+</li>
         <li><a href="dowhy.causal_refuters.html#dowhy.causal_refuters.add_unobserved_common_cause.AddUnobservedCommonCause.refute_estimate">(dowhy.causal_refuters.add_unobserved_common_cause.AddUnobservedCommonCause method)</a>
 </li>
         <li><a href="dowhy.causal_refuters.html#dowhy.causal_refuters.data_subset_refuter.DataSubsetRefuter.refute_estimate">(dowhy.causal_refuters.data_subset_refuter.DataSubsetRefuter method)</a>
@@ -587,11 +638,15 @@
       </ul></li>
       <li><a href="dowhy.do_samplers.html#dowhy.do_samplers.kernel_density_sampler.KernelSampler.sample_point">sample_point() (dowhy.do_samplers.kernel_density_sampler.KernelSampler method)</a>
 </li>
+      <li><a href="dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler.sample_prior_causal_model">sample_prior_causal_model() (dowhy.do_samplers.mcmc_sampler.McmcSampler method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dowhy.html#dowhy.causal_identifier.IdentifiedEstimand.set_identifier_method">set_identifier_method() (dowhy.causal_identifier.IdentifiedEstimand method)</a>
 </li>
       <li><a href="dowhy.html#dowhy.datasets.sigmoid">sigmoid() (in module dowhy.datasets)</a>
+</li>
+      <li><a href="dowhy.html#dowhy.datasets.simple_iv_dataset">simple_iv_dataset() (in module dowhy.datasets)</a>
 </li>
       <li><a href="dowhy.utils.html#dowhy.utils.propensity_score.state_propensity_score">state_propensity_score() (in module dowhy.utils.propensity_score)</a>
 </li>

@@ -38,7 +38,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Demo for the DoWhy causal API" href="dowhy_causal_api.html" />
+    <link rel="next" title="Conditional Average Treatment Effects (CATE) with DoWhy and EconML" href="dowhy-conditional-treatment-effects.html" />
     <link rel="prev" title="Confounding Example: Finding causal effects from observed data" href="dowhy_confounder_example.html" /> 
 </head>
 
@@ -98,12 +98,18 @@
 <li class="toctree-l2"><a class="reference internal" href="#Method-6:-Regression-Discontinuity">Method 6: Regression Discontinuity</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Linear-Model">Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#EconML-methods">EconML methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Works-with-any-EconML-method">Works with any EconML method</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Refuting-the-estimate">Refuting the estimate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../code_repo.html">Code repository &amp; Versions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../dowhy.html">dowhy package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">dowhy</a></li>
@@ -481,62 +487,62 @@ div.rendered_html tbody tr:hover {
     <tr>
       <th>0</th>
       <td>1.0</td>
-      <td>0.701982</td>
-      <td>0.024579</td>
-      <td>0.192484</td>
-      <td>1.453203</td>
-      <td>1.225925</td>
-      <td>-0.475766</td>
+      <td>0.856829</td>
+      <td>0.871424</td>
+      <td>-0.792461</td>
+      <td>-0.336331</td>
+      <td>0.386621</td>
+      <td>-0.068865</td>
       <td>True</td>
-      <td>13.572196</td>
+      <td>9.124501</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>0.0</td>
-      <td>0.242941</td>
-      <td>1.225778</td>
-      <td>-1.566807</td>
-      <td>1.107805</td>
-      <td>1.132326</td>
-      <td>0.688376</td>
+      <td>1.0</td>
+      <td>0.491077</td>
+      <td>0.197358</td>
+      <td>-0.505399</td>
+      <td>-0.424140</td>
+      <td>0.367762</td>
+      <td>0.168461</td>
       <td>True</td>
-      <td>13.946462</td>
+      <td>8.622930</td>
     </tr>
     <tr>
       <th>2</th>
       <td>1.0</td>
-      <td>0.883972</td>
-      <td>-1.777568</td>
-      <td>-1.565806</td>
-      <td>0.001832</td>
-      <td>1.759653</td>
-      <td>0.634530</td>
+      <td>0.665795</td>
+      <td>0.945841</td>
+      <td>-0.288969</td>
+      <td>0.274395</td>
+      <td>-1.312587</td>
+      <td>2.382897</td>
       <td>True</td>
-      <td>11.779975</td>
+      <td>17.977266</td>
     </tr>
     <tr>
       <th>3</th>
       <td>1.0</td>
-      <td>0.918023</td>
-      <td>-0.648299</td>
-      <td>-0.682472</td>
-      <td>1.255655</td>
-      <td>2.117590</td>
-      <td>-0.085458</td>
+      <td>0.902905</td>
+      <td>1.268346</td>
+      <td>-0.059530</td>
+      <td>0.315513</td>
+      <td>-0.932715</td>
+      <td>-1.360252</td>
       <td>True</td>
-      <td>14.588348</td>
+      <td>8.367090</td>
     </tr>
     <tr>
       <th>4</th>
       <td>1.0</td>
-      <td>0.942274</td>
-      <td>0.193453</td>
-      <td>-1.284952</td>
-      <td>-0.778548</td>
-      <td>0.330621</td>
-      <td>0.350299</td>
+      <td>0.104740</td>
+      <td>-1.342788</td>
+      <td>-1.935350</td>
+      <td>-0.649980</td>
+      <td>-0.852453</td>
+      <td>0.843568</td>
       <td>True</td>
-      <td>8.194333</td>
+      <td>-1.326686</td>
     </tr>
     <tr>
       <th>...</th>
@@ -553,62 +559,62 @@ div.rendered_html tbody tr:hover {
     <tr>
       <th>9995</th>
       <td>1.0</td>
-      <td>0.448219</td>
-      <td>-0.717358</td>
-      <td>0.742045</td>
-      <td>1.596378</td>
-      <td>1.889145</td>
-      <td>-0.160641</td>
+      <td>0.577368</td>
+      <td>1.846929</td>
+      <td>0.755214</td>
+      <td>-2.979011</td>
+      <td>1.525415</td>
+      <td>-0.225743</td>
       <td>True</td>
-      <td>18.115923</td>
+      <td>9.653687</td>
     </tr>
     <tr>
       <th>9996</th>
       <td>1.0</td>
-      <td>0.691309</td>
-      <td>0.266874</td>
-      <td>-1.134911</td>
-      <td>1.726687</td>
-      <td>1.382415</td>
-      <td>-0.406323</td>
+      <td>0.131065</td>
+      <td>1.880914</td>
+      <td>-1.314365</td>
+      <td>-0.538280</td>
+      <td>-0.303415</td>
+      <td>0.863559</td>
       <td>True</td>
-      <td>10.776816</td>
+      <td>11.305263</td>
     </tr>
     <tr>
       <th>9997</th>
-      <td>0.0</td>
-      <td>0.940634</td>
-      <td>-1.437683</td>
-      <td>-1.950858</td>
-      <td>1.701739</td>
-      <td>1.891118</td>
-      <td>1.325125</td>
+      <td>1.0</td>
+      <td>0.739417</td>
+      <td>-0.974042</td>
+      <td>-0.707890</td>
+      <td>-0.028049</td>
+      <td>-1.371608</td>
+      <td>0.100693</td>
       <td>True</td>
-      <td>15.831704</td>
+      <td>2.620035</td>
     </tr>
     <tr>
       <th>9998</th>
       <td>1.0</td>
-      <td>0.849666</td>
-      <td>-0.753199</td>
-      <td>-0.198880</td>
-      <td>1.509888</td>
-      <td>0.106379</td>
-      <td>0.683263</td>
+      <td>0.489953</td>
+      <td>-0.363797</td>
+      <td>-0.590689</td>
+      <td>-1.905395</td>
+      <td>-0.374315</td>
+      <td>0.622429</td>
       <td>True</td>
-      <td>13.269083</td>
+      <td>1.844830</td>
     </tr>
     <tr>
       <th>9999</th>
       <td>1.0</td>
-      <td>0.372705</td>
-      <td>-0.018488</td>
-      <td>-0.358214</td>
-      <td>-0.040396</td>
-      <td>2.855035</td>
-      <td>0.726370</td>
+      <td>0.484942</td>
+      <td>1.118425</td>
+      <td>-0.414818</td>
+      <td>-1.112958</td>
+      <td>0.608269</td>
+      <td>1.865714</td>
       <td>True</td>
-      <td>21.026073</td>
+      <td>15.116874</td>
     </tr>
   </tbody>
 </table>
@@ -686,7 +692,7 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#3
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;Unobserved Confounders&#39;, &#39;W4&#39;, &#39;W0&#39;, &#39;W1&#39;, &#39;W3&#39;, &#39;W2&#39;]
+INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;W1&#39;, &#39;W4&#39;, &#39;W0&#39;, &#39;W2&#39;, &#39;Unobserved Confounders&#39;, &#39;W3&#39;]
 WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
 </pre></div></div>
 </div>
@@ -716,9 +722,9 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(Expectation(y|W4,W0,W1,W3,W2))
+─────(Expectation(y|W1,W4,W0,W2,W3))
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W0,W1,W3,W2,U) = P(y|v0,W4,W0,W1,W3,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W4,W0,W2,W3,U) = P(y|v0,W1,W4,W0,W2,W3)
 ### Estimand : 2
 Estimand name: iv
 Estimand expression:
@@ -751,7 +757,7 @@ Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}�
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Linear Regression Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W4+W0+W1+W3+W2
+INFO:dowhy.causal_estimator:b: y~v0+W1+W4+W0+W2+W3
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -767,9 +773,9 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(Expectation(y|W4,W0,W1,W3,W2))
+─────(Expectation(y|W1,W4,W0,W2,W3))
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W0,W1,W3,W2,U) = P(y|v0,W4,W0,W1,W3,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W4,W0,W2,W3,U) = P(y|v0,W1,W4,W0,W2,W3)
 ### Estimand : 2
 Estimand name: iv
 Estimand expression:
@@ -778,14 +784,14 @@ Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
 Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
 
 ## Realized estimand
-b: y~v0+W4+W0+W1+W3+W2
+b: y~v0+W1+W4+W0+W2+W3
 ## Estimate
-Value: 9.99999999999974
+Value: 10.000000000000021
 
 ## Statistical Significance
 p-value: &lt;0.001
 
-Causal Estimate is 9.99999999999974
+Causal Estimate is 10.000000000000021
 </pre></div></div>
 </div>
 </div>
@@ -811,7 +817,7 @@ Causal Estimate is 9.99999999999974
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W4+W0+W1+W3+W2
+INFO:dowhy.causal_estimator:b: y~v0+W1+W4+W0+W2+W3
 /home/amshar/python-environments/vpy36/lib/python3.6/site-packages/sklearn/utils/validation.py:744: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
   y = column_or_1d(y, warn=True)
 </pre></div></div>
@@ -829,9 +835,9 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(Expectation(y|W4,W0,W1,W3,W2))
+─────(Expectation(y|W1,W4,W0,W2,W3))
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W0,W1,W3,W2,U) = P(y|v0,W4,W0,W1,W3,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W4,W0,W2,W3,U) = P(y|v0,W1,W4,W0,W2,W3)
 ### Estimand : 2
 Estimand name: iv
 Estimand expression:
@@ -840,11 +846,11 @@ Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
 Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
 
 ## Realized estimand
-b: y~v0+W4+W0+W1+W3+W2
+b: y~v0+W1+W4+W0+W2+W3
 ## Estimate
-Value: 10.064504732274713
+Value: 10.173499320316472
 
-Causal Estimate is 10.064504732274713
+Causal Estimate is 10.173499320316472
 </pre></div></div>
 </div>
 </div>
@@ -870,16 +876,14 @@ Causal Estimate is 10.064504732274713
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W4+W0+W1+W3+W2
+INFO:dowhy.causal_estimator:b: y~v0+W1+W4+W0+W2+W3
 /home/amshar/python-environments/vpy36/lib/python3.6/site-packages/sklearn/utils/validation.py:744: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
   y = column_or_1d(y, warn=True)
 /mnt/c/Users/amshar/code/dowhy/dowhy/causal_estimators/propensity_score_matching_estimator.py:62: FutureWarning: `item` has been deprecated and will be removed in a future version
   control_outcome = control.iloc[indices[i]][self._outcome_name].item()
-/mnt/c/Users/amshar/code/dowhy/dowhy/causal_estimators/propensity_score_matching_estimator.py:77: FutureWarning: `item` has been deprecated and will be removed in a future version
-  treated_outcome = treated.iloc[indices[i]][self._outcome_name].item()
 </pre></div></div>
 </div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
@@ -892,9 +896,9 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(Expectation(y|W4,W0,W1,W3,W2))
+─────(Expectation(y|W1,W4,W0,W2,W3))
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W0,W1,W3,W2,U) = P(y|v0,W4,W0,W1,W3,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W4,W0,W2,W3,U) = P(y|v0,W1,W4,W0,W2,W3)
 ### Estimand : 2
 Estimand name: iv
 Estimand expression:
@@ -903,11 +907,20 @@ Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
 Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
 
 ## Realized estimand
-b: y~v0+W4+W0+W1+W3+W2
+b: y~v0+W1+W4+W0+W2+W3
 ## Estimate
-Value: 9.856834069883842
+Value: 10.036816324727294
 
-Causal Estimate is 9.856834069883842
+Causal Estimate is 10.036816324727294
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/mnt/c/Users/amshar/code/dowhy/dowhy/causal_estimators/propensity_score_matching_estimator.py:77: FutureWarning: `item` has been deprecated and will be removed in a future version
+  treated_outcome = treated.iloc[indices[i]][self._outcome_name].item()
 </pre></div></div>
 </div>
 </div>
@@ -934,7 +947,7 @@ Causal Estimate is 9.856834069883842
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W4+W0+W1+W3+W2
+INFO:dowhy.causal_estimator:b: y~v0+W1+W4+W0+W2+W3
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -950,9 +963,9 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(Expectation(y|W4,W0,W1,W3,W2))
+─────(Expectation(y|W1,W4,W0,W2,W3))
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W0,W1,W3,W2,U) = P(y|v0,W4,W0,W1,W3,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W4,W0,W2,W3,U) = P(y|v0,W1,W4,W0,W2,W3)
 ### Estimand : 2
 Estimand name: iv
 Estimand expression:
@@ -961,11 +974,11 @@ Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
 Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
 
 ## Realized estimand
-b: y~v0+W4+W0+W1+W3+W2
+b: y~v0+W1+W4+W0+W2+W3
 ## Estimate
-Value: 15.103825856686212
+Value: 10.722320441623154
 
-Causal Estimate is 15.103825856686212
+Causal Estimate is 10.722320441623154
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1024,9 +1037,9 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(Expectation(y|W4,W0,W1,W3,W2))
+─────(Expectation(y|W1,W4,W0,W2,W3))
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W0,W1,W3,W2,U) = P(y|v0,W4,W0,W1,W3,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W4,W0,W2,W3,U) = P(y|v0,W1,W4,W0,W2,W3)
 ### Estimand : 2
 Estimand name: iv
 Estimand expression:
@@ -1046,9 +1059,9 @@ Estimand assumption 3, treatment_effect_homogeneity: Each unit&#39;s treatment [
 Estimand assumption 4, outcome_effect_homogeneity: Each unit&#39;s outcome y is affected in the same way by common causes of [&#39;v0&#39;] and y
 
 ## Estimate
-Value: 8.431207181421312
+Value: 6.7777521025251435
 
-Causal Estimate is 8.431207181421312
+Causal Estimate is 6.7777521025251435
 </pre></div></div>
 </div>
 </div>
@@ -1077,34 +1090,6 @@ Causal Estimate is 8.431207181421312
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:Using Regression Discontinuity Estimator
 INFO:dowhy.causal_estimator:
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-      local_rd_variable  local_treatment  local_outcome
-6              0.597719             True      19.666240
-11             0.426837             True       8.465613
-19             0.539785             True      16.948250
-22             0.431814             True      11.478121
-25             0.411029             True      17.837136
-...                 ...              ...            ...
-9977           0.413834             True      32.515201
-9978           0.457739             True       1.210606
-9979           0.594694             True       9.426116
-9986           0.583982             True      17.739097
-9995           0.448219             True      18.115923
-
-[2026 rows x 3 columns]
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Instrumental Variable Estimator
 INFO:dowhy.causal_estimator:Realized estimand: Wald Estimator
 Realized estimand type: nonparametric-ate
@@ -1126,6 +1111,20 @@ Estimand assumption 4, outcome_effect_homogeneity: Each unit&#39;s outcome local
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+      local_rd_variable  local_treatment  local_outcome
+1              0.491077             True       8.622930
+17             0.526249             True       1.107572
+18             0.557455             True       4.576484
+24             0.416279             True      -5.730869
+25             0.554845             True       1.196812
+...                 ...              ...            ...
+9974           0.531890             True       1.377569
+9982           0.575699             True      14.511282
+9995           0.577368             True       9.653687
+9998           0.489953             True       1.844830
+9999           0.484942             True      15.116874
+
+[1924 rows x 3 columns]
 *** Causal Estimate ***
 
 ## Target estimand
@@ -1134,9 +1133,9 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(Expectation(y|W4,W0,W1,W3,W2))
+─────(Expectation(y|W1,W4,W0,W2,W3))
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W0,W1,W3,W2,U) = P(y|v0,W4,W0,W1,W3,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W4,W0,W2,W3,U) = P(y|v0,W1,W4,W0,W2,W3)
 ### Estimand : 2
 Estimand name: iv
 Estimand expression:
@@ -1159,9 +1158,9 @@ Estimand assumption 3, treatment_effect_homogeneity: Each unit&#39;s treatment [
 Estimand assumption 4, outcome_effect_homogeneity: Each unit&#39;s outcome local_outcome is affected in the same way by common causes of [&#39;local_treatment&#39;] and local_outcome
 
 ## Estimate
-Value: 25.965733858996124
+Value: 22.999383345332262
 
-Causal Estimate is 25.965733858996124
+Causal Estimate is 22.999383345332262
 </pre></div></div>
 </div>
 </div>
@@ -1175,7 +1174,7 @@ Causal Estimate is 25.965733858996124
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="dowhy_causal_api.html" class="btn btn-neutral float-right" title="Demo for the DoWhy causal API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="dowhy-conditional-treatment-effects.html" class="btn btn-neutral float-right" title="Conditional Average Treatment Effects (CATE) with DoWhy and EconML" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="dowhy_confounder_example.html" class="btn btn-neutral float-left" title="Confounding Example: Finding causal effects from observed data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

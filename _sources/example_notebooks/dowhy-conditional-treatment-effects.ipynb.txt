@@ -1,0 +1,1275 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Conditional Average Treatment Effects (CATE) with DoWhy and EconML\n",
+    "\n",
+    "This is an experimental feature where we use [EconML](https://github.com/microsoft/econml) methods from DoWhy. Using EconML allows CATE estimation using different methods. \n",
+    "\n",
+    "All four steps of causal inference in DoWhy remain the same: model, identify, estimate, and refute. The key difference is that we now call econml methods in the estimation step. There is also a simpler example using linear regression to understand the intuition behind CATE estimators. \n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import os, sys\n",
+    "sys.path.insert(1, os.path.abspath(\"../../../\"))  # for dowhy source code"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import logging\n",
+    "\n",
+    "import dowhy\n",
+    "from dowhy import CausalModel\n",
+    "import dowhy.datasets\n",
+    "\n",
+    "import econml\n",
+    "import warnings\n",
+    "warnings.filterwarnings('ignore')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>X0</th>\n",
+       "      <th>X1</th>\n",
+       "      <th>Z0</th>\n",
+       "      <th>Z1</th>\n",
+       "      <th>W0</th>\n",
+       "      <th>W1</th>\n",
+       "      <th>W2</th>\n",
+       "      <th>W3</th>\n",
+       "      <th>v0</th>\n",
+       "      <th>y</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>-0.423069</td>\n",
+       "      <td>-0.783912</td>\n",
+       "      <td>1.0</td>\n",
+       "      <td>0.595267</td>\n",
+       "      <td>-1.719039</td>\n",
+       "      <td>1.133622</td>\n",
+       "      <td>2.154847</td>\n",
+       "      <td>2.093053</td>\n",
+       "      <td>24.336479</td>\n",
+       "      <td>168.434975</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>-0.671984</td>\n",
+       "      <td>-0.517552</td>\n",
+       "      <td>1.0</td>\n",
+       "      <td>0.840097</td>\n",
+       "      <td>-0.871639</td>\n",
+       "      <td>1.240345</td>\n",
+       "      <td>2.513988</td>\n",
+       "      <td>1.144102</td>\n",
+       "      <td>32.005832</td>\n",
+       "      <td>244.808533</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>-0.408754</td>\n",
+       "      <td>-1.224234</td>\n",
+       "      <td>1.0</td>\n",
+       "      <td>0.841418</td>\n",
+       "      <td>-2.992127</td>\n",
+       "      <td>1.947631</td>\n",
+       "      <td>1.178079</td>\n",
+       "      <td>0.364007</td>\n",
+       "      <td>20.560389</td>\n",
+       "      <td>105.083930</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>-1.797735</td>\n",
+       "      <td>-0.810235</td>\n",
+       "      <td>1.0</td>\n",
+       "      <td>0.469800</td>\n",
+       "      <td>-1.097293</td>\n",
+       "      <td>-0.831213</td>\n",
+       "      <td>0.490426</td>\n",
+       "      <td>-0.229491</td>\n",
+       "      <td>8.713406</td>\n",
+       "      <td>34.353637</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>-0.579162</td>\n",
+       "      <td>-3.119641</td>\n",
+       "      <td>1.0</td>\n",
+       "      <td>0.691993</td>\n",
+       "      <td>-0.117981</td>\n",
+       "      <td>0.009197</td>\n",
+       "      <td>0.169698</td>\n",
+       "      <td>2.553771</td>\n",
+       "      <td>17.375187</td>\n",
+       "      <td>-28.550935</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "         X0        X1   Z0        Z1        W0        W1        W2        W3  \\\n",
+       "0 -0.423069 -0.783912  1.0  0.595267 -1.719039  1.133622  2.154847  2.093053   \n",
+       "1 -0.671984 -0.517552  1.0  0.840097 -0.871639  1.240345  2.513988  1.144102   \n",
+       "2 -0.408754 -1.224234  1.0  0.841418 -2.992127  1.947631  1.178079  0.364007   \n",
+       "3 -1.797735 -0.810235  1.0  0.469800 -1.097293 -0.831213  0.490426 -0.229491   \n",
+       "4 -0.579162 -3.119641  1.0  0.691993 -0.117981  0.009197  0.169698  2.553771   \n",
+       "\n",
+       "          v0           y  \n",
+       "0  24.336479  168.434975  \n",
+       "1  32.005832  244.808533  \n",
+       "2  20.560389  105.083930  \n",
+       "3   8.713406   34.353637  \n",
+       "4  17.375187  -28.550935  "
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "data = dowhy.datasets.linear_dataset(10, num_common_causes=4, num_samples=10000,\n",
+    "                                    num_instruments=2, num_effect_modifiers=2,\n",
+    "                                     num_treatments=1,\n",
+    "                                    treatment_is_binary=False)\n",
+    "df=data['df']\n",
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "INFO:dowhy.causal_model:Model to find the causal effect of treatment ['v0'] on outcome ['y']\n"
+     ]
+    }
+   ],
+   "source": [
+    "model = CausalModel(data=data[\"df\"], \n",
+    "                    treatment=data[\"treatment_name\"], outcome=data[\"outcome_name\"], \n",
+    "                    graph=data[\"gml_graph\"])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<IPython.core.display.Image object>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "model.view_model()\n",
+    "from IPython.display import Image, display\n",
+    "display(Image(filename=\"causal_model.png\"))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "INFO:dowhy.causal_identifier:Common causes of treatment and outcome:['W0', 'W3', 'W1', 'Unobserved Confounders', 'W2']\n",
+      "WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "WARN: Do you want to continue by ignoring any unobserved confounders? (use proceed_when_unidentifiable=True to disable this prompt) [y/n] y\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:['Z0', 'Z1']\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Estimand type: nonparametric-ate\n",
+      "### Estimand : 1\n",
+      "Estimand name: backdoor\n",
+      "Estimand expression:\n",
+      "  d                              \n",
+      "─────(Expectation(y|W0,W3,W1,W2))\n",
+      "d[v₀]                            \n",
+      "Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W2,U) = P(y|v0,W0,W3,W1,W2)\n",
+      "### Estimand : 2\n",
+      "Estimand name: iv\n",
+      "Estimand expression:\n",
+      "Expectation(Derivative(y, [Z0, Z1])*Derivative([v0], [Z0, Z1])**(-1))\n",
+      "Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})\n",
+      "Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "identified_estimand= model.identify_effect()\n",
+    "print(identified_estimand)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Linear Model \n",
+    "First, let us build some intuition using a linear model for estimating CATE. The effect modifiers (that lead to a heterogeneous treatment effect) can be modeled as interaction terms with the treatment. Thus, their value modulates the effect of treatment. \n",
+    "\n",
+    "Below the estimated effect of changing treatment from 0 to 1. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "INFO:dowhy.causal_estimator:INFO: Using Linear Regression Estimator\n",
+      "INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2+v0*X1+v0*X0\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "*** Causal Estimate ***\n",
+      "\n",
+      "## Target estimand\n",
+      "Estimand type: nonparametric-ate\n",
+      "### Estimand : 1\n",
+      "Estimand name: backdoor\n",
+      "Estimand expression:\n",
+      "  d                              \n",
+      "─────(Expectation(y|W0,W3,W1,W2))\n",
+      "d[v₀]                            \n",
+      "Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W2,U) = P(y|v0,W0,W3,W1,W2)\n",
+      "### Estimand : 2\n",
+      "Estimand name: iv\n",
+      "Estimand expression:\n",
+      "Expectation(Derivative(y, [Z0, Z1])*Derivative([v0], [Z0, Z1])**(-1))\n",
+      "Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})\n",
+      "Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)\n",
+      "\n",
+      "## Realized estimand\n",
+      "b: y~v0+W0+W3+W1+W2+v0*X1+v0*X0\n",
+      "## Estimate\n",
+      "Value: 10.000000000000007\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "linear_estimate = model.estimate_effect(identified_estimand, \n",
+    "                                        method_name=\"backdoor.linear_regression\",\n",
+    "                                       control_value=0,\n",
+    "                                       treatment_value=1)\n",
+    "print(linear_estimate) "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# EconML methods\n",
+    "We now move to the more advanced methods from the EconML package for estimating CATE.\n",
+    "\n",
+    "First, let us look at the double machine learning estimator. Method_name corresponds to the fully qualified name of the class that we want to use. For double ML, it is \"econml.dml.DMLCateEstimator\". \n",
+    "\n",
+    "Target units defines the units over which the causal estimate is to be computed. This can be a lambda function filter on the original dataframe, a new Pandas dataframe, or a string corresponding to the three main kinds of target units (\"ate\", \"att\" and \"atc\"). Below we show an example of a lambda function. \n",
+    "\n",
+    "Method_params are passed directly to EconML. For details on allowed parameters, refer to the EconML documentation. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {
+    "scrolled": false
+   },
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "INFO:dowhy.causal_estimator:INFO: Using EconML Estimator\n",
+      "INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "*** Causal Estimate ***\n",
+      "\n",
+      "## Target estimand\n",
+      "Estimand type: nonparametric-ate\n",
+      "### Estimand : 1\n",
+      "Estimand name: backdoor\n",
+      "Estimand expression:\n",
+      "  d                              \n",
+      "─────(Expectation(y|W0,W3,W1,W2))\n",
+      "d[v₀]                            \n",
+      "Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W2,U) = P(y|v0,W0,W3,W1,W2)\n",
+      "### Estimand : 2\n",
+      "Estimand name: iv\n",
+      "Estimand expression:\n",
+      "Expectation(Derivative(y, [Z0, Z1])*Derivative([v0], [Z0, Z1])**(-1))\n",
+      "Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})\n",
+      "Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)\n",
+      "\n",
+      "## Realized estimand\n",
+      "b: y~v0+W0+W3+W1+W2\n",
+      "## Estimate\n",
+      "Value: 8.578440374266151\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "from sklearn.preprocessing import PolynomialFeatures\n",
+    "from sklearn.linear_model import LassoCV\n",
+    "from sklearn.ensemble import GradientBoostingRegressor\n",
+    "dml_estimate = model.estimate_effect(identified_estimand, method_name=\"backdoor.econml.dml.DMLCateEstimator\",\n",
+    "                                     control_value = 0,\n",
+    "                                     treatment_value = 1,\n",
+    "                                 target_units = lambda df: df[\"X0\"]>1,  # condition used for CATE\n",
+    "                                 confidence_intervals=False,\n",
+    "                                method_params={\"init_params\":{'model_y':GradientBoostingRegressor(),\n",
+    "                                                              'model_t': GradientBoostingRegressor(),\n",
+    "                                                              \"model_final\":LassoCV(), \n",
+    "                                                              'featurizer':PolynomialFeatures(degree=1, include_bias=True)},\n",
+    "                                               \"fit_params\":{}})\n",
+    "print(dml_estimate)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "True causal estimate is 6.531368733675461\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(\"True causal estimate is\", data[\"ate\"])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "INFO:dowhy.causal_estimator:INFO: Using EconML Estimator\n",
+      "INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "*** Causal Estimate ***\n",
+      "\n",
+      "## Target estimand\n",
+      "Estimand type: nonparametric-ate\n",
+      "### Estimand : 1\n",
+      "Estimand name: backdoor\n",
+      "Estimand expression:\n",
+      "  d                              \n",
+      "─────(Expectation(y|W0,W3,W1,W2))\n",
+      "d[v₀]                            \n",
+      "Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W2,U) = P(y|v0,W0,W3,W1,W2)\n",
+      "### Estimand : 2\n",
+      "Estimand name: iv\n",
+      "Estimand expression:\n",
+      "Expectation(Derivative(y, [Z0, Z1])*Derivative([v0], [Z0, Z1])**(-1))\n",
+      "Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})\n",
+      "Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)\n",
+      "\n",
+      "## Realized estimand\n",
+      "b: y~v0+W0+W3+W1+W2\n",
+      "## Estimate\n",
+      "Value: 6.478668642785378\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "dml_estimate = model.estimate_effect(identified_estimand, method_name=\"backdoor.econml.dml.DMLCateEstimator\",\n",
+    "                                     control_value = 0,\n",
+    "                                     treatment_value = 1,\n",
+    "                                 target_units = 1,  # condition used for CATE\n",
+    "                                 confidence_intervals=False,\n",
+    "                                method_params={\"init_params\":{'model_y':GradientBoostingRegressor(),\n",
+    "                                                              'model_t': GradientBoostingRegressor(),\n",
+    "                                                              \"model_final\":LassoCV(), \n",
+    "                                                              'featurizer':PolynomialFeatures(degree=1, include_bias=True)},\n",
+    "                                               \"fit_params\":{}})\n",
+    "print(dml_estimate)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### CATE Object and Confidence Intervals"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "INFO:dowhy.causal_estimator:INFO: Using EconML Estimator\n",
+      "INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2\n",
+      "[Parallel(n_jobs=-1)]: Using backend ThreadingBackend with 32 concurrent workers.\n",
+      "[Parallel(n_jobs=-1)]: Done  71 out of 100 | elapsed:  1.1min remaining:   27.4s\n",
+      "[Parallel(n_jobs=-1)]: Done 100 out of 100 | elapsed:  1.2min finished\n",
+      "[Parallel(n_jobs=-1)]: Using backend ThreadingBackend with 32 concurrent workers.\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "*** Causal Estimate ***\n",
+      "\n",
+      "## Target estimand\n",
+      "Estimand type: nonparametric-ate\n",
+      "### Estimand : 1\n",
+      "Estimand name: backdoor\n",
+      "Estimand expression:\n",
+      "  d                              \n",
+      "─────(Expectation(y|W0,W3,W1,W2))\n",
+      "d[v₀]                            \n",
+      "Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W2,U) = P(y|v0,W0,W3,W1,W2)\n",
+      "### Estimand : 2\n",
+      "Estimand name: iv\n",
+      "Estimand expression:\n",
+      "Expectation(Derivative(y, [Z0, Z1])*Derivative([v0], [Z0, Z1])**(-1))\n",
+      "Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})\n",
+      "Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)\n",
+      "\n",
+      "## Realized estimand\n",
+      "b: y~v0+W0+W3+W1+W2\n",
+      "## Estimate\n",
+      "Value: 8.59526782752452\n",
+      "\n",
+      "[[11.26396103]\n",
+      " [10.54322021]\n",
+      " [ 8.16997949]\n",
+      " [ 4.86061276]\n",
+      " [11.09707173]\n",
+      " [-2.36778738]\n",
+      " [ 4.65848744]\n",
+      " [ 6.6349523 ]\n",
+      " [ 7.01785881]\n",
+      " [ 9.61921864]]\n",
+      "(array([[10.7209148 ],\n",
+      "       [10.05703784],\n",
+      "       [ 7.82636093],\n",
+      "       ...,\n",
+      "       [10.37314163],\n",
+      "       [ 5.89648783],\n",
+      "       [14.28637593]]), array([[10.98146476],\n",
+      "       [10.28543916],\n",
+      "       [ 8.04793421],\n",
+      "       ...,\n",
+      "       [10.63228411],\n",
+      "       [ 6.08169175],\n",
+      "       [14.69742395]]))\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "[Parallel(n_jobs=-1)]: Done  71 out of 100 | elapsed:    0.1s remaining:    0.0s\n",
+      "[Parallel(n_jobs=-1)]: Done 100 out of 100 | elapsed:    0.1s finished\n"
+     ]
+    }
+   ],
+   "source": [
+    "from sklearn.preprocessing import PolynomialFeatures\n",
+    "from sklearn.linear_model import LassoCV\n",
+    "from sklearn.ensemble import GradientBoostingRegressor\n",
+    "dml_estimate = model.estimate_effect(identified_estimand, \n",
+    "                                     method_name=\"backdoor.econml.dml.DMLCateEstimator\",\n",
+    "                                     target_units = lambda df: df[\"X0\"]>1, \n",
+    "                                     confidence_intervals=True,\n",
+    "                                     method_params={\"init_params\":{'model_y':GradientBoostingRegressor(),\n",
+    "                                                              'model_t': GradientBoostingRegressor(),\n",
+    "                                                              \"model_final\":LassoCV(), \n",
+    "                                                              'featurizer':PolynomialFeatures(degree=1, include_bias=True)},\n",
+    "                                               \"fit_params\":{\n",
+    "                                                               'inference': 'bootstrap',\n",
+    "                                                            }\n",
+    "                                              })\n",
+    "print(dml_estimate)\n",
+    "print(dml_estimate.cate_estimates[:10])\n",
+    "print(dml_estimate.effect_intervals)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Can provide a new inputs as target units and estimate CATE on them."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "INFO:dowhy.causal_estimator:INFO: Using EconML Estimator\n",
+      "INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[[10.98805765]\n",
+      " [13.07006079]\n",
+      " [10.63717349]\n",
+      " [11.88142705]\n",
+      " [12.24428257]\n",
+      " [14.27632508]\n",
+      " [13.19014829]\n",
+      " [11.06457798]\n",
+      " [11.51427196]\n",
+      " [12.50204303]]\n"
+     ]
+    }
+   ],
+   "source": [
+    "test_cols= data['effect_modifier_names'] # only need effect modifiers' values\n",
+    "test_arr = [np.random.uniform(0,1, 10) for _ in range(len(test_cols))] # all variables are sampled uniformly, sample of 10\n",
+    "test_df = pd.DataFrame(np.array(test_arr).transpose(), columns=test_cols)\n",
+    "dml_estimate = model.estimate_effect(identified_estimand, \n",
+    "                                     method_name=\"backdoor.econml.dml.DMLCateEstimator\",\n",
+    "                                     target_units = test_df,\n",
+    "                                     confidence_intervals=False,\n",
+    "                                     method_params={\"init_params\":{'model_y':GradientBoostingRegressor(),\n",
+    "                                                              'model_t': GradientBoostingRegressor(),\n",
+    "                                                              \"model_final\":LassoCV(), \n",
+    "                                                              'featurizer':PolynomialFeatures(degree=1, include_bias=True)},\n",
+    "                                               \"fit_params\":{}\n",
+    "                                              })\n",
+    "print(dml_estimate.cate_estimates)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Can also retrieve the raw EconML estimator object for any further operations"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<econml.dml.DMLCateEstimator object at 0x7fff577ce940>\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "<dowhy.causal_estimator.CausalEstimate at 0x7fff577ce828>"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "print(dml_estimate._estimator_object)\n",
+    "dml_estimate"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Works with any EconML method\n",
+    "In addition to double machine learning, below we example analyses using orthogonal forests, DRLearner (bug to fix), and neural network-based instrumental variables. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Continuous treatment, Continuous outcome"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "INFO:dowhy.causal_estimator:INFO: Using EconML Estimator\n",
+      "INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2\n",
+      "[Parallel(n_jobs=-1)]: Using backend LokyBackend with 32 concurrent workers.\n",
+      "[Parallel(n_jobs=-1)]: Done   2 out of   2 | elapsed:   38.9s remaining:    0.0s\n",
+      "[Parallel(n_jobs=-1)]: Done   2 out of   2 | elapsed:   38.9s finished\n",
+      "[Parallel(n_jobs=-1)]: Using backend LokyBackend with 32 concurrent workers.\n",
+      "[Parallel(n_jobs=-1)]: Done   2 out of   2 | elapsed:   11.7s remaining:    0.0s\n",
+      "[Parallel(n_jobs=-1)]: Done   2 out of   2 | elapsed:   11.7s finished\n",
+      "[Parallel(n_jobs=-1)]: Using backend ThreadingBackend with 32 concurrent workers.\n",
+      "[Parallel(n_jobs=-1)]: Done  64 tasks      | elapsed:   34.5s\n",
+      "[Parallel(n_jobs=-1)]: Done 224 tasks      | elapsed:  1.7min\n",
+      "[Parallel(n_jobs=-1)]: Done 448 tasks      | elapsed:  3.5min\n",
+      "[Parallel(n_jobs=-1)]: Done 736 tasks      | elapsed:  5.8min\n",
+      "[Parallel(n_jobs=-1)]: Done 1088 tasks      | elapsed:  8.6min\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "*** Causal Estimate ***\n",
+      "\n",
+      "## Target estimand\n",
+      "Estimand type: nonparametric-ate\n",
+      "### Estimand : 1\n",
+      "Estimand name: backdoor\n",
+      "Estimand expression:\n",
+      "  d                              \n",
+      "─────(Expectation(y|W0,W3,W1,W2))\n",
+      "d[v₀]                            \n",
+      "Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W2,U) = P(y|v0,W0,W3,W1,W2)\n",
+      "### Estimand : 2\n",
+      "Estimand name: iv\n",
+      "Estimand expression:\n",
+      "Expectation(Derivative(y, [Z0, Z1])*Derivative([v0], [Z0, Z1])**(-1))\n",
+      "Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})\n",
+      "Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)\n",
+      "\n",
+      "## Realized estimand\n",
+      "b: y~v0+W0+W3+W1+W2\n",
+      "## Estimate\n",
+      "Value: 8.331353134942322\n",
+      "\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "[Parallel(n_jobs=-1)]: Done 1483 out of 1483 | elapsed: 11.6min finished\n"
+     ]
+    }
+   ],
+   "source": [
+    "from sklearn.linear_model import LogisticRegression\n",
+    "orthoforest_estimate = model.estimate_effect(identified_estimand, method_name=\"backdoor.econml.ortho_forest.ContinuousTreatmentOrthoForest\",\n",
+    "                                 target_units = lambda df: df[\"X0\"]>1, \n",
+    "                                 confidence_intervals=False,\n",
+    "                                method_params={\"init_params\":{\n",
+    "                                                    'n_trees':2, # not ideal, just as an example to speed up computation\n",
+    "                                                    },\n",
+    "                                               \"fit_params\":{}\n",
+    "                                              })\n",
+    "print(orthoforest_estimate)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Binary treatment, Binary outcome"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "INFO:dowhy.causal_model:Model to find the causal effect of treatment ['v0'] on outcome ['y']\n",
+      "INFO:dowhy.causal_identifier:Common causes of treatment and outcome:['W0', 'W3', 'W1', 'Unobserved Confounders', 'W2']\n",
+      "WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.\n",
+      "INFO:dowhy.causal_identifier:Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True.\n",
+      "INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:['Z0', 'Z1']\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "            X0        X1   Z0        Z1        W0        W1        W2  \\\n",
+      "0     1.170983 -0.463676  0.0  0.999261  1.265824 -0.591487  0.187607   \n",
+      "1     1.874968 -1.237442  0.0  0.372351  2.055680 -0.470702 -1.089608   \n",
+      "2    -0.231365  0.227272  0.0  0.517914  1.004229 -1.196373 -2.495002   \n",
+      "3     1.313117  0.065614  0.0  0.793337 -0.316458 -0.459159 -0.455055   \n",
+      "4     0.012586  0.194818  0.0  0.683885 -0.322924 -1.523299 -0.816566   \n",
+      "...        ...       ...  ...       ...       ...       ...       ...   \n",
+      "9995  2.170496 -0.544734  0.0  0.251869  0.903261 -1.776711 -0.312277   \n",
+      "9996  0.359327  0.190037  0.0  0.877978  1.832255 -1.413621 -1.064130   \n",
+      "9997 -0.515581 -2.971678  0.0  0.482088  0.136553  0.119679  0.081736   \n",
+      "9998  0.105968 -1.541644  0.0  0.095357  3.035971 -1.195416 -0.069832   \n",
+      "9999  1.180787 -0.944992  0.0  0.265338  0.176723  1.442231 -1.669103   \n",
+      "\n",
+      "            W3     v0      y  \n",
+      "0     0.281102   True   True  \n",
+      "1    -0.175620   True  False  \n",
+      "2    -1.024748  False   True  \n",
+      "3     2.365471   True  False  \n",
+      "4    -1.955707  False   True  \n",
+      "...        ...    ...    ...  \n",
+      "9995 -0.112627  False   True  \n",
+      "9996 -2.130779   True   True  \n",
+      "9997 -0.567688   True   True  \n",
+      "9998  0.280326   True  False  \n",
+      "9999 -0.242490   True   True  \n",
+      "\n",
+      "[10000 rows x 10 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "data_binary = dowhy.datasets.linear_dataset(10, num_common_causes=4, num_samples=10000,\n",
+    "                                    num_instruments=2, num_effect_modifiers=2,\n",
+    "                                    treatment_is_binary=True, outcome_is_binary=True)\n",
+    "print(data_binary['df'])\n",
+    "\n",
+    "model_binary = CausalModel(data=data_binary[\"df\"], \n",
+    "                    treatment=data_binary[\"treatment_name\"], outcome=data_binary[\"outcome_name\"], \n",
+    "                    graph=data_binary[\"gml_graph\"])\n",
+    "identified_estimand_binary = model_binary.identify_effect(proceed_when_unidentifiable=True)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "NOTE: DRLearner throws an error since it expects the outcome in a 1-D array. This will be fixed soon in the EconML package. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "INFO:dowhy.causal_estimator:INFO: Using EconML Estimator\n",
+      "INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2\n"
+     ]
+    },
+    {
+     "ename": "AssertionError",
+     "evalue": "Can only accept single dimensional outcomes Y! Use Y.ravel().",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[0;31mAssertionError\u001b[0m                            Traceback (most recent call last)",
+      "\u001b[0;32m<ipython-input-17-f77b6b495b1d>\u001b[0m in \u001b[0;36m<module>\u001b[0;34m\u001b[0m\n\u001b[1;32m      8\u001b[0m                                                     \u001b[0;34m'model_propensity'\u001b[0m\u001b[0;34m:\u001b[0m \u001b[0mLogisticRegressionCV\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mcv\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m3\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0msolver\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m'lbfgs'\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mmulti_class\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m'auto'\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      9\u001b[0m                                                     },\n\u001b[0;32m---> 10\u001b[0;31m                                                \u001b[0;34m\"fit_params\"\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m{\u001b[0m\u001b[0;34m}\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     11\u001b[0m                                               })\n\u001b[1;32m     12\u001b[0m \u001b[0mprint\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mdrlearner_estimate\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m/mnt/c/Users/amshar/code/dowhy/dowhy/causal_model.py\u001b[0m in \u001b[0;36mestimate_effect\u001b[0;34m(self, identified_estimand, method_name, control_value, treatment_value, test_significance, evaluate_effect_strength, confidence_intervals, target_units, effect_modifiers, method_params)\u001b[0m\n\u001b[1;32m    205\u001b[0m                 \u001b[0mparams\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mmethod_params\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    206\u001b[0m             )\n\u001b[0;32m--> 207\u001b[0;31m             \u001b[0mestimate\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mcausal_estimator\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mestimate_effect\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    208\u001b[0m             \u001b[0;31m# Store parameters inside estimate object for refutation methods\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    209\u001b[0m             estimate.add_params(\n",
+      "\u001b[0;32m/mnt/c/Users/amshar/code/dowhy/dowhy/causal_estimator.py\u001b[0m in \u001b[0;36mestimate_effect\u001b[0;34m(self)\u001b[0m\n\u001b[1;32m     88\u001b[0m         \"\"\"\n\u001b[1;32m     89\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 90\u001b[0;31m         \u001b[0mest\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_estimate_effect\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     91\u001b[0m         \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_estimate\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mest\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     92\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m/mnt/c/Users/amshar/code/dowhy/dowhy/causal_estimators/econml_cate_estimator.py\u001b[0m in \u001b[0;36m_estimate_effect\u001b[0;34m(self)\u001b[0m\n\u001b[1;32m     66\u001b[0m         \u001b[0;31m# Calling the econml estimator's fit method\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     67\u001b[0m         \u001b[0;32mif\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0midentifier_method\u001b[0m \u001b[0;34m==\u001b[0m \u001b[0;34m\"backdoor\"\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 68\u001b[0;31m             \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mestimator\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mfit\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mY\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mT\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mX\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mW\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m**\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mmethod_params\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;34m\"fit_params\"\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     69\u001b[0m         \u001b[0;32melse\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     70\u001b[0m             \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mestimator\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mfit\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mY\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mT\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mX\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mZ\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m**\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mmethod_params\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;34m\"fit_params\"\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m~/python-environments/vpy36/lib/python3.6/site-packages/econml/drlearner.py\u001b[0m in \u001b[0;36mfit\u001b[0;34m(self, Y, T, X, W, sample_weight, sample_var, inference)\u001b[0m\n\u001b[1;32m    656\u001b[0m         \"\"\"\n\u001b[1;32m    657\u001b[0m         \u001b[0;31m# Replacing fit from DRLearner, to add statsmodels inference in docstring\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 658\u001b[0;31m         \u001b[0;32mreturn\u001b[0m \u001b[0msuper\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mfit\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mY\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mT\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mX\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mX\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mW\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mW\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0msample_weight\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0msample_weight\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0msample_var\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0msample_var\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0minference\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0minference\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    659\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    660\u001b[0m     \u001b[0;34m@\u001b[0m\u001b[0mproperty\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m~/python-environments/vpy36/lib/python3.6/site-packages/econml/drlearner.py\u001b[0m in \u001b[0;36mfit\u001b[0;34m(self, Y, T, X, W, sample_weight, sample_var, inference)\u001b[0m\n\u001b[1;32m    364\u001b[0m         \"\"\"\n\u001b[1;32m    365\u001b[0m         \u001b[0;31m# Replacing fit from _OrthoLearner, to enforce Z=None and improve the docstring\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 366\u001b[0;31m         \u001b[0;32mreturn\u001b[0m \u001b[0msuper\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mfit\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mY\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mT\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mX\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mX\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mW\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mW\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0msample_weight\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0msample_weight\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0msample_var\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0msample_var\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0minference\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0minference\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    367\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    368\u001b[0m     \u001b[0;32mdef\u001b[0m \u001b[0mscore\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mY\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mT\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mX\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;32mNone\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mW\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;32mNone\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m~/python-environments/vpy36/lib/python3.6/site-packages/econml/cate_estimator.py\u001b[0m in \u001b[0;36mcall\u001b[0;34m(self, Y, T, inference, *args, **kwargs)\u001b[0m\n\u001b[1;32m     87\u001b[0m                 \u001b[0minference\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mprefit\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mY\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mT\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m*\u001b[0m\u001b[0margs\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m**\u001b[0m\u001b[0mkwargs\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     88\u001b[0m             \u001b[0;31m# call the wrapped fit method\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 89\u001b[0;31m             \u001b[0mm\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mY\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mT\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m*\u001b[0m\u001b[0margs\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m**\u001b[0m\u001b[0mkwargs\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     90\u001b[0m             \u001b[0;32mif\u001b[0m \u001b[0minference\u001b[0m \u001b[0;32mis\u001b[0m \u001b[0;32mnot\u001b[0m \u001b[0;32mNone\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     91\u001b[0m                 \u001b[0;31m# NOTE: we call inference fit *after* calling the main fit method\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m~/python-environments/vpy36/lib/python3.6/site-packages/econml/_ortho_learner.py\u001b[0m in \u001b[0;36mfit\u001b[0;34m(self, Y, T, X, W, Z, sample_weight, sample_var, inference)\u001b[0m\n\u001b[1;32m    478\u001b[0m         \"\"\"\n\u001b[1;32m    479\u001b[0m         \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_check_input_dims\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mY\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mT\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mX\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mW\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mZ\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0msample_weight\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0msample_var\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 480\u001b[0;31m         \u001b[0mnuisances\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mfitted_inds\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_fit_nuisances\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mY\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mT\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mX\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mW\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mZ\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0msample_weight\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0msample_weight\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    481\u001b[0m         self._fit_final(self._subinds_check_none(Y, fitted_inds),\n\u001b[1;32m    482\u001b[0m                         \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_subinds_check_none\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mT\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mfitted_inds\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m~/python-environments/vpy36/lib/python3.6/site-packages/econml/_ortho_learner.py\u001b[0m in \u001b[0;36m_fit_nuisances\u001b[0;34m(self, Y, T, X, W, Z, sample_weight)\u001b[0m\n\u001b[1;32m    516\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    517\u001b[0m         nuisances, fitted_models, fitted_inds = _crossfit(self._model_nuisance, folds,\n\u001b[0;32m--> 518\u001b[0;31m                                                           Y, T, X=X, W=W, Z=Z, sample_weight=sample_weight)\n\u001b[0m\u001b[1;32m    519\u001b[0m         \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_models_nuisance\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mfitted_models\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    520\u001b[0m         \u001b[0;32mreturn\u001b[0m \u001b[0mnuisances\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mfitted_inds\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m~/python-environments/vpy36/lib/python3.6/site-packages/econml/_ortho_learner.py\u001b[0m in \u001b[0;36m_crossfit\u001b[0;34m(model, folds, *args, **kwargs)\u001b[0m\n\u001b[1;32m    143\u001b[0m                 \u001b[0mkwargs_test\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0mkey\u001b[0m\u001b[0;34m]\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mvar\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0mtest_idxs\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    144\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 145\u001b[0;31m         \u001b[0mmodel_list\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0midx\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mfit\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m*\u001b[0m\u001b[0margs_train\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m**\u001b[0m\u001b[0mkwargs_train\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    146\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    147\u001b[0m         \u001b[0mnuisance_temp\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mmodel_list\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0midx\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mpredict\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m*\u001b[0m\u001b[0margs_test\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m**\u001b[0m\u001b[0mkwargs_test\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m~/python-environments/vpy36/lib/python3.6/site-packages/econml/drlearner.py\u001b[0m in \u001b[0;36mfit\u001b[0;34m(self, Y, T, X, W, sample_weight)\u001b[0m\n\u001b[1;32m    260\u001b[0m             \u001b[0;32mdef\u001b[0m \u001b[0mfit\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mY\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mT\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mX\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;32mNone\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mW\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;32mNone\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m*\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0msample_weight\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;32mNone\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    261\u001b[0m                 \u001b[0;31m# TODO Allow for non-vector y, i.e. of shape (n, 1)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 262\u001b[0;31m                 \u001b[0;32massert\u001b[0m \u001b[0mnp\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mndim\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mY\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;34m==\u001b[0m \u001b[0;36m1\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m\"Can only accept single dimensional outcomes Y! Use Y.ravel().\"\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    263\u001b[0m                 \u001b[0;32mif\u001b[0m \u001b[0;34m(\u001b[0m\u001b[0mX\u001b[0m \u001b[0;32mis\u001b[0m \u001b[0;32mNone\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;32mand\u001b[0m \u001b[0;34m(\u001b[0m\u001b[0mW\u001b[0m \u001b[0;32mis\u001b[0m \u001b[0;32mNone\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    264\u001b[0m                     \u001b[0;32mraise\u001b[0m \u001b[0mAttributeError\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"At least one of X or W has to not be None!\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;31mAssertionError\u001b[0m: Can only accept single dimensional outcomes Y! Use Y.ravel()."
+     ]
+    }
+   ],
+   "source": [
+    "from sklearn.linear_model import LogisticRegressionCV\n",
+    "#todo needs binary y\n",
+    "drlearner_estimate = model_binary.estimate_effect(identified_estimand_binary, \n",
+    "                                method_name=\"backdoor.econml.drlearner.LinearDRLearner\",\n",
+    "                                target_units = lambda df: df[\"X0\"]>1, \n",
+    "                                confidence_intervals=False,\n",
+    "                                method_params={\"init_params\":{\n",
+    "                                                    'model_propensity': LogisticRegressionCV(cv=3, solver='lbfgs', multi_class='auto')\n",
+    "                                                    },\n",
+    "                                               \"fit_params\":{}\n",
+    "                                              })\n",
+    "print(drlearner_estimate)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Instrumental Variable Method"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "Using TensorFlow backend.\n",
+      "INFO:dowhy.causal_estimator:INFO: Using EconML Estimator\n",
+      "INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2\n",
+      "WARNING:tensorflow:From /home/amshar/python-environments/vpy36/lib/python3.6/site-packages/tensorflow/python/ops/math_ops.py:2403: add_dispatch_support.<locals>.wrapper (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.\n",
+      "Instructions for updating:\n",
+      "Use tf.where in 2.0, which has the same broadcast rule as np.where\n",
+      "WARNING:tensorflow:From /home/amshar/python-environments/vpy36/lib/python3.6/site-packages/keras/backend/tensorflow_backend.py:422: The name tf.global_variables is deprecated. Please use tf.compat.v1.global_variables instead.\n",
+      "\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Epoch 1/25\n",
+      "10000/10000 [==============================] - 1s 125us/step - loss: 5.7914\n",
+      "Epoch 2/25\n",
+      "10000/10000 [==============================] - 1s 69us/step - loss: 2.7293\n",
+      "Epoch 3/25\n",
+      "10000/10000 [==============================] - 1s 67us/step - loss: 2.5698\n",
+      "Epoch 4/25\n",
+      "10000/10000 [==============================] - 1s 67us/step - loss: 2.5207\n",
+      "Epoch 5/25\n",
+      "10000/10000 [==============================] - 1s 67us/step - loss: 2.4888\n",
+      "Epoch 6/25\n",
+      "10000/10000 [==============================] - 1s 66us/step - loss: 2.4770\n",
+      "Epoch 7/25\n",
+      "10000/10000 [==============================] - 1s 67us/step - loss: 2.4734\n",
+      "Epoch 8/25\n",
+      "10000/10000 [==============================] - 1s 66us/step - loss: 2.4526\n",
+      "Epoch 9/25\n",
+      "10000/10000 [==============================] - 1s 67us/step - loss: 2.4543\n",
+      "Epoch 10/25\n",
+      "10000/10000 [==============================] - 1s 67us/step - loss: 2.4469\n",
+      "Epoch 11/25\n",
+      "10000/10000 [==============================] - 1s 67us/step - loss: 2.4347\n",
+      "Epoch 12/25\n",
+      "10000/10000 [==============================] - 1s 67us/step - loss: 2.4246\n",
+      "Epoch 13/25\n",
+      "10000/10000 [==============================] - 1s 67us/step - loss: 2.4259\n",
+      "Epoch 14/25\n",
+      "10000/10000 [==============================] - 1s 66us/step - loss: 2.4241\n",
+      "Epoch 15/25\n",
+      "10000/10000 [==============================] - 1s 66us/step - loss: 2.4149\n",
+      "Epoch 16/25\n",
+      "10000/10000 [==============================] - 1s 66us/step - loss: 2.4150\n",
+      "Epoch 17/25\n",
+      "10000/10000 [==============================] - 1s 66us/step - loss: 2.4078\n",
+      "Epoch 18/25\n",
+      "10000/10000 [==============================] - 1s 66us/step - loss: 2.4015\n",
+      "Epoch 19/25\n",
+      "10000/10000 [==============================] - 1s 67us/step - loss: 2.4001\n",
+      "Epoch 20/25\n",
+      "10000/10000 [==============================] - 1s 67us/step - loss: 2.4029\n",
+      "Epoch 21/25\n",
+      "10000/10000 [==============================] - 1s 67us/step - loss: 2.4025\n",
+      "Epoch 22/25\n",
+      "10000/10000 [==============================] - 1s 66us/step - loss: 2.3970\n",
+      "Epoch 23/25\n",
+      "10000/10000 [==============================] - 1s 66us/step - loss: 2.3930\n",
+      "Epoch 24/25\n",
+      "10000/10000 [==============================] - 1s 66us/step - loss: 2.3982\n",
+      "Epoch 25/25\n",
+      "10000/10000 [==============================] - 1s 66us/step - loss: 2.3940\n",
+      "Epoch 1/25\n",
+      "10000/10000 [==============================] - 2s 205us/step - loss: 8526.7076\n",
+      "Epoch 2/25\n",
+      "10000/10000 [==============================] - 1s 111us/step - loss: 4659.4835\n",
+      "Epoch 3/25\n",
+      "10000/10000 [==============================] - 1s 107us/step - loss: 4231.5569\n",
+      "Epoch 4/25\n",
+      "10000/10000 [==============================] - 1s 104us/step - loss: 4215.2266\n",
+      "Epoch 5/25\n",
+      "10000/10000 [==============================] - 1s 102us/step - loss: 4090.3670\n",
+      "Epoch 6/25\n",
+      "10000/10000 [==============================] - 1s 102us/step - loss: 4030.0446\n",
+      "Epoch 7/25\n",
+      "10000/10000 [==============================] - 1s 100us/step - loss: 4137.3973\n",
+      "Epoch 8/25\n",
+      "10000/10000 [==============================] - 1s 98us/step - loss: 4091.2221\n",
+      "Epoch 9/25\n",
+      "10000/10000 [==============================] - 1s 97us/step - loss: 4003.9576\n",
+      "Epoch 10/25\n",
+      "10000/10000 [==============================] - 1s 97us/step - loss: 4013.2564\n",
+      "Epoch 11/25\n",
+      "10000/10000 [==============================] - 1s 98us/step - loss: 4035.7388\n",
+      "Epoch 12/25\n",
+      "10000/10000 [==============================] - 1s 97us/step - loss: 3965.2224\n",
+      "Epoch 13/25\n",
+      "10000/10000 [==============================] - 1s 98us/step - loss: 4054.5777\n",
+      "Epoch 14/25\n",
+      "10000/10000 [==============================] - 1s 97us/step - loss: 4014.5290\n",
+      "Epoch 15/25\n",
+      "10000/10000 [==============================] - 1s 97us/step - loss: 3984.4700\n",
+      "Epoch 16/25\n",
+      "10000/10000 [==============================] - 1s 96us/step - loss: 3926.2307\n",
+      "Epoch 17/25\n",
+      "10000/10000 [==============================] - 1s 94us/step - loss: 4015.3016\n",
+      "Epoch 18/25\n",
+      "10000/10000 [==============================] - 1s 94us/step - loss: 4034.1578\n",
+      "Epoch 19/25\n",
+      "10000/10000 [==============================] - 1s 94us/step - loss: 3974.5770\n",
+      "Epoch 20/25\n",
+      "10000/10000 [==============================] - 1s 94us/step - loss: 3985.2165\n",
+      "Epoch 21/25\n",
+      "10000/10000 [==============================] - 1s 94us/step - loss: 3977.9142\n",
+      "Epoch 22/25\n",
+      "10000/10000 [==============================] - 1s 94us/step - loss: 3950.7200\n",
+      "Epoch 23/25\n",
+      "10000/10000 [==============================] - 1s 94us/step - loss: 4011.0488\n",
+      "Epoch 24/25\n",
+      "10000/10000 [==============================] - 1s 93us/step - loss: 3986.2898\n",
+      "Epoch 25/25\n",
+      "10000/10000 [==============================] - 1s 94us/step - loss: 4029.8864\n",
+      "*** Causal Estimate ***\n",
+      "\n",
+      "## Target estimand\n",
+      "Estimand type: nonparametric-ate\n",
+      "### Estimand : 1\n",
+      "Estimand name: backdoor\n",
+      "Estimand expression:\n",
+      "  d                              \n",
+      "─────(Expectation(y|W0,W3,W1,W2))\n",
+      "d[v₀]                            \n",
+      "Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W2,U) = P(y|v0,W0,W3,W1,W2)\n",
+      "### Estimand : 2\n",
+      "Estimand name: iv\n",
+      "Estimand expression:\n",
+      "Expectation(Derivative(y, [Z0, Z1])*Derivative([v0], [Z0, Z1])**(-1))\n",
+      "Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})\n",
+      "Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)\n",
+      "\n",
+      "## Realized estimand\n",
+      "b: y~v0+W0+W3+W1+W2\n",
+      "## Estimate\n",
+      "Value: 6.484096527099609\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "import keras\n",
+    "from econml.deepiv import DeepIVEstimator\n",
+    "dims_zx = len(model._instruments)+len(model._effect_modifiers)\n",
+    "dims_tx = len(model._treatment)+len(model._effect_modifiers)\n",
+    "treatment_model = keras.Sequential([keras.layers.Dense(128, activation='relu', input_shape=(dims_zx,)), # sum of dims of Z and X \n",
+    "                                    keras.layers.Dropout(0.17),\n",
+    "                                    keras.layers.Dense(64, activation='relu'),\n",
+    "                                    keras.layers.Dropout(0.17),\n",
+    "                                    keras.layers.Dense(32, activation='relu'),\n",
+    "                                    keras.layers.Dropout(0.17)])                \n",
+    "response_model = keras.Sequential([keras.layers.Dense(128, activation='relu', input_shape=(dims_tx,)), # sum of dims of T and X\n",
+    "                                    keras.layers.Dropout(0.17), \n",
+    "                                    keras.layers.Dense(64, activation='relu'),\n",
+    "                                    keras.layers.Dropout(0.17),\n",
+    "                                    keras.layers.Dense(32, activation='relu'),\n",
+    "                                    keras.layers.Dropout(0.17),\n",
+    "                                    keras.layers.Dense(1)])\n",
+    "\n",
+    "deepiv_estimate = model.estimate_effect(identified_estimand, \n",
+    "                                        method_name=\"iv.econml.deepiv.DeepIVEstimator\",\n",
+    "                                        target_units = lambda df: df[\"X0\"]>-1, \n",
+    "                                        confidence_intervals=False,\n",
+    "                                method_params={\"init_params\":{'n_components': 10, # Number of gaussians in the mixture density networks\n",
+    "                                                              'm': lambda z, x: treatment_model(keras.layers.concatenate([z, x])), # Treatment model,\n",
+    "                                                              \"h\": lambda t, x: response_model(keras.layers.concatenate([t, x])), # Response model\n",
+    "                                                              'n_samples': 1, # Number of samples used to estimate the response\n",
+    "                                                              'first_stage_options': {'epochs':25},\n",
+    "                                                              'second_stage_options': {'epochs':25}\n",
+    "                                                             },\n",
+    "                                               \"fit_params\":{}})\n",
+    "print(deepiv_estimate)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Refuting the estimate"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Random "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "INFO:dowhy.causal_estimator:INFO: Using EconML Estimator\n",
+      "INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2+w_random\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Refute: Add a Random Common Cause\n",
+      "Estimated effect:(12.13683678878986,)\n",
+      "New effect:(13.248034250593435,)\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "res_random=model.refute_estimate(identified_estimand, dml_estimate, method_name=\"random_common_cause\")\n",
+    "print(res_random)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Adding an unobserved common cause variable"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "INFO:dowhy.causal_estimator:INFO: Using EconML Estimator\n",
+      "INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Refute: Add an Unobserved Common Cause\n",
+      "Estimated effect:(12.13683678878986,)\n",
+      "New effect:(13.196059198878597,)\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "res_unobserved=model.refute_estimate(identified_estimand, dml_estimate, method_name=\"add_unobserved_common_cause\",\n",
+    "                                     confounders_effect_on_treatment=\"linear\", confounders_effect_on_outcome=\"linear\",\n",
+    "                                    effect_strength_on_treatment=0.01, effect_strength_on_outcome=0.02)\n",
+    "print(res_unobserved)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Replacing treatment with a random (placebo) variable"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "INFO:dowhy.causal_estimator:INFO: Using EconML Estimator\n",
+      "INFO:dowhy.causal_estimator:b: y~placebo+W0+W3+W1+W2\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Refute: Use a Placebo Treatment\n",
+      "Estimated effect:(12.13683678878986,)\n",
+      "New effect:(0.0,)\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "res_placebo=model.refute_estimate(identified_estimand, dml_estimate,\n",
+    "        method_name=\"placebo_treatment_refuter\", placebo_type=\"permute\")\n",
+    "print(res_placebo)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Removing a random subset of the data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "INFO:dowhy.causal_estimator:INFO: Using EconML Estimator\n",
+      "INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Refute: Use a subset of data\n",
+      "Estimated effect:(12.13683678878986,)\n",
+      "New effect:(13.150007335670214,)\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "res_subset=model.refute_estimate(identified_estimand, dml_estimate,\n",
+    "        method_name=\"data_subset_refuter\", subset_fraction=0.8)\n",
+    "print(res_subset)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "More refutation methods to come, especially specific to the CATE estimators."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.9"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

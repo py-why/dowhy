@@ -25,6 +25,7 @@
         <script type="text/javascript" src="../../_static/underscore.js"></script>
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
@@ -86,12 +87,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-conditional-treatment-effects.html#Linear-Model">Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-conditional-treatment-effects.html#EconML-methods">EconML methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-conditional-treatment-effects.html#Works-with-any-EconML-method">Works with any EconML method</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-conditional-treatment-effects.html#Refuting-the-estimate">Refuting the estimate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../code_repo.html">Code repository &amp; Versions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../dowhy.html">dowhy package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">dowhy</a></li>
@@ -163,8 +170,14 @@
 
 
 <div class="viewcode-block" id="CausalRefuter"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_refuter.CausalRefuter">[docs]</a><span class="k">class</span> <span class="nc">CausalRefuter</span><span class="p">:</span>
+    
+    <span class="sd">&quot;&quot;&quot;Base class for different refutation methods. </span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="sd">    Subclasses implement specific refutations methods. </span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span> <span class="o">=</span> <span class="n">identified_estimand</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span> <span class="o">=</span> <span class="n">estimate</span>
@@ -174,17 +187,39 @@
         <span class="k">if</span> <span class="s2">&quot;random_seed&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_random_seed</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;random_seed&#39;</span><span class="p">]</span>
             <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_random_seed</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CausalRefuter.get_estimator_object"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_refuter.CausalRefuter.get_estimator_object">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_estimator_object</span><span class="p">(</span><span class="n">new_data</span><span class="p">,</span> <span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">):</span>
+        <span class="n">estimator_class</span> <span class="o">=</span> <span class="n">estimate</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;estimator_class&#39;</span><span class="p">]</span>
+        <span class="n">new_estimator</span> <span class="o">=</span> <span class="n">estimator_class</span><span class="p">(</span>
+                <span class="n">new_data</span><span class="p">,</span>
+                <span class="n">identified_estimand</span><span class="p">,</span>
+                <span class="n">identified_estimand</span><span class="o">.</span><span class="n">treatment_variable</span><span class="p">,</span> <span class="n">identified_estimand</span><span class="o">.</span><span class="n">outcome_variable</span><span class="p">,</span> <span class="c1">#names of treatment and outcome</span>
+                <span class="n">test_significance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">evaluate_effect_strength</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">confidence_intervals</span> <span class="o">=</span> <span class="n">estimate</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;confidence_intervals&quot;</span><span class="p">],</span>
+                <span class="n">target_units</span> <span class="o">=</span> <span class="n">estimate</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;target_units&quot;</span><span class="p">],</span>
+                <span class="n">effect_modifiers</span> <span class="o">=</span> <span class="n">estimate</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;effect_modifiers&quot;</span><span class="p">],</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="n">estimate</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;method_params&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_estimator</span></div>
+
+<div class="viewcode-block" id="CausalRefuter.refute_estimate"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_refuter.CausalRefuter.refute_estimate">[docs]</a>    <span class="k">def</span> <span class="nf">refute_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
 
 
 <div class="viewcode-block" id="CausalRefutation"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_refuter.CausalRefutation">[docs]</a><span class="k">class</span> <span class="nc">CausalRefutation</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Class for storing the result of a refutation method.</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimated_effect</span><span class="p">,</span> <span class="n">new_effect</span><span class="p">,</span> <span class="n">refutation_type</span><span class="p">):</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimated_effect</span><span class="p">,</span> <span class="n">new_effect</span><span class="p">,</span> <span class="n">refutation_type</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">estimated_effect</span> <span class="o">=</span> <span class="n">estimated_effect</span><span class="p">,</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">new_effect</span> <span class="o">=</span> <span class="n">new_effect</span><span class="p">,</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">refutation_type</span> <span class="o">=</span> <span class="n">refutation_type</span>
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="se">\n</span><span class="s2">Estimated effect:</span><span class="si">{1}</span><span class="se">\n</span><span class="s2">New effect:</span><span class="si">{2}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">refutation_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimated_effect</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_effect</span>
         <span class="p">)</span></div>

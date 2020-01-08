@@ -25,6 +25,7 @@
         <script type="text/javascript" src="../../../_static/underscore.js"></script>
         <script type="text/javascript" src="../../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
@@ -86,12 +87,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy-conditional-treatment-effects.html#Linear-Model">Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy-conditional-treatment-effects.html#EconML-methods">EconML methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy-conditional-treatment-effects.html#Works-with-any-EconML-method">Works with any EconML method</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy-conditional-treatment-effects.html#Refuting-the-estimate">Refuting the estimate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../code_repo.html">Code repository &amp; Versions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../dowhy.html">dowhy package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules.html">dowhy</a></li>
@@ -164,32 +171,23 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">dowhy.causal_refuter</span> <span class="k">import</span> <span class="n">CausalRefutation</span>
-<span class="kn">from</span> <span class="nn">dowhy.causal_refuter</span> <span class="k">import</span> <span class="n">CausalRefuter</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_refuter</span> <span class="kn">import</span> <span class="n">CausalRefutation</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_refuter</span> <span class="kn">import</span> <span class="n">CausalRefuter</span>
 
 
 <div class="viewcode-block" id="RandomCommonCause"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.random_common_cause.RandomCommonCause">[docs]</a><span class="k">class</span> <span class="nc">RandomCommonCause</span><span class="p">(</span><span class="n">CausalRefuter</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="RandomCommonCause.refute_estimate"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.random_common_cause.RandomCommonCause.refute_estimate">[docs]</a>    <span class="k">def</span> <span class="nf">refute_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">num_rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">new_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">w_random</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">num_rows</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">new_data</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">])</span>
         <span class="n">new_backdoor_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">backdoor_variables</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;w_random&#39;</span><span class="p">]</span>
-        <span class="n">estimator_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;estimator_class&#39;</span><span class="p">]</span>
         <span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="p">)</span>
+        <span class="c1"># Adding a new backdoor variable to the identified estimand</span>
         <span class="n">identified_estimand</span><span class="o">.</span><span class="n">backdoor_variables</span> <span class="o">=</span> <span class="n">new_backdoor_variables</span>
-        <span class="c1"># identified_estimand = IdentifiedEstimand(</span>
-        <span class="c1">#        treatment_variable = self._treatment_name,</span>
-        <span class="c1">#        outcome_variable = self._outcome_name,</span>
-        <span class="c1">#        backdoor_variables = new_backdoor_variables)#self._target_estimand.backdoor_variables)#new_backdoor_variables)</span>
-        <span class="n">new_estimator</span> <span class="o">=</span> <span class="n">estimator_class</span><span class="p">(</span>
-            <span class="n">new_data</span><span class="p">,</span>
-            <span class="n">identified_estimand</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name</span><span class="p">,</span>
-            <span class="n">test_significance</span><span class="o">=</span><span class="kc">None</span>
-        <span class="p">)</span>
+
+        <span class="n">new_estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_estimator_object</span><span class="p">(</span><span class="n">new_data</span><span class="p">,</span> <span class="n">identified_estimand</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="p">)</span>
         <span class="n">new_effect</span> <span class="o">=</span> <span class="n">new_estimator</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">()</span>
         <span class="n">refute</span> <span class="o">=</span> <span class="n">CausalRefutation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">new_effect</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
                                   <span class="n">refutation_type</span><span class="o">=</span><span class="s2">&quot;Refute: Add a Random Common Cause&quot;</span><span class="p">)</span>

@@ -25,6 +25,7 @@
         <script type="text/javascript" src="../../../_static/underscore.js"></script>
         <script type="text/javascript" src="../../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
@@ -86,12 +87,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy-conditional-treatment-effects.html#Linear-Model">Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy-conditional-treatment-effects.html#EconML-methods">EconML methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy-conditional-treatment-effects.html#Works-with-any-EconML-method">Works with any EconML method</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy-conditional-treatment-effects.html#Refuting-the-estimate">Refuting the estimate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../code_repo.html">Code repository &amp; Versions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../dowhy.html">dowhy package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules.html">dowhy</a></li>
@@ -159,14 +166,14 @@
             
   <h1>Source code for dowhy.api.causal_data_frame</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">dowhy.causal_model</span> <span class="k">import</span> <span class="n">CausalModel</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_model</span> <span class="kn">import</span> <span class="n">CausalModel</span>
 <span class="kn">import</span> <span class="nn">dowhy.do_samplers</span> <span class="k">as</span> <span class="nn">do_samplers</span>
-<span class="kn">from</span> <span class="nn">dowhy.utils.api</span> <span class="k">import</span> <span class="n">parse_state</span>
+<span class="kn">from</span> <span class="nn">dowhy.utils.api</span> <span class="kn">import</span> <span class="n">parse_state</span>
 
 
 <div class="viewcode-block" id="CausalAccessor"><a class="viewcode-back" href="../../../dowhy.api.html#dowhy.api.causal_data_frame.CausalAccessor">[docs]</a><span class="nd">@pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">extensions</span><span class="o">.</span><span class="n">register_dataframe_accessor</span><span class="p">(</span><span class="s2">&quot;causal&quot;</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">CausalAccessor</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pandas_obj</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pandas_obj</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        An accessor for the pandas.DataFrame under the `causal` namespace.</span>
 
@@ -190,7 +197,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_method</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="CausalAccessor.do"><a class="viewcode-back" href="../../../dowhy.api.html#dowhy.api.causal_data_frame.CausalAccessor.do">[docs]</a>    <span class="k">def</span> <span class="nf">do</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;weighting&#39;</span><span class="p">,</span> <span class="n">num_cores</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">variable_types</span><span class="o">=</span><span class="p">{},</span> <span class="n">outcome</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dot_graph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-           <span class="n">common_causes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">estimand_type</span><span class="o">=</span><span class="s1">&#39;ate&#39;</span><span class="p">,</span> <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stateful</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+           <span class="n">common_causes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">estimand_type</span><span class="o">=</span><span class="s1">&#39;nonparametric-ate&#39;</span><span class="p">,</span> <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stateful</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The do-operation implemented with sampling. This will return a pandas.DataFrame with the outcome</span>
 <span class="sd">        variable(s) replaced with samples from P(Y|do(X=x)).</span>
@@ -228,8 +235,7 @@
 <span class="sd">        :param params: dict: extra parameters to set as attributes on the sampler object</span>
 <span class="sd">        :param dot_graph: str: A string specifying the causal graph.</span>
 <span class="sd">        :param common_causes: list: A list of strings containing the variable names to control for.</span>
-<span class="sd">        :param estimand_type: str: &#39;ate&#39; is the only one currently supported. Others may be added later, to allow for</span>
-<span class="sd">        CATE estimation.</span>
+<span class="sd">        :param estimand_type: str: &#39;nonparametric-ate&#39; is the only one currently supported. Others may be added later, to allow for specific, parametric estimands.</span>
 <span class="sd">        :param proceed_when_unidentifiable: bool: A flag to over-ride user prompts to proceed when effects aren&#39;t</span>
 <span class="sd">        identifiable with the assumptions provided.</span>
 <span class="sd">        :param stateful: bool: Whether to retain state. By default, the do operation is stateless.</span>

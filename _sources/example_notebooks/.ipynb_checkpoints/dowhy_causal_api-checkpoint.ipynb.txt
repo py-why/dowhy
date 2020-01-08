@@ -1,0 +1,358 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Demo for the DoWhy causal API\n",
+    "We show a simple example of adding a causal extension to any dataframe. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import os, sys\n",
+    "sys.path.append(os.path.abspath(\"../../../\"))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import dowhy.datasets\n",
+    "import dowhy.api\n",
+    "\n",
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "\n",
+    "from statsmodels.api import OLS"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>W0</th>\n",
+       "      <th>v0</th>\n",
+       "      <th>y</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>-2.162280</td>\n",
+       "      <td>True</td>\n",
+       "      <td>3.221392</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>-0.414811</td>\n",
+       "      <td>False</td>\n",
+       "      <td>-1.699314</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>-1.723537</td>\n",
+       "      <td>False</td>\n",
+       "      <td>-1.503957</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>0.323579</td>\n",
+       "      <td>False</td>\n",
+       "      <td>0.981959</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>-1.628089</td>\n",
+       "      <td>False</td>\n",
+       "      <td>-2.090974</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>...</th>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>995</th>\n",
+       "      <td>1.510481</td>\n",
+       "      <td>True</td>\n",
+       "      <td>6.481622</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>996</th>\n",
+       "      <td>0.198010</td>\n",
+       "      <td>False</td>\n",
+       "      <td>-0.108632</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>997</th>\n",
+       "      <td>-1.355205</td>\n",
+       "      <td>False</td>\n",
+       "      <td>0.244389</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>998</th>\n",
+       "      <td>-0.153224</td>\n",
+       "      <td>True</td>\n",
+       "      <td>5.764859</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>999</th>\n",
+       "      <td>0.625423</td>\n",
+       "      <td>False</td>\n",
+       "      <td>0.348370</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>1000 rows × 3 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "           W0     v0         y\n",
+       "0   -2.162280   True  3.221392\n",
+       "1   -0.414811  False -1.699314\n",
+       "2   -1.723537  False -1.503957\n",
+       "3    0.323579  False  0.981959\n",
+       "4   -1.628089  False -2.090974\n",
+       "..        ...    ...       ...\n",
+       "995  1.510481   True  6.481622\n",
+       "996  0.198010  False -0.108632\n",
+       "997 -1.355205  False  0.244389\n",
+       "998 -0.153224   True  5.764859\n",
+       "999  0.625423  False  0.348370\n",
+       "\n",
+       "[1000 rows x 3 columns]"
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "data = dowhy.datasets.linear_dataset(beta=5,\n",
+    "        num_common_causes=1,\n",
+    "        num_instruments = 0,\n",
+    "        num_samples=1000,\n",
+    "        treatment_is_binary=True)\n",
+    "df = data['df']\n",
+    "df['y'] = df['y'] + np.random.normal(size=len(df)) # Adding noise to data. Without noise, the variance in Y|X, Z is zero, and mcmc fails.\n",
+    "data['dot_graph'] = 'digraph { v ->y;X0-> v;X0-> y;}'\n",
+    "df"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "WARNING:dowhy.causal_model:Causal Graph not provided. DoWhy will construct a graph based on data inputs.\n",
+      "INFO:dowhy.causal_model:Model to find the causal effect of treatment ['v0'] on outcome ['y']\n",
+      "INFO:dowhy.causal_identifier:Common causes of treatment and outcome:['X0']\n",
+      "WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "WARN: Do you want to continue by ignoring any unobserved confounders? (use proceed_when_unidentifiable=True to disable this prompt) [y/n] y\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[]\n",
+      "INFO:dowhy.do_sampler:Using WeightingSampler for do sampling.\n",
+      "INFO:dowhy.do_sampler:Caution: do samplers assume iid data.\n"
+     ]
+    },
+    {
+     "ename": "ValueError",
+     "evalue": "at least one array or dtype is required",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[0;31mValueError\u001b[0m                                Traceback (most recent call last)",
+      "\u001b[0;32m<ipython-input-7-9064fb9aafee>\u001b[0m in \u001b[0;36m<module>\u001b[0;34m\u001b[0m\n\u001b[1;32m      3\u001b[0m                      \u001b[0mvariable_types\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m{\u001b[0m\u001b[0;34m'v0'\u001b[0m\u001b[0;34m:\u001b[0m \u001b[0;34m'b'\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m'y'\u001b[0m\u001b[0;34m:\u001b[0m \u001b[0;34m'c'\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m'X0'\u001b[0m\u001b[0;34m:\u001b[0m \u001b[0;34m'c'\u001b[0m\u001b[0;34m}\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      4\u001b[0m                      \u001b[0moutcome\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m'y'\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 5\u001b[0;31m                      common_causes=['X0']).groupby('v0').mean().plot(y='y', kind='bar')\n\u001b[0m",
+      "\u001b[0;32m/mnt/c/Users/amshar/code/dowhy/dowhy/api/causal_data_frame.py\u001b[0m in \u001b[0;36mdo\u001b[0;34m(self, x, method, num_cores, variable_types, outcome, params, dot_graph, common_causes, estimand_type, proceed_when_unidentifiable, stateful)\u001b[0m\n\u001b[1;32m    101\u001b[0m                                              \u001b[0mcausal_model\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_causal_model\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    102\u001b[0m                                              keep_original_treatment=keep_original_treatment)\n\u001b[0;32m--> 103\u001b[0;31m         \u001b[0mresult\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_sampler\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mdo_sample\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mx\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    104\u001b[0m         \u001b[0;32mif\u001b[0m \u001b[0;32mnot\u001b[0m \u001b[0mstateful\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    105\u001b[0m             \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mreset\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m/mnt/c/Users/amshar/code/dowhy/dowhy/do_sampler.py\u001b[0m in \u001b[0;36mdo_sample\u001b[0;34m(self, x)\u001b[0m\n\u001b[1;32m    141\u001b[0m     \u001b[0;32mdef\u001b[0m \u001b[0mdo_sample\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mx\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    142\u001b[0m         \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mreset\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 143\u001b[0;31m         \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mdisrupt_causes\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    144\u001b[0m         \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mmake_treatment_effective\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mx\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    145\u001b[0m         \u001b[0;32mif\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mpoint_sampler\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m/mnt/c/Users/amshar/code/dowhy/dowhy/do_samplers/weighting_sampler.py\u001b[0m in \u001b[0;36mdisrupt_causes\u001b[0;34m(self)\u001b[0m\n\u001b[1;32m     34\u001b[0m                                                               \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_target_estimand\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mbackdoor_variables\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     35\u001b[0m                                                               \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_treatment_names\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 36\u001b[0;31m                                                               variable_types=self._variable_types)\n\u001b[0m\u001b[1;32m     37\u001b[0m         \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_df\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;34m'weight'\u001b[0m\u001b[0;34m]\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mcompute_weights\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     38\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m/mnt/c/Users/amshar/code/dowhy/dowhy/utils/propensity_score.py\u001b[0m in \u001b[0;36mstate_propensity_score\u001b[0;34m(data, covariates, treatments, variable_types)\u001b[0m\n\u001b[1;32m     28\u001b[0m                                                                         \u001b[0mcovariates\u001b[0m \u001b[0;34m+\u001b[0m \u001b[0mtreatments\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0mi\u001b[0m\u001b[0;34m+\u001b[0m\u001b[0;36m1\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     29\u001b[0m                                                                         \u001b[0mtreatment\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 30\u001b[0;31m                                                                         variable_types))\n\u001b[0m\u001b[1;32m     31\u001b[0m         \u001b[0;32melif\u001b[0m \u001b[0mvariable_types\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0mtreatment\u001b[0m\u001b[0;34m]\u001b[0m \u001b[0;32min\u001b[0m \u001b[0;34m[\u001b[0m\u001b[0;34m'o'\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m'u'\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m'd'\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     32\u001b[0m             log_propensities[treatment] = np.log(categorical_treatment_model(data.copy(),\n",
+      "\u001b[0;32m/mnt/c/Users/amshar/code/dowhy/dowhy/utils/propensity_score.py\u001b[0m in \u001b[0;36mbinary_treatment_model\u001b[0;34m(data, covariates, treatment, variable_types)\u001b[0m\n\u001b[1;32m     51\u001b[0m     \u001b[0mdata\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcovariates\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mbinarize_discrete\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mdata\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcovariates\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mvariable_types\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     52\u001b[0m     \u001b[0mmodel\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mLogisticRegression\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0msolver\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m'lbfgs'\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 53\u001b[0;31m     \u001b[0mmodel\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mmodel\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mfit\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mdata\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0mcovariates\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mdata\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0mtreatment\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     54\u001b[0m     \u001b[0mscores\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mmodel\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mpredict_proba\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mdata\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0mcovariates\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     55\u001b[0m     \u001b[0mscores\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mscores\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0mrange\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mlen\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mscores\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mdata\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0mtreatment\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mvalues\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mastype\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mint\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m~/python-environments/vpy36/lib/python3.6/site-packages/sklearn/linear_model/_logistic.py\u001b[0m in \u001b[0;36mfit\u001b[0;34m(self, X, y, sample_weight)\u001b[0m\n\u001b[1;32m   1523\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1524\u001b[0m         X, y = check_X_y(X, y, accept_sparse='csr', dtype=_dtype, order=\"C\",\n\u001b[0;32m-> 1525\u001b[0;31m                          accept_large_sparse=solver != 'liblinear')\n\u001b[0m\u001b[1;32m   1526\u001b[0m         \u001b[0mcheck_classification_targets\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0my\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1527\u001b[0m         \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mclasses_\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mnp\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0munique\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0my\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m~/python-environments/vpy36/lib/python3.6/site-packages/sklearn/utils/validation.py\u001b[0m in \u001b[0;36mcheck_X_y\u001b[0;34m(X, y, accept_sparse, accept_large_sparse, dtype, order, copy, force_all_finite, ensure_2d, allow_nd, multi_output, ensure_min_samples, ensure_min_features, y_numeric, warn_on_dtype, estimator)\u001b[0m\n\u001b[1;32m    737\u001b[0m                     \u001b[0mensure_min_features\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mensure_min_features\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    738\u001b[0m                     \u001b[0mwarn_on_dtype\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mwarn_on_dtype\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 739\u001b[0;31m                     estimator=estimator)\n\u001b[0m\u001b[1;32m    740\u001b[0m     \u001b[0;32mif\u001b[0m \u001b[0mmulti_output\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    741\u001b[0m         y = check_array(y, 'csr', force_all_finite=True, ensure_2d=False,\n",
+      "\u001b[0;32m~/python-environments/vpy36/lib/python3.6/site-packages/sklearn/utils/validation.py\u001b[0m in \u001b[0;36mcheck_array\u001b[0;34m(array, accept_sparse, accept_large_sparse, dtype, order, copy, force_all_finite, ensure_2d, allow_nd, ensure_min_samples, ensure_min_features, warn_on_dtype, estimator)\u001b[0m\n\u001b[1;32m    457\u001b[0m         \u001b[0mdtypes_orig\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mnp\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0marray\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0marray\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mdtypes\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    458\u001b[0m         \u001b[0;32mif\u001b[0m \u001b[0mall\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0misinstance\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mdtype\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mnp\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mdtype\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;32mfor\u001b[0m \u001b[0mdtype\u001b[0m \u001b[0;32min\u001b[0m \u001b[0mdtypes_orig\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 459\u001b[0;31m             \u001b[0mdtype_orig\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mnp\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mresult_type\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m*\u001b[0m\u001b[0marray\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mdtypes\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    460\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    461\u001b[0m     \u001b[0;32mif\u001b[0m \u001b[0mdtype_numeric\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m<__array_function__ internals>\u001b[0m in \u001b[0;36mresult_type\u001b[0;34m(*args, **kwargs)\u001b[0m\n",
+      "\u001b[0;31mValueError\u001b[0m: at least one array or dtype is required"
+     ]
+    }
+   ],
+   "source": [
+    "# data['df'] is just a regular pandas.DataFrame\n",
+    "df.causal.do(x='v0',\n",
+    "                     variable_types={'v0': 'b', 'y': 'c', 'W0': 'c'},\n",
+    "                     outcome='y',\n",
+    "                     common_causes=['0']).groupby('v0').mean().plot(y='y', kind='bar')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df.causal.do(x={'v': 1}, \n",
+    "              variable_types={'v': 'b', 'y': 'c', 'X0': 'c'}, \n",
+    "              outcome='y',\n",
+    "              method='weighting', \n",
+    "              common_causes=['X0'],\n",
+    "              proceed_when_unidentifiable=True).groupby('v').mean().plot(y='y', kind='bar')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": false
+   },
+   "outputs": [],
+   "source": [
+    "cdf_1 = df.causal.do(x={'v': 1}, \n",
+    "              variable_types={'v': 'b', 'y': 'c', 'X0': 'c'}, \n",
+    "              outcome='y', \n",
+    "              dot_graph=data['dot_graph'],\n",
+    "              proceed_when_unidentifiable=True)\n",
+    "\n",
+    "cdf_0 = df.causal.do(x={'v': 0}, \n",
+    "              variable_types={'v': 'b', 'y': 'c', 'X0': 'c'}, \n",
+    "              outcome='y', \n",
+    "              dot_graph=data['dot_graph'],\n",
+    "              proceed_when_unidentifiable=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "cdf_0"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": false
+   },
+   "outputs": [],
+   "source": [
+    "cdf_1"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Comparing the estimate to Linear Regression\n",
+    "First, estimating the effect using the causal data frame, and the 95% confidence interval."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "(cdf_1['y'] - cdf_0['y']).mean()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "1.96*(cdf_1['y'] - cdf_0['y']).std() / np.sqrt(len(df))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Comparing to the estimate from OLS."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": false
+   },
+   "outputs": [],
+   "source": [
+    "model = OLS(df['y'], df[['X0', 'v']])\n",
+    "result = model.fit()\n",
+    "result.summary()"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.9"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

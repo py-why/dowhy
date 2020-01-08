@@ -25,6 +25,7 @@
         <script type="text/javascript" src="../../_static/underscore.js"></script>
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
@@ -86,12 +87,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-conditional-treatment-effects.html#Linear-Model">Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-conditional-treatment-effects.html#EconML-methods">EconML methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-conditional-treatment-effects.html#Works-with-any-EconML-method">Works with any EconML method</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-conditional-treatment-effects.html#Refuting-the-estimate">Refuting the estimate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../code_repo.html">Code repository &amp; Versions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../dowhy.html">dowhy package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">dowhy</a></li>
@@ -161,33 +168,38 @@
 <span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
-<span class="kn">from</span> <span class="nn">dowhy.utils.api</span> <span class="k">import</span> <span class="n">parse_state</span>
+<span class="kn">from</span> <span class="nn">dowhy.utils.api</span> <span class="kn">import</span> <span class="n">parse_state</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
 
 
 <div class="viewcode-block" id="CausalGraph"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_graph.CausalGraph">[docs]</a><span class="k">class</span> <span class="nc">CausalGraph</span><span class="p">:</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="sd">&quot;&quot;&quot;Class for creating and modifying the causal graph.</span>
+
+<span class="sd">       Accepts a graph string (or a text file) in gml format (preferred) and dot format. Graphviz-like attributes can be set for edges and nodes. E.g. style=&quot;dashed&quot; as an edge attribute ensures that the edge is drawn with a dashed line.</span>
+
+<span class="sd">        If a graph string is not given, names of treatment, outcome, and confounders, instruments and effect modifiers (if any) can be provided to create the graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="p">,</span>
                  <span class="n">graph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">common_cause_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">instrument_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">observed_node_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                 <span class="n">effect_modifier_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">observed_node_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">missing_nodes_as_confounders</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="n">treatment_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="n">outcome_name</span><span class="p">)</span>
         <span class="n">instrument_names</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="n">instrument_names</span><span class="p">)</span>
         <span class="n">common_cause_names</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="n">common_cause_names</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fullname</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span> <span class="o">+</span>
-                                 <span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span> <span class="o">+</span>
-                                 <span class="n">common_cause_names</span> <span class="o">+</span>
-                                 <span class="n">instrument_names</span><span class="p">)</span>
-
+        <span class="n">effect_modifier_names</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="n">effect_modifier_names</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">graph</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_graph</span><span class="p">(</span><span class="n">common_cause_names</span><span class="p">,</span>
-                                           <span class="n">instrument_names</span><span class="p">)</span>
+                                           <span class="n">instrument_names</span><span class="p">,</span> <span class="n">effect_modifier_names</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;.*\.dot&quot;</span><span class="p">,</span> <span class="n">graph</span><span class="p">):</span>
             <span class="c1"># load dot file</span>
             <span class="k">try</span><span class="p">:</span>
@@ -223,8 +235,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error: Please provide graph (as string or text file) in dot or gml format.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error: Incorrect graph format&quot;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">ValueError</span>
-
+        <span class="k">if</span> <span class="n">missing_nodes_as_confounders</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_missing_nodes_as_common_causes</span><span class="p">(</span><span class="n">observed_node_names</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_node_attributes</span><span class="p">(</span><span class="n">observed_node_names</span><span class="p">)</span>
+        <span class="c1">#TODO do not add it here. CausalIdentifier should call causal_graph to add an unobserved common cause if needed. This also ensures that we do not need get_common_causes in this class.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_unobserved_common_cause</span><span class="p">(</span><span class="n">observed_node_names</span><span class="p">)</span>
 
 <div class="viewcode-block" id="CausalGraph.view_graph"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_graph.CausalGraph.view_graph">[docs]</a>    <span class="k">def</span> <span class="nf">view_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="s2">&quot;dot&quot;</span><span class="p">):</span>
@@ -237,13 +251,36 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Warning: Pygraphviz cannot be loaded. Check that graphviz and pygraphviz are installed.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using Matplotlib for plotting&quot;</span><span class="p">)</span>
             <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+            <span class="n">solid_edges</span> <span class="o">=</span> <span class="p">[(</span><span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">)</span> <span class="k">for</span> <span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;style&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">e</span> <span class="p">]</span>
+            <span class="n">dashed_edges</span> <span class="o">=</span><span class="p">[(</span><span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">)</span> <span class="k">for</span> <span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;style&#39;</span> <span class="ow">in</span> <span class="n">e</span> <span class="ow">and</span> <span class="n">e</span><span class="p">[</span><span class="s1">&#39;style&#39;</span><span class="p">]</span><span class="o">==</span><span class="s2">&quot;dashed&quot;</span><span class="p">)</span> <span class="p">]</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
-            <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">nx</span><span class="o">.</span><span class="n">shell_layout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">))</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">shell_layout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">)</span>
+            <span class="n">nodes</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
+            <span class="n">edges</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_edges</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span>
+                    <span class="n">pos</span><span class="p">,</span>
+                    <span class="n">edgelist</span><span class="o">=</span><span class="n">solid_edges</span><span class="p">,</span>
+                    <span class="n">arrowstyle</span><span class="o">=</span><span class="s2">&quot;fancy&quot;</span><span class="p">,</span>
+                    <span class="n">arrowsize</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">edges</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_edges</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span>
+                    <span class="n">pos</span><span class="p">,</span>
+                    <span class="n">edgelist</span><span class="o">=</span><span class="n">dashed_edges</span><span class="p">,</span>
+                    <span class="n">arrowstyle</span><span class="o">=</span><span class="s2">&quot;-&gt;&quot;</span><span class="p">,</span>
+                    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;dashed&quot;</span><span class="p">,</span>
+                    <span class="n">arrowsize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_labels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
+            <span class="c1">#nx.draw_networkx(self._graph, pos=nx.shell_layout(self._graph))</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">out_filename</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="CausalGraph.build_graph"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_graph.CausalGraph.build_graph">[docs]</a>    <span class="k">def</span> <span class="nf">build_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">common_cause_names</span><span class="p">,</span> <span class="n">instrument_names</span><span class="p">):</span>
+<div class="viewcode-block" id="CausalGraph.build_graph"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_graph.CausalGraph.build_graph">[docs]</a>    <span class="k">def</span> <span class="nf">build_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">common_cause_names</span><span class="p">,</span> <span class="n">instrument_names</span><span class="p">,</span> <span class="n">effect_modifier_names</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Creates nodes and edges based on variable names and their semantics.</span>
+<span class="sd">        </span>
+<span class="sd">        Currently only considers the graphical representation of &quot;direct&quot; effect modifiers. Thus, all effect modifiers are assumed to be &quot;direct&quot; unless otherwise expressed using a graph. Based on the taxonomy of effect modifiers by VanderWheele and Robins: &quot;Four types of effect modification: A classification based on directed acyclic graphs. Epidemiology. 2007.&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">for</span> <span class="n">treatment</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">treatment</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">outcome</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span><span class="p">:</span>
@@ -258,6 +295,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">treatment</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">outcome</span><span class="p">)</span>
+
         <span class="c1"># Adding instruments</span>
         <span class="k">if</span> <span class="n">instrument_names</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">instrument_names</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">tuple</span><span class="p">:</span>
@@ -270,6 +308,14 @@
                 <span class="k">for</span> <span class="n">instrument</span><span class="p">,</span> <span class="n">treatment</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">instrument_names</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">instrument</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">instrument</span><span class="p">,</span> <span class="n">treatment</span><span class="p">)</span>
+
+        <span class="c1"># Adding effect modifiers</span>
+        <span class="k">if</span> <span class="n">effect_modifier_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">node_name</span> <span class="ow">in</span> <span class="n">effect_modifier_names</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">outcome</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;dotted&quot;</span><span class="p">,</span> <span class="n">headport</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">tailport</span><span class="o">=</span><span class="s2">&quot;n&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">outcome</span><span class="p">,</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;dotted&quot;</span><span class="p">,</span> <span class="n">headport</span><span class="o">=</span><span class="s2">&quot;n&quot;</span><span class="p">,</span> <span class="n">tailport</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span> <span class="c1"># TODO make the ports more general so that they apply not just to top-bottom node configurations</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span></div>
 
 <div class="viewcode-block" id="CausalGraph.add_node_attributes"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_graph.CausalGraph.add_node_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">add_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observed_node_names</span><span class="p">):</span>
@@ -278,6 +324,15 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node_name</span><span class="p">][</span><span class="s2">&quot;observed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;yes&quot;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node_name</span><span class="p">][</span><span class="s2">&quot;observed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;no&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span></div>
+
+<div class="viewcode-block" id="CausalGraph.add_missing_nodes_as_common_causes"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_graph.CausalGraph.add_missing_nodes_as_common_causes">[docs]</a>    <span class="k">def</span> <span class="nf">add_missing_nodes_as_common_causes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observed_node_names</span><span class="p">):</span>
+        <span class="c1"># Adding unobserved confounders</span>
+        <span class="k">for</span> <span class="n">node_name</span> <span class="ow">in</span> <span class="n">observed_node_names</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">node_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">treatment_outcome_node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">treatment_outcome_node</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span></div>
 
 <div class="viewcode-block" id="CausalGraph.add_unobserved_common_cause"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_graph.CausalGraph.add_unobserved_common_cause">[docs]</a>    <span class="k">def</span> <span class="nf">add_unobserved_common_cause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observed_node_names</span><span class="p">):</span>
@@ -294,6 +349,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">uc_label</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="s2">&quot;no&quot;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;If this is observed data (not from a randomized experiment), there might always be missing confounders. Adding a node named &quot;Unobserved Confounders&quot; to reflect this.&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span></div>
 
 <div class="viewcode-block" id="CausalGraph.get_unconfounded_observed_subgraph"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_graph.CausalGraph.get_unconfounded_observed_subgraph">[docs]</a>    <span class="k">def</span> <span class="nf">get_unconfounded_observed_subgraph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -330,6 +386,10 @@
         <span class="k">return</span> <span class="n">causes</span></div>
 
 <div class="viewcode-block" id="CausalGraph.get_common_causes"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_graph.CausalGraph.get_common_causes">[docs]</a>    <span class="k">def</span> <span class="nf">get_common_causes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes1</span><span class="p">,</span> <span class="n">nodes2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assume that nodes1 causes nodes2 (e.g., nodes1 are the treatments and nodes2 are the outcomes)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO Refactor to remove this from here and only implement this logic in causalIdentifier. Unnecessary assumption of nodes1 to be causing nodes2.</span>
         <span class="n">nodes1</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="n">nodes1</span><span class="p">)</span>
         <span class="n">nodes2</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="n">nodes2</span><span class="p">)</span>
         <span class="n">causes_1</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -337,8 +397,22 @@
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes1</span><span class="p">:</span>
             <span class="n">causes_1</span> <span class="o">=</span> <span class="n">causes_1</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_ancestors</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes2</span><span class="p">:</span>
-            <span class="n">causes_2</span> <span class="o">=</span> <span class="n">causes_2</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_ancestors</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+            <span class="c1"># Cannot simply compute ancestors, since that will also include nodes1 and its parents (e.g. instruments)</span>
+            <span class="n">parents_2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parents</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">parents_2</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">parent</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nodes1</span><span class="p">:</span>
+                    <span class="n">causes_2</span> <span class="o">=</span> <span class="n">causes_2</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">parent</span><span class="p">,]))</span>
+                    <span class="n">causes_2</span> <span class="o">=</span> <span class="n">causes_2</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_ancestors</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">causes_1</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">causes_2</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="CausalGraph.get_effect_modifiers"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_graph.CausalGraph.get_effect_modifiers">[docs]</a>    <span class="k">def</span> <span class="nf">get_effect_modifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes1</span><span class="p">,</span> <span class="n">nodes2</span><span class="p">):</span>
+        <span class="n">modifiers</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes2</span><span class="p">:</span>
+            <span class="n">modifiers</span> <span class="o">=</span> <span class="n">modifiers</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_ancestors</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+        <span class="n">modifiers</span> <span class="o">=</span> <span class="n">modifiers</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">nodes1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes1</span><span class="p">:</span>
+            <span class="n">modifiers</span> <span class="o">=</span> <span class="n">modifiers</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_ancestors</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">modifiers</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CausalGraph.get_parents"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_graph.CausalGraph.get_parents">[docs]</a>    <span class="k">def</span> <span class="nf">get_parents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_name</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">predecessors</span><span class="p">(</span><span class="n">node_name</span><span class="p">))</span></div>
