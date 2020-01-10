@@ -189,7 +189,7 @@ class TestPandasDoAPI(object):
 
     assert True
 
-       @pytest.mark.parametrize(["N","variable_types"],
+    @pytest.mark.parametrize(["N","variable_types"],
                             [(10000,{}),])
     def test_pandas_api_withno_specification_of_type(self, N, variable_types):
         data = dowhy.datasets.linear_dataset(beta=5,
