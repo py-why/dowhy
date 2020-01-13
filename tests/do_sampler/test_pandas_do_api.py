@@ -169,6 +169,7 @@ class TestPandasDoAPI(object):
         data['df'].causal.do(x='v0',
                         variable_types=variable_types,
                         outcome='y',
+                        proceed_when_unidentifiable=True,
                         common_causes=['W0']).groupby('v0').mean().plot(y='y', kind='bar')
 
         assert True
@@ -185,13 +186,14 @@ class TestPandasDoAPI(object):
         data['df'].causal.do(x='v0',
                         variable_types=variable_types,
                         outcome='y',
+                        proceed_when_unidentifiable=True,
                         common_causes=['W0']).groupby('v0').mean().plot(y='y', kind='bar')
 
     assert True
 
     @pytest.mark.parametrize(["N","variable_types"],
                             [(10000,{}),])
-    def test_pandas_api_withno_specification_of_type(self, N, variable_types):
+    def test_pandas_api_with_no_specification_of_type(self, N, variable_types):
         data = dowhy.datasets.linear_dataset(beta=5,
                                                 num_common_causes=1,
                                                 num_instruments = 0,
@@ -201,6 +203,7 @@ class TestPandasDoAPI(object):
         data['df'].causal.do(x='v0',
                         variable_types=variable_types,
                         outcome='y',
+                        proceed_when_unidentifiable=True,
                         common_causes=['W0']).groupby('v0').mean().plot(y='y', kind='bar')
 
     assert True

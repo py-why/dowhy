@@ -92,12 +92,14 @@ class CausalAccessor(object):
         if not bool(variable_types): #check if the variables dictionary is empty
             variable_types = dict(self._obj.dtypes) #Convert the series containing data types to a dictionary
             for key in variable_types.keys():
-                variable_types[key] = self.convert_to_custom_type(variable_types[key]) #Obtain the custom type corrosponding to each data type
+                print(variable_types[key])
+                variable_types[key] = self.convert_to_custom_type(variable_types[key].name) #Obtain the custom type corrosponding to each data type 
         
         elif len(self._obj.columns) > len(variable_types):
             all_variables = dict(self._obj.dtypes) 
-            for key in all_variables.keys and key not in variable_types:
-                variable_types[key] = self.convert_to_custom_type(variable_types[key])
+            for key in all_variables.keys():
+                if key not in variable_types:
+                    variable_types[key] = self.convert_to_custom_type(all_variables[key].name)
 
         elif len(self._obj.columns) < len(variable_types):
             raise Exception('Number of variables in the DataFrame is lesser than the variable_types dict') 
