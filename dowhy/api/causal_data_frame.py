@@ -92,7 +92,6 @@ class CausalAccessor(object):
         if not bool(variable_types): #check if the variables dictionary is empty
             variable_types = dict(self._obj.dtypes) #Convert the series containing data types to a dictionary
             for key in variable_types.keys():
-                print(variable_types[key])
                 variable_types[key] = self.convert_to_custom_type(variable_types[key].name) #Obtain the custom type corrosponding to each data type 
         
         elif len(self._obj.columns) > len(variable_types):
