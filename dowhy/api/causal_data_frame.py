@@ -121,7 +121,7 @@ class CausalAccessor(object):
         return result
 
     def convert_to_custom_type(self, input_type):
-        '''
+        """
         This function converts a DataFrame type to a custom type used within dowhy.
         We make use of the following mapping
         int -> 'c'
@@ -130,7 +130,7 @@ class CausalAccessor(object):
         category -> 'd'
         Currently we have not added support for time.
         :param input_type: str: The datatype of a column within a DataFrame
-        '''
+        """
         if 'int' in input_type:
             return 'c'
         elif 'float' in input_type:

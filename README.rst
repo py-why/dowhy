@@ -190,6 +190,18 @@ you can use the namespace as follows.
 
 .. image:: https://raw.githubusercontent.com/microsoft/dowhy/master/docs/images/do_barplot.png
 
+For some methods, the :code:`variable_types` field must be specified. It should be a :code:`dict`, where the keys are
+variable names, and values are 'o' for ordered discrete, 'u' for un-ordered discrete, 'd' for discrete, or 'c'
+for continuous.
+
+If the :code:`variable_types` is not specified we make use of the following implicit conversions:
+We make use of the following mapping
+    int -> 'c'
+    float -> 'c'
+    binary -> 'b'
+    category -> 'd'
+Currently we have not added support for time.
+
 The :code:`do` method in the causal namespace generates a random sample from $P(outcome|do(X=x))$ of the
 same length as your data set, and returns this outcome as a new :code:`DataFrame`. You can continue to perform
 the usual :code:`DataFrame` operations with this sample, and so you can compute statistics and create plots

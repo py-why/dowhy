@@ -156,7 +156,12 @@ class TestPandasDoAPI(object):
             error, error_tolerance * 100, ate, data['ate'])
         )
         assert res
-
+    
+    '''
+    In the following three tests, we have made use of the assert True at the end, but it is not
+    a tautology due to the fact the function being tested has the ability to raise an exception
+    when it belives that the behavior of the function is wrong.
+    '''
     @pytest.mark.parametrize(["N","variable_types"],
                             [(10000,{'v0': 'b', 'y': 'c', 'W0': 'c'}),])
     def test_pandas_api_with_full_specification_of_type(self, N, variable_types):
