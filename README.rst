@@ -194,8 +194,7 @@ For some methods, the :code:`variable_types` field must be specified. It should 
 variable names, and values are 'o' for ordered discrete, 'u' for un-ordered discrete, 'd' for discrete, or 'c'
 for continuous.
 
-**Note:If the :code:`variable_types` is not specified we make use of the following implicit conversions:
-We make use of the following mapping**
+**Note:If the** :code:`variable_types` **is not specified we make use of the following implicit conversions:**
 ::
    int -> 'c'
    float -> 'c'
