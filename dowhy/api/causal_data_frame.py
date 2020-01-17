@@ -88,6 +88,21 @@ class CausalAccessor(object):
                                              estimand_type=estimand_type,
                                              proceed_when_unidentifiable=proceed_when_unidentifiable)
         #self._identified_estimand = self._causal_model.identify_effect()
+        
+        if not bool(variable_types): #check if the variables dictionary is empty
+            variable_types = dict(self._obj.dtypes) #Convert the series containing data types to a dictionary
+            for key in variable_types.keys():
+                variable_types[key] = self.convert_to_custom_type(variable_types[key].name) #Obtain the custom type corrosponding to each data type 
+        
+        elif len(self._obj.columns) > len(variable_types):
+            all_variables = dict(self._obj.dtypes) 
+            for key in all_variables.keys():
+                if key not in variable_types:
+                    variable_types[key] = self.convert_to_custom_type(all_variables[key].name)
+
+        elif len(self._obj.columns) < len(variable_types):
+            raise Exception('Number of variables in the DataFrame is lesser than the variable_types dict') 
+
         if not self._sampler:
             self._method = method
             do_sampler_class = do_samplers.get_class_object(method + "_sampler")
@@ -104,6 +119,28 @@ class CausalAccessor(object):
         if not stateful:
             self.reset()
         return result
+
+    def convert_to_custom_type(self, input_type):
+        """
+        This function converts a DataFrame type to a custom type used within dowhy.
+        We make use of the following mapping
+        int -> 'c'
+        float -> 'c'
+        binary -> 'b'
+        category -> 'd'
+        Currently we have not added support for time.
+        :param input_type: str: The datatype of a column within a DataFrame
+        """
+        if 'int' in input_type:
+            return 'c'
+        elif 'float' in input_type:
+            return 'c'
+        elif 'bool' in input_type:
+            return 'b'
+        elif 'category' in input_type:
+            return 'd'
+        else:
+            raise Exception('{} format is not supported'.format(input_type))
 
     def parse_x(self, x):
         if type(x) == str:
