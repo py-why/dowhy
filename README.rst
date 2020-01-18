@@ -88,7 +88,7 @@ the repository.
 
 .. code:: shell
     
-    python setup.py install
+    pip install -e .
 
 If you face any problems, try installing dependencies manually.
 
