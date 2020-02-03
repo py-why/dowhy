@@ -26,6 +26,14 @@ class AddUnobservedCommonCause(CausalRefuter):
     """
 
     def __init__(self, *args, **kwargs):
+        """
+        Initialize the parameters required for the refuter
+
+        :param effect_on_t: str : This is used to represent the type of effect on the treatment due to the unobserved confounder.
+        :param effect_on_y: str : This is used to represent the type of effect on the outcome due to the unobserved confounder.
+        :param kappa_t: float, numpy.ndarray: This refers to the strength of the confounder on treatment. For a linear effect, it behaves like the regression coeffecient. For a binary flip it is the probability with which it can invert the value of the treatment.
+        :param kappa_y: floar, numpy.ndarray: This refers to the strength of the confounder on outcome. For a linear effect, it behaves like the regression coefficient. For a binary flip, it is the probability with which it can invert the value of the outcome.
+        """
         super().__init__(*args, **kwargs)
 
         self.effect_on_t = kwargs["confounders_effect_on_treatment"] if "confounders_effect_on_treatment" in kwargs else "binary_flip"
@@ -34,7 +42,13 @@ class AddUnobservedCommonCause(CausalRefuter):
         self.kappa_y = kwargs["effect_strength_on_outcome"]
 
     def refute_estimate(self):
-        
+        """
+        This function attempts to add an unobserved common cause to the outcome and the treatment. At present, we have implemented the behavior for one dimensional behaviors for continueous
+        and binary variables. This function can either take single valued inputs or a range of inputs. The function then looks at the data type of the input and then decides on the course of
+        action.
+
+        :return: CausalRefuter: An object that contains the estimated effect and a new effect and the name of the refutation used.
+        """
         if not isinstance(self.kappa_t, np.ndarray) and not isinstance(self.kappa_y, np.ndarray): # Deal with single value inputs
             new_data = copy.deepcopy(self._data)
             new_data = self.include_confounders_effect(new_data, self.kappa_t, self.kappa_y)
@@ -137,6 +151,17 @@ class AddUnobservedCommonCause(CausalRefuter):
                 return refute
 
     def include_confounders_effect(self, new_data, kappa_t, kappa_y):
+        """
+        This function deals with the change in the value of the data due to the effect of the unobserved confounder. 
+        In the case of a binary flip, we flip only if the random number is greater than the threshold set.
+        In the case of a linear effect, we use the variable as the linear regression constant.
+
+        :param new_data: pandas.DataFrame: The data to be changed due to the effects of the unobserved confounder.
+        :param kappa_t: numpy.float64: The value of the threshold for binary_flip or the value of the regression coefficient for linear effect.
+        :param kappa_y: numpy.float64: The value of the threshold for binary_flip or the value of the regression coefficient for linear effect.
+
+        :return: pandas.DataFrame: The DataFrame that includes the effects of the unobserved confounder.
+        """
         num_rows = self._data.shape[0]
         w_random=np.random.randn(num_rows)
 
@@ -163,4 +188,3 @@ class AddUnobservedCommonCause(CausalRefuter):
         else:
             raise NotImplementedError("'" + self.effect_on_y+ "' method not supported for confounders' effect on outcome")
         return new_data
-
