@@ -41,6 +41,12 @@ class AddUnobservedCommonCause(CausalRefuter):
         self.kappa_t = kwargs["effect_strength_on_treatment"]
         self.kappa_y = kwargs["effect_strength_on_outcome"]
 
+        if 'logging_level' in kwargs:
+            logging.basicConfig(level=kwargs['logging_level'])
+        else:
+            logging.basicConfig(level=logging.INFO)
+        self.logger = logging.getLogger(__name__)
+
     def refute_estimate(self):
         """
         This function attempts to add an unobserved common cause to the outcome and the treatment. At present, we have implemented the behavior for one dimensional behaviors for continueous
@@ -80,7 +86,7 @@ class AddUnobservedCommonCause(CausalRefuter):
                         new_effect = new_estimator.estimate_effect()
                         refute = CausalRefutation(self._estimate.value, new_effect.value,
                                                 refutation_type="Refute: Add an Unobserved Common Cause")
-                        logging.debug(refute)
+                        self.logger.debug(refute)
                         results_matrix[i][j] = refute.estimated_effect[0] # Populate the results
                 
                 fig = plt.figure(figsize=(6,5))
@@ -108,7 +114,7 @@ class AddUnobservedCommonCause(CausalRefuter):
                     new_effect = new_estimator.estimate_effect()
                     refute = CausalRefutation(self._estimate.value, new_effect.value,
                                             refutation_type="Refute: Add an Unobserved Common Cause")
-                    logging.debug(refute)
+                    self.logger.debug(refute)
                     outcomes[i] = refute.estimated_effect[0] # Populate the results
 
                 fig = plt.figure(figsize=(6,5))
@@ -134,7 +140,7 @@ class AddUnobservedCommonCause(CausalRefuter):
                     new_effect = new_estimator.estimate_effect()
                     refute = CausalRefutation(self._estimate.value, new_effect.value,
                                             refutation_type="Refute: Add an Unobserved Common Cause")
-                    logging.debug(refute)
+                    self.logger.debug(refute)
                     outcomes[i] = refute.estimated_effect[0] # Populate the results
                 
                 fig = plt.figure(figsize=(6,5))

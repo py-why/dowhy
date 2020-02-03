@@ -48,7 +48,7 @@ class TestRefuter(object):
             test_significance=None
         )
         true_ate = data["ate"]
-        logger.debug(true_ate)
+        self.logger.debug(true_ate)
 
         # To test if there are any exceptions
         ref = model.refute_estimate(target_estimand, ate_estimate,
@@ -57,7 +57,7 @@ class TestRefuter(object):
             confounders_effect_on_outcome = self.confounders_effect_on_y,
             effect_strength_on_treatment =self.effect_strength_on_t,
             effect_strength_on_outcome=self.effect_strength_on_y)
-        logger.debug(ref.new_effect)
+        self.logger.debug(ref.new_effect)
 
         # To test if the estimate is identical if refutation parameters are zero
         refute = model.refute_estimate(target_estimand, ate_estimate,
