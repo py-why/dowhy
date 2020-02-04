@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+import pandas as pd
 
 import dowhy.datasets
 import dowhy.api
@@ -212,3 +213,15 @@ class TestPandasDoAPI(object):
                         common_causes=['W0']).groupby('v0').mean().plot(y='y', kind='bar')
 
     assert True
+
+    @pytest.mark.parametrize(["N","variable_types"],
+                            [(1,{'v0': 'b', 'W0': 'c'}),])
+
+    def test_pandas_api_with_dummy_data(self, N, variable_types):
+        df = pd.DataFrame({'x': [0,0.5,1], 'y': [1,0.5,0], 'a': [0,0.5,0], 'b': [0.25,0,0]})
+        dd = df.causal.do(x=['x'], outcome='y', common_causes=['a', 'b'],
+                    proceed_when_unidentifiable=True,
+                    variable_types=dict(x='c', y='c', a='c', b='c'))
+        
+        print(dd)
+        
