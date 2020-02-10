@@ -16,6 +16,36 @@ def stochastically_convert_to_binary(x):
     p = sigmoid(x)
     return choice([0, 1], 1, p=[1-p, p])
 
+def convert_to_categorical(arr, num_vars, num_discrete_vars,
+        quantiles = [0.25, 0.5, 0.75], one_hot_encode=False):
+    arr_with_dummy = arr.copy()
+    # Below loop assumes that the last indices of W are alwawys converted to discrete
+    for arr_index in range(num_vars - num_discrete_vars, num_vars):
+        # one-hot encode discrete W
+        arr_bins = np.quantile(arr[:, arr_index], q=quantiles)
+        arr_categorical = np.digitize(arr[:, arr_index], bins=arr_bins)
+        if one_hot_encode:
+            dummy_vecs = np.eye(len(quantiles)+1)[arr_categorical]
+            arr_with_dummy = np.concatenate((arr_with_dummy, dummy_vecs), axis=1)
+        else:
+            arr_with_dummy = np.concatenate((arr_with_dummy, arr_categorical[:,np.newaxis ]), axis=1)
+    # Now deleting the old continuous value
+    for arr_index in range(num_vars -1,num_vars-num_discrete_vars-1, -1):
+        arr_with_dummy = np.delete(arr_with_dummy, arr_index, axis=1)
+    return arr_with_dummy
+
+def construct_col_names(name, num_vars, num_discrete_vars,
+        num_discrete_levels, one_hot_encode):
+    colnames = [(name + str(i)) for i in range(0, num_vars - num_discrete_vars)]
+    if one_hot_encode:
+        discrete_colnames =  [name+str(i) + "_" + str(j)
+                                for i in range(num_vars - num_discrete_vars, num_vars)
+                                    for j in range(0, num_discrete_levels)]
+        colnames = colnames + discrete_colnames
+    else:
+        colnames = colnames  + [(name + str(i)) for i in range(num_vars-num_discrete_vars, num_vars)]
+
+    return colnames
 
 def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
                    num_effect_modifiers=0,
@@ -24,7 +54,8 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
                    outcome_is_binary=False,
                    num_discrete_common_causes=0,
                    num_discrete_instruments=0,
-                   num_discrete_effect_modifiers=0):
+                   num_discrete_effect_modifiers=0,
+                   one_hot_encode = False):
     W, X, Z, c1, c2, ce, cz = [None]*7
     beta = float(beta)
     # Making beta an array
@@ -39,19 +70,8 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         means = np.random.uniform(-1, 1, num_common_causes)
         cov_mat = np.diag(np.ones(num_common_causes))
         W = np.random.multivariate_normal(means, cov_mat, num_samples)
-        W_dummy = W.copy()
-        for w_index in range(num_discrete_common_causes):
-            print(W.shape)
-            print(W[:,w_index].shape)
-            # one-hot encode discrete W
-            quantiles = [0.25, 0.5, 0.75]
-            w_bins = np.quantile(W[:, w_index], q=quantiles)
-            W[:, w_index] = np.digitize(W[:, w_index], bins=w_bins)
-            dummy_vecs = np.eye(len(quantiles)+1)[W[:, w_index]]
-            W_with_dummy = np.delete(W_with_dummy, w_index, axis=1)
-            W_with_dummy = np.concatenate((W_with_dummy, dummy_vecs), axis=1)
-
-
+        W_with_dummy = convert_to_categorical(W, num_common_causes, num_discrete_common_causes,
+                quantiles=[0.25, 0.5, 0.75], one_hot_encode=one_hot_encode)
         c1 = np.random.uniform(0, range_c1, (W_with_dummy.shape[1], num_treatments))
         c2 = np.random.uniform(0, range_c2, W_with_dummy.shape[1])
 
@@ -72,12 +92,15 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         means = np.random.uniform(-1, 1, num_effect_modifiers)
         cov_mat = np.diag(np.ones(num_effect_modifiers))
         X = np.random.multivariate_normal(means, cov_mat, num_samples)
-        ce = np.random.uniform(0, range_ce, num_effect_modifiers)
+        X_with_categorical = convert_to_categorical(X, num_effect_modifiers,
+                num_discrete_effect_modifiers, quantiles=[0.25, 0.5, 0.75],
+                one_hot_encode=one_hot_encode)
+        ce = np.random.uniform(0, range_ce, X_with_categorical.shape[1])
     # TODO - test all our methods with random noise added to covariates (instead of the stochastic treatment assignment)
 
     t = np.random.normal(0, 1, (num_samples, num_treatments))
     if num_common_causes > 0:
-        t += W @ c1  # + np.random.normal(0, 0.01)
+        t += W_with_dummy @ c1  # + np.random.normal(0, 0.01)
     if num_instruments > 0:
         t += Z @ cz
     # Converting treatment to binary if required
@@ -91,24 +114,28 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         if num_effect_modifiers > 0:
             y += (X @ ce) * np.prod(t, axis=1)
         return y
-    y = _compute_y(t, W, X, beta, c2, ce)
+    y = _compute_y(t, W_with_dummy, X_with_categorical, beta, c2, ce)
     if outcome_is_binary:
-        y = np.vectorize(stochastically_convert_to_binary)(t)
+        y = np.vectorize(stochastically_convert_to_binary)(y)
 
     data = np.column_stack((t, y))
     if num_common_causes > 0:
-        data = np.column_stack((W, data))
+        data = np.column_stack((W_with_dummy, data))
     if num_instruments > 0:
         data = np.column_stack((Z, data))
     if num_effect_modifiers > 0:
-        data = np.column_stack((X, data))
+        data = np.column_stack((X_with_categorical, data))
 
     treatments = [("v" + str(i)) for i in range(0, num_treatments)]
     outcome = "y"
-    common_causes = [("W" + str(i)) for i in range(0, num_common_causes)]
-    ate = np.mean(_compute_y(np.ones((num_samples, num_treatments)), W, X, beta, c2, ce) - _compute_y(np.zeros((num_samples, num_treatments)), W, X, beta, c2, ce))
+    common_causes = construct_col_names("W", num_common_causes, num_discrete_common_causes,
+            num_discrete_levels=4, one_hot_encode=one_hot_encode)
+
+    ate = np.mean(_compute_y(np.ones((num_samples, num_treatments)), W_with_dummy, X_with_categorical, beta, c2, ce) - _compute_y(np.zeros((num_samples, num_treatments)), W_with_dummy, X_with_categorical, beta, c2, ce))
     instruments = [("Z" + str(i)) for i in range(0, num_instruments)]
-    effect_modifiers =[("X" + str(i)) for i in range(0, num_effect_modifiers)]
+    effect_modifiers = construct_col_names("X", num_effect_modifiers,
+            num_discrete_effect_modifiers,
+            num_discrete_levels=4, one_hot_encode=one_hot_encode)
     other_variables = None
     col_names = effect_modifiers + instruments + common_causes + treatments + [outcome]
     data = pd.DataFrame(data, columns=col_names)
@@ -117,6 +144,12 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         data = data.astype({tname:'bool' for tname in treatments}, copy=False)
     if outcome_is_binary:
         data = data.astype({outcome: 'bool'}, copy=False)
+    if num_discrete_common_causes >0 and not one_hot_encode:
+        data = data.astype({wname:'int64' for wname in common_causes[num_cont_common_causes:]}, copy=False)
+        data = data.astype({wname:'category' for wname in common_causes[num_cont_common_causes:]}, copy=False)
+    if num_discrete_effect_modifiers >0 and not one_hot_encode:
+        data = data.astype({emodname:'int64' for emodname in effect_modifiers[num_cont_effect_modifiers:]}, copy=False)
+        data = data.astype({emodname:'category' for emodname in effect_modifiers[num_cont_effect_modifiers:]}, copy=False)
 
     # Now specifying the corresponding graph strings
     dot_graph = create_dot_graph(treatments, outcome, common_causes, instruments, effect_modifiers)
