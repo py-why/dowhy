@@ -5,6 +5,7 @@ from sklearn.preprocessing import LabelEncoder
 from pandas import get_dummies
 import numpy as np
 import logging
+import dowhy.utils.api as api
 
 
 def propensity_of_treatment_score(data, covariates, treatment, model='logistic', variable_types=None):
@@ -68,7 +69,7 @@ def categorical_treatment_model(data, covariates, treatment, variable_types):
 
 def continuous_treatment_model(data, covariates, treatment, variable_types):
     data, covariates = binarize_discrete(data, covariates, variable_types)
-    if len(data) > 300 or len(treatment + covariates) >= 3:
+    if len(data) > 300 or len([treatment] + covariates) >= 3:
         defaults = EstimatorSettings(n_jobs=4, efficient=True)
     else:
         defaults = EstimatorSettings(n_jobs=-1, efficient=False)
