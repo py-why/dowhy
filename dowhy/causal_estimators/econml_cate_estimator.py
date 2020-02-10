@@ -55,13 +55,14 @@ class EconmlCateEstimator(CausalEstimator):
         X = None  # Effect modifiers
         W = None  # common causes/ confounders
         Y = np.reshape(np.array(self._outcome),(n_samples, 1))
+        # TODO treatment can be also be a discrete variable, will need to update len argument below for such cases
         T = np.reshape(np.array(self._treatment), (n_samples, len(self._treatment_name)))
         if self._effect_modifier_names:
-            X = np.reshape(np.array(self._effect_modifiers), (n_samples, len(self._effect_modifier_names)))
+            X = np.reshape(np.array(self._effect_modifiers), (n_samples, self._effect_modifiers.shape[1]))
         if self._observed_common_causes_names:
-            W = np.reshape(np.array(self._observed_common_causes), (n_samples,len(self._observed_common_causes_names)))
+            W = np.reshape(np.array(self._observed_common_causes), (n_samples,self._observed_common_causes.shape[1]))
         if self._instrumental_variable_names:
-            Z = np.reshape(np.array(self._instrumental_variables), (n_samples, len(self._instrumental_variable_names)))
+            Z = np.reshape(np.array(self._instrumental_variables), (n_samples, self._instrumental_variables.shape[1]))
 
         # Calling the econml estimator's fit method
         if self.identifier_method == "backdoor":

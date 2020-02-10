@@ -1,6 +1,7 @@
 import logging
 
 import numpy as np
+import pandas as pd
 import sympy as sp
 
 
@@ -69,6 +70,7 @@ class CausalEstimator:
         # Now saving the effect modifiers
         if self._effect_modifier_names:
             self._effect_modifiers = self._data[self._effect_modifier_names]
+            self._effect_modifiers = pd.get_dummies(self._effect_modifiers, drop_first=True)
             self.logger.debug("Effect modifiers: " +
                           ",".join(self._effect_modifier_names))
 

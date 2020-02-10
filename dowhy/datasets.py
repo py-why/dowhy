@@ -21,20 +21,39 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
                    num_effect_modifiers=0,
                    num_treatments = 1,
                    treatment_is_binary=True,
-                   outcome_is_binary=False):
+                   outcome_is_binary=False,
+                   num_discrete_common_causes=0,
+                   num_discrete_instruments=0,
+                   num_discrete_effect_modifiers=0):
     W, X, Z, c1, c2, ce, cz = [None]*7
     beta = float(beta)
     # Making beta an array
     if type(beta) not in [list, np.ndarray]:
         beta = np.repeat(beta, num_treatments)
+    num_cont_common_causes = num_common_causes-num_discrete_common_causes
+    num_cont_instruments = num_instruments -num_discrete_instruments
+    num_cont_effect_modifiers = num_effect_modifiers - num_discrete_effect_modifiers
     if num_common_causes > 0:
         range_c1 = max(beta)*0.5
         range_c2 = max(beta)*0.5
         means = np.random.uniform(-1, 1, num_common_causes)
         cov_mat = np.diag(np.ones(num_common_causes))
         W = np.random.multivariate_normal(means, cov_mat, num_samples)
-        c1 = np.random.uniform(0, range_c1, (num_common_causes, num_treatments))
-        c2 = np.random.uniform(0, range_c2, num_common_causes)
+        W_dummy = W.copy()
+        for w_index in range(num_discrete_common_causes):
+            print(W.shape)
+            print(W[:,w_index].shape)
+            # one-hot encode discrete W
+            quantiles = [0.25, 0.5, 0.75]
+            w_bins = np.quantile(W[:, w_index], q=quantiles)
+            W[:, w_index] = np.digitize(W[:, w_index], bins=w_bins)
+            dummy_vecs = np.eye(len(quantiles)+1)[W[:, w_index]]
+            W_with_dummy = np.delete(W_with_dummy, w_index, axis=1)
+            W_with_dummy = np.concatenate((W_with_dummy, dummy_vecs), axis=1)
+
+
+        c1 = np.random.uniform(0, range_c1, (W_with_dummy.shape[1], num_treatments))
+        c2 = np.random.uniform(0, range_c2, W_with_dummy.shape[1])
 
     if num_instruments > 0:
         range_cz = beta
