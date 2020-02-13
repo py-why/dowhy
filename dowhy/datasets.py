@@ -57,6 +57,7 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
                    num_discrete_effect_modifiers=0,
                    one_hot_encode = False):
     W, X, Z, c1, c2, ce, cz = [None]*7
+    W_with_dummy, X_with_categorical  = (None, None)
     beta = float(beta)
     # Making beta an array
     if type(beta) not in [list, np.ndarray]:
@@ -131,7 +132,9 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
     common_causes = construct_col_names("W", num_common_causes, num_discrete_common_causes,
             num_discrete_levels=4, one_hot_encode=one_hot_encode)
 
-    ate = np.mean(_compute_y(np.ones((num_samples, num_treatments)), W_with_dummy, X_with_categorical, beta, c2, ce) - _compute_y(np.zeros((num_samples, num_treatments)), W_with_dummy, X_with_categorical, beta, c2, ce))
+    ate = np.mean(
+            _compute_y(np.ones((num_samples, num_treatments)), W_with_dummy, X_with_categorical, beta, c2, ce) -
+            _compute_y(np.zeros((num_samples, num_treatments)), W_with_dummy, X_with_categorical, beta, c2, ce))
     instruments = [("Z" + str(i)) for i in range(0, num_instruments)]
     effect_modifiers = construct_col_names("X", num_effect_modifiers,
             num_discrete_effect_modifiers,
