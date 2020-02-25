@@ -1,4 +1,5 @@
 from dowhy.causal_refuter import CausalRefuter, CausalRefutation
+import numpy as np
 from sklearn.utils import resample
 
 class BootstrapRefuter(CausalRefuter):
@@ -30,7 +31,7 @@ class BootstrapRefuter(CausalRefuter):
             for index in range( len(new_data) ):
                 new_estimator = self.get_estimator_object(new_data, self._target_estimand, self._estimate)
                 new_effect = new_estimator.estimate_effect()
-                sample_estimates[i] = new_effect.value
+                sample_estimates[index] = new_effect.value
 
             refute = CausalRefutation(
                 self._estimate.value,
