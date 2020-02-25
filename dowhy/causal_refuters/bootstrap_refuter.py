@@ -7,8 +7,10 @@ class BootstrapRefuter(CausalRefuter):
     """
     Refute an estimate by running it on a random sample of the original data.
     It supports additional parameters that can be specified in the regute_estimate() method.
-    - 'number_of_sumples': int, None by default
+    - 'number_of_samples': int, None by default
     The number of bootstrap samples to be constructed
+    - 'sample_size': int, None by default
+    The size of each bootstrap sample
     - 'random_state': int, RandomState, None by default
     The seed value to be added if we wish to repeat the same random behavior. For this purpose, 
     we repeat the same seed in the psuedo-random generator.
