@@ -35,10 +35,10 @@ class BootstrapRefuter(CausalRefuter):
         for index in range( self._number_of_samples ):
              if self._random_state is None:
                 new_data = resample(self._data, 
-                                n_samples=self._number_of_samples )
+                                n_samples=self._sample_size )
             else:
                 new_data = resample(self._data,
-                                    n_samples=self._number_of_samples,
+                                    n_samples=self._sample_size,
                                     random_state=self._random_state )
 
             new_estimator = self.get_estimator_object(new_data, self._target_estimand, self._estimate)
