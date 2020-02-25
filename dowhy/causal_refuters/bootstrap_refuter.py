@@ -6,7 +6,7 @@ import logging
 class BootstrapRefuter(CausalRefuter):
     """
     Refute an estimate by running it on a random sample of the original data.
-    It supports additional parameters that can be specified in the regute_estimate() method.
+    It supports additional parameters that can be specified in the refute_estimate() method.
     - 'number_of_samples': int, None by default
     The number of bootstrap samples to be constructed
     - 'sample_size': int, None by default
