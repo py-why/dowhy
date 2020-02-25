@@ -27,17 +27,17 @@ class BootstrapRefuter(CausalRefuter):
                                 n_samples=self._number_of_samples,
                                 random_state=self._random_state)
             
-            sample_estimates = np.zeros(self._number_of_samples) 
-            for index in range( len(new_data) ):
-                new_estimator = self.get_estimator_object(new_data, self._target_estimand, self._estimate)
-                new_effect = new_estimator.estimate_effect()
-                sample_estimates[index] = new_effect.value
+        sample_estimates = np.zeros(self._number_of_samples) 
+        for index in range( len(new_data) ):
+            new_estimator = self.get_estimator_object(new_data, self._target_estimand, self._estimate)
+            new_effect = new_estimator.estimate_effect()
+            sample_estimates[index] = new_effect.value
 
-            refute = CausalRefutation(
-                self._estimate.value,
-                np.mean(sample_estimates),
-                refutation_type="Refute: Bootstrap Sample Dataset"
-            )
+        refute = CausalRefutation(
+            self._estimate.value,
+            np.mean(sample_estimates),
+            refutation_type="Refute: Bootstrap Sample Dataset"
+        )
 
-            return refute
+        return refute
 
