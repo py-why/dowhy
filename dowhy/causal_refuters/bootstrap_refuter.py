@@ -20,7 +20,7 @@ class BootstrapRefuter(CausalRefuter):
         self._sample_size = kwargs.pop("sample_size",len(self._data))
         self._random_state = kwargs.pop("random_state",None)
 
-        if 'logging_level' in options:
+        if 'logging_level' in kwargs:
             logging.basicConfig(level=kwargs['logging_level'])
         else:
             logging.basicConfig(level=logging.INFO)
@@ -33,7 +33,7 @@ class BootstrapRefuter(CausalRefuter):
         sample_estimates = np.zeros(self._number_of_samples) 
         
         for index in range( self._number_of_samples ):
-             if self._random_state is None:
+            if self._random_state is None:
                 new_data = resample(self._data, 
                                 n_samples=self._sample_size )
             else:
