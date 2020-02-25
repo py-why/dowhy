@@ -14,8 +14,8 @@ class BootstrapRefuter(CausalRefuter):
 
     def __init__(self, *args, **options):
         super().__init__(*args, **options)
-        self._number_of_samples = options("number_of_samples", 200)
-        self._random_state = kwargs("random_state",None)
+        self._number_of_samples = options.pop("number_of_samples", 200)
+        self._random_state = options.pop("random_state",None)
         
     def refute_estimate(self, *args, **kwargs):
         if self._random_state is None:
