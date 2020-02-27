@@ -35,10 +35,14 @@ class DataSubsetRefuter(CausalRefuter):
                          .format(self._subset_fraction
                          ,self._number_of_samples)
                         )
-                        
-        for index in range( self._number_of_samples):
-            new_data = self._data.sample(frac=self._subset_fraction)
 
+        for index in range( self._number_of_samples):
+            if self._random_state is None:
+                new_data = self._data.sample(frac=self._subset_fraction)
+            else:
+                new_data = self._data.sample(frac=self._subset_fraction,
+                                            random_state=self._random_state)
+                                            
             new_estimator = self.get_estimator_object(new_data, self._target_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
             sample_estimates[index] = new_effect.value
