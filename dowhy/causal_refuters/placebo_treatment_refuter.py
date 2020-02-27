@@ -23,6 +23,8 @@ class PlaceboTreatmentRefuter(CausalRefuter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._placebo_type = kwargs.pop("placebo_type",None)
+        if self._placebo_type is None:
+            self._placebo_type = "Random Data"
         self._number_of_samples = kwargs.pop("number_of_samples",200)
         self._random_state = kwargs.pop("random_state",None)
 
@@ -35,6 +37,11 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         identified_estimand.treatment_variable = ["placebo"]
 
         sample_estimates = np.zeros(self._number_of_samples)
+        self.logger.info("Number of Samples{}\nTreatment Type{}"
+                        .format(self._number_of_samples
+                        ,self._placebo_type)
+                        )
+                        
         num_rows = self._data.shape[0]
 
         for index in range( self._number_of_samples ):
