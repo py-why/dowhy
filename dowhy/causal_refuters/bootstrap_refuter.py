@@ -32,7 +32,11 @@ class BootstrapRefuter(CausalRefuter):
         if self._sample_size > len(self._data):
                 self.logger.warning("The sample size is larger than the population size")
 
-        sample_estimates = np.zeros(self._number_of_samples) 
+        sample_estimates = np.zeros(self._number_of_samples)
+        self.logger.info("Sample Size:{}\nNumber of Samples:{}"
+                         .format(self._sample_size
+                         ,self._number_of_samples)
+                        ) 
         
         for index in range( self._number_of_samples ):
             if self._random_state is None:

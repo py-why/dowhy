@@ -31,7 +31,11 @@ class DataSubsetRefuter(CausalRefuter):
     def refute_estimate(self):
 
         sample_estimates = np.zeros(self._number_of_samples)
-
+        self.logger.info("Subset Fraction:{}\nNumber of Samples:{}"
+                         .format(self._subset_fraction
+                         ,self._number_of_samples)
+                        )
+                        
         for index in range( self._number_of_samples):
             new_data = self._data.sample(frac=self._subset_fraction)
 
