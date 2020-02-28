@@ -14,7 +14,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
     - 'placebo_type':  str, None by default
     Default is to generate random values for the treatment. If placebo_type is "permute", 
     then the original treatment values are permuted by row.
-    - 'num_of_simulations': int, None by default
+    - 'num_of_simulations': int, 200 by default
     The number of simulations to be run
     - 'random_state': int, RandomState, None by default
     The seed value to be added if we wish to repeat the same random behavior. If we with to repeat the

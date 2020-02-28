@@ -7,7 +7,7 @@ class BootstrapRefuter(CausalRefuter):
     """
     Refute an estimate by running it on a random sample of the original data.
     It supports additional parameters that can be specified in the refute_estimate() method.
-    - 'num_of_simulations': int, None by default
+    - 'num_of_simulations': int, 200 by default
     The number of bootstrap simulations to be run
     - 'sample_size': int, Size of the original data by default
     The size of each bootstrap sample
