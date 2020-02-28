@@ -7,8 +7,8 @@ class BootstrapRefuter(CausalRefuter):
     """
     Refute an estimate by running it on a random sample of the original data.
     It supports additional parameters that can be specified in the refute_estimate() method.
-    - 'number_of_samples': int, None by default
-    The number of bootstrap samples to be constructed
+    - 'num_of_simulations': int, None by default
+    The number of bootstrap simulations to be run
     - 'sample_size': int, None by default
     The size of each bootstrap sample
     - 'random_state': int, RandomState, None by default
@@ -18,7 +18,7 @@ class BootstrapRefuter(CausalRefuter):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._number_of_samples = kwargs.pop("number_of_samples", 200)
+        self._num_of_simulations = kwargs.pop("num_of_simulations", 200)
         self._sample_size = kwargs.pop("sample_size",len(self._data))
         self._random_state = kwargs.pop("random_state",None)
 
@@ -32,13 +32,13 @@ class BootstrapRefuter(CausalRefuter):
         if self._sample_size > len(self._data):
                 self.logger.warning("The sample size is larger than the population size")
 
-        sample_estimates = np.zeros(self._number_of_samples)
+        sample_estimates = np.zeros(self._num_of_simulations)
         self.logger.info("Sample Size:{}\nNumber of Samples:{}"
                          .format(self._sample_size
-                         ,self._number_of_samples)
+                         ,self._num_of_simulations)
                         ) 
         
-        for index in range( self._number_of_samples ):
+        for index in range( self._num_of_simulations ):
             if self._random_state is None:
                 new_data = resample(self._data, 
                                 n_samples=self._sample_size )

@@ -9,8 +9,8 @@ class DataSubsetRefuter(CausalRefuter):
 
     - 'subset_fraction': float, None by default
     Fraction of the data to be used for re-estimation.
-    - 'number_of_samples': int, None by default
-    The number of samples to be constructed
+    - 'num_of_simulations': int, None by default
+    The number of simulations to be run
     - random_state': int, RandomState, None by default
     The seed value to be added if we wish to repeat the same random behavior. If we with to repeat the
     same behavior we push the same seed in the psuedo-random generator
@@ -19,7 +19,7 @@ class DataSubsetRefuter(CausalRefuter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._subset_fraction = kwargs.pop("subset_fraction", 0.8)
-        self._number_of_samples = kwargs.pop("number_of_samples", 200)
+        self._num_of_simulations = kwargs.pop("num_of_simulations", 200)
         self._random_state = kwargs.pop("random_state",None)
 
         if 'logging_level' in kwargs:
@@ -30,13 +30,13 @@ class DataSubsetRefuter(CausalRefuter):
 
     def refute_estimate(self):
 
-        sample_estimates = np.zeros(self._number_of_samples)
+        sample_estimates = np.zeros(self._num_of_simulations)
         self.logger.info("Subset Fraction:{}\nNumber of Samples:{}"
                          .format(self._subset_fraction
-                         ,self._number_of_samples)
+                         ,self._num_of_simulations)
                         )
 
-        for index in range( self._number_of_samples):
+        for index in range( self._num_of_simulations):
             if self._random_state is None:
                 new_data = self._data.sample(frac=self._subset_fraction)
             else:
