@@ -9,7 +9,7 @@ class BootstrapRefuter(CausalRefuter):
     It supports additional parameters that can be specified in the refute_estimate() method.
     - 'num_of_simulations': int, None by default
     The number of bootstrap simulations to be run
-    - 'sample_size': int, None by default
+    - 'sample_size': int, Size of the original data by default
     The size of each bootstrap sample
     - 'random_state': int, RandomState, None by default
     The seed value to be added if we wish to repeat the same random behavior. For this purpose, 
