@@ -36,7 +36,7 @@ class DataSubsetRefuter(CausalRefuter):
                          ,self._num_of_simulations)
                         )
 
-        for index in range( self._num_of_simulations):
+        for index in range(self._num_of_simulations):
             if self._random_state is None:
                 new_data = self._data.sample(frac=self._subset_fraction)
             else:

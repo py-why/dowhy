@@ -38,7 +38,7 @@ class BootstrapRefuter(CausalRefuter):
                          ,self._num_of_simulations)
                         ) 
         
-        for index in range( self._num_of_simulations ):
+        for index in range(self._num_of_simulations):
             if self._random_state is None:
                 new_data = resample(self._data, 
                                 n_samples=self._sample_size )

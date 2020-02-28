@@ -44,7 +44,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
 
         num_rows = self._data.shape[0]
 
-        for index in range( self._num_of_simulations ):
+        for index in range(self._num_of_simulations):
 
             if self._placebo_type == "permute":
                 if self._random_state is None:
