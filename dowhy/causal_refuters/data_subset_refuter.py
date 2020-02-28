@@ -31,9 +31,9 @@ class DataSubsetRefuter(CausalRefuter):
     def refute_estimate(self):
 
         sample_estimates = np.zeros(self._num_of_simulations)
-        self.logger.info("Subset Fraction:{}\nNumber of Samples:{}"
+        self.logger.info("Refutation over {} simulated datasets of size {} each"
                          .format(self._subset_fraction
-                         ,self._num_of_simulations)
+                         ,self._subset_fraction*len(self._data.index) )
                         )
 
         for index in range(self._num_of_simulations):

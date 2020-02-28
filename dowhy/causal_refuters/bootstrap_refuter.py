@@ -33,9 +33,9 @@ class BootstrapRefuter(CausalRefuter):
                 self.logger.warning("The sample size is larger than the population size")
 
         sample_estimates = np.zeros(self._num_of_simulations)
-        self.logger.info("Sample Size:{}\nNumber of Samples:{}"
-                         .format(self._sample_size
-                         ,self._num_of_simulations)
+        self.logger.info("Refutation over {} simulated datasets of size {} each"
+                         .format(self._num_of_simulations
+                         ,self._sample_size )
                         ) 
         
         for index in range(self._num_of_simulations):

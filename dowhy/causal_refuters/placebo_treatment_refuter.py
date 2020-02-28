@@ -37,7 +37,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         identified_estimand.treatment_variable = ["placebo"]
 
         sample_estimates = np.zeros(self._num_of_simulations)
-        self.logger.info("Number of Samples{}\nTreatment Type{}"
+        self.logger.info("Refutation over {} simulated datasets of {} treatment"
                         .format(self._num_of_simulations
                         ,self._placebo_type)
                         )
