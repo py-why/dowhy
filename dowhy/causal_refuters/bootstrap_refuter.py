@@ -6,10 +6,10 @@ import logging
 class BootstrapRefuter(CausalRefuter):
     """
     Refute an estimate by running it on a random sample of the original data.
-    It supports additional parameters that can be specified in the regute_estimate() method.
-    - 'number_of_samples': int, None by default
-    The number of bootstrap samples to be constructed
-    - 'sample_size': int, None by default
+    It supports additional parameters that can be specified in the refute_estimate() method.
+    - 'num_simulations': int, 200 by default
+    The number of bootstrap simulations to be run
+    - 'sample_size': int, Size of the original data by default
     The size of each bootstrap sample
     - 'random_state': int, RandomState, None by default
     The seed value to be added if we wish to repeat the same random behavior. For this purpose, 
@@ -18,7 +18,7 @@ class BootstrapRefuter(CausalRefuter):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._number_of_samples = kwargs.pop("number_of_samples", 200)
+        self._num_simulations = kwargs.pop("num_simulations", 200)
         self._sample_size = kwargs.pop("sample_size",len(self._data))
         self._random_state = kwargs.pop("random_state",None)
 
@@ -32,9 +32,13 @@ class BootstrapRefuter(CausalRefuter):
         if self._sample_size > len(self._data):
                 self.logger.warning("The sample size is larger than the population size")
 
-        sample_estimates = np.zeros(self._number_of_samples) 
+        sample_estimates = np.zeros(self._num_simulations)
+        self.logger.info("Refutation over {} simulated datasets of size {} each"
+                         .format(self._num_simulations
+                         ,self._sample_size )
+                        ) 
         
-        for index in range( self._number_of_samples ):
+        for index in range(self._num_simulations):
             if self._random_state is None:
                 new_data = resample(self._data, 
                                 n_samples=self._sample_size )
