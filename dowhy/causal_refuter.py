@@ -92,7 +92,7 @@ class CausalRefuter:
                 else: # Left Tail
                     p_value = st.norm.cdf(z_value)
             else:
-                logger.warn("The current evaluation has less than 30 samples. Thus, we make use of t test")
+                self.logger.warn("The current evaluation has less than 30 samples. Thus, we make use of t test")
                 if z_value > 0.5: # Right Tail
                     p_value = 1 - st.t.cdf(z_value)
                 else: # Left Tail
