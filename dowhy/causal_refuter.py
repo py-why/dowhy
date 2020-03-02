@@ -67,7 +67,7 @@ class CausalRefuter:
                 # We select side to be left as we want to find the first value that matches
                 estimate_index = np.searchsorted(simulations, estimate.value, side="left")
                 # We subtact 1 as we are finding the value from the right tail
-                P_value = 1 - (estimate_index/ num_simulations)
+                p_value = 1 - (estimate_index/ num_simulations)
             else:
                 # We take the side to be right as we want to find the last index that matches
                 estimate_index = np.searchsorted(simulations, estimate.value, side="right")
@@ -83,13 +83,14 @@ class CausalRefuter:
             mean_refute_values = np.mean(simulations)
             # Get the standard deviation for the simulations
             std_dev_refute_values = np.std(simulations)
+            # Get the Z Score [(val - mean)/ std_dev ]
             z_value = (estimate.value - mean_refute_values)/ std_dev_refute_values
             
-            if z_value > 0.5:
+            if z_value > 0.5: # Right Tail
                 p_value = 1 - st.norm.cdf(z_value)
-            else:
+            else: # Left Tail
                 p_value = st.norm.cdf(z_value)
-                
+
             return p_value
 
     def refute_estimate(self):
