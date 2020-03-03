@@ -65,8 +65,17 @@ class PlaceboTreatmentRefuter(CausalRefuter):
             new_estimator = self.get_estimator_object(new_data, identified_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
             sample_estimates[index] = new_effect.value
+        
 
         refute = CausalRefutation(self._estimate.value, 
                                   np.mean(sample_estimates),
                                   refutation_type="Refute: Use a Placebo Treatment")
+                                  
+        # Note: We hardcode the estimate value to ZERO as we want to check if it falls in the distribution of the refuter
+        # Ideally we should expect that ZERO should fall in the distribution of the refuter as we have severed any causal
+        # relationship between the treatment and the outcome.
+        refute.add_significance_test_results(
+            self.test_significance(0, sample_estimates)
+        )        
+        
         return refute
