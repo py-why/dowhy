@@ -117,14 +117,9 @@ class CausalRefutation:
         self.p_value = None
 
     def __str__(self):
-        if self.p_value is None:
-            return "{0}\nEstimated effect:{1}\nNew effect:{2}\n".format(
-                self.refutation_type, self.estimated_effect, self.new_effect
-            )
-        else:
-            return "{0}\nEstimated effect:{1}\nNew effect:{2}\np value{3}".format(
-                self.refutation_type, self.estimated_effect, self.new_effect, self.p_value
-            ) 
+        return "{0}\nEstimated effect:{1}\nNew effect:{2}\n".format(
+            self.refutation_type, self.estimated_effect, self.new_effect
+        )
     
     def add_significance_test_results(self, p_value):
         self.p_value = p_value
