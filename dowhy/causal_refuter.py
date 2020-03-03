@@ -45,6 +45,9 @@ class CausalRefuter:
         The basis behind using the sample statistics of the refuter when we are in fact testing the estimate,
         is due to the fact that, we would ideally expect them to follow the same distribition
 
+        Null Hypothesis: The estimate is a part of the distribution
+        Alternative Hypothesis: The estimate does not fall in the distribution.
+
         'estimate': CausalEstimate
         The estimate obtained from the estimator for the original data.
         'simulations': np.array
