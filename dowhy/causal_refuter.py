@@ -108,7 +108,7 @@ class CausalRefuter:
             p_value = self.perform_normal_distribution_test(estimate, simulations)
 
         else:
-            raise Exception("{} has not been implemented".format(test_type))
+            raise NotImplementedError
 
         significance_dict = {
                 "p_value":p_value,
