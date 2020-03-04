@@ -38,7 +38,7 @@ class CausalRefuter:
                 )
         return new_estimator
 
-    def test_significance(self, estimate, simulations):
+    def test_significance(self, estimate, simulations, significance_level=0.05):
         """
         Tests the satistical significance of the estimate obtained to the simulations produced by a refuter
 
@@ -52,8 +52,8 @@ class CausalRefuter:
         The estimate obtained from the estimator for the original data.
         'simulations': np.array
         An array containing the result of the refuter for the simulations
-        'distribution': string
-        The underlying distribution of the data
+        'significance_level': float, default 0.05
+        The significance level for the statistical test
         """
         num_simulations = len(simulations)
         if num_simulations > 200: # Bootstrapping
@@ -101,7 +101,10 @@ class CausalRefuter:
                 else: # Left Tail
                     p_value = st.t.cdf(z_score)
 
-            return p_value
+            return {
+                    "p_value":p_value,
+                    "pass_test": p_value <= significance_level
+                    }
 
     def refute_estimate(self):
         raise NotImplementedError
