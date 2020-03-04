@@ -14,7 +14,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
     - 'placebo_type':  str, None by default
     Default is to generate random values for the treatment. If placebo_type is "permute", 
     then the original treatment values are permuted by row.
-    - 'num_simulations': int, 200 by default
+    - 'num_simulations': int, CausalRefuter.DEFAULT_NUM_SIMULATIONS by default
     The number of simulations to be run
     - 'random_state': int, RandomState, None by default
     The seed value to be added if we wish to repeat the same random behavior. If we with to repeat the
@@ -25,7 +25,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         self._placebo_type = kwargs.pop("placebo_type",None)
         if self._placebo_type is None:
             self._placebo_type = "Random Data"
-        self._num_simulations = kwargs.pop("num_simulations",200)
+        self._num_simulations = kwargs.pop("num_simulations",CausalRefuter.DEFAULT_NUM_SIMULATIONS)
         self._random_state = kwargs.pop("random_state",None)
 
     def refute_estimate(self):
@@ -65,8 +65,17 @@ class PlaceboTreatmentRefuter(CausalRefuter):
             new_estimator = self.get_estimator_object(new_data, identified_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
             sample_estimates[index] = new_effect.value
+        
 
         refute = CausalRefutation(self._estimate.value, 
                                   np.mean(sample_estimates),
                                   refutation_type="Refute: Use a Placebo Treatment")
+                                  
+        # Note: We hardcode the estimate value to ZERO as we want to check if it falls in the distribution of the refuter
+        # Ideally we should expect that ZERO should fall in the distribution of the effect estimates as we have severed any causal
+        # relationship between the treatment and the outcome.
+        refute.add_significance_test_results(
+            self.test_significance(0, sample_estimates)
+        )        
+        
         return refute
