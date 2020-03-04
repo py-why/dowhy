@@ -48,6 +48,8 @@ class CausalRefuter:
         Null Hypothesis: The estimate is a part of the distribution
         Alternative Hypothesis: The estimate does not fall in the distribution.
 
+        Parameters
+        -----------
         'estimate': CausalEstimate
         The estimate obtained from the estimator for the original data.
         'simulations': np.array
@@ -56,6 +58,11 @@ class CausalRefuter:
         The type of test the user wishes to perform.
         'significance_level': float, default 0.05
         The significance level for the statistical test
+
+        Returns
+        --------
+        significance_dict: Dict
+        A Dict containing the p_value and a boolean that indicates if the result is statistically significant
         """
         # Initializing the p_value
         p_value = 0
@@ -93,10 +100,12 @@ class CausalRefuter:
         else:
             raise Exception("{} has not been implemented".format(test_type))
 
-        return {
+        significance_dict = {
                 "p_value":p_value,
                 "pass_test": p_value <= significance_level
                 }
+
+        return significance_dict
 
     def perform_bootstrap_test(self, estimate, simulations):
 
