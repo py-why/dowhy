@@ -89,17 +89,11 @@ class CausalRefuter:
             # Get the Z Score [(val - mean)/ std_dev ]
             z_score = (estimate.value - mean_refute_values)/ std_dev_refute_values
             
-            if num_simulations > 30:
-                if z_score > 0: # Right Tail
-                    p_value = 1 - st.norm.cdf(z_score)
-                else: # Left Tail
-                    p_value = st.norm.cdf(z_score)
-            else:
-                self.logger.warn("The current evaluation has less than 30 samples. Thus, we make use of t test")
-                if z_score > 0.5: # Right Tail
-                    p_value = 1 - st.t.cdf(z_score)
-                else: # Left Tail
-                    p_value = st.t.cdf(z_score)
+            
+            if z_score > 0: # Right Tail
+                p_value = 1 - st.norm.cdf(z_score)
+            else: # Left Tail
+                p_value = st.norm.cdf(z_score)
 
             return {
                     "p_value":p_value,
