@@ -112,7 +112,7 @@ class CausalRefuter:
 
         significance_dict = {
                 "p_value":p_value,
-                "pass_test": p_value <= significance_level
+                "fail_test": p_value > significance_level
                 }
 
         return significance_dict
