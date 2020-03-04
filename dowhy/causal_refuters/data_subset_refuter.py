@@ -9,7 +9,7 @@ class DataSubsetRefuter(CausalRefuter):
 
     - 'subset_fraction': float, 0.8 by default
     Fraction of the data to be used for re-estimation.
-    - 'num_simulations': int, 100 by default
+    - 'num_simulations': int, CausalRefuter.DEFAULT_NUM_SIMULATIONS by default
     The number of simulations to be run
     - random_state': int, RandomState, None by default
     The seed value to be added if we wish to repeat the same random behavior. If we with to repeat the
@@ -19,7 +19,7 @@ class DataSubsetRefuter(CausalRefuter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._subset_fraction = kwargs.pop("subset_fraction", 0.8)
-        self._num_simulations = kwargs.pop("num_simulations", 30)
+        self._num_simulations = kwargs.pop("num_simulations", CausalRefuter.DEFAULT_NUM_SIMULATIONS )
         self._random_state = kwargs.pop("random_state",None)
 
         if 'logging_level' in kwargs:

@@ -9,6 +9,8 @@ class CausalRefuter:
     Subclasses implement specific refutations methods. 
 
     """
+    # Default value for the number of simulations to be conducted
+    DEFAULT_NUM_SIMULATIONS = 100
 
     def __init__(self, data, identified_estimand, estimate, **kwargs):
         self._data = data
