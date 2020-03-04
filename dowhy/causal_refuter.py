@@ -56,7 +56,7 @@ class CausalRefuter:
         The significance level for the statistical test
         """
         num_simulations = len(simulations)
-        if num_simulations > 200: # Bootstrapping
+        if num_simulations >= 100: # Bootstrapping
             self.logger.info("Making use of Bootstrap as we have more than 200 examples.\n \
              Note: The greater the number of examples, the more accurate are the confidence estimates")
             # Sort the simulations

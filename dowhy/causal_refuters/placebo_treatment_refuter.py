@@ -14,7 +14,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
     - 'placebo_type':  str, None by default
     Default is to generate random values for the treatment. If placebo_type is "permute", 
     then the original treatment values are permuted by row.
-    - 'num_simulations': int, 200 by default
+    - 'num_simulations': int, 100 by default
     The number of simulations to be run
     - 'random_state': int, RandomState, None by default
     The seed value to be added if we wish to repeat the same random behavior. If we with to repeat the
@@ -25,7 +25,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         self._placebo_type = kwargs.pop("placebo_type",None)
         if self._placebo_type is None:
             self._placebo_type = "Random Data"
-        self._num_simulations = kwargs.pop("num_simulations",200)
+        self._num_simulations = kwargs.pop("num_simulations",100)
         self._random_state = kwargs.pop("random_state",None)
 
     def refute_estimate(self):

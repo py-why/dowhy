@@ -7,7 +7,7 @@ class BootstrapRefuter(CausalRefuter):
     """
     Refute an estimate by running it on a random sample of the original data.
     It supports additional parameters that can be specified in the refute_estimate() method.
-    - 'num_simulations': int, 200 by default
+    - 'num_simulations': int, 100 by default
     The number of bootstrap simulations to be run
     - 'sample_size': int, Size of the original data by default
     The size of each bootstrap sample
@@ -18,7 +18,7 @@ class BootstrapRefuter(CausalRefuter):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._num_simulations = kwargs.pop("num_simulations", 200)
+        self._num_simulations = kwargs.pop("num_simulations", 100)
         self._sample_size = kwargs.pop("sample_size",len(self._data))
         self._random_state = kwargs.pop("random_state",None)
 
