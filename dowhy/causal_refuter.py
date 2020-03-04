@@ -45,6 +45,16 @@ class CausalRefuter:
         The basis behind using the sample statistics of the refuter when we are in fact testing the estimate,
         is due to the fact that, we would ideally expect them to follow the same distribition
 
+        For refutation tests (e.g., placebo refuters), consider the null distribution as a distribution of effect
+        estimates over multiple simulations with placebo treatment, and compute how likely the true estimate (e.g.,
+         zero for placebo test) is under the null. If the probability of true effect estimate is lower than the 
+         p-value, then estimator method fails the test.
+        
+        For sensitivity analysis tests (e.g., bootstrap, subset or common cause refuters), the null distribution captures
+        the distribution of effect estimates under the "true" dataset (e.g., with an additional confounder or different 
+        sampling), and we compute the probability of the obtained estimate under this distribution. If the probability is 
+        lower than the p-value, then the estimator method fails the test
+
         Null Hypothesis: The estimate is a part of the distribution
         Alternative Hypothesis: The estimate does not fall in the distribution.
 
