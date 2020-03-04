@@ -114,7 +114,7 @@ class CausalRefuter:
 
         significance_dict = {
                 "p_value":p_value,
-                "fail_test": p_value > significance_level
+                "is_statistically_significant": p_value <= significance_level
                 }
 
         return significance_dict
@@ -176,13 +176,13 @@ class CausalRefutation:
         self.refutation_result = None
 
     def __str__(self):
-        if self.p_value is None:
+        if self.refutation_result is None:
             return "{0}\nEstimated effect:{1}\nNew effect:{2}\n".format(
                 self.refutation_type, self.estimated_effect, self.new_effect
             )
         else:
             return "{0}\nEstimated effect:{1}\nNew effect:{2}\np value{3}\n".format(
-                self.refutation_type, self.estimated_effect, self.new_effect, self.p_value
+                self.refutation_type, self.estimated_effect, self.new_effect, self.refutation_result
             )
     
     def add_significance_test_results(self, refutation_result):
