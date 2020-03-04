@@ -40,7 +40,7 @@ class CausalRefuter:
 
     def test_significance(self, estimate, simulations, test_type='auto',significance_level=0.05):
         """
-        Tests the satistical significance of the estimate obtained to the simulations produced by a refuter
+        Tests the statistical significance of the estimate obtained to the simulations produced by a refuter
 
         The basis behind using the sample statistics of the refuter when we are in fact testing the estimate,
         is due to the fact that, we would ideally expect them to follow the same distribition
