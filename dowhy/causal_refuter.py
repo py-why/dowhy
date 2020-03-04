@@ -182,7 +182,7 @@ class CausalRefutation:
             )
         else:
             return "{0}\nEstimated effect:{1}\nNew effect:{2}\np value{3}\n".format(
-                self.refutation_type, self.estimated_effect, self.new_effect, self.refutation_result
+                self.refutation_type, self.estimated_effect, self.new_effect, self.refutation_result['p_value']
             )
     
     def add_significance_test_results(self, refutation_result):
