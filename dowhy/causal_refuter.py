@@ -80,14 +80,14 @@ class CausalRefuter:
         if test_type == 'auto':
             num_simulations = len(simulations)
             if num_simulations >= 100: # Bootstrapping
-                self.logger.info("Making use of Bootstrap as we have more than 200 examples.\n \
+                self.logger.info("Making use of Bootstrap as we have more than 100 examples.\n \
                 Note: The greater the number of examples, the more accurate are the confidence estimates")
 
                 # Perform Bootstrap Significance Test with the original estimate and the set of refutations
                 p_value = self.perform_bootstrap_test(estimate, simulations)
 
             else:
-                self.logger.warn("We make use of the Normal Distribution as the sample has less than 200 examples.\n \
+                self.logger.warn("We make use of the Normal Distribution as the sample has less than 100 examples.\n \
                 Note: The underlying distribution may not be Normal. We assume that it approaches normal with the increase in sample size.")
             
                 # Perform Normal Tests of Significance with the original estimate and the set of refutations
