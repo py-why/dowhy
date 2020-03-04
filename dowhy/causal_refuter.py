@@ -67,28 +67,28 @@ class CausalRefuter:
                 Note: The greater the number of examples, the more accurate are the confidence estimates")
 
                 # Perform Bootstrap Significance Test with the original estimate and the set of refutations
-                self.perform_bootstrap_test(estimate, simulations)
+                p_value = self.perform_bootstrap_test(estimate, simulations)
 
             else:
                 self.logger.warn("We make use of the Normal Distribution as the sample has less than 200 examples.\n \
                 Note: The underlying distribution may not be Normal. We assume that it approaches normal with the increase in sample size.")
             
                 # Perform Normal Tests of Significance with the original estimate and the set of refutations
-                self.perform_normal_distribution_test(estimate, simulations)
+                p_value = self.perform_normal_distribution_test(estimate, simulations)
 
         elif test_type == 'bootstrap':
             self.logger.info("Performing Bootstrap Test with {} samples\n \
             Note: The greater the number of examples, the more accurate are the confidence estimates".format( len(simulations) ) )
 
             # Perform Bootstrap Significance Test with the original estimate and the set of refutations
-            self.perform_bootstrap_test(estimate, simulations)
+            p_value = self.perform_bootstrap_test(estimate, simulations)
 
         elif test_type == 'normal_test':
             self.logger.info("Performing Normal Test with {} samples\n \
             Note: We assume that the underlying distribution is Normal.".format( len(simulations) ) )
 
             # Perform Normal Tests of Significance with the original estimate and the set of refutations
-            self.perform_normal_distribution_test(estimate, simulations)
+            p_value = self.perform_normal_distribution_test(estimate, simulations)
 
         else:
             raise Exception("{} has not been implemented".format(test_type))
