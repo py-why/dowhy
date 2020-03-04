@@ -72,7 +72,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
                                   refutation_type="Refute: Use a Placebo Treatment")
                                   
         # Note: We hardcode the estimate value to ZERO as we want to check if it falls in the distribution of the refuter
-        # Ideally we should expect that ZERO should fall in the distribution of the refuter as we have severed any causal
+        # Ideally we should expect that ZERO should fall in the distribution of the effect estimates as we have severed any causal
         # relationship between the treatment and the outcome.
         refute.add_significance_test_results(
             self.test_significance(0, sample_estimates)
