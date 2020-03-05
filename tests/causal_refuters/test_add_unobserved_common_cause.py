@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 from .base import TestRefuter
 
+@pytest.mark.usefixtures("fixed_seed")
 class TestAddUnobservedCommonCauseRefuter(object):
     @pytest.mark.parametrize(["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
                              [(0.01, "backdoor.propensity_score_matching", 0.01, 0.02),])

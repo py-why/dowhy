@@ -7,7 +7,7 @@ from .base import TestEstimator
 
 from sklearn.linear_model import LinearRegression
 
-
+@pytest.mark.usefixtures("fixed_seed")
 class TestPropensityScoreWeightingEstimator(object):
     @pytest.mark.parametrize(["error_tolerance", "Estimator",
         "num_common_causes", "num_instruments",

@@ -7,7 +7,7 @@ import dowhy.api
 
 from sklearn.linear_model import LinearRegression
 
-
+@pytest.mark.usefixtures("fixed_seed")
 class TestPandasDoAPI(object):
     @pytest.mark.parametrize(["N", "error_tolerance"],
                              [(10000, 0.1),])

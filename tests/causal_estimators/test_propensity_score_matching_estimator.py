@@ -3,13 +3,13 @@ import pytest
 
 from .base import TestEstimator
 
-
+@pytest.mark.usefixtures("fixed_seed")
 class TestPropensityScoreMatchingEstimator(object):
     @pytest.mark.parametrize(["error_tolerance", "Estimator",
         "num_common_causes", "num_instruments",
         "num_effect_modifiers", "num_treatments",
         "treatment_is_binary", "outcome_is_binary"],
-                             [(0.1, PropensityScoreMatchingEstimator, [1,2], [0], [0,], [1,], [True,], [False,]),])
+                             [(0.3, PropensityScoreMatchingEstimator, [1,2], [0], [0,], [1,], [True,], [False,]),])
     def test_average_treatment_effect(self, error_tolerance, Estimator,
             num_common_causes, num_instruments, num_effect_modifiers,
             num_treatments, treatment_is_binary, outcome_is_binary
