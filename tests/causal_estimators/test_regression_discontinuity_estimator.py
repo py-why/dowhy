@@ -3,7 +3,7 @@ import pytest
 from dowhy.causal_estimators.regression_discontinuity_estimator import RegressionDiscontinuityEstimator
 from .base import TestEstimator
 
-
+@pytest.mark.usefixtures("fixed_seed")
 class TestRegressionDiscontinuityEstimator(object):
     @pytest.mark.parametrize(["error_tolerance", "Estimator",
         "num_common_causes", "num_instruments",

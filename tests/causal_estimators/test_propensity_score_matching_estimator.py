@@ -3,7 +3,7 @@ import pytest
 
 from .base import TestEstimator
 
-
+@pytest.mark.usefixtures("fixed_seed")
 class TestPropensityScoreMatchingEstimator(object):
     @pytest.mark.parametrize(["error_tolerance", "Estimator",
         "num_common_causes", "num_instruments",
