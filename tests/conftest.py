@@ -6,3 +6,4 @@ import random as rand
 def fixed_seed():
     rand.seed(0)
     numpy.random.seed(0)
+
