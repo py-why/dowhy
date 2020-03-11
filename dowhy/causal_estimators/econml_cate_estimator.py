@@ -1,3 +1,4 @@
+import inspect
 import numpy as np
 import pandas as pd
 
@@ -19,7 +20,7 @@ class EconmlCateEstimator(CausalEstimator):
             self._observed_common_causes = self._data[self._observed_common_causes_names]
             self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
         else:
-            self._observed_common_causes= None
+            self._observed_common_causes = None
 
         # Instrumental variables names, if present
         self._instrumental_variable_names = self._target_estimand.instrumental_variables
@@ -51,26 +52,26 @@ class EconmlCateEstimator(CausalEstimator):
         n_samples = self._treatment.shape[0]
         X = None  # Effect modifiers
         W = None  # common causes/ confounders
-        Y = np.reshape(np.array(self._outcome),(n_samples, 1))
+        Z = None  # Instruments
+        Y = np.array(self._outcome)
         # TODO treatment can be also be a discrete variable, will need to update len argument below for such cases
-        T = np.reshape(np.array(self._treatment), (n_samples, len(self._treatment_name)))
+        T = np.array(self._treatment)
         if self._effect_modifier_names:
             X = np.reshape(np.array(self._effect_modifiers), (n_samples, self._effect_modifiers.shape[1]))
         if self._observed_common_causes_names:
-            W = np.reshape(np.array(self._observed_common_causes), (n_samples,self._observed_common_causes.shape[1]))
+            W = np.reshape(np.array(self._observed_common_causes), (n_samples, self._observed_common_causes.shape[1]))
         if self._instrumental_variable_names:
-            Z = np.reshape(np.array(self._instrumental_variables), (n_samples, self._instrumental_variables.shape[1]))
+            Z = np.array(self._instrumental_variables)
+        named_data_args = {'Y': Y, 'T': T, 'X': X, 'W': W, 'Z': Z}
 
         # Calling the econml estimator's fit method
-        (module_name, _, class_name) = self._econml_methodname.rpartition(".")
-        if self.identifier_method == "backdoor":
-            if module_name == "econml.metalearners":
-                # Meta learners  only need X (e.g., data is from a randomized experiment)
-                self.estimator.fit(Y, T, X, **self.method_params["fit_params"])
-            else:
-                self.estimator.fit(Y, T, X, W, **self.method_params["fit_params"])
-        else:
-            self.estimator.fit(Y, T, X, Z, **self.method_params["fit_params"])
+        estimator_named_args = inspect.getfullargspec(
+            inspect.unwrap(self.estimator.fit)
+            )[0]
+        estimator_data_args = {
+            arg: named_data_args[arg] for arg in named_data_args.keys() if arg in estimator_named_args
+            }
+        self.estimator.fit(**estimator_data_args, **self.method_params["fit_params"])
 
         X_test = X
         n_target_units = n_samples
@@ -90,19 +91,18 @@ class EconmlCateEstimator(CausalEstimator):
             self._treatment_value = [self._treatment_value]
         T0_test = np.repeat([self._control_value], n_target_units, axis=0)
         T1_test = np.repeat([self._treatment_value], n_target_units, axis=0)
-
-        est = self.estimator.effect(X_test, T0 = T0_test, T1 = T1_test)
+        est = self.estimator.effect(X_test, T0=T0_test, T1=T1_test)
         ate = np.mean(est)
 
         est_interval = None
         if self._confidence_intervals:
-            est_interval = self.estimator.effect_interval(X_test, T0 = T0_test, T1 = T1_test)
+            est_interval = self.estimator.effect_interval(X_test, T0=T0_test, T1=T1_test)
         estimate = CausalEstimate(estimate=ate,
                                   target_estimand=self._target_estimand,
                                   realized_estimand_expr=self.symbolic_estimator,
                                   cate_estimates=est,
                                   effect_intervals=est_interval,
-                                  _estimator_object = self.estimator)
+                                  _estimator_object=self.estimator)
         return estimate
 
     def _do(self, x):
