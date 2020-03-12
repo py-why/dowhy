@@ -74,8 +74,11 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         # Note: We hardcode the estimate value to ZERO as we want to check if it falls in the distribution of the refuter
         # Ideally we should expect that ZERO should fall in the distribution of the effect estimates as we have severed any causal
         # relationship between the treatment and the outcome.
+
+        dummy_estimator = copy.deepcopy(self._estimate)
+        dummy_estimator.value = 0
         refute.add_significance_test_results(
-            self.test_significance(0, sample_estimates)
+            self.test_significance(dummy_estimator, sample_estimates)
         )        
         
         return refute

@@ -78,7 +78,7 @@ class TestRefuter(object):
         elif self.refuter_method == "placebo_treatment_refuter":
             ref = model.refute_estimate(target_estimand, 
                                         ate_estimate,
-                                        placebo_treatment_refuter
+                                        method_name=self.refuter_method
                                         )
             # This value is hardcoded to be zero as we are runnning this on a linear dataset.
             # Ordinarily, we should expect this value to be zero.
@@ -87,11 +87,15 @@ class TestRefuter(object):
             error =  abs(ref.new_effect - ate_estimate.value)
 
             print("Error in the refuted estimate = {0} with tolderence {1}%. Expected Value={2}, After Refutation={3}".format(
-                error, self._error_tolerence * 100, EXPECTED_PLACEBO_VALUE, refute.new_effect)
+                error, self._error_tolerance * 100, EXPECTED_PLACEBO_VALUE, ref.new_effect)
             )
 
-            res = True if (error <  self._error_tolerance)
-            assert res 
+            print(ref)
+
+            res = True if (error <  self._error_tolerance) else False
+            assert res
+
+         
             
 
     def binary_treatment_testsuite(self, tests_to_run="all"):
@@ -101,11 +105,11 @@ class TestRefuter(object):
 
     def continuous_treatment_testsuite(self, tests_to_run="all"):
         self.null_refutation_test(
-                #beta=1,
             num_common_causes=1,
-            #num_instruments=2, num_samples=100000,
             treatment_is_binary=False)
         if tests_to_run != "atleast-one-common-cause":
             self.null_refutation_test(num_common_causes=0,
                     treatment_is_binary=False)
+    
+        
 

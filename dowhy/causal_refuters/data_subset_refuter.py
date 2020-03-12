@@ -57,7 +57,7 @@ class DataSubsetRefuter(CausalRefuter):
         # Ideally that should be the case as choosing a subset should not have a significant effect on the ability
         # of the treatment to affect the outcome
         refute.add_significance_test_results(
-            self.test_significance(self._estimate.value, sample_estimates)
+            self.test_significance(self._estimate, sample_estimates)
         )
 
         return refute

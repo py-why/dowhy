@@ -126,7 +126,7 @@ class CausalRefuter:
         # Sort the simulations
         simulations.sort()
         # Obtain the median value
-        median_refute_values= simulations[int(num_simulations)/2]
+        median_refute_values= simulations[int(num_simulations/2)]
 
         # Performing a two sided test
         if estimate.value > median_refute_values:
@@ -181,7 +181,7 @@ class CausalRefutation:
                 self.refutation_type, self.estimated_effect, self.new_effect
             )
         else:
-            return "{0}\nEstimated effect:{1}\nNew effect:{2}\np value{3}\n".format(
+            return "{0}\nEstimated effect:{1}\nNew effect:{2}\np value:{3}\n".format(
                 self.refutation_type, self.estimated_effect, self.new_effect, self.refutation_result['p_value']
             )
     
