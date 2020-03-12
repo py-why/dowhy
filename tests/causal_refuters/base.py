@@ -50,29 +50,30 @@ class TestRefuter(object):
         true_ate = data["ate"]
         self.logger.debug(true_ate)
 
+        if self.refuter_method == "add_unobserved_common_cause":
         # To test if there are any exceptions
-        ref = model.refute_estimate(target_estimand, ate_estimate,
-            method_name=self.refuter_method,
-            confounders_effect_on_treatment = self.confounders_effect_on_t,
-            confounders_effect_on_outcome = self.confounders_effect_on_y,
-            effect_strength_on_treatment =self.effect_strength_on_t,
-            effect_strength_on_outcome=self.effect_strength_on_y)
-        self.logger.debug(ref.new_effect)
+            ref = model.refute_estimate(target_estimand, ate_estimate,
+                method_name=self.refuter_method,
+                confounders_effect_on_treatment = self.confounders_effect_on_t,
+                confounders_effect_on_outcome = self.confounders_effect_on_y,
+                effect_strength_on_treatment =self.effect_strength_on_t,
+                effect_strength_on_outcome=self.effect_strength_on_y)
+            self.logger.debug(ref.new_effect)
 
-        # To test if the estimate is identical if refutation parameters are zero
-        refute = model.refute_estimate(target_estimand, ate_estimate,
-            method_name=self.refuter_method,
-            confounders_effect_on_treatment = self.confounders_effect_on_t,
-            confounders_effect_on_outcome = self.confounders_effect_on_y,
-            effect_strength_on_treatment = 0,
-            effect_strength_on_outcome = 0)
-        error = abs(refute.new_effect - ate_estimate.value)
-        
-        print("Error in refuted estimate = {0} with tolerance {1}%. Estimated={2},After Refutation={3}".format(
-            error, self._error_tolerance * 100, ate_estimate.value, refute.new_effect)
-        )
-        res = True if (error < abs(ate_estimate.value) * self._error_tolerance) else False
-        assert res
+            # To test if the estimate is identical if refutation parameters are zero
+            refute = model.refute_estimate(target_estimand, ate_estimate,
+                method_name=self.refuter_method,
+                confounders_effect_on_treatment = self.confounders_effect_on_t,
+                confounders_effect_on_outcome = self.confounders_effect_on_y,
+                effect_strength_on_treatment = 0,
+                effect_strength_on_outcome = 0)
+            error = abs(refute.new_effect - ate_estimate.value)
+            
+            print("Error in refuted estimate = {0} with tolerance {1}%. Estimated={2},After Refutation={3}".format(
+                error, self._error_tolerance * 100, ate_estimate.value, refute.new_effect)
+            )
+            res = True if (error < abs(ate_estimate.value) * self._error_tolerance) else False
+            assert res
 
     def binary_treatment_testsuite(self, tests_to_run="all"):
         self.null_refutation_test(num_common_causes=1)
