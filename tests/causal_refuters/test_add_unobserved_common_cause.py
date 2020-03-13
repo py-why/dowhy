@@ -64,9 +64,10 @@ class TestAddUnobservedCommonCauseRefuter(object):
                 effect_strength_on_y = effect_strength_on_y)
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
 
-    @pytest.mark.parametrize(["error_tolerance", "estimator_method"],
-                             [(0.01, "iv.instrumental_variable")])
-    def test_refutation_placebo_refuter(self, error_tolerance, estimator_method):
-            refuter_tester = TestRefuter(error_tolerance, estimator_method, "placebo_treatment_refuter")
-            refuter_tester.continuous_treatment_testsuite(tests_to_run="other") # No common cause
+
+#      @pytest.mark.parametrize(["error_tolerance", "estimator_method"],
+#                              [(0.01, "iv.instrumental_variable")])
+#     def test_refutation_data_subset_refuter(self, error_tolerance, estimator_method):
+#             refuter_tester = TestRefuter(error_tolerance, estimator_method, "data_subset_refuter")
+#             refuter_tester.continuous_treatment_testsuite(tests_to_run="other") # No common cause
 
