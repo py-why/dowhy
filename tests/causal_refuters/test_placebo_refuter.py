@@ -6,7 +6,7 @@ from .base import TestRefuter
 class TestPlaceboRefuter(object):
     @pytest.mark.parametrize(["error_tolerance", "estimator_method"],
                              [(0.01, "iv.instrumental_variable")])
-    def test_refutation_placebo_refuter_continueous(self, error_tolerance, estimator_method):
+    def test_refutation_placebo_refuter_continuous(self, error_tolerance, estimator_method):
             refuter_tester = TestRefuter(error_tolerance, estimator_method, "placebo_treatment_refuter")
             refuter_tester.continuous_treatment_testsuite() # Run both
 
@@ -14,4 +14,4 @@ class TestPlaceboRefuter(object):
                               [(0.01, "backdoor.propensity_score_matching")])
     def test_refutation_placebo_refuter_binary(self, error_tolerance, estimator_method):
         refuter_tester = TestRefuter(error_tolerance, estimator_method, "placebo_treatment_refuter")
-        refuter_tester.binary_treatment_testsuite() # Run both
+        refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause")

@@ -63,7 +63,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
                                                                     random_state=self._random_state).values                    
             else:
                 new_treatment = np.random.randn(num_rows)
-            
+
             # Create a new column in the data by the name of placebo
             new_data = self._data.assign(placebo=new_treatment)
 
@@ -90,5 +90,4 @@ class PlaceboTreatmentRefuter(CausalRefuter):
             self.test_significance(dummy_estimator, sample_estimates)
         )        
         
-        print("number of sample estimates ",len(sample_estimates))
         return refute
