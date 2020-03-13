@@ -102,7 +102,7 @@ class TestRefuter(object):
         elif self.refuter_method == "data_subset_refuter":
             ref = model.refute_estimate(target_estimand, 
                                         ate_estimate,
-                                        method_name=self.refuter_method,
+                                        method_name=self.refuter_method
                                         )
             
             error =  abs(ref.new_effect - ate_estimate.value)
@@ -113,7 +113,7 @@ class TestRefuter(object):
 
             print(ref)
 
-            res = True if (error <  self._error_tolerance) else False
+            res = True if (error <  abs(ate_estimate.value)*self._error_tolerance) else False
             assert res
         
 
