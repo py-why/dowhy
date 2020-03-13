@@ -89,7 +89,7 @@ class CausalRefuter:
                 p_value = self.perform_bootstrap_test(estimate, simulations)
 
             else:
-                self.logger.warn("We assume a Normal Distribution as the sample has less than 100 examples.\n \
+                self.logger.warning("We assume a Normal Distribution as the sample has less than 100 examples.\n \
                 Note: The underlying distribution may not be Normal. We assume that it approaches normal with the increase in sample size.")
             
                 # Perform Normal Tests of Significance with the original estimate and the set of refutations
@@ -169,8 +169,8 @@ class CausalRefutation:
     """
 
     def __init__(self, estimated_effect, new_effect, refutation_type):
-        self.estimated_effect = estimated_effect,
-        self.new_effect = new_effect,
+        self.estimated_effect = estimated_effect
+        self.new_effect = new_effect
         self.refutation_type = refutation_type
 
         self.refutation_result = None

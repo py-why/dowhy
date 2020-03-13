@@ -1,6 +1,7 @@
 import copy
 
 import numpy as np
+import logging 
 
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
@@ -27,6 +28,14 @@ class PlaceboTreatmentRefuter(CausalRefuter):
             self._placebo_type = "Random Data"
         self._num_simulations = kwargs.pop("num_simulations",CausalRefuter.DEFAULT_NUM_SIMULATIONS)
         self._random_state = kwargs.pop("random_state",None)
+
+        if 'logging_level' in kwargs:
+            logging.basicConfig(level=kwargs['logging_level'])
+        else:
+            logging.basicConfig(level=logging.INFO)
+
+        self.logger = logging.getLogger(__name__)
+
 
     def refute_estimate(self):
 
@@ -65,7 +74,6 @@ class PlaceboTreatmentRefuter(CausalRefuter):
             new_estimator = self.get_estimator_object(new_data, identified_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
             sample_estimates[index] = new_effect.value
-        
 
         refute = CausalRefutation(self._estimate.value, 
                                   np.mean(sample_estimates),
@@ -77,8 +85,10 @@ class PlaceboTreatmentRefuter(CausalRefuter):
 
         dummy_estimator = copy.deepcopy(self._estimate)
         dummy_estimator.value = 0
+
         refute.add_significance_test_results(
             self.test_significance(dummy_estimator, sample_estimates)
         )        
         
+        print("number of sample estimates ",len(sample_estimates))
         return refute
