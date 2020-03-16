@@ -18,7 +18,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
     - 'num_simulations': int, CausalRefuter.DEFAULT_NUM_SIMULATIONS by default
     The number of simulations to be run
     - 'random_state': int, RandomState, None by default
-    The seed value to be added if we wish to repeat the same random behavior. If we with to repeat the
+    The seed value to be added if we wish to repeat the same random behavior. If we want to repeat the
     same behavior we push the same seed in the psuedo-random generator
     """
     def __init__(self, *args, **kwargs):
@@ -40,7 +40,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
     def refute_estimate(self):
 
         # We need to change the identified estimand
-        # This is done as a safety measure, we don't want to change the
+        # We make a copy as a safety measure, we don't want to change the
         # original DataFrame
         identified_estimand = copy.deepcopy(self._target_estimand)
         identified_estimand.treatment_variable = ["placebo"]
