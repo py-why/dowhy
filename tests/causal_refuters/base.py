@@ -132,6 +132,27 @@ class TestRefuter(object):
             res = True if (error <  abs(ate_estimate.value)*self._error_tolerance) else False
             assert res
 
+        elif self.refuter_method == "dummy_outcome_refuter":
+            ref = model.refute_estimate(target_estimand,
+                                         ate_estimate,
+                                         method_name=self.refuter_method
+                                         )
+            
+            # This value is hardcoded to be zero as we are runnning this on a linear dataset.
+            # Ordinarily, we should expect this value to be zero.
+            EXPECTED_DUMMY_OUTCOME_VALUE = 0
+
+            error = abs( ref.new_effect - EXPECTED_DUMMY_OUTCOME_VALUE)
+
+            print("Error in the refuted estimate = {0} with tolerence {1}%. Expected Value={2}, After Refutation={3}".format(
+                error, self._error_tolerance * 100, EXPECTED_DUMMY_OUTCOME_VALUE, ref.new_effect)
+            )
+
+            print(ref)
+
+            res = True if (error <  self._error_tolerance) else False
+            assert res
+
     def binary_treatment_testsuite(self, tests_to_run="all"):
         self.null_refutation_test(num_common_causes=1)
         if tests_to_run != "atleast-one-common-cause":

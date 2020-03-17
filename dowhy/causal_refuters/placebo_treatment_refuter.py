@@ -63,7 +63,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
                         )
 
         num_rows = self._data.shape[0]
-
+        treatment_name = self._treatment_name[0] # Extract the name of the treatment variable
         type_dict = dict( self._data.dtypes )
 
         for index in range(self._num_simulations):
@@ -75,7 +75,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
                     new_treatment = self._data[self._treatment_name].sample(frac=1, 
                                                                     random_state=self._random_state).values                    
             else:
-                if 'float' in type_dict[self._treatment_name].name :
+                if 'float' in type_dict[treatment_name].name :
                     self.logger.info("Using a Normal Distribution with Mean:{} and Variance:{}"
                                      .format(PlaceboTreatmentRefuter.DEFAULT_MEAN_OF_NORMAL
                                      ,PlaceboTreatmentRefuter.DEFAULT_STD_DEV_OF_NORMAL)
@@ -83,7 +83,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
                     new_treatment = np.random.randn(num_rows)*PlaceboTreatmentRefuter.DEFAULT_STD_DEV_OF_NORMAL + \
                                     PlaceboTreatmentRefuter.DEFAULT_MEAN_OF_NORMAL 
                 
-                elif 'bool' in type_dict[self._treatment_name].name :
+                elif 'bool' in type_dict[treatment_name].name :
                     self.logger.info("Using a Binomial Distribution with {} trials and {} probability of success"
                                     .format(PlaceboTreatmentRefuter.DEFAULT_NUMBER_OF_TRIALS
                                     ,PlaceboTreatmentRefuter.DEFAULT_PROBABILITY_OF_BINOMIAL)
@@ -92,17 +92,17 @@ class PlaceboTreatmentRefuter(CausalRefuter):
                                                        PlaceboTreatmentRefuter.DEFAULT_PROBABILITY_OF_BINOMIAL,
                                                        num_rows).astype(bool)
                 
-                elif 'int' in type_dict[self._treatment_name].name :
+                elif 'int' in type_dict[treatment_name].name :
                     self.logger.info("Using a Discrete Uniform Distribution lying between {} and {}"
-                    .format(self._data[self._treatment_name].min()
-                    ,self._data[self._treatment_name].max())
+                    .format(self._data[treatment_name].min()
+                    ,self._data[treatment_name].max())
                     )
-                    new_treatment = np.random.randint(low=self._data[self._target_estimand].min(),
-                                                      high=self._data[self._treatment_name].max(),
+                    new_treatment = np.random.randint(low=self._data[treatment_name].min(),
+                                                      high=self._data[treatment_name].max(),
                                                       size=num_rows)
 
-                elif 'category' in type_dict[self._treatment_name].name :
-                    categories = self._data[self._treatment_name].unique()
+                elif 'category' in type_dict[treatment_name].name :
+                    categories = self._data[treatment_name].unique()
                     self.logger.info("Using a Discrete Uniform Distribution with the following categories:{}"
                     .format(categories))
                     sample = np.random.choice(categories, size=num_rows)
@@ -114,7 +114,6 @@ class PlaceboTreatmentRefuter(CausalRefuter):
             # Sanity check the data
             self.logger.debug(new_data[0:10])
 
-            
             new_estimator = self.get_estimator_object(new_data, identified_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
             sample_estimates[index] = new_effect.value

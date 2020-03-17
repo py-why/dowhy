@@ -33,7 +33,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         else:
             logging.basicConfig(level=logging.INFO)
         
-        self.logger - logging.getLogger(__name__)
+        self.logger = logging.getLogger(__name__)
 
     def refute_estimate(self):
 
@@ -68,22 +68,22 @@ class DummyOutcomeRefuter(CausalRefuter):
         self.logger.debug(new_data[0:10])
 
         new_estimator = self.get_estimator_object(new_data, identified_estimand, self._estimate)
-        new_effect = new_estimator.esitmate_effect()
-        sample_estimates[index] = new_effect.values
+        new_effect = new_estimator.estimate_effect()
+        sample_estimates[index] = new_effect.value
 
-    refute = CausalRefutation(self._estimate.value,
-                                       np.mean(sample_estimates),
-                                       refutation_type="Refute: Use a Dummy Outcome")
-    
-    # Note: We hardcode the estimate value to ZERO as we want to check if it falls in the distribution of the refuter
-    # Ideally we should expect that ZERO should fall in the distribution of the effect estimates as we have severed any causal 
-    # relationship between the treatment and the outcome.
+        refute = CausalRefutation(self._estimate.value,
+                                        np.mean(sample_estimates),
+                                        refutation_type="Refute: Use a Dummy Outcome")
+        
+        # Note: We hardcode the estimate value to ZERO as we want to check if it falls in the distribution of the refuter
+        # Ideally we should expect that ZERO should fall in the distribution of the effect estimates as we have severed any causal 
+        # relationship between the treatment and the outcome.
 
-    dummy_estimator = copy.deepcopy(self._estimate)
-    dummy_estimator.value = 0
+        dummy_estimator = copy.deepcopy(self._estimate)
+        dummy_estimator.value = 0
 
-    refute.add_significance_test_results(
-        self.test_significance(dummy_estimator, sample_estimates)
-    )
+        refute.add_significance_test_results(
+            self.test_significance(dummy_estimator, sample_estimates)
+        )
 
-    return refute
+        return refute
