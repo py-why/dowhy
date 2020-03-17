@@ -1,6 +1,7 @@
 import copy
 
 import numpy as np
+import pandas as pd
 import logging 
 
 from dowhy.causal_refuter import CausalRefutation
@@ -21,6 +22,16 @@ class PlaceboTreatmentRefuter(CausalRefuter):
     The seed value to be added if we wish to repeat the same random behavior. If we want to repeat the
     same behavior we push the same seed in the psuedo-random generator
     """
+
+    # Default value of the p value taken for the distribution
+    DEFAULT_PROBABILITY_OF_BINOMIAL = 0.5
+    # Number of Trials: Number of cointosses to understand if a sample gets the treatment
+    DEFAULT_NUMBER_OF_TRIALS = 1
+    # Mean of the Normal Distribution
+    DEFAULT_MEAN_OF_NORMAL = 0
+    # Standard Deviation of the Normal Distribution
+    DEFAULT_STD_DEV_OF_NORMAL = 0
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._placebo_type = kwargs.pop("placebo_type",None)
@@ -53,6 +64,8 @@ class PlaceboTreatmentRefuter(CausalRefuter):
 
         num_rows = self._data.shape[0]
 
+        type_dict = dict( self._data.dtypes )
+
         for index in range(self._num_simulations):
 
             if self._placebo_type == "permute":
@@ -62,7 +75,38 @@ class PlaceboTreatmentRefuter(CausalRefuter):
                     new_treatment = self._data[self._treatment_name].sample(frac=1, 
                                                                     random_state=self._random_state).values                    
             else:
-                new_treatment = np.random.randn(num_rows)
+                if 'float' in type_dict[self._treatment_name].name :
+                    self.logger.info("Using a Normal Distribution with Mean:{} and Variance:{}"
+                                     .format(PlaceboTreatmentRefuter.DEFAULT_MEAN_OF_NORMAL
+                                     ,PlaceboTreatmentRefuter.DEFAULT_STD_DEV_OF_NORMAL)
+                                     )
+                    new_treatment = np.random.randn(num_rows)*PlaceboTreatmentRefuter.DEFAULT_STD_DEV_OF_NORMAL + \
+                                    PlaceboTreatmentRefuter.DEFAULT_MEAN_OF_NORMAL 
+                
+                elif 'bool' in type_dict[self._treatment_name].name :
+                    self.logger.info("Using a Binomial Distribution with {} trials and {} probability of success"
+                                    .format(PlaceboTreatmentRefuter.DEFAULT_NUMBER_OF_TRIALS
+                                    ,PlaceboTreatmentRefuter.DEFAULT_PROBABILITY_OF_BINOMIAL)
+                                    )
+                    new_treatment = np.random.binomial(PlaceboTreatmentRefuter.DEFAULT_NUMBER_OF_TRIALS,
+                                                       PlaceboTreatmentRefuter.DEFAULT_PROBABILITY_OF_BINOMIAL,
+                                                       num_rows).astype(bool)
+                
+                elif 'int' in type_dict[self._treatment_name].name :
+                    self.logger.info("Using a Discrete Uniform Distribution lying between {} and {}"
+                    .format(self._data[self._treatment_name].min()
+                    ,self._data[self._treatment_name].max())
+                    )
+                    new_treatment = np.random.randint(low=self._data[self._target_estimand].min(),
+                                                      high=self._data[self._treatment_name].max(),
+                                                      size=num_rows)
+
+                elif 'category' in type_dict[self._treatment_name].name :
+                    categories = self._data[self._treatment_name].unique()
+                    self.logger.info("Using a Discrete Uniform Distribution with the following categories:{}"
+                    .format(categories))
+                    sample = np.random.choice(categories, size=num_rows)
+                    new_treatment = pd.Series(sample).astype('category')
 
             # Create a new column in the data by the name of placebo
             new_data = self._data.assign(placebo=new_treatment)
