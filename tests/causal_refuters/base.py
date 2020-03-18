@@ -79,10 +79,17 @@ class TestRefuter(object):
             assert res
 
         elif self.refuter_method == "placebo_treatment_refuter":
-            ref = model.refute_estimate(target_estimand, 
+            if treatment_is_binary is True:
+                ref = model.refute_estimate(target_estimand, 
                                         ate_estimate,
-                                        method_name=self.refuter_method
+                                        method_name=self.refuter_method,
+                                        num_simulations=10
                                         )
+            else:
+                ref = model.refute_estimate(target_estimand, 
+                                            ate_estimate,
+                                            method_name=self.refuter_method
+                                            )
             # This value is hardcoded to be zero as we are runnning this on a linear dataset.
             # Ordinarily, we should expect this value to be zero.
             EXPECTED_PLACEBO_VALUE = 0
@@ -99,10 +106,17 @@ class TestRefuter(object):
             assert res
             
         elif self.refuter_method == "data_subset_refuter":
-            ref = model.refute_estimate(target_estimand, 
+            if treatment_is_binary is True:
+                ref = model.refute_estimate(target_estimand, 
                                         ate_estimate,
-                                        method_name=self.refuter_method
+                                        method_name=self.refuter_method,
+                                        num_simulations=5
                                         )
+            else:
+                ref = model.refute_estimate(target_estimand, 
+                                            ate_estimate,
+                                            method_name=self.refuter_method
+                                            )
             
             error =  abs(ref.new_effect - ate_estimate.value)
 
@@ -116,10 +130,17 @@ class TestRefuter(object):
             assert res
         
         elif self.refuter_method == "bootstrap_refuter":
-            ref = model.refute_estimate(target_estimand, 
+            if treatment_is_binary is True:
+                ref = model.refute_estimate(target_estimand, 
                                         ate_estimate,
-                                        method_name=self.refuter_method
+                                        method_name=self.refuter_method,
+                                        num_simulations=5
                                         )
+            else:
+                ref = model.refute_estimate(target_estimand, 
+                                            ate_estimate,
+                                            method_name=self.refuter_method
+                                            )
             
             error =  abs(ref.new_effect - ate_estimate.value)
 
