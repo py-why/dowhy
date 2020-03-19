@@ -87,7 +87,7 @@ class AddUnobservedCommonCause(CausalRefuter):
                         refute = CausalRefutation(self._estimate.value, new_effect.value,
                                                 refutation_type="Refute: Add an Unobserved Common Cause")
                         self.logger.debug(refute)
-                        results_matrix[i][j] = refute.estimated_effect[0] # Populate the results
+                        results_matrix[i][j] = refute.estimated_effect # Populate the results
                 
                 fig = plt.figure(figsize=(6,5))
                 left, bottom, width, height = 0.1, 0.1, 0.8, 0.8
@@ -115,7 +115,7 @@ class AddUnobservedCommonCause(CausalRefuter):
                     refute = CausalRefutation(self._estimate.value, new_effect.value,
                                             refutation_type="Refute: Add an Unobserved Common Cause")
                     self.logger.debug(refute)
-                    outcomes[i] = refute.estimated_effect[0] # Populate the results
+                    outcomes[i] = refute.estimated_effect # Populate the results
 
                 fig = plt.figure(figsize=(6,5))
                 left, bottom, width, height = 0.1, 0.1, 0.8, 0.8
@@ -141,7 +141,7 @@ class AddUnobservedCommonCause(CausalRefuter):
                     refute = CausalRefutation(self._estimate.value, new_effect.value,
                                             refutation_type="Refute: Add an Unobserved Common Cause")
                     self.logger.debug(refute)
-                    outcomes[i] = refute.estimated_effect[0] # Populate the results
+                    outcomes[i] = refute.estimated_effect # Populate the results
                 
                 fig = plt.figure(figsize=(6,5))
                 left, bottom, width, height = 0.1, 0.1, 0.8, 0.8

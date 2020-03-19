@@ -1,6 +1,8 @@
 import copy
 
 import numpy as np
+import pandas as pd
+import logging 
 
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
@@ -17,9 +19,19 @@ class PlaceboTreatmentRefuter(CausalRefuter):
     - 'num_simulations': int, CausalRefuter.DEFAULT_NUM_SIMULATIONS by default
     The number of simulations to be run
     - 'random_state': int, RandomState, None by default
-    The seed value to be added if we wish to repeat the same random behavior. If we with to repeat the
+    The seed value to be added if we wish to repeat the same random behavior. If we want to repeat the
     same behavior we push the same seed in the psuedo-random generator
     """
+
+    # Default value of the p value taken for the distribution
+    DEFAULT_PROBABILITY_OF_BINOMIAL = 0.5
+    # Number of Trials: Number of cointosses to understand if a sample gets the treatment
+    DEFAULT_NUMBER_OF_TRIALS = 1
+    # Mean of the Normal Distribution
+    DEFAULT_MEAN_OF_NORMAL = 0
+    # Standard Deviation of the Normal Distribution
+    DEFAULT_STD_DEV_OF_NORMAL = 0
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._placebo_type = kwargs.pop("placebo_type",None)
@@ -28,10 +40,18 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         self._num_simulations = kwargs.pop("num_simulations",CausalRefuter.DEFAULT_NUM_SIMULATIONS)
         self._random_state = kwargs.pop("random_state",None)
 
+        if 'logging_level' in kwargs:
+            logging.basicConfig(level=kwargs['logging_level'])
+        else:
+            logging.basicConfig(level=logging.INFO)
+
+        self.logger = logging.getLogger(__name__)
+
+
     def refute_estimate(self):
 
         # We need to change the identified estimand
-        # This is done as a safety measure, we don't want to change the
+        # We make a copy as a safety measure, we don't want to change the
         # original DataFrame
         identified_estimand = copy.deepcopy(self._target_estimand)
         identified_estimand.treatment_variable = ["placebo"]
@@ -43,6 +63,8 @@ class PlaceboTreatmentRefuter(CausalRefuter):
                         )
 
         num_rows = self._data.shape[0]
+        treatment_name = self._treatment_name[0] # Extract the name of the treatment variable
+        type_dict = dict( self._data.dtypes )
 
         for index in range(self._num_simulations):
 
@@ -53,19 +75,48 @@ class PlaceboTreatmentRefuter(CausalRefuter):
                     new_treatment = self._data[self._treatment_name].sample(frac=1, 
                                                                     random_state=self._random_state).values                    
             else:
-                new_treatment = np.random.randn(num_rows)
-            
+                if 'float' in type_dict[treatment_name].name :
+                    self.logger.info("Using a Normal Distribution with Mean:{} and Variance:{}"
+                                     .format(PlaceboTreatmentRefuter.DEFAULT_MEAN_OF_NORMAL
+                                     ,PlaceboTreatmentRefuter.DEFAULT_STD_DEV_OF_NORMAL)
+                                     )
+                    new_treatment = np.random.randn(num_rows)*PlaceboTreatmentRefuter.DEFAULT_STD_DEV_OF_NORMAL + \
+                                    PlaceboTreatmentRefuter.DEFAULT_MEAN_OF_NORMAL 
+                
+                elif 'bool' in type_dict[treatment_name].name :
+                    self.logger.info("Using a Binomial Distribution with {} trials and {} probability of success"
+                                    .format(PlaceboTreatmentRefuter.DEFAULT_NUMBER_OF_TRIALS
+                                    ,PlaceboTreatmentRefuter.DEFAULT_PROBABILITY_OF_BINOMIAL)
+                                    )
+                    new_treatment = np.random.binomial(PlaceboTreatmentRefuter.DEFAULT_NUMBER_OF_TRIALS,
+                                                       PlaceboTreatmentRefuter.DEFAULT_PROBABILITY_OF_BINOMIAL,
+                                                       num_rows).astype(bool)
+                
+                elif 'int' in type_dict[treatment_name].name :
+                    self.logger.info("Using a Discrete Uniform Distribution lying between {} and {}"
+                    .format(self._data[treatment_name].min()
+                    ,self._data[treatment_name].max())
+                    )
+                    new_treatment = np.random.randint(low=self._data[treatment_name].min(),
+                                                      high=self._data[treatment_name].max(),
+                                                      size=num_rows)
+
+                elif 'category' in type_dict[treatment_name].name :
+                    categories = self._data[treatment_name].unique()
+                    self.logger.info("Using a Discrete Uniform Distribution with the following categories:{}"
+                    .format(categories))
+                    sample = np.random.choice(categories, size=num_rows)
+                    new_treatment = pd.Series(sample).astype('category')
+
             # Create a new column in the data by the name of placebo
             new_data = self._data.assign(placebo=new_treatment)
 
             # Sanity check the data
             self.logger.debug(new_data[0:10])
 
-            
             new_estimator = self.get_estimator_object(new_data, identified_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
             sample_estimates[index] = new_effect.value
-        
 
         refute = CausalRefutation(self._estimate.value, 
                                   np.mean(sample_estimates),
@@ -74,8 +125,12 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         # Note: We hardcode the estimate value to ZERO as we want to check if it falls in the distribution of the refuter
         # Ideally we should expect that ZERO should fall in the distribution of the effect estimates as we have severed any causal
         # relationship between the treatment and the outcome.
+
+        dummy_estimator = copy.deepcopy(self._estimate)
+        dummy_estimator.value = 0
+
         refute.add_significance_test_results(
-            self.test_significance(0, sample_estimates)
+            self.test_significance(dummy_estimator, sample_estimates)
         )        
         
         return refute

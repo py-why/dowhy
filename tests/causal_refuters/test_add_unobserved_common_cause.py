@@ -64,3 +64,4 @@ class TestAddUnobservedCommonCauseRefuter(object):
                 effect_strength_on_y = effect_strength_on_y)
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
 
+
