@@ -11,7 +11,7 @@ class TestPlaceboRefuter(object):
             refuter_tester.continuous_treatment_testsuite() # Run both
 
     @pytest.mark.parametrize(["error_tolerance", "estimator_method"],
-                              [(0.01, "backdoor.propensity_score_matching")])
+                              [(0.05, "backdoor.propensity_score_matching")])
     def test_refutation_placebo_refuter_binary(self, error_tolerance, estimator_method):
         refuter_tester = TestRefuter(error_tolerance, estimator_method, "placebo_treatment_refuter")
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause")
