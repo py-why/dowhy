@@ -16,9 +16,9 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
 
     def _estimate_effect(self, recalculate_propensity_score=False):
         if self._propensity_score_model is None or recalculate_propensity_score is True:
-            propensity_score_model = linear_model.LogisticRegression(solver="lbfgs")
-            propensity_score_model.fit(self._observed_common_causes, self._treatment.to_numpy())
-            self._data['propensity_score'] = propensity_score_model.predict_proba(self._observed_common_causes)[:,1]
+            self._propensity_score_model = linear_model.LogisticRegression(solver="lbfgs")
+            self._propensity_score_model.fit(self._observed_common_causes, self._treatment.to_numpy())
+            self._data['propensity_score'] = self._propensity_score_model.predict_proba(self._observed_common_causes)[:,1]
 
         # this assumes a binary treatment regime
         treated = self._data.loc[self._data[self._treatment_name[0]] == 1]

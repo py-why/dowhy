@@ -3,10 +3,9 @@ import pandas as pd
 from sklearn import linear_model
 
 from dowhy.causal_estimator import CausalEstimate
-from dowhy.causal_estimator import CausalEstimator
+from dowhy.causal_estimators.propensity_score_estimator import PropensityScoreEstimator
 
-
-class PropensityScoreWeightingEstimator(CausalEstimator):
+class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
     """ Estimate effect of treatment by weighing the data by
     inverse probability of occurrence.
 
@@ -20,26 +19,6 @@ class PropensityScoreWeightingEstimator(CausalEstimator):
 
     def __init__(self, *args, min_ps_score=0.05, max_ps_score=0.95, **kwargs):
         super().__init__(*args, **kwargs)
-        # Checking if treatment is one-dimensional
-        if len(self._treatment_name) > 1:
-            error_msg = str(self.__class__) + " cannot handle more than one treatment variable."
-            raise Exception(error_msg)
-        # Checking if treatment is binary
-        if not pd.api.types.is_bool_dtype(self._data[self._treatment_name[0]]):
-            error_msg = "Propensity Score Weighting method is only applicable for binary treatments. Try explictly setting dtype=bool for the treatment column."
-            raise Exception(error_msg)
-
-        self.logger.debug("Back-door variables used:" +
-                          ",".join(self._target_estimand.backdoor_variables))
-        self._observed_common_causes_names = self._target_estimand.backdoor_variables
-        if len(self._observed_common_causes_names)>0:
-            self._observed_common_causes = self._data[self._observed_common_causes_names]
-            self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
-        else:
-            self._observed_common_causes= None
-            error_msg ="No common causes/confounders present. Propensity score based methods are not applicable"
-            self.logger.error(error_msg)
-            raise Exception(error_msg)
 
         self.logger.info("INFO: Using Propensity Score Weighting Estimator")
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
@@ -49,15 +28,14 @@ class PropensityScoreWeightingEstimator(CausalEstimator):
         self.min_ps_score = min_ps_score
         self.max_ps_score = max_ps_score
 
-    def _estimate_effect(self):
-        psmodel = linear_model.LogisticRegression()
-        psmodel.fit(self._observed_common_causes, self._treatment)
-        self._data['ps'] = psmodel.predict_proba(self._observed_common_causes)[:,1]
-        # trim propensity score weights
-        self._data['ps'] = np.minimum(self.max_ps_score, self._data['ps'])
-        self._data['ps'] = np.maximum(self.min_ps_score, self._data['ps'])
-
-
+    def _estimate_effect(self, recalculate_propensity_score=False):
+        if self._propensity_score_model is None or recalculate_propensity_score is True:
+            self._propensity_score_model = linear_model.LogisticRegression()
+            self._propensity_score_model.fit(self._observed_common_causes, self._treatment)
+            self._data['ps'] = self._propensity_score_model.predict_proba(self._observed_common_causes)[:,1]
+            # trim propensity score weights
+            self._data['ps'] = np.minimum(self.max_ps_score, self._data['ps'])
+            self._data['ps'] = np.maximum(self.min_ps_score, self._data['ps'])
 
         # ips ==> (isTreated(y)/ps(y)) + ((1-isTreated(y))/(1-ps(y)))
         # nips ==> ips / (sum of ips over all units)
