@@ -33,6 +33,9 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
             .fit(control['propensity_score'].values.reshape(-1, 1))
         )
         distances, indices = control_neighbors.kneighbors(treated['propensity_score'].values.reshape(-1, 1))
+        self.logger.debug("distances:")
+        self.logger.debug(distances)
+        
         att = 0
         numtreatedunits = treated.shape[0]
         for i in range(numtreatedunits):
