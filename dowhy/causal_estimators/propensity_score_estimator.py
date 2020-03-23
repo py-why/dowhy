@@ -51,7 +51,7 @@ class PropensityScoreEstimator(CausalEstimator):
             
             Parameters
             -----------
-            recualculate_propensity_score: bool, default False,
+            recalculate_propensity_score: bool, default False,
             This forces the estimator to recalculate the estimate for the propensity score.
         '''
         raise NotImplementedError
