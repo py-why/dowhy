@@ -33,9 +33,10 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
             self._propensity_score_model = linear_model.LogisticRegression()
             self._propensity_score_model.fit(self._observed_common_causes, self._treatment)
             self._data['ps'] = self._propensity_score_model.predict_proba(self._observed_common_causes)[:,1]
-            # trim propensity score weights
-            self._data['ps'] = np.minimum(self.max_ps_score, self._data['ps'])
-            self._data['ps'] = np.maximum(self.min_ps_score, self._data['ps'])
+        
+        # trim propensity score weights
+        self._data['ps'] = np.minimum(self.max_ps_score, self._data['ps'])
+        self._data['ps'] = np.maximum(self.min_ps_score, self._data['ps'])
 
         # ips ==> (isTreated(y)/ps(y)) + ((1-isTreated(y))/(1-ps(y)))
         # nips ==> ips / (sum of ips over all units)
