@@ -10,7 +10,7 @@ class PropensityScoreEstimator(CausalEstimator):
 
         # We need to initialize the model when we create any propensity score estimator
         self._propensity_score_model = None
-        # Check if the input is one-dimensional
+        # Check if the treatment is one-dimensional
         if len(self._treatment_name) > 1:
             error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
             raise Exception(error_msg)
