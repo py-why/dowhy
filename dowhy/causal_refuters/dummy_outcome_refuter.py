@@ -65,8 +65,11 @@ class DummyOutcomeRefuter(CausalRefuter):
                                                                 random_state=self._random_state).values
             elif self._outcome_function is not None:
                 new_outcome = self._outcome_function(self._data)
+                
+                # Check if data types match
                 assert type(new_outcome) is np.ndarray, ("Only  supports numpy.ndarray as the output")
                 assert 'float' in new_outcome.dtype.name, ("Only float outcomes are currently supported")
+                
                 if len(new_outcome.shape) == 2 and \
                     ( new_outcome.shape[0] ==1 or new_outcome.shape[1] ):
                     self.logger.warning("Converting the row or column vector to 1D array")
