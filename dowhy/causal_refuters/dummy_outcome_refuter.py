@@ -65,12 +65,12 @@ class DummyOutcomeRefuter(CausalRefuter):
                                                                 random_state=self._random_state).values
             elif self._outcome_function is not None:
                 new_outcome = self._outcome_function(self._data)
-                if len(new_outcome.shape) == 2 and 
+                if len(new_outcome.shape) == 2 and \
                     ( new_outcome.shape[0] ==1 or new_outcome.shape[1] ):
                     self.logger.warning("Converting the row or column vector to 1D array")
                     new_outcome = new_outcome.ravel()
                     assert len(new_outcome) == num_rows, ("The number of outputs do not match that of the number of outcomes")
-                elif len(new_oucome.shape) == 1:
+                elif len(new_outcome.shape) == 1:
                     assert len(new_outcome) == num_rows, ("The number of outputs do not match that of the number of outcomes")
                 else:
                     raise Exception("Type Mismatch: The outcome is one dimensional, but the output has the shape:{}".format(new_outcome.shape))
