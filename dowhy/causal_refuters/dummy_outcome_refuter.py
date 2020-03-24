@@ -19,7 +19,7 @@ class DummyOutcomeRefuter(CausalRefuter):
     - 'random_state': int, RandomState, None by default
     The seed value to be added if we wish to repeat the same random behavior. If we want to repeat the
     same behavior we push the same seed in the psuedo-random generator
-    - 'outcome_prediction_function': function pd.Dataframe -> np.ndarray, None
+    - 'outcome_function': function pd.Dataframe -> np.ndarray, None
     A function that takes in a function that takes the input data frame as the input and outputs the outcome
     variable. This allows us to create an output varable that only depends on the confounders and does not depend 
     on the treatment variable.
@@ -31,7 +31,7 @@ class DummyOutcomeRefuter(CausalRefuter):
             self._dummy_outcome_type = "Random Data"
         self._num_simulations = kwargs.pop("num_simulations", CausalRefuter.DEFAULT_NUM_SIMULATIONS)
         self._random_state = kwargs.pop("random_state", None)
-        self._outcome_prediction_function = kwargs.pop("outcome_prediction_function", None)
+        self._outcome_function = kwargs.pop("outcome_function", None)
 
         if 'logging_level' in kwargs:
             logging.basicConfig(level=kwargs['logging_level'])
@@ -63,8 +63,8 @@ class DummyOutcomeRefuter(CausalRefuter):
                 else:
                     new_outcome = self._data[self._outcome_name].sample(frac=1,
                                                                 random_state=self._random_state).values
-            elif self._outcome_prediction_function is not None:
-                new_outcome = self._outcome_prediction_function(self._data)
+            elif self._outcome_function is not None:
+                new_outcome = self._outcome_function(self._data)
                 if len(new_outcome.shape) == 2 and 
                     ( new_outcome.shape[0] ==1 or new_outcome.shape[1] ):
                     self.logger.warning("Converting the row or column vector to 1D array")
