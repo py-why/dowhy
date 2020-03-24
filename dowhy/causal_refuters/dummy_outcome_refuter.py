@@ -66,6 +66,10 @@ class DummyOutcomeRefuter(CausalRefuter):
             elif self._outcome_function is not None:
                 new_outcome = self._outcome_function(self._data)
                 
+                if type(new_outcome) is pd.Series or \
+                   type(new_outcome) is pd.DataFrame:
+                   new_outcome = new_outcome.values
+                
                 # Check if data types match
                 assert type(new_outcome) is np.ndarray, ("Only  supports numpy.ndarray as the output")
                 assert 'float' in new_outcome.dtype.name, ("Only float outcomes are currently supported")
