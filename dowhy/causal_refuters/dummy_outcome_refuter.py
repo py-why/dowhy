@@ -1,6 +1,7 @@
 import copy
 
 import numpy as np
+import pandas as pd
 import logging
 
 from dowhy.causal_refuter import CausalRefutation
@@ -19,6 +20,10 @@ class DummyOutcomeRefuter(CausalRefuter):
     - 'random_state': int, RandomState, None by default
     The seed value to be added if we wish to repeat the same random behavior. If we want to repeat the
     same behavior we push the same seed in the psuedo-random generator
+    - 'outcome_function': function pd.Dataframe -> np.ndarray, None
+    A function that takes in a function that takes the input data frame as the input and outputs the outcome
+    variable. This allows us to create an output varable that only depends on the confounders and does not depend 
+    on the treatment variable.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -27,6 +32,7 @@ class DummyOutcomeRefuter(CausalRefuter):
             self._dummy_outcome_type = "Random Data"
         self._num_simulations = kwargs.pop("num_simulations", CausalRefuter.DEFAULT_NUM_SIMULATIONS)
         self._random_state = kwargs.pop("random_state", None)
+        self._outcome_function = kwargs.pop("outcome_function", None)
 
         if 'logging_level' in kwargs:
             logging.basicConfig(level=kwargs['logging_level'])
@@ -58,6 +64,26 @@ class DummyOutcomeRefuter(CausalRefuter):
                 else:
                     new_outcome = self._data[self._outcome_name].sample(frac=1,
                                                                 random_state=self._random_state).values
+            elif self._outcome_function is not None:
+                new_outcome = self._outcome_function(self._data)
+                
+                if type(new_outcome) is pd.Series or \
+                   type(new_outcome) is pd.DataFrame:
+                   new_outcome = new_outcome.values
+                
+                # Check if data types match
+                assert type(new_outcome) is np.ndarray, ("Only  supports numpy.ndarray as the output")
+                assert 'float' in new_outcome.dtype.name, ("Only float outcomes are currently supported")
+                
+                if len(new_outcome.shape) == 2 and \
+                    ( new_outcome.shape[0] ==1 or new_outcome.shape[1] ):
+                    self.logger.warning("Converting the row or column vector to 1D array")
+                    new_outcome = new_outcome.ravel()
+                    assert len(new_outcome) == num_rows, ("The number of outputs do not match that of the number of outcomes")
+                elif len(new_outcome.shape) == 1:
+                    assert len(new_outcome) == num_rows, ("The number of outputs do not match that of the number of outcomes")
+                else:
+                    raise Exception("Type Mismatch: The outcome is one dimensional, but the output has the shape:{}".format(new_outcome.shape))
             else:
                 new_outcome = np.random.randn(num_rows)
 
