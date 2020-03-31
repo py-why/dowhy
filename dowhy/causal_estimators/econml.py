@@ -7,7 +7,7 @@ from dowhy.causal_estimator import CausalEstimator
 from importlib import import_module
 import econml
 
-class EconmlCateEstimator(CausalEstimator):
+class Econml(CausalEstimator):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

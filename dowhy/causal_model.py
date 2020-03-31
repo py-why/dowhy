@@ -184,16 +184,22 @@ class CausalModel:
             #TODO add propensity score as default backdoor method, iv as default iv method, add an informational message to show which method has been selected.
             pass
         else:
+            # TODO add dowhy as a prefix to all in-house estimators
+            num_components = len(method_name.split("."))
             str_arr = method_name.split(".", maxsplit=1)
             identifier_name = str_arr[0]
             estimator_name = str_arr[1]
             identified_estimand.set_identifier_method(identifier_name)
-            if estimator_name.startswith("econml"):
-                causal_estimator_class =causal_estimators.get_class_object("econml_cate_estimator")
+            # This is done as all in-house have two parts and external ones have two or more parts
+            if num_components > 2:
+                third_party_estimator_name =  estimator_name.split(".")[0] # Get the third party library name
+                causal_estimator_class = causal_estimators.get_class_object(third_party_estimator_name)
                 if method_params is None:
                     method_params = {}
-                method_params["_econml_methodname"] = estimator_name
+                # Define the thrid party estimation method to be used
+                method_params["_" + third_party_estimator_name + "_methodname"] = estimator_name
             else:
+                # Process the In-house estimators
                 causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
 
         # Check if estimator's target estimand is identified
