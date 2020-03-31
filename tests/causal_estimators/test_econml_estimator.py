@@ -10,7 +10,7 @@ from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
 from sklearn.preprocessing import PolynomialFeatures
 
 
-class TestEconMLCateEstimator:
+class TestEconMLEstimator:
     """Smoke tests for the integration with EconML estimators
 
     These tests only check that the ate estimation routine can be executed without errors.
