@@ -195,7 +195,7 @@ class CausalModel:
                 estimator_package =  estimator_name.split(".")[0]
                 if estimator_package == 'dowhy': # For updated dowhy methods
                     estimator_method = estimator_name.split(".",maxsplit=1)[1] # discard dowhy from the full package name
-                    causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
+                    causal_estimator_class = causal_estimators.get_class_object(estimator_method + "_estimator")
                 else:
                     third_party_estimator_package = estimator_package
                     causal_estimator_class = causal_estimators.get_class_object(third_party_estimator_package)
