@@ -196,7 +196,7 @@ class CausalModel:
                 causal_estimator_class = causal_estimators.get_class_object(third_party_estimator_name)
                 if method_params is None:
                     method_params = {}
-                # Define the thrid party estimation method to be used
+                # Define the third party estimation method to be used
                 method_params["_" + third_party_estimator_name + "_methodname"] = estimator_name
             else:
                 # Process the In-house estimators
