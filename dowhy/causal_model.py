@@ -192,13 +192,18 @@ class CausalModel:
             identified_estimand.set_identifier_method(identifier_name)
             # This is done as all dowhy estimators have two parts and external ones have two or more parts
             if num_components > 2:
-                third_party_estimator_name =  estimator_name.split(".")[0] # Get the third party library name
-                causal_estimator_class = causal_estimators.get_class_object(third_party_estimator_name)
-                if method_params is None:
-                    method_params = {}
-                # Define the third-party estimation method to be used
-                method_params["_" + third_party_estimator_name + "_methodname"] = estimator_name
-            else:
+                estimator_package =  estimator_name.split(".")[0]
+                if estimator_package == 'dowhy': # For updated dowhy methods
+                    estimator_method = estimator_name.split(".",maxsplit=1)[1] # discard dowhy from the full package name
+                    causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
+                else:
+                    third_party_estimator_package = estimator_package
+                    causal_estimator_class = causal_estimators.get_class_object(third_party_estimator_package)
+                    if method_params is None:
+                        method_params = {}
+                    # Define the third-party estimation method to be used
+                    method_params["_" + third_party_estimator_package + "_methodname"] = estimator_name
+            else: # For older dowhy methods
                 # Process the dowhy estimators 
                 causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
 
