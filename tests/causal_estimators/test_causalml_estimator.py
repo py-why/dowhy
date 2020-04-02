@@ -1,7 +1,18 @@
 import pytest
+import subprocess
+import sys
 
 from dowhy import CausalModel
 from dowhy.datasets import linear_dataset
+
+# Hack to install causalml if not already present
+try:
+    __import__("causalml")
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "causalml"])
+finally:
+    __import__("causalml")
+# We import this later as we obtained this from causalml
 from xgboost import XGBRegressor
 
 class TestCausalMLEstimator:
