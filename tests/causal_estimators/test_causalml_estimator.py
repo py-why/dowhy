@@ -42,7 +42,7 @@ class TestCausalmlEstimator:
     
     def test_cuasalml_LRSRegressor(self):
         # Defined a linear dataset with a given set of properties
-        data = init_data
+        data = init_data()
 
         # Create a model that captures the same
         model = CausalModel(
@@ -69,7 +69,7 @@ class TestCausalmlEstimator:
 
     def test_cuasalml_XGBTRegressor(self):
         # Defined a linear dataset with a given set of properties
-        data = init_data
+        data = init_data()
 
         # Create a model that captures the same
         model = CausalModel(
@@ -96,7 +96,7 @@ class TestCausalmlEstimator:
 
     def test_cuasalml_MLPTRegressor(self):
         # Defined a linear dataset with a given set of properties
-        data = init_data
+        data = init_data()
 
         # Create a model that captures the same
         model = CausalModel(
@@ -128,7 +128,7 @@ class TestCausalmlEstimator:
 
     def test_cuasalml_XLearner(self):
         # Defined a linear dataset with a given set of properties
-        data = init_data
+        data = init_data()
 
         # Create a model that captures the same
         model = CausalModel(
@@ -158,7 +158,7 @@ class TestCausalmlEstimator:
 
     def test_cuasalml_RLearner(self):
         # Defined a linear dataset with a given set of properties
-        data = init_data
+        data = init_data()
 
         # Create a model that captures the same
         model = CausalModel(
