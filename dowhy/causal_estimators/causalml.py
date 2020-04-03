@@ -42,7 +42,7 @@ class Causalml(CausalEstimator):
         else:
             self._instrumental_variables = []
 
-        #Check if effect modifiers are used
+        # Check if effect modifiers are used
         self.logger.debug("Effect Modifiers used:" + 
                         ",".join(self._effect_modifier_names))
         
