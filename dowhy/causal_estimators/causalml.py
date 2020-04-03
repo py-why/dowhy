@@ -14,7 +14,7 @@ class Causalml(CausalEstimator):
 
         super().__init__(*args, **kwargs)
 
-        # Add the core method used in the estimator
+        # Add the identification method used in the estimator
         self.identifier_method = self._target_estimand.identifier_method
         self.logger.debug("The identifier method used {}".format(self.identifier_method))
 
