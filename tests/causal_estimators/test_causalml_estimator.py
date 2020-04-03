@@ -19,12 +19,12 @@ except ImportError:
     except subprocess.CalledProcessError:
         installed_failed = True
 
+@pytest.mark.skipif(installed_failed, reason="CausalML was not installed successfully")
 class TestCausalMLEstimator:
     '''
         To test the basic functionality of the CauslML estimators
     '''
     
-    @pytest.mark.skipif(installed_failed)
     def test_LRSRegressor(self):
         # Defined a linear dataset with a given set of properties
         data = linear_dataset(
@@ -60,7 +60,6 @@ class TestCausalMLEstimator:
         print("The LR estimate obtained:")
         print(lr_estimate)
 
-    @pytest.mark.skipif(installed_failed)
     def test_XGBTRegressor(self):
         # Defined a linear dataset with a given set of properties
         data = linear_dataset(
@@ -96,7 +95,6 @@ class TestCausalMLEstimator:
         print("The XGBT estimate obtained:")
         print(xgbt_estimate)
 
-    @pytest.mark.skipif(installed_failed)
     def test_MLPTRegressor(self):
         # Defined a linear dataset with a given set of properties
         data = linear_dataset(
@@ -137,7 +135,6 @@ class TestCausalMLEstimator:
         print("The MLPT estimate obtained:")
         print(mlpt_estimate)
 
-    @pytest.mark.skipif(installed_failed)
     def test_XLearner(self):
         # Defined a linear dataset with a given set of properties
         data = linear_dataset(
@@ -176,7 +173,6 @@ class TestCausalMLEstimator:
         print("The X Learner estimate obtained:")
         print(xl_estimate)
 
-    @pytest.mark.skipif(installed_failed)
     def test_RLearner(self):
         # Defined a linear dataset with a given set of properties
         data = linear_dataset(
