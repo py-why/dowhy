@@ -6,7 +6,7 @@ from dowhy import CausalModel
 from dowhy.datasets import linear_dataset
 
 # To skip the tests if we cannot install causalml
-installed_failed = False
+is_causalml_installed = True
 # Hack to install causalml if not already present
 try:
     __import__("causalml")
@@ -17,7 +17,7 @@ except ImportError:
         # We import this later as we obtained this from causalml
         from xgboost import XGBRegressor
     except subprocess.CalledProcessError:
-        installed_failed = True
+        is_causalml_installed = False
 
 @pytest.fixture
 def init_data():
@@ -33,7 +33,7 @@ def init_data():
     
     return data
 
-@pytest.mark.skipif(installed_failed, reason="CausalML was not installed successfully")
+@pytest.mark.skipif(is_causalml_installed is False, reason="CausalML is not installed")
 class TestCausalmlEstimator:
     '''
         To test the basic functionality of the CausalML estimators
