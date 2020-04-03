@@ -10,6 +10,8 @@ is_causalml_installed = True
 # Hack to install causalml if not already present
 try:
     __import__("causalml")
+    # If it imports successfully the first time
+    from xgboost import XGBRegressor
 except ImportError:
     try:
         subprocess.check_call([sys.executable, "-m", "pip", "install", "causalml"])
@@ -40,9 +42,9 @@ class TestCausalmlEstimator:
         To test the basic functionality of the CausalML estimators
     '''
     
-    def test_cuasalml_LRSRegressor(self):
+    def test_cuasalml_LRSRegressor(self, init_data):
         # Defined a linear dataset with a given set of properties
-        data = init_data()
+        data = init_data
 
         # Create a model that captures the same
         model = CausalModel(
@@ -67,9 +69,9 @@ class TestCausalmlEstimator:
         print("The LR estimate obtained:")
         print(lr_estimate)
 
-    def test_cuasalml_XGBTRegressor(self):
+    def test_cuasalml_XGBTRegressor(self, init_data):
         # Defined a linear dataset with a given set of properties
-        data = init_data()
+        data = init_data
 
         # Create a model that captures the same
         model = CausalModel(
@@ -94,9 +96,9 @@ class TestCausalmlEstimator:
         print("The XGBT estimate obtained:")
         print(xgbt_estimate)
 
-    def test_cuasalml_MLPTRegressor(self):
+    def test_cuasalml_MLPTRegressor(self, init_data):
         # Defined a linear dataset with a given set of properties
-        data = init_data()
+        data = init_data
 
         # Create a model that captures the same
         model = CausalModel(
@@ -126,9 +128,9 @@ class TestCausalmlEstimator:
         print("The MLPT estimate obtained:")
         print(mlpt_estimate)
 
-    def test_cuasalml_XLearner(self):
+    def test_cuasalml_XLearner(self, init_data):
         # Defined a linear dataset with a given set of properties
-        data = init_data()
+        data = init_data
 
         # Create a model that captures the same
         model = CausalModel(
@@ -156,9 +158,9 @@ class TestCausalmlEstimator:
         print("The X Learner estimate obtained:")
         print(xl_estimate)
 
-    def test_cuasalml_RLearner(self):
+    def test_cuasalml_RLearner(self, init_data):
         # Defined a linear dataset with a given set of properties
-        data = init_data()
+        data = init_data
 
         # Create a model that captures the same
         model = CausalModel(
