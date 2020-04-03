@@ -2,8 +2,7 @@ import inspect
 import numpy as np
 import pandas as pd
 
-from dowhy.causal_estimator import CausalEstimate
-from dowhy.causal_estimator import CausalEstimator
+from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from importlib import import_module
 import causalml
 
