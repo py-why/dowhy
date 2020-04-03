@@ -40,7 +40,7 @@ class TestCausalmlEstimator:
         To test the basic functionality of the CausalML estimators
     '''
     
-    def test_LRSRegressor(self):
+    def test_cuasalml_LRSRegressor(self):
         # Defined a linear dataset with a given set of properties
         data = init_data
 
@@ -67,7 +67,7 @@ class TestCausalmlEstimator:
         print("The LR estimate obtained:")
         print(lr_estimate)
 
-    def test_XGBTRegressor(self):
+    def test_cuasalml_XGBTRegressor(self):
         # Defined a linear dataset with a given set of properties
         data = init_data
 
@@ -94,7 +94,7 @@ class TestCausalmlEstimator:
         print("The XGBT estimate obtained:")
         print(xgbt_estimate)
 
-    def test_MLPTRegressor(self):
+    def test_cuasalml_MLPTRegressor(self):
         # Defined a linear dataset with a given set of properties
         data = init_data
 
@@ -126,7 +126,7 @@ class TestCausalmlEstimator:
         print("The MLPT estimate obtained:")
         print(mlpt_estimate)
 
-    def test_XLearner(self):
+    def test_cuasalml_XLearner(self):
         # Defined a linear dataset with a given set of properties
         data = init_data
 
@@ -156,7 +156,7 @@ class TestCausalmlEstimator:
         print("The X Learner estimate obtained:")
         print(xl_estimate)
 
-    def test_RLearner(self):
+    def test_cuasalml_RLearner(self):
         # Defined a linear dataset with a given set of properties
         data = init_data
 
@@ -175,7 +175,7 @@ class TestCausalmlEstimator:
         )
 
         rl_estimate = None
-        
+
         try:
             rl_estimate = model.estimate_effect(
                 identified_estimand,
