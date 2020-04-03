@@ -19,10 +19,11 @@ except ImportError:
     except subprocess.CalledProcessError:
         installed_failed = True
 
+
 @pytest.mark.skipif(installed_failed, reason="CausalML was not installed successfully")
 class TestCausalMLEstimator:
     '''
-        To test the basic functionality of the CauslML estimators
+        To test the basic functionality of the CausalML estimators
     '''
     
     def test_LRSRegressor(self):
