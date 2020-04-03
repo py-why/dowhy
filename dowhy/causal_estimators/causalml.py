@@ -70,9 +70,11 @@ class Causalml(CausalEstimator):
         X_names = self._instrumental_variable_names + \
                 self._observed_common_causes_names + \
                 self._effect_modifier_names
-
-        y_name = self._outcome_name # We need to make sure that both are pd.Series, so we take the first element
+        
+        # Both the outcome and the treatment have to be 1D arrays according to the CausalML API
+        y_name = self._outcome_name 
         treatment_name = self._treatment_name[0] # As we have only one treatment variable
+        # We want to pass 'v0' rather than ['v0'] to prevent a shape mismatch
         
         func_args={
             'X':self._data[X_names],
