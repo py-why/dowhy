@@ -34,7 +34,7 @@ def init_data():
     return data
 
 @pytest.mark.skipif(installed_failed, reason="CausalML was not installed successfully")
-class TestCausalMLEstimator:
+class TestCausalmlEstimator:
     '''
         To test the basic functionality of the CausalML estimators
     '''
