@@ -14,7 +14,7 @@ except ImportError:
     try:
         subprocess.check_call([sys.executable, "-m", "pip", "install", "causalml"])
         __import__("causalml")
-        # We import this later as we obtained this from causalml
+        # We import XGBRegressor later as we obtained this from causalml
         from xgboost import XGBRegressor
     except subprocess.CalledProcessError:
         is_causalml_installed = False
