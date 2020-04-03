@@ -83,7 +83,6 @@ class Causalml(CausalEstimator):
         }
 
         arg_names = inspect.getfullargspec(self.estimator.estimate_ate)[0]
-        # pdb.set_trace()
         matched_args = {
             arg: func_args[arg] for arg in func_args.keys() if arg in arg_names 
         }
