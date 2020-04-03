@@ -101,6 +101,7 @@ class Causalml(CausalEstimator):
     def construct_symbolic_estimator(self, estimand):
         expr = "b: " + ",".join(estimand.outcome_variable) + "~"
         # TODO we are conditioning on a postive treatment
+        # TODO create an expression corresponding to each estimator used
         var_list = estimand.treatment_variable + estimand.backdoor_variables
         expr += "+".join(var_list)
         return expr
