@@ -25,7 +25,7 @@ class Causalml(CausalEstimator):
         if self._observed_common_causes_names:
             # Get the data of the unobserved confounders
             self._observed_common_causes = self._data[self._observed_common_causes_names]
-            # One hot encode the data if they are cateogorical
+            # One hot encode the data if they are categorical
             self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
         else:
             self._observed_common_causes = []
@@ -50,7 +50,6 @@ class Causalml(CausalEstimator):
         # Get the class corresponding the the estimator to be used
         estimator_class = self._get_causalml_class_object(self._causalml_methodname)
         # Initialize the object
-        # pdb.set_trace()
         self.estimator = estimator_class(**self.method_params["init_params"])
         self.logger.info("INFO: Using CausalML Estimator")
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
