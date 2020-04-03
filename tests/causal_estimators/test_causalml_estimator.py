@@ -5,21 +5,26 @@ import sys
 from dowhy import CausalModel
 from dowhy.datasets import linear_dataset
 
+# To skip the tests if we cannot install causalml
+installed_failed = False
 # Hack to install causalml if not already present
 try:
     __import__("causalml")
 except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "causalml"])
-finally:
-    __import__("causalml")
-# We import this later as we obtained this from causalml
-from xgboost import XGBRegressor
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "causalml"])
+        __import__("causalml")
+        # We import this later as we obtained this from causalml
+        from xgboost import XGBRegressor
+    except subprocess.CalledProcessError:
+        installed_failed = True
 
 class TestCausalMLEstimator:
     '''
         To test the basic functionality of the CauslML estimators
     '''
-
+    
+    @pytest.mark.skipif(installed_failed)
     def test_LRSRegressor(self):
         # Defined a linear dataset with a given set of properties
         data = linear_dataset(
@@ -55,6 +60,7 @@ class TestCausalMLEstimator:
         print("The LR estimate obtained:")
         print(lr_estimate)
 
+    @pytest.mark.skipif(installed_failed)
     def test_XGBTRegressor(self):
         # Defined a linear dataset with a given set of properties
         data = linear_dataset(
@@ -90,6 +96,7 @@ class TestCausalMLEstimator:
         print("The XGBT estimate obtained:")
         print(xgbt_estimate)
 
+    @pytest.mark.skipif(installed_failed)
     def test_MLPTRegressor(self):
         # Defined a linear dataset with a given set of properties
         data = linear_dataset(
@@ -130,6 +137,7 @@ class TestCausalMLEstimator:
         print("The MLPT estimate obtained:")
         print(mlpt_estimate)
 
+    @pytest.mark.skipif(installed_failed)
     def test_XLearner(self):
         # Defined a linear dataset with a given set of properties
         data = linear_dataset(
@@ -168,6 +176,7 @@ class TestCausalMLEstimator:
         print("The X Learner estimate obtained:")
         print(xl_estimate)
 
+    @pytest.mark.skipif(installed_failed)
     def test_RLearner(self):
         # Defined a linear dataset with a given set of properties
         data = linear_dataset(
