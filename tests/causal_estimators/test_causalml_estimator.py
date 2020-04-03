@@ -19,16 +19,9 @@ except ImportError:
     except subprocess.CalledProcessError:
         installed_failed = True
 
-
-@pytest.mark.skipif(installed_failed, reason="CausalML was not installed successfully")
-class TestCausalMLEstimator:
-    '''
-        To test the basic functionality of the CausalML estimators
-    '''
-    
-    def test_LRSRegressor(self):
-        # Defined a linear dataset with a given set of properties
-        data = linear_dataset(
+@pytest.fixture
+def init_data():
+    data = linear_dataset(
             beta=10,
             num_common_causes=4,
             num_instruments=2,
@@ -37,6 +30,18 @@ class TestCausalMLEstimator:
             num_samples=1000,
             treatment_is_binary=True
         )
+    
+    return data
+
+@pytest.mark.skipif(installed_failed, reason="CausalML was not installed successfully")
+class TestCausalMLEstimator:
+    '''
+        To test the basic functionality of the CausalML estimators
+    '''
+    
+    def test_LRSRegressor(self, init_data):
+        # Defined a linear dataset with a given set of properties
+        data = init_data
 
         # Create a model that captures the same
         model = CausalModel(
@@ -61,17 +66,9 @@ class TestCausalMLEstimator:
         print("The LR estimate obtained:")
         print(lr_estimate)
 
-    def test_XGBTRegressor(self):
+    def test_XGBTRegressor(self, init_data):
         # Defined a linear dataset with a given set of properties
-        data = linear_dataset(
-            beta=10,
-            num_common_causes=4,
-            num_instruments=2,
-            num_effect_modifiers=2,
-            num_treatments=1,
-            num_samples=1000,
-            treatment_is_binary=True
-        )
+        data = init_data
 
         # Create a model that captures the same
         model = CausalModel(
@@ -96,17 +93,9 @@ class TestCausalMLEstimator:
         print("The XGBT estimate obtained:")
         print(xgbt_estimate)
 
-    def test_MLPTRegressor(self):
+    def test_MLPTRegressor(self, init_data):
         # Defined a linear dataset with a given set of properties
-        data = linear_dataset(
-            beta=10,
-            num_common_causes=4,
-            num_instruments=2,
-            num_effect_modifiers=2,
-            num_treatments=1,
-            num_samples=1000,
-            treatment_is_binary=True
-        )
+        data = init_data
 
         # Create a model that captures the same
         model = CausalModel(
@@ -136,17 +125,9 @@ class TestCausalMLEstimator:
         print("The MLPT estimate obtained:")
         print(mlpt_estimate)
 
-    def test_XLearner(self):
+    def test_XLearner(self, init_data):
         # Defined a linear dataset with a given set of properties
-        data = linear_dataset(
-            beta=10,
-            num_common_causes=4,
-            num_instruments=2,
-            num_effect_modifiers=2,
-            num_treatments=1,
-            num_samples=1000,
-            treatment_is_binary=True
-        )
+        data = init_data
 
         # Create a model that captures the same
         model = CausalModel(
@@ -174,17 +155,9 @@ class TestCausalMLEstimator:
         print("The X Learner estimate obtained:")
         print(xl_estimate)
 
-    def test_RLearner(self):
+    def test_RLearner(self, init_data):
         # Defined a linear dataset with a given set of properties
-        data = linear_dataset(
-            beta=10,
-            num_common_causes=4,
-            num_instruments=2,
-            num_effect_modifiers=2,
-            num_treatments=1,
-            num_samples=1000,
-            treatment_is_binary=True
-        )
+        data = init_data
 
         # Create a model that captures the same
         model = CausalModel(
