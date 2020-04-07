@@ -17,7 +17,9 @@ class CausalEstimator:
     # The default number of simulations to obtain confidence intervals
     DEFAULT_NUMBER_OF_SIMULATIONS_CI = 100
     # The portion of the total size that should be taken each time to find the confidence interval
-    DEFAULT_SAMPLE_SIZE = 0.8
+    # 1 is the recommended value 
+    # https://ocw.mit.edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings/MIT18_05S14_Reading24.pdf
+    DEFAULT_SAMPLE_SIZE = 1
 
     def __init__(self, data, identified_estimand, treatment, outcome,
                  control_value=0, treatment_value=1,
@@ -160,6 +162,45 @@ class CausalEstimator:
 
     def construct_symbolic_estimator(self, estimand):
         raise NotImplementedError
+
+    def get_confidence_intervals(self, estimate):
+        '''
+            Find the confidence intervals corresponding to any estimator
+
+            This is done with the help of bootstrapping
+
+        '''
+
+        simulation_results = np.zeros(self.num_ci_simulations)
+        # Find the praportion
+        sample_size = int( self.sample_size * len(self._data) )
+
+        if samples_size > len(self._data):
+            self.logger.warning("WARN: The sample size is greater than the population being sampled")
+        
+        self.logger.info("INFO: The sample size: {}".format(sample_size) )
+        self.logger.info("INFO: The number of simulations: {}".format(self.num_ci_simulations) )
+        
+        # Perform the set number of simulations
+        for index in range(self.num_ci_simulations):
+            new_data = resample(self._data,n_samples=sample_size)
+
+            new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
+            new_effect = estimator.estimate_effect()
+            simulation_results[index] = new_effect.value
+        
+        # Now use the data obtained from the simulations to get the value of the confidence estimates
+        # Sort the simulations
+        simulation_results.sort()
+        # Now we take the 5th and the 95th values
+        lower_bound_index = int( 0.05 * len(simulation_results) ) 
+        upper_bound_index = int( 0.95 * len(simulation_results) )
+        
+        # get the values
+        lower_bound = simulation_results[lower_bound_index]
+        upper_bound = simulation_results[upper_bound_index]
+
+        return (lower_bound, upper_bound)
 
     def test_significance(self, estimate, num_simulations=None):
         """Test statistical significance of obtained estimate.
