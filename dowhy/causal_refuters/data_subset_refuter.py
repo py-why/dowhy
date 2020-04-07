@@ -1,4 +1,5 @@
 from dowhy.causal_refuter import CausalRefuter, CausalRefutation
+from dawhy.causal_estimator import CausalEstimator
 import numpy as np
 import logging
 
@@ -43,7 +44,7 @@ class DataSubsetRefuter(CausalRefuter):
                 new_data = self._data.sample(frac=self._subset_fraction,
                                             random_state=self._random_state)
                                             
-            new_estimator = self.get_estimator_object(new_data, self._target_estimand, self._estimate)
+            new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
             sample_estimates[index] = new_effect.value
 

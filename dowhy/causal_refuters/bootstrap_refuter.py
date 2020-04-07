@@ -1,4 +1,5 @@
 from dowhy.causal_refuter import CausalRefuter, CausalRefutation
+from dowhy.causal_estimator import CausalEstimator
 import numpy as np
 from sklearn.utils import resample
 import logging
@@ -47,7 +48,7 @@ class BootstrapRefuter(CausalRefuter):
                                     n_samples=self._sample_size,
                                     random_state=self._random_state )
 
-            new_estimator = self.get_estimator_object(new_data, self._target_estimand, self._estimate)
+            new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
             sample_estimates[index] = new_effect.value
 

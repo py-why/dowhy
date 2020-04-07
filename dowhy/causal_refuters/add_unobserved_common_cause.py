@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
-
+from dowhy.causal_estimator import CausalEstimator
 
 class AddUnobservedCommonCause(CausalRefuter):
 
@@ -59,7 +59,7 @@ class AddUnobservedCommonCause(CausalRefuter):
             new_data = copy.deepcopy(self._data)
             new_data = self.include_confounders_effect(new_data, self.kappa_t, self.kappa_y)
 
-            new_estimator = self.get_estimator_object(new_data, self._target_estimand, self._estimate)
+            new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
             refute = CausalRefutation(self._estimate.value, new_effect.value,
                                     refutation_type="Refute: Add an Unobserved Common Cause")

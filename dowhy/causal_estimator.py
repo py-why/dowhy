@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import sympy as sp
 
+from sklearn.utils import resample
 
 class CausalEstimator:
     """Base class for an estimator of causal effect.
@@ -11,6 +12,12 @@ class CausalEstimator:
     Subclasses implement different estimation methods. All estimation methods are in the package "dowhy.causal_estimators"
 
     """
+    # The default number of simulations for statistical testing
+    DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST = 1000
+    # The default number of simulations to obtain confidence intervals
+    DEFAULT_NUMBER_OF_SIMULATIONS_CI = 100
+    # The portion of the total size that should be taken each time to find the confidence interval
+    DEFAULT_SAMPLE_SIZE = 0.8
 
     def __init__(self, data, identified_estimand, treatment, outcome,
                  control_value=0, treatment_value=1,
@@ -53,14 +60,24 @@ class CausalEstimator:
         self._estimate = None
         self._effect_modifiers = None
         self.method_params = params
+
+        # Unpacking the keyword arguments
         if params is not None:
             for key, value in params.items():
                 setattr(self, key, value)
 
+        
+        self.logger = logging.getLogger(__name__)
+
         # Checking if some parameters were set, otherwise setting to default values
         if not hasattr(self, 'num_simulations'):
-            self.num_simulations = 1000
-        self.logger = logging.getLogger(__name__)
+            self.num_simulations = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST
+
+        if not hasattr(self, 'num_ci_simulations') and self._confidence_intervals:
+            self.num_ci_simulations = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI
+
+        if not hasattr(self, 'sample_size') and self._confidence_intervals:
+            self.sample_size = CausalEstimator.DEFAULT_SAMPLE_SIZE
 
         # Setting more values
         if self._data is not None:
@@ -73,6 +90,22 @@ class CausalEstimator:
             self._effect_modifiers = pd.get_dummies(self._effect_modifiers, drop_first=True)
             self.logger.debug("Effect modifiers: " +
                           ",".join(self._effect_modifier_names))
+    
+    @staticmethod
+    def get_estimator_object(new_data, identified_estimand, estimate):
+        estimator_class = estimate.params['estimator_class']
+        new_estimator = estimator_class(
+                new_data,
+                identified_estimand,
+                identified_estimand.treatment_variable, identified_estimand.outcome_variable, #names of treatment and outcome
+                test_significance=None,
+                evaluate_effect_strength=False,
+                confidence_intervals = estimate.params["confidence_intervals"],
+                target_units = estimate.params["target_units"],
+                effect_modifiers = estimate.params["effect_modifiers"],
+                params = estimate.params["method_params"]
+                )
+        return new_estimator
 
     def _estimate_effect(self):
         raise NotImplementedError
@@ -95,6 +128,8 @@ class CausalEstimator:
         if self._significance_test:
             signif_dict = self.test_significance(est)
             est.add_significance_test_results(signif_dict)
+        if self._confidence_intervals:
+            self.get_confidence_intervals(est)
         if self._effect_strength_eval:
             effect_strength_dict = self.evaluate_effect_strength(est)
             est.add_effect_strength(effect_strength_dict)
