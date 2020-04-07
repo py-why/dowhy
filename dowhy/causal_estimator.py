@@ -186,7 +186,7 @@ class CausalEstimator:
             new_data = resample(self._data,n_samples=sample_size)
 
             new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
-            new_effect = estimator.estimate_effect()
+            new_effect = new_estimator.estimate_effect()
             simulation_results[index] = new_effect.value
         
         # Now use the data obtained from the simulations to get the value of the confidence estimates
