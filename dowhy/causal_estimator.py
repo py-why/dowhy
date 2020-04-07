@@ -149,7 +149,8 @@ class CausalEstimator:
             signif_dict = self.test_significance(est)
             est.add_significance_test_results(signif_dict)
         if self._confidence_intervals:
-            self.get_confidence_intervals(est)
+            confidence_intervals = self.get_confidence_intervals(est)
+            est.add_confidence_intervals(confidence_intervals)
         if self._effect_strength_eval:
             effect_strength_dict = self.evaluate_effect_strength(est)
             est.add_effect_strength(effect_strength_dict)
@@ -311,6 +312,9 @@ class CausalEstimate:
 
     def add_significance_test_results(self, test_results):
         self.significance_test = test_results
+
+    def add_confidence_intervals(self, confidence_intervals):
+        self.confidence_intervals = confidence_intervals
 
     def add_effect_strength(self, strength_dict):
         self.effect_strength = strength_dict
