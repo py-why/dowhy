@@ -95,6 +95,23 @@ class CausalEstimator:
     
     @staticmethod
     def get_estimator_object(new_data, identified_estimand, estimate):
+        '''
+            This method is used to create a new estimator, of the same type as the
+            one passed in the estimate argument. It then attempts to create a new object
+            with the new_data and the identified_estimand
+
+            Parameters
+            -----------
+
+            'new_data': np.ndarray, pd.Series, pd.DataFrame 
+            The newly assigned data on which the estimator should run
+
+            'identified_estimand': IdentifiedEstimand
+            An instance of the identified estimand class that provides the information with 
+            respect to which causal pathways are employed when the treatment effects the outcome
+            'estimate': CausalEstimate
+            It is an already existing estimator whose properties we wish to replicate
+        '''
         estimator_class = estimate.params['estimator_class']
         new_estimator = estimator_class(
                 new_data,
@@ -109,6 +126,7 @@ class CausalEstimator:
                 )
         return new_estimator
 
+    # This method is to be overriden by the child classes, so that they can run the estimation technique of their choice
     def _estimate_effect(self):
         raise NotImplementedError
 
@@ -166,16 +184,19 @@ class CausalEstimator:
     def get_confidence_intervals(self, estimate):
         '''
             Find the confidence intervals corresponding to any estimator
+            This is done with the help of bootstrapped confidence intervals
 
-            This is done with the help of bootstrapping
-
+            For more details, refer to the following link:
+            https://ocw.mit.edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings/MIT18_05S14_Reading24.pdf
         '''
 
+        # The array that stores the results of all estimations
         simulation_results = np.zeros(self.num_ci_simulations)
-        # Find the praportion
+
+        # Find the sample size the praportion with the population size
         sample_size = int( self.sample_size * len(self._data) )
 
-        if samples_size > len(self._data):
+        if sample_size > len(self._data):
             self.logger.warning("WARN: The sample size is greater than the population being sampled")
         
         self.logger.info("INFO: The sample size: {}".format(sample_size) )
