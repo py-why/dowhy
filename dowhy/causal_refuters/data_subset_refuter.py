@@ -1,5 +1,5 @@
 from dowhy.causal_refuter import CausalRefuter, CausalRefutation
-from dawhy.causal_estimator import CausalEstimator
+from dowhy.causal_estimator import CausalEstimator
 import numpy as np
 import logging
 
