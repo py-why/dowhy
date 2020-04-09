@@ -144,9 +144,13 @@ class BootstrapRefuter(CausalRefuter):
             self._chosen_variables = self._target_estimand.backdoor_variables[:self._required_variables]
         elif type(self._required_variables) is list:
             self._chosen_variables = self._required_variables
+            
 
-        self.logger.info("INFO: The chosen variables are: " +
-                        ",".join(self._chosen_variables))
+        if self._chosen_variables is None:
+            self.logger.info("INFO: There are no chosen variables")
+        else:    
+            self.logger.info("INFO: The chosen variables are: " +
+                            ",".join(self._chosen_variables))
 
     def get_mask_variables(self):
         '''

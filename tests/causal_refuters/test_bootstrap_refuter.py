@@ -34,7 +34,7 @@ class TestDataSubsetRefuter(object):
         refuter_tester.continuous_treatment_testsuite(num_common_causes=num_common_causes, tests_to_run="atleast-one-common-cause") # Run atleats one common cause
 
     @pytest.mark.parametrize(["error_tolerance","estimator_method", "num_common_causes", "required_variables"],
-                              [(0.01, "iv.instrumental_variable", 5, ["X0","X1"])])
+                              [(0.01, "iv.instrumental_variable", 5, ["W0","W1"])])
     def test_refutation_bootstrap_refuter_continuous_list_argument(self, error_tolerance, estimator_method, num_common_causes, required_variables):
         refuter_tester = TestRefuter(error_tolerance,
                                      estimator_method,
@@ -43,7 +43,7 @@ class TestDataSubsetRefuter(object):
         refuter_tester.continuous_treatment_testsuite(num_common_causes=num_common_causes, tests_to_run="atleat-one-common-cause") # Run atleast one common cause
 
     @pytest.mark.parametrize(["error_tolerance", "estimator_method", "num_common_causes", "required_variables"],
-                             [(0.01, "backdoor.propensity_score_matching", 5, 3)])
+                             [(0.05, "backdoor.propensity_score_matching", 5, 3)])
     def test_refutation_bootstrap_refuter_binary_integer_argument(self, error_tolerance, estimator_method, num_common_causes, required_variables):
         refuter_tester = TestRefuter(error_tolerance, 
                                      estimator_method,
@@ -52,7 +52,7 @@ class TestDataSubsetRefuter(object):
         refuter_tester.binary_treatment_testsuite(num_common_causes=num_common_causes, tests_to_run="atleast-one-common-cause")
     
     @pytest.mark.parametrize(["error_tolerance", "estimator_method", "num_common_causes", "required_variables"],
-                             [(0.01, "backdoor.propensity_score_matching",5, ["X0", "X1"])])
+                             [(0.05, "backdoor.propensity_score_matching",5, ["W0", "W1"])])
     def test_refutation_bootstrap_refuter_binary_list_argument(self, error_tolerance, estimator_method, num_common_causes, required_variables):
         refuter_tester = TestRefuter(error_tolerance,
                                      estimator_method, 
