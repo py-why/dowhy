@@ -27,7 +27,7 @@ class CausalEstimator:
     def __init__(self, data, identified_estimand, treatment, outcome,
                  control_value=0, treatment_value=1,
                  test_significance=False, evaluate_effect_strength=False,
-                 confidence_interval = False,
+                 confidence_intervals = False,
                  target_units=None, effect_modifiers=None,
                  params=None):
         """Initializes an estimator with data and names of relevant variables.
