@@ -6,8 +6,14 @@ import logging
 
 class BootstrapRefuter(CausalRefuter):
     """
-    Refute an estimate by running it on a random sample of the original data.
+    Refute an estimate by running it on a random sample of the data containing measurement error in the 
+    confounders. This allows us to find the ability of the estimator to find the effect of the 
+    treatment on the outcome.
+    
     It supports additional parameters that can be specified in the refute_estimate() method.
+    
+    Parameters
+    -----------
     -'num_simulations': int, CausalRefuter.DEFAULT_NUM_SIMULATIONS by default
     The number of simulations to be run
     - 'sample_size': int, Size of the original data by default
