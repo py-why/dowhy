@@ -14,9 +14,9 @@ class CausalEstimator:
     """
     # The default number of simulations for statistical testing
     DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST = 1000
-    # The default number of simulations to obtain confidence interval
+    # The default number of simulations to obtain confidence intervals
     DEFAULT_NUMBER_OF_SIMULATIONS_CI = 100
-    # The portion of the total size that should be taken each time to find the confidence interval
+    # The portion of the total size that should be taken each time to find the confidence intervals
     # 1 is the recommended value 
     # https://ocw.mit.edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings/MIT18_05S14_Reading24.pdf
     # https://projecteuclid.org/download/pdf_1/euclid.ss/1032280214 
@@ -129,7 +129,7 @@ class CausalEstimator:
                 identified_estimand.treatment_variable, identified_estimand.outcome_variable, #names of treatment and outcome
                 test_significance=None,
                 evaluate_effect_strength=False,
-                confidence_interval = estimate.params["confidence_interval"],
+                confidence_interval = estimate.params["confidence_intervals"],
                 target_units = estimate.params["target_units"],
                 effect_modifiers = estimate.params["effect_modifiers"],
                 params = estimate.params["method_params"]
@@ -148,7 +148,7 @@ class CausalEstimator:
 
         Can optionally also test significance and estimate effect strength for any returned estimate.
 
-        TODO: Enable methods to return a confidence interval in addition to the point estimate.
+        TODO: Enable methods to return a confidence intervals in addition to the point estimate.
 
         :param self: object instance of class Estimator
         :returns: point estimate of causal effect
@@ -162,8 +162,8 @@ class CausalEstimator:
             signif_dict = self.test_significance(est)
             est.add_significance_test_results(signif_dict)
         if self._confidence_intervals:
-            confidence_interval = self.get_confidence_interval(est)
-            est.add_confidence_interval(confidence_interval)
+            confidence_intervals = self.get_confidence_intervals(est)
+            est.add_confidence_intervals(confidence_intervals)
         if self._effect_strength_eval:
             effect_strength_dict = self.evaluate_effect_strength(est)
             est.add_effect_strength(effect_strength_dict)
@@ -195,17 +195,17 @@ class CausalEstimator:
     def construct_symbolic_estimator(self, estimand):
         raise NotImplementedError
 
-    def get_confidence_interval(self, estimate, num_ci_simulations = None, sample_size_fraction = None, confidence_level = None):
+    def get_confidence_intervals(self, estimate, num_ci_simulations = None, sample_size_fraction = None, confidence_level = None):
         '''
-            Find the confidence interval corresponding to any estimator
-            This is done with the help of bootstrapped confidence interval
+            Find the confidence intervals corresponding to any estimator
+            This is done with the help of bootstrapped confidence intervals
 
             This function can be overriden by any function that inherits this method. So, that they can implement their own way of finding confidence intervals.
 
             :param estimate: The obtained estimate.
-            :param num_ci_simulations: The number of simulations to be performed to get the bootstrap confidence interval.
+            :param num_ci_simulations: The number of simulations to be performed to get the bootstrap confidence intervals.
             :param sample_size_fraction: The fraction of the dataset to be resampled.
-            :param confidence_level: The confidence level of the confidence interval of the estimate.
+            :param confidence_level: The confidence level of the confidence intervals of the estimate.
             
             For more details, refer to the following links:
             https://ocw.mit.edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings/MIT18_05S14_Reading24.pdf
@@ -343,8 +343,8 @@ class CausalEstimate:
     def add_significance_test_results(self, test_results):
         self.significance_test = test_results
 
-    def add_confidence_interval(self, confidence_interval):
-        self.confidence_interval = confidence_interval
+    def add_confidence_intervals(self, confidence_intervals):
+        self.confidence_intervals = confidence_intervals
 
     def add_effect_strength(self, strength_dict):
         self.effect_strength = strength_dict
