@@ -14,7 +14,7 @@ class CausalEstimator:
     """
     # The default number of simulations for statistical testing
     DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST = 1000
-    # The default number of simulations to obtain confidence intervals
+    # The default number of simulations to obtain confidence interval
     DEFAULT_NUMBER_OF_SIMULATIONS_CI = 100
     # The portion of the total size that should be taken each time to find the confidence interval
     # 1 is the recommended value 
@@ -23,10 +23,11 @@ class CausalEstimator:
     DEFAULT_SAMPLE_SIZE_FRACTION = 1
     # The default Confidence Level
     DEFAULT_CONFIDENCE_LEVEL = 0.05
+
     def __init__(self, data, identified_estimand, treatment, outcome,
                  control_value=0, treatment_value=1,
                  test_significance=False, evaluate_effect_strength=False,
-                 confidence_intervals = False,
+                 confidence_interval = False,
                  target_units=None, effect_modifiers=None,
                  params=None):
         """Initializes an estimator with data and names of relevant variables.
@@ -42,7 +43,7 @@ class CausalEstimator:
         :param treatment_value: Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.
         :param test_significance: whether to test significance
         :param evaluate_effect_strength: (Experimental) whether to evaluate the strength of effect
-        :param confidence_intervals: (Experimental) Binary flag indicating whether confidence intervals should be computed.
+        :param confidence_interval: (Experimental) Binary flag indicating whether the confidence interval should be computed.
         :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be a string for common specifications of target units (namely, "ate", "att" and "atc"). It can also be a lambda function that can be used as an index for the data (pandas DataFrame). Alternatively, it can be a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
         :param effect_modifiers: variables on which to compute separate effects, or return a heterogeneous effect function. Not all methods support this currently.
         :param params: (optional) additional method parameters
@@ -64,7 +65,7 @@ class CausalEstimator:
         self._effect_strength_eval = evaluate_effect_strength
         self._target_units = target_units
         self._effect_modifier_names = effect_modifiers
-        self._confidence_intervals = confidence_intervals
+        self._confidence_interval = confidence_interval
         self._estimate = None
         self._effect_modifiers = None
         self.method_params = params
@@ -81,13 +82,13 @@ class CausalEstimator:
         if not hasattr(self, 'num_simulations'):
             self.num_simulations = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST
 
-        if not hasattr(self, 'num_ci_simulations') and self._confidence_intervals:
+        if not hasattr(self, 'num_ci_simulations') and self._confidence_interval:
             self.num_ci_simulations = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI
 
-        if not hasattr(self, 'sample_size_fraction') and self._confidence_intervals:
+        if not hasattr(self, 'sample_size_fraction') and self._confidence_interval:
             self.sample_size_fraction = CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION
 
-        if not hasattr(self, 'confidence_level') and self._confidence_intervals:
+        if not hasattr(self, 'confidence_level') and self._confidence_interval:
             self.confidence_level = CausalEstimator.DEFAULT_CONFIDENCE_LEVEL
 
         # Setting more values
@@ -128,7 +129,7 @@ class CausalEstimator:
                 identified_estimand.treatment_variable, identified_estimand.outcome_variable, #names of treatment and outcome
                 test_significance=None,
                 evaluate_effect_strength=False,
-                confidence_intervals = estimate.params["confidence_intervals"],
+                confidence_interval = estimate.params["confidence_interval"],
                 target_units = estimate.params["target_units"],
                 effect_modifiers = estimate.params["effect_modifiers"],
                 params = estimate.params["method_params"]
@@ -160,9 +161,9 @@ class CausalEstimator:
         if self._significance_test:
             signif_dict = self.test_significance(est)
             est.add_significance_test_results(signif_dict)
-        if self._confidence_intervals:
-            confidence_intervals = self.get_confidence_intervals(est)
-            est.add_confidence_intervals(confidence_intervals)
+        if self._confidence_interval:
+            confidence_interval = self.get_confidence_interval(est)
+            est.add_confidence_interval(confidence_interval)
         if self._effect_strength_eval:
             effect_strength_dict = self.evaluate_effect_strength(est)
             est.add_effect_strength(effect_strength_dict)
@@ -194,10 +195,10 @@ class CausalEstimator:
     def construct_symbolic_estimator(self, estimand):
         raise NotImplementedError
 
-    def get_confidence_intervals(self, estimate):
+    def get_confidence_interval(self, estimate):
         '''
-            Find the confidence intervals corresponding to any estimator
-            This is done with the help of bootstrapped confidence intervals
+            Find the confidence interval corresponding to any estimator
+            This is done with the help of bootstrapped confidence interval
 
             For more details, refer to the following links:
             https://ocw.mit.edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings/MIT18_05S14_Reading24.pdf
@@ -326,8 +327,8 @@ class CausalEstimate:
     def add_significance_test_results(self, test_results):
         self.significance_test = test_results
 
-    def add_confidence_intervals(self, confidence_intervals):
-        self.confidence_intervals = confidence_intervals
+    def add_confidence_interval(self, confidence_interval):
+        self.confidence_interval = confidence_interval
 
     def add_effect_strength(self, strength_dict):
         self.effect_strength = strength_dict
