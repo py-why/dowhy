@@ -129,8 +129,11 @@ class CausalEstimator:
                 )
         return new_estimator
 
-    # This method is to be overriden by the child classes, so that they can run the estimation technique of their choice
+    
     def _estimate_effect(self):
+        '''
+            This method is to be overriden by the child classes, so that they can run the estimation technique of their choice
+        '''
         raise NotImplementedError
 
     def estimate_effect(self):
