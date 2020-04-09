@@ -129,7 +129,7 @@ class CausalEstimator:
                 identified_estimand.treatment_variable, identified_estimand.outcome_variable, #names of treatment and outcome
                 test_significance=None,
                 evaluate_effect_strength=False,
-                confidence_interval = estimate.params["confidence_interval"],
+                confidence_interval = estimate.params["confidence_intervals"],
                 target_units = estimate.params["target_units"],
                 effect_modifiers = estimate.params["effect_modifiers"],
                 params = estimate.params["method_params"]
