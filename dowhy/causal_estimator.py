@@ -195,30 +195,46 @@ class CausalEstimator:
     def construct_symbolic_estimator(self, estimand):
         raise NotImplementedError
 
-    def get_confidence_interval(self, estimate):
+    def get_confidence_interval(self, estimate, num_ci_simulations = None, sample_size_fraction = None, confidence_level = None):
         '''
             Find the confidence interval corresponding to any estimator
             This is done with the help of bootstrapped confidence interval
 
+            This function can be overriden by any function that inherits this method. So, that they can implement their own way of finding confidence intervals.
+
+            :param estimate: The obtained estimate.
+            :param num_ci_simulations: The number of simulations to be performed to get the bootstrap confidence interval.
+            :param sample_size_fraction: The fraction of the dataset to be resampled.
+            :param confidence_level: The confidence level of the confidence interval of the estimate.
+            
             For more details, refer to the following links:
             https://ocw.mit.edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings/MIT18_05S14_Reading24.pdf
             https://projecteuclid.org/download/pdf_1/euclid.ss/1032280214
         '''
 
+        # Use existing params, if new user defined params are not present
+        if num_ci_simulations is None:
+            num_ci_simulations = self.num_ci_simulations
+        if sample_size_fraction is None:
+            sample_size_fraction = self.sample_size_fraction
+        if confidence_level is None:
+            confidence_level = self.confidence_level
+        
+
         # The array that stores the results of all estimations
-        simulation_results = np.zeros(self.num_ci_simulations)
+        simulation_results = np.zeros(num_ci_simulations)
 
         # Find the sample size the proportion with the population size
-        sample_size= int( self.sample_size_fraction * len(self._data) )
+        sample_size= int( sample_size_fraction * len(self._data) )
 
         if sample_size > len(self._data):
             self.logger.warning("WARN: The sample size is greater than the data being sampled")
         
         self.logger.info("INFO: The sample size: {}".format(sample_size) )
-        self.logger.info("INFO: The number of simulations: {}".format(self.num_ci_simulations) )
+        self.logger.info("INFO: The number of simulations: {}".format(num_ci_simulations) )
         
         # Perform the set number of simulations
-        for index in range(self.num_ci_simulations):
+        for index in range(num_ci_simulations):
             new_data = resample(self._data,n_samples=sample_size)
 
             new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
@@ -229,8 +245,8 @@ class CausalEstimator:
         # Sort the simulations
         simulation_results.sort()
         # Now we take the pth and the (1-p)th values, where p is the chosen confidence level
-        lower_bound_index = int( self.confidence_level * len(simulation_results) ) 
-        upper_bound_index = int( (1 - self.confidence_level) * len(simulation_results) )
+        lower_bound_index = int( confidence_level * len(simulation_results) ) 
+        upper_bound_index = int( (1 - confidence_level) * len(simulation_results) )
         
         # get the values
         lower_bound = simulation_results[lower_bound_index]
