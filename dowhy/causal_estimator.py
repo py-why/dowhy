@@ -206,7 +206,7 @@ class CausalEstimator:
         sample_size= int( self.sample_size_fraction * len(self._data) )
 
         if sample_size > len(self._data):
-            self.logger.warning("WARN: The sample size is greater than the population being sampled")
+            self.logger.warning("WARN: The sample size is greater than the data being sampled")
         
         self.logger.info("INFO: The sample size: {}".format(sample_size) )
         self.logger.info("INFO: The number of simulations: {}".format(self.num_ci_simulations) )
