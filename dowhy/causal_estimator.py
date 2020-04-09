@@ -20,7 +20,7 @@ class CausalEstimator:
     # 1 is the recommended value 
     # https://ocw.mit.edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings/MIT18_05S14_Reading24.pdf
     # https://projecteuclid.org/download/pdf_1/euclid.ss/1032280214 
-    DEFAULT_SAMPLE_SIZE = 1
+    DEFAULT_SAMPLE_SIZE_FRACTION = 1
 
     def __init__(self, data, identified_estimand, treatment, outcome,
                  control_value=0, treatment_value=1,
@@ -47,7 +47,7 @@ class CausalEstimator:
         :param params: (optional) additional method parameters
             num_simulations: The number of simulations for testing the statistical significance of the estimator
             num_ci_simulations: The number os simulations for finding the confidence estimate for a estimate
-            sample_size: The size of the sample for the bootstrap estimator
+            sample_size_fraction: The size of the sample for the bootstrap estimator
         :returns: an instance of the estimator class.
 
         """
@@ -82,8 +82,8 @@ class CausalEstimator:
         if not hasattr(self, 'num_ci_simulations') and self._confidence_intervals:
             self.num_ci_simulations = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI
 
-        if not hasattr(self, 'sample_size') and self._confidence_intervals:
-            self.sample_size = CausalEstimator.DEFAULT_SAMPLE_SIZE
+        if not hasattr(self, 'sample_size_fraction') and self._confidence_intervals:
+            self.sample_size_fraction = CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION
 
         # Setting more values
         if self._data is not None:
@@ -202,8 +202,8 @@ class CausalEstimator:
         # The array that stores the results of all estimations
         simulation_results = np.zeros(self.num_ci_simulations)
 
-        # Find the sample size the praportion with the population size
-        sample_size = int( self.sample_size * len(self._data) )
+        # Find the sample size the proportion with the population size
+        sample_size= int( self.sample_size_fraction * len(self._data) )
 
         if sample_size > len(self._data):
             self.logger.warning("WARN: The sample size is greater than the population being sampled")
