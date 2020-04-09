@@ -145,6 +145,9 @@ class BootstrapRefuter(CausalRefuter):
         elif type(self._required_variables) is list:
             self._chosen_variables = self._required_variables
 
+        self.logger.info("INFO: The chosen variables are: " +
+                        ",".join(self._chosen_variables))
+
     def get_mask_variables(self):
         '''
             This function helps to create a mask that sets false for all values that have a value
