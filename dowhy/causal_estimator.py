@@ -44,6 +44,9 @@ class CausalEstimator:
         :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be a string for common specifications of target units (namely, "ate", "att" and "atc"). It can also be a lambda function that can be used as an index for the data (pandas DataFrame). Alternatively, it can be a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
         :param effect_modifiers: variables on which to compute separate effects, or return a heterogeneous effect function. Not all methods support this currently.
         :param params: (optional) additional method parameters
+            num_simulations: The number of simulations for testing the statistical significance of the estimator
+            num_ci_simulations: The number os simulations for finding the confidence estimate for a estimate
+            sample_size: The size of the sample for the bootstrap estimator
         :returns: an instance of the estimator class.
 
         """
