@@ -43,7 +43,7 @@ class CausalEstimator:
         :param treatment_value: Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.
         :param test_significance: whether to test significance
         :param evaluate_effect_strength: (Experimental) whether to evaluate the strength of effect
-        :param confidence_interval: (Experimental) Binary flag indicating whether the confidence interval should be computed.
+        :param confidence_intervals: (Experimental) Binary flag indicating whether the confidence intervals should be computed.
         :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be a string for common specifications of target units (namely, "ate", "att" and "atc"). It can also be a lambda function that can be used as an index for the data (pandas DataFrame). Alternatively, it can be a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
         :param effect_modifiers: variables on which to compute separate effects, or return a heterogeneous effect function. Not all methods support this currently.
         :param params: (optional) additional method parameters
@@ -65,7 +65,7 @@ class CausalEstimator:
         self._effect_strength_eval = evaluate_effect_strength
         self._target_units = target_units
         self._effect_modifier_names = effect_modifiers
-        self._confidence_interval = confidence_interval
+        self._confidence_intervals = confidence_intervals
         self._estimate = None
         self._effect_modifiers = None
         self.method_params = params
@@ -82,13 +82,13 @@ class CausalEstimator:
         if not hasattr(self, 'num_simulations'):
             self.num_simulations = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST
 
-        if not hasattr(self, 'num_ci_simulations') and self._confidence_interval:
+        if not hasattr(self, 'num_ci_simulations') and self._confidence_intervals:
             self.num_ci_simulations = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI
 
-        if not hasattr(self, 'sample_size_fraction') and self._confidence_interval:
+        if not hasattr(self, 'sample_size_fraction') and self._confidence_intervals:
             self.sample_size_fraction = CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION
 
-        if not hasattr(self, 'confidence_level') and self._confidence_interval:
+        if not hasattr(self, 'confidence_level') and self._confidence_intervals:
             self.confidence_level = CausalEstimator.DEFAULT_CONFIDENCE_LEVEL
 
         # Setting more values
@@ -161,7 +161,7 @@ class CausalEstimator:
         if self._significance_test:
             signif_dict = self.test_significance(est)
             est.add_significance_test_results(signif_dict)
-        if self._confidence_interval:
+        if self._confidence_intervals:
             confidence_interval = self.get_confidence_interval(est)
             est.add_confidence_interval(confidence_interval)
         if self._effect_strength_eval:
