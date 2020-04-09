@@ -21,7 +21,8 @@ class CausalEstimator:
     # https://ocw.mit.edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings/MIT18_05S14_Reading24.pdf
     # https://projecteuclid.org/download/pdf_1/euclid.ss/1032280214 
     DEFAULT_SAMPLE_SIZE_FRACTION = 1
-
+    # The default Confidence Level
+    DEFAULT_CONFIDENCE_LEVEL = 0.05
     def __init__(self, data, identified_estimand, treatment, outcome,
                  control_value=0, treatment_value=1,
                  test_significance=False, evaluate_effect_strength=False,
@@ -48,6 +49,7 @@ class CausalEstimator:
             num_simulations: The number of simulations for testing the statistical significance of the estimator
             num_ci_simulations: The number os simulations for finding the confidence estimate for a estimate
             sample_size_fraction: The size of the sample for the bootstrap estimator
+            confidence_level: The confidence level of the confidence interval estimate
         :returns: an instance of the estimator class.
 
         """
@@ -84,6 +86,9 @@ class CausalEstimator:
 
         if not hasattr(self, 'sample_size_fraction') and self._confidence_intervals:
             self.sample_size_fraction = CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION
+
+        if not hasattr(self, 'confidence_level') and self._confidence_intervals:
+            self.confidence_level = CausalEstimator.DEFAULT_CONFIDENCE_LEVEL
 
         # Setting more values
         if self._data is not None:
@@ -222,9 +227,9 @@ class CausalEstimator:
         # Now use the data obtained from the simulations to get the value of the confidence estimates
         # Sort the simulations
         simulation_results.sort()
-        # Now we take the 5th and the 95th values
-        lower_bound_index = int( 0.05 * len(simulation_results) ) 
-        upper_bound_index = int( 0.95 * len(simulation_results) )
+        # Now we take the pth and the (1-p)th values, where p is the chosen confidence level
+        lower_bound_index = int( self.confidence_level * len(simulation_results) ) 
+        upper_bound_index = int( (1 - self.confidence_level) * len(simulation_results) )
         
         # get the values
         lower_bound = simulation_results[lower_bound_index]
