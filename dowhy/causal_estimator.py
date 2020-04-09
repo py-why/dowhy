@@ -19,6 +19,7 @@ class CausalEstimator:
     # The portion of the total size that should be taken each time to find the confidence interval
     # 1 is the recommended value 
     # https://ocw.mit.edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings/MIT18_05S14_Reading24.pdf
+    # https://projecteuclid.org/download/pdf_1/euclid.ss/1032280214 
     DEFAULT_SAMPLE_SIZE = 1
 
     def __init__(self, data, identified_estimand, treatment, outcome,
@@ -193,8 +194,9 @@ class CausalEstimator:
             Find the confidence intervals corresponding to any estimator
             This is done with the help of bootstrapped confidence intervals
 
-            For more details, refer to the following link:
+            For more details, refer to the following links:
             https://ocw.mit.edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings/MIT18_05S14_Reading24.pdf
+            https://projecteuclid.org/download/pdf_1/euclid.ss/1032280214
         '''
 
         # The array that stores the results of all estimations
