@@ -19,7 +19,9 @@ class BootstrapRefuter(CausalRefuter):
     - 'sample_size': int, Size of the original data by default
     The size of each bootstrap sample
     - 'required_variables': int, list
-    An integer argument means that we select a select number of covariates out of all covariates
+    A user can input either an integer value or a list.
+        1. An integer argument refers to how many confounders  will be modified
+        2. A list allows the user to explicitly refer to which confounders should be seleted to be made noisy
     - 'noise': float, BootstrapRefuter.DEFAULT_STD_DEV by default
     The standard deviation of the noise to be added to the data
     - 'random_state': int, RandomState, None by default
