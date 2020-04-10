@@ -22,7 +22,7 @@ class CausalEstimator:
     # https://projecteuclid.org/download/pdf_1/euclid.ss/1032280214 
     DEFAULT_SAMPLE_SIZE_FRACTION = 1
     # The default Confidence Level
-    DEFAULT_CONFIDENCE_LEVEL = 0.05
+    DEFAULT_CONFIDENCE_LEVEL = 0.95
 
     def __init__(self, data, identified_estimand, treatment, outcome,
                  control_value=0, treatment_value=1,
@@ -129,7 +129,7 @@ class CausalEstimator:
                 identified_estimand.treatment_variable, identified_estimand.outcome_variable, #names of treatment and outcome
                 test_significance=None,
                 evaluate_effect_strength=False,
-                confidence_interval = estimate.params["confidence_intervals"],
+                confidence_intervals = estimate.params["confidence_intervals"],
                 target_units = estimate.params["target_units"],
                 effect_modifiers = estimate.params["effect_modifiers"],
                 params = estimate.params["method_params"]
@@ -244,9 +244,9 @@ class CausalEstimator:
         # Now use the data obtained from the simulations to get the value of the confidence estimates
         # Sort the simulations
         simulation_results.sort()
-        # Now we take the pth and the (1-p)th values, where p is the chosen confidence level
-        lower_bound_index = int( confidence_level * len(simulation_results) ) 
-        upper_bound_index = int( (1 - confidence_level) * len(simulation_results) )
+        # Now we take the (1- p)th and the (p)th values, where p is the chosen confidence level
+        lower_bound_index = int( ( 1 - confidence_level ) * len(simulation_results) ) 
+        upper_bound_index = int( confidence_level * len(simulation_results) )
         
         # get the values
         lower_bound = simulation_results[lower_bound_index]
