@@ -53,8 +53,7 @@ class BootstrapRefuter(CausalRefuter):
                     len(self._target_estimand.backdoor_variables),
                     self._required_variables )
                 )
-                self.logger.warning("The bootstrap refuter will follow the default behavior")
-                self._required_variables = None
+                raise ValueError("The number of variables in the arguments is greater than the number of backdoor variables")
 
         elif self._required_variables is list:
             for variable in self._required_variables:
