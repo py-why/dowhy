@@ -94,7 +94,7 @@ class BootstrapRefuter(CausalRefuter):
                     if ('float' or 'int') in new_data[variable].dtype.name: 
                         new_data[variable] += np.random.randn(self._sample_size) * self._noise
                     
-                    elif 'bool' in new_data[variable]:
+                    elif 'bool' in new_data[variable].dtype.name:
                         change_mask = self.get_mask_variables()
                         # Set these values to zero
                         new_data[variable] *= change_mask
@@ -103,7 +103,7 @@ class BootstrapRefuter(CausalRefuter):
                                                                   BootstrapRefuter.DEFAULT_SUCCESS_PROBABILITY,
                                                                   self._sample_size).astype(bool) 
                     
-                    elif 'category' in new_data[variable]:
+                    elif 'category' in new_data[variable].dtype.name:
                         change_mask = self.get_mask_variables()
                         # Set these values to zero
                         new_data[variable] *= change_mask
