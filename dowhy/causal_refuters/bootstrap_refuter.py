@@ -45,7 +45,7 @@ class BootstrapRefuter(CausalRefuter):
             logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
         
-        # Sanity check the data passed by the user
+        # Sanity check the parameters passed by the user
         # If the data is invalid, we run the default behavior
         if self._required_variables is int:
             if len(self._target_estimand.backdoor_variables) < self._required_variables:
