@@ -56,7 +56,6 @@ class BootstrapRefuter(CausalRefuter):
             logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
         
-
         # Sanity check the parameters passed by the user
         # If the data is invalid, we run the default behavior
         if self._required_variables is int:
@@ -74,6 +73,9 @@ class BootstrapRefuter(CausalRefuter):
                     break
             raise ValueError("The variable selected by the User is not a confounder")
         
+        elif self._required_variables is None:
+            self.logger.info("No required variable. Resorting to Default Behavior")
+
         else:
             self.logger.warning("Incorrect type: {}. Expected an int or list".format( type(self._required_variables) ) )
             self._required_variables = None
