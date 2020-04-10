@@ -24,6 +24,8 @@ class BootstrapRefuter(CausalRefuter):
         2. A list allows the user to explicitly refer to which confounders should be seleted to be made noisy
     - 'noise': float, BootstrapRefuter.DEFAULT_STD_DEV by default
     The standard deviation of the noise to be added to the data
+    - 'probability_of_change': float, 'noise' by default
+    It specifies the probability with which we change the data for a boolean or categorical variable
     - 'random_state': int, RandomState, None by default
     The seed value to be added if we wish to repeat the same random behavior. For this purpose, 
     we repeat the same seed in the psuedo-random generator.
@@ -32,6 +34,7 @@ class BootstrapRefuter(CausalRefuter):
     DEFAULT_STD_DEV = 0.1
     DEFAULT_SUCCESS_PROBABILITY = 0.5
     DEFAULT_NUMBER_OF_TRIALS = 1
+    DEFAULT_FLIP_PROBABILITY = 0.5
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -39,7 +42,13 @@ class BootstrapRefuter(CausalRefuter):
         self._sample_size = kwargs.pop("sample_size", len(self._data))
         self._required_variables = kwargs.pop("required_variables", None)
         self._noise = kwargs.pop("noise", BootstrapRefuter.DEFAULT_STD_DEV )
+        self._probability_of_change = kwargs.pop("probability_of_change", None)
         self._random_state = kwargs.pop("random_state", None)
+
+        # Concatenate the confounders, instruments and effect modifiers
+        self._variables_of_interest = self._target_estimand.backdoor_variables + \
+                                      self._target_estimand.instrumental_variables + \
+                                      self._estimate.params['effect_modifiers']
 
         if 'logging_level' in kwargs:
             logging.basicConfig(level=kwargs['logging_level'])
@@ -47,6 +56,7 @@ class BootstrapRefuter(CausalRefuter):
             logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
         
+
         # Sanity check the parameters passed by the user
         # If the data is invalid, we run the default behavior
         if self._required_variables is int:
@@ -59,8 +69,9 @@ class BootstrapRefuter(CausalRefuter):
 
         elif self._required_variables is list:
             for variable in self._required_variables:
-                self.logger.error(variable in self._target_estimand.backdoor_variables), "The variable {} is not not a backdoor variable".format(variable)
-                break
+                if variable not in self._variables_of_interest:
+                    self.logger.error(variable in self._target_estimand.backdoor_variables), "The variable {} is not not a backdoor variable".format(variable)
+                    break
             raise ValueError("The variable selected by the User is not a confounder")
         
         else:
@@ -70,6 +81,17 @@ class BootstrapRefuter(CausalRefuter):
         
         self.choose_desired_variables()
 
+        if self._probability_of_change is None:
+            if self._noise > 1:
+                self.logger.warning("The probability of flip is: {}, However, this value cannot be greater than 1".format(self._noise))
+                self.logger.warning("Cannot use the value of noise. Setting to default value: {}".format(BootstrapRefuter.DEFAULT_FLIP_PROBABILITY))
+            else:
+                self._probability_of_change = self._noise
+        elif self._probability_of_change > 1:
+            self.logger.error("The probability of flip is: {}, However, this value cannot be greater than 1".format(self._probability_of_change))
+            raise ValueError("Probability of Flip cannor be greater than 1")
+
+    
     def refute_estimate(self, *args, **kwargs):
         if self._sample_size > len(self._data):
                 self.logger.warning("The sample size is larger than the population size")
@@ -92,24 +114,23 @@ class BootstrapRefuter(CausalRefuter):
             if self._chosen_variables is not None:
                 for variable in self._chosen_variables:
                     
-                    if ('float' or 'int') in new_data[variable].dtype.name: 
-                        new_data[variable] += np.random.randn(self._sample_size) * self._noise
+                    if ('float' or 'int') in new_data[variable].dtype.name:
+                        scaling_factor = new_data[variable].std() 
+                        new_data[variable] += np.random.randn(self._sample_size) * self._noise * scaling_factor
                     
                     elif 'bool' in new_data[variable].dtype.name:
-                        change_mask = self.get_mask_variables()
-                        # Set these values to zero
-                        new_data[variable] *= change_mask
-                        # Sample a binomial distribution and set the value for those datapoints we set to zero in the previous step
-                        new_data[variable] += (1 - change_mask) * np.random.binomial(BootstrapRefuter.DEFAULT_NUMBER_OF_TRIALS,
-                                                                  BootstrapRefuter.DEFAULT_SUCCESS_PROBABILITY,
-                                                                  self._sample_size).astype(bool) 
+                        probs = np.random.uniform(0, 1, self._sample_size )
+                        new_data[variable] = np.where(probs < self._probability_of_change, 
+                                                        np.logical_not(new_data[variable]), 
+                                                        new_data[variable]) 
                     
                     elif 'category' in new_data[variable].dtype.name:
-                        change_mask = self.get_mask_variables()
-                        # Set these values to zero
-                        new_data[variable] *= change_mask
-                        # Sample a binomial distribution and set the value for those datapoints we set to zero in the previous step
-                        new_data[variable] += (1 - change_mask) * np.random.choice(categories, size=self._sample_size)
+                        self.categories = new_data[variable].unique()
+                        # Find the set difference for each row
+                        changed_data = new_data[variable].apply(self.set_diff)
+                        # Chose one out of the remaining
+                        changed_data = changed_data.apply(self.choose_random)
+                        new_data[variable] = np.where(probs < self._probability_of_change, changed_data)
                         new_data[variable].astype('category')
 
             new_estimator = self.get_estimator_object(new_data, self._target_estimand, self._estimate)
@@ -152,13 +173,9 @@ class BootstrapRefuter(CausalRefuter):
             self.logger.info("INFO: The chosen variables are: " +
                             ",".join(self._chosen_variables))
 
-    def get_mask_variables(self):
-        '''
-            This function helps to create a mask that sets false for all values that have a value
-            smaller than the noise level set by the user.
-        '''
-        # Sample a uniform distribution for each data point
-        probs = np.random.uniform(0,1, self._sample_size)
-        # Find all the data points in which the value is smaller than equal to the value set by the user
-        change_mask = probs <= self._noise
-        return change_mask
+    def set_diff(self, row):
+        self.categories = set(self.categories)
+        return list( self.categories - set([row]) )
+
+    def choose_random(self, row):
+        return random.choice(row)
