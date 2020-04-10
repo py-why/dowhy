@@ -51,7 +51,7 @@ class BootstrapRefuter(CausalRefuter):
         # If the data is invalid, we run the default behavior
         if self._required_variables is int:
             if len(self._target_estimand.backdoor_variables) < self._required_variables:
-                self.logger.warning("Too many variables passed.\n The number of backdoor variables is: {}.\n The number of variables passed: {}".format(
+                self.logger.error("Too many variables passed.\n The number of backdoor variables is: {}.\n The number of variables passed: {}".format(
                     len(self._target_estimand.backdoor_variables),
                     self._required_variables )
                 )
@@ -59,10 +59,9 @@ class BootstrapRefuter(CausalRefuter):
 
         elif self._required_variables is list:
             for variable in self._required_variables:
-                self.logger.warning(variable in self._target_estimand.backdoor_variables), "The variable {} is not not a backdoor variable".format(variable)
+                self.logger.error(variable in self._target_estimand.backdoor_variables), "The variable {} is not not a backdoor variable".format(variable)
                 break
-            self.logger.warning("The bootstrap refuter will follow the default behavior")
-            self._required_variables = None
+            raise ValueError("The variable selected by the User is not a confounder")
         
         else:
             self.logger.warning("Incorrect type: {}. Expected an int or list".format( type(self._required_variables) ) )
