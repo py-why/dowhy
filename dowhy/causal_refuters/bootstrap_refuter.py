@@ -24,7 +24,7 @@ class BootstrapRefuter(CausalRefuter):
         2. A list allows the user to explicitly refer to which confounders should be seleted to be made noisy
     - 'noise': float, BootstrapRefuter.DEFAULT_STD_DEV by default
     The standard deviation of the noise to be added to the data
-    - 'probability_of_change': float, 'noise' by default
+    - 'probability_of_change': float, 'noise' by default if the value is less than 1
     It specifies the probability with which we change the data for a boolean or categorical variable
     - 'random_state': int, RandomState, None by default
     The seed value to be added if we wish to repeat the same random behavior. For this purpose, 
@@ -57,7 +57,7 @@ class BootstrapRefuter(CausalRefuter):
         self.logger = logging.getLogger(__name__)
         
         # Sanity check the parameters passed by the user
-        # If the data is invalid, we run the default behavior
+        # If the data is invalid, we throw the corresponding error
         if self._required_variables is int:
             if len(self._variables_of_interest) < self._required_variables:
                 self.logger.error("Too many variables passed.\n The number of  variables is: {}.\n The number of variables passed: {}".format(
@@ -93,7 +93,7 @@ class BootstrapRefuter(CausalRefuter):
                         raise ValueError("The variable selected by the User is not a confounder, Instrument Variable or a Effect Modifier")    
         
         elif self._required_variables is None:
-            self.logger.info("No required variable. Resorting to Default Behavior")
+            self.logger.info("No required variable. Resorting to Default Behavior: Run bootstrapping without any change to the original data.")
 
         else:
             self.logger.warning("Incorrect type: {}. Expected an int or list".format( type(self._required_variables) ) )
