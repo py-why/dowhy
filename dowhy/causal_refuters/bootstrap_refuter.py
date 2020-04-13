@@ -34,7 +34,7 @@ class BootstrapRefuter(CausalRefuter):
     DEFAULT_STD_DEV = 0.1
     DEFAULT_SUCCESS_PROBABILITY = 0.5
     DEFAULT_NUMBER_OF_TRIALS = 1
-    DEFAULT_FLIP_PROBABILITY = 0.5
+    
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -104,8 +104,8 @@ class BootstrapRefuter(CausalRefuter):
 
         if self._probability_of_change is None:
             if self._noise > 1:
-                self.logger.warning("The probability of flip is: {}, However, this value cannot be greater than 1".format(self._noise))
-                self.logger.warning("Cannot use the value of noise. Setting to default value: {}".format(BootstrapRefuter.DEFAULT_FLIP_PROBABILITY))
+                self.logger.error("Error in using noise:{} for Binary Flip. The value is greater than 1".format(self._noise))
+                raise ValueError("The value for Binary Flip cannot be greater than 1")
             else:
                 self._probability_of_change = self._noise
         elif self._probability_of_change > 1:
