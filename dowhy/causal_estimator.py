@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import sympy as sp
 
+from sklearn.utils import resample
 
 class CausalEstimator:
     """Base class for an estimator of causal effect.
@@ -11,6 +12,17 @@ class CausalEstimator:
     Subclasses implement different estimation methods. All estimation methods are in the package "dowhy.causal_estimators"
 
     """
+    # The default number of simulations for statistical testing
+    DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST = 1000
+    # The default number of simulations to obtain confidence intervals
+    DEFAULT_NUMBER_OF_SIMULATIONS_CI = 100
+    # The portion of the total size that should be taken each time to find the confidence intervals
+    # 1 is the recommended value 
+    # https://ocw.mit.edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings/MIT18_05S14_Reading24.pdf
+    # https://projecteuclid.org/download/pdf_1/euclid.ss/1032280214 
+    DEFAULT_SAMPLE_SIZE_FRACTION = 1
+    # The default Confidence Level
+    DEFAULT_CONFIDENCE_LEVEL = 0.95
 
     def __init__(self, data, identified_estimand, treatment, outcome,
                  control_value=0, treatment_value=1,
@@ -31,10 +43,14 @@ class CausalEstimator:
         :param treatment_value: Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.
         :param test_significance: whether to test significance
         :param evaluate_effect_strength: (Experimental) whether to evaluate the strength of effect
-        :param confidence_intervals: (Experimental) Binary flag indicating whether confidence intervals should be computed.
+        :param confidence_intervals: (Experimental) Binary flag indicating whether the confidence intervals should be computed.
         :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be a string for common specifications of target units (namely, "ate", "att" and "atc"). It can also be a lambda function that can be used as an index for the data (pandas DataFrame). Alternatively, it can be a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
         :param effect_modifiers: variables on which to compute separate effects, or return a heterogeneous effect function. Not all methods support this currently.
         :param params: (optional) additional method parameters
+            num_simulations: The number of simulations for testing the statistical significance of the estimator
+            num_ci_simulations: The number os simulations for finding the confidence estimate for a estimate
+            sample_size_fraction: The size of the sample for the bootstrap estimator
+            confidence_level: The confidence level of the confidence interval estimate
         :returns: an instance of the estimator class.
 
         """
@@ -53,14 +69,27 @@ class CausalEstimator:
         self._estimate = None
         self._effect_modifiers = None
         self.method_params = params
+
+        # Unpacking the keyword arguments
         if params is not None:
             for key, value in params.items():
                 setattr(self, key, value)
 
+        
+        self.logger = logging.getLogger(__name__)
+
         # Checking if some parameters were set, otherwise setting to default values
         if not hasattr(self, 'num_simulations'):
-            self.num_simulations = 1000
-        self.logger = logging.getLogger(__name__)
+            self.num_simulations = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST
+
+        if not hasattr(self, 'num_ci_simulations') and self._confidence_intervals:
+            self.num_ci_simulations = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI
+
+        if not hasattr(self, 'sample_size_fraction') and self._confidence_intervals:
+            self.sample_size_fraction = CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION
+
+        if not hasattr(self, 'confidence_level') and self._confidence_intervals:
+            self.confidence_level = CausalEstimator.DEFAULT_CONFIDENCE_LEVEL
 
         # Setting more values
         if self._data is not None:
@@ -73,8 +102,45 @@ class CausalEstimator:
             self._effect_modifiers = pd.get_dummies(self._effect_modifiers, drop_first=True)
             self.logger.debug("Effect modifiers: " +
                           ",".join(self._effect_modifier_names))
+    
+    @staticmethod
+    def get_estimator_object(new_data, identified_estimand, estimate):
+        '''
+            This method is used to create a new estimator, of the same type as the
+            one passed in the estimate argument. It then attempts to create a new object
+            with the new_data and the identified_estimand
 
+            Parameters
+            -----------
+
+            'new_data': np.ndarray, pd.Series, pd.DataFrame 
+            The newly assigned data on which the estimator should run
+
+            'identified_estimand': IdentifiedEstimand
+            An instance of the identified estimand class that provides the information with 
+            respect to which causal pathways are employed when the treatment effects the outcome
+            'estimate': CausalEstimate
+            It is an already existing estimator whose properties we wish to replicate
+        '''
+        estimator_class = estimate.params['estimator_class']
+        new_estimator = estimator_class(
+                new_data,
+                identified_estimand,
+                identified_estimand.treatment_variable, identified_estimand.outcome_variable, #names of treatment and outcome
+                test_significance=None,
+                evaluate_effect_strength=False,
+                confidence_intervals = estimate.params["confidence_intervals"],
+                target_units = estimate.params["target_units"],
+                effect_modifiers = estimate.params["effect_modifiers"],
+                params = estimate.params["method_params"]
+                )
+        return new_estimator
+
+    
     def _estimate_effect(self):
+        '''
+            This method is to be overriden by the child classes, so that they can run the estimation technique of their choice
+        '''
         raise NotImplementedError
 
     def estimate_effect(self):
@@ -82,7 +148,7 @@ class CausalEstimator:
 
         Can optionally also test significance and estimate effect strength for any returned estimate.
 
-        TODO: Enable methods to return a confidence interval in addition to the point estimate.
+        TODO: Enable methods to return a confidence intervals in addition to the point estimate.
 
         :param self: object instance of class Estimator
         :returns: point estimate of causal effect
@@ -95,6 +161,9 @@ class CausalEstimator:
         if self._significance_test:
             signif_dict = self.test_significance(est)
             est.add_significance_test_results(signif_dict)
+        if self._confidence_intervals:
+            confidence_intervals = self.get_confidence_intervals(est)
+            est.add_confidence_intervals(confidence_intervals)
         if self._effect_strength_eval:
             effect_strength_dict = self.evaluate_effect_strength(est)
             est.add_effect_strength(effect_strength_dict)
@@ -125,6 +194,65 @@ class CausalEstimator:
 
     def construct_symbolic_estimator(self, estimand):
         raise NotImplementedError
+
+    def get_confidence_intervals(self, estimate, num_ci_simulations = None, sample_size_fraction = None, confidence_level = None):
+        '''
+            Find the confidence intervals corresponding to any estimator
+            This is done with the help of bootstrapped confidence intervals
+
+            This function can be overriden by any function that inherits this method. So, that they can implement their own way of finding confidence intervals.
+
+            :param estimate: The obtained estimate.
+            :param num_ci_simulations: The number of simulations to be performed to get the bootstrap confidence intervals.
+            :param sample_size_fraction: The fraction of the dataset to be resampled.
+            :param confidence_level: The confidence level of the confidence intervals of the estimate.
+            
+            For more details, refer to the following links:
+            https://ocw.mit.edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings/MIT18_05S14_Reading24.pdf
+            https://projecteuclid.org/download/pdf_1/euclid.ss/1032280214
+        '''
+
+        # Use existing params, if new user defined params are not present
+        if num_ci_simulations is None:
+            num_ci_simulations = self.num_ci_simulations
+        if sample_size_fraction is None:
+            sample_size_fraction = self.sample_size_fraction
+        if confidence_level is None:
+            confidence_level = self.confidence_level
+        
+
+        # The array that stores the results of all estimations
+        simulation_results = np.zeros(num_ci_simulations)
+
+        # Find the sample size the proportion with the population size
+        sample_size= int( sample_size_fraction * len(self._data) )
+
+        if sample_size > len(self._data):
+            self.logger.warning("WARN: The sample size is greater than the data being sampled")
+        
+        self.logger.info("INFO: The sample size: {}".format(sample_size) )
+        self.logger.info("INFO: The number of simulations: {}".format(num_ci_simulations) )
+        
+        # Perform the set number of simulations
+        for index in range(num_ci_simulations):
+            new_data = resample(self._data,n_samples=sample_size)
+
+            new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
+            new_effect = new_estimator.estimate_effect()
+            simulation_results[index] = new_effect.value
+        
+        # Now use the data obtained from the simulations to get the value of the confidence estimates
+        # Sort the simulations
+        simulation_results.sort()
+        # Now we take the (1- p)th and the (p)th values, where p is the chosen confidence level
+        lower_bound_index = int( ( 1 - confidence_level ) * len(simulation_results) ) 
+        upper_bound_index = int( confidence_level * len(simulation_results) )
+        
+        # get the values
+        lower_bound = simulation_results[lower_bound_index]
+        upper_bound = simulation_results[upper_bound_index]
+
+        return (lower_bound, upper_bound)
 
     def test_significance(self, estimate, num_simulations=None):
         """Test statistical significance of obtained estimate.
@@ -214,6 +342,9 @@ class CausalEstimate:
 
     def add_significance_test_results(self, test_results):
         self.significance_test = test_results
+
+    def add_confidence_intervals(self, confidence_intervals):
+        self.confidence_intervals = confidence_intervals
 
     def add_effect_strength(self, strength_dict):
         self.effect_strength = strength_dict
