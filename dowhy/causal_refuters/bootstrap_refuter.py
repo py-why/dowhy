@@ -154,9 +154,9 @@ class BootstrapRefuter(CausalRefuter):
                     elif 'category' in new_data[variable].dtype.name:
                         categories = new_data[variable].unique()
                         # Find the set difference for each row
-                        changed_data = new_data[variable].apply( lambda row: self.set_diff(categories, row) )
+                        changed_data = new_data[variable].apply( lambda row: list( set(categories) - set([row]) ) )
                         # Choose one out of the remaining
-                        changed_data = changed_data.apply( lambda row: self.choose_random(row)  )
+                        changed_data = changed_data.apply( lambda row: random.choice(row)  )
                         new_data[variable] = np.where(probs < self._probability_of_change, changed_data)
                         new_data[variable].astype('category')
 
@@ -196,9 +196,3 @@ class BootstrapRefuter(CausalRefuter):
             else:
                 return list( set(self._variables_of_interest) - set(required_variables) )
 
-    def set_diff(self, categories, row):
-        categories = set(categories)
-        return list( categories - set([row]) )
-
-    def choose_random(self, row):
-        return random.choice(row)
