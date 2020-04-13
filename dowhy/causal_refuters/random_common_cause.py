@@ -4,7 +4,7 @@ import numpy as np
 
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
-
+from dowhy.causal_estimator import CausalEstimator
 
 class RandomCommonCause(CausalRefuter):
     """Refute an estimate by introducing a randomly generated confounder
@@ -22,7 +22,7 @@ class RandomCommonCause(CausalRefuter):
         # Adding a new backdoor variable to the identified estimand
         identified_estimand.backdoor_variables = new_backdoor_variables
 
-        new_estimator = self.get_estimator_object(new_data, identified_estimand, self._estimate)
+        new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
         new_effect = new_estimator.estimate_effect()
         refute = CausalRefutation(self._estimate.value, new_effect.value,
                                   refutation_type="Refute: Add a Random Common Cause")

@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
-
+from dowhy.causal_estimator import CausalEstimator
 
 class AddUnobservedCommonCause(CausalRefuter):
 
@@ -59,7 +59,7 @@ class AddUnobservedCommonCause(CausalRefuter):
             new_data = copy.deepcopy(self._data)
             new_data = self.include_confounders_effect(new_data, self.kappa_t, self.kappa_y)
 
-            new_estimator = self.get_estimator_object(new_data, self._target_estimand, self._estimate)
+            new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
             refute = CausalRefutation(self._estimate.value, new_effect.value,
                                     refutation_type="Refute: Add an Unobserved Common Cause")
@@ -82,7 +82,7 @@ class AddUnobservedCommonCause(CausalRefuter):
                 for i in range(0,len(x[0])):
                     for j in range(0,len(y)):
                         new_data = self.include_confounders_effect(orig_data, x[0][i], y[j][0])
-                        new_estimator = self.get_estimator_object(new_data, self._target_estimand, self._estimate)
+                        new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
                         new_effect = new_estimator.estimate_effect()
                         refute = CausalRefutation(self._estimate.value, new_effect.value,
                                                 refutation_type="Refute: Add an Unobserved Common Cause")
@@ -110,7 +110,7 @@ class AddUnobservedCommonCause(CausalRefuter):
 
                 for i in range(0,len(self.kappa_t)):
                     new_data = self.include_confounders_effect(orig_data, self.kappa_t[i], self.kappa_y)
-                    new_estimator = self.get_estimator_object(new_data, self._target_estimand, self._estimate)
+                    new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
                     new_effect = new_estimator.estimate_effect()
                     refute = CausalRefutation(self._estimate.value, new_effect.value,
                                             refutation_type="Refute: Add an Unobserved Common Cause")
@@ -136,7 +136,7 @@ class AddUnobservedCommonCause(CausalRefuter):
 
                 for i in range(0, len(self.kappa_y)):
                     new_data = self.include_confounders_effect(orig_data, self.kappa_t, self.kappa_y[i])
-                    new_estimator = self.get_estimator_object(new_data, self._target_estimand, self._estimate)
+                    new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
                     new_effect = new_estimator.estimate_effect()
                     refute = CausalRefutation(self._estimate.value, new_effect.value,
                                             refutation_type="Refute: Add an Unobserved Common Cause")
