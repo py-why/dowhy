@@ -18,10 +18,17 @@ class BootstrapRefuter(CausalRefuter):
     The number of simulations to be run
     - 'sample_size': int, Size of the original data by default
     The size of each bootstrap sample
-    - 'required_variables': int, list
-    A user can input either an integer value or a list.
+    - 'required_variables': int, list, bool, True by default
+    A user can input either an integer value,list or bool.
         1. An integer argument refers to how many confounders  will be modified
         2. A list allows the user to explicitly refer to which confounders should be seleted to be made noisy
+            Furthermore, a user can either choose to select the variables desired. Or they can delselect the variables,
+            that they do not want in their analysis. 
+            For example:
+            We need to pass required_variables = [W0,W1] is we want W0 and W1.
+            We need to pass required_variables = [-W0,-W1] if we want all variables excluding W0 and W1.
+        3. If the user passes True, noise is added to  confounders, instrumental variables and effect modifiers
+           If the value is False, we just Bootstrap the existing dataset  
     - 'noise': float, BootstrapRefuter.DEFAULT_STD_DEV by default
     The standard deviation of the noise to be added to the data
     - 'probability_of_change': float, 'noise' by default if the value is less than 1
@@ -40,7 +47,7 @@ class BootstrapRefuter(CausalRefuter):
         super().__init__(*args, **kwargs)
         self._num_simulations = kwargs.pop("num_simulations", CausalRefuter.DEFAULT_NUM_SIMULATIONS )
         self._sample_size = kwargs.pop("sample_size", len(self._data))
-        required_variables = kwargs.pop("required_variables", None)
+        required_variables = kwargs.pop("required_variables", True)
         self._noise = kwargs.pop("noise", BootstrapRefuter.DEFAULT_STD_DEV )
         self._probability_of_change = kwargs.pop("probability_of_change", None)
         self._random_state = kwargs.pop("random_state", None)
@@ -64,7 +71,7 @@ class BootstrapRefuter(CausalRefuter):
                     len(self._variables_of_interest),
                     required_variables )
                 )
-                raise ValueError("The number of variables in the arguments is greater than the number of variables")
+                raise ValueError("The number of variables in the required_variables is greater than the number of confounders, instrumental variables and effect modifiers")
 
         elif required_variables is list:
             for variable in required_variables:
@@ -78,26 +85,29 @@ class BootstrapRefuter(CausalRefuter):
                 if self._invert is True:
                     if variable[0] != '-':
                         self.logger.error("The first argument is a deselect {}. And the current argument {} is a select".format(required_variables[0], variable))
-                        raise ValueError("It appears that there are some select and deselect variables by the user. Note you can either select or delect variables at a time not both")
+                        raise ValueError("It appears that there are some select and deselect variables. Note you can either select or delect variables at a time, but not both")
 
                     if variable[1:] not in self._variables_of_interest:
                         self.logger.error("The variable {} is not in {}".format(variable, self._variables_of_interest))
-                        raise ValueError("The variable selected by the User is not a confounder, Instrument Variable or a Effect Modifier")
+                        raise ValueError("At least one of required_variables is not a valid variable name, or it is not a confounder, instrumental variable or effect modifier")
                 else:
                     if variable[0] == '-':
                         self.logger.error("The first argument is a select {}. And the current argument {} is a deselect".format(required_variables[0], variable))
-                        raise ValueError("It appears that there are some select and deselect variables by the user. Note you can either select or delect variables at a time not both") 
+                        raise ValueError("It appears that there are some select and deselect variables. Note you can either select or delect variables at a time, but not both") 
 
                     if variable not in self._variables_of_interest:
                         self.logger.error("The variable {} is not in {}".format(variable, self._variables_of_interest))
-                        raise ValueError("The variable selected by the User is not a confounder, Instrument Variable or a Effect Modifier")    
+                        raise ValueError("At least one of required_variables is not a valid variable name, or it is not a confounder, instrumental variable or effect modifier")    
         
-        elif required_variables is None:
-            self.logger.info("No required variable. Resorting to Default Behavior: Run bootstrapping without any change to the original data.")
+        elif required_variables is True:
+            self.logger.info("All variables required: Running bootstrap adding noise to confounders, instrumental variables and effect modifiers.")
+
+        elif required_variables is False:
+            self.logger.info("No required variable: Running bootstrap without any change to the original data.")
 
         else:
-            self.logger.warning("Incorrect type: {}. Expected an int or list".format( type(required_variables) ) )
-            required_variables = None
+            self.logger.error("Incorrect type: {}. Expected an int,list or bool".format( type(required_variables) ) )
+            raise TypeError("Expected int, list or bool. Got an unexpected datatype")
 
         
         self._chosen_variables = self.choose_variables(required_variables)
@@ -143,7 +153,7 @@ class BootstrapRefuter(CausalRefuter):
                     
                     if ('float' or 'int') in new_data[variable].dtype.name:
                         scaling_factor = new_data[variable].std() 
-                        new_data[variable] += np.random.randn(self._sample_size) * self._noise * scaling_factor
+                        new_data[variable] += np.random.normal(loc=0.0, scale=self._noise * scaling_factor,size=self._sample_size) 
                     
                     elif 'bool' in new_data[variable].dtype.name:
                         probs = np.random.uniform(0, 1, self._sample_size )
@@ -171,7 +181,7 @@ class BootstrapRefuter(CausalRefuter):
         )
 
         # We want to see if the estimate falls in the same distribution as the one generated by the refuter
-        # Ideally that should be the case as bootstrapping should not have a significant effect on the ability
+        # Ideally that should be the case as running bootstrap should not have a significant effect on the ability
         # of the treatment to affect the outcome
         refute.add_significance_test_results(
             self.test_significance(self._estimate, sample_estimates)
@@ -184,8 +194,10 @@ class BootstrapRefuter(CausalRefuter):
             This method provides a way to choose the confounders whose values we wish to
             modify for finding its effect on the ability of the treatment to affect the outcome.
         '''
-        if required_variables is None:
+        if required_variables is False:
             return None
+        elif required_variables is True:
+            return self._variables_of_interest
         elif type(required_variables) is int:
             # Shuffle the confounders 
             random.shuffle(self._variables_of_interest)
