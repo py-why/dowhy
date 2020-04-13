@@ -40,7 +40,7 @@ class BootstrapRefuter(CausalRefuter):
         super().__init__(*args, **kwargs)
         self._num_simulations = kwargs.pop("num_simulations", CausalRefuter.DEFAULT_NUM_SIMULATIONS )
         self._sample_size = kwargs.pop("sample_size", len(self._data))
-        self._required_variables = kwargs.pop("required_variables", None)
+        required_variables = kwargs.pop("required_variables", None)
         self._noise = kwargs.pop("noise", BootstrapRefuter.DEFAULT_STD_DEV )
         self._probability_of_change = kwargs.pop("probability_of_change", None)
         self._random_state = kwargs.pop("random_state", None)
@@ -58,16 +58,16 @@ class BootstrapRefuter(CausalRefuter):
         
         # Sanity check the parameters passed by the user
         # If the data is invalid, we throw the corresponding error
-        if self._required_variables is int:
-            if len(self._variables_of_interest) < self._required_variables:
+        if required_variables is int:
+            if len(self._variables_of_interest) < required_variables:
                 self.logger.error("Too many variables passed.\n The number of  variables is: {}.\n The number of variables passed: {}".format(
                     len(self._variables_of_interest),
-                    self._required_variables )
+                    required_variables )
                 )
                 raise ValueError("The number of variables in the arguments is greater than the number of variables")
 
-        elif self._required_variables is list:
-            for variable in self._required_variables:
+        elif required_variables is list:
+            for variable in required_variables:
                 # Find out if the user wants to select or deselect the variable
                 if self._invert is None:
                     if variable[0] == '-':
@@ -77,7 +77,7 @@ class BootstrapRefuter(CausalRefuter):
 
                 if self._invert is True:
                     if variable[0] != '-':
-                        self.logger.error("The first argument is a deselect {}. And the current argument {} is a select".format(self._required_variables[0], variable))
+                        self.logger.error("The first argument is a deselect {}. And the current argument {} is a select".format(required_variables[0], variable))
                         raise ValueError("It appears that there are some select and deselect variables by the user. Note you can either select or delect variables at a time not both")
 
                     if variable[1:] not in self._variables_of_interest:
@@ -85,22 +85,28 @@ class BootstrapRefuter(CausalRefuter):
                         raise ValueError("The variable selected by the User is not a confounder, Instrument Variable or a Effect Modifier")
                 else:
                     if variable[0] == '-':
-                        self.logger.error("The first argument is a select {}. And the current argument {} is a deselect".format(self._required_variables[0], variable))
+                        self.logger.error("The first argument is a select {}. And the current argument {} is a deselect".format(required_variables[0], variable))
                         raise ValueError("It appears that there are some select and deselect variables by the user. Note you can either select or delect variables at a time not both") 
 
                     if variable not in self._variables_of_interest:
                         self.logger.error("The variable {} is not in {}".format(variable, self._variables_of_interest))
                         raise ValueError("The variable selected by the User is not a confounder, Instrument Variable or a Effect Modifier")    
         
-        elif self._required_variables is None:
+        elif required_variables is None:
             self.logger.info("No required variable. Resorting to Default Behavior: Run bootstrapping without any change to the original data.")
 
         else:
-            self.logger.warning("Incorrect type: {}. Expected an int or list".format( type(self._required_variables) ) )
-            self._required_variables = None
+            self.logger.warning("Incorrect type: {}. Expected an int or list".format( type(required_variables) ) )
+            required_variables = None
 
         
-        self.choose_desired_variables()
+        self._chosen_variables = self.choose_variables(required_variables)
+
+        if self._chosen_variables is None:
+            self.logger.info("INFO: There are no chosen variables")
+        else:    
+            self.logger.info("INFO: The chosen variables are: " +
+                            ",".join(self._chosen_variables))
 
         if self._probability_of_change is None:
             if self._noise > 1:
@@ -173,28 +179,22 @@ class BootstrapRefuter(CausalRefuter):
 
         return refute
 
-    def choose_desired_variables(self):
+    def choose_variables(self, required_variables):
         '''
             This method provides a way to choose the confounders whose values we wish to
             modify for finding its effect on the ability of the treatment to affect the outcome.
         '''
-        if self._required_variables is None:
-            self._chosen_variables = None
-        elif type(self._required_variables) is int:
+        if required_variables is None:
+            return None
+        elif type(required_variables) is int:
             # Shuffle the confounders 
             random.shuffle(self._variables_of_interest)
-            self._chosen_variables = self._variables_of_interest[:self._required_variables]
-        elif type(self._required_variables) is list:
+            return self._variables_of_interest[:required_variables]
+        elif type(required_variables) is list:
             if self._invert is False:
-                self._chosen_variables = self._required_variables
+                return required_variables
             else:
-                self._chosen_variables = list( set(self._variables_of_interest) - set(self._required_variables) )
-
-        if self._chosen_variables is None:
-            self.logger.info("INFO: There are no chosen variables")
-        else:    
-            self.logger.info("INFO: The chosen variables are: " +
-                            ",".join(self._chosen_variables))
+                return list( set(self._variables_of_interest) - set(required_variables) )
 
     def set_diff(self, row):
         self.categories = set(self.categories)
