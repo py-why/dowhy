@@ -110,7 +110,7 @@ class BootstrapRefuter(CausalRefuter):
                 self._probability_of_change = self._noise
         elif self._probability_of_change > 1:
             self.logger.error("The probability of flip is: {}, However, this value cannot be greater than 1".format(self._probability_of_change))
-            raise ValueError("Probability of Flip cannor be greater than 1")
+            raise ValueError("Probability of Flip cannot be greater than 1")
 
     
     def refute_estimate(self, *args, **kwargs):
@@ -149,7 +149,7 @@ class BootstrapRefuter(CausalRefuter):
                         self.categories = new_data[variable].unique()
                         # Find the set difference for each row
                         changed_data = new_data[variable].apply(self.set_diff)
-                        # Chose one out of the remaining
+                        # Choose one out of the remaining
                         changed_data = changed_data.apply(self.choose_random)
                         new_data[variable] = np.where(probs < self._probability_of_change, changed_data)
                         new_data[variable].astype('category')
