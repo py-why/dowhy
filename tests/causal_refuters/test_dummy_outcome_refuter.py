@@ -22,4 +22,4 @@ class TestDummyOtcomeRefuter(object):
                                     estimator_method, 
                                     "dummy_outcome_refuter",
                                     outcome_function=outcome_function)
-        refuter_tester.continuous_treatment_testsuite("atleast-one-common-cause")
+        refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")

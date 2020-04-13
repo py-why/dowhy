@@ -183,14 +183,14 @@ class TestRefuter(object):
                 res = True if (error <  self._error_tolerance) else False
                 assert res
  
-    def binary_treatment_testsuite(self, tests_to_run="all"):
-        self.null_refutation_test(num_common_causes=1)
+    def binary_treatment_testsuite(self, num_common_causes=1,tests_to_run="all"):
+        self.null_refutation_test(num_common_causes=num_common_causes)
         if tests_to_run != "atleast-one-common-cause":
             self.null_refutation_test(num_common_causes=0)
 
-    def continuous_treatment_testsuite(self, tests_to_run="all"):
+    def continuous_treatment_testsuite(self, num_common_causes=1,tests_to_run="all"):
         self.null_refutation_test(
-            num_common_causes=1,
+            num_common_causes=num_common_causes,
             treatment_is_binary=False)
         if tests_to_run != "atleast-one-common-cause":
             self.null_refutation_test(num_common_causes=0,
