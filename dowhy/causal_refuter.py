@@ -49,7 +49,7 @@ class CausalRefuter:
 
         if required_variables is False:
            
-            self.logger.info("All variables required: Running bootstrap adding noise to confounders, instrumental variables and effect modifiers.")self.logger.info("All variables required: Running bootstrap adding noise to confounders, instrumental variables and effect modifiers.")
+            self.logger.info("All variables required: Running bootstrap adding noise to confounders, instrumental variables and effect modifiers.")
             return None
         
         elif required_variables is True:
