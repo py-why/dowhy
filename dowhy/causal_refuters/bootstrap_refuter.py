@@ -52,7 +52,6 @@ class BootstrapRefuter(CausalRefuter):
         self._noise = kwargs.pop("noise", BootstrapRefuter.DEFAULT_STD_DEV )
         self._probability_of_change = kwargs.pop("probability_of_change", None)
         self._random_state = kwargs.pop("random_state", None)
-        self._invert = None
 
         if 'logging_level' in kwargs:
             logging.basicConfig(level=kwargs['logging_level'])
