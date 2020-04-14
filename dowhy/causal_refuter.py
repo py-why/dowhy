@@ -12,71 +12,7 @@ class CausalRefuter:
     """
     # Default value for the number of simulations to be conducted
     DEFAULT_NUM_SIMULATIONS = 100
-    
-    def sanity_check_required_variables(self, required_variables):
-        if required_variables is int:
-            if len(self._variables_of_interest) < required_variables:
-                self.logger.error("Too many variables passed.\n The number of  variables is: {}.\n The number of variables passed: {}".format(
-                    len(self._variables_of_interest),
-                    required_variables )
-                )
-                raise ValueError("The number of variables in the required_variables is greater than the number of confounders, instrumental variables and effect modifiers")
-
-        elif required_variables is list:
-            for variable in required_variables:
-                # Find out if the user wants to select or deselect the variable
-                if self._invert is None:
-                    if variable[0] == '-':
-                        self._invert = True
-                    else:
-                        self._invert = False
-
-                if self._invert is True:
-                    if variable[0] != '-':
-                        self.logger.error("The first argument is a deselect {}. And the current argument {} is a select".format(required_variables[0], variable))
-                        raise ValueError("It appears that there are some select and deselect variables. Note you can either select or delect variables at a time, but not both")
-
-                    if variable[1:] not in self._variables_of_interest:
-                        self.logger.error("The variable {} is not in {}".format(variable, self._variables_of_interest))
-                        raise ValueError("At least one of required_variables is not a valid variable name, or it is not a confounder, instrumental variable or effect modifier")
-                else:
-                    if variable[0] == '-':
-                        self.logger.error("The first argument is a select {}. And the current argument {} is a deselect".format(required_variables[0], variable))
-                        raise ValueError("It appears that there are some select and deselect variables. Note you can either select or delect variables at a time, but not both") 
-
-                    if variable not in self._variables_of_interest:
-                        self.logger.error("The variable {} is not in {}".format(variable, self._variables_of_interest))
-                        raise ValueError("At least one of required_variables is not a valid variable name, or it is not a confounder, instrumental variable or effect modifier")    
-        
-        elif required_variables is True:
-            self.logger.info("All variables required: Running bootstrap adding noise to confounders, instrumental variables and effect modifiers.")
-
-        elif required_variables is False:
-            self.logger.info("No required variable: Running bootstrap without any change to the original data.")
-
-        else:
-            self.logger.error("Incorrect type: {}. Expected an int,list or bool".format( type(required_variables) ) )
-            raise TypeError("Expected int, list or bool. Got an unexpected datatype")
-    
-    def choose_variables(self, required_variables):
-        '''
-            This method provides a way to choose the confounders whose values we wish to
-            modify for finding its effect on the ability of the treatment to affect the outcome.
-        '''
-        if required_variables is False:
-            return None
-        elif required_variables is True:
-            return self._variables_of_interest
-        elif type(required_variables) is int:
-            # Shuffle the confounders 
-            random.shuffle(self._variables_of_interest)
-            return self._variables_of_interest[:required_variables]
-        elif type(required_variables) is list:
-            if self._invert is False:
-                return required_variables
-            else:
-                return list( set(self._variables_of_interest) - set(required_variables) )
-        
+          
     def __init__(self, data, identified_estimand, estimate, **kwargs):
         self._data = data
         self._target_estimand = identified_estimand
@@ -84,7 +20,7 @@ class CausalRefuter:
         self._treatment_name = self._target_estimand.treatment_variable
         self._outcome_name = self._target_estimand.outcome_variable
         self._random_seed = None
-        self._invert = None
+
         if "random_seed" in kwargs:
             self._random_seed = kwargs['random_seed']
             np.random.seed(self._random_seed)
@@ -96,11 +32,70 @@ class CausalRefuter:
         self.logger = logging.getLogger(__name__)
 
         # Concatenate the confounders, instruments and effect modifiers
-        self._variables_of_interest = self._target_estimand.backdoor_variables + \
-                                      self._target_estimand.instrumental_variables + \
-                                      self._estimate.params['effect_modifiers']
+        try:
+            self._variables_of_interest = self._target_estimand.backdoor_variables + \
+                                        self._target_estimand.instrumental_variables + \
+                                        self._estimate.params['effect_modifiers']
+        except AttributeError as attr_error:
+            self.logger.error(attr_error)
 
+    def choose_variables(self, required_variables):
+        '''
+            This method provides a way to choose the confounders whose values we wish to
+            modify for finding its effect on the ability of the treatment to affect the outcome.
+        '''
+        
+        invert = None
 
+        if required_variables is False:
+           
+            self.logger.info("All variables required: Running bootstrap adding noise to confounders, instrumental variables and effect modifiers.")self.logger.info("All variables required: Running bootstrap adding noise to confounders, instrumental variables and effect modifiers.")
+            return None
+        
+        elif required_variables is True:
+            
+            self.logger.info("All variables required: Running bootstrap adding noise to confounders, instrumental variables and effect modifiers.")
+            return self._variables_of_interest
+        
+        elif type(required_variables) is int:
+            
+            if len(self._variables_of_interest) < required_variables:
+                self.logger.error("Too many variables passed.\n The number of  variables is: {}.\n The number of variables passed: {}".format(
+                    len(self._variables_of_interest),
+                    required_variables )
+                )
+                raise ValueError("The number of variables in the required_variables is greater than the number of confounders, instrumental variables and effect modifiers")
+            else:
+                # Shuffle the confounders 
+                random.shuffle(self._variables_of_interest)
+                return self._variables_of_interest[:required_variables]
+        
+        elif type(required_variables) is list:
+           
+           # Check if all are select or deselect variables
+            if all(variable[0] == '-' for variable in required_variables):
+                invert = True
+                required_variables = [variable[1:] for variable in required_variables]
+            elif all(variable[0] != '-' for variable in required_variables):
+                invert = False
+            else:
+                self.logger.error("{} has both select and delect variables".format(required_variables))
+                raise ValueError("It appears that there are some select and deselect variables. Note you can either select or delect variables at a time, but not both") 
+            
+            # Check if all the required_variables belong to confounders, instrumental variables or effect
+            if set(required_variables) - set(self._variables_of_interest) != set([]):
+                self.logger.error("{} are not confounder, instrumental variable or effect modifier".format( list( set(required_variables) - set(self._variables_of_interest) ) ))
+                raise ValueError("At least one of required_variables is not a valid variable name, or it is not a confounder, instrumental variable or effect modifier") 
+            
+            if invert is False:
+                return required_variables
+            elif invert is True:
+                return list( set(self._variables_of_interest) - set(required_variables) )
+        
+        else:
+            self.logger.error("Incorrect type: {}. Expected an int,list or bool".format( type(required_variables) ) )
+            raise TypeError("Expected int, list or bool. Got an unexpected datatype")
+    
     def test_significance(self, estimate, simulations, test_type='auto',significance_level=0.05):
         """
         Tests the statistical significance of the estimate obtained to the simulations produced by a refuter
