@@ -59,8 +59,6 @@ class BootstrapRefuter(CausalRefuter):
             logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
         
-        self.sanity_check_required_variables(required_variables)
-        
         self._chosen_variables = self.choose_variables(required_variables)
 
         if self._chosen_variables is None:
