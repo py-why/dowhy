@@ -8,6 +8,12 @@ from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
 from dowhy.causal_estimator import CausalEstimator
 
+from sklearn.linear_model import LinearRegression
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.svm import SVR
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.neural_network import MLPClassifier
+
 class DummyOutcomeRefuter(CausalRefuter):
     """Refute an estimate by replacing the outcome with a randomly generated variable.
 
@@ -25,6 +31,24 @@ class DummyOutcomeRefuter(CausalRefuter):
     A function that takes in a function that takes the input data frame as the input and outputs the outcome
     variable. This allows us to create an output varable that only depends on the confounders and does not depend 
     on the treatment variable.
+    Currently it supports some common functions like 
+        1. Linear Regression
+        2. K Nearest Neighbours
+        3. Support Vector Machine
+        4. Neural Network
+        5. Random Forest
+    - 'params': dict, default empty dictionary
+    The parameters that go with the outcome_function. This consists of the paramters to be passed to the sklearn objects
+    to give the desired behavior.
+    -  - 'required_variables': int, list, bool, True by default
+    A user can input either an integer value,list or bool.
+        1. An integer argument refers to how many variables will be used for estimating the value of the outcome
+        2. A list allows the user to explicitly refer to which variables will be used to estimate the outcome
+            Furthermore, a user can either choose to select the variables desired. Or they can delselect the variables,
+            that they do not want in their analysis. 
+            For example:
+            We need to pass required_variables = [W0,W1] is we want W0 and W1.
+            We need to pass required_variables = [-W0,-W1] if we want all variables excluding W0 and W1. 
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -34,6 +58,10 @@ class DummyOutcomeRefuter(CausalRefuter):
         self._num_simulations = kwargs.pop("num_simulations", CausalRefuter.DEFAULT_NUM_SIMULATIONS)
         self._random_state = kwargs.pop("random_state", None)
         self._outcome_function = kwargs.pop("outcome_function", None)
+        self._params = kwargs.pop("params", {})
+        required_variables = kwargs.pop("required_variables", True)
+
+        self._chosen_variables = self.choose_variables(required_variables)
 
         if 'logging_level' in kwargs:
             logging.basicConfig(level=kwargs['logging_level'])
@@ -66,8 +94,11 @@ class DummyOutcomeRefuter(CausalRefuter):
                     new_outcome = self._data[self._outcome_name].sample(frac=1,
                                                                 random_state=self._random_state).values
             elif self._outcome_function is not None:
-                new_outcome = self._outcome_function(self._data)
-                
+                if callable(self._outcome_function):
+                    new_outcome = self._outcome_function(self._data)
+                else:
+                    new_outcome = self._run_std_function()
+
                 if type(new_outcome) is pd.Series or \
                    type(new_outcome) is pd.DataFrame:
                    new_outcome = new_outcome.values
@@ -114,3 +145,26 @@ class DummyOutcomeRefuter(CausalRefuter):
         )
 
         return refute
+
+    def _run_std_function(self):
+        estimator = self._get_regressor_object()
+        X = self._chosen_variables
+        y = self._data['y']
+        estimator = estimator.fit(X, y)
+        
+        return estimator.predict(X) 
+    
+    def _get_regressor_object(self):
+        
+        if  self._outcome_function == "linear_regression":
+            return LinearRegression(**self._params)
+        elif self._outcome_function == "knn":
+            return KNeighborsRegressor(**self._params)
+        elif self._outcome_function == "svm":
+            return SVR(**self._params)
+        elif self._outcome_function == "random_forest":
+            return RandomForestRegressor(**self._params)
+        elif self._outcome_function == "neural_network":
+            return MLPClassifier(**self._params)
+        else:
+            raise ValueError("The function: {} is not supported by dowhy at the moment")

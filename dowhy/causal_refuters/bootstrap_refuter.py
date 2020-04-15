@@ -21,8 +21,8 @@ class BootstrapRefuter(CausalRefuter):
     The size of each bootstrap sample
     - 'required_variables': int, list, bool, True by default
     A user can input either an integer value,list or bool.
-        1. An integer argument refers to how many confounders  will be modified
-        2. A list allows the user to explicitly refer to which confounders should be seleted to be made noisy
+        1. An integer argument refers to how many variables will be modified
+        2. A list allows the user to explicitly refer to which variables should be seleted to be made noisy
             Furthermore, a user can either choose to select the variables desired. Or they can delselect the variables,
             that they do not want in their analysis. 
             For example:
