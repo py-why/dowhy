@@ -9,7 +9,7 @@
 .. |BuildStatus| image:: https://dev.azure.com/ms/dowhy/_apis/build/status/microsoft.dowhy?branchName=master
 .. _BuildStatus: https://dev.azure.com/ms/dowhy/_build/latest?definitionId=179&branchName=master
 
-DoWhy | Making causal inference easy
+DoWhy | Making causal inference easyyyyyyyyy
 ====================================
 
 `Amit Sharma <http://www.amitsharma.in>`_,
