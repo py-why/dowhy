@@ -31,7 +31,7 @@ class Causalml(CausalEstimator):
             self._observed_common_causes = []
 
         # Check the instrumental variables involved	
-        self.logger.debug("Instrumental variables used:"+	
+        self.logger.debug("Instrumental variables used:"+
                         ",".join(self._target_estimand.instrumental_variables))
 
         # Perform the same actions as the above
@@ -66,7 +66,7 @@ class Causalml(CausalEstimator):
         return estimator_class
 
     def _estimate_effect(self):	
-        X_names = self._observed_common_causes_names + \	
+        X_names = self._observed_common_causes_names + \
                 self._effect_modifier_names	
 
         # Both the outcome and the treatment have to be 1D arrays according to the CausalML API	
