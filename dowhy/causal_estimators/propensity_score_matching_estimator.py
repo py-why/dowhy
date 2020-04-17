@@ -21,7 +21,7 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
             self._propensity_score_model.fit(self._observed_common_causes, self._treatment.to_numpy())
             self._data['propensity_score'] = self._propensity_score_model.predict_proba(self._observed_common_causes)[:,1]
             self._data['propensity_score_logit'] = np.log(self._data['propensity_score'] / (1-self._data['propensity_score']))
-            self.radius = 0.2 * np.std(self._data['propensity_score_logit'])
+            # self.radius = 0.2 * np.std(self._data['propensity_score_logit'])
 
         # this assumes a binary treatment regime
         treated = self._data.loc[self._data[self._treatment_name[0]] == 1]
@@ -29,6 +29,7 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
 
 
         # TODO remove neighbors that are more than a given radius apart
+        self.radius = 0.2 * np.sqrt((np.var(control['propensity_score_logit'].values)+np.var(treated['propensity_score_logit'].values))/2)
 
 
         # estimate ATT on treated by summing over difference between matched neighbors
