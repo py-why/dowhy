@@ -31,6 +31,10 @@ class Causalml(CausalEstimator):
         else:
             self._observed_common_causes = []
 
+        # Check the instrumental variables involved	
+        self.logger.debug("Instrumental variables used:"+	
+                        ",".join(self._target_estimand.instrumental_variables))
+
         # Perform the same actions as the above
         self._instrumental_variable_names = self._target_estimand.instrumental_variables
         if self._instrumental_variable_names:
