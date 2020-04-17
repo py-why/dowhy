@@ -1,7 +1,6 @@
 import inspect
 import numpy as np
 import pandas as pd
-import pdb
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from importlib import import_module
