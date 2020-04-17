@@ -40,7 +40,7 @@ class DummyOutcomeRefuter(CausalRefuter):
     - 'params': dict, default empty dictionary
     The parameters that go with the outcome_function. This consists of the paramters to be passed to the sklearn objects
     to give the desired behavior.
-    -  - 'required_variables': int, list, bool, True by default
+    - 'required_variables': int, list, bool, True by default
     A user can input either an integer value,list or bool.
         1. An integer argument refers to how many variables will be used for estimating the value of the outcome
         2. A list allows the user to explicitly refer to which variables will be used to estimate the outcome
@@ -48,7 +48,9 @@ class DummyOutcomeRefuter(CausalRefuter):
             that they do not want in their analysis. 
             For example:
             We need to pass required_variables = [W0,W1] is we want W0 and W1.
-            We need to pass required_variables = [-W0,-W1] if we want all variables excluding W0 and W1. 
+            We need to pass required_variables = [-W0,-W1] if we want all variables excluding W0 and W1.
+    - scale: float, 1.0 by default
+    The value by which the std_deviation of the dummy outcome has to be scaled 
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -59,6 +61,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         self._random_state = kwargs.pop("random_state", None)
         self._outcome_function = kwargs.pop("outcome_function", None)
         self._params = kwargs.pop("params", None)
+        self._scale = kwargs.pop("scale", 1)
         required_variables = kwargs.pop("required_variables", True)
 
         self._chosen_variables = self.choose_variables(required_variables)
@@ -102,6 +105,8 @@ class DummyOutcomeRefuter(CausalRefuter):
             assert type(new_outcome) is np.ndarray, ("Only  supports numpy.ndarray as the output")
             assert 'float' in new_outcome.dtype.name, ("Only float outcomes are currently supported")
             
+            self._scale *= np.std(new_outcome)
+
             if len(new_outcome.shape) == 2 and \
                 ( new_outcome.shape[0] ==1 or new_outcome.shape[1] ):
                 self.logger.warning("Converting the row or column vector to 1D array")

@@ -43,25 +43,25 @@ class TestDummyOtcomeRefuter(object):
                                     params=params)
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
     
-    @pytest.mark.parametrize(["error_tolerence","estimator_method","outcome_function","params"],
-                             [(0.1, "iv.instrumental_variable","svm",{'C':1,'epsilon':0.2})])
-    def test_refutation_dummy_outcome_refuter_internal_svm(self, error_tolerence, estimator_method, outcome_function,params):
+    @pytest.mark.parametrize(["error_tolerence","estimator_method","outcome_function","params","num_samples"],
+                             [(0.1, "iv.instrumental_variable","svm",{'C':1,'epsilon':0.2}, 1000)])
+    def test_refutation_dummy_outcome_refuter_internal_svm(self, error_tolerence, estimator_method, outcome_function,params, num_samples):
         refuter_tester = TestRefuter(error_tolerence, 
                                     estimator_method, 
                                     "dummy_outcome_refuter",
                                     outcome_function=outcome_function,
                                     params=params)
-        refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
+        refuter_tester.continuous_treatment_testsuite(num_samples=num_samples, tests_to_run="atleast-one-common-cause")
 
-    @pytest.mark.parametrize(["error_tolerence","estimator_method","outcome_function","params"],
-                             [(0.1, "iv.instrumental_variable","random_forest",{'max_depth':20})])
-    def test_refutation_dummy_outcome_refuter_internal_random_forest(self, error_tolerence, estimator_method, outcome_function,params):
+    @pytest.mark.parametrize(["error_tolerence","estimator_method","outcome_function","params","num_samples"],
+                             [(0.1, "iv.instrumental_variable","random_forest",{'max_depth':20}, 1000)])
+    def test_refutation_dummy_outcome_refuter_internal_random_forest(self, error_tolerence, estimator_method, outcome_function,params, num_samples):
         refuter_tester = TestRefuter(error_tolerence, 
                                     estimator_method, 
                                     "dummy_outcome_refuter",
                                     outcome_function=outcome_function,
                                     params=params)
-        refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
+        refuter_tester.continuous_treatment_testsuite(num_samples,tests_to_run="atleast-one-common-cause")
 
     # As we run with only one common cause and one instrument variable we run with (?, 2)
     @pytest.mark.parametrize(["error_tolerence","estimator_method","outcome_function","params"],
