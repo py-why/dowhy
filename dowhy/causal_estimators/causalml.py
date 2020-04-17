@@ -3,8 +3,7 @@ import numpy as np
 import pandas as pd
 import pdb
 
-from dowhy.causal_estimator import CausalEstimate
-from dowhy.causal_estimator import CausalEstimator
+from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from importlib import import_module
 import causalml
 
@@ -40,8 +39,18 @@ class Causalml(CausalEstimator):
         else:
             self._instrumental_variables = []
 
+        # Check if effect modifiers are used	
+        self.logger.debug("Effect Modifiers used:" + 	
+                        ",".join(self._effect_modifier_names))	
+
+        # Get the class corresponding the the estimator to be used
         estimator_class = self._get_causalml_class_object(self._causalml_methodname)
-        
+        # Initialize the object	
+        self.estimator = estimator_class(**self.method_params["init_params"])	
+        self.logger.info("INFO: Using CausalML Estimator")	
+        self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)	
+        self.logger.info(self.symbolic_estimator)
+
     def _get_causalml_class_object(self, module_method_name, *args, **kwargs):
         
         try:
@@ -53,5 +62,39 @@ class Causalml(CausalEstimator):
             raise ImportError('Error loading {}.{}. Double-check the method name and ensure that all econml dependencies are installed.'.format(module_name, class_name))
         return estimator_class
 
+    def _estimate_effect(self):	
+        X_names = self._observed_common_causes_names + \	
+                self._effect_modifier_names	
 
- 
+        # Both the outcome and the treatment have to be 1D arrays according to the CausalML API	
+        y_name = self._outcome_name 	
+        treatment_name = self._treatment_name[0] # As we have only one treatment variable	
+        # We want to pass 'v0' rather than ['v0'] to prevent a shape mismatch	
+
+        func_args={	
+            'X':self._data[X_names],	
+            'y':self._data[y_name],	
+            'treatment':self._data[treatment_name]	
+        }	
+
+        arg_names = inspect.getfullargspec(self.estimator.estimate_ate)[0]	
+        matched_args = {	
+            arg: func_args[arg] for arg in func_args.keys() if arg in arg_names 	
+        }	
+        value_tuple = self.estimator.estimate_ate(**matched_args) 	
+
+        estimate = CausalEstimate(estimate=value_tuple[0],	
+                                  target_estimand=self._target_estimand,	
+                                  realized_estimand_expr=self.symbolic_estimator,	
+                                  effect_intervals=(value_tuple[1],value_tuple[2]),	
+                                  _estimator_object=self.estimator)	
+
+        return estimate
+
+    def construct_symbolic_estimator(self, estimand):	
+        expr = "b: " + ",".join(estimand.outcome_variable) + "~"	
+        # TODO we are conditioning on a postive treatment	
+        # TODO create an expression corresponding to each estimator used	
+        var_list = estimand.treatment_variable + estimand.backdoor_variables	
+        expr += "+".join(var_list)	
+        return expr
