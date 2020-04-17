@@ -1,5 +1,5 @@
 import copy
-
+import pdb
 import numpy as np
 import pandas as pd
 import logging
@@ -12,7 +12,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import SVR
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.neural_network import MLPClassifier
+from sklearn.neural_network import MLPRegressor
 
 class DummyOutcomeRefuter(CausalRefuter):
     """Refute an estimate by replacing the outcome with a randomly generated variable.
@@ -58,10 +58,12 @@ class DummyOutcomeRefuter(CausalRefuter):
         self._num_simulations = kwargs.pop("num_simulations", CausalRefuter.DEFAULT_NUM_SIMULATIONS)
         self._random_state = kwargs.pop("random_state", None)
         self._outcome_function = kwargs.pop("outcome_function", None)
-        self._params = kwargs.pop("params", {})
+        self._params = kwargs.pop("params", None)
         required_variables = kwargs.pop("required_variables", True)
 
         self._chosen_variables = self.choose_variables(required_variables)
+        if self._params is None:
+            self._params = {}
 
         if 'logging_level' in kwargs:
             logging.basicConfig(level=kwargs['logging_level'])
@@ -84,6 +86,31 @@ class DummyOutcomeRefuter(CausalRefuter):
                         ,self._dummy_outcome_type)
                         )
         num_rows =  self._data.shape[0]
+        new_outcome = np.zeros((num_rows,))
+
+        if self._outcome_function is not None:
+            if callable(self._outcome_function):
+                new_outcome = self._outcome_function(self._data)
+            else:
+                new_outcome = self._run_std_function()
+
+            if type(new_outcome) is pd.Series or \
+                type(new_outcome) is pd.DataFrame:
+                new_outcome = new_outcome.values
+            
+            # Check if data types match
+            assert type(new_outcome) is np.ndarray, ("Only  supports numpy.ndarray as the output")
+            assert 'float' in new_outcome.dtype.name, ("Only float outcomes are currently supported")
+            
+            if len(new_outcome.shape) == 2 and \
+                ( new_outcome.shape[0] ==1 or new_outcome.shape[1] ):
+                self.logger.warning("Converting the row or column vector to 1D array")
+                new_outcome = new_outcome.ravel()
+                assert len(new_outcome) == num_rows, ("The number of outputs do not match that of the number of outcomes")
+            elif len(new_outcome.shape) == 1:
+                assert len(new_outcome) == num_rows, ("The number of outputs do not match that of the number of outcomes")
+            else:
+                raise Exception("Type Mismatch: The outcome is one dimensional, but the output has the shape:{}".format(new_outcome.shape))
 
         for index in range(self._num_simulations):
 
@@ -93,31 +120,8 @@ class DummyOutcomeRefuter(CausalRefuter):
                 else:
                     new_outcome = self._data[self._outcome_name].sample(frac=1,
                                                                 random_state=self._random_state).values
-            elif self._outcome_function is not None:
-                if callable(self._outcome_function):
-                    new_outcome = self._outcome_function(self._data)
-                else:
-                    new_outcome = self._run_std_function()
-
-                if type(new_outcome) is pd.Series or \
-                   type(new_outcome) is pd.DataFrame:
-                   new_outcome = new_outcome.values
-                
-                # Check if data types match
-                assert type(new_outcome) is np.ndarray, ("Only  supports numpy.ndarray as the output")
-                assert 'float' in new_outcome.dtype.name, ("Only float outcomes are currently supported")
-                
-                if len(new_outcome.shape) == 2 and \
-                    ( new_outcome.shape[0] ==1 or new_outcome.shape[1] ):
-                    self.logger.warning("Converting the row or column vector to 1D array")
-                    new_outcome = new_outcome.ravel()
-                    assert len(new_outcome) == num_rows, ("The number of outputs do not match that of the number of outcomes")
-                elif len(new_outcome.shape) == 1:
-                    assert len(new_outcome) == num_rows, ("The number of outputs do not match that of the number of outcomes")
-                else:
-                    raise Exception("Type Mismatch: The outcome is one dimensional, but the output has the shape:{}".format(new_outcome.shape))
             else:
-                new_outcome = np.random.randn(num_rows)
+                new_outcome += np.random.randn(num_rows)
 
         # Create a new column in the data by the name of dummy_outcome
         new_data = self._data.assign(dummy_outcome=new_outcome)
@@ -128,6 +132,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
         new_effect = new_estimator.estimate_effect()
         sample_estimates[index] = new_effect.value
+        print(sample_estimates)
 
         refute = CausalRefutation(self._estimate.value,
                                         np.mean(sample_estimates),
@@ -148,7 +153,7 @@ class DummyOutcomeRefuter(CausalRefuter):
 
     def _run_std_function(self):
         estimator = self._get_regressor_object()
-        X = self._chosen_variables
+        X = self._data[self._chosen_variables]
         y = self._data['y']
         estimator = estimator.fit(X, y)
         
@@ -165,6 +170,6 @@ class DummyOutcomeRefuter(CausalRefuter):
         elif self._outcome_function == "random_forest":
             return RandomForestRegressor(**self._params)
         elif self._outcome_function == "neural_network":
-            return MLPClassifier(**self._params)
+            return MLPRegressor(**self._params)
         else:
             raise ValueError("The function: {} is not supported by dowhy at the moment")
