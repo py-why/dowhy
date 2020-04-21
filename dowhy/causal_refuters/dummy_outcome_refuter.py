@@ -18,33 +18,37 @@ class DummyOutcomeRefuter(CausalRefuter):
 
     Supports additional parameters that can be specified in the refute_estimate() method.
 
-    - 'dummy_outcome_type': str, None by default
-    Default is to generate random values for the treatment. If palcebo_type is "permute",
-    then the original treatement values are permuted by row.
     - 'num_simulations': int, CausalRefuter.DEFAULT_NUM_SIMULATIONS by default
     The number of simulations to be run
     - 'random_state': int, RandomState, None by default
     The seed value to be added if we wish to repeat the same random behavior. If we want to repeat the
     same behavior we push the same seed in the psuedo-random generator
     - 'outcome_function': function pd.Dataframe -> np.ndarray, None
-    A function that takes in a function that takes the input data frame as the input and outputs the outcome
-    variable. This allows us to create an output varable that only depends on the confounders and does not depend 
-    on the treatment variable.
-    Currently it supports some common functions like 
-        1. Linear Regression
-        2. K Nearest Neighbours
-        3. Support Vector Machine
-        4. Neural Network
-        5. Random Forest
+    * function argument
+        It takes in a function that takes the input data frame as the input and outputs the outcome
+        variable. This allows us to create an output varable that only depends on the covariates and does not depend 
+        on the treatment variable.
+    * string argument
+        - Currently it supports some common functions like 
+            1. Linear Regression
+            2. K Nearest Neighbours
+            3. Support Vector Machine
+            4. Neural Network
+            5. Random Forest
+        - On the other hand, there are other options:
+            1. Permute
+            This permutes the rows of the outcome, disassociating any effect of the treatment on the outcome.
+            2. Noise
+            This replaces the outcome with white noise, eliminating any causal relationship with the treatment.
     - 'params': dict, default {}
     The parameters that go with the outcome_function. This consists of the parameters to be passed to the sklearn objects
     to give the desired behavior.
     - 'required_variables': int, list, bool, True by default
-    A user can input either an integer value, list or bool.
+    The inputs are either an integer value, list or bool.
         1. An integer argument refers to how many variables will be used for estimating the value of the outcome
-        2. A list allows the user to explicitly refer to which variables will be used to estimate the outcome
-            Furthermore, a user can either choose to select the variables desired. Or they can deselect the variables,
-            that they do not want in their analysis. 
+        2. A list explicitly refers to which variables will be used to estimate the outcome
+            Furthermore, it gives the ability to explictly select or deselect the covariates present in the estimation of the 
+            outcome. This is done by either adding or explicitly removing variables from the list as shown below: 
             For example:
             We need to pass required_variables = [W0,W1] is we want W0 and W1.
             We need to pass required_variables = [-W0,-W1] if we want all variables excluding W0 and W1.
@@ -97,7 +101,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         if self._outcome_function is not None:
             if callable(self._outcome_function):
                 new_outcome = self._outcome_function(self._data)
-            else:
+            elif type(self._outcome_function) is str:
                 new_outcome = self._estimate_dummy_outcome()
 
             if type(new_outcome) is pd.Series or \
