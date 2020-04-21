@@ -36,14 +36,14 @@ class DummyOutcomeRefuter(CausalRefuter):
         3. Support Vector Machine
         4. Neural Network
         5. Random Forest
-    - 'params': dict, default empty dictionary
-    The parameters that go with the outcome_function. This consists of the paramters to be passed to the sklearn objects
+    - 'params': dict, default {}
+    The parameters that go with the outcome_function. This consists of the parameters to be passed to the sklearn objects
     to give the desired behavior.
     - 'required_variables': int, list, bool, True by default
-    A user can input either an integer value,list or bool.
+    A user can input either an integer value, list or bool.
         1. An integer argument refers to how many variables will be used for estimating the value of the outcome
         2. A list allows the user to explicitly refer to which variables will be used to estimate the outcome
-            Furthermore, a user can either choose to select the variables desired. Or they can delselect the variables,
+            Furthermore, a user can either choose to select the variables desired. Or they can deselect the variables,
             that they do not want in their analysis. 
             For example:
             We need to pass required_variables = [W0,W1] is we want W0 and W1.
@@ -67,7 +67,7 @@ class DummyOutcomeRefuter(CausalRefuter):
 
         if required_variables is False:
             raise ValueError("The value of required_variables cannot be False")
-        
+
         self._chosen_variables = self.choose_variables(required_variables)
         if self._params is None:
             self._params = {}
@@ -93,7 +93,6 @@ class DummyOutcomeRefuter(CausalRefuter):
                         ,self._dummy_outcome_type)
                         )
         num_rows =  self._data.shape[0]
-        new_outcome = np.zeros((num_rows,))
 
         if self._outcome_function is not None:
             if callable(self._outcome_function):
@@ -120,6 +119,9 @@ class DummyOutcomeRefuter(CausalRefuter):
                 assert len(new_outcome) == num_rows, ("The number of outputs do not match that of the number of outcomes")
             else:
                 raise Exception("Type Mismatch: The outcome is one dimensional, but the output has the shape:{}".format(new_outcome.shape))
+        
+        else:
+            new_outcome = np.zeros((num_rows,))
 
         for index in range(self._num_simulations):
 
