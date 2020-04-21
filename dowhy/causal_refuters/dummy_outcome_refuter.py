@@ -98,7 +98,7 @@ class DummyOutcomeRefuter(CausalRefuter):
             if callable(self._outcome_function):
                 new_outcome = self._outcome_function(self._data)
             else:
-                new_outcome = self._run_estimation_function()
+                new_outcome = self._estimate_dummy_outcome()
 
             if type(new_outcome) is pd.Series or \
                 type(new_outcome) is pd.DataFrame:
@@ -161,7 +161,7 @@ class DummyOutcomeRefuter(CausalRefuter):
 
         return refute
 
-    def _run_estimation_function(self):
+    def _estimate_dummy_outcome(self):
         estimator = self._get_regressor_object()
         X = self._data[self._chosen_variables]
         y = self._data['y']
