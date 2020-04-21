@@ -201,9 +201,9 @@ class TestRefuter(object):
         if tests_to_run != "atleast-one-common-cause":
             self.null_refutation_test(num_common_causes=0,num_samples=num_samples)
 
-    def continuous_treatment_testsuite(self,num_samples=100000,num_common_causes=1,tests_to_run="all"):
+    def continuous_treatment_testsuite(self, num_samples=100000,num_common_causes=1,tests_to_run="all"):
         self.null_refutation_test(
-            num_common_causes=num_common_causes, num_samples=num_samples,
+            num_common_causes=num_common_causes,num_samples=num_samples,
             treatment_is_binary=False)
         if tests_to_run != "atleast-one-common-cause":
             self.null_refutation_test(num_common_causes=0, num_samples=num_samples,
