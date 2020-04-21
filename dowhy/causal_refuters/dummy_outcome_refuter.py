@@ -48,6 +48,8 @@ class DummyOutcomeRefuter(CausalRefuter):
             For example:
             We need to pass required_variables = [W0,W1] is we want W0 and W1.
             We need to pass required_variables = [-W0,-W1] if we want all variables excluding W0 and W1.
+        3. If the value is True, we wish to include all variables to estimate the value of the outcome. A False value is INVALID
+           and will result in an error. 
     - scale: float, 1.0 by default
     The value by which the std_deviation of the dummy outcome has to be scaled 
     """
@@ -63,6 +65,9 @@ class DummyOutcomeRefuter(CausalRefuter):
         self._scale = kwargs.pop("scale", 1)
         required_variables = kwargs.pop("required_variables", True)
 
+        if required_variables is False:
+            raise ValueError("The value of required_variables cannot be False")
+        
         self._chosen_variables = self.choose_variables(required_variables)
         if self._params is None:
             self._params = {}
