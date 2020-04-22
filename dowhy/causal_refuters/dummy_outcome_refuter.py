@@ -2,6 +2,7 @@ import copy
 import numpy as np
 import pandas as pd
 import logging
+import pdb
 
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
@@ -20,11 +21,9 @@ class DummyOutcomeRefuter(CausalRefuter):
 
     - 'num_simulations': int, CausalRefuter.DEFAULT_NUM_SIMULATIONS by default
     The number of simulations to be run
-    - 'random_state': int, RandomState, None by default
-    The seed value to be added if we wish to repeat the same random behavior. If we want to repeat the
-    same behavior we push the same seed in the psuedo-random generator
-    - 'outcome_function': function pd.Dataframe -> np.ndarray, None
-    * function argument
+    - 'pipeline': list, [noise]
+    The pipeline gives a list of actions to be performed to obtain the outcome. The actions are of the following types:
+    * function argument: function pd.Dataframe -> np.ndarray
         It takes in a function that takes the input data frame as the input and outputs the outcome
         variable. This allows us to create an output varable that only depends on the covariates and does not depend 
         on the treatment variable.
@@ -39,10 +38,16 @@ class DummyOutcomeRefuter(CausalRefuter):
             1. Permute
             This permutes the rows of the outcome, disassociating any effect of the treatment on the outcome.
             2. Noise
-            This replaces the outcome with white noise, eliminating any causal relationship with the treatment.
-    - 'params': dict, default {}
-    The parameters that go with the outcome_function. This consists of the parameters to be passed to the sklearn objects
-    to give the desired behavior.
+            This adds white noise to the outcome with white noise, reducing any causal relationship with the treatment.
+            3. Zero
+            It replaces all the values in the outcome by zero
+
+    The pipeline is of the following form:
+    * If the function pd.Dataframe -> np.ndarray is already defined.
+    [(func,func_params),('permute', permute_fraction), ('noise', std_dev)]
+    * If a function from the above list is used
+    [('knn',{'n_neighbors':5}), ('permute', permute_fraction), ('noise', std_dev)]
+
     - 'required_variables': int, list, bool, True by default
     The inputs are either an integer value, list or bool.
         1. An integer argument refers to how many variables will be used for estimating the value of the outcome
@@ -54,27 +59,27 @@ class DummyOutcomeRefuter(CausalRefuter):
             We need to pass required_variables = [-W0,-W1] if we want all variables excluding W0 and W1.
         3. If the value is True, we wish to include all variables to estimate the value of the outcome. A False value is INVALID
            and will result in an error. 
-    - scale: float, 1.0 by default
-    The value by which the std_deviation of the dummy outcome has to be scaled 
+    Note:
+    These inputs are fed to the function for estimating the outcome variable. The same set of required_variables is used for each
+    instance of an internal function.
     """
+    # The currently supported estimators
+    SUPPORTED_ESTIMATORS = ["linear_regression", "knn", "svm", "random_forest", "neural_network"]
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._dummy_outcome_type = kwargs.pop("placebo_type", None)
-        if self._dummy_outcome_type is None:
-            self._dummy_outcome_type = "Random Data"
+        
         self._num_simulations = kwargs.pop("num_simulations", CausalRefuter.DEFAULT_NUM_SIMULATIONS)
-        self._random_state = kwargs.pop("random_state", None)
-        self._outcome_function = kwargs.pop("outcome_function", None)
-        self._params = kwargs.pop("params", None)
-        self._scale = kwargs.pop("scale", 1)
+        pipeline = kwargs.pop("pipeline",[("zero",""),("noise", 1)])
+        pipeline = self._parse_pipeline(pipeline)
+        self._pipeline = self._save_precompute(pipeline)
+        pdb.set_trace()
         required_variables = kwargs.pop("required_variables", True)
 
         if required_variables is False:
             raise ValueError("The value of required_variables cannot be False")
 
         self._chosen_variables = self.choose_variables(required_variables)
-        if self._params is None:
-            self._params = {}
 
         if 'logging_level' in kwargs:
             logging.basicConfig(level=kwargs['logging_level'])
@@ -92,53 +97,51 @@ class DummyOutcomeRefuter(CausalRefuter):
         identified_estimand.outcome_variable = ["dummy_outcome"]
 
         sample_estimates = np.zeros(self._num_simulations)
-        self.logger.info("Refutation over {} simulated datasets of {} treatment"
-                        .format(self._num_simulations
-                        ,self._dummy_outcome_type)
-                        )
-        num_rows =  self._data.shape[0]
+        self.logger.info("Refutation over {} simulated datasets".format(self._num_simulations) )
 
-        if self._outcome_function is not None:
-            if callable(self._outcome_function):
-                new_outcome = self._outcome_function(self._data)
-            elif type(self._outcome_function) is str:
-                new_outcome = self._estimate_dummy_outcome()
+        new_outcome = self._data['y']
 
-            if type(new_outcome) is pd.Series or \
-                type(new_outcome) is pd.DataFrame:
-                new_outcome = new_outcome.values
-            
-            # Check if data types match
-            assert type(new_outcome) is np.ndarray, ("Only  supports numpy.ndarray as the output")
-            assert 'float' in new_outcome.dtype.name, ("Only float outcomes are currently supported")
-            
-            self._scale *= np.std(new_outcome)
-
-            if len(new_outcome.shape) == 2 and \
-                ( new_outcome.shape[0] ==1 or new_outcome.shape[1] ):
-                self.logger.warning("Converting the row or column vector to 1D array")
-                new_outcome = new_outcome.ravel()
-                assert len(new_outcome) == num_rows, ("The number of outputs do not match that of the number of outcomes")
-            elif len(new_outcome.shape) == 1:
-                assert len(new_outcome) == num_rows, ("The number of outputs do not match that of the number of outcomes")
-            else:
-                raise Exception("Type Mismatch: The outcome is one dimensional, but the output has the shape:{}".format(new_outcome.shape))
+        # if callable(self._outcome_function):
+        #     new_outcome = self._outcome_function(self._data)
         
-        else:
-            new_outcome = np.zeros((num_rows,))
 
+        # elif type(self._outcome_function) is str:
+        #     new_outcome = self._estimate_dummy_outcome()
+
+        # if type(new_outcome) is pd.Series or \
+        #     type(new_outcome) is pd.DataFrame:
+        #     new_outcome = new_outcome.values
+        
+        # # Check if data types match
+        # assert type(new_outcome) is np.ndarray, ("Only  supports numpy.ndarray as the output")
+        # assert 'float' in new_outcome.dtype.name, ("Only float outcomes are currently supported")
+        
+        # self._scale *= np.std(new_outcome)
+
+        # if len(new_outcome.shape) == 2 and \
+        #     ( new_outcome.shape[0] ==1 or new_outcome.shape[1] ):
+        #     self.logger.warning("Converting the row or column vector to 1D array")
+        #     new_outcome = new_outcome.ravel()
+        #     assert len(new_outcome) == num_rows, ("The number of outputs do not match that of the number of outcomes")
+        # elif len(new_outcome.shape) == 1:
+        #     assert len(new_outcome) == num_rows, ("The number of outputs do not match that of the number of outcomes")
+        # else:
+        #     raise Exception("Type Mismatch: The outcome is one dimensional, but the output has the shape:{}".format(new_outcome.shape))
+
+        
+        pdb.set_trace()
         for index in range(self._num_simulations):
-
-            if self._dummy_outcome_type == "permute":
-                if self._random_state is None:
-                    new_outcome = self._data[self._outcome_name].sample(frac=1).values
-                else:
-                    new_outcome = self._data[self._outcome_name].sample(frac=1,
-                                                                random_state=self._random_state).values
-            else:
-                new_outcome += np.random.randn(num_rows)
+            for action, props in self._pipeline:
+                if props['input'] == ['X']:
+                    new_outcome = action( self._data[self._chosen_variables] )
+                elif props['input'] == ['y']:
+                    new_outcome = action( new_outcome )
+                elif props['input'] == ['X','y']:
+                    temp_estimator = action( new_outcome )
+                    new_outcome = temp_estimator( self._data[self._chosen_variables] )   
 
         # Create a new column in the data by the name of dummy_outcome
+        
         new_data = self._data.assign(dummy_outcome=new_outcome)
 
         # Sanity check the data
@@ -164,26 +167,86 @@ class DummyOutcomeRefuter(CausalRefuter):
         )
 
         return refute
+    def _save_precompute(self, pipeline):
+        pdb.set_trace()
+        precomputed_pipeline = []
+        isAtTheStart = True
+        new_outcome = self._data['y']
+        for action,props in pipeline:
+            if 'save_compute' in props and isAtTheStart:
+                precomputed_pipeline.append( ( action(new_outcome), {'input':['X'], 'save_compute':True} ) )
+                new_outcome = precomputed_pipeline[-1]( self._data[self._chosen_variables] )
+            else:
+                isAtTheStart = False
+                precomputed_pipeline.append( (action, props) )
+        
+        return precomputed_pipeline
 
-    def _estimate_dummy_outcome(self):
-        estimator = self._get_regressor_object()
+    def _parse_pipeline(self, pipeline):
+        function_pipeline = []
+        # Every element consists of the operation and the associated arguments
+        # (func, func_args)
+        for action, func_args in pipeline:
+            if callable(action): 
+                function_pipeline.append( (action, {'input':['X']}) )
+            elif action in DummyOutcomeRefuter.SUPPORTED_ESTIMATORS:
+                pdb.set_trace()
+                function_pipeline.append( ( lambda new_data: self._estimate_dummy_outcome(func_args, action, new_data), {'input':['X', 'y'], 'save_compute':False} ) )
+            elif action == 'noise':
+                function_pipeline.append( ( lambda new_data: self._noise(new_data, func_args), {'input':['y']} ) )
+            elif action == 'permute':
+                function_pipeline.append( ( lambda new_data: self._permute(new_data, func_args), {'input':['y']} ) )
+            elif action == 'zero':
+                function_pipeline.append( (lambda new_data: np.zeros(new_data.shape), {'input':['y']} ) )
+            else:
+                raise ValueError("Invalid action:{} passed to pipeline".format(action))
+
+        return function_pipeline
+            
+    def _estimate_dummy_outcome(self, func_args, action, new_data):
+        pdb.set_trace()
+        estimator = self._get_regressor_object(action, func_args)
         X = self._data[self._chosen_variables]
-        y = self._data['y']
+        y = new_data
         estimator = estimator.fit(X, y)
         
-        return estimator.predict(X) 
+        return estimator.predict
     
-    def _get_regressor_object(self):
-        
-        if  self._outcome_function == "linear_regression":
-            return LinearRegression(**self._params)
-        elif self._outcome_function == "knn":
-            return KNeighborsRegressor(**self._params)
-        elif self._outcome_function == "svm":
-            return SVR(**self._params)
-        elif self._outcome_function == "random_forest":
-            return RandomForestRegressor(**self._params)
-        elif self._outcome_function == "neural_network":
-            return MLPRegressor(**self._params)
+    def _get_regressor_object(self, action, func_args):
+        if  action == "linear_regression":
+            return LinearRegression(**func_args)
+        elif action == "knn":
+            return KNeighborsRegressor(**func_args)
+        elif action == "svm":
+            return SVR(**func_args)
+        elif action == "random_forest":
+            return RandomForestRegressor(**func_args)
+        elif action == "neural_network":
+            return MLPRegressor(**func_args)
         else:
-            raise ValueError("The function: {} is not supported by dowhy at the moment")
+            raise ValueError("The function: {} is not supported by dowhy at the moment".format(action))
+
+    def _permute(self, new_data, permute_fraction):
+        new_data = pd.DataFrame(new_data)
+        new_data.columns = ['y']
+
+        if permute_fraction == 1:
+            return new_data['y'].sample(frac=1).values
+        else: 
+            return new_data.apply( lambda row: self.replace(row, new_data, permute_fraction), axis=1).values
+        
+
+    def replace(self, row, new_data, fraction):
+        '''
+        In this function, we make use of the Fisher Yates shuffle:
+        https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
+        '''  
+        if np.random.uniform(0,1) <= fraction:
+            index = np.random.randint(row.name + 1, len(new_data))
+        else:
+            index = row.name
+        
+        return new_data['y'][index]
+    
+    def _noise(self, new_data, std_dev):
+        return new_data + np.random.randn(new_data.shape[0]) * std_dev
