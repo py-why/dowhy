@@ -21,8 +21,8 @@ class DummyOutcomeRefuter(CausalRefuter):
 
     - 'num_simulations': int, CausalRefuter.DEFAULT_NUM_SIMULATIONS by default
     The number of simulations to be run
-    - 'pipeline': list, [noise]
-    The pipeline gives a list of actions to be performed to obtain the outcome. The actions are of the following types:
+    - 'transformations': list, [('zero',''),('noise','0.1')]
+    The transformations list gives a list of actions to be performed to obtain the outcome. The actions are of the following types:
     * function argument: function pd.Dataframe -> np.ndarray
         It takes in a function that takes the input data frame as the input and outputs the outcome
         variable. This allows us to create an output varable that only depends on the covariates and does not depend 
@@ -42,7 +42,7 @@ class DummyOutcomeRefuter(CausalRefuter):
             3. Zero
             It replaces all the values in the outcome by zero
 
-    The pipeline is of the following form:
+    The transformations list is of the following form:
     * If the function pd.Dataframe -> np.ndarray is already defined.
     [(func,func_params),('permute', permute_fraction), ('noise', std_dev)]
     * If a function from the above list is used
@@ -70,10 +70,8 @@ class DummyOutcomeRefuter(CausalRefuter):
         super().__init__(*args, **kwargs)
         
         self._num_simulations = kwargs.pop("num_simulations", CausalRefuter.DEFAULT_NUM_SIMULATIONS)
-        pipeline = kwargs.pop("pipeline",[("zero",""),("noise", 1)])
-        pipeline = self._parse_pipeline(pipeline)
-        self._pipeline = self._save_precompute(pipeline)
-        pdb.set_trace()
+        self._transformations = kwargs.pop("transformations",[("zero",""),("noise", 1)])
+        
         required_variables = kwargs.pop("required_variables", True)
 
         if required_variables is False:
@@ -129,17 +127,9 @@ class DummyOutcomeRefuter(CausalRefuter):
         #     raise Exception("Type Mismatch: The outcome is one dimensional, but the output has the shape:{}".format(new_outcome.shape))
 
         
-        pdb.set_trace()
+        
         for index in range(self._num_simulations):
-            for action, props in self._pipeline:
-                if props['input'] == ['X']:
-                    new_outcome = action( self._data[self._chosen_variables] )
-                elif props['input'] == ['y']:
-                    new_outcome = action( new_outcome )
-                elif props['input'] == ['X','y']:
-                    temp_estimator = action( new_outcome )
-                    new_outcome = temp_estimator( self._data[self._chosen_variables] )   
-
+            pass
         # Create a new column in the data by the name of dummy_outcome
         
         new_data = self._data.assign(dummy_outcome=new_outcome)
@@ -201,7 +191,7 @@ class DummyOutcomeRefuter(CausalRefuter):
             new_data.columns = ['y']
             return new_data['y'].sample(frac=1).values
         else: 
-            changes = np.where( np.random.uniform(0,1,new_data.shape[0]) <= permute_fraction )[0]
+            changes = np.where( np.random.uniform(0,1,new_data.shape[0]) <= permute_fraction )[0] # As this is tuple containing a single element (array[...])
             num_rows = new_data.shape[0]
             for change in changes:
                 index = np.random.randint(change+1,num_rows)
