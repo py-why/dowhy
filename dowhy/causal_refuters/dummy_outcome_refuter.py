@@ -167,41 +167,6 @@ class DummyOutcomeRefuter(CausalRefuter):
         )
 
         return refute
-    def _save_precompute(self, pipeline):
-        pdb.set_trace()
-        precomputed_pipeline = []
-        isAtTheStart = True
-        new_outcome = self._data['y']
-        for action,props in pipeline:
-            if 'save_compute' in props and isAtTheStart:
-                precomputed_pipeline.append( ( action(new_outcome), {'input':['X'], 'save_compute':True} ) )
-                new_outcome = precomputed_pipeline[-1]( self._data[self._chosen_variables] )
-            else:
-                isAtTheStart = False
-                precomputed_pipeline.append( (action, props) )
-        
-        return precomputed_pipeline
-
-    def _parse_pipeline(self, pipeline):
-        function_pipeline = []
-        # Every element consists of the operation and the associated arguments
-        # (func, func_args)
-        for action, func_args in pipeline:
-            if callable(action): 
-                function_pipeline.append( (action, {'input':['X']}) )
-            elif action in DummyOutcomeRefuter.SUPPORTED_ESTIMATORS:
-                pdb.set_trace()
-                function_pipeline.append( ( lambda new_data: self._estimate_dummy_outcome(func_args, action, new_data), {'input':['X', 'y'], 'save_compute':False} ) )
-            elif action == 'noise':
-                function_pipeline.append( ( lambda new_data: self._noise(new_data, func_args), {'input':['y']} ) )
-            elif action == 'permute':
-                function_pipeline.append( ( lambda new_data: self._permute(new_data, func_args), {'input':['y']} ) )
-            elif action == 'zero':
-                function_pipeline.append( (lambda new_data: np.zeros(new_data.shape), {'input':['y']} ) )
-            else:
-                raise ValueError("Invalid action:{} passed to pipeline".format(action))
-
-        return function_pipeline
             
     def _estimate_dummy_outcome(self, func_args, action, new_data):
         pdb.set_trace()
@@ -227,26 +192,24 @@ class DummyOutcomeRefuter(CausalRefuter):
             raise ValueError("The function: {} is not supported by dowhy at the moment".format(action))
 
     def _permute(self, new_data, permute_fraction):
-        new_data = pd.DataFrame(new_data)
-        new_data.columns = ['y']
-
-        if permute_fraction == 1:
-            return new_data['y'].sample(frac=1).values
-        else: 
-            return new_data.apply( lambda row: self.replace(row, new_data, permute_fraction), axis=1).values
-        
-
-    def replace(self, row, new_data, fraction):
         '''
         In this function, we make use of the Fisher Yates shuffle:
         https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
-        '''  
-        if np.random.uniform(0,1) <= fraction:
-            index = np.random.randint(row.name + 1, len(new_data))
-        else:
-            index = row.name
-        
-        return new_data['y'][index]
-    
+        '''
+        if permute_fraction == 1:
+            new_data = pd.DataFrame(new_data)
+            new_data.columns = ['y']
+            return new_data['y'].sample(frac=1).values
+        else: 
+            changes = np.where( np.random.uniform(0,1,new_data.shape[0]) <= permute_fraction )[0]
+            num_rows = new_data.shape[0]
+            for change in changes:
+                index = np.random.randint(change+1,num_rows)
+                temp = new_data[change]
+                new_data[change] = new_data[index]
+                new_data[index] = temp
+
+            return new_data
+
     def _noise(self, new_data, std_dev):
         return new_data + np.random.randn(new_data.shape[0]) * std_dev
