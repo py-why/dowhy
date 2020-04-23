@@ -98,7 +98,7 @@ class DummyOutcomeRefuter(CausalRefuter):
 
         sample_estimates = np.zeros(self._num_simulations)
         self.logger.info("Refutation over {} simulated datasets".format(self._num_simulations) )
-        self.logger.inform("The transformation passed: {}", self._transformations)
+        self.logger.info("The transformation passed: {}", self._transformations)
 
         # This flag is to make sure we store the estimators whose input is deterministic
         save_estimators = True
