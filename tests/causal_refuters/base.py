@@ -4,13 +4,13 @@ import logging
 
 class TestRefuter(object):
     def __init__(self, error_tolerance, estimator_method, refuter_method,
-            pipeline=None, params = None, confounders_effect_on_t=None, 
+            transformations=None, params = None, confounders_effect_on_t=None, 
             confounders_effect_on_y=None, effect_strength_on_t=None,
             effect_strength_on_y=None, **kwargs):
         self._error_tolerance = error_tolerance
         self.estimator_method = estimator_method
         self.refuter_method = refuter_method
-        self.pipeline = pipeline
+        self.transformations = transformations
         self.params = params
         self.confounders_effect_on_t = confounders_effect_on_t
         self.confounders_effect_on_y = confounders_effect_on_y
@@ -157,7 +157,7 @@ class TestRefuter(object):
             assert res
 
         elif self.refuter_method == "dummy_outcome_refuter":
-            if self.pipeline is None:
+            if self.transformations is None:
                 ref = model.refute_estimate(target_estimand,
                                             ate_estimate,
                                             method_name=self.refuter_method,
@@ -167,7 +167,7 @@ class TestRefuter(object):
                 ref = model.refute_estimate(target_estimand,
                                             ate_estimate,
                                             method_name=self.refuter_method,
-                                            pipeline = self.pipeline,
+                                            transformations = self.transformations,
                                             params = self.params,
                                             num_simulations = 2
                                             )

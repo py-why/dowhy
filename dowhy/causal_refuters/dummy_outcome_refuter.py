@@ -21,7 +21,7 @@ class DummyOutcomeRefuter(CausalRefuter):
 
     - 'num_simulations': int, CausalRefuter.DEFAULT_NUM_SIMULATIONS by default
     The number of simulations to be run
-    - 'transformations': list, [('zero',''),('noise','0.1')]
+    - 'transformations': list, [('zero',''),('noise','DummyOutcomeRefuter.DEFAULT_STD_DEV')]
     The transformations list gives a list of actions to be performed to obtain the outcome. The actions are of the following types:
     * function argument: function pd.Dataframe -> np.ndarray
         It takes in a function that takes the input data frame as the input and outputs the outcome
@@ -65,6 +65,8 @@ class DummyOutcomeRefuter(CausalRefuter):
     """
     # The currently supported estimators
     SUPPORTED_ESTIMATORS = ["linear_regression", "knn", "svm", "random_forest", "neural_network"]
+    # The default standard deviation for noise
+    DEFAULT_STD_DEV = 0.1 
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -96,40 +98,47 @@ class DummyOutcomeRefuter(CausalRefuter):
 
         sample_estimates = np.zeros(self._num_simulations)
         self.logger.info("Refutation over {} simulated datasets".format(self._num_simulations) )
+        self.logger.inform("The transformation passed: {}", self._transformations)
 
+        # This flag is to make sure we store the estimators whose input is deterministic
+        save_estimators = True
+        # We store the value of the estimators in the format "estimator_name" +  "pos_in_transform" : estimator_object
+        saved_estimator_dict = {}
+        
+        X = self._data[self._chosen_variables]
         new_outcome = self._data['y']
-
-        # if callable(self._outcome_function):
-        #     new_outcome = self._outcome_function(self._data)
-        
-
-        # elif type(self._outcome_function) is str:
-        #     new_outcome = self._estimate_dummy_outcome()
-
-        # if type(new_outcome) is pd.Series or \
-        #     type(new_outcome) is pd.DataFrame:
-        #     new_outcome = new_outcome.values
-        
-        # # Check if data types match
-        # assert type(new_outcome) is np.ndarray, ("Only  supports numpy.ndarray as the output")
-        # assert 'float' in new_outcome.dtype.name, ("Only float outcomes are currently supported")
-        
-        # self._scale *= np.std(new_outcome)
-
-        # if len(new_outcome.shape) == 2 and \
-        #     ( new_outcome.shape[0] ==1 or new_outcome.shape[1] ):
-        #     self.logger.warning("Converting the row or column vector to 1D array")
-        #     new_outcome = new_outcome.ravel()
-        #     assert len(new_outcome) == num_rows, ("The number of outputs do not match that of the number of outcomes")
-        # elif len(new_outcome.shape) == 1:
-        #     assert len(new_outcome) == num_rows, ("The number of outputs do not match that of the number of outcomes")
-        # else:
-        #     raise Exception("Type Mismatch: The outcome is one dimensional, but the output has the shape:{}".format(new_outcome.shape))
-
-        
         
         for index in range(self._num_simulations):
-            pass
+            for action, func_args in self._transformations:
+                transform_num = 0
+
+                if callable(action):
+                    new_outcome = action(X, **func_args)
+                elif action in DummyOutcomeRefuter.SUPPORTED_ESTIMATORS:
+                    if save_estimators:
+                        estimator = self._estimate_dummy_outcome(func_args, action, new_outcome)
+                        saved_estimator_dict[action + str(transform_num)] = estimator
+                    
+                    if action + str(transform_num) in saved_estimator_dict:
+                        estimator = saved_estimator_dict[action + str(transform_num)]
+                        new_outcome = estimator(X)
+                    else:
+                        estimator = self._estimate_dummy_outcome(func_args, action, new_outcome)
+                        new_outcome = estimator(X)
+
+                elif action == 'noise':
+                    save_estimators = False
+                    new_outcome = self._noise(new_outcome, func_args)
+                elif action == 'permute':
+                    save_estimators = False
+                    new_outcome = self._permute(new_outcome, func_args)
+                elif action =='zero':
+                    save_estimators = False
+                    new_outcome = np.zeros(new_outcome.shape)
+            
+            transform_num += 1
+            save_estimators = False       
+        
         # Create a new column in the data by the name of dummy_outcome
         
         new_data = self._data.assign(dummy_outcome=new_outcome)
@@ -158,11 +167,10 @@ class DummyOutcomeRefuter(CausalRefuter):
 
         return refute
             
-    def _estimate_dummy_outcome(self, func_args, action, new_data):
-        pdb.set_trace()
+    def _estimate_dummy_outcome(self, func_args, action, new_outcome):
         estimator = self._get_regressor_object(action, func_args)
         X = self._data[self._chosen_variables]
-        y = new_data
+        y = new_outcome
         estimator = estimator.fit(X, y)
         
         return estimator.predict
@@ -181,25 +189,25 @@ class DummyOutcomeRefuter(CausalRefuter):
         else:
             raise ValueError("The function: {} is not supported by dowhy at the moment".format(action))
 
-    def _permute(self, new_data, permute_fraction):
+    def _permute(self, new_outcome, permute_fraction):
         '''
         In this function, we make use of the Fisher Yates shuffle:
         https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
         '''
         if permute_fraction == 1:
-            new_data = pd.DataFrame(new_data)
-            new_data.columns = ['y']
-            return new_data['y'].sample(frac=1).values
+            new_outcome = pd.DataFrame(new_outcome)
+            new_outcome.columns = ['y']
+            return new_outcome['y'].sample(frac=1).values
         else: 
-            changes = np.where( np.random.uniform(0,1,new_data.shape[0]) <= permute_fraction )[0] # As this is tuple containing a single element (array[...])
-            num_rows = new_data.shape[0]
+            changes = np.where( np.random.uniform(0,1,new_outcome.shape[0]) <= permute_fraction )[0] # As this is tuple containing a single element (array[...])
+            num_rows = new_outcome.shape[0]
             for change in changes:
-                index = np.random.randint(change+1,num_rows)
-                temp = new_data[change]
-                new_data[change] = new_data[index]
-                new_data[index] = temp
+                if change + 1 < num_rows:
+                    index = np.random.randint(change+1,num_rows)
+                    temp = new_outcome[change]
+                    new_outcome[change] = new_outcome[index]
+                    new_outcome[index] = temp
+            return new_outcome
 
-            return new_data
-
-    def _noise(self, new_data, std_dev):
-        return new_data + np.random.randn(new_data.shape[0]) * std_dev
+    def _noise(self, new_outcome, std_dev):
+        return new_outcome + np.random.randn(new_outcome.shape[0]) * std_dev
