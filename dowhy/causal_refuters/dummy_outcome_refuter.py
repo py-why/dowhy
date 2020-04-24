@@ -133,7 +133,7 @@ class DummyOutcomeRefuter(CausalRefuter):
                 elif action == 'permute':
                     save_estimators = False
                     new_outcome = self._permute(new_outcome, func_args)
-                    
+
                 elif action =='zero':
                     save_estimators = False
                     new_outcome = np.zeros(new_outcome.shape)
@@ -201,7 +201,8 @@ class DummyOutcomeRefuter(CausalRefuter):
             new_outcome = pd.DataFrame(new_outcome)
             new_outcome.columns = ['y']
             return new_outcome['y'].sample(frac=1).values
-        else: 
+        else:
+            permute_fraction /= 2 # We do this as every swap leads to two changes 
             changes = np.where( np.random.uniform(0,1,new_outcome.shape[0]) <= permute_fraction )[0] # As this is tuple containing a single element (array[...])
             num_rows = new_outcome.shape[0]
             for change in changes:
