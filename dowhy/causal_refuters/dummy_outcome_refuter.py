@@ -114,24 +114,26 @@ class DummyOutcomeRefuter(CausalRefuter):
 
                 if callable(action):
                     new_outcome = action(X, **func_args)
+
                 elif action in DummyOutcomeRefuter.SUPPORTED_ESTIMATORS:
-                    if save_estimators:
-                        estimator = self._estimate_dummy_outcome(func_args, action, new_outcome)
-                        saved_estimator_dict[action + str(transform_num)] = estimator
-                    
                     if action + str(transform_num) in saved_estimator_dict:
                         estimator = saved_estimator_dict[action + str(transform_num)]
                         new_outcome = estimator(X)
                     else:
                         estimator = self._estimate_dummy_outcome(func_args, action, new_outcome)
                         new_outcome = estimator(X)
+                        if save_estimators:
+                            estimator = self._estimate_dummy_outcome(func_args, action, new_outcome)
+                            saved_estimator_dict[action + str(transform_num)] = estimator
 
                 elif action == 'noise':
                     save_estimators = False
                     new_outcome = self._noise(new_outcome, func_args)
+
                 elif action == 'permute':
                     save_estimators = False
                     new_outcome = self._permute(new_outcome, func_args)
+                    
                 elif action =='zero':
                     save_estimators = False
                     new_outcome = np.zeros(new_outcome.shape)
