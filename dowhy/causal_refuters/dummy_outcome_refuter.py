@@ -109,8 +109,8 @@ class DummyOutcomeRefuter(CausalRefuter):
         new_outcome = self._data['y']
         
         for index in range(self._num_simulations):
+            transform_num = 0
             for action, func_args in self._transformations:
-                transform_num = 0
 
                 if callable(action):
                     new_outcome = action(X, **func_args)
@@ -136,7 +136,8 @@ class DummyOutcomeRefuter(CausalRefuter):
                     save_estimators = False
                     new_outcome = np.zeros(new_outcome.shape)
             
-            transform_num += 1
+                transform_num += 1
+            
             save_estimators = False       
         
         # Create a new column in the data by the name of dummy_outcome
@@ -167,10 +168,10 @@ class DummyOutcomeRefuter(CausalRefuter):
 
         return refute
             
-    def _estimate_dummy_outcome(self, func_args, action, new_outcome):
+    def _estimate_dummy_outcome(self, func_args, action, outcome):
         estimator = self._get_regressor_object(action, func_args)
         X = self._data[self._chosen_variables]
-        y = new_outcome
+        y = outcome
         estimator = estimator.fit(X, y)
         
         return estimator.predict
@@ -210,4 +211,4 @@ class DummyOutcomeRefuter(CausalRefuter):
             return new_outcome
 
     def _noise(self, new_outcome, std_dev):
-        return new_outcome + np.random.randn(new_outcome.shape[0]) * std_dev
+        return new_outcome + np.random.normal(scale=std_dev,size=new_outcome.shape[0])
