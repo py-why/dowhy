@@ -123,7 +123,6 @@ class DummyOutcomeRefuter(CausalRefuter):
                         estimator = self._estimate_dummy_outcome(func_args, action, new_outcome)
                         new_outcome = estimator(X)
                         if save_estimators:
-                            estimator = self._estimate_dummy_outcome(func_args, action, new_outcome)
                             saved_estimator_dict[action + str(transform_num)] = estimator
 
                 elif action == 'noise':
