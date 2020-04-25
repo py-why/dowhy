@@ -4,13 +4,14 @@ import logging
 
 class TestRefuter(object):
     def __init__(self, error_tolerance, estimator_method, refuter_method,
-            outcome_function=None, confounders_effect_on_t=None,
+            transformations=None, params = None, confounders_effect_on_t=None, 
             confounders_effect_on_y=None, effect_strength_on_t=None,
             effect_strength_on_y=None, **kwargs):
         self._error_tolerance = error_tolerance
         self.estimator_method = estimator_method
         self.refuter_method = refuter_method
-        self.outcome_function = outcome_function
+        self.transformations = transformations
+        self.params = params
         self.confounders_effect_on_t = confounders_effect_on_t
         self.confounders_effect_on_y = confounders_effect_on_y
         self.effect_strength_on_t = effect_strength_on_t
@@ -156,16 +157,19 @@ class TestRefuter(object):
             assert res
 
         elif self.refuter_method == "dummy_outcome_refuter":
-            if self.outcome_function is None:
+            if self.transformations is None:
                 ref = model.refute_estimate(target_estimand,
                                             ate_estimate,
-                                            method_name=self.refuter_method
+                                            method_name=self.refuter_method,
+                                            num_simulations = 2
                                             )
             else:
                 ref = model.refute_estimate(target_estimand,
                                             ate_estimate,
                                             method_name=self.refuter_method,
-                                            outcome_function =self.outcome_function
+                                            transformations = self.transformations,
+                                            params = self.params,
+                                            num_simulations = 2
                                             )
 
                 # This value is hardcoded to be zero as we are runnning this on a linear dataset.
@@ -180,8 +184,8 @@ class TestRefuter(object):
 
                 print(ref)
 
-                res = True if (error <  self._error_tolerance) else False
-                assert res
+                
+                assert ref
  
     def binary_treatment_testsuite(self, num_samples=100000,num_common_causes=1,tests_to_run="all"):
         self.null_refutation_test(num_common_causes=num_common_causes,num_samples=num_samples)
