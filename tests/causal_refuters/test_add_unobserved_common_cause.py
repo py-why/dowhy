@@ -42,7 +42,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
                 effect_strength_on_t = effect_strength_on_t,
                 effect_strength_on_y = effect_strength_on_y)
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
-        mock_fig.assert_called()  # we patched figure plotting call to avoid drawing plots during tests
+        assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
     @pytest.mark.parametrize(["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
                              [(0.01, "iv.instrumental_variable", np.arange(0.01, 0.02, 0.001), 0.02),])
@@ -56,7 +56,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
                 effect_strength_on_t = effect_strength_on_t,
                 effect_strength_on_y = effect_strength_on_y)
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
-        mock_fig.assert_called()  # we patched figure plotting call to avoid drawing plots during tests
+        assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
     @pytest.mark.parametrize(["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
                              [(0.01, "iv.instrumental_variable", 0.01, np.arange(0.02, 0.03, 0.001)),])
@@ -70,5 +70,5 @@ class TestAddUnobservedCommonCauseRefuter(object):
                 effect_strength_on_t = effect_strength_on_t,
                 effect_strength_on_y = effect_strength_on_y)
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
-        mock_fig.assert_called()  # we patched figure plotting call to avoid drawing plots during tests
+        assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
