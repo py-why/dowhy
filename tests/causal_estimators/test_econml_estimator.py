@@ -1,6 +1,5 @@
 import pytest
 import itertools
-import keras
 
 from dowhy import CausalModel
 from dowhy import datasets
@@ -19,6 +18,8 @@ class TestEconMLEstimator:
     """ 
 
     def test_backdoor_estimators(self):
+        econml = pytest.importorskip("econml")
+        
         # Setup data
         data = datasets.linear_dataset(
             10, num_common_causes=4, num_samples=10000,
@@ -81,6 +82,8 @@ class TestEconMLEstimator:
                         })
 
     def test_iv_estimators(self):
+        econml = pytest.importorskip("econml")
+        keras = pytest.importorskip("keras")
         # Setup data
         data = datasets.linear_dataset(
             10, num_common_causes=4, num_samples=10000,

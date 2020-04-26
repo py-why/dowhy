@@ -157,7 +157,7 @@ class TestPandasDoAPI(object):
             error, error_tolerance * 100, ate, data['ate'])
         )
         assert res
-    
+
     '''
     In the following three tests, we have made use of the assert True at the end, but it is not
     a tautology due to the fact the function being tested has the ability to raise an exception
@@ -176,8 +176,7 @@ class TestPandasDoAPI(object):
                         variable_types=variable_types,
                         outcome='y',
                         proceed_when_unidentifiable=True,
-                        common_causes=['W0']).groupby('v0').mean().plot(y='y', kind='bar')
-
+                        common_causes=['W0']).groupby('v0').mean()
         assert True
 
     @pytest.mark.parametrize(["N","variable_types"],
@@ -193,9 +192,8 @@ class TestPandasDoAPI(object):
                         variable_types=variable_types,
                         outcome='y',
                         proceed_when_unidentifiable=True,
-                        common_causes=['W0']).groupby('v0').mean().plot(y='y', kind='bar')
-
-    assert True
+                        common_causes=['W0']).groupby('v0').mean()
+        assert True
 
     @pytest.mark.parametrize(["N","variable_types"],
                             [(10000,{}),])
@@ -210,9 +208,8 @@ class TestPandasDoAPI(object):
                         variable_types=variable_types,
                         outcome='y',
                         proceed_when_unidentifiable=True,
-                        common_causes=['W0']).groupby('v0').mean().plot(y='y', kind='bar')
-
-    assert True
+                        common_causes=['W0']).groupby('v0').mean()
+        assert True
 
     @pytest.mark.parametrize(["N","variable_types"],
                             [(1,{'v0': 'b', 'W0': 'c'}),])
@@ -222,6 +219,5 @@ class TestPandasDoAPI(object):
         dd = df.causal.do(x=['x'], outcome='y', common_causes=['a', 'b'],
                     proceed_when_unidentifiable=True,
                     variable_types=dict(x='c', y='c', a='c', b='c'))
-        
         print(dd)
-        
+

@@ -2,7 +2,6 @@ import string
 from importlib import import_module
 
 from dowhy.causal_estimator import CausalEstimator
-import econml
 
 def get_class_object(method_name, *args, **kwargs):
     # from https://www.bnmetrics.com/blog/factory-pattern-in-python3-simple-version
