@@ -8,6 +8,7 @@ from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
 from sklearn.preprocessing import PolynomialFeatures
 
+econml = pytest.importorskip("econml")
 
 class TestEconMLEstimator:
     """Smoke tests for the integration with EconML estimators
@@ -18,8 +19,6 @@ class TestEconMLEstimator:
     """ 
 
     def test_backdoor_estimators(self):
-        econml = pytest.importorskip("econml")
-        
         # Setup data
         data = datasets.linear_dataset(
             10, num_common_causes=4, num_samples=10000,
@@ -82,7 +81,6 @@ class TestEconMLEstimator:
                         })
 
     def test_iv_estimators(self):
-        econml = pytest.importorskip("econml")
         keras = pytest.importorskip("keras")
         # Setup data
         data = datasets.linear_dataset(
