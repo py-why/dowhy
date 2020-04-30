@@ -217,7 +217,7 @@ class DummyOutcomeRefuter(CausalRefuter):
             data_chunks.append( ~self._data[ self._data[treatment_variable_name] ])
 
         # We use string arguments to account for both 32 and 64 bit varaibles
-        elif 'float' in variable_type.name or
+        elif 'float' in variable_type.name or\
                'int' in variable_type.name:
             # action for continuous variables
             data_copy = copy.deepcopy( self._data )
@@ -227,7 +227,6 @@ class DummyOutcomeRefuter(CausalRefuter):
 
         elif 'categorical' in variable_type.name:
             # Action for categorical variables
-            categories = list( self._data[treatment_variable_name].cat.categories )
             groups = data_copy.groupby(treatment_variable_name)
             data_chunks = [groups.get_group(group) for group in groups ]
         else:
