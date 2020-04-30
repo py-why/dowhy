@@ -104,16 +104,17 @@ class DummyOutcomeRefuter(CausalRefuter):
         estimates = []
         for chunk in data_chunks:
 
-            X = chunk[self._chosen_variables]
+            X_input = chunk[self._chosen_variables]
             new_outcome = chunk['y']
-
+            X = self._data[self._chosen_variables]
+            
             for action, func_args in self._transformations:
 
                 if callable(action):
-                    estimator = action(X, new_outcome, **func_args)
+                    estimator = action(X_input, new_outcome, **func_args)
                     new_outcome = estimator(X)
                 elif action in DummyOutcomeRefuter.SUPPORTED_ESTIMATORS:
-                    estimator = self._estimate_dummy_outcome(func_args, action, new_outcome)
+                    estimator = self._estimate_dummy_outcome(func_args, action, new_outcome, X_input)
                     new_outcome = estimator(X)
                 elif action == 'noise':
                     new_outcome = self._noise(new_outcome, func_args)
@@ -229,9 +230,9 @@ class DummyOutcomeRefuter(CausalRefuter):
 
         return data_chunks
             
-    def _estimate_dummy_outcome(self, func_args, action, outcome):
+    def _estimate_dummy_outcome(self, func_args, action, outcome, X_chunk):
         estimator = self._get_regressor_object(action, func_args)
-        X = self._data[self._chosen_variables]
+        X = X_chunk
         y = outcome
         estimator = estimator.fit(X, y)
         
