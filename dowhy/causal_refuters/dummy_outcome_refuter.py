@@ -1,3 +1,8 @@
+'''
+WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP 
+WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP  
+WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP 
+'''
 import copy
 import numpy as np
 import pandas as pd
@@ -107,7 +112,7 @@ class DummyOutcomeRefuter(CausalRefuter):
             X_input = chunk[self._chosen_variables]
             new_outcome = chunk['y']
             X = self._data[self._chosen_variables]
-            
+
             for action, func_args in self._transformations:
 
                 if callable(action):
