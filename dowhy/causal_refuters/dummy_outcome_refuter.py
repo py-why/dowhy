@@ -105,7 +105,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         self.logger.info("Refutation over {} simulated datasets".format(self._num_simulations) )
         self.logger.info("The transformation passed: {}".format(self._transformations) )
 
-        data_chunks = self.data_preprocess()
+        data_chunks = self.preprocess_data_by_treatment()
         estimates = []
         for chunk in data_chunks:
 
@@ -202,7 +202,7 @@ class DummyOutcomeRefuter(CausalRefuter):
 
         return refute
 
-    def data_preprocess(self):
+    def preprocess_data_by_treatment(self):
         data_chunks = []
 
         assert len(self._treatment_name) == 1, "At present, DoWhy supports a simgle treatment variable"
