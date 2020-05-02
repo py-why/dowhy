@@ -66,7 +66,8 @@ class CausalEstimator:
         self._target_units = target_units
         self._effect_modifier_names = effect_modifiers
         self._confidence_intervals = confidence_intervals
-        self._estimate = None
+        self.bootstrap_estimates = None
+        #self._estimate = None
         self._effect_modifiers = None
         self.method_params = params
 
@@ -75,20 +76,19 @@ class CausalEstimator:
             for key, value in params.items():
                 setattr(self, key, value)
 
-        
         self.logger = logging.getLogger(__name__)
 
         # Checking if some parameters were set, otherwise setting to default values
         if not hasattr(self, 'num_simulations'):
             self.num_simulations = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST
 
-        if not hasattr(self, 'num_ci_simulations') and self._confidence_intervals:
+        if not hasattr(self, 'num_ci_simulations'):
             self.num_ci_simulations = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI
 
-        if not hasattr(self, 'sample_size_fraction') and self._confidence_intervals:
+        if not hasattr(self, 'sample_size_fraction'):
             self.sample_size_fraction = CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION
 
-        if not hasattr(self, 'confidence_level') and self._confidence_intervals:
+        if not hasattr(self, 'confidence_level'):
             self.confidence_level = CausalEstimator.DEFAULT_CONFIDENCE_LEVEL
 
         # Setting more values
@@ -156,14 +156,21 @@ class CausalEstimator:
         """
 
         est = self._estimate_effect()
-        self._estimate = est
+        #self._estimate = est
+        est.add_estimator(self)
 
         if self._significance_test:
             signif_dict = self.test_significance(est)
             est.add_significance_test_results(signif_dict)
         if self._confidence_intervals:
-            confidence_intervals = self.get_confidence_intervals(est)
+            self.bootstrap_estimates = self._generate_bootstrap_estimates()
+            confidence_intervals = self.estimate_confidence_intervals()
+            est.confidence_level = self.confidence_level
             est.add_confidence_intervals(confidence_intervals)
+            # Also compute standard error
+            std_error = self.estimate_std_error()
+            est.add_std_error(std_error)
+
         if self._effect_strength_eval:
             effect_strength_dict = self.evaluate_effect_strength(est)
             est.add_effect_strength(effect_strength_dict)
@@ -195,7 +202,46 @@ class CausalEstimator:
     def construct_symbolic_estimator(self, estimand):
         raise NotImplementedError
 
-    def get_confidence_intervals(self, estimate, num_ci_simulations = None, sample_size_fraction = None, confidence_level = None):
+    def _generate_bootstrap_estimates(self, num_bootstrap_simulations=None,
+            sample_size_fraction=None):
+        # Use existing params, if new user defined params are not present
+        if num_bootstrap_simulations is None:
+            num_bootstrap_simulations = self.num_ci_simulations
+        if sample_size_fraction is None:
+            sample_size_fraction = self.sample_size_fraction
+        # The array that stores the results of all estimations
+        simulation_results = np.zeros(num_bootstrap_simulations)
+
+        # Find the sample size the proportion with the population size
+        sample_size= int( sample_size_fraction * len(self._data) )
+
+        if sample_size > len(self._data):
+            self.logger.warning("WARN: The sample size is greater than the data being sampled")
+        
+        self.logger.info("INFO: The sample size: {}".format(sample_size) )
+        self.logger.info("INFO: The number of simulations: {}".format(num_bootstrap_simulations) )
+        
+        # Perform the set number of simulations
+        for index in range(num_bootstrap_simulations):
+            new_data = resample(self._data,n_samples=sample_size)
+
+            new_estimator = type(self)(
+                new_data,
+                self._target_estimand,
+                self._target_estimand.treatment_variable, self._target_estimand.outcome_variable, #names of treatment and outcome
+                test_significance=None,
+                evaluate_effect_strength=False,
+                confidence_intervals = False,
+                target_units = self._target_units,
+                effect_modifiers = self._effect_modifier_names,
+                params = self.method_params
+                )
+            new_effect = new_estimator.estimate_effect()
+            simulation_results[index] = new_effect.value
+        
+        return simulation_results
+
+    def estimate_confidence_intervals(self, bootstrap_estimates=None, confidence_level=None):
         '''
             Find the confidence intervals corresponding to any estimator
             This is done with the help of bootstrapped confidence intervals
@@ -211,48 +257,35 @@ class CausalEstimator:
             https://ocw.mit.edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings/MIT18_05S14_Reading24.pdf
             https://projecteuclid.org/download/pdf_1/euclid.ss/1032280214
         '''
-
-        # Use existing params, if new user defined params are not present
-        if num_ci_simulations is None:
-            num_ci_simulations = self.num_ci_simulations
-        if sample_size_fraction is None:
-            sample_size_fraction = self.sample_size_fraction
+        if bootstrap_estimates is None:
+            bootstrap_estimates = self.bootstrap_estimates
         if confidence_level is None:
             confidence_level = self.confidence_level
-        
-
-        # The array that stores the results of all estimations
-        simulation_results = np.zeros(num_ci_simulations)
-
-        # Find the sample size the proportion with the population size
-        sample_size= int( sample_size_fraction * len(self._data) )
-
-        if sample_size > len(self._data):
-            self.logger.warning("WARN: The sample size is greater than the data being sampled")
-        
-        self.logger.info("INFO: The sample size: {}".format(sample_size) )
-        self.logger.info("INFO: The number of simulations: {}".format(num_ci_simulations) )
-        
-        # Perform the set number of simulations
-        for index in range(num_ci_simulations):
-            new_data = resample(self._data,n_samples=sample_size)
-
-            new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
-            new_effect = new_estimator.estimate_effect()
-            simulation_results[index] = new_effect.value
-        
+       
+        if bootstrap_estimates is None:
+            bootstrap_estimates = self._generate_bootstrap_estimates()
         # Now use the data obtained from the simulations to get the value of the confidence estimates
         # Sort the simulations
-        simulation_results.sort()
+        bootstrap_estimates.sort()
         # Now we take the (1- p)th and the (p)th values, where p is the chosen confidence level
-        lower_bound_index = int( ( 1 - confidence_level ) * len(simulation_results) ) 
-        upper_bound_index = int( confidence_level * len(simulation_results) )
+        lower_bound_index = int( ( 1 - confidence_level ) * len(bootstrap_estimates) ) 
+        upper_bound_index = int( confidence_level * len(bootstrap_estimates) )
         
         # get the values
-        lower_bound = simulation_results[lower_bound_index]
-        upper_bound = simulation_results[upper_bound_index]
+        lower_bound = bootstrap_estimates[lower_bound_index]
+        upper_bound = bootstrap_estimates[upper_bound_index]
 
         return (lower_bound, upper_bound)
+
+    def estimate_std_error(self, bootstrap_estimates=None):
+        if bootstrap_estimates is None:
+            bootstrap_estimates = self.bootstrap_estimates
+
+        if bootstrap_estimates is None:
+            bootstrap_estimates = self._generate_bootstrap_estimates()
+
+        std_error = np.std(bootstrap_estimates)
+        return std_error
 
     def test_significance(self, estimate, num_simulations=None):
         """Test statistical significance of obtained estimate.
@@ -339,6 +372,11 @@ class CausalEstimate:
 
         self.significance_test = None
         self.effect_strength = None
+        self.confidence_intervals = None
+        self.std_error = None
+
+    def add_estimator(self, estimator_instance):
+        self.estimator = estimator_instance
 
     def add_significance_test_results(self, test_results):
         self.significance_test = test_results
@@ -346,11 +384,27 @@ class CausalEstimate:
     def add_confidence_intervals(self, confidence_intervals):
         self.confidence_intervals = confidence_intervals
 
+    def add_std_error(self, std_error):
+        self.std_error = std_error
+
     def add_effect_strength(self, strength_dict):
         self.effect_strength = strength_dict
 
     def add_params(self, **kwargs):
         self.params.update(kwargs)
+
+    def get_confidence_intervals(self):
+        if self.confidence_intervals is None:
+            self.confidence_intervals = self.estimator.estimate_confidence_intervals()
+        print("Confidence intervals for the estimate with level={0}: {1}".format(
+            self.estimator.confidence_level,self.confidence_intervals))
+        return self.confidence_intervals
+
+    def get_standard_error(self):
+        if self.std_error is None:
+            self.std_error = self.estimator.estimate_std_error()
+        print("Standard error for the estimate: {0}".format(self.std_error))
+        return self.std_error
 
     def __str__(self):
         s = "*** Causal Estimate ***\n"
