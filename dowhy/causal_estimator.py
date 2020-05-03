@@ -50,7 +50,7 @@ class CausalEstimator:
         :param effect_modifiers: variables on which to compute separate effects, or return a heterogeneous effect function. Not all methods support this currently.
         :param params: (optional) additional method parameters
             num_null_simulations: The number of simulations for testing the statistical significance of the estimator
-            num_ci_simulations: The number of simulations for finding the confidence estimate for a estimate
+            num_ci_simulations: The number of simulations for finding the confidence interval (and/or standard error) for a estimate
             sample_size_fraction: The size of the sample for the bootstrap estimator
             confidence_level: The confidence level of the confidence interval estimate
         :returns: an instance of the estimator class.
@@ -197,6 +197,12 @@ class CausalEstimator:
 
     def _generate_bootstrap_estimates(self, num_bootstrap_simulations,
             sample_size_fraction):
+        """ Helper function to generate causal estimates over bootstrapped samples.
+
+        :param num_bootstrap_simulations: Number of simulations for the bootstrap method.
+        :param sample_size_fraction: Fraction of the dataset to be resampled.
+        :returns: A collections.namedtuple containing a list of bootstrapped estimates and a dictionary containing parameters used for the bootstrap.
+        """
         # The array that stores the results of all estimations
         simulation_results = np.zeros(num_bootstrap_simulations)
 
@@ -236,6 +242,18 @@ class CausalEstimator:
     def _estimate_confidence_intervals_with_bootstrap(self,
             confidence_level=None,
             num_simulations=None, sample_size_fraction=None):
+        '''
+            Method to compute confidence interval using bootstrapped sampling.
+            
+            :param confidence_level: The level for which to compute CI (e.g., 95% confidence level translates to confidence_level=0.95)
+            :param num_simulations: The number of simulations to be performed to get the bootstrap confidence intervals.
+            :param sample_size_fraction: The fraction of the dataset to be resampled.
+            :returns: confidence interval at the specified level.
+
+            For more details on bootstrap or resampling statistics, refer to the following links:
+            https://ocw.mit.edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings/MIT18_05S14_Reading24.pdf
+            https://projecteuclid.org/download/pdf_1/euclid.ss/1032280214
+        '''
         # Using class default parameters if not specified
         if confidence_level is None:
             confidence_level = self.confidence_level
@@ -267,24 +285,26 @@ class CausalEstimator:
 
     def _estimate_confidence_intervals(self, method=None, confidence_level=None,
             **kwargs):
+        '''
+            This method is to be overriden by the child classes, so that they 
+            can run a confidence interval estimation method suited to the specific 
+            causal estimator.
+        '''
         raise NotImplementedError
 
     def estimate_confidence_intervals(self, method="bootstrap", 
             confidence_level=None, **kwargs):
         '''
             Find the confidence intervals corresponding to any estimator
-            This is done with the help of bootstrapped confidence intervals
+            By default, this is done with the help of bootstrapped confidence intervals
+            but can be overridden if the specific estimator implements other methods of estimating confidence intervals. 
 
-            This function can be overriden by any function that inherits this method. So, that they can implement their own way of finding confidence intervals.
+            If the method provided is not bootstrap, this function calls the implementation of the specific estimator.
 
-            :param estimate: The obtained estimate.
-            :param num_ci_simulations: The number of simulations to be performed to get the bootstrap confidence intervals.
-            :param sample_size_fraction: The fraction of the dataset to be resampled.
+            :param method: Method for estimating confidence intervals. 
             :param confidence_level: The confidence level of the confidence intervals of the estimate.
-            
-            For more details, refer to the following links:
-            https://ocw.mit.edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings/MIT18_05S14_Reading24.pdf
-            https://projecteuclid.org/download/pdf_1/euclid.ss/1032280214
+            :param kwargs: Other optional args to be passed to the CI method.
+            :returns: The obtained confidence interval. 
         '''
         confidence_intervals = None
         if method == "bootstrap":
@@ -297,6 +317,12 @@ class CausalEstimator:
         
     def _estimate_std_error_with_bootstrap(self, num_simulations=None,
             sample_size_fraction=None):
+        """ Compute standard error using the bootstrap method.
+
+        :param num_simulations: Number of bootstrapped samples.
+        :param sample_size_fraction: Fraction of data to be resampled. 
+        :returns: Standard error of the obtained estimate.
+        """
         # Use existing params, if new user defined params are not present
         if num_simulations is None:
             num_simulations = self.num_ci_simulations
@@ -315,9 +341,21 @@ class CausalEstimator:
         return std_error
 
     def _estimate_std_error(self, method=None, **kwargs):
+        '''
+            This method is to be overriden by the child classes, so that they 
+            can run a standard error estimation method suited to the specific 
+            causal estimator.
+        '''
         raise NotImplementedError
 
     def estimate_std_error(self, method="bootstrap",  **kwargs):
+        """ Compute standard error of an obtained causal estimate.
+
+        :param method: Method for computing the standard error. 
+        :param **kwargs: Other optional parameters to be passed to the estimating method.
+        :returns: Standard error of the causal estimate.
+        """
+
         std_error = None
         if method=="bootstrap":
             std_error = self._estimate_std_error_with_bootstrap(**kwargs)
@@ -326,6 +364,12 @@ class CausalEstimator:
         return std_error
 
     def _test_significance_with_bootstrap(self, estimate_value, num_null_simulations=None):
+        """ Test statistical significance of an estimate using the bootstrap method.
+
+        :param estimate_value: Obtained estimate's value
+        :param num_null_simulations: Number of simulations for the null hypothesis
+        :returns: p-value of the statistical significance test.
+        """
         # Use existing params, if new user defined params are not present
         if num_null_simulations is None:
             num_null_simulations = self.num_null_simulations
@@ -369,18 +413,26 @@ class CausalEstimator:
         return signif_dict
 
     def _test_significance(self, estimate_value, method=None, **kwargs):
+        '''
+            This method is to be overriden by the child classes, so that they 
+            can run a significance test suited to the specific 
+            causal estimator.
+        '''
         raise NotImplementedError
 
     def test_significance(self, estimate_value, method="bootstrap", **kwargs):
         """Test statistical significance of obtained estimate.
 
-        Uses resampling to create a non-parametric significance test.
-        A general procedure. Individual estimators can override this method.
+        By default, uses resampling to create a non-parametric significance test.
+        A general procedure. Individual child estimators can implement different methods. 
+        If the method name is different from "bootstrap", this function calls the 
+        implementation of the child estimator.
 
         :param self: object instance of class Estimator
-        :param estimate: obtained estimate
-        :param num_null_simulations: (optional) number of simulations to run
-        :returns:
+        :param estimate_value: obtained estimate's value
+        :param method: Method for checking statistical significance
+
+        :returns: p-value from the significance test
 
         """
         signif_dict = None
@@ -423,6 +475,15 @@ class CausalEstimator:
 
     @staticmethod
     def is_bootstrap_parameter_changed(bootstrap_estimates_params, given_params):
+        """ Check whether parameters of the bootstrap have changed. 
+
+        This is an efficiency method that checks if fresh resampling of the bootstrap samples is required.
+        Returns True if parameters have changed and resampling should be done again.
+
+        :param bootstrap_estimates_params: A dictionary of parameters for the current bootstrap samples
+        :param given_params: A dictionary of parameters passed by the user
+        :returns : A binary flag denoting whether the parameters are different. 
+        """
         is_any_parameter_changed = False
         for prm, val in bootstrap_estimates_params.items():
             given_val = given_params.get(prm, None)
@@ -476,12 +537,16 @@ class CausalEstimate:
         self.params.update(kwargs)
 
     def get_confidence_intervals(self, confidence_level=None, **kwargs):
+        """ Get confidence interval from the estimator.
+        """
         confidence_intervals = self.estimator.estimate_confidence_intervals(
                 confidence_level=confidence_level,
                 **kwargs)
         return confidence_intervals
 
     def get_standard_error(self, **kwargs):
+        """ Get standard error from the estimator. 
+        """
         std_error = self.estimator.estimate_std_error(**kwargs)
         return std_error
 
