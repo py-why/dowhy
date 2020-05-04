@@ -105,30 +105,41 @@ class DummyOutcomeRefuter(CausalRefuter):
         self.logger.info("Refutation over {} simulated datasets".format(self._num_simulations) )
         self.logger.info("The transformation passed: {}".format(self._transformations) )
 
-        data_chunks = self.preprocess_data_by_treatment()
+        groups = self.preprocess_data_by_treatment()
         estimates = []
-        for chunk in data_chunks:
+        for key_train, _ in groups:
+            X_train = groups.get_group(key_train)[self._chosen_variables].values
+            new_outcome_train = groups.get_group(key_train)['y'].values
+            validation_df = [] 
+            for key_validation, _ in groups:
+                if key_validation != key_train:
+                    validation_df.append(groups.get_group(key_validation))
 
-            X_input = chunk[self._chosen_variables]
-            new_outcome = chunk['y']
-            X = self._data[self._chosen_variables]
+            validation_df = pd.concat(validation_df)
+            X_validation = validation_df[self._chosen_variables].values
+            new_outcome_validation = validation_df['y'].values
 
             for action, func_args in self._transformations:
 
                 if callable(action):
-                    estimator = action(X_input, new_outcome, **func_args)
-                    new_outcome = estimator(X)
+                    estimator = action(X_train, new_outcome_train, **func_args)
+                    new_outcome_train = estimator(X_train)
+                    new_outcome_validation = estimator(X_validation)
                 elif action in DummyOutcomeRefuter.SUPPORTED_ESTIMATORS:
-                    estimator = self._estimate_dummy_outcome(func_args, action, new_outcome, X_input)
-                    new_outcome = estimator(X)
+                    estimator = self._estimate_dummy_outcome(func_args, action, new_outcome_train, X_train)
+                    new_outcome_train = estimator(X_train)
+                    new_outcome_validation = estimator(X_validation)
                 elif action == 'noise':
-                    new_outcome = self._noise(new_outcome, func_args)
+                    new_outcome_train = self._noise(new_outcome_train, func_args)
+                    new_outcome_validation = self._noise(new_outcome_validation, func_args)
                 elif action == 'permute':
-                    new_outcome = self._permute(new_outcome, func_args)
+                    new_outcome_train = self._permute(new_outcome_train, func_args)
+                    new_outcome_validation = self._permute(new_outcome_validation, func_args)
                 elif action =='zero':
-                    new_outcome = np.zeros(new_outcome.shape)
-
-            new_data = chunk.assign(dummy_outcome=new_outcome)
+                    new_outcome_train = np.zeros(new_outcome_train.shape)
+                    new_outcome_validation = np.zeros(new_outcome_train.shape)
+            
+            new_data = validation_df.assign(dummy_outcome=new_outcome_validation)
             new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
             estimates.append(new_effect.value)
@@ -203,7 +214,6 @@ class DummyOutcomeRefuter(CausalRefuter):
         return refute
 
     def preprocess_data_by_treatment(self):
-        data_chunks = []
 
         assert len(self._treatment_name) == 1, "At present, DoWhy supports a simgle treatment variable"
         
@@ -211,11 +221,12 @@ class DummyOutcomeRefuter(CausalRefuter):
         variable_type = self._data[treatment_variable_name].dtypes
         
         if bool == variable_type:
-            # All the positive values go the first bucket
-            data_chunks.append( self._data[ self._data[treatment_variable_name] ])
-            # All the negative values go into the other
-            data_chunks.append( ~self._data[ self._data[treatment_variable_name] ])
-
+            # All the True values go the first bucket
+            # data_chunks.append( self._data[ self._data[treatment_variable_name] ])
+            # All the False values go into the other
+            # data_chunks.append( self._data[ ~self._data[treatment_variable_name] ])
+            groups = self._data.groupby(treatment_variable_name)
+            return groups
         # We use string arguments to account for both 32 and 64 bit varaibles
         elif 'float' in variable_type.name or\
                'int' in variable_type.name:
@@ -223,16 +234,18 @@ class DummyOutcomeRefuter(CausalRefuter):
             data_copy = copy.deepcopy( self._data )
             data_copy['bins'] = pd.qcut(data_copy[treatment_variable_name], 10)
             groups = data_copy.groupby('bins')
-            data_chunks = [groups.get_group(group) for group in groups ]
+            # data_chunks = [groups.get_group(group) for group in groups ]
+            return groups
 
         elif 'categorical' in variable_type.name:
             # Action for categorical variables
             groups = data_copy.groupby(treatment_variable_name)
-            data_chunks = [groups.get_group(group) for group in groups ]
+            # data_chunks = [groups.get_group(group) for group in groups ]
+            return groups
         else:
             raise ValueError("Passed {}. Expected bool, float, int or categorical".format(variable_type.name))
 
-        return data_chunks
+        # return data_chunks
             
     def _estimate_dummy_outcome(self, func_args, action, outcome, X_chunk):
         estimator = self._get_regressor_object(action, func_args)
