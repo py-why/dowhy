@@ -166,58 +166,6 @@ class DummyOutcomeRefuter(CausalRefuter):
             new_effect = new_estimator.estimate_effect()
             estimates.append(new_effect.value)
 
-        # # This flag is to make sure we store the estimators whose input is deterministic
-        # save_estimators = True
-        # # We store the value of the estimators in the format "estimator_name" +  "pos_in_transform" : estimator_object
-        # saved_estimator_dict = {}
-        
-        # X = self._data[self._chosen_variables]
-        # new_outcome = self._data['y']
-        
-        # for index in range(self._num_simulations):
-        #     transform_num = 0
-        #     for action, func_args in self._transformations:
-
-        #         if callable(action):
-        #             new_outcome = action(X, **func_args)
-
-        #         elif action in DummyOutcomeRefuter.SUPPORTED_ESTIMATORS:
-        #             if action + str(transform_num) in saved_estimator_dict:
-        #                 estimator = saved_estimator_dict[action + str(transform_num)]
-        #                 new_outcome = estimator(X)
-        #             else:
-        #                 estimator = self._estimate_dummy_outcome(func_args, action, new_outcome)
-        #                 new_outcome = estimator(X)
-        #                 if save_estimators:
-        #                     saved_estimator_dict[action + str(transform_num)] = estimator
-
-        #         elif action == 'noise':
-        #             save_estimators = False
-        #             new_outcome = self._noise(new_outcome, func_args)
-
-        #         elif action == 'permute':
-        #             save_estimators = False
-        #             new_outcome = self._permute(new_outcome, func_args)
-
-        #         elif action =='zero':
-        #             save_estimators = False
-        #             new_outcome = np.zeros(new_outcome.shape)
-            
-        #         transform_num += 1
-            
-        #     save_estimators = False       
-        
-        # Create a new column in the data by the name of dummy_outcome
-        
-        # new_data = self._data.assign(dummy_outcome=new_outcome)
-
-        # # Sanity check the data
-        # self.logger.debug(new_data[0:10])
-
-        # new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
-        # new_effect = new_estimator.estimate_effect()
-        # sample_estimates[index] = new_effect.value
-
         refute = CausalRefutation(self._estimate.value,
                                         np.mean(sample_estimates),
                                         refutation_type="Refute: Use a Dummy Outcome")
@@ -243,14 +191,10 @@ class DummyOutcomeRefuter(CausalRefuter):
         variable_type = self._data[treatment_variable_name].dtypes
         
         if bool == variable_type:
-            # All the True values go the first bucket
-            # data_chunks.append( self._data[ self._data[treatment_variable_name] ])
-            # All the False values go into the other
-            # data_chunks.append( self._data[ ~self._data[treatment_variable_name] ])
             groups = self._data.groupby(treatment_variable_name)
             return groups
         # We use string arguments to account for both 32 and 64 bit varaibles
-        elif 'float' in variable_type.name or\
+        elif 'float' in variable_type.name or \
                'int' in variable_type.name:
             # action for continuous variables
             data =  self._data
@@ -259,14 +203,12 @@ class DummyOutcomeRefuter(CausalRefuter):
             data['bins'] = pd.cut(data[treatment_variable_name], num_bins)
             groups = data.groupby('bins')
             data.drop('bins')
-            # data_chunks = [groups.get_group(group) for group in groups ]
             return groups
 
         elif 'categorical' in variable_type.name:
             # Action for categorical variables
             groups = data.groupby(treatment_variable_name)
             groups = data.groupby('bins')
-            # data_chunks = [groups.get_group(group) for group in groups ]
             return groups
         else:
             raise ValueError("Passed {}. Expected bool, float, int or categorical".format(variable_type.name))
