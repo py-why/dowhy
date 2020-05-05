@@ -122,6 +122,15 @@ class DummyOutcomeRefuter(CausalRefuter):
         self.logger.info("Refutation over {} simulated datasets".format(self._num_simulations) )
         self.logger.info("The transformation passed: {}".format(self._transformations) )
 
+        no_estimator = self.check_for_estimator()
+        if no_estimator:
+            X_train = np.zeros(self._data[self._chosen_variables].shape)
+            outcome_train = np.zeros(self._data['y'].shape)
+            X_validation = self._data[self._chosen_variables].values
+            outcome_validation = self._data['y'].values
+
+            outcome_validation = self.process_data(X_train, outcome_train, X_validation, outcome_validation, self._transformations)
+
         groups = self.preprocess_data_by_treatment()
         estimates = []
         for key_train, _ in groups:
@@ -141,25 +150,7 @@ class DummyOutcomeRefuter(CausalRefuter):
             if X_train.shape[0] <= self._min_data_point_threshold:
                 transformations = DummyOutcomeRefuter.DEFAULT_TRANSFORMATION
 
-            for action, func_args in transformations:
-
-                if callable(action):
-                    estimator = action(X_train, outcome_train, **func_args)
-                    outcome_train = estimator(X_train)
-                    outcome_validation = estimator(X_validation)
-                elif action in DummyOutcomeRefuter.SUPPORTED_ESTIMATORS:
-                    estimator = self._estimate_dummy_outcome(action, outcome_train, X_train, **func_args)
-                    outcome_train = estimator(X_train)
-                    outcome_validation = estimator(X_validation)
-                elif action == 'noise':
-                    outcome_train = self._noise(outcome_train, **func_args)
-                    outcome_validation = self._noise(outcome_validation, **func_args)
-                elif action == 'permute':
-                    outcome_train = self._permute(outcome_train, **func_args)
-                    outcome_validation = self._permute(outcome_validation, **func_args)
-                elif action =='zero':
-                    outcome_train = np.zeros(outcome_train.shape)
-                    outcome_validation = np.zeros(outcome_train.shape)
+            outcome_validation = self.process_data(X_train, outcome_train, X_validation, outcome_validation, transformations)
             
             new_data = validation_df.assign(dummy_outcome=outcome_validation)
             new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
@@ -182,6 +173,37 @@ class DummyOutcomeRefuter(CausalRefuter):
         # )
 
         return refute
+    def process_data(self, X_train, outcome_train, X_validation, outcome_validation, transformations):
+        for action, func_args in transformations:
+            if callable(action):
+                estimator = action(X_train, outcome_train, **func_args)
+                outcome_train = estimator(X_train)
+                outcome_validation = estimator(X_validation)
+            elif action in DummyOutcomeRefuter.SUPPORTED_ESTIMATORS:
+                estimator = self._estimate_dummy_outcome(action, outcome_train, X_train, **func_args)
+                outcome_train = estimator(X_train)
+                outcome_validation = estimator(X_validation)
+            elif action == 'noise':
+                if np.any(X_train):
+                    outcome_train = self._noise(outcome_train, **func_args)
+                outcome_validation = self._noise(outcome_validation, **func_args)
+            elif action == 'permute':
+                if np.any(X_train):
+                    outcome_train = self._permute(outcome_train, **func_args)
+                outcome_validation = self._permute(outcome_validation, **func_args)
+            elif action =='zero':
+                if np.any(X_train):
+                    outcome_train = np.zeros(outcome_train.shape)
+                outcome_validation = np.zeros(outcome_train.shape)
+
+        return outcome_validation
+            
+    def check_for_estimator(self):
+        for action,_ in self._transformations:
+            if callable(action) or action in DummyOutcomeRefuter.SUPPORTED_ESTIMATORS:
+                return False
+            
+        return True
 
     def preprocess_data_by_treatment(self):
 
