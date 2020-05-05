@@ -70,7 +70,13 @@ class DummyOutcomeRefuter(CausalRefuter):
     instance of an internal function.
     - 'bucket_size_scale_factor': float, DummyOutcomeRefuter.DEFAULT_BUCKET_SCALE_FACTOR by default
     For continuous data, the scale factor helps us scale the size of the bucket used on the data
-    Note: The number of buckets is given by (max value - min value)/(scale_factor * std_dev)
+    Note: 
+    The number of buckets is given by: 
+        (max value - min value)
+        ------------------------
+        (scale_factor * std_dev)
+    - 'min_data_point_threshold': int, DummyOutcomeRefuter.MIN_DATA_POINT_THRESHOLD by default
+    The minimum number of data points for an estimator to run.
     """
     # The currently supported estimators
     SUPPORTED_ESTIMATORS = ["linear_regression", "knn", "svm", "random_forest", "neural_network"]
@@ -78,13 +84,18 @@ class DummyOutcomeRefuter(CausalRefuter):
     DEFAULT_STD_DEV = 0.1
     # The default scaling factor to determine the bucket size 
     DEFAULT_BUCKET_SCALE_FACTOR = 0.5
+    # The minimum number of points for the estimator to run
+    MIN_DATA_POINT_THRESHOLD = 30
+    # The Default Transformation, when no arguments are given, or if the number of data points are insufficient for an estimator
+    DEFAULT_TRANSFORMATION = [("zero",""),("noise", 1)]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
         self._num_simulations = kwargs.pop("num_simulations", CausalRefuter.DEFAULT_NUM_SIMULATIONS)
-        self._transformations = kwargs.pop("transformations",[("zero",""),("noise", 1)])
+        self._transformations = kwargs.pop("transformations", DummyOutcomeRefuter.DEFAULT_TRANSFORMATION)
         self._bucket_size_scale_factor = kwargs.pop("bucket_size_scale_factor", DummyOutcomeRefuter.DEFAULT_BUCKET_SCALE_FACTOR)
+        self._min_data_point_threshold = kwargs.pop("min_data_point_threshold", DummyOutcomeRefuter.MIN_DATA_POINT_THRESHOLD)
         required_variables = kwargs.pop("required_variables", True)
 
         if required_variables is False:
@@ -116,7 +127,8 @@ class DummyOutcomeRefuter(CausalRefuter):
         for key_train, _ in groups:
             X_train = groups.get_group(key_train)[self._chosen_variables].values
             new_outcome_train = groups.get_group(key_train)['y'].values
-            validation_df = [] 
+            validation_df = []
+            transformations = self._transformations 
             for key_validation, _ in groups:
                 if key_validation != key_train:
                     validation_df.append(groups.get_group(key_validation))
@@ -125,7 +137,11 @@ class DummyOutcomeRefuter(CausalRefuter):
             X_validation = validation_df[self._chosen_variables].values
             new_outcome_validation = validation_df['y'].values
 
-            for action, func_args in self._transformations:
+            # If the number of data points is too few, run the default transformation: [("zero",""),("noise", 1)]
+            if X_train.shape[0] <= self._min_data_point_threshold:
+                transformations = DummyOutcomeRefuter.DEFAULT_TRANSFORMATION
+
+            for action, func_args in transformations:
 
                 if callable(action):
                     estimator = action(X_train, new_outcome_train, **func_args)
