@@ -4,6 +4,7 @@ WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP
 WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP 
 '''
 import copy
+import math
 import numpy as np
 import pandas as pd
 import logging
@@ -67,18 +68,23 @@ class DummyOutcomeRefuter(CausalRefuter):
     Note:
     These inputs are fed to the function for estimating the outcome variable. The same set of required_variables is used for each
     instance of an internal function.
+    - 'bucket_size_scale_factor': float, DummyOutcomeRefuter.DEFAULT_BUCKET_SCALE_FACTOR by default
+    For continuous data, the scale factor helps us scale the size of the bucket used on the data
+    Note: The number of buckets is given by (max value - min value)/(scale_factor * std_dev)
     """
     # The currently supported estimators
     SUPPORTED_ESTIMATORS = ["linear_regression", "knn", "svm", "random_forest", "neural_network"]
     # The default standard deviation for noise
-    DEFAULT_STD_DEV = 0.1 
+    DEFAULT_STD_DEV = 0.1
+    # The default scaling factor to determine the bucket size 
+    DEFAULT_BUCKET_SCALE_FACTOR = 0.5
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
         self._num_simulations = kwargs.pop("num_simulations", CausalRefuter.DEFAULT_NUM_SIMULATIONS)
         self._transformations = kwargs.pop("transformations",[("zero",""),("noise", 1)])
-        
+        self._bucket_size_scale_factor = kwargs.pop("bucket_size_scale_factor", DummyOutcomeRefuter.DEFAULT_BUCKET_SCALE_FACTOR)
         required_variables = kwargs.pop("required_variables", True)
 
         if required_variables is False:
@@ -231,15 +237,19 @@ class DummyOutcomeRefuter(CausalRefuter):
         elif 'float' in variable_type.name or\
                'int' in variable_type.name:
             # action for continuous variables
-            data_copy = copy.deepcopy( self._data )
-            data_copy['bins'] = pd.qcut(data_copy[treatment_variable_name], 10)
-            groups = data_copy.groupby('bins')
+            data =  self._data
+            std_dev = data[treatment_variable_name].std()
+            num_bins = ( data.max() - data.min() )/ (self._bucket_size_scale_factor * std_dev)
+            data['bins'] = pd.cut(data[treatment_variable_name], num_bins)
+            groups = data.groupby('bins')
+            data.drop('bins')
             # data_chunks = [groups.get_group(group) for group in groups ]
             return groups
 
         elif 'categorical' in variable_type.name:
             # Action for categorical variables
-            groups = data_copy.groupby(treatment_variable_name)
+            groups = data.groupby(treatment_variable_name)
+            groups = data.groupby('bins')
             # data_chunks = [groups.get_group(group) for group in groups ]
             return groups
         else:
