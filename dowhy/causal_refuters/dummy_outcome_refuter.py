@@ -273,9 +273,9 @@ class DummyOutcomeRefuter(CausalRefuter):
 
         # return data_chunks
             
-    def _estimate_dummy_outcome(self, func_args, action, outcome, X_chunk):
+    def _estimate_dummy_outcome(self, action, outcome, X_train, func_args):
         estimator = self._get_regressor_object(action, func_args)
-        X = X_chunk
+        X = X_train
         y = outcome
         estimator = estimator.fit(X, y)
         
