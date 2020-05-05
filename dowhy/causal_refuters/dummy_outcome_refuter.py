@@ -126,7 +126,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         estimates = []
         for key_train, _ in groups:
             X_train = groups.get_group(key_train)[self._chosen_variables].values
-            new_outcome_train = groups.get_group(key_train)['y'].values
+            outcome_train = groups.get_group(key_train)['y'].values
             validation_df = []
             transformations = self._transformations 
             for key_validation, _ in groups:
@@ -135,7 +135,7 @@ class DummyOutcomeRefuter(CausalRefuter):
 
             validation_df = pd.concat(validation_df)
             X_validation = validation_df[self._chosen_variables].values
-            new_outcome_validation = validation_df['y'].values
+            outcome_validation = validation_df['y'].values
 
             # If the number of data points is too few, run the default transformation: [("zero",""),("noise", 1)]
             if X_train.shape[0] <= self._min_data_point_threshold:
@@ -144,24 +144,24 @@ class DummyOutcomeRefuter(CausalRefuter):
             for action, func_args in transformations:
 
                 if callable(action):
-                    estimator = action(X_train, new_outcome_train, **func_args)
-                    new_outcome_train = estimator(X_train)
-                    new_outcome_validation = estimator(X_validation)
+                    estimator = action(X_train, outcome_train, **func_args)
+                    outcome_train = estimator(X_train)
+                    outcome_validation = estimator(X_validation)
                 elif action in DummyOutcomeRefuter.SUPPORTED_ESTIMATORS:
-                    estimator = self._estimate_dummy_outcome(func_args, action, new_outcome_train, X_train)
-                    new_outcome_train = estimator(X_train)
-                    new_outcome_validation = estimator(X_validation)
+                    estimator = self._estimate_dummy_outcome(func_args, action, outcome_train, X_train)
+                    outcome_train = estimator(X_train)
+                    outcome_validation = estimator(X_validation)
                 elif action == 'noise':
-                    new_outcome_train = self._noise(new_outcome_train, func_args)
-                    new_outcome_validation = self._noise(new_outcome_validation, func_args)
+                    outcome_train = self._noise(outcome_train, func_args)
+                    outcome_validation = self._noise(outcome_validation, func_args)
                 elif action == 'permute':
-                    new_outcome_train = self._permute(new_outcome_train, func_args)
-                    new_outcome_validation = self._permute(new_outcome_validation, func_args)
+                    outcome_train = self._permute(outcome_train, func_args)
+                    outcome_validation = self._permute(outcome_validation, func_args)
                 elif action =='zero':
-                    new_outcome_train = np.zeros(new_outcome_train.shape)
-                    new_outcome_validation = np.zeros(new_outcome_train.shape)
+                    outcome_train = np.zeros(outcome_train.shape)
+                    outcome_validation = np.zeros(outcome_train.shape)
             
-            new_data = validation_df.assign(dummy_outcome=new_outcome_validation)
+            new_data = validation_df.assign(dummy_outcome=outcome_validation)
             new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
             estimates.append(new_effect.value)
@@ -295,26 +295,26 @@ class DummyOutcomeRefuter(CausalRefuter):
         else:
             raise ValueError("The function: {} is not supported by dowhy at the moment".format(action))
 
-    def _permute(self, new_outcome, permute_fraction):
+    def _permute(self, outcome, permute_fraction):
         '''
         In this function, we make use of the Fisher Yates shuffle:
         https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
         '''
         if permute_fraction == 1:
-            new_outcome = pd.DataFrame(new_outcome)
-            new_outcome.columns = ['y']
-            return new_outcome['y'].sample(frac=1).values
+            outcome = pd.DataFrame(outcome)
+            outcome.columns = ['y']
+            return outcome['y'].sample(frac=1).values
         else:
             permute_fraction /= 2 # We do this as every swap leads to two changes 
-            changes = np.where( np.random.uniform(0,1,new_outcome.shape[0]) <= permute_fraction )[0] # As this is tuple containing a single element (array[...])
-            num_rows = new_outcome.shape[0]
+            changes = np.where( np.random.uniform(0,1,outcome.shape[0]) <= permute_fraction )[0] # As this is tuple containing a single element (array[...])
+            num_rows = outcome.shape[0]
             for change in changes:
                 if change + 1 < num_rows:
                     index = np.random.randint(change+1,num_rows)
-                    temp = new_outcome[change]
-                    new_outcome[change] = new_outcome[index]
-                    new_outcome[index] = temp
-            return new_outcome
+                    temp = outcome[change]
+                    outcome[change] = outcome[index]
+                    outcome[index] = temp
+            return outcome
 
-    def _noise(self, new_outcome, std_dev):
-        return new_outcome + np.random.normal(scale=std_dev,size=new_outcome.shape[0])
+    def _noise(self, outcome, std_dev):
+        return outcome + np.random.normal(scale=std_dev,size=outcome.shape[0])
