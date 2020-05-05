@@ -52,7 +52,7 @@ class DummyOutcomeRefuter(CausalRefuter):
     * If the function pd.Dataframe -> np.ndarray is already defined.
     [(func,func_params),('permute', permute_fraction), ('noise', std_dev)]
     * If a function from the above list is used
-    [('knn',{'n_neighbors':5}), ('permute', permute_fraction), ('noise', std_dev)]
+    [('knn',{'n_neighbors':5}), ('permute', {'permute_fraction': val}), ('noise', {'std_dev': val} )]
 
     - 'required_variables': int, list, bool, True by default
     The inputs are either an integer value, list or bool.
@@ -87,7 +87,7 @@ class DummyOutcomeRefuter(CausalRefuter):
     # The minimum number of points for the estimator to run
     MIN_DATA_POINT_THRESHOLD = 30
     # The Default Transformation, when no arguments are given, or if the number of data points are insufficient for an estimator
-    DEFAULT_TRANSFORMATION = [("zero",""),("noise", 1)]
+    DEFAULT_TRANSFORMATION = [("zero",""),("noise", {'std_dev':1})]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -137,7 +137,7 @@ class DummyOutcomeRefuter(CausalRefuter):
             X_validation = validation_df[self._chosen_variables].values
             outcome_validation = validation_df['y'].values
 
-            # If the number of data points is too few, run the default transformation: [("zero",""),("noise", 1)]
+            # If the number of data points is too few, run the default transformation: [("zero",""),("noise", {'std_dev':1} )]
             if X_train.shape[0] <= self._min_data_point_threshold:
                 transformations = DummyOutcomeRefuter.DEFAULT_TRANSFORMATION
 
@@ -148,15 +148,15 @@ class DummyOutcomeRefuter(CausalRefuter):
                     outcome_train = estimator(X_train)
                     outcome_validation = estimator(X_validation)
                 elif action in DummyOutcomeRefuter.SUPPORTED_ESTIMATORS:
-                    estimator = self._estimate_dummy_outcome(func_args, action, outcome_train, X_train)
+                    estimator = self._estimate_dummy_outcome(action, outcome_train, X_train, **func_args)
                     outcome_train = estimator(X_train)
                     outcome_validation = estimator(X_validation)
                 elif action == 'noise':
-                    outcome_train = self._noise(outcome_train, func_args)
-                    outcome_validation = self._noise(outcome_validation, func_args)
+                    outcome_train = self._noise(outcome_train, **func_args)
+                    outcome_validation = self._noise(outcome_validation, **func_args)
                 elif action == 'permute':
-                    outcome_train = self._permute(outcome_train, func_args)
-                    outcome_validation = self._permute(outcome_validation, func_args)
+                    outcome_train = self._permute(outcome_train, **func_args)
+                    outcome_validation = self._permute(outcome_validation, **func_args)
                 elif action =='zero':
                     outcome_train = np.zeros(outcome_train.shape)
                     outcome_validation = np.zeros(outcome_train.shape)
@@ -273,15 +273,15 @@ class DummyOutcomeRefuter(CausalRefuter):
 
         # return data_chunks
             
-    def _estimate_dummy_outcome(self, action, outcome, X_train, func_args):
-        estimator = self._get_regressor_object(action, func_args)
+    def _estimate_dummy_outcome(self, action, outcome, X_train, **func_args):
+        estimator = self._get_regressor_object(action, **func_args)
         X = X_train
         y = outcome
         estimator = estimator.fit(X, y)
         
         return estimator.predict
     
-    def _get_regressor_object(self, action, func_args):
+    def _get_regressor_object(self, action, **func_args):
         if  action == "linear_regression":
             return LinearRegression(**func_args)
         elif action == "knn":
