@@ -118,61 +118,91 @@ class DummyOutcomeRefuter(CausalRefuter):
         identified_estimand = copy.deepcopy(self._target_estimand)
         identified_estimand.outcome_variable = ["dummy_outcome"]
 
-        sample_estimates = np.zeros(self._num_simulations)
         self.logger.info("Refutation over {} simulated datasets".format(self._num_simulations) )
         self.logger.info("The transformation passed: {}".format(self._transformations) )
 
-        no_estimator = self.check_for_estimator()
-        if no_estimator:
-            X_train = np.zeros(self._data[self._chosen_variables].shape)
-            outcome_train = np.zeros(self._data['y'].shape)
-            X_validation = self._data[self._chosen_variables].values
-            outcome_validation = self._data['y'].values
+        simulation_results = []
+        refute_list = []
 
-            outcome_validation = self.process_data(X_train, outcome_train, X_validation, outcome_validation, self._transformations)
+        for _ in self._num_simulations:
+            no_estimator = self.check_for_estimator()
+            if no_estimator:
+                X_train = np.zeros(self._data[self._chosen_variables].shape)
+                outcome_train = np.zeros(self._data['y'].shape)
+                X_validation = self._data[self._chosen_variables].values
+                outcome_validation = self._data['y'].values
 
-        groups = self.preprocess_data_by_treatment()
-        estimates = []
-        for key_train, _ in groups:
-            X_train = groups.get_group(key_train)[self._chosen_variables].values
-            outcome_train = groups.get_group(key_train)['y'].values
-            validation_df = []
-            transformations = self._transformations 
-            for key_validation, _ in groups:
-                if key_validation != key_train:
-                    validation_df.append(groups.get_group(key_validation))
+                outcome_validation = self.process_data(X_train, outcome_train, X_validation, outcome_validation, self._transformations)
 
-            validation_df = pd.concat(validation_df)
-            X_validation = validation_df[self._chosen_variables].values
-            outcome_validation = validation_df['y'].values
+            groups = self.preprocess_data_by_treatment()
+            estimates = []
+            for key_train, _ in groups:
+                X_train = groups.get_group(key_train)[self._chosen_variables].values
+                outcome_train = groups.get_group(key_train)['y'].values
+                validation_df = []
+                transformations = self._transformations 
+                for key_validation, _ in groups:
+                    if key_validation != key_train:
+                        validation_df.append(groups.get_group(key_validation))
 
-            # If the number of data points is too few, run the default transformation: [("zero",""),("noise", {'std_dev':1} )]
-            if X_train.shape[0] <= self._min_data_point_threshold:
-                transformations = DummyOutcomeRefuter.DEFAULT_TRANSFORMATION
+                validation_df = pd.concat(validation_df)
+                X_validation = validation_df[self._chosen_variables].values
+                outcome_validation = validation_df['y'].values
 
-            outcome_validation = self.process_data(X_train, outcome_train, X_validation, outcome_validation, transformations)
-            
+                # If the number of data points is too few, run the default transformation: [("zero",""),("noise", {'std_dev':1} )]
+                if X_train.shape[0] <= self._min_data_point_threshold:
+                    transformations = DummyOutcomeRefuter.DEFAULT_TRANSFORMATION
+
+                outcome_validation = self.process_data(X_train, outcome_train, X_validation, outcome_validation, transformations)
+                
             new_data = validation_df.assign(dummy_outcome=outcome_validation)
             new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
             estimates.append(new_effect.value)
 
-        refute = CausalRefutation(self._estimate.value,
-                                        np.mean(sample_estimates),
-                                        refutation_type="Refute: Use a Dummy Outcome")
-        
+        simulation_results.append(estimates)
+
+        # We convert to ndarray for ease in indexing
+        # The data is of the form
+        # sim1: cat1 cat2 ... catn
+        # sim2: cat1 cat2 ... catn
+        simulation_results = np.array(simulation_results)
+
         # Note: We hardcode the estimate value to ZERO as we want to check if it falls in the distribution of the refuter
         # Ideally we should expect that ZERO should fall in the distribution of the effect estimates as we have severed any causal 
         # relationship between the treatment and the outcome.
-
+        
         dummy_estimator = copy.deepcopy(self._estimate)
         dummy_estimator.value = 0
+        if no_estimator:
+            refute = CausalRefutation(
+                        self._estimate.value,
+                        np.mean(simulation_results),
+                        refutation_type="Refute: Use a Dummy Outcome"
+                    )
 
-        # refute.add_significance_test_results(
-        #     self.test_significance(dummy_estimator, sample_estimates)
-        # )
+            refute.add_significance_test_results(
+                self.test_significance(dummy_estimator, simulation_results)
+            )
 
-        return refute
+            refute_list.append(refute)
+
+        else:
+            for category in simulation_results.shape[1]:
+                refute = CausalRefutation(
+                    self._estimate.value,
+                    np.mean(simulation_results[:, category]),
+                    refutation_type="Refute: Use a Dummy Outcome"
+                )
+
+                refute.add_significance_test_results(
+                    self.test_significance(dummy_estimator, simulation_results[:, category])
+                )
+
+                refute_list.append(refute)
+
+        return refute_list
+
     def process_data(self, X_train, outcome_train, X_validation, outcome_validation, transformations):
         for action, func_args in transformations:
             if callable(action):
