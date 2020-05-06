@@ -123,38 +123,43 @@ class DummyOutcomeRefuter(CausalRefuter):
 
         simulation_results = []
         refute_list = []
+        no_estimator = self.check_for_estimator()
 
         for _ in self._num_simulations:
-            no_estimator = self.check_for_estimator()
-            if no_estimator:
-                X_train = np.zeros(self._data[self._chosen_variables].shape)
-                outcome_train = np.zeros(self._data['y'].shape)
-                X_validation = self._data[self._chosen_variables].values
-                outcome_validation = self._data['y'].values
-
-                outcome_validation = self.process_data(X_train, outcome_train, X_validation, outcome_validation, self._transformations)
-
-            groups = self.preprocess_data_by_treatment()
             estimates = []
-            for key_train, _ in groups:
-                X_train = groups.get_group(key_train)[self._chosen_variables].values
-                outcome_train = groups.get_group(key_train)['y'].values
-                validation_df = []
-                transformations = self._transformations 
-                for key_validation, _ in groups:
-                    if key_validation != key_train:
-                        validation_df.append(groups.get_group(key_validation))
-
-                validation_df = pd.concat(validation_df)
+            if no_estimator:
+                # We set X_train = 0 and outcome_train to be 0
+                validation_df = self._data
+                X_train = None
+                outcome_train = None
                 X_validation = validation_df[self._chosen_variables].values
                 outcome_validation = validation_df['y'].values
 
-                # If the number of data points is too few, run the default transformation: [("zero",""),("noise", {'std_dev':1} )]
-                if X_train.shape[0] <= self._min_data_point_threshold:
-                    transformations = DummyOutcomeRefuter.DEFAULT_TRANSFORMATION
+                # Get the final outcome, after running through all the values in the transformation list
+                outcome_validation = self.process_data(X_train, outcome_train, X_validation, outcome_validation, self._transformations)
 
-                outcome_validation = self.process_data(X_train, outcome_train, X_validation, outcome_validation, transformations)
-                
+            else:
+                groups = self.preprocess_data_by_treatment()
+                for key_train, _ in groups:
+                    X_train = groups.get_group(key_train)[self._chosen_variables].values
+                    outcome_train = groups.get_group(key_train)['y'].values
+                    validation_df = []
+                    transformations = self._transformations
+
+                    for key_validation, _ in groups:
+                        if key_validation != key_train:
+                            validation_df.append(groups.get_group(key_validation))
+
+                    validation_df = pd.concat(validation_df)
+                    X_validation = validation_df[self._chosen_variables].values
+                    outcome_validation = validation_df['y'].values
+
+                    # If the number of data points is too few, run the default transformation: [("zero",""),("noise", {'std_dev':1} )]
+                    if X_train.shape[0] <= self._min_data_point_threshold:
+                        transformations = DummyOutcomeRefuter.DEFAULT_TRANSFORMATION
+
+                    outcome_validation = self.process_data(X_train, outcome_train, X_validation, outcome_validation, transformations)
+                    
             new_data = validation_df.assign(dummy_outcome=outcome_validation)
             new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
@@ -174,6 +179,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         
         dummy_estimator = copy.deepcopy(self._estimate)
         dummy_estimator.value = 0
+
         if no_estimator:
             refute = CausalRefutation(
                         self._estimate.value,
@@ -214,15 +220,15 @@ class DummyOutcomeRefuter(CausalRefuter):
                 outcome_train = estimator(X_train)
                 outcome_validation = estimator(X_validation)
             elif action == 'noise':
-                if np.any(X_train):
+                if X_train is not None:
                     outcome_train = self._noise(outcome_train, **func_args)
                 outcome_validation = self._noise(outcome_validation, **func_args)
             elif action == 'permute':
-                if np.any(X_train):
+                if X_train is not None:
                     outcome_train = self._permute(outcome_train, **func_args)
                 outcome_validation = self._permute(outcome_validation, **func_args)
             elif action =='zero':
-                if np.any(X_train):
+                if X_train is not None:
                     outcome_train = np.zeros(outcome_train.shape)
                 outcome_validation = np.zeros(outcome_train.shape)
 
