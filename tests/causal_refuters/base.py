@@ -158,13 +158,13 @@ class TestRefuter(object):
 
         elif self.refuter_method == "dummy_outcome_refuter":
             if self.transformations is None:
-                ref = model.refute_estimate(target_estimand,
+                ref_list = model.refute_estimate(target_estimand,
                                             ate_estimate,
                                             method_name=self.refuter_method,
                                             num_simulations = 2
                                             )
             else:
-                ref = model.refute_estimate(target_estimand,
+                ref_list = model.refute_estimate(target_estimand,
                                             ate_estimate,
                                             method_name=self.refuter_method,
                                             transformations = self.transformations,
@@ -172,20 +172,23 @@ class TestRefuter(object):
                                             num_simulations = 2
                                             )
 
-                # This value is hardcoded to be zero as we are runnning this on a linear dataset.
-                # Ordinarily, we should expect this value to be zero.
-                EXPECTED_DUMMY_OUTCOME_VALUE = 0
+            INDEX = 0
+            ref = ref_list[INDEX]
 
-                error = abs( ref.new_effect - EXPECTED_DUMMY_OUTCOME_VALUE)
+            # This value is hardcoded to be zero as we are runnning this on a linear dataset.
+            # Ordinarily, we should expect this value to be zero.
+            EXPECTED_DUMMY_OUTCOME_VALUE = 0
 
-                print("Error in the refuted estimate = {0} with tolerence {1}%. Expected Value={2}, After Refutation={3}".format(
-                    error, self._error_tolerance * 100, EXPECTED_DUMMY_OUTCOME_VALUE, ref.new_effect)
-                )
+            error = abs( ref.new_effect - EXPECTED_DUMMY_OUTCOME_VALUE)
 
-                print(ref)
+            print("Error in the refuted estimate = {0} with tolerence {1}%. Expected Value={2}, After Refutation={3}".format(
+                error, self._error_tolerance * 100, EXPECTED_DUMMY_OUTCOME_VALUE, ref.new_effect)
+            )
 
-                
-                assert ref
+            print(ref)
+    
+            res = True if (error <  abs(ate_estimate.value)*self._error_tolerance) else False
+            assert res
  
     def binary_treatment_testsuite(self, num_samples=100000,num_common_causes=1,tests_to_run="all"):
         self.null_refutation_test(num_common_causes=num_common_causes,num_samples=num_samples)
