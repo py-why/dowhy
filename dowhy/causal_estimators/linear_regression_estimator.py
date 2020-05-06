@@ -71,6 +71,7 @@ class LinearRegressionEstimator(CausalEstimator):
                 curr_treatment = treatment_2d[:,i]
                 new_features = curr_treatment[:, np.newaxis] * self._effect_modifiers.to_numpy()
                 features = np.concatenate((features, new_features), axis=1)
+        features = features.astype(float, copy=False) # converting to float in case of binary treatment and no other variables
         features = sm.add_constant(features) # to add an intercept term
         return features
 
