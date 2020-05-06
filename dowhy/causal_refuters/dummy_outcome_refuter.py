@@ -85,7 +85,7 @@ class DummyOutcomeRefuter(CausalRefuter):
     # The minimum number of points for the estimator to run
     MIN_DATA_POINT_THRESHOLD = 30
     # The Default Transformation, when no arguments are given, or if the number of data points are insufficient for an estimator
-    DEFAULT_TRANSFORMATION = [("zero",""),("noise", {'std_dev':1})]
+    DEFAULT_TRANSFORMATION = [("zero",""),("noise", {'std_dev': 1} )]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -123,7 +123,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         refute_list = []
         no_estimator = self.check_for_estimator()
 
-        for _ in self._num_simulations:
+        for _ in range( self._num_simulations ):
             estimates = []
             if no_estimator:
                 # We set X_train = 0 and outcome_train to be 0
@@ -246,7 +246,7 @@ class DummyOutcomeRefuter(CausalRefuter):
             elif action =='zero':
                 if X_train is not None:
                     outcome_train = np.zeros(outcome_train.shape)
-                outcome_validation = np.zeros(outcome_train.shape)
+                outcome_validation = np.zeros(outcome_validation.shape)
 
         return outcome_validation
             

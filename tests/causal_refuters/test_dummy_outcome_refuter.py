@@ -1,101 +1,101 @@
-# import pytest
-# import numpy as np
-# from .base import TestRefuter
+import pytest
+import numpy as np
+from .base import TestRefuter
 
-# def simple_linear_outcome_model(df):
-#     # The outcome is a linar function of the confounder
-#     # The slope is 2 and the intercept is 3
-#     return df['W0'].values * 2 + 3
+def simple_linear_outcome_model(df):
+    # The outcome is a linar function of the confounder
+    # The slope is 2 and the intercept is 3
+    return df['W0'].values * 2 + 3
 
-# @pytest.mark.usefixtures("fixed_seed")
-# class TestDummyOtcomeRefuter(object):
-#     @pytest.mark.parametrize(["error_tolerence","estimator_method"],
-#                              [(0.03, "iv.instrumental_variable")])
-#     def test_refutation_dummy_outcome_refuter_default_input(self, error_tolerence, estimator_method):
-#         refuter_tester = TestRefuter(error_tolerence, estimator_method, "dummy_outcome_refuter")
-#         refuter_tester.continuous_treatment_testsuite()
+@pytest.mark.usefixtures("fixed_seed")
+class TestDummyOtcomeRefuter(object):
+    @pytest.mark.parametrize(["error_tolerence","estimator_method"],
+                             [(0.03, "iv.instrumental_variable")])
+    def test_refutation_dummy_outcome_refuter_default_input(self, error_tolerence, estimator_method):
+        refuter_tester = TestRefuter(error_tolerence, estimator_method, "dummy_outcome_refuter")
+        refuter_tester.continuous_treatment_testsuite()
 
-#     @pytest.mark.parametrize(["error_tolerence","estimator_method", "transformations"],
-#                              [(0.03, "iv.instrumental_variable", [("zero",""),("noise", 0.1)] )] )
-#     def test_refutation_dummy_outcome_refuter_randomly_generated(self, error_tolerence, estimator_method, transformations):
-#         refuter_tester = TestRefuter(error_tolerence,
-#                                     estimator_method, 
-#                                     "dummy_outcome_refuter", 
-#                                     transformations=transformations)
+    @pytest.mark.parametrize(["error_tolerence","estimator_method", "transformations"],
+                             [(0.03, "iv.instrumental_variable", [("zero",""),("noise", {'std_dev': 1} )] )] )
+    def test_refutation_dummy_outcome_refuter_randomly_generated(self, error_tolerence, estimator_method, transformations):
+        refuter_tester = TestRefuter(error_tolerence,
+                                    estimator_method, 
+                                    "dummy_outcome_refuter", 
+                                    transformations=transformations)
 
-#         refuter_tester.continuous_treatment_testsuite()
+        refuter_tester.continuous_treatment_testsuite()
 
-#     @pytest.mark.parametrize(["error_tolerence", "estimator_method", "transformations"],
-#                             [(0.03, "iv.instrumental_variable", [("permute", 1)] )] )
-#     def test_refutation_dummy_outcome_refuter_permute_data(self, error_tolerence, estimator_method, transformations):
-#         refuter_tester = TestRefuter(error_tolerence,
-#                                     estimator_method,
-#                                     "dummy_outcome_refuter",
-#                                     transformations=transformations)
+    @pytest.mark.parametrize(["error_tolerence", "estimator_method", "transformations"],
+                            [(0.03, "iv.instrumental_variable", [("permute", {'permute_fraction' :1} )] )] )
+    def test_refutation_dummy_outcome_refuter_permute_data(self, error_tolerence, estimator_method, transformations):
+        refuter_tester = TestRefuter(error_tolerence,
+                                    estimator_method,
+                                    "dummy_outcome_refuter",
+                                    transformations=transformations)
 
-#         refuter_tester.continuous_treatment_testsuite()
+        refuter_tester.continuous_treatment_testsuite()
 
-#     @pytest.mark.parametrize(["error_tolerence","estimator_method","transformations"],
-#                              [(0.03, "iv.instrumental_variable",[(simple_linear_outcome_model, {}), ("noise", 0.1)] )])
-#     def test_refutation_dummy_outcome_refuter_custom_function_linear_regression_with_noise(self, error_tolerence, estimator_method, transformations):
-#         refuter_tester = TestRefuter(error_tolerence, 
-#                                     estimator_method, 
-#                                     "dummy_outcome_refuter",
-#                                     transformations=transformations)
-#         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
+    @pytest.mark.parametrize(["error_tolerence","estimator_method","transformations"],
+                             [(0.03, "iv.instrumental_variable",[(simple_linear_outcome_model, {}), ("noise", {'std_dev': 1} )] )])
+    def test_refutation_dummy_outcome_refuter_custom_function_linear_regression_with_noise(self, error_tolerence, estimator_method, transformations):
+        refuter_tester = TestRefuter(error_tolerence, 
+                                    estimator_method, 
+                                    "dummy_outcome_refuter",
+                                    transformations=transformations)
+        refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
 
-#     @pytest.mark.parametrize(["error_tolerence","estimator_method","transformations"],
-#                              [(0.03, "iv.instrumental_variable",[("permute", 0.5),(simple_linear_outcome_model, {}), ("noise", 0.1)] )])
-#     def test_refutation_dummy_outcome_refuter_custom_function_linear_regression_with_permute(self, error_tolerence, estimator_method, transformations):
-#         refuter_tester = TestRefuter(error_tolerence, 
-#                                     estimator_method, 
-#                                     "dummy_outcome_refuter",
-#                                     transformations=transformations)
-#         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
+    @pytest.mark.parametrize(["error_tolerence","estimator_method","transformations"],
+                             [(0.03, "iv.instrumental_variable",[("permute", 0.5),(simple_linear_outcome_model, {}), ("noise", {'std_dev': 1} )] )])
+    def test_refutation_dummy_outcome_refuter_custom_function_linear_regression_with_permute(self, error_tolerence, estimator_method, transformations):
+        refuter_tester = TestRefuter(error_tolerence, 
+                                    estimator_method, 
+                                    "dummy_outcome_refuter",
+                                    transformations=transformations)
+        refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
 
     
-#     @pytest.mark.parametrize(["error_tolerence","estimator_method","transformations"],
-#                              [(0.01, "iv.instrumental_variable",[("linear_regression",{}) , ("zero",""), ("noise", 0.1)] )])
-#     def test_refutation_dummy_outcome_refuter_internal_linear_regression(self, error_tolerence, estimator_method, transformations):
-#         refuter_tester = TestRefuter(error_tolerence, 
-#                                     estimator_method, 
-#                                     "dummy_outcome_refuter",
-#                                     transformations=transformations)
-#         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
+    @pytest.mark.parametrize(["error_tolerence","estimator_method","transformations"],
+                             [(0.01, "iv.instrumental_variable",[("linear_regression",{}) , ("zero",""), ("noise", {'std_dev': 1} )] )])
+    def test_refutation_dummy_outcome_refuter_internal_linear_regression(self, error_tolerence, estimator_method, transformations):
+        refuter_tester = TestRefuter(error_tolerence, 
+                                    estimator_method, 
+                                    "dummy_outcome_refuter",
+                                    transformations=transformations)
+        refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
 
-#     @pytest.mark.parametrize(["error_tolerence","estimator_method", "transformations"],
-#                              [(0.01, "iv.instrumental_variable",[("knn",{'n_neighbors':5}), ("zero",""), ("noise", 0.1)] )])
-#     def test_refutation_dummy_outcome_refuter_internal_knn(self, error_tolerence, estimator_method, transformations):
-#         refuter_tester = TestRefuter(error_tolerence, 
-#                                     estimator_method, 
-#                                     "dummy_outcome_refuter",
-#                                     transformations=transformations)
-#         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
+    @pytest.mark.parametrize(["error_tolerence","estimator_method", "transformations"],
+                             [(0.01, "iv.instrumental_variable",[("knn",{'n_neighbors':5}), ("zero",""), ("noise", {'std_dev': 1} )] )])
+    def test_refutation_dummy_outcome_refuter_internal_knn(self, error_tolerence, estimator_method, transformations):
+        refuter_tester = TestRefuter(error_tolerence, 
+                                    estimator_method, 
+                                    "dummy_outcome_refuter",
+                                    transformations=transformations)
+        refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
     
-#     @pytest.mark.parametrize(["error_tolerence","estimator_method","transformations", "num_samples"],
-#                              [(0.01, "iv.instrumental_variable",[("svm",{'C':1,'epsilon':0.2}), ("zero",""), ("noise", 0.1)], 1000 )])
-#     def test_refutation_dummy_outcome_refuter_internal_svm(self, error_tolerence, estimator_method, transformations, num_samples):
-#         refuter_tester = TestRefuter(error_tolerence, 
-#                                     estimator_method, 
-#                                     "dummy_outcome_refuter",
-#                                     transformations=transformations)
-#         refuter_tester.continuous_treatment_testsuite(num_samples=num_samples, tests_to_run="atleast-one-common-cause")
+    @pytest.mark.parametrize(["error_tolerence","estimator_method","transformations", "num_samples"],
+                             [(0.01, "iv.instrumental_variable",[("svm",{'C':1,'epsilon':0.2}), ("zero",""), ("noise", {'std_dev': 1} )], 1000 )])
+    def test_refutation_dummy_outcome_refuter_internal_svm(self, error_tolerence, estimator_method, transformations, num_samples):
+        refuter_tester = TestRefuter(error_tolerence, 
+                                    estimator_method, 
+                                    "dummy_outcome_refuter",
+                                    transformations=transformations)
+        refuter_tester.continuous_treatment_testsuite(num_samples=num_samples, tests_to_run="atleast-one-common-cause")
 
-#     @pytest.mark.parametrize(["error_tolerence","estimator_method","transformations","num_samples"],
-#                              [(0.01, "iv.instrumental_variable",[("random_forest",{'max_depth':20}), ("zero",""), ("noise", 0.1)], 1000)])
-#     def test_refutation_dummy_outcome_refuter_internal_random_forest(self, error_tolerence, estimator_method, transformations, num_samples):
-#         refuter_tester = TestRefuter(error_tolerence, 
-#                                     estimator_method, 
-#                                     "dummy_outcome_refuter",
-#                                     transformations=transformations)
-#         refuter_tester.continuous_treatment_testsuite(num_samples,tests_to_run="atleast-one-common-cause")
+    @pytest.mark.parametrize(["error_tolerence","estimator_method","transformations","num_samples"],
+                             [(0.01, "iv.instrumental_variable",[("random_forest",{'max_depth':20}), ("zero",""), ("noise", {'std_dev': 1} )], 1000)])
+    def test_refutation_dummy_outcome_refuter_internal_random_forest(self, error_tolerence, estimator_method, transformations, num_samples):
+        refuter_tester = TestRefuter(error_tolerence, 
+                                    estimator_method, 
+                                    "dummy_outcome_refuter",
+                                    transformations=transformations)
+        refuter_tester.continuous_treatment_testsuite(num_samples,tests_to_run="atleast-one-common-cause")
 
-#     # As we run with only one common cause and one instrument variable we run with (?, 2)
-#     @pytest.mark.parametrize(["error_tolerence","estimator_method","transformations"],
-#                              [(0.01, "iv.instrumental_variable",[("neural_network",{'solver':'lbfgs', 'alpha':1e-5, 'hidden_layer_sizes':(5,2)}), ("zero",""), ("noise", 0.1)]  )])
-#     def test_refutation_dummy_outcome_refuter_internal_neural_network(self, error_tolerence, estimator_method, transformations):
-#         refuter_tester = TestRefuter(error_tolerence, 
-#                                     estimator_method, 
-#                                     "dummy_outcome_refuter",
-#                                     transformations=transformations)
-#         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
+    # As we run with only one common cause and one instrument variable we run with (?, 2)
+    @pytest.mark.parametrize(["error_tolerence","estimator_method","transformations"],
+                             [(0.01, "iv.instrumental_variable",[("neural_network",{'solver':'lbfgs', 'alpha':1e-5, 'hidden_layer_sizes':(5,2)}), ("zero",""), ("noise", {'std_dev': 1} )]  )])
+    def test_refutation_dummy_outcome_refuter_internal_neural_network(self, error_tolerence, estimator_method, transformations):
+        refuter_tester = TestRefuter(error_tolerence, 
+                                    estimator_method, 
+                                    "dummy_outcome_refuter",
+                                    transformations=transformations)
+        refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
