@@ -27,8 +27,8 @@ class DummyOutcomeRefuter(CausalRefuter):
 
     - 'num_simulations': int, CausalRefuter.DEFAULT_NUM_SIMULATIONS by default
     The number of simulations to be run
-    - 'transformations': list, [('zero',''),('noise','DummyOutcomeRefuter.DEFAULT_STD_DEV')]
-    The transformations list gives a list of actions to be performed to obtain the outcome. The actions are of the following types:
+    - 'transformation_list': list, DummyOutcomeRefuter.DEFAULT_TRANSFORMATION
+    The transformation_list is a list of actions to be performed to obtain the outcome. The actions are of the following types:
     * function argument: function pd.Dataframe -> np.ndarray
         It takes in a function that takes the input data frame as the input and outputs the outcome
         variable. This allows us to create an output varable that only depends on the covariates and does not depend 
@@ -48,11 +48,11 @@ class DummyOutcomeRefuter(CausalRefuter):
             3. Zero
             It replaces all the values in the outcome by zero
 
-    The transformations list is of the following form:
+    The transformation_list is of the following form:
     * If the function pd.Dataframe -> np.ndarray is already defined.
-    [(func,func_params),('permute', permute_fraction), ('noise', std_dev)]
+    [(func,func_params),('permute', {'permute_fraction': val} ), ('noise', {'std_dev': val} )]
     * If a function from the above list is used
-    [('knn',{'n_neighbors':5}), ('permute', {'permute_fraction': val}), ('noise', {'std_dev': val} )]
+    [('knn',{'n_neighbors':5}), ('permute', {'permute_fraction': val} ), ('noise', {'std_dev': val} )]
 
     - 'required_variables': int, list, bool, True by default
     The inputs are either an integer value, list or bool.
@@ -93,7 +93,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         super().__init__(*args, **kwargs)
         
         self._num_simulations = kwargs.pop("num_simulations", CausalRefuter.DEFAULT_NUM_SIMULATIONS)
-        self._transformations = kwargs.pop("transformations", DummyOutcomeRefuter.DEFAULT_TRANSFORMATION)
+        self._transformation_list = kwargs.pop("transformation_list", DummyOutcomeRefuter.DEFAULT_TRANSFORMATION)
         self._bucket_size_scale_factor = kwargs.pop("bucket_size_scale_factor", DummyOutcomeRefuter.DEFAULT_BUCKET_SCALE_FACTOR)
         self._min_data_point_threshold = kwargs.pop("min_data_point_threshold", DummyOutcomeRefuter.MIN_DATA_POINT_THRESHOLD)
         required_variables = kwargs.pop("required_variables", True)
@@ -119,7 +119,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         identified_estimand.outcome_variable = ["dummy_outcome"]
 
         self.logger.info("Refutation over {} simulated datasets".format(self._num_simulations) )
-        self.logger.info("The transformation passed: {}".format(self._transformations) )
+        self.logger.info("The transformation passed: {}".format(self._transformation_list) )
 
         simulation_results = []
         refute_list = []
@@ -136,7 +136,7 @@ class DummyOutcomeRefuter(CausalRefuter):
                 outcome_validation = validation_df['y'].values
 
                 # Get the final outcome, after running through all the values in the transformation list
-                outcome_validation = self.process_data(X_train, outcome_train, X_validation, outcome_validation, self._transformations)
+                outcome_validation = self.process_data(X_train, outcome_train, X_validation, outcome_validation, self._transformation_list)
 
             else:
                 groups = self.preprocess_data_by_treatment()
@@ -144,7 +144,7 @@ class DummyOutcomeRefuter(CausalRefuter):
                     X_train = groups.get_group(key_train)[self._chosen_variables].values
                     outcome_train = groups.get_group(key_train)['y'].values
                     validation_df = []
-                    transformations = self._transformations
+                    transformation_list = self._transformation_list
 
                     for key_validation, _ in groups:
                         if key_validation != key_train:
@@ -156,9 +156,9 @@ class DummyOutcomeRefuter(CausalRefuter):
 
                     # If the number of data points is too few, run the default transformation: [("zero",""),("noise", {'std_dev':1} )]
                     if X_train.shape[0] <= self._min_data_point_threshold:
-                        transformations = DummyOutcomeRefuter.DEFAULT_TRANSFORMATION
+                        transformation_list = DummyOutcomeRefuter.DEFAULT_TRANSFORMATION
 
-                    outcome_validation = self.process_data(X_train, outcome_train, X_validation, outcome_validation, transformations)
+                    outcome_validation = self.process_data(X_train, outcome_train, X_validation, outcome_validation, transformation_list)
                     
             new_data = validation_df.assign(dummy_outcome=outcome_validation)
             new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
@@ -209,8 +209,8 @@ class DummyOutcomeRefuter(CausalRefuter):
 
         return refute_list
 
-    def process_data(self, X_train, outcome_train, X_validation, outcome_validation, transformations):
-        for action, func_args in transformations:
+    def process_data(self, X_train, outcome_train, X_validation, outcome_validation, transformation_list):
+        for action, func_args in transformation_list:
             if callable(action):
                 estimator = action(X_train, outcome_train, **func_args)
                 outcome_train = estimator(X_train)
@@ -235,7 +235,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         return outcome_validation
             
     def check_for_estimator(self):
-        for action,_ in self._transformations:
+        for action,_ in self._transformation_list:
             if callable(action) or action in DummyOutcomeRefuter.SUPPORTED_ESTIMATORS:
                 return False
             
