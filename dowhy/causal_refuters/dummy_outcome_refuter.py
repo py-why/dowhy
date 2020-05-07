@@ -303,8 +303,6 @@ class DummyOutcomeRefuter(CausalRefuter):
         else:
             raise ValueError("Passed {}. Expected bool, float, int or categorical.".format(variable_type.name))
 
-        # return data_chunks
-            
     def _estimate_dummy_outcome(self, action, X_train, outcome, **func_args):
         """
         A function that takes in any sklearn estimator and returns a trained estimator
