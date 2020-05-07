@@ -21,11 +21,9 @@ class CausalGraph:
                  instrument_names=None,
                  effect_modifier_names=None,
                  observed_node_names=None,
-                 missing_nodes_as_confounders=False,
-                 effect_modifiers_as_confounders=False):
+                 missing_nodes_as_confounders=False):
         self.treatment_name = parse_state(treatment_name)
         self.outcome_name = parse_state(outcome_name)
-        self.effect_modifier_names = parse_state(effect_modifier_names)
         instrument_names = parse_state(instrument_names)
         common_cause_names = parse_state(common_cause_names)
         self.logger = logging.getLogger(__name__)
@@ -71,10 +69,6 @@ class CausalGraph:
             raise ValueError
         if missing_nodes_as_confounders:
             self._graph = self.add_missing_nodes_as_common_causes(observed_node_names)
-        if effect_modifiers_as_confounders:
-            if self.effect_modifier_names is None:
-                self.effect_modifier_names = self.get_effect_modifiers(self.treatment_name, self.outcome_name)
-            self._graph = self.add_effect_modifiers_as_confounders(self.effect_modifier_names)
         # Adding node attributes
         self._graph = self.add_node_attributes(observed_node_names)
         #TODO do not add it here. CausalIdentifier should call causal_graph to add an unobserved common cause if needed. This also ensures that we do not need get_common_causes in this class.
@@ -151,10 +145,11 @@ class CausalGraph:
         # Adding effect modifiers
         if effect_modifier_names is not None:
             for node_name in effect_modifier_names:
-                for outcome in self.outcome_name:
-                    self._graph.add_node(node_name, observed="yes")
-                    self._graph.add_edge(node_name, outcome, style = "dotted", headport="s", tailport="n")
-                    self._graph.add_edge(outcome, node_name, style = "dotted", headport="n", tailport="s") # TODO make the ports more general so that they apply not just to top-bottom node configurations
+                if node_name not in common_cause_names:
+                    for outcome in self.outcome_name:
+                        self._graph.add_node(node_name, observed="yes")
+                        self._graph.add_edge(node_name, outcome, style = "dotted", headport="s", tailport="n")
+                        self._graph.add_edge(outcome, node_name, style = "dotted", headport="n", tailport="s") # TODO make the ports more general so that they apply not just to top-bottom node configurations
         return self._graph
 
     def add_node_attributes(self, observed_node_names):
@@ -166,20 +161,12 @@ class CausalGraph:
         return self._graph
 
     def add_missing_nodes_as_common_causes(self, observed_node_names):
-        # Adding unobserved confounders
+        # Adding columns in the dataframe as confounders that were not in the graph
         for node_name in observed_node_names:
             if node_name not in self._graph:
                 self._graph.add_node(node_name, observed="yes")
                 for treatment_outcome_node in self.treatment_name + self.outcome_name:
                     self._graph.add_edge(node_name, treatment_outcome_node)
-        return self._graph
-
-    def add_effect_modifiers_as_confounders(self, effect_modifier_names):
-        if effect_modifier_names is not None:
-            for node_name in effect_modifier_names:
-                for treatment in self.treatment_name:
-                    if not self._graph.has_edge(node_name, treatment):
-                        self._graph.add_edge(node_name, treatment)
         return self._graph
 
     def add_unobserved_common_cause(self, observed_node_names):
@@ -190,7 +177,6 @@ class CausalGraph:
         for node_name in current_common_causes:
             if self._graph.nodes[node_name]["observed"] == "no":
                 create_new_common_cause = False
-
         if create_new_common_cause:
             uc_label = "Unobserved Confounders"
             self._graph.add_node('U', label=uc_label, observed="no")
@@ -253,8 +239,6 @@ class CausalGraph:
         return list(causes_1.intersection(causes_2))
 
     def get_effect_modifiers(self, nodes1, nodes2):
-        if self.effect_modifier_names is not None:
-            return self.effect_modifier_names
         modifiers = set()
         for node in nodes2:
             modifiers = modifiers.union(self.get_ancestors(node))

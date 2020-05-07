@@ -29,7 +29,6 @@ class CausalModel:
                  estimand_type="nonparametric-ate",
                  proceed_when_unidentifiable=False,
                  missing_nodes_as_confounders=False,
-                 effect_modifiers_as_confounders=False,
                  **kwargs):
         """Initialize data and create a causal graph instance.
 
@@ -45,14 +44,13 @@ class CausalModel:
         :param outcome: name of the outcome variable
         :param graph: path to DOT file containing a DAG or a string containing
         a DAG specification in DOT format
-        :param common_causes: names of common causes of treatment and _outcome
+        :param common_causes: names of common causes of treatment and _outcome. Only used when graph is None.
         :param instruments: names of instrumental variables for the effect of
-        treatment on outcome
-        :param effect_modifiers: names of variables that can modify the treatment effect (useful for heterogeneous treatment effect estimation)
+        treatment on outcome. Only used when graph is None.
+        :param effect_modifiers: names of variables that can modify the treatment effect. If not provided, then the causal graph is used to find the effect modifiers. Estimators will return multiple different estimates based on each value of effect_modifiers. If you are using an EconML estimator, then effect modifiers should be a subset of common causes.
         :param estimand_type: the type of estimand requested (currently only "nonparametric-ate" is supported). In the future, may support other specific parametric forms of identification.
         :param proceed_when_unidentifiable: does the identification proceed by ignoring potential unobserved confounders. Binary flag.
         :param missing_nodes_as_confounders: Binary flag indicating whether variables in the dataframe that are not included in the causal graph, should be  automatically included as confounder nodes.
-        :param effect_modifiers_as_confounders: Binary flag indicating whether effect modifiers should be considered as confounders too. This is often efficient from a statistical estimation perspective. Should be True if you are using EconML estimators. 
         :returns: an instance of CausalModel class
 
         """
@@ -63,7 +61,6 @@ class CausalModel:
         self._estimand_type = estimand_type
         self._proceed_when_unidentifiable = proceed_when_unidentifiable
         self._missing_nodes_as_confounders = missing_nodes_as_confounders
-        self._effect_modifiers_as_confounders = effect_modifiers_as_confounders
         if 'logging_level' in kwargs:
             logging.basicConfig(level=kwargs['logging_level'])
         else:
@@ -76,9 +73,6 @@ class CausalModel:
             self.logger.warning("Causal Graph not provided. DoWhy will construct a graph based on data inputs.")
             self._common_causes = parse_state(common_causes)
             self._instruments = parse_state(instruments)
-            if self._effect_modifiers_as_confounders:
-                self._common_causes.extend(self._effect_modifiers)
-                self._common_causes = list(set(self._common_causes))
             if common_causes is not None and instruments is not None:
                 self._graph = CausalGraph(
                     self._treatment,
@@ -86,8 +80,7 @@ class CausalModel:
                     common_cause_names=self._common_causes,
                     instrument_names=self._instruments,
                     effect_modifier_names=self._effect_modifiers,
-                    observed_node_names=self._data.columns.tolist(),
-                    effect_modifiers_as_confounders=self._effect_modifiers_as_confounders
+                    observed_node_names=self._data.columns.tolist()
                 )
             elif common_causes is not None:
                 self._graph = CausalGraph(
@@ -95,8 +88,7 @@ class CausalModel:
                     self._outcome,
                     common_cause_names=self._common_causes,
                     effect_modifier_names = self._effect_modifiers,
-                    observed_node_names=self._data.columns.tolist(),
-                    effect_modifiers_as_confounders=self._effect_modifiers_as_confounders
+                    observed_node_names=self._data.columns.tolist()
                 )
             elif instruments is not None:
                 self._graph = CausalGraph(
@@ -104,8 +96,7 @@ class CausalModel:
                     self._outcome,
                     instrument_names=self._instruments,
                     effect_modifier_names = self._effect_modifiers,
-                    observed_node_names=self._data.columns.tolist(),
-                    effect_modifiers_as_confounders=self._effect_modifiers_as_confounders
+                    observed_node_names=self._data.columns.tolist()
                 )
             else:
                 cli.query_yes_no(
@@ -120,13 +111,16 @@ class CausalModel:
                 graph,
                 effect_modifier_names=self._effect_modifiers,
                 observed_node_names=self._data.columns.tolist(),
-                missing_nodes_as_confounders = self._missing_nodes_as_confounders,
-                effect_modifiers_as_confounders=self._effect_modifiers_as_confounders
+                missing_nodes_as_confounders = self._missing_nodes_as_confounders
             )
             self._common_causes = self._graph.get_common_causes(self._treatment, self._outcome)
             self._instruments = self._graph.get_instruments(self._treatment,
                                                             self._outcome)
-            if self._effect_modifiers is None:
+            # Sometimes, effect modifiers from the graph may not match those provided by the user.
+            # (Because some effect modifiers may also be common causes)
+            # In such cases, the user-provided modifiers are used.
+            # If no effect modifiers are provided,  then the ones from the graph are used.
+            if self._effect_modifiers is None or not self._effect_modifiers:
                 self._effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
 
         self._other_variables = kwargs
