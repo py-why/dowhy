@@ -47,7 +47,7 @@ class CausalModel:
         :param common_causes: names of common causes of treatment and _outcome. Only used when graph is None.
         :param instruments: names of instrumental variables for the effect of
         treatment on outcome. Only used when graph is None.
-        :param effect_modifiers: names of variables that can modify the treatment effect. If not provided, then the causal graph is used to find the effect modifiers. Estimators will return multiple different estimates based on each value of effect_modifiers. If you are using an EconML estimator, then effect modifiers should be a subset of common causes.
+        :param effect_modifiers: names of variables that can modify the treatment effect. If not provided, then the causal graph is used to find the effect modifiers. Estimators will return multiple different estimates based on each value of effect_modifiers.
         :param estimand_type: the type of estimand requested (currently only "nonparametric-ate" is supported). In the future, may support other specific parametric forms of identification.
         :param proceed_when_unidentifiable: does the identification proceed by ignoring potential unobserved confounders. Binary flag.
         :param missing_nodes_as_confounders: Binary flag indicating whether variables in the dataframe that are not included in the causal graph, should be  automatically included as confounder nodes.

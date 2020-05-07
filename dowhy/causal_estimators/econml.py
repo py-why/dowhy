@@ -11,17 +11,27 @@ class Econml(CausalEstimator):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.logger.info("INFO: Using EconML Estimator")
         self.identifier_method = self._target_estimand.identifier_method
-        self.logger.debug("Back-door variables used:" +
-                          ",".join(self._target_estimand.backdoor_variables))
+        self._observed_common_causes_names = self._target_estimand.backdoor_variables.copy()
+        # Checking if effect modifiers are a subset of common causes
+        x_subsetof_w = True
+        unique_effect_modifier_names = []
+        for em_name in self._effect_modifier_names:
+            if em_name not in self._observed_common_causes_names:
+                x_subsetof_w = False
+                unique_effect_modifier_names.append(em_name)
+        if not x_subsetof_w:
+            self.logger.warn("Effect modifiers are not a subset of common causes. For efficiency in estimation, EconML will consider all effect modifiers as common causes too.")
+            self._observed_common_causes_names.extend(unique_effect_modifier_names)
 
-        self._observed_common_causes_names = self._target_estimand.backdoor_variables
         if self._observed_common_causes_names:
             self._observed_common_causes = self._data[self._observed_common_causes_names]
             self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
         else:
             self._observed_common_causes = None
-
+        self.logger.debug("Back-door variables used:" +
+                          ",".join(self._observed_common_causes_names))
         # Instrumental variables names, if present
         self._instrumental_variable_names = self._target_estimand.instrumental_variables
         if self._instrumental_variable_names:
@@ -32,7 +42,6 @@ class Econml(CausalEstimator):
 
         estimator_class = self._get_econml_class_object(self._econml_methodname)
         self.estimator = estimator_class(**self.method_params["init_params"])
-        self.logger.info("INFO: Using EconML Estimator")
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
 
@@ -54,7 +63,6 @@ class Econml(CausalEstimator):
         W = None  # common causes/ confounders
         Z = None  # Instruments
         Y = np.array(self._outcome)
-        # TODO treatment can be also be a discrete variable, will need to update len argument below for such cases
         T = np.array(self._treatment)
         if self._effect_modifier_names:
             X = np.reshape(np.array(self._effect_modifiers), (n_samples, self._effect_modifiers.shape[1]))
@@ -111,6 +119,7 @@ class Econml(CausalEstimator):
     def construct_symbolic_estimator(self, estimand):
         expr = "b: " + ", ".join(estimand.outcome_variable) + "~"
         # TODO -- fix: we are actually conditioning on positive treatment (d=1)
-        var_list = estimand.treatment_variable + estimand.backdoor_variables
+        var_list = estimand.treatment_variable + self._observed_common_causes_names
         expr += "+".join(var_list)
+        expr += " | " + ",".join(self._effect_modifier_names)
         return expr
