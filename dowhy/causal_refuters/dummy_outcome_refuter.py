@@ -7,7 +7,7 @@ import pdb
 
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
-from dowhy.causal_estimator import CausalEstimator
+from dowhy.causal_estimator import CausalEstimator,CausalEstimate
 
 from sklearn.linear_model import LinearRegression
 from sklearn.neighbors import KNeighborsRegressor
@@ -174,9 +174,10 @@ class DummyOutcomeRefuter(CausalRefuter):
         # Note: We hardcode the estimate value to ZERO as we want to check if it falls in the distribution of the refuter
         # Ideally we should expect that ZERO should fall in the distribution of the effect estimates as we have severed any causal 
         # relationship between the treatment and the outcome.
-        
-        dummy_estimator = copy.deepcopy(self._estimate)
-        dummy_estimator.value = 0
+        dummy_estimator = CausalEstimate(
+                estimate = 0,
+                target_estimand =self._estimate.target_estimand,
+                realized_estimand_expr=self._estimate.realized_estimand_expr)
 
         if no_estimator:
             refute = CausalRefutation(
@@ -302,8 +303,6 @@ class DummyOutcomeRefuter(CausalRefuter):
         else:
             raise ValueError("Passed {}. Expected bool, float, int or categorical.".format(variable_type.name))
 
-        # return data_chunks
-            
     def _estimate_dummy_outcome(self, action, X_train, outcome, **func_args):
         """
         A function that takes in any sklearn estimator and returns a trained estimator

@@ -21,5 +21,12 @@ class TestPropensityScoreMatchingEstimator(object):
                 num_effect_modifiers = num_effect_modifiers,
                 num_treatments=num_treatments,
                 treatment_is_binary=treatment_is_binary,
-                outcome_is_binary=outcome_is_binary
+                outcome_is_binary=outcome_is_binary,
+                confidence_intervals=[False,],
+                test_significance=[False,],
+                method_params={
+                    'num_ci_simulations': 10,
+                    'num_null_simulations': 10
+                    }
                 )
+
