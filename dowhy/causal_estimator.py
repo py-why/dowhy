@@ -6,6 +6,8 @@ import sympy as sp
 from collections import namedtuple
 from sklearn.utils import resample
 
+from dowhy.utils.api import parse_state
+
 class CausalEstimator:
     """Base class for an estimator of causal effect.
 
@@ -23,7 +25,10 @@ class CausalEstimator:
     DEFAULT_SAMPLE_SIZE_FRACTION = 1
     # The default Confidence Level
     DEFAULT_CONFIDENCE_LEVEL = 0.95
-
+    # Number of quantiles to discretize continuous columns, for applying groupby 
+    NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS = 5
+    # Prefix to add to temporary categorical variables created after discretization
+    TEMP_CAT_COLUMN_PREFIX = "__categorical__"
     BootstrapEstimates = namedtuple('BootstrapEstimates', ['estimates', 'params'])
 
     def __init__(self, data, identified_estimand, treatment, outcome,
@@ -83,16 +88,14 @@ class CausalEstimator:
         # Checking if some parameters were set, otherwise setting to default values
         if not hasattr(self, 'num_null_simulations'):
             self.num_null_simulations = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST
-
         if not hasattr(self, 'num_simulations'):
             self.num_simulations = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI
-
         if not hasattr(self, 'sample_size_fraction'):
             self.sample_size_fraction = CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION
-
         if not hasattr(self, 'confidence_level'):
             self.confidence_level = CausalEstimator.DEFAULT_CONFIDENCE_LEVEL
-
+        if not hasattr(self, 'num_quantiles_to_discretize_cont_cols'):
+            self.num_quantiles_to_discretize_cont_cols = CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS
         # Setting more values
         if self._data is not None:
             self._treatment = self._data[self._treatment_name]
@@ -176,10 +179,47 @@ class CausalEstimator:
         est = np.mean(df_withtreatment[self._outcome_name]) - np.mean(df_notreatment[self._outcome_name])
         return CausalEstimate(est, None, None)
 
-    def _do(self, x):
+    def _estimate_effect_fn(self, data_df):
         raise NotImplementedError
 
-    def do(self, x):
+    def _estimate_conditional_effects(self, estimate_effect_fn,
+            effect_modifier_names=None,
+            num_quantiles=None):
+        # Defaulting to class default values if parameters are not provided
+        if effect_modifier_names is None:
+            effect_modifier_names = self._effect_modifier_names
+        if num_quantiles is None:
+            num_quantiles = self.num_quantiles_to_discretize_cont_cols
+        # Checking that there is at least one effect modifier
+        if not effect_modifier_names:
+            raise ValueError("At least one effect modifier should be specified to compute conditional effects.")
+        # Making sure that effect_modifier_names is a list
+        effect_modifier_names = parse_state(effect_modifier_names)
+        # Making a copy since we are going to be changing effect modifier names
+        effect_modifier_names = effect_modifier_names.copy()
+        prefix = CausalEstimator.TEMP_CAT_COLUMN_PREFIX
+        # For every numeric effect modifier, adding a temp categorical column
+        for i in range(len(effect_modifier_names)):
+            em = effect_modifier_names[i]
+            if pd.api.types.is_numeric_dtype(self._data[em].dtypes):
+                self._data[prefix+str(em)] = pd.qcut(self._data[em], 
+                        num_quantiles, duplicates="drop")
+                effect_modifier_names[i] = prefix + str(em)
+        # Grouping by effect modifiers and computing effect separately
+        by_effect_mods = self._data.groupby(effect_modifier_names)
+        cond_est_fn = lambda x: self._do(self._treatment_value, x) -self._do(self._control_value, x)
+        conditional_estimates = by_effect_mods.apply(estimate_effect_fn)
+        # Deleting the temporary categorical columns
+        for em in effect_modifier_names:
+            if em.startswith(prefix):
+                self._data.pop(em)
+        return conditional_estimates
+
+
+    def _do(self, x, data_df=None):
+        raise NotImplementedError
+
+    def do(self, x, data_df=None):
         """Method that implements the do-operator.
 
         Given a value x for the treatment, returns the expected value of the outcome when the treatment is intervened to a value x.
@@ -188,9 +228,11 @@ class CausalEstimator:
         :returns: Value of the outcome when treatment is intervened/set to x.
 
         """
-        est = self._do(x)
+        est = self._do(x, data_df)
         return est
 
+    def estimate_individual_effects(self, target_units):
+        pass
     def construct_symbolic_estimator(self, estimand):
         raise NotImplementedError
 
@@ -560,10 +602,12 @@ class CausalEstimate:
 
     """
 
-    def __init__(self, estimate, target_estimand, realized_estimand_expr, **kwargs):
+    def __init__(self, estimate, target_estimand, realized_estimand_expr,
+            conditional_estimates = None, **kwargs):
         self.value = estimate
         self.target_estimand = target_estimand
         self.realized_estimand_expr = realized_estimand_expr
+        self.conditional_estimates = conditional_estimates
         self.params = kwargs
         if self.params is not None:
             for key, value in self.params.items():
@@ -602,12 +646,18 @@ class CausalEstimate:
                 **kwargs)
         return {'p_value': signif_results["p_value"]}
 
+    def estimate_conditional_effects(self, effect_modifiers=None,
+            num_quantiles=CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS):
+        return self.estimator._estimate_conditional_effects(
+                self.estimator._estimate_effect_fn,
+                effect_modifiers, num_quantiles)
+
     def __str__(self):
         s = "*** Causal Estimate ***\n"
         s += "\n## Identified estimand\n{0}".format(self.target_estimand)
         s += "\n## Realized estimand\n{0}".format(self.realized_estimand_expr)
         s += "\nTarget units: {0}\n".format(self.estimator.target_units_tostr())
-        s += "\n## Estimate: \n"
+        s += "\n## Estimate\n"
         s += "Mean value: {0}\n".format(self.value)
         s += "" 
         if self.estimator._significance_test:
@@ -615,6 +665,9 @@ class CausalEstimate:
         if self.estimator._confidence_intervals:
             s += "Standard error: {0}\n".format(self.get_standard_error())
             s += "{0}% confidence interval: {1}\n".format(100 * self.estimator.confidence_level, self.get_confidence_intervals())
+        if self.conditional_estimates is not None:
+            s += "### Conditional Estimates\n"
+            s += str(self.conditional_estimates)
         if self.effect_strength is not None:
             s += "\n## Effect Strength\n"
             s += "Change in outcome attributable to treatment: {}\n".format(self.effect_strength["fraction-effect"])
