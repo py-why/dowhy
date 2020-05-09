@@ -29,6 +29,9 @@ class CausalEstimator:
     NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS = 5
     # Prefix to add to temporary categorical variables created after discretization
     TEMP_CAT_COLUMN_PREFIX = "__categorical__"
+
+    DEFAULT_NOTIMPLEMENTEDERROR_MSG = "not yet implemented for {0}. If you would this to be implemented in the next version, please raise an issue at https://github.com/microsoft/dowhy/issues"
+
     BootstrapEstimates = namedtuple('BootstrapEstimates', ['estimates', 'params'])
 
     def __init__(self, data, identified_estimand, treatment, outcome,
@@ -146,7 +149,7 @@ class CausalEstimator:
         '''
             This method is to be overriden by the child classes, so that they can run the estimation technique of their choice
         '''
-        raise NotImplementedError
+        raise NotImplementedError(("Main estimation method is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG).format(self__class__))
 
     def estimate_effect(self):
         """Base estimation method that calls the estimate_effect method of its calling subclass.
@@ -180,7 +183,7 @@ class CausalEstimator:
         return CausalEstimate(est, None, None)
 
     def _estimate_effect_fn(self, data_df):
-        raise NotImplementedError
+        raise NotImplementedError(("Conditional treatment effects are " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG).format(self.__class__))
 
     def _estimate_conditional_effects(self, estimate_effect_fn,
             effect_modifier_names=None,
@@ -217,7 +220,7 @@ class CausalEstimator:
 
 
     def _do(self, x, data_df=None):
-        raise NotImplementedError
+        raise NotImplementedError(("Do-operator is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG).format(self.__class__))
 
     def do(self, x, data_df=None):
         """Method that implements the do-operator.
@@ -231,10 +234,8 @@ class CausalEstimator:
         est = self._do(x, data_df)
         return est
 
-    def estimate_individual_effects(self, target_units):
-        pass
     def construct_symbolic_estimator(self, estimand):
-        raise NotImplementedError
+        raise NotImplementedError(("Symbolic estimator string is ").format(self.__class__))
 
     def _generate_bootstrap_estimates(self, num_bootstrap_simulations,
             sample_size_fraction):
@@ -329,7 +330,7 @@ class CausalEstimator:
             can run a confidence interval estimation method suited to the specific 
             causal estimator.
         '''
-        raise NotImplementedError
+        raise NotImplementedError(("This method for estimating confidence intervals is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG + " Meanwhile, you can try the bootstrap method (method='bootstrap') to estimate confidence intervals.").format(self.__class__))
 
     def estimate_confidence_intervals(self, confidence_level=None, method=None, 
              **kwargs):
@@ -402,7 +403,7 @@ class CausalEstimator:
             can run a standard error estimation method suited to the specific 
             causal estimator.
         '''
-        raise NotImplementedError
+        raise NotImplementedError(("This method for estimating standard errors is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG + " Meanwhile, you can try the bootstrap method (method='bootstrap') to estimate standard errors.").format(self.__class__))
 
     def estimate_std_error(self, method=None,  **kwargs):
         """ Compute standard error of an obtained causal estimate.
@@ -493,7 +494,7 @@ class CausalEstimator:
             can run a significance test suited to the specific 
             causal estimator.
         '''
-        raise NotImplementedError
+        raise NotImplementedError(("This method for testing statistical significance is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG + " Meanwhile, you can try the bootstrap method (method='bootstrap') to test statistical significance.").format(self.__class__))
 
     def test_significance(self, estimate_value, method=None, **kwargs):
         """Test statistical significance of obtained estimate.
