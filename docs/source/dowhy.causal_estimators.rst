@@ -4,10 +4,18 @@ dowhy.causal\_estimators package
 Submodules
 ----------
 
-dowhy.causal\_estimators.econml\_cate\_estimator module
--------------------------------------------------------
+dowhy.causal\_estimators.causalml module
+----------------------------------------
 
-.. automodule:: dowhy.causal_estimators.econml_cate_estimator
+.. automodule:: dowhy.causal_estimators.causalml
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.causal\_estimators.econml module
+--------------------------------------
+
+.. automodule:: dowhy.causal_estimators.econml
    :members:
    :undoc-members:
    :show-inheritance:
@@ -24,6 +32,14 @@ dowhy.causal\_estimators.linear\_regression\_estimator module
 -------------------------------------------------------------
 
 .. automodule:: dowhy.causal_estimators.linear_regression_estimator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.causal\_estimators.propensity\_score\_estimator module
+------------------------------------------------------------
+
+.. automodule:: dowhy.causal_estimators.propensity_score_estimator
    :members:
    :undoc-members:
    :show-inheritance:
