@@ -100,6 +100,7 @@ class CausalEstimator:
             self.confidence_level = CausalEstimator.DEFAULT_CONFIDENCE_LEVEL
         if not hasattr(self, 'num_quantiles_to_discretize_cont_cols'):
             self.num_quantiles_to_discretize_cont_cols = CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS
+
         # Setting more values
         if self._data is not None:
             self._treatment = self._data[self._treatment_name]
@@ -147,7 +148,7 @@ class CausalEstimator:
     def _estimate_effect(self):
         '''This method is to be overriden by the child classes, so that they can run the estimation technique of their choice
         '''
-        raise NotImplementedError(("Main estimation method is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG).format(self__class__))
+        raise NotImplementedError(("Main estimation method is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG).format(self.__class__))
 
     def estimate_effect(self):
         """Base estimation method that calls the estimate_effect method of its calling subclass.
@@ -208,6 +209,8 @@ class CausalEstimator:
             raise ValueError("At least one effect modifier should be specified to compute conditional effects.")
         # Making sure that effect_modifier_names is a list
         effect_modifier_names = parse_state(effect_modifier_names)
+        if not all(em in self._effect_modifier_names for em in effect_modifier_names):
+            self.logger.warn("At least one of the provided effect modifiers was not included while fitting the estimator. You may get incorrect results. To resolve, fit the estimator again by providing the updated effect modifiers in estimate_effect().")
         # Making a copy since we are going to be changing effect modifier names
         effect_modifier_names = effect_modifier_names.copy()
         prefix = CausalEstimator.TEMP_CAT_COLUMN_PREFIX

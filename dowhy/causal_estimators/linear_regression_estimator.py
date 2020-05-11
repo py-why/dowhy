@@ -32,7 +32,7 @@ class LinearRegressionEstimator(CausalEstimator):
         self._linear_model = None
 
     def _estimate_effect(self, data_df=None, need_conditional_estimates=None):
-        # TODO make treatment_vale and control value also as local parameters
+        # TODO make treatment_value and control value also as local parameters
         if data_df is None:
             data_df = self._data
         if need_conditional_estimates is None:
@@ -44,6 +44,7 @@ class LinearRegressionEstimator(CausalEstimator):
             coefficients = self._linear_model.params[1:] # first coefficient is the intercept
             self.logger.debug("Coefficients of the fitted linear model: " +
                           ",".join(map(str, coefficients)))
+            print(self._linear_model.summary())
         # All treatments are set to the same constant value
         effect_estimate = self._do(self._treatment_value, data_df) - self._do(self._control_value, data_df)
         conditional_effect_estimates = None
@@ -83,8 +84,10 @@ class LinearRegressionEstimator(CausalEstimator):
             treatment_vals = data_df[self._treatment_name]
             if len(self._observed_common_causes_names)>0:
                 observed_common_causes_vals = data_df[self._observed_common_causes_names]
+                observed_common_causes_vals = pd.get_dummies(observed_common_causes_vals, drop_first=True)
             if self._effect_modifier_names:
                 effect_modifiers_vals =  data_df[self._effect_modifier_names]
+                effect_modifiers_vals = pd.get_dummies(effect_modifiers_vals, drop_first=True)
         # Fixing treatment value to the specified value, if provided
         if treatment_values is not None:
             treatment_vals = treatment_values
@@ -118,7 +121,7 @@ class LinearRegressionEstimator(CausalEstimator):
     def _do(self, treatment_val, data_df=None):
         if data_df is None:
             data_df = self._data
-        if not self._linear_model: 
+        if not self._linear_model:
             # The model is always built on the entire data
             _, self._linear_model = self._build_linear_model()
         # Replacing treatment values by given x
