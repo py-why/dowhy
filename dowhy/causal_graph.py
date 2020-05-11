@@ -84,26 +84,16 @@ class CausalGraph:
             self.logger.warning("Warning: Pygraphviz cannot be loaded. Check that graphviz and pygraphviz are installed.")
             self.logger.info("Using Matplotlib for plotting")
             import matplotlib.pyplot as plt
-            solid_edges = [(n1,n2) for n1,n2, e in self._graph.edges(data=True) if 'style' not in e ]
-            dashed_edges =[(n1,n2) for n1,n2, e in self._graph.edges(data=True) if ('style' in e and e['style']=="dashed") ]
-            plt.clf()
-            pos = nx.layout.shell_layout(self._graph)
-            nodes = nx.draw_networkx_nodes(self._graph, pos)
-            edges = nx.draw_networkx_edges(
-                    self._graph,
-                    pos,
-                    edgelist=solid_edges,
-                    arrowstyle="fancy",
-                    arrowsize=1)
-            edges = nx.draw_networkx_edges(
-                    self._graph,
-                    pos,
-                    edgelist=dashed_edges,
-                    arrowstyle="->",
-                    style="dashed",
-                    arrowsize=2)
-            labels = nx.draw_networkx_labels(self._graph, pos)
-            #nx.draw_networkx(self._graph, pos=nx.shell_layout(self._graph))
+            
+            options = {
+                'node_color': 'yellow',
+                'node_size': 500,
+                'width': 3,
+                'arrowstyle': '-|>',
+                'arrowsize': 20,
+            }
+            
+            nx.draw_networkx(self._graph, arrows=True, **options)
             plt.axis('off')
             plt.savefig(out_filename)
             plt.draw()
