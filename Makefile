@@ -3,7 +3,7 @@ init:
 test:
 	py.test tests
 check: 
-	python setup.py checka
+	python setup.py check
 sdist:
 	python setup.py sdist
 jupyter:
