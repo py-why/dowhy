@@ -21,12 +21,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -88,7 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">DoWhy | Making causal inference easy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Confounding Example: Finding causal effects from observed data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#Let's-create-a-mystery-dataset-for-which-we-need-to-determine-whether-there-is-a-causal-effect.">Let’s create a mystery dataset for which we need to determine whether there is a causal effect.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Let’s-create-a-mystery-dataset-for-which-we-need-to-determine-whether-there-is-a-causal-effect.">Let’s create a mystery dataset for which we need to determine whether there is a causal effect.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Using-DoWhy-to-resolve-the-mystery:-Does-Treatment-cause-Outcome?">Using DoWhy to resolve the mystery: <em>Does Treatment cause Outcome?</em></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#STEP-1:-Model-the-problem-as-a-causal-graph">STEP 1: Model the problem as a causal graph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#STEP-2:-Identify-causal-effect-using-properties-of-the-formal-causal-graph">STEP 2: Identify causal effect using properties of the formal causal graph</a></li>
@@ -104,10 +104,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Linear-Model">Linear Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#EconML-methods">EconML methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Works-with-any-EconML-method">Works with any EconML method</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Refuting-the-estimate">Refuting the estimate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="load_graph_example.html">Different ways to load an input graph</a></li>
@@ -249,20 +245,33 @@ div.nboutput.container div.prompt pre {
 /* all prompts */
 div.nbinput.container div.prompt,
 div.nboutput.container div.prompt {
-    min-width: 5ex;
-    padding-top: 0.4em;
-    padding-right: 0.4em;
-    text-align: right;
-    flex: 0;
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
 }
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
 @media (max-width: 540px) {
     div.nbinput.container div.prompt,
     div.nboutput.container div.prompt {
+        width: unset;
         text-align: left;
         padding: 0.4em;
     }
     div.nboutput.container div.prompt.empty {
         padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
     }
 }
 
@@ -275,7 +284,6 @@ div.nboutput.container div.prompt pre {
 /* input/output area */
 div.nbinput.container div.input_area,
 div.nboutput.container div.output_area {
-    padding: 0.4em;
     -webkit-flex: 1;
     flex: 1;
     overflow: auto;
@@ -349,6 +357,27 @@ div.nboutput.container div.output_area.stderr {
 .ansi-bold { font-weight: bold; }
 .ansi-underline { text-decoration: underline; }
 
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
 /* Some additional styling taken form the Jupyter notebook CSS */
 div.rendered_html table {
   border: none;
@@ -413,8 +442,8 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
+<span></span>import os, sys
+sys.path.append(os.path.abspath(&quot;../../../&quot;))
 </pre></div>
 </div>
 </div>
@@ -423,28 +452,28 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">import</span> <span class="nn">dowhy</span>
-<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
-<span class="kn">import</span> <span class="nn">dowhy.datasets</span><span class="o">,</span> <span class="nn">dowhy.plotter</span>
+<span></span>import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import math
+import dowhy
+from dowhy import CausalModel
+import dowhy.datasets, dowhy.plotter
 </pre></div>
 </div>
 </div>
-<div class="section" id="Let's-create-a-mystery-dataset-for-which-we-need-to-determine-whether-there-is-a-causal-effect.">
-<h2>Let’s create a mystery dataset for which we need to determine whether there is a causal effect.<a class="headerlink" href="#Let's-create-a-mystery-dataset-for-which-we-need-to-determine-whether-there-is-a-causal-effect." title="Permalink to this headline">¶</a></h2>
+<div class="section" id="Let’s-create-a-mystery-dataset-for-which-we-need-to-determine-whether-there-is-a-causal-effect.">
+<h2>Let’s create a mystery dataset for which we need to determine whether there is a causal effect.<a class="headerlink" href="#Let’s-create-a-mystery-dataset-for-which-we-need-to-determine-whether-there-is-a-causal-effect." title="Permalink to this headline">¶</a></h2>
 <p>Creating the dataset. It is generated from either one of two models: * <strong>Model 1</strong>: Treatment does cause outcome. * <strong>Model 2</strong>: Treatment does not cause outcome. All observed correlation is due to a common cause.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">rvar</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">()</span> <span class="o">&gt;</span><span class="mf">0.5</span> <span class="k">else</span> <span class="mi">0</span>
-<span class="n">data_dict</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">xy_dataset</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span> <span class="n">effect</span><span class="o">=</span><span class="n">rvar</span><span class="p">,</span> <span class="n">sd_error</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;Treatment&quot;</span><span class="p">,</span> <span class="s2">&quot;Outcome&quot;</span><span class="p">,</span> <span class="s2">&quot;w0&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+<span></span>rvar = 1 if np.random.uniform() &gt;0.5 else 0
+data_dict = dowhy.datasets.xy_dataset(10000, effect=rvar, sd_error=0.2)
+df = data_dict[&#39;df&#39;]
+print(df[[&quot;Treatment&quot;, &quot;Outcome&quot;, &quot;w0&quot;]].head())
 </pre></div>
 </div>
 </div>
@@ -466,8 +495,8 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">dowhy</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">plot_treatment_outcome</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">]],</span> <span class="n">df</span><span class="p">[</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">]],</span>
-                             <span class="n">df</span><span class="p">[</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;time_val&quot;</span><span class="p">]])</span>
+<span></span>dowhy.plotter.plot_treatment_outcome(df[data_dict[&quot;treatment_name&quot;]], df[data_dict[&quot;outcome_name&quot;]],
+                             df[data_dict[&quot;time_val&quot;]])
 </pre></div>
 </div>
 </div>
@@ -497,13 +526,13 @@ No handles with labels found to put in legend.
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">model</span><span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
-        <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
-        <span class="n">treatment</span><span class="o">=</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
-        <span class="n">outcome</span><span class="o">=</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
-        <span class="n">common_causes</span><span class="o">=</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;common_causes_names&quot;</span><span class="p">],</span>
-        <span class="n">instruments</span><span class="o">=</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;instrument_names&quot;</span><span class="p">])</span>
-<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">(</span><span class="n">layout</span><span class="o">=</span><span class="s2">&quot;dot&quot;</span><span class="p">)</span>
+<span></span>model= CausalModel(
+        data=df,
+        treatment=data_dict[&quot;treatment_name&quot;],
+        outcome=data_dict[&quot;outcome_name&quot;],
+        common_causes=data_dict[&quot;common_causes_names&quot;],
+        instruments=data_dict[&quot;instrument_names&quot;])
+model.view_model(layout=&quot;dot&quot;)
 </pre></div>
 </div>
 </div>
@@ -523,8 +552,8 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;Treat
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
-<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+<span></span>from IPython.display import Image, display
+display(Image(filename=&quot;causal_model.png&quot;))
 </pre></div>
 </div>
 </div>
@@ -544,8 +573,8 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;Treat
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+<span></span>identified_estimand = model.identify_effect()
+print(identified_estimand)
 </pre></div>
 </div>
 </div>
@@ -603,12 +632,12 @@ No such variable found!
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
-        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+<span></span>estimate = model.estimate_effect(identified_estimand,
+        method_name=&quot;backdoor.linear_regression&quot;)
+print(&quot;Causal Estimate is &quot; + str(estimate.value))
 
-<span class="c1"># Plot Slope of line between treamtent and outcome =causal effect</span>
-<span class="n">dowhy</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">plot_causal_effect</span><span class="p">(</span><span class="n">estimate</span><span class="p">,</span> <span class="n">df</span><span class="p">[</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">]],</span> <span class="n">df</span><span class="p">[</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">]])</span>
+# Plot Slope of line between treamtent and outcome =causal effect
+dowhy.plotter.plot_causal_effect(estimate, df[data_dict[&quot;treatment_name&quot;]], df[data_dict[&quot;outcome_name&quot;]])
 </pre></div>
 </div>
 </div>
@@ -644,8 +673,8 @@ Causal Estimate is 1.0154712956668286
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DoWhy estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
-<span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;Actual true causal effect was </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rvar</span><span class="p">))</span>
+<span></span>print(&quot;DoWhy estimate is &quot; + str(estimate.value))
+print (&quot;Actual true causal effect was {0}&quot;.format(rvar))
 </pre></div>
 </div>
 </div>
@@ -670,8 +699,8 @@ Actual true causal effect was 1
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">res_random</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;random_common_cause&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">res_random</span><span class="p">)</span>
+<span></span>res_random=model.refute_estimate(identified_estimand, estimate, method_name=&quot;random_common_cause&quot;)
+print(res_random)
 </pre></div>
 </div>
 </div>
@@ -703,9 +732,9 @@ New effect:(1.01547620948807,)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">res_placebo</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span>
-        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;placebo_treatment_refuter&quot;</span><span class="p">,</span> <span class="n">placebo_type</span><span class="o">=</span><span class="s2">&quot;permute&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">res_placebo</span><span class="p">)</span>
+<span></span>res_placebo=model.refute_estimate(identified_estimand, estimate,
+        method_name=&quot;placebo_treatment_refuter&quot;, placebo_type=&quot;permute&quot;)
+print(res_placebo)
 </pre></div>
 </div>
 </div>
@@ -737,9 +766,9 @@ New effect:(-0.001212143363314766,)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">res_subset</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span>
-        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;data_subset_refuter&quot;</span><span class="p">,</span> <span class="n">subset_fraction</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">res_subset</span><span class="p">)</span>
+<span></span>res_subset=model.refute_estimate(identified_estimand, estimate,
+        method_name=&quot;data_subset_refuter&quot;, subset_fraction=0.9)
+print(res_subset)
 
 </pre></div>
 </div>
@@ -789,7 +818,7 @@ New effect:(1.02452210674865,)
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Microsoft
+        &copy; Copyright 2020, Microsoft
 
     </p>
   </div>

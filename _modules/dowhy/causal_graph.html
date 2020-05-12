@@ -21,12 +21,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
@@ -188,7 +188,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="n">outcome_name</span><span class="p">)</span>
         <span class="n">instrument_names</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="n">instrument_names</span><span class="p">)</span>
         <span class="n">common_cause_names</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="n">common_cause_names</span><span class="p">)</span>
-        <span class="n">effect_modifier_names</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="n">effect_modifier_names</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">graph</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -232,6 +231,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span>
         <span class="k">if</span> <span class="n">missing_nodes_as_confounders</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_missing_nodes_as_common_causes</span><span class="p">(</span><span class="n">observed_node_names</span><span class="p">)</span>
+        <span class="c1"># Adding node attributes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_node_attributes</span><span class="p">(</span><span class="n">observed_node_names</span><span class="p">)</span>
         <span class="c1">#TODO do not add it here. CausalIdentifier should call causal_graph to add an unobserved common cause if needed. This also ensures that we do not need get_common_causes in this class.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_unobserved_common_cause</span><span class="p">(</span><span class="n">observed_node_names</span><span class="p">)</span>
@@ -246,26 +246,29 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Warning: Pygraphviz cannot be loaded. Check that graphviz and pygraphviz are installed.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using Matplotlib for plotting&quot;</span><span class="p">)</span>
             <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
             <span class="n">solid_edges</span> <span class="o">=</span> <span class="p">[(</span><span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">)</span> <span class="k">for</span> <span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;style&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">e</span> <span class="p">]</span>
             <span class="n">dashed_edges</span> <span class="o">=</span><span class="p">[(</span><span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">)</span> <span class="k">for</span> <span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;style&#39;</span> <span class="ow">in</span> <span class="n">e</span> <span class="ow">and</span> <span class="n">e</span><span class="p">[</span><span class="s1">&#39;style&#39;</span><span class="p">]</span><span class="o">==</span><span class="s2">&quot;dashed&quot;</span><span class="p">)</span> <span class="p">]</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+
             <span class="n">pos</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">shell_layout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">)</span>
-            <span class="n">nodes</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
-            <span class="n">edges</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_edges</span><span class="p">(</span>
+            <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">node_color</span><span class="o">=</span><span class="s1">&#39;yellow&#39;</span><span class="p">,</span><span class="n">node_size</span><span class="o">=</span><span class="mi">400</span> <span class="p">)</span>
+            <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_edges</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span>
                     <span class="n">pos</span><span class="p">,</span>
                     <span class="n">edgelist</span><span class="o">=</span><span class="n">solid_edges</span><span class="p">,</span>
-                    <span class="n">arrowstyle</span><span class="o">=</span><span class="s2">&quot;fancy&quot;</span><span class="p">,</span>
-                    <span class="n">arrowsize</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">edges</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_edges</span><span class="p">(</span>
+                    <span class="n">arrowstyle</span><span class="o">=</span><span class="s2">&quot;-|&gt;&quot;</span><span class="p">,</span>
+                    <span class="n">arrowsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+            <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_edges</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span>
                     <span class="n">pos</span><span class="p">,</span>
                     <span class="n">edgelist</span><span class="o">=</span><span class="n">dashed_edges</span><span class="p">,</span>
-                    <span class="n">arrowstyle</span><span class="o">=</span><span class="s2">&quot;-&gt;&quot;</span><span class="p">,</span>
+                    <span class="n">arrowstyle</span><span class="o">=</span><span class="s2">&quot;-|&gt;&quot;</span><span class="p">,</span>
                     <span class="n">style</span><span class="o">=</span><span class="s2">&quot;dashed&quot;</span><span class="p">,</span>
-                    <span class="n">arrowsize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                    <span class="n">arrowsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+            
             <span class="n">labels</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_labels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
-            <span class="c1">#nx.draw_networkx(self._graph, pos=nx.shell_layout(self._graph))</span>
+
             <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">out_filename</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span></div>
@@ -307,10 +310,11 @@
         <span class="c1"># Adding effect modifiers</span>
         <span class="k">if</span> <span class="n">effect_modifier_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">node_name</span> <span class="ow">in</span> <span class="n">effect_modifier_names</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">outcome</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;dotted&quot;</span><span class="p">,</span> <span class="n">headport</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">tailport</span><span class="o">=</span><span class="s2">&quot;n&quot;</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">outcome</span><span class="p">,</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;dotted&quot;</span><span class="p">,</span> <span class="n">headport</span><span class="o">=</span><span class="s2">&quot;n&quot;</span><span class="p">,</span> <span class="n">tailport</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span> <span class="c1"># TODO make the ports more general so that they apply not just to top-bottom node configurations</span>
+                <span class="k">if</span> <span class="n">node_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">common_cause_names</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">outcome</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;dotted&quot;</span><span class="p">,</span> <span class="n">headport</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">tailport</span><span class="o">=</span><span class="s2">&quot;n&quot;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">outcome</span><span class="p">,</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;dotted&quot;</span><span class="p">,</span> <span class="n">headport</span><span class="o">=</span><span class="s2">&quot;n&quot;</span><span class="p">,</span> <span class="n">tailport</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span> <span class="c1"># TODO make the ports more general so that they apply not just to top-bottom node configurations</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span></div>
 
 <div class="viewcode-block" id="CausalGraph.add_node_attributes"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_graph.CausalGraph.add_node_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">add_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observed_node_names</span><span class="p">):</span>
@@ -322,7 +326,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span></div>
 
 <div class="viewcode-block" id="CausalGraph.add_missing_nodes_as_common_causes"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_graph.CausalGraph.add_missing_nodes_as_common_causes">[docs]</a>    <span class="k">def</span> <span class="nf">add_missing_nodes_as_common_causes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observed_node_names</span><span class="p">):</span>
-        <span class="c1"># Adding unobserved confounders</span>
+        <span class="c1"># Adding columns in the dataframe as confounders that were not in the graph</span>
         <span class="k">for</span> <span class="n">node_name</span> <span class="ow">in</span> <span class="n">observed_node_names</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">node_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span><span class="p">)</span>
@@ -338,7 +342,6 @@
         <span class="k">for</span> <span class="n">node_name</span> <span class="ow">in</span> <span class="n">current_common_causes</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node_name</span><span class="p">][</span><span class="s2">&quot;observed&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;no&quot;</span><span class="p">:</span>
                 <span class="n">create_new_common_cause</span> <span class="o">=</span> <span class="kc">False</span>
-
         <span class="k">if</span> <span class="n">create_new_common_cause</span><span class="p">:</span>
             <span class="n">uc_label</span> <span class="o">=</span> <span class="s2">&quot;Unobserved Confounders&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">uc_label</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="s2">&quot;no&quot;</span><span class="p">)</span>
@@ -476,7 +479,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Microsoft
+        &copy; Copyright 2020, Microsoft
 
     </p>
   </div>

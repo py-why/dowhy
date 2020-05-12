@@ -21,12 +21,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -99,8 +99,12 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#Works-with-any-EconML-method">Works with any EconML method</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#Continuous-treatment,-Continuous-outcome">Continuous treatment, Continuous outcome</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Binary-treatment,-Binary-outcome">Binary treatment, Binary outcome</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Binary-treatment,-Binary-outcome">Binary treatment, Binary outcome</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Using-DRLearner-estimator">Using DRLearner estimator</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#Instrumental-Variable-Method">Instrumental Variable Method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Metalearners">Metalearners</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#Refuting-the-estimate">Refuting the estimate</a><ul>
@@ -253,20 +257,33 @@ div.nboutput.container div.prompt pre {
 /* all prompts */
 div.nbinput.container div.prompt,
 div.nboutput.container div.prompt {
-    min-width: 5ex;
-    padding-top: 0.4em;
-    padding-right: 0.4em;
-    text-align: right;
-    flex: 0;
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
 }
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
 @media (max-width: 540px) {
     div.nbinput.container div.prompt,
     div.nboutput.container div.prompt {
+        width: unset;
         text-align: left;
         padding: 0.4em;
     }
     div.nboutput.container div.prompt.empty {
         padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
     }
 }
 
@@ -279,7 +296,6 @@ div.nboutput.container div.prompt pre {
 /* input/output area */
 div.nbinput.container div.input_area,
 div.nboutput.container div.output_area {
-    padding: 0.4em;
     -webkit-flex: 1;
     flex: 1;
     overflow: auto;
@@ -353,6 +369,27 @@ div.nboutput.container div.output_area.stderr {
 .ansi-bold { font-weight: bold; }
 .ansi-underline { text-decoration: underline; }
 
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
 /* Some additional styling taken form the Jupyter notebook CSS */
 div.rendered_html table {
   border: none;
@@ -418,8 +455,8 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>  <span class="c1"># for dowhy source code</span>
+<span></span>import os, sys
+sys.path.insert(1, os.path.abspath(&quot;../../../&quot;))  # for dowhy source code
 </pre></div>
 </div>
 </div>
@@ -428,17 +465,17 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">logging</span>
+<span></span>import numpy as np
+import pandas as pd
+import logging
 
-<span class="kn">import</span> <span class="nn">dowhy</span>
-<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
-<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+import dowhy
+from dowhy import CausalModel
+import dowhy.datasets
 
-<span class="kn">import</span> <span class="nn">econml</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+import econml
+import warnings
+warnings.filterwarnings(&#39;ignore&#39;)
 </pre></div>
 </div>
 </div>
@@ -447,12 +484,15 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">linear_dataset</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">num_common_causes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
-                                    <span class="n">num_instruments</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_effect_modifiers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                                     <span class="n">num_treatments</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                    <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">df</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span>
-<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span></span>data = dowhy.datasets.linear_dataset(10, num_common_causes=4, num_samples=10000,
+                                    num_instruments=2, num_effect_modifiers=2,
+                                     num_treatments=1,
+                                    treatment_is_binary=False,
+                                    num_discrete_common_causes=2,
+                                    num_discrete_effect_modifiers=0,
+                                    one_hot_encode=False)
+df=data[&#39;df&#39;]
+df.head()
 </pre></div>
 </div>
 </div>
@@ -494,68 +534,68 @@ div.rendered_html tbody tr:hover {
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.423069</td>
-      <td>-0.783912</td>
-      <td>1.0</td>
-      <td>0.595267</td>
-      <td>-1.719039</td>
-      <td>1.133622</td>
-      <td>2.154847</td>
-      <td>2.093053</td>
-      <td>24.336479</td>
-      <td>168.434975</td>
+      <td>0.279018</td>
+      <td>-0.955066</td>
+      <td>0.0</td>
+      <td>0.228005</td>
+      <td>2.128748</td>
+      <td>-0.064190</td>
+      <td>2</td>
+      <td>1</td>
+      <td>14.761720</td>
+      <td>122.169174</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.671984</td>
-      <td>-0.517552</td>
+      <td>-0.284234</td>
+      <td>1.382251</td>
       <td>1.0</td>
-      <td>0.840097</td>
-      <td>-0.871639</td>
-      <td>1.240345</td>
-      <td>2.513988</td>
-      <td>1.144102</td>
-      <td>32.005832</td>
-      <td>244.808533</td>
+      <td>0.396490</td>
+      <td>0.175366</td>
+      <td>-0.115139</td>
+      <td>1</td>
+      <td>2</td>
+      <td>23.566119</td>
+      <td>345.906350</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.408754</td>
-      <td>-1.224234</td>
-      <td>1.0</td>
-      <td>0.841418</td>
-      <td>-2.992127</td>
-      <td>1.947631</td>
-      <td>1.178079</td>
-      <td>0.364007</td>
-      <td>20.560389</td>
-      <td>105.083930</td>
+      <td>1.411501</td>
+      <td>2.756870</td>
+      <td>0.0</td>
+      <td>0.765155</td>
+      <td>0.649999</td>
+      <td>0.861213</td>
+      <td>2</td>
+      <td>3</td>
+      <td>24.094062</td>
+      <td>477.367085</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-1.797735</td>
-      <td>-0.810235</td>
-      <td>1.0</td>
-      <td>0.469800</td>
-      <td>-1.097293</td>
-      <td>-0.831213</td>
-      <td>0.490426</td>
-      <td>-0.229491</td>
-      <td>8.713406</td>
-      <td>34.353637</td>
+      <td>-0.149004</td>
+      <td>1.887996</td>
+      <td>0.0</td>
+      <td>0.484696</td>
+      <td>0.693805</td>
+      <td>0.009433</td>
+      <td>0</td>
+      <td>0</td>
+      <td>7.781959</td>
+      <td>124.409057</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-0.579162</td>
-      <td>-3.119641</td>
-      <td>1.0</td>
-      <td>0.691993</td>
-      <td>-0.117981</td>
-      <td>0.009197</td>
-      <td>0.169698</td>
-      <td>2.553771</td>
-      <td>17.375187</td>
-      <td>-28.550935</td>
+      <td>-1.033017</td>
+      <td>1.886337</td>
+      <td>0.0</td>
+      <td>0.989248</td>
+      <td>-1.287000</td>
+      <td>-0.845054</td>
+      <td>3</td>
+      <td>2</td>
+      <td>21.967755</td>
+      <td>356.001269</td>
     </tr>
   </tbody>
 </table>
@@ -566,9 +606,9 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span>
-                    <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span> <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
-                    <span class="n">graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;gml_graph&quot;</span><span class="p">])</span>
+<span></span>model = CausalModel(data=data[&quot;df&quot;],
+                    treatment=data[&quot;treatment_name&quot;], outcome=data[&quot;outcome_name&quot;],
+                    graph=data[&quot;gml_graph&quot;])
 </pre></div>
 </div>
 </div>
@@ -585,9 +625,9 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#3
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
-<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+<span></span>model.view_model()
+from IPython.display import Image, display
+display(Image(filename=&quot;causal_model.png&quot;))
 </pre></div>
 </div>
 </div>
@@ -603,8 +643,8 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#3
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">identified_estimand</span><span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+<span></span>identified_estimand= model.identify_effect()
+print(identified_estimand)
 </pre></div>
 </div>
 </div>
@@ -613,7 +653,7 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#3
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;W0&#39;, &#39;W3&#39;, &#39;W1&#39;, &#39;Unobserved Confounders&#39;, &#39;W2&#39;]
+INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;W2&#39;, &#39;Unobserved Confounders&#39;, &#39;W1&#39;, &#39;W0&#39;, &#39;W3&#39;]
 WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
 </pre></div></div>
 </div>
@@ -630,7 +670,7 @@ WARN: Do you want to continue by ignoring any unobserved confounders? (use proce
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[&#39;Z0&#39;, &#39;Z1&#39;]
+INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[&#39;Z1&#39;, &#39;Z0&#39;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -643,15 +683,15 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(Expectation(y|W0,W3,W1,W2))
+─────(Expectation(y|W2,W1,W0,W3))
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W2,U) = P(y|v0,W0,W3,W1,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W0,W3,U) = P(y|v0,W2,W1,W0,W3)
 ### Estimand : 2
 Estimand name: iv
 Estimand expression:
-Expectation(Derivative(y, [Z0, Z1])*Derivative([v0], [Z0, Z1])**(-1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
-Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
+Expectation(Derivative(y, [Z1, Z0])*Derivative([v0], [Z1, Z0])**(-1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z1,Z0})
+Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→{v0}, then ¬({Z1,Z0}→y)
 
 </pre></div></div>
 </div>
@@ -664,11 +704,11 @@ Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}�
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">linear_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
-                                        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">,</span>
-                                       <span class="n">control_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                       <span class="n">treatment_value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">linear_estimate</span><span class="p">)</span>
+<span></span>linear_estimate = model.estimate_effect(identified_estimand,
+                                        method_name=&quot;backdoor.linear_regression&quot;,
+                                       control_value=0,
+                                       treatment_value=1)
+print(linear_estimate)
 </pre></div>
 </div>
 </div>
@@ -678,7 +718,7 @@ Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}�
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using Linear Regression Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2+v0*X1+v0*X0
+INFO:dowhy.causal_estimator:b: y~v0+W2+W1+W0+W3+v0*X0+v0*X1
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -694,20 +734,20 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(Expectation(y|W0,W3,W1,W2))
+─────(Expectation(y|W2,W1,W0,W3))
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W2,U) = P(y|v0,W0,W3,W1,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W0,W3,U) = P(y|v0,W2,W1,W0,W3)
 ### Estimand : 2
 Estimand name: iv
 Estimand expression:
-Expectation(Derivative(y, [Z0, Z1])*Derivative([v0], [Z0, Z1])**(-1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
-Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
+Expectation(Derivative(y, [Z1, Z0])*Derivative([v0], [Z1, Z0])**(-1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z1,Z0})
+Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→{v0}, then ¬({Z1,Z0}→y)
 
 ## Realized estimand
-b: y~v0+W0+W3+W1+W2+v0*X1+v0*X0
+b: y~v0+W2+W1+W0+W3+v0*X0+v0*X1
 ## Estimate
-Value: 10.000000000000007
+Value: 9.999999999999979
 
 </pre></div></div>
 </div>
@@ -723,20 +763,20 @@ Value: 10.000000000000007
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">PolynomialFeatures</span>
-<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LassoCV</span>
-<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostingRegressor</span>
-<span class="n">dml_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.econml.dml.DMLCateEstimator&quot;</span><span class="p">,</span>
-                                     <span class="n">control_value</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                                     <span class="n">treatment_value</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-                                 <span class="n">target_units</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">df</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;X0&quot;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># condition used for CATE</span>
-                                 <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;init_params&quot;</span><span class="p">:{</span><span class="s1">&#39;model_y&#39;</span><span class="p">:</span><span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
-                                                              <span class="s1">&#39;model_t&#39;</span><span class="p">:</span> <span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
-                                                              <span class="s2">&quot;model_final&quot;</span><span class="p">:</span><span class="n">LassoCV</span><span class="p">(),</span>
-                                                              <span class="s1">&#39;featurizer&#39;</span><span class="p">:</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="n">degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">include_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)},</span>
-                                               <span class="s2">&quot;fit_params&quot;</span><span class="p">:{}})</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">dml_estimate</span><span class="p">)</span>
+<span></span>from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LassoCV
+from sklearn.ensemble import GradientBoostingRegressor
+dml_estimate = model.estimate_effect(identified_estimand, method_name=&quot;backdoor.econml.dml.DMLCateEstimator&quot;,
+                                     control_value = 0,
+                                     treatment_value = 1,
+                                 target_units = lambda df: df[&quot;X0&quot;]&gt;1,  # condition used for CATE
+                                 confidence_intervals=False,
+                                method_params={&quot;init_params&quot;:{&#39;model_y&#39;:GradientBoostingRegressor(),
+                                                              &#39;model_t&#39;: GradientBoostingRegressor(),
+                                                              &quot;model_final&quot;:LassoCV(),
+                                                              &#39;featurizer&#39;:PolynomialFeatures(degree=1, include_bias=True)},
+                                               &quot;fit_params&quot;:{}})
+print(dml_estimate)
 </pre></div>
 </div>
 </div>
@@ -746,7 +786,7 @@ Value: 10.000000000000007
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using EconML Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2
+INFO:dowhy.causal_estimator:b: y~v0+W2+W1+W0+W3
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -762,20 +802,20 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(Expectation(y|W0,W3,W1,W2))
+─────(Expectation(y|W2,W1,W0,W3))
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W2,U) = P(y|v0,W0,W3,W1,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W0,W3,U) = P(y|v0,W2,W1,W0,W3)
 ### Estimand : 2
 Estimand name: iv
 Estimand expression:
-Expectation(Derivative(y, [Z0, Z1])*Derivative([v0], [Z0, Z1])**(-1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
-Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
+Expectation(Derivative(y, [Z1, Z0])*Derivative([v0], [Z1, Z0])**(-1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z1,Z0})
+Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→{v0}, then ¬({Z1,Z0}→y)
 
 ## Realized estimand
-b: y~v0+W0+W3+W1+W2
+b: y~v0+W2+W1+W0+W3
 ## Estimate
-Value: 8.578440374266151
+Value: 13.199275668451099
 
 </pre></div></div>
 </div>
@@ -784,7 +824,7 @@ Value: 8.578440374266151
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;True causal estimate is&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;ate&quot;</span><span class="p">])</span>
+<span></span>print(&quot;True causal estimate is&quot;, data[&quot;ate&quot;])
 </pre></div>
 </div>
 </div>
@@ -793,7 +833,7 @@ Value: 8.578440374266151
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-True causal estimate is 6.531368733675461
+True causal estimate is 12.855552298854034
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -801,17 +841,17 @@ True causal estimate is 6.531368733675461
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">dml_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.econml.dml.DMLCateEstimator&quot;</span><span class="p">,</span>
-                                     <span class="n">control_value</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                                     <span class="n">treatment_value</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-                                 <span class="n">target_units</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># condition used for CATE</span>
-                                 <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;init_params&quot;</span><span class="p">:{</span><span class="s1">&#39;model_y&#39;</span><span class="p">:</span><span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
-                                                              <span class="s1">&#39;model_t&#39;</span><span class="p">:</span> <span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
-                                                              <span class="s2">&quot;model_final&quot;</span><span class="p">:</span><span class="n">LassoCV</span><span class="p">(),</span>
-                                                              <span class="s1">&#39;featurizer&#39;</span><span class="p">:</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="n">degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">include_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)},</span>
-                                               <span class="s2">&quot;fit_params&quot;</span><span class="p">:{}})</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">dml_estimate</span><span class="p">)</span>
+<span></span>dml_estimate = model.estimate_effect(identified_estimand, method_name=&quot;backdoor.econml.dml.DMLCateEstimator&quot;,
+                                     control_value = 0,
+                                     treatment_value = 1,
+                                 target_units = 1,  # condition used for CATE
+                                 confidence_intervals=False,
+                                method_params={&quot;init_params&quot;:{&#39;model_y&#39;:GradientBoostingRegressor(),
+                                                              &#39;model_t&#39;: GradientBoostingRegressor(),
+                                                              &quot;model_final&quot;:LassoCV(),
+                                                              &#39;featurizer&#39;:PolynomialFeatures(degree=1, include_bias=True)},
+                                               &quot;fit_params&quot;:{}})
+print(dml_estimate)
 </pre></div>
 </div>
 </div>
@@ -821,7 +861,7 @@ True causal estimate is 6.531368733675461
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 INFO:dowhy.causal_estimator:INFO: Using EconML Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2
+INFO:dowhy.causal_estimator:b: y~v0+W2+W1+W0+W3
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -837,206 +877,88 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(Expectation(y|W0,W3,W1,W2))
+─────(Expectation(y|W2,W1,W0,W3))
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W2,U) = P(y|v0,W0,W3,W1,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W0,W3,U) = P(y|v0,W2,W1,W0,W3)
 ### Estimand : 2
 Estimand name: iv
 Estimand expression:
-Expectation(Derivative(y, [Z0, Z1])*Derivative([v0], [Z0, Z1])**(-1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
-Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
+Expectation(Derivative(y, [Z1, Z0])*Derivative([v0], [Z1, Z0])**(-1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z1,Z0})
+Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→{v0}, then ¬({Z1,Z0}→y)
 
 ## Realized estimand
-b: y~v0+W0+W3+W1+W2
+b: y~v0+W2+W1+W0+W3
 ## Estimate
-Value: 6.478668642785378
+Value: 12.785653600020371
 
 </pre></div></div>
 </div>
 <div class="section" id="CATE-Object-and-Confidence-Intervals">
 <h3>CATE Object and Confidence Intervals<a class="headerlink" href="#CATE-Object-and-Confidence-Intervals" title="Permalink to this headline">¶</a></h3>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">PolynomialFeatures</span>
-<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LassoCV</span>
-<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostingRegressor</span>
-<span class="n">dml_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
-                                     <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.econml.dml.DMLCateEstimator&quot;</span><span class="p">,</span>
-                                     <span class="n">target_units</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">df</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;X0&quot;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">,</span>
-                                     <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                     <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;init_params&quot;</span><span class="p">:{</span><span class="s1">&#39;model_y&#39;</span><span class="p">:</span><span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
-                                                              <span class="s1">&#39;model_t&#39;</span><span class="p">:</span> <span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
-                                                              <span class="s2">&quot;model_final&quot;</span><span class="p">:</span><span class="n">LassoCV</span><span class="p">(),</span>
-                                                              <span class="s1">&#39;featurizer&#39;</span><span class="p">:</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="n">degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">include_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)},</span>
-                                               <span class="s2">&quot;fit_params&quot;</span><span class="p">:{</span>
-                                                               <span class="s1">&#39;inference&#39;</span><span class="p">:</span> <span class="s1">&#39;bootstrap&#39;</span><span class="p">,</span>
-                                                            <span class="p">}</span>
-                                              <span class="p">})</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">dml_estimate</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">dml_estimate</span><span class="o">.</span><span class="n">cate_estimates</span><span class="p">[:</span><span class="mi">10</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">dml_estimate</span><span class="o">.</span><span class="n">effect_intervals</span><span class="p">)</span>
+<span></span>from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LassoCV
+from sklearn.ensemble import GradientBoostingRegressor
+dml_estimate = model.estimate_effect(identified_estimand,
+                                     method_name=&quot;backdoor.econml.dml.DMLCateEstimator&quot;,
+                                     target_units = lambda df: df[&quot;X0&quot;]&gt;1,
+                                     confidence_intervals=True,
+                                     method_params={&quot;init_params&quot;:{&#39;model_y&#39;:GradientBoostingRegressor(),
+                                                              &#39;model_t&#39;: GradientBoostingRegressor(),
+                                                              &quot;model_final&quot;:LassoCV(),
+                                                              &#39;featurizer&#39;:PolynomialFeatures(degree=1, include_bias=True)},
+                                               &quot;fit_params&quot;:{
+                                                               &#39;inference&#39;: &#39;bootstrap&#39;,
+                                                            }
+                                              })
+print(dml_estimate)
+print(dml_estimate.cate_estimates[:10])
+print(dml_estimate.effect_intervals)
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using EconML Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2
-[Parallel(n_jobs=-1)]: Using backend ThreadingBackend with 32 concurrent workers.
-[Parallel(n_jobs=-1)]: Done  71 out of 100 | elapsed:  1.1min remaining:   27.4s
-[Parallel(n_jobs=-1)]: Done 100 out of 100 | elapsed:  1.2min finished
-[Parallel(n_jobs=-1)]: Using backend ThreadingBackend with 32 concurrent workers.
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-*** Causal Estimate ***
-
-## Target estimand
-Estimand type: nonparametric-ate
-### Estimand : 1
-Estimand name: backdoor
-Estimand expression:
-  d
-─────(Expectation(y|W0,W3,W1,W2))
-d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W2,U) = P(y|v0,W0,W3,W1,W2)
-### Estimand : 2
-Estimand name: iv
-Estimand expression:
-Expectation(Derivative(y, [Z0, Z1])*Derivative([v0], [Z0, Z1])**(-1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
-Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
-
-## Realized estimand
-b: y~v0+W0+W3+W1+W2
-## Estimate
-Value: 8.59526782752452
-
-[[11.26396103]
- [10.54322021]
- [ 8.16997949]
- [ 4.86061276]
- [11.09707173]
- [-2.36778738]
- [ 4.65848744]
- [ 6.6349523 ]
- [ 7.01785881]
- [ 9.61921864]]
-(array([[10.7209148 ],
-       [10.05703784],
-       [ 7.82636093],
-       ...,
-       [10.37314163],
-       [ 5.89648783],
-       [14.28637593]]), array([[10.98146476],
-       [10.28543916],
-       [ 8.04793421],
-       ...,
-       [10.63228411],
-       [ 6.08169175],
-       [14.69742395]]))
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-[Parallel(n_jobs=-1)]: Done  71 out of 100 | elapsed:    0.1s remaining:    0.0s
-[Parallel(n_jobs=-1)]: Done 100 out of 100 | elapsed:    0.1s finished
-</pre></div></div>
 </div>
 </div>
 <div class="section" id="Can-provide-a-new-inputs-as-target-units-and-estimate-CATE-on-them.">
 <h3>Can provide a new inputs as target units and estimate CATE on them.<a class="headerlink" href="#Can-provide-a-new-inputs-as-target-units-and-estimate-CATE-on-them." title="Permalink to this headline">¶</a></h3>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">test_cols</span><span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;effect_modifier_names&#39;</span><span class="p">]</span> <span class="c1"># only need effect modifiers&#39; values</span>
-<span class="n">test_arr</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test_cols</span><span class="p">))]</span> <span class="c1"># all variables are sampled uniformly, sample of 10</span>
-<span class="n">test_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">test_arr</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span> <span class="n">columns</span><span class="o">=</span><span class="n">test_cols</span><span class="p">)</span>
-<span class="n">dml_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
-                                     <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.econml.dml.DMLCateEstimator&quot;</span><span class="p">,</span>
-                                     <span class="n">target_units</span> <span class="o">=</span> <span class="n">test_df</span><span class="p">,</span>
-                                     <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                     <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;init_params&quot;</span><span class="p">:{</span><span class="s1">&#39;model_y&#39;</span><span class="p">:</span><span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
-                                                              <span class="s1">&#39;model_t&#39;</span><span class="p">:</span> <span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
-                                                              <span class="s2">&quot;model_final&quot;</span><span class="p">:</span><span class="n">LassoCV</span><span class="p">(),</span>
-                                                              <span class="s1">&#39;featurizer&#39;</span><span class="p">:</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="n">degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">include_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)},</span>
-                                               <span class="s2">&quot;fit_params&quot;</span><span class="p">:{}</span>
-                                              <span class="p">})</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">dml_estimate</span><span class="o">.</span><span class="n">cate_estimates</span><span class="p">)</span>
+<span></span>test_cols= data[&#39;effect_modifier_names&#39;] # only need effect modifiers&#39; values
+test_arr = [np.random.uniform(0,1, 10) for _ in range(len(test_cols))] # all variables are sampled uniformly, sample of 10
+test_df = pd.DataFrame(np.array(test_arr).transpose(), columns=test_cols)
+dml_estimate = model.estimate_effect(identified_estimand,
+                                     method_name=&quot;backdoor.econml.dml.DMLCateEstimator&quot;,
+                                     target_units = test_df,
+                                     confidence_intervals=False,
+                                     method_params={&quot;init_params&quot;:{&#39;model_y&#39;:GradientBoostingRegressor(),
+                                                              &#39;model_t&#39;: GradientBoostingRegressor(),
+                                                              &quot;model_final&quot;:LassoCV(),
+                                                              &#39;featurizer&#39;:PolynomialFeatures(degree=1, include_bias=True)},
+                                               &quot;fit_params&quot;:{}
+                                              })
+print(dml_estimate.cate_estimates)
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using EconML Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-[[10.98805765]
- [13.07006079]
- [10.63717349]
- [11.88142705]
- [12.24428257]
- [14.27632508]
- [13.19014829]
- [11.06457798]
- [11.51427196]
- [12.50204303]]
-</pre></div></div>
 </div>
 </div>
 <div class="section" id="Can-also-retrieve-the-raw-EconML-estimator-object-for-any-further-operations">
 <h3>Can also retrieve the raw EconML estimator object for any further operations<a class="headerlink" href="#Can-also-retrieve-the-raw-EconML-estimator-object-for-any-further-operations" title="Permalink to this headline">¶</a></h3>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="n">dml_estimate</span><span class="o">.</span><span class="n">_estimator_object</span><span class="p">)</span>
-<span class="n">dml_estimate</span>
+<span></span>print(dml_estimate._estimator_object)
+dml_estimate
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;econml.dml.DMLCateEstimator object at 0x7fff577ce940&gt;
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;dowhy.causal_estimator.CausalEstimate at 0x7fff577ce828&gt;
-</pre></div></div>
 </div>
 </div>
 </div>
@@ -1045,452 +967,153 @@ INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2
 <p>In addition to double machine learning, below we example analyses using orthogonal forests, DRLearner (bug to fix), and neural network-based instrumental variables.</p>
 <div class="section" id="Continuous-treatment,-Continuous-outcome">
 <h3>Continuous treatment, Continuous outcome<a class="headerlink" href="#Continuous-treatment,-Continuous-outcome" title="Permalink to this headline">¶</a></h3>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
-<span class="n">orthoforest_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.econml.ortho_forest.ContinuousTreatmentOrthoForest&quot;</span><span class="p">,</span>
-                                 <span class="n">target_units</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">df</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;X0&quot;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">,</span>
-                                 <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;init_params&quot;</span><span class="p">:{</span>
-                                                    <span class="s1">&#39;n_trees&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="c1"># not ideal, just as an example to speed up computation</span>
-                                                    <span class="p">},</span>
-                                               <span class="s2">&quot;fit_params&quot;</span><span class="p">:{}</span>
-                                              <span class="p">})</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">orthoforest_estimate</span><span class="p">)</span>
+<span></span>from sklearn.linear_model import LogisticRegression
+orthoforest_estimate = model.estimate_effect(identified_estimand, method_name=&quot;backdoor.econml.ortho_forest.ContinuousTreatmentOrthoForest&quot;,
+                                 target_units = lambda df: df[&quot;X0&quot;]&gt;1,
+                                 confidence_intervals=False,
+                                method_params={&quot;init_params&quot;:{
+                                                    &#39;n_trees&#39;:2, # not ideal, just as an example to speed up computation
+                                                    },
+                                               &quot;fit_params&quot;:{}
+                                              })
+print(orthoforest_estimate)
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using EconML Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2
-[Parallel(n_jobs=-1)]: Using backend LokyBackend with 32 concurrent workers.
-[Parallel(n_jobs=-1)]: Done   2 out of   2 | elapsed:   38.9s remaining:    0.0s
-[Parallel(n_jobs=-1)]: Done   2 out of   2 | elapsed:   38.9s finished
-[Parallel(n_jobs=-1)]: Using backend LokyBackend with 32 concurrent workers.
-[Parallel(n_jobs=-1)]: Done   2 out of   2 | elapsed:   11.7s remaining:    0.0s
-[Parallel(n_jobs=-1)]: Done   2 out of   2 | elapsed:   11.7s finished
-[Parallel(n_jobs=-1)]: Using backend ThreadingBackend with 32 concurrent workers.
-[Parallel(n_jobs=-1)]: Done  64 tasks      | elapsed:   34.5s
-[Parallel(n_jobs=-1)]: Done 224 tasks      | elapsed:  1.7min
-[Parallel(n_jobs=-1)]: Done 448 tasks      | elapsed:  3.5min
-[Parallel(n_jobs=-1)]: Done 736 tasks      | elapsed:  5.8min
-[Parallel(n_jobs=-1)]: Done 1088 tasks      | elapsed:  8.6min
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-*** Causal Estimate ***
-
-## Target estimand
-Estimand type: nonparametric-ate
-### Estimand : 1
-Estimand name: backdoor
-Estimand expression:
-  d
-─────(Expectation(y|W0,W3,W1,W2))
-d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W2,U) = P(y|v0,W0,W3,W1,W2)
-### Estimand : 2
-Estimand name: iv
-Estimand expression:
-Expectation(Derivative(y, [Z0, Z1])*Derivative([v0], [Z0, Z1])**(-1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
-Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
-
-## Realized estimand
-b: y~v0+W0+W3+W1+W2
-## Estimate
-Value: 8.331353134942322
-
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-[Parallel(n_jobs=-1)]: Done 1483 out of 1483 | elapsed: 11.6min finished
-</pre></div></div>
 </div>
 </div>
 <div class="section" id="Binary-treatment,-Binary-outcome">
 <h3>Binary treatment, Binary outcome<a class="headerlink" href="#Binary-treatment,-Binary-outcome" title="Permalink to this headline">¶</a></h3>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">data_binary</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">linear_dataset</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">num_common_causes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
-                                    <span class="n">num_instruments</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_effect_modifiers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                                    <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">outcome_is_binary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">data_binary</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">])</span>
+<span></span>data_binary = dowhy.datasets.linear_dataset(10, num_common_causes=4, num_samples=10000,
+                                    num_instruments=2, num_effect_modifiers=2,
+                                    treatment_is_binary=True, outcome_is_binary=True)
+# convert boolean values to {0,1} numeric
+data_binary[&#39;df&#39;].v0 = data_binary[&#39;df&#39;].v0.astype(int)
+data_binary[&#39;df&#39;].y = data_binary[&#39;df&#39;].y.astype(int)
+print(data_binary[&#39;df&#39;])
 
-<span class="n">model_binary</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data_binary</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span>
-                    <span class="n">treatment</span><span class="o">=</span><span class="n">data_binary</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span> <span class="n">outcome</span><span class="o">=</span><span class="n">data_binary</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
-                    <span class="n">graph</span><span class="o">=</span><span class="n">data_binary</span><span class="p">[</span><span class="s2">&quot;gml_graph&quot;</span><span class="p">])</span>
-<span class="n">identified_estimand_binary</span> <span class="o">=</span> <span class="n">model_binary</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+model_binary = CausalModel(data=data_binary[&quot;df&quot;],
+                    treatment=data_binary[&quot;treatment_name&quot;], outcome=data_binary[&quot;outcome_name&quot;],
+                    graph=data_binary[&quot;gml_graph&quot;])
+identified_estimand_binary = model_binary.identify_effect(proceed_when_unidentifiable=True)
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#39;] on outcome [&#39;y&#39;]
-INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;W0&#39;, &#39;W3&#39;, &#39;W1&#39;, &#39;Unobserved Confounders&#39;, &#39;W2&#39;]
-WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
-INFO:dowhy.causal_identifier:Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True.
-INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[&#39;Z0&#39;, &#39;Z1&#39;]
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-            X0        X1   Z0        Z1        W0        W1        W2  \
-0     1.170983 -0.463676  0.0  0.999261  1.265824 -0.591487  0.187607
-1     1.874968 -1.237442  0.0  0.372351  2.055680 -0.470702 -1.089608
-2    -0.231365  0.227272  0.0  0.517914  1.004229 -1.196373 -2.495002
-3     1.313117  0.065614  0.0  0.793337 -0.316458 -0.459159 -0.455055
-4     0.012586  0.194818  0.0  0.683885 -0.322924 -1.523299 -0.816566
-...        ...       ...  ...       ...       ...       ...       ...
-9995  2.170496 -0.544734  0.0  0.251869  0.903261 -1.776711 -0.312277
-9996  0.359327  0.190037  0.0  0.877978  1.832255 -1.413621 -1.064130
-9997 -0.515581 -2.971678  0.0  0.482088  0.136553  0.119679  0.081736
-9998  0.105968 -1.541644  0.0  0.095357  3.035971 -1.195416 -0.069832
-9999  1.180787 -0.944992  0.0  0.265338  0.176723  1.442231 -1.669103
-
-            W3     v0      y
-0     0.281102   True   True
-1    -0.175620   True  False
-2    -1.024748  False   True
-3     2.365471   True  False
-4    -1.955707  False   True
-...        ...    ...    ...
-9995 -0.112627  False   True
-9996 -2.130779   True   True
-9997 -0.567688   True   True
-9998  0.280326   True  False
-9999 -0.242490   True   True
-
-[10000 rows x 10 columns]
-</pre></div></div>
-</div>
-<p>NOTE: DRLearner throws an error since it expects the outcome in a 1-D array. This will be fixed soon in the EconML package.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="section" id="Using-DRLearner-estimator">
+<h4>Using DRLearner estimator<a class="headerlink" href="#Using-DRLearner-estimator" title="Permalink to this headline">¶</a></h4>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegressionCV</span>
-<span class="c1">#todo needs binary y</span>
-<span class="n">drlearner_estimate</span> <span class="o">=</span> <span class="n">model_binary</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand_binary</span><span class="p">,</span>
-                                <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.econml.drlearner.LinearDRLearner&quot;</span><span class="p">,</span>
-                                <span class="n">target_units</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">df</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;X0&quot;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">,</span>
-                                <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;init_params&quot;</span><span class="p">:{</span>
-                                                    <span class="s1">&#39;model_propensity&#39;</span><span class="p">:</span> <span class="n">LogisticRegressionCV</span><span class="p">(</span><span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;lbfgs&#39;</span><span class="p">,</span> <span class="n">multi_class</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
-                                                    <span class="p">},</span>
-                                               <span class="s2">&quot;fit_params&quot;</span><span class="p">:{}</span>
-                                              <span class="p">})</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">drlearner_estimate</span><span class="p">)</span>
+<span></span>from sklearn.linear_model import LogisticRegressionCV
+#todo needs binary y
+drlearner_estimate = model_binary.estimate_effect(identified_estimand_binary,
+                                method_name=&quot;backdoor.econml.drlearner.LinearDRLearner&quot;,
+                                target_units = lambda df: df[&quot;X0&quot;]&gt;1,
+                                confidence_intervals=False,
+                                method_params={&quot;init_params&quot;:{
+                                                    &#39;model_propensity&#39;: LogisticRegressionCV(cv=3, solver=&#39;lbfgs&#39;, multi_class=&#39;auto&#39;)
+                                                    },
+                                               &quot;fit_params&quot;:{}
+                                              })
+print(drlearner_estimate)
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using EconML Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">AssertionError</span>                            Traceback (most recent call last)
-<span class="ansi-green-fg">&lt;ipython-input-17-f77b6b495b1d&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
-<span class="ansi-green-intense-fg ansi-bold">      8</span>                                                     <span class="ansi-blue-fg">&#39;model_propensity&#39;</span><span class="ansi-blue-fg">:</span> LogisticRegressionCV<span class="ansi-blue-fg">(</span>cv<span class="ansi-blue-fg">=</span><span class="ansi-cyan-fg">3</span><span class="ansi-blue-fg">,</span> solver<span class="ansi-blue-fg">=</span><span class="ansi-blue-fg">&#39;lbfgs&#39;</span><span class="ansi-blue-fg">,</span> multi_class<span class="ansi-blue-fg">=</span><span class="ansi-blue-fg">&#39;auto&#39;</span><span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">      9</span>                                                     },
-<span class="ansi-green-fg">---&gt; 10</span><span class="ansi-red-fg">                                                </span><span class="ansi-blue-fg">&#34;fit_params&#34;</span><span class="ansi-blue-fg">:</span><span class="ansi-blue-fg">{</span><span class="ansi-blue-fg">}</span>
-<span class="ansi-green-intense-fg ansi-bold">     11</span>                                               })
-<span class="ansi-green-intense-fg ansi-bold">     12</span> print<span class="ansi-blue-fg">(</span>drlearner_estimate<span class="ansi-blue-fg">)</span>
-
-<span class="ansi-green-fg">/mnt/c/Users/amshar/code/dowhy/dowhy/causal_model.py</span> in <span class="ansi-cyan-fg">estimate_effect</span><span class="ansi-blue-fg">(self, identified_estimand, method_name, control_value, treatment_value, test_significance, evaluate_effect_strength, confidence_intervals, target_units, effect_modifiers, method_params)</span>
-<span class="ansi-green-intense-fg ansi-bold">    205</span>                 params<span class="ansi-blue-fg">=</span>method_params
-<span class="ansi-green-intense-fg ansi-bold">    206</span>             )
-<span class="ansi-green-fg">--&gt; 207</span><span class="ansi-red-fg">             </span>estimate <span class="ansi-blue-fg">=</span> causal_estimator<span class="ansi-blue-fg">.</span>estimate_effect<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    208</span>             <span class="ansi-red-fg"># Store parameters inside estimate object for refutation methods</span>
-<span class="ansi-green-intense-fg ansi-bold">    209</span>             estimate.add_params(
-
-<span class="ansi-green-fg">/mnt/c/Users/amshar/code/dowhy/dowhy/causal_estimator.py</span> in <span class="ansi-cyan-fg">estimate_effect</span><span class="ansi-blue-fg">(self)</span>
-<span class="ansi-green-intense-fg ansi-bold">     88</span>         &#34;&#34;&#34;
-<span class="ansi-green-intense-fg ansi-bold">     89</span>
-<span class="ansi-green-fg">---&gt; 90</span><span class="ansi-red-fg">         </span>est <span class="ansi-blue-fg">=</span> self<span class="ansi-blue-fg">.</span>_estimate_effect<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">     91</span>         self<span class="ansi-blue-fg">.</span>_estimate <span class="ansi-blue-fg">=</span> est
-<span class="ansi-green-intense-fg ansi-bold">     92</span>
-
-<span class="ansi-green-fg">/mnt/c/Users/amshar/code/dowhy/dowhy/causal_estimators/econml_cate_estimator.py</span> in <span class="ansi-cyan-fg">_estimate_effect</span><span class="ansi-blue-fg">(self)</span>
-<span class="ansi-green-intense-fg ansi-bold">     66</span>         <span class="ansi-red-fg"># Calling the econml estimator&#39;s fit method</span>
-<span class="ansi-green-intense-fg ansi-bold">     67</span>         <span class="ansi-green-fg">if</span> self<span class="ansi-blue-fg">.</span>identifier_method <span class="ansi-blue-fg">==</span> <span class="ansi-blue-fg">&#34;backdoor&#34;</span><span class="ansi-blue-fg">:</span>
-<span class="ansi-green-fg">---&gt; 68</span><span class="ansi-red-fg">             </span>self<span class="ansi-blue-fg">.</span>estimator<span class="ansi-blue-fg">.</span>fit<span class="ansi-blue-fg">(</span>Y<span class="ansi-blue-fg">,</span> T<span class="ansi-blue-fg">,</span> X<span class="ansi-blue-fg">,</span> W<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">**</span>self<span class="ansi-blue-fg">.</span>method_params<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#34;fit_params&#34;</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">     69</span>         <span class="ansi-green-fg">else</span><span class="ansi-blue-fg">:</span>
-<span class="ansi-green-intense-fg ansi-bold">     70</span>             self<span class="ansi-blue-fg">.</span>estimator<span class="ansi-blue-fg">.</span>fit<span class="ansi-blue-fg">(</span>Y<span class="ansi-blue-fg">,</span> T<span class="ansi-blue-fg">,</span> X<span class="ansi-blue-fg">,</span> Z<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">**</span>self<span class="ansi-blue-fg">.</span>method_params<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#34;fit_params&#34;</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span>
-
-<span class="ansi-green-fg">~/python-environments/vpy36/lib/python3.6/site-packages/econml/drlearner.py</span> in <span class="ansi-cyan-fg">fit</span><span class="ansi-blue-fg">(self, Y, T, X, W, sample_weight, sample_var, inference)</span>
-<span class="ansi-green-intense-fg ansi-bold">    656</span>         &#34;&#34;&#34;
-<span class="ansi-green-intense-fg ansi-bold">    657</span>         <span class="ansi-red-fg"># Replacing fit from DRLearner, to add statsmodels inference in docstring</span>
-<span class="ansi-green-fg">--&gt; 658</span><span class="ansi-red-fg">         </span><span class="ansi-green-fg">return</span> super<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">.</span>fit<span class="ansi-blue-fg">(</span>Y<span class="ansi-blue-fg">,</span> T<span class="ansi-blue-fg">,</span> X<span class="ansi-blue-fg">=</span>X<span class="ansi-blue-fg">,</span> W<span class="ansi-blue-fg">=</span>W<span class="ansi-blue-fg">,</span> sample_weight<span class="ansi-blue-fg">=</span>sample_weight<span class="ansi-blue-fg">,</span> sample_var<span class="ansi-blue-fg">=</span>sample_var<span class="ansi-blue-fg">,</span> inference<span class="ansi-blue-fg">=</span>inference<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    659</span>
-<span class="ansi-green-intense-fg ansi-bold">    660</span>     <span class="ansi-blue-fg">@</span>property
-
-<span class="ansi-green-fg">~/python-environments/vpy36/lib/python3.6/site-packages/econml/drlearner.py</span> in <span class="ansi-cyan-fg">fit</span><span class="ansi-blue-fg">(self, Y, T, X, W, sample_weight, sample_var, inference)</span>
-<span class="ansi-green-intense-fg ansi-bold">    364</span>         &#34;&#34;&#34;
-<span class="ansi-green-intense-fg ansi-bold">    365</span>         <span class="ansi-red-fg"># Replacing fit from _OrthoLearner, to enforce Z=None and improve the docstring</span>
-<span class="ansi-green-fg">--&gt; 366</span><span class="ansi-red-fg">         </span><span class="ansi-green-fg">return</span> super<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">.</span>fit<span class="ansi-blue-fg">(</span>Y<span class="ansi-blue-fg">,</span> T<span class="ansi-blue-fg">,</span> X<span class="ansi-blue-fg">=</span>X<span class="ansi-blue-fg">,</span> W<span class="ansi-blue-fg">=</span>W<span class="ansi-blue-fg">,</span> sample_weight<span class="ansi-blue-fg">=</span>sample_weight<span class="ansi-blue-fg">,</span> sample_var<span class="ansi-blue-fg">=</span>sample_var<span class="ansi-blue-fg">,</span> inference<span class="ansi-blue-fg">=</span>inference<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    367</span>
-<span class="ansi-green-intense-fg ansi-bold">    368</span>     <span class="ansi-green-fg">def</span> score<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">,</span> Y<span class="ansi-blue-fg">,</span> T<span class="ansi-blue-fg">,</span> X<span class="ansi-blue-fg">=</span><span class="ansi-green-fg">None</span><span class="ansi-blue-fg">,</span> W<span class="ansi-blue-fg">=</span><span class="ansi-green-fg">None</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
-
-<span class="ansi-green-fg">~/python-environments/vpy36/lib/python3.6/site-packages/econml/cate_estimator.py</span> in <span class="ansi-cyan-fg">call</span><span class="ansi-blue-fg">(self, Y, T, inference, *args, **kwargs)</span>
-<span class="ansi-green-intense-fg ansi-bold">     87</span>                 inference<span class="ansi-blue-fg">.</span>prefit<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">,</span> Y<span class="ansi-blue-fg">,</span> T<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">*</span>args<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">**</span>kwargs<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">     88</span>             <span class="ansi-red-fg"># call the wrapped fit method</span>
-<span class="ansi-green-fg">---&gt; 89</span><span class="ansi-red-fg">             </span>m<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">,</span> Y<span class="ansi-blue-fg">,</span> T<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">*</span>args<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">**</span>kwargs<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">     90</span>             <span class="ansi-green-fg">if</span> inference <span class="ansi-green-fg">is</span> <span class="ansi-green-fg">not</span> <span class="ansi-green-fg">None</span><span class="ansi-blue-fg">:</span>
-<span class="ansi-green-intense-fg ansi-bold">     91</span>                 <span class="ansi-red-fg"># NOTE: we call inference fit *after* calling the main fit method</span>
-
-<span class="ansi-green-fg">~/python-environments/vpy36/lib/python3.6/site-packages/econml/_ortho_learner.py</span> in <span class="ansi-cyan-fg">fit</span><span class="ansi-blue-fg">(self, Y, T, X, W, Z, sample_weight, sample_var, inference)</span>
-<span class="ansi-green-intense-fg ansi-bold">    478</span>         &#34;&#34;&#34;
-<span class="ansi-green-intense-fg ansi-bold">    479</span>         self<span class="ansi-blue-fg">.</span>_check_input_dims<span class="ansi-blue-fg">(</span>Y<span class="ansi-blue-fg">,</span> T<span class="ansi-blue-fg">,</span> X<span class="ansi-blue-fg">,</span> W<span class="ansi-blue-fg">,</span> Z<span class="ansi-blue-fg">,</span> sample_weight<span class="ansi-blue-fg">,</span> sample_var<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-fg">--&gt; 480</span><span class="ansi-red-fg">         </span>nuisances<span class="ansi-blue-fg">,</span> fitted_inds <span class="ansi-blue-fg">=</span> self<span class="ansi-blue-fg">.</span>_fit_nuisances<span class="ansi-blue-fg">(</span>Y<span class="ansi-blue-fg">,</span> T<span class="ansi-blue-fg">,</span> X<span class="ansi-blue-fg">,</span> W<span class="ansi-blue-fg">,</span> Z<span class="ansi-blue-fg">,</span> sample_weight<span class="ansi-blue-fg">=</span>sample_weight<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    481</span>         self._fit_final(self._subinds_check_none(Y, fitted_inds),
-<span class="ansi-green-intense-fg ansi-bold">    482</span>                         self<span class="ansi-blue-fg">.</span>_subinds_check_none<span class="ansi-blue-fg">(</span>T<span class="ansi-blue-fg">,</span> fitted_inds<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">,</span>
-
-<span class="ansi-green-fg">~/python-environments/vpy36/lib/python3.6/site-packages/econml/_ortho_learner.py</span> in <span class="ansi-cyan-fg">_fit_nuisances</span><span class="ansi-blue-fg">(self, Y, T, X, W, Z, sample_weight)</span>
-<span class="ansi-green-intense-fg ansi-bold">    516</span>
-<span class="ansi-green-intense-fg ansi-bold">    517</span>         nuisances, fitted_models, fitted_inds = _crossfit(self._model_nuisance, folds,
-<span class="ansi-green-fg">--&gt; 518</span><span class="ansi-red-fg">                                                           Y, T, X=X, W=W, Z=Z, sample_weight=sample_weight)
-</span><span class="ansi-green-intense-fg ansi-bold">    519</span>         self<span class="ansi-blue-fg">.</span>_models_nuisance <span class="ansi-blue-fg">=</span> fitted_models
-<span class="ansi-green-intense-fg ansi-bold">    520</span>         <span class="ansi-green-fg">return</span> nuisances<span class="ansi-blue-fg">,</span> fitted_inds
-
-<span class="ansi-green-fg">~/python-environments/vpy36/lib/python3.6/site-packages/econml/_ortho_learner.py</span> in <span class="ansi-cyan-fg">_crossfit</span><span class="ansi-blue-fg">(model, folds, *args, **kwargs)</span>
-<span class="ansi-green-intense-fg ansi-bold">    143</span>                 kwargs_test<span class="ansi-blue-fg">[</span>key<span class="ansi-blue-fg">]</span> <span class="ansi-blue-fg">=</span> var<span class="ansi-blue-fg">[</span>test_idxs<span class="ansi-blue-fg">]</span>
-<span class="ansi-green-intense-fg ansi-bold">    144</span>
-<span class="ansi-green-fg">--&gt; 145</span><span class="ansi-red-fg">         </span>model_list<span class="ansi-blue-fg">[</span>idx<span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">.</span>fit<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">*</span>args_train<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">**</span>kwargs_train<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    146</span>
-<span class="ansi-green-intense-fg ansi-bold">    147</span>         nuisance_temp <span class="ansi-blue-fg">=</span> model_list<span class="ansi-blue-fg">[</span>idx<span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">.</span>predict<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">*</span>args_test<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">**</span>kwargs_test<span class="ansi-blue-fg">)</span>
-
-<span class="ansi-green-fg">~/python-environments/vpy36/lib/python3.6/site-packages/econml/drlearner.py</span> in <span class="ansi-cyan-fg">fit</span><span class="ansi-blue-fg">(self, Y, T, X, W, sample_weight)</span>
-<span class="ansi-green-intense-fg ansi-bold">    260</span>             <span class="ansi-green-fg">def</span> fit<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">,</span> Y<span class="ansi-blue-fg">,</span> T<span class="ansi-blue-fg">,</span> X<span class="ansi-blue-fg">=</span><span class="ansi-green-fg">None</span><span class="ansi-blue-fg">,</span> W<span class="ansi-blue-fg">=</span><span class="ansi-green-fg">None</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">*</span><span class="ansi-blue-fg">,</span> sample_weight<span class="ansi-blue-fg">=</span><span class="ansi-green-fg">None</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
-<span class="ansi-green-intense-fg ansi-bold">    261</span>                 <span class="ansi-red-fg"># TODO Allow for non-vector y, i.e. of shape (n, 1)</span>
-<span class="ansi-green-fg">--&gt; 262</span><span class="ansi-red-fg">                 </span><span class="ansi-green-fg">assert</span> np<span class="ansi-blue-fg">.</span>ndim<span class="ansi-blue-fg">(</span>Y<span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">==</span> <span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#34;Can only accept single dimensional outcomes Y! Use Y.ravel().&#34;</span>
-<span class="ansi-green-intense-fg ansi-bold">    263</span>                 <span class="ansi-green-fg">if</span> <span class="ansi-blue-fg">(</span>X <span class="ansi-green-fg">is</span> <span class="ansi-green-fg">None</span><span class="ansi-blue-fg">)</span> <span class="ansi-green-fg">and</span> <span class="ansi-blue-fg">(</span>W <span class="ansi-green-fg">is</span> <span class="ansi-green-fg">None</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
-<span class="ansi-green-intense-fg ansi-bold">    264</span>                     <span class="ansi-green-fg">raise</span> AttributeError<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#34;At least one of X or W has to not be None!&#34;</span><span class="ansi-blue-fg">)</span>
-
-<span class="ansi-red-fg">AssertionError</span>: Can only accept single dimensional outcomes Y! Use Y.ravel().
-</pre></div></div>
 </div>
 </div>
 <div class="section" id="Instrumental-Variable-Method">
 <h3>Instrumental Variable Method<a class="headerlink" href="#Instrumental-Variable-Method" title="Permalink to this headline">¶</a></h3>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">keras</span>
-<span class="kn">from</span> <span class="nn">econml.deepiv</span> <span class="kn">import</span> <span class="n">DeepIVEstimator</span>
-<span class="n">dims_zx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">_instruments</span><span class="p">)</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">_effect_modifiers</span><span class="p">)</span>
-<span class="n">dims_tx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">_treatment</span><span class="p">)</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">_effect_modifiers</span><span class="p">)</span>
-<span class="n">treatment_model</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">Sequential</span><span class="p">([</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="n">input_shape</span><span class="o">=</span><span class="p">(</span><span class="n">dims_zx</span><span class="p">,)),</span> <span class="c1"># sum of dims of Z and X</span>
-                                    <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.17</span><span class="p">),</span>
-                                    <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">),</span>
-                                    <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.17</span><span class="p">),</span>
-                                    <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">),</span>
-                                    <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.17</span><span class="p">)])</span>
-<span class="n">response_model</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">Sequential</span><span class="p">([</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="n">input_shape</span><span class="o">=</span><span class="p">(</span><span class="n">dims_tx</span><span class="p">,)),</span> <span class="c1"># sum of dims of T and X</span>
-                                    <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.17</span><span class="p">),</span>
-                                    <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">),</span>
-                                    <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.17</span><span class="p">),</span>
-                                    <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">),</span>
-                                    <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.17</span><span class="p">),</span>
-                                    <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">)])</span>
+<span></span>import keras
+from econml.deepiv import DeepIVEstimator
+dims_zx = len(model._instruments)+len(model._effect_modifiers)
+dims_tx = len(model._treatment)+len(model._effect_modifiers)
+treatment_model = keras.Sequential([keras.layers.Dense(128, activation=&#39;relu&#39;, input_shape=(dims_zx,)), # sum of dims of Z and X
+                                    keras.layers.Dropout(0.17),
+                                    keras.layers.Dense(64, activation=&#39;relu&#39;),
+                                    keras.layers.Dropout(0.17),
+                                    keras.layers.Dense(32, activation=&#39;relu&#39;),
+                                    keras.layers.Dropout(0.17)])
+response_model = keras.Sequential([keras.layers.Dense(128, activation=&#39;relu&#39;, input_shape=(dims_tx,)), # sum of dims of T and X
+                                    keras.layers.Dropout(0.17),
+                                    keras.layers.Dense(64, activation=&#39;relu&#39;),
+                                    keras.layers.Dropout(0.17),
+                                    keras.layers.Dense(32, activation=&#39;relu&#39;),
+                                    keras.layers.Dropout(0.17),
+                                    keras.layers.Dense(1)])
 
-<span class="n">deepiv_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
-                                        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;iv.econml.deepiv.DeepIVEstimator&quot;</span><span class="p">,</span>
-                                        <span class="n">target_units</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">df</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;X0&quot;</span><span class="p">]</span><span class="o">&gt;-</span><span class="mi">1</span><span class="p">,</span>
-                                        <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;init_params&quot;</span><span class="p">:{</span><span class="s1">&#39;n_components&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="c1"># Number of gaussians in the mixture density networks</span>
-                                                              <span class="s1">&#39;m&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">treatment_model</span><span class="p">(</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">])),</span> <span class="c1"># Treatment model,</span>
-                                                              <span class="s2">&quot;h&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">response_model</span><span class="p">(</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">])),</span> <span class="c1"># Response model</span>
-                                                              <span class="s1">&#39;n_samples&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="c1"># Number of samples used to estimate the response</span>
-                                                              <span class="s1">&#39;first_stage_options&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;epochs&#39;</span><span class="p">:</span><span class="mi">25</span><span class="p">},</span>
-                                                              <span class="s1">&#39;second_stage_options&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;epochs&#39;</span><span class="p">:</span><span class="mi">25</span><span class="p">}</span>
-                                                             <span class="p">},</span>
-                                               <span class="s2">&quot;fit_params&quot;</span><span class="p">:{}})</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">deepiv_estimate</span><span class="p">)</span>
+deepiv_estimate = model.estimate_effect(identified_estimand,
+                                        method_name=&quot;iv.econml.deepiv.DeepIVEstimator&quot;,
+                                        target_units = lambda df: df[&quot;X0&quot;]&gt;-1,
+                                        confidence_intervals=False,
+                                method_params={&quot;init_params&quot;:{&#39;n_components&#39;: 10, # Number of gaussians in the mixture density networks
+                                                              &#39;m&#39;: lambda z, x: treatment_model(keras.layers.concatenate([z, x])), # Treatment model,
+                                                              &quot;h&quot;: lambda t, x: response_model(keras.layers.concatenate([t, x])), # Response model
+                                                              &#39;n_samples&#39;: 1, # Number of samples used to estimate the response
+                                                              &#39;first_stage_options&#39;: {&#39;epochs&#39;:25},
+                                                              &#39;second_stage_options&#39;: {&#39;epochs&#39;:25}
+                                                             },
+                                               &quot;fit_params&quot;:{}})
+print(deepiv_estimate)
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
 </div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-Using TensorFlow backend.
-INFO:dowhy.causal_estimator:INFO: Using EconML Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2
-WARNING:tensorflow:From /home/amshar/python-environments/vpy36/lib/python3.6/site-packages/tensorflow/python/ops/math_ops.py:2403: add_dispatch_support.&lt;locals&gt;.wrapper (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.
-Instructions for updating:
-Use tf.where in 2.0, which has the same broadcast rule as np.where
-WARNING:tensorflow:From /home/amshar/python-environments/vpy36/lib/python3.6/site-packages/keras/backend/tensorflow_backend.py:422: The name tf.global_variables is deprecated. Please use tf.compat.v1.global_variables instead.
-
-</pre></div></div>
+<div class="section" id="Metalearners">
+<h3>Metalearners<a class="headerlink" href="#Metalearners" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>data_experiment = dowhy.datasets.linear_dataset(10, num_common_causes=0, num_samples=10000,
+                                    num_instruments=2, num_effect_modifiers=4,
+                                    treatment_is_binary=True, outcome_is_binary=True)
+# convert boolean values to {0,1} numeric
+data_experiment[&#39;df&#39;].v0 = data_experiment[&#39;df&#39;].v0.astype(int)
+data_experiment[&#39;df&#39;].y = data_experiment[&#39;df&#39;].y.astype(int)
+print(data_experiment[&#39;df&#39;])
+
+model_experiment = CausalModel(data=data_experiment[&quot;df&quot;],
+                    treatment=data_experiment[&quot;treatment_name&quot;], outcome=data_experiment[&quot;outcome_name&quot;],
+                    graph=data_experiment[&quot;gml_graph&quot;])
+identified_estimand_experiment = model_experiment.identify_effect(proceed_when_unidentifiable=True)
+</pre></div>
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Epoch 1/25
-10000/10000 [==============================] - 1s 125us/step - loss: 5.7914
-Epoch 2/25
-10000/10000 [==============================] - 1s 69us/step - loss: 2.7293
-Epoch 3/25
-10000/10000 [==============================] - 1s 67us/step - loss: 2.5698
-Epoch 4/25
-10000/10000 [==============================] - 1s 67us/step - loss: 2.5207
-Epoch 5/25
-10000/10000 [==============================] - 1s 67us/step - loss: 2.4888
-Epoch 6/25
-10000/10000 [==============================] - 1s 66us/step - loss: 2.4770
-Epoch 7/25
-10000/10000 [==============================] - 1s 67us/step - loss: 2.4734
-Epoch 8/25
-10000/10000 [==============================] - 1s 66us/step - loss: 2.4526
-Epoch 9/25
-10000/10000 [==============================] - 1s 67us/step - loss: 2.4543
-Epoch 10/25
-10000/10000 [==============================] - 1s 67us/step - loss: 2.4469
-Epoch 11/25
-10000/10000 [==============================] - 1s 67us/step - loss: 2.4347
-Epoch 12/25
-10000/10000 [==============================] - 1s 67us/step - loss: 2.4246
-Epoch 13/25
-10000/10000 [==============================] - 1s 67us/step - loss: 2.4259
-Epoch 14/25
-10000/10000 [==============================] - 1s 66us/step - loss: 2.4241
-Epoch 15/25
-10000/10000 [==============================] - 1s 66us/step - loss: 2.4149
-Epoch 16/25
-10000/10000 [==============================] - 1s 66us/step - loss: 2.4150
-Epoch 17/25
-10000/10000 [==============================] - 1s 66us/step - loss: 2.4078
-Epoch 18/25
-10000/10000 [==============================] - 1s 66us/step - loss: 2.4015
-Epoch 19/25
-10000/10000 [==============================] - 1s 67us/step - loss: 2.4001
-Epoch 20/25
-10000/10000 [==============================] - 1s 67us/step - loss: 2.4029
-Epoch 21/25
-10000/10000 [==============================] - 1s 67us/step - loss: 2.4025
-Epoch 22/25
-10000/10000 [==============================] - 1s 66us/step - loss: 2.3970
-Epoch 23/25
-10000/10000 [==============================] - 1s 66us/step - loss: 2.3930
-Epoch 24/25
-10000/10000 [==============================] - 1s 66us/step - loss: 2.3982
-Epoch 25/25
-10000/10000 [==============================] - 1s 66us/step - loss: 2.3940
-Epoch 1/25
-10000/10000 [==============================] - 2s 205us/step - loss: 8526.7076
-Epoch 2/25
-10000/10000 [==============================] - 1s 111us/step - loss: 4659.4835
-Epoch 3/25
-10000/10000 [==============================] - 1s 107us/step - loss: 4231.5569
-Epoch 4/25
-10000/10000 [==============================] - 1s 104us/step - loss: 4215.2266
-Epoch 5/25
-10000/10000 [==============================] - 1s 102us/step - loss: 4090.3670
-Epoch 6/25
-10000/10000 [==============================] - 1s 102us/step - loss: 4030.0446
-Epoch 7/25
-10000/10000 [==============================] - 1s 100us/step - loss: 4137.3973
-Epoch 8/25
-10000/10000 [==============================] - 1s 98us/step - loss: 4091.2221
-Epoch 9/25
-10000/10000 [==============================] - 1s 97us/step - loss: 4003.9576
-Epoch 10/25
-10000/10000 [==============================] - 1s 97us/step - loss: 4013.2564
-Epoch 11/25
-10000/10000 [==============================] - 1s 98us/step - loss: 4035.7388
-Epoch 12/25
-10000/10000 [==============================] - 1s 97us/step - loss: 3965.2224
-Epoch 13/25
-10000/10000 [==============================] - 1s 98us/step - loss: 4054.5777
-Epoch 14/25
-10000/10000 [==============================] - 1s 97us/step - loss: 4014.5290
-Epoch 15/25
-10000/10000 [==============================] - 1s 97us/step - loss: 3984.4700
-Epoch 16/25
-10000/10000 [==============================] - 1s 96us/step - loss: 3926.2307
-Epoch 17/25
-10000/10000 [==============================] - 1s 94us/step - loss: 4015.3016
-Epoch 18/25
-10000/10000 [==============================] - 1s 94us/step - loss: 4034.1578
-Epoch 19/25
-10000/10000 [==============================] - 1s 94us/step - loss: 3974.5770
-Epoch 20/25
-10000/10000 [==============================] - 1s 94us/step - loss: 3985.2165
-Epoch 21/25
-10000/10000 [==============================] - 1s 94us/step - loss: 3977.9142
-Epoch 22/25
-10000/10000 [==============================] - 1s 94us/step - loss: 3950.7200
-Epoch 23/25
-10000/10000 [==============================] - 1s 94us/step - loss: 4011.0488
-Epoch 24/25
-10000/10000 [==============================] - 1s 93us/step - loss: 3986.2898
-Epoch 25/25
-10000/10000 [==============================] - 1s 94us/step - loss: 4029.8864
-*** Causal Estimate ***
-
-## Target estimand
-Estimand type: nonparametric-ate
-### Estimand : 1
-Estimand name: backdoor
-Estimand expression:
-  d
-─────(Expectation(y|W0,W3,W1,W2))
-d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W2,U) = P(y|v0,W0,W3,W1,W2)
-### Estimand : 2
-Estimand name: iv
-Estimand expression:
-Expectation(Derivative(y, [Z0, Z1])*Derivative([v0], [Z0, Z1])**(-1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
-Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
-
-## Realized estimand
-b: y~v0+W0+W3+W1+W2
-## Estimate
-Value: 6.484096527099609
-
-</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>from sklearn.linear_model import LogisticRegressionCV
+metalearner_estimate = model_experiment.estimate_effect(identified_estimand_experiment,
+                                method_name=&quot;backdoor.econml.metalearners.TLearner&quot;,
+                                target_units = lambda df: df[&quot;X0&quot;]&gt;1,
+                                confidence_intervals=False,
+                                method_params={&quot;init_params&quot;:{
+                                                    &#39;models&#39;: LogisticRegressionCV(cv=3, solver=&#39;lbfgs&#39;, multi_class=&#39;auto&#39;)
+                                                    },
+                                               &quot;fit_params&quot;:{}
+                                              })
+print(metalearner_estimate)
+</pre></div>
+</div>
 </div>
 </div>
 </div>
@@ -1498,138 +1121,58 @@ Value: 6.484096527099609
 <h2>Refuting the estimate<a class="headerlink" href="#Refuting-the-estimate" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="Random">
 <h3>Random<a class="headerlink" href="#Random" title="Permalink to this headline">¶</a></h3>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">res_random</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">dml_estimate</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;random_common_cause&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">res_random</span><span class="p">)</span>
+<span></span>res_random=model.refute_estimate(identified_estimand, dml_estimate, method_name=&quot;random_common_cause&quot;)
+print(res_random)
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using EconML Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2+w_random
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Refute: Add a Random Common Cause
-Estimated effect:(12.13683678878986,)
-New effect:(13.248034250593435,)
-
-</pre></div></div>
 </div>
 </div>
 <div class="section" id="Adding-an-unobserved-common-cause-variable">
 <h3>Adding an unobserved common cause variable<a class="headerlink" href="#Adding-an-unobserved-common-cause-variable" title="Permalink to this headline">¶</a></h3>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">res_unobserved</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">dml_estimate</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;add_unobserved_common_cause&quot;</span><span class="p">,</span>
-                                     <span class="n">confounders_effect_on_treatment</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="n">confounders_effect_on_outcome</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span>
-                                    <span class="n">effect_strength_on_treatment</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">effect_strength_on_outcome</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">res_unobserved</span><span class="p">)</span>
+<span></span>res_unobserved=model.refute_estimate(identified_estimand, dml_estimate, method_name=&quot;add_unobserved_common_cause&quot;,
+                                     confounders_effect_on_treatment=&quot;linear&quot;, confounders_effect_on_outcome=&quot;linear&quot;,
+                                    effect_strength_on_treatment=0.01, effect_strength_on_outcome=0.02)
+print(res_unobserved)
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using EconML Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Refute: Add an Unobserved Common Cause
-Estimated effect:(12.13683678878986,)
-New effect:(13.196059198878597,)
-
-</pre></div></div>
 </div>
 </div>
 <div class="section" id="Replacing-treatment-with-a-random-(placebo)-variable">
 <h3>Replacing treatment with a random (placebo) variable<a class="headerlink" href="#Replacing-treatment-with-a-random-(placebo)-variable" title="Permalink to this headline">¶</a></h3>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">res_placebo</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">dml_estimate</span><span class="p">,</span>
-        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;placebo_treatment_refuter&quot;</span><span class="p">,</span> <span class="n">placebo_type</span><span class="o">=</span><span class="s2">&quot;permute&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">res_placebo</span><span class="p">)</span>
+<span></span>res_placebo=model.refute_estimate(identified_estimand, dml_estimate,
+        method_name=&quot;placebo_treatment_refuter&quot;, placebo_type=&quot;permute&quot;)
+print(res_placebo)
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using EconML Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W0+W3+W1+W2
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Refute: Use a Placebo Treatment
-Estimated effect:(12.13683678878986,)
-New effect:(0.0,)
-
-</pre></div></div>
 </div>
 </div>
 <div class="section" id="Removing-a-random-subset-of-the-data">
 <h3>Removing a random subset of the data<a class="headerlink" href="#Removing-a-random-subset-of-the-data" title="Permalink to this headline">¶</a></h3>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">res_subset</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">dml_estimate</span><span class="p">,</span>
-        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;data_subset_refuter&quot;</span><span class="p">,</span> <span class="n">subset_fraction</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">res_subset</span><span class="p">)</span>
+<span></span>res_subset=model.refute_estimate(identified_estimand, dml_estimate,
+        method_name=&quot;data_subset_refuter&quot;, subset_fraction=0.8)
+print(res_subset)
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using EconML Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W0+W3+W1+W2
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Refute: Use a subset of data
-Estimated effect:(12.13683678878986,)
-New effect:(13.150007335670214,)
-
-</pre></div></div>
 </div>
 <p>More refutation methods to come, especially specific to the CATE estimators.</p>
 </div>
@@ -1656,7 +1199,7 @@ New effect:(13.150007335670214,)
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Microsoft
+        &copy; Copyright 2020, Microsoft
 
     </p>
   </div>

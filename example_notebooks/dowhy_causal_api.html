@@ -21,12 +21,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -90,10 +90,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Linear-Model">Linear Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#EconML-methods">EconML methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Works-with-any-EconML-method">Works with any EconML method</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Refuting-the-estimate">Refuting the estimate</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Demo for the DoWhy causal API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#Comparing-the-estimate-to-Linear-Regression">Comparing the estimate to Linear Regression</a></li>
 </ul>
@@ -238,20 +234,33 @@ div.nboutput.container div.prompt pre {
 /* all prompts */
 div.nbinput.container div.prompt,
 div.nboutput.container div.prompt {
-    min-width: 5ex;
-    padding-top: 0.4em;
-    padding-right: 0.4em;
-    text-align: right;
-    flex: 0;
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
 }
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
 @media (max-width: 540px) {
     div.nbinput.container div.prompt,
     div.nboutput.container div.prompt {
+        width: unset;
         text-align: left;
         padding: 0.4em;
     }
     div.nboutput.container div.prompt.empty {
         padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
     }
 }
 
@@ -264,7 +273,6 @@ div.nboutput.container div.prompt pre {
 /* input/output area */
 div.nbinput.container div.input_area,
 div.nboutput.container div.output_area {
-    padding: 0.4em;
     -webkit-flex: 1;
     flex: 1;
     overflow: auto;
@@ -338,6 +346,27 @@ div.nboutput.container div.output_area.stderr {
 .ansi-bold { font-weight: bold; }
 .ansi-underline { text-decoration: underline; }
 
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
 /* Some additional styling taken form the Jupyter notebook CSS */
 div.rendered_html table {
   border: none;
@@ -402,8 +431,8 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
+<span></span>import os, sys
+sys.path.append(os.path.abspath(&quot;../../../&quot;))
 </pre></div>
 </div>
 </div>
@@ -412,13 +441,13 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">dowhy.datasets</span>
-<span class="kn">import</span> <span class="nn">dowhy.api</span>
+<span></span>import dowhy.datasets
+import dowhy.api
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+import numpy as np
+import pandas as pd
 
-<span class="kn">from</span> <span class="nn">statsmodels.api</span> <span class="kn">import</span> <span class="n">OLS</span>
+from statsmodels.api import OLS
 </pre></div>
 </div>
 </div>
@@ -427,19 +456,19 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">linear_dataset</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-        <span class="n">num_common_causes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">num_instruments</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">num_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
-        <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span>
-<span class="n">df</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span> <span class="c1"># Adding noise to data. Without noise, the variance in Y|X, Z is zero, and mcmc fails.</span>
-<span class="c1">#data[&#39;dot_graph&#39;] = &#39;digraph { v -&gt;y;X0-&gt; v;X0-&gt; y;}&#39;</span>
+<span></span>data = dowhy.datasets.linear_dataset(beta=5,
+        num_common_causes=1,
+        num_instruments = 0,
+        num_samples=1000,
+        treatment_is_binary=True)
+df = data[&#39;df&#39;]
+df[&#39;y&#39;] = df[&#39;y&#39;] + np.random.normal(size=len(df)) # Adding noise to data. Without noise, the variance in Y|X, Z is zero, and mcmc fails.
+#data[&#39;dot_graph&#39;] = &#39;digraph { v -&gt;y;X0-&gt; v;X0-&gt; y;}&#39;
 
-<span class="n">treatment</span><span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">outcome</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">common_cause</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;common_causes_names&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">df</span>
+treatment= data[&quot;treatment_name&quot;][0]
+outcome = data[&quot;outcome_name&quot;][0]
+common_cause = data[&quot;common_causes_names&quot;][0]
+df
 </pre></div>
 </div>
 </div>
@@ -548,11 +577,11 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># data[&#39;df&#39;] is just a regular pandas.DataFrame</span>
-<span class="n">df</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">treatment</span><span class="p">,</span>
-                     <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">outcome</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">common_cause</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
-                     <span class="n">outcome</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span>
-                     <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="n">common_cause</span><span class="p">])</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">treatment</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+<span></span># data[&#39;df&#39;] is just a regular pandas.DataFrame
+df.causal.do(x=treatment,
+                     variable_types={treatment: &#39;b&#39;, outcome: &#39;c&#39;, common_cause: &#39;c&#39;},
+                     outcome=outcome,
+                     common_causes=[common_cause]).groupby(treatment).mean().plot(y=outcome, kind=&#39;bar&#39;)
 </pre></div>
 </div>
 </div>
@@ -607,12 +636,12 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">df</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-              <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">outcome</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">common_cause</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
-              <span class="n">outcome</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span>
-              <span class="n">method</span><span class="o">=</span><span class="s1">&#39;weighting&#39;</span><span class="p">,</span>
-              <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="n">common_cause</span><span class="p">],</span>
-              <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">treatment</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+<span></span>df.causal.do(x={treatment: 1},
+              variable_types={treatment:&#39;b&#39;, outcome: &#39;c&#39;, common_cause: &#39;c&#39;},
+              outcome=outcome,
+              method=&#39;weighting&#39;,
+              common_causes=[common_cause],
+              proceed_when_unidentifiable=True).groupby(treatment).mean().plot(y=outcome, kind=&#39;bar&#39;)
 </pre></div>
 </div>
 </div>
@@ -653,17 +682,17 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">cdf_1</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-              <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">outcome</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">common_cause</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
-              <span class="n">outcome</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span>
-              <span class="n">dot_graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dot_graph&#39;</span><span class="p">],</span>
-              <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span></span>cdf_1 = df.causal.do(x={treatment: 1},
+              variable_types={treatment: &#39;b&#39;, outcome: &#39;c&#39;, common_cause: &#39;c&#39;},
+              outcome=outcome,
+              dot_graph=data[&#39;dot_graph&#39;],
+              proceed_when_unidentifiable=True)
 
-<span class="n">cdf_0</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
-              <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">outcome</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">common_cause</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
-              <span class="n">outcome</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span>
-              <span class="n">dot_graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dot_graph&#39;</span><span class="p">],</span>
-              <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+cdf_0 = df.causal.do(x={treatment: 0},
+              variable_types={treatment: &#39;b&#39;, outcome: &#39;c&#39;, common_cause: &#39;c&#39;},
+              outcome=outcome,
+              dot_graph=data[&#39;dot_graph&#39;],
+              proceed_when_unidentifiable=True)
 
 </pre></div>
 </div>
@@ -694,7 +723,7 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">cdf_0</span>
+<span></span>cdf_0
 </pre></div>
 </div>
 </div>
@@ -827,7 +856,7 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">cdf_1</span>
+<span></span>cdf_1
 </pre></div>
 </div>
 </div>
@@ -963,7 +992,7 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="p">(</span><span class="n">cdf_1</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">cdf_0</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span></span>(cdf_1[&#39;y&#39;] - cdf_0[&#39;y&#39;]).mean()
 </pre></div>
 </div>
 </div>
@@ -980,7 +1009,7 @@ $\displaystyle 5.006194579687894$</div></div>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="mf">1.96</span><span class="o">*</span><span class="p">(</span><span class="n">cdf_1</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">cdf_0</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
+<span></span>1.96*(cdf_1[&#39;y&#39;] - cdf_0[&#39;y&#39;]).std() / np.sqrt(len(df))
 </pre></div>
 </div>
 </div>
@@ -998,9 +1027,9 @@ $\displaystyle 0.2245958282589085$</div></div>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">model</span> <span class="o">=</span> <span class="n">OLS</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">outcome</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="n">common_cause</span><span class="p">,</span> <span class="n">treatment</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-<span class="n">result</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+<span></span>model = OLS(np.asarray(df[outcome]), np.asarray(df[[common_cause, treatment]], dtype=np.float64))
+result = model.fit()
+result.summary()
 </pre></div>
 </div>
 </div>
@@ -1088,7 +1117,7 @@ $\displaystyle 0.2245958282589085$</div></div>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Microsoft
+        &copy; Copyright 2020, Microsoft
 
     </p>
   </div>

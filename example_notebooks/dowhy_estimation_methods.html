@@ -21,12 +21,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -99,10 +99,6 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Linear-Model">Linear Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#EconML-methods">EconML methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Works-with-any-EconML-method">Works with any EconML method</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Refuting-the-estimate">Refuting the estimate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="load_graph_example.html">Different ways to load an input graph</a></li>
@@ -244,20 +240,33 @@ div.nboutput.container div.prompt pre {
 /* all prompts */
 div.nbinput.container div.prompt,
 div.nboutput.container div.prompt {
-    min-width: 5ex;
-    padding-top: 0.4em;
-    padding-right: 0.4em;
-    text-align: right;
-    flex: 0;
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
 }
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
 @media (max-width: 540px) {
     div.nbinput.container div.prompt,
     div.nboutput.container div.prompt {
+        width: unset;
         text-align: left;
         padding: 0.4em;
     }
     div.nboutput.container div.prompt.empty {
         padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
     }
 }
 
@@ -270,7 +279,6 @@ div.nboutput.container div.prompt pre {
 /* input/output area */
 div.nbinput.container div.input_area,
 div.nboutput.container div.output_area {
-    padding: 0.4em;
     -webkit-flex: 1;
     flex: 1;
     overflow: auto;
@@ -344,6 +352,27 @@ div.nboutput.container div.output_area.stderr {
 .ansi-bold { font-weight: bold; }
 .ansi-underline { text-decoration: underline; }
 
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
 /* Some additional styling taken form the Jupyter notebook CSS */
 div.rendered_html table {
   border: none;
@@ -409,8 +438,8 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
+<span></span>import os, sys
+sys.path.append(os.path.abspath(&quot;../../../&quot;))
 </pre></div>
 </div>
 </div>
@@ -419,13 +448,13 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">logging</span>
+<span></span>import numpy as np
+import pandas as pd
+import logging
 
-<span class="kn">import</span> <span class="nn">dowhy</span>
-<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
-<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+import dowhy
+from dowhy import CausalModel
+import dowhy.datasets
 </pre></div>
 </div>
 </div>
@@ -436,15 +465,15 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">linear_dataset</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-        <span class="n">num_common_causes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-        <span class="n">num_instruments</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">num_treatments</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">num_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
-        <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">outcome_is_binary</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">]</span>
-<span class="n">df</span>
+<span></span>data = dowhy.datasets.linear_dataset(beta=10,
+        num_common_causes=5,
+        num_instruments = 2,
+        num_treatments=1,
+        num_samples=10000,
+        treatment_is_binary=True,
+        outcome_is_binary=False)
+df = data[&quot;df&quot;]
+df
 </pre></div>
 </div>
 </div>
@@ -629,15 +658,15 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># With graph</span>
-<span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
-        <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
-        <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
-        <span class="n">graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;gml_graph&quot;</span><span class="p">],</span>
-        <span class="n">instruments</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;instrument_names&quot;</span><span class="p">],</span>
-        <span class="n">logging_level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span>
-        <span class="p">)</span>
+<span></span># With graph
+model=CausalModel(
+        data = df,
+        treatment=data[&quot;treatment_name&quot;],
+        outcome=data[&quot;outcome_name&quot;],
+        graph=data[&quot;gml_graph&quot;],
+        instruments=data[&quot;instrument_names&quot;],
+        logging_level = logging.INFO
+        )
 </pre></div>
 </div>
 </div>
@@ -654,7 +683,7 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#3
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span></span>model.view_model()
 </pre></div>
 </div>
 </div>
@@ -663,8 +692,8 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#3
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
-<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+<span></span>from IPython.display import Image, display
+display(Image(filename=&quot;causal_model.png&quot;))
 </pre></div>
 </div>
 </div>
@@ -681,8 +710,8 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#3
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+<span></span>identified_estimand = model.identify_effect()
+print(identified_estimand)
 </pre></div>
 </div>
 </div>
@@ -742,11 +771,11 @@ Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}�
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">causal_estimate_reg</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
-        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">,</span>
-        <span class="n">test_significance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_reg</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">causal_estimate_reg</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+<span></span>causal_estimate_reg = model.estimate_effect(identified_estimand,
+        method_name=&quot;backdoor.linear_regression&quot;,
+        test_significance=True)
+print(causal_estimate_reg)
+print(&quot;Causal Estimate is &quot; + str(causal_estimate_reg.value))
 </pre></div>
 </div>
 </div>
@@ -802,11 +831,11 @@ Causal Estimate is 10.000000000000021
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">causal_estimate_strat</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
-                                              <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_stratification&quot;</span><span class="p">,</span>
-                                              <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;att&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_strat</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">causal_estimate_strat</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+<span></span>causal_estimate_strat = model.estimate_effect(identified_estimand,
+                                              method_name=&quot;backdoor.propensity_score_stratification&quot;,
+                                              target_units=&quot;att&quot;)
+print(causal_estimate_strat)
+print(&quot;Causal Estimate is &quot; + str(causal_estimate_strat.value))
 </pre></div>
 </div>
 </div>
@@ -861,11 +890,11 @@ Causal Estimate is 10.173499320316472
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">causal_estimate_match</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
-                                              <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_matching&quot;</span><span class="p">,</span>
-                                              <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;atc&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_match</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">causal_estimate_match</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+<span></span>causal_estimate_match = model.estimate_effect(identified_estimand,
+                                              method_name=&quot;backdoor.propensity_score_matching&quot;,
+                                              target_units=&quot;atc&quot;)
+print(causal_estimate_match)
+print(&quot;Causal Estimate is &quot; + str(causal_estimate_match.value))
 </pre></div>
 </div>
 </div>
@@ -925,18 +954,18 @@ Causal Estimate is 10.036816324727294
 </div>
 <div class="section" id="Method-4:-Weighting">
 <h2>Method 4: Weighting<a class="headerlink" href="#Method-4:-Weighting" title="Permalink to this headline">¶</a></h2>
-<p>We will be using (inverse) propensity scores to assign weights to units in the data. DoWhy supports a few different weighting schemes: 1. Vanilla Inverse Propensity Score weighting (IPS) (weighting_scheme=”ips_weight”) 2. Self-normalized IPS weighting (also known as the Hajek estimator) (weighting_scheme=”ips_normalized_weight”) 3. Stabilized IPS weighting (weighting_scheme = “ips_stabilized_weight”)</p>
+<p>We will be using (inverse) propensity scores to assign weights to units in the data. DoWhy supports a few different weighting schemes: 1. Vanilla Inverse Propensity Score weighting (IPS) (weighting_scheme=“ips_weight”) 2. Self-normalized IPS weighting (also known as the Hajek estimator) (weighting_scheme=“ips_normalized_weight”) 3. Stabilized IPS weighting (weighting_scheme = “ips_stabilized_weight”)</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">causal_estimate_ipw</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
-                                            <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_weighting&quot;</span><span class="p">,</span>
-                                            <span class="n">target_units</span> <span class="o">=</span> <span class="s2">&quot;ate&quot;</span><span class="p">,</span>
-                                            <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;weighting_scheme&quot;</span><span class="p">:</span><span class="s2">&quot;ips_weight&quot;</span><span class="p">})</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_ipw</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">causal_estimate_ipw</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+<span></span>causal_estimate_ipw = model.estimate_effect(identified_estimand,
+                                            method_name=&quot;backdoor.propensity_score_weighting&quot;,
+                                            target_units = &quot;ate&quot;,
+                                            method_params={&quot;weighting_scheme&quot;:&quot;ips_weight&quot;})
+print(causal_estimate_ipw)
+print(&quot;Causal Estimate is &quot; + str(causal_estimate_ipw.value))
 </pre></div>
 </div>
 </div>
@@ -998,10 +1027,10 @@ Causal Estimate is 10.722320441623154
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">causal_estimate_iv</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
-        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;iv.instrumental_variable&quot;</span><span class="p">,</span> <span class="n">method_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;iv_instrument_name&#39;</span><span class="p">:</span> <span class="s1">&#39;Z0&#39;</span><span class="p">})</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_iv</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">causal_estimate_iv</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+<span></span>causal_estimate_iv = model.estimate_effect(identified_estimand,
+        method_name=&quot;iv.instrumental_variable&quot;, method_params = {&#39;iv_instrument_name&#39;: &#39;Z0&#39;})
+print(causal_estimate_iv)
+print(&quot;Causal Estimate is &quot; + str(causal_estimate_iv.value))
 </pre></div>
 </div>
 </div>
@@ -1072,13 +1101,13 @@ Causal Estimate is 6.7777521025251435
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">causal_estimate_regdist</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
-        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;iv.regression_discontinuity&quot;</span><span class="p">,</span>
-        <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;rd_variable_name&#39;</span><span class="p">:</span><span class="s1">&#39;Z1&#39;</span><span class="p">,</span>
-                       <span class="s1">&#39;rd_threshold_value&#39;</span><span class="p">:</span><span class="mf">0.5</span><span class="p">,</span>
-                       <span class="s1">&#39;rd_bandwidth&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">})</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_regdist</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">causal_estimate_regdist</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+<span></span>causal_estimate_regdist = model.estimate_effect(identified_estimand,
+        method_name=&quot;iv.regression_discontinuity&quot;,
+        method_params={&#39;rd_variable_name&#39;:&#39;Z1&#39;,
+                       &#39;rd_threshold_value&#39;:0.5,
+                       &#39;rd_bandwidth&#39;: 0.1})
+print(causal_estimate_regdist)
+print(&quot;Causal Estimate is &quot; + str(causal_estimate_regdist.value))
 </pre></div>
 </div>
 </div>
@@ -1185,7 +1214,7 @@ Causal Estimate is 22.999383345332262
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Microsoft
+        &copy; Copyright 2020, Microsoft
 
     </p>
   </div>

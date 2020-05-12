@@ -21,12 +21,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -90,10 +90,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Linear-Model">Linear Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#EconML-methods">EconML methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Works-with-any-EconML-method">Works with any EconML method</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Refuting-the-estimate">Refuting the estimate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Do-sampler Introduction</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#Pearlian-Interventions">Pearlian Interventions</a></li>
@@ -242,20 +238,33 @@ div.nboutput.container div.prompt pre {
 /* all prompts */
 div.nbinput.container div.prompt,
 div.nboutput.container div.prompt {
-    min-width: 5ex;
-    padding-top: 0.4em;
-    padding-right: 0.4em;
-    text-align: right;
-    flex: 0;
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
 }
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
 @media (max-width: 540px) {
     div.nbinput.container div.prompt,
     div.nboutput.container div.prompt {
+        width: unset;
         text-align: left;
         padding: 0.4em;
     }
     div.nboutput.container div.prompt.empty {
         padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
     }
 }
 
@@ -268,7 +277,6 @@ div.nboutput.container div.prompt pre {
 /* input/output area */
 div.nbinput.container div.input_area,
 div.nboutput.container div.output_area {
-    padding: 0.4em;
     -webkit-flex: 1;
     flex: 1;
     overflow: auto;
@@ -341,6 +349,27 @@ div.nboutput.container div.output_area.stderr {
 
 .ansi-bold { font-weight: bold; }
 .ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
 
 /* Some additional styling taken form the Jupyter notebook CSS */
 div.rendered_html table {
@@ -446,8 +475,8 @@ specified on sampling will be ignored.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
+<span></span>import os, sys
+sys.path.append(os.path.abspath(&quot;../../../&quot;))
 </pre></div>
 </div>
 </div>
@@ -456,9 +485,9 @@ specified on sampling will be ignored.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">dowhy.api</span>
+<span></span>import numpy as np
+import pandas as pd
+import dowhy.api
 </pre></div>
 </div>
 </div>
@@ -467,13 +496,13 @@ specified on sampling will be ignored.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">N</span> <span class="o">=</span> <span class="mi">5000</span>
+<span></span>N = 5000
 
-<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>
-<span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">binomial</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">5.</span> <span class="o">*</span> <span class="n">z</span><span class="p">)))</span>
-<span class="n">y</span> <span class="o">=</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">z</span> <span class="o">+</span> <span class="n">d</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>
+z = np.random.uniform(size=N)
+d = np.random.binomial(1., p=1./(1. + np.exp(-5. * z)))
+y = 2. * z + d + 0.1 * np.random.normal(size=N)
 
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="n">z</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span> <span class="n">d</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="n">y</span><span class="p">})</span>
+df = pd.DataFrame({&#39;Z&#39;: z, &#39;D&#39;: d, &#39;Y&#39;: y})
 </pre></div>
 </div>
 </div>
@@ -482,7 +511,7 @@ specified on sampling will be ignored.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">D</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">D</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())[</span><span class="s1">&#39;Y&#39;</span><span class="p">]</span>
+<span></span>(df[df.D == 1].mean() - df[df.D == 0].mean())[&#39;Y&#39;]
 </pre></div>
 </div>
 </div>
@@ -500,16 +529,16 @@ $\displaystyle 1.625771192059154$</div></div>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span></span>from dowhy import CausalModel
 
-<span class="n">causes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">]</span>
-<span class="n">outcomes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">]</span>
-<span class="n">common_causes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">]</span>
+causes = [&#39;D&#39;]
+outcomes = [&#39;Y&#39;]
+common_causes = [&#39;Z&#39;]
 
-<span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span><span class="n">df</span><span class="p">,</span>
-                    <span class="n">causes</span><span class="p">,</span>
-                    <span class="n">outcomes</span><span class="p">,</span>
-                    <span class="n">common_causes</span><span class="o">=</span><span class="n">common_causes</span><span class="p">)</span>
+model = CausalModel(df,
+                    causes,
+                    outcomes,
+                    common_causes=common_causes)
 </pre></div>
 </div>
 </div>
@@ -529,7 +558,7 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;D&#39
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">identification</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
+<span></span>identification = model.identify_effect()
 </pre></div>
 </div>
 </div>
@@ -564,12 +593,12 @@ INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[]
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">dowhy.do_samplers.weighting_sampler</span> <span class="kn">import</span> <span class="n">WeightingSampler</span>
+<span></span>from dowhy.do_samplers.weighting_sampler import WeightingSampler
 
-<span class="n">sampler</span> <span class="o">=</span> <span class="n">WeightingSampler</span><span class="p">(</span><span class="n">df</span><span class="p">,</span>
-                           <span class="n">causal_model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
-                           <span class="n">keep_original_treatment</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                           <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;D&#39;</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">})</span>
+sampler = WeightingSampler(df,
+                           causal_model=model,
+                           keep_original_treatment=True,
+                           variable_types={&#39;D&#39;: &#39;b&#39;, &#39;Z&#39;: &#39;c&#39;, &#39;Y&#39;: &#39;c&#39;})
 
 
 </pre></div>
@@ -609,7 +638,7 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">interventional_df</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">do_sample</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+<span></span>interventional_df = sampler.do_sample(None)
 </pre></div>
 </div>
 </div>
@@ -618,7 +647,7 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="p">(</span><span class="n">interventional_df</span><span class="p">[</span><span class="n">interventional_df</span><span class="o">.</span><span class="n">D</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">interventional_df</span><span class="p">[</span><span class="n">interventional_df</span><span class="o">.</span><span class="n">D</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())[</span><span class="s1">&#39;Y&#39;</span><span class="p">]</span>
+<span></span>(interventional_df[interventional_df.D == 1].mean() - interventional_df[interventional_df.D == 0].mean())[&#39;Y&#39;]
 </pre></div>
 </div>
 </div>
@@ -654,7 +683,7 @@ $\displaystyle 1.0884335905187326$</div></div>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Microsoft
+        &copy; Copyright 2020, Microsoft
 
     </p>
   </div>

@@ -21,12 +21,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -90,10 +90,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Linear-Model">Linear Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#EconML-methods">EconML methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Works-with-any-EconML-method">Works with any EconML method</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Refuting-the-estimate">Refuting the estimate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="load_graph_example.html">Different ways to load an input graph</a></li>
@@ -242,20 +238,33 @@ div.nboutput.container div.prompt pre {
 /* all prompts */
 div.nbinput.container div.prompt,
 div.nboutput.container div.prompt {
-    min-width: 5ex;
-    padding-top: 0.4em;
-    padding-right: 0.4em;
-    text-align: right;
-    flex: 0;
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
 }
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
 @media (max-width: 540px) {
     div.nbinput.container div.prompt,
     div.nboutput.container div.prompt {
+        width: unset;
         text-align: left;
         padding: 0.4em;
     }
     div.nboutput.container div.prompt.empty {
         padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
     }
 }
 
@@ -268,7 +277,6 @@ div.nboutput.container div.prompt pre {
 /* input/output area */
 div.nbinput.container div.input_area,
 div.nboutput.container div.output_area {
-    padding: 0.4em;
     -webkit-flex: 1;
     flex: 1;
     overflow: auto;
@@ -342,6 +350,27 @@ div.nboutput.container div.output_area.stderr {
 .ansi-bold { font-weight: bold; }
 .ansi-underline { text-decoration: underline; }
 
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
 /* Some additional styling taken form the Jupyter notebook CSS */
 div.rendered_html table {
   border: none;
@@ -412,8 +441,8 @@ which we call a “do” sample.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
+<span></span>import os, sys
+sys.path.append(os.path.abspath(&quot;../../../&quot;))
 </pre></div>
 </div>
 </div>
@@ -422,14 +451,14 @@ which we call a “do” sample.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">rpy2.robjects</span> <span class="kn">import</span> <span class="n">r</span> <span class="k">as</span> <span class="n">R</span>
+<span></span>from rpy2.robjects import r as R
 
-<span class="o">%</span><span class="k">load_ext</span> rpy2.ipython
-<span class="c1">#%R install.packages(&quot;Matching&quot;)</span>
-<span class="o">%</span><span class="k">R</span> library(Matching)
-<span class="o">%</span><span class="k">R</span> data(lalonde)
-<span class="o">%</span><span class="k">R</span> -o lalonde
-<span class="n">lalonde</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;lalonde.csv&quot;</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+%load_ext rpy2.ipython
+#%R install.packages(&quot;Matching&quot;)
+%R library(Matching)
+%R data(lalonde)
+%R -o lalonde
+lalonde.to_csv(&quot;lalonde.csv&quot;,index=False)
 </pre></div>
 </div>
 </div>
@@ -457,12 +486,12 @@ R[write to console]: ##
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># the data already loaded in the previous cell. we include the import</span>
-<span class="c1"># here you so you don&#39;t have to keep re-downloading it.</span>
+<span></span># the data already loaded in the previous cell. we include the import
+# here you so you don&#39;t have to keep re-downloading it.
 
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+import pandas as pd
 
-<span class="n">lalonde</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;lalonde.csv&quot;</span><span class="p">)</span>
+lalonde=pd.read_csv(&quot;lalonde.csv&quot;)
 </pre></div>
 </div>
 </div>
@@ -475,7 +504,7 @@ R[write to console]: ##
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">dowhy.api</span>
+<span></span>import dowhy.api
 </pre></div>
 </div>
 </div>
@@ -489,11 +518,11 @@ R[write to console]: ##
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">do_df</span> <span class="o">=</span> <span class="n">lalonde</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;treat&#39;</span><span class="p">,</span>
-                          <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;re78&#39;</span><span class="p">,</span>
-                          <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;nodegr&#39;</span><span class="p">,</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="s1">&#39;hisp&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="s1">&#39;educ&#39;</span><span class="p">,</span> <span class="s1">&#39;married&#39;</span><span class="p">],</span>
-                          <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;educ&#39;</span><span class="p">:</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;black&#39;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;hisp&#39;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span>
-                                          <span class="s1">&#39;married&#39;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;nodegr&#39;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="s1">&#39;re78&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;treat&#39;</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">})</span>
+<span></span>do_df = lalonde.causal.do(x=&#39;treat&#39;,
+                          outcome=&#39;re78&#39;,
+                          common_causes=[&#39;nodegr&#39;, &#39;black&#39;, &#39;hisp&#39;, &#39;age&#39;, &#39;educ&#39;, &#39;married&#39;],
+                          variable_types={&#39;age&#39;: &#39;c&#39;, &#39;educ&#39;:&#39;c&#39;, &#39;black&#39;: &#39;d&#39;, &#39;hisp&#39;: &#39;d&#39;,
+                                          &#39;married&#39;: &#39;d&#39;, &#39;nodegr&#39;: &#39;d&#39;,&#39;re78&#39;: &#39;c&#39;, &#39;treat&#39;: &#39;b&#39;})
 </pre></div>
 </div>
 </div>
@@ -534,7 +563,7 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">lalonde</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span></span>lalonde.head()
 </pre></div>
 </div>
 </div>
@@ -660,7 +689,7 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">do_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span></span>do_df.head()
 </pre></div>
 </div>
 </div>
@@ -802,7 +831,7 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="p">(</span><span class="n">lalonde</span><span class="p">[</span><span class="n">lalonde</span><span class="p">[</span><span class="s1">&#39;treat&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">lalonde</span><span class="p">[</span><span class="n">lalonde</span><span class="p">[</span><span class="s1">&#39;treat&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())[</span><span class="s1">&#39;re78&#39;</span><span class="p">]</span>
+<span></span>(lalonde[lalonde[&#39;treat&#39;] == 1].mean() - lalonde[lalonde[&#39;treat&#39;] == 0].mean())[&#39;re78&#39;]
 </pre></div>
 </div>
 </div>
@@ -820,7 +849,7 @@ $\displaystyle 1794.3430848752569$</div></div>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="p">(</span><span class="n">do_df</span><span class="p">[</span><span class="n">do_df</span><span class="p">[</span><span class="s1">&#39;treat&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">do_df</span><span class="p">[</span><span class="n">do_df</span><span class="p">[</span><span class="s1">&#39;treat&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())[</span><span class="s1">&#39;re78&#39;</span><span class="p">]</span>
+<span></span>(do_df[do_df[&#39;treat&#39;] == 1].mean() - do_df[do_df[&#39;treat&#39;] == 0].mean())[&#39;re78&#39;]
 </pre></div>
 </div>
 </div>
@@ -838,9 +867,9 @@ $\displaystyle 978.3142432607156$</div></div>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="mf">1.96</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">do_df</span><span class="p">[</span><span class="n">do_df</span><span class="p">[</span><span class="s1">&#39;treat&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">var</span><span class="p">()</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">do_df</span><span class="p">[</span><span class="n">do_df</span><span class="p">[</span><span class="s1">&#39;treat&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]))</span> <span class="o">+</span>
-             <span class="p">(</span><span class="n">do_df</span><span class="p">[</span><span class="n">do_df</span><span class="p">[</span><span class="s1">&#39;treat&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">var</span><span class="p">()</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">do_df</span><span class="p">[</span><span class="n">do_df</span><span class="p">[</span><span class="s1">&#39;treat&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">])))[</span><span class="s1">&#39;re78&#39;</span><span class="p">]</span>
+<span></span>import numpy as np
+1.96*np.sqrt((do_df[do_df[&#39;treat&#39;] == 1].var()/len(do_df[do_df[&#39;treat&#39;] == 1])) +
+             (do_df[do_df[&#39;treat&#39;] == 0].var()/len(do_df[do_df[&#39;treat&#39;] == 0])))[&#39;re78&#39;]
 </pre></div>
 </div>
 </div>
@@ -859,7 +888,7 @@ $\displaystyle 1189.852604362387$</div></div>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">do_df</span><span class="p">[</span><span class="s1">&#39;re78&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+<span></span>do_df[&#39;re78&#39;].describe()
 </pre></div>
 </div>
 </div>
@@ -885,7 +914,7 @@ Name: re78, dtype: float64
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">lalonde</span><span class="p">[</span><span class="s1">&#39;re78&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+<span></span>lalonde[&#39;re78&#39;].describe()
 </pre></div>
 </div>
 </div>
@@ -912,7 +941,7 @@ Name: re78, dtype: float64
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span></span>%matplotlib inline
 </pre></div>
 </div>
 </div>
@@ -921,9 +950,9 @@ Name: re78, dtype: float64
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span></span>import seaborn as sns
 
-<span class="n">sns</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">lalonde</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;treat&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;re78&#39;</span><span class="p">)</span>
+sns.barplot(data=lalonde, x=&#39;treat&#39;, y=&#39;re78&#39;)
 </pre></div>
 </div>
 </div>
@@ -948,7 +977,7 @@ Name: re78, dtype: float64
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sns</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">do_df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;treat&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;re78&#39;</span><span class="p">)</span>
+<span></span>sns.barplot(data=do_df, x=&#39;treat&#39;, y=&#39;re78&#39;)
 </pre></div>
 </div>
 </div>
@@ -977,11 +1006,11 @@ Name: re78, dtype: float64
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">do_df</span> <span class="o">=</span> <span class="n">lalonde</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;treat&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-                          <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;re78&#39;</span><span class="p">,</span>
-                          <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;nodegr&#39;</span><span class="p">,</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="s1">&#39;hisp&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="s1">&#39;educ&#39;</span><span class="p">,</span> <span class="s1">&#39;married&#39;</span><span class="p">],</span>
-                          <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;educ&#39;</span><span class="p">:</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;black&#39;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;hisp&#39;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span>
-                                          <span class="s1">&#39;married&#39;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;nodegr&#39;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="s1">&#39;re78&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;treat&#39;</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">})</span>
+<span></span>do_df = lalonde.causal.do(x={&#39;treat&#39;: 1},
+                          outcome=&#39;re78&#39;,
+                          common_causes=[&#39;nodegr&#39;, &#39;black&#39;, &#39;hisp&#39;, &#39;age&#39;, &#39;educ&#39;, &#39;married&#39;],
+                          variable_types={&#39;age&#39;: &#39;c&#39;, &#39;educ&#39;:&#39;c&#39;, &#39;black&#39;: &#39;d&#39;, &#39;hisp&#39;: &#39;d&#39;,
+                                          &#39;married&#39;: &#39;d&#39;, &#39;nodegr&#39;: &#39;d&#39;,&#39;re78&#39;: &#39;c&#39;, &#39;treat&#39;: &#39;b&#39;})
 </pre></div>
 </div>
 </div>
@@ -1020,7 +1049,7 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">do_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span></span>do_df.head()
 </pre></div>
 </div>
 </div>
@@ -1160,7 +1189,7 @@ INFO:dowhy.do_sampler:Caution: do samplers assume iid data.
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">help</span><span class="p">(</span><span class="n">lalonde</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">)</span>
+<span></span>help(lalonde.causal.do)
 </pre></div>
 </div>
 </div>
@@ -1239,7 +1268,7 @@ do(x, method=&#39;weighting&#39;, num_cores=1, variable_types={}, outcome=None, 
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Microsoft
+        &copy; Copyright 2020, Microsoft
 
     </p>
   </div>

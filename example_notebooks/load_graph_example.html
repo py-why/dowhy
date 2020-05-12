@@ -21,12 +21,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -90,10 +90,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Linear-Model">Linear Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#EconML-methods">EconML methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Works-with-any-EconML-method">Works with any EconML method</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html#Refuting-the-estimate">Refuting the estimate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Different ways to load an input graph</a><ul>
@@ -243,20 +239,33 @@ div.nboutput.container div.prompt pre {
 /* all prompts */
 div.nbinput.container div.prompt,
 div.nboutput.container div.prompt {
-    min-width: 5ex;
-    padding-top: 0.4em;
-    padding-right: 0.4em;
-    text-align: right;
-    flex: 0;
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
 }
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
 @media (max-width: 540px) {
     div.nbinput.container div.prompt,
     div.nboutput.container div.prompt {
+        width: unset;
         text-align: left;
         padding: 0.4em;
     }
     div.nboutput.container div.prompt.empty {
         padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
     }
 }
 
@@ -269,7 +278,6 @@ div.nboutput.container div.prompt pre {
 /* input/output area */
 div.nbinput.container div.input_area,
 div.nboutput.container div.output_area {
-    padding: 0.4em;
     -webkit-flex: 1;
     flex: 1;
     overflow: auto;
@@ -343,6 +351,27 @@ div.nboutput.container div.output_area.stderr {
 .ansi-bold { font-weight: bold; }
 .ansi-underline { text-decoration: underline; }
 
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
 /* Some additional styling taken form the Jupyter notebook CSS */
 div.rendered_html table {
   border: none;
@@ -409,9 +438,9 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">random</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
+<span></span>import os, sys
+import random
+sys.path.append(os.path.abspath(&quot;../../../&quot;))
 </pre></div>
 </div>
 </div>
@@ -420,12 +449,12 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span></span>import numpy as np
+import pandas as pd
 
-<span class="kn">import</span> <span class="nn">dowhy</span>
-<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+import dowhy
+from dowhy import CausalModel
+from IPython.display import Image, display
 </pre></div>
 </div>
 </div>
@@ -437,10 +466,10 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">z</span><span class="o">=</span><span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
-<span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="n">z</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">10</span><span class="p">)})</span>
-<span class="n">df</span>
+<span></span>z=[i for i in range(10)]
+random.shuffle(z)
+df = pd.DataFrame(data = {&#39;Z&#39;: z, &#39;X&#39;: range(0,10), &#39;Y&#39;: range(0,100,10)})
+df
 </pre></div>
 </div>
 </div>
@@ -547,23 +576,23 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># With GML string</span>
-<span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
-        <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">,</span>
-        <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span>
-        <span class="n">graph</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;graph[directed 1 node[id &quot;Z&quot; label &quot;Z&quot;]</span>
-<span class="s2">                    node[id &quot;X&quot; label &quot;X&quot;]</span>
-<span class="s2">                    node[id &quot;Y&quot; label &quot;Y&quot;]</span>
-<span class="s2">                    edge[source &quot;Z&quot; target &quot;X&quot;]</span>
-<span class="s2">                    edge[source &quot;Z&quot; target &quot;Y&quot;]</span>
-<span class="s2">                    edge[source &quot;X&quot; target &quot;Y&quot;]]&quot;&quot;&quot;</span>
+<span></span># With GML string
+model=CausalModel(
+        data = df,
+        treatment=&#39;X&#39;,
+        outcome=&#39;Y&#39;,
+        graph=&quot;&quot;&quot;graph[directed 1 node[id &quot;Z&quot; label &quot;Z&quot;]
+                    node[id &quot;X&quot; label &quot;X&quot;]
+                    node[id &quot;Y&quot; label &quot;Y&quot;]
+                    edge[source &quot;Z&quot; target &quot;X&quot;]
+                    edge[source &quot;Z&quot; target &quot;Y&quot;]
+                    edge[source &quot;X&quot; target &quot;Y&quot;]]&quot;&quot;&quot;
 
-        <span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+        )
+model.view_model()
 
 
-<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+display(Image(filename=&quot;causal_model.png&quot;))
 </pre></div>
 </div>
 </div>
@@ -588,17 +617,17 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;X&#39
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># With GML file</span>
-<span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
-        <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">,</span>
-        <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span>
-        <span class="n">graph</span><span class="o">=</span><span class="s2">&quot;../example_graphs/simple_graph_example.gml&quot;</span>
-        <span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span></span># With GML file
+model=CausalModel(
+        data = df,
+        treatment=&#39;X&#39;,
+        outcome=&#39;Y&#39;,
+        graph=&quot;../example_graphs/simple_graph_example.gml&quot;
+        )
+model.view_model()
 
 
-<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+display(Image(filename=&quot;causal_model.png&quot;))
 </pre></div>
 </div>
 </div>
@@ -626,17 +655,17 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;X&#39
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># With DOT string</span>
-<span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
-        <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">,</span>
-        <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span>
-        <span class="n">graph</span><span class="o">=</span><span class="s2">&quot;digraph {Z -&gt; X;Z -&gt; Y;X -&gt; Y;}&quot;</span>
-        <span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span></span># With DOT string
+model=CausalModel(
+        data = df,
+        treatment=&#39;X&#39;,
+        outcome=&#39;Y&#39;,
+        graph=&quot;digraph {Z -&gt; X;Z -&gt; Y;X -&gt; Y;}&quot;
+        )
+model.view_model()
 
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
-<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+from IPython.display import Image, display
+display(Image(filename=&quot;causal_model.png&quot;))
 </pre></div>
 </div>
 </div>
@@ -661,17 +690,17 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;X&#39
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># With DOT file</span>
-<span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
-        <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">,</span>
-        <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span>
-        <span class="n">graph</span><span class="o">=</span><span class="s2">&quot;../example_graphs/simple_graph_example.dot&quot;</span>
-        <span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span></span># With DOT file
+model=CausalModel(
+        data = df,
+        treatment=&#39;X&#39;,
+        outcome=&#39;Y&#39;,
+        graph=&quot;../example_graphs/simple_graph_example.dot&quot;
+        )
+model.view_model()
 
 
-<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+display(Image(filename=&quot;causal_model.png&quot;))
 </pre></div>
 </div>
 </div>
@@ -715,7 +744,7 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;X&#39
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Microsoft
+        &copy; Copyright 2020, Microsoft
 
     </p>
   </div>

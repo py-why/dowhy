@@ -21,12 +21,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
@@ -163,23 +163,20 @@
             
   <h1>Source code for dowhy.causal_estimators.linear_regression_estimator</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">linear_model</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">linear_model</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
 
 <span class="kn">from</span> <span class="nn">dowhy.causal_estimator</span> <span class="kn">import</span> <span class="n">CausalEstimate</span>
 <span class="kn">from</span> <span class="nn">dowhy.causal_estimator</span> <span class="kn">import</span> <span class="n">CausalEstimator</span>
-
-<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
 
 <div class="viewcode-block" id="LinearRegressionEstimator"><a class="viewcode-back" href="../../../dowhy.causal_estimators.html#dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator">[docs]</a><span class="k">class</span> <span class="nc">LinearRegressionEstimator</span><span class="p">(</span><span class="n">CausalEstimator</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Compute effect of treatment using linear regression.</span>
 
 <span class="sd">    Fits a regression model for estimating the outcome using treatment(s) and confounders. For a univariate treatment, the treatment effect is equivalent to the coefficient of the treatment variable.</span>
 
-<span class="sd">    Demo method to show the implementation of a causal inference method that can handle multiple treatments and heterogeneity in treatment. Requires a strong assumption that all relationships from (T, W) to Y are linear.</span>
-
-<span class="sd">    Common method but the assumptions required are too strong.</span>
+<span class="sd">    Simple method to show the implementation of a causal inference method that can handle multiple treatments and heterogeneity in treatment. Requires a strong assumption that all relationships from (T, W) to Y are linear.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -198,18 +195,38 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolic_estimator</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_linear_model</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">_estimate_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_linear_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_linear_model</span><span class="p">()</span>
-        <span class="n">coefficients</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_linear_model</span><span class="o">.</span><span class="n">coef_</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Coefficients of the fitted linear model: &quot;</span> <span class="o">+</span>
+    <span class="k">def</span> <span class="nf">_estimate_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">need_conditional_estimates</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># TODO make treatment_value and control value also as local parameters</span>
+        <span class="k">if</span> <span class="n">data_df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+        <span class="k">if</span> <span class="n">need_conditional_estimates</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">need_conditional_estimates</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">)</span>
+        <span class="c1"># Checking if the model is already trained</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_linear_model</span><span class="p">:</span>
+            <span class="c1"># The model is always built on the entire data</span>
+            <span class="n">features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_linear_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_linear_model</span><span class="p">()</span>
+            <span class="n">coefficients</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_linear_model</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="c1"># first coefficient is the intercept</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Coefficients of the fitted linear model: &quot;</span> <span class="o">+</span>
                           <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">)))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_linear_model</span><span class="o">.</span><span class="n">summary</span><span class="p">())</span>
         <span class="c1"># All treatments are set to the same constant value</span>
-        <span class="n">effect_estimate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_value</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_control_value</span><span class="p">)</span>
+        <span class="n">effect_estimate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_value</span><span class="p">,</span> <span class="n">data_df</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_control_value</span><span class="p">,</span> <span class="n">data_df</span><span class="p">)</span>
+        <span class="n">conditional_effect_estimates</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">need_conditional_estimates</span><span class="p">:</span>
+            <span class="n">conditional_effect_estimates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimate_conditional_effects</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_estimate_effect_fn</span><span class="p">,</span>
+                    <span class="n">effect_modifier_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">)</span>
+        <span class="n">intercept_parameter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_linear_model</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">estimate</span> <span class="o">=</span> <span class="n">CausalEstimate</span><span class="p">(</span><span class="n">estimate</span><span class="o">=</span><span class="n">effect_estimate</span><span class="p">,</span>
+                              <span class="n">conditional_estimates</span><span class="o">=</span><span class="n">conditional_effect_estimates</span><span class="p">,</span>
                               <span class="n">target_estimand</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="p">,</span>
                               <span class="n">realized_estimand_expr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolic_estimator</span><span class="p">,</span>
-                              <span class="n">intercept</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_linear_model</span><span class="o">.</span><span class="n">intercept_</span><span class="p">)</span>
+                              <span class="n">intercept</span><span class="o">=</span><span class="n">intercept_parameter</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">estimate</span>
+
+    <span class="k">def</span> <span class="nf">_estimate_effect_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_df</span><span class="p">):</span>
+        <span class="n">est</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimate_effect</span><span class="p">(</span><span class="n">data_df</span><span class="p">,</span> <span class="n">need_conditional_estimates</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">est</span><span class="o">.</span><span class="n">value</span>
 
 <div class="viewcode-block" id="LinearRegressionEstimator.construct_symbolic_estimator"><a class="viewcode-back" href="../../../dowhy.causal_estimators.html#dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator.construct_symbolic_estimator">[docs]</a>    <span class="k">def</span> <span class="nf">construct_symbolic_estimator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimand</span><span class="p">):</span>
         <span class="n">expr</span> <span class="o">=</span> <span class="s2">&quot;b: &quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">estimand</span><span class="o">.</span><span class="n">outcome_variable</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;~&quot;</span>
@@ -220,35 +237,76 @@
             <span class="n">expr</span> <span class="o">+=</span> <span class="s2">&quot;+&quot;</span> <span class="o">+</span> <span class="s2">&quot;+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">interaction_terms</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">expr</span> </div>
 
-    <span class="k">def</span> <span class="nf">_build_features</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">n_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">treatment_2d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">n_samples</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">)))</span>
+    <span class="k">def</span> <span class="nf">_build_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">treatment_values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_df</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Using all data by default</span>
+        <span class="k">if</span> <span class="n">data_df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+            <span class="n">treatment_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span>
+            <span class="n">observed_common_causes_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span>
+            <span class="n">effect_modifiers_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifiers</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">treatment_vals</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes_names</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">observed_common_causes_vals</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes_names</span><span class="p">]</span>
+                <span class="n">observed_common_causes_vals</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">observed_common_causes_vals</span><span class="p">,</span> <span class="n">drop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">:</span>
+                <span class="n">effect_modifiers_vals</span> <span class="o">=</span>  <span class="n">data_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">]</span>
+                <span class="n">effect_modifiers_vals</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">effect_modifiers_vals</span><span class="p">,</span> <span class="n">drop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># Fixing treatment value to the specified value, if provided</span>
+        <span class="k">if</span> <span class="n">treatment_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">treatment_vals</span> <span class="o">=</span> <span class="n">treatment_values</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">treatment_vals</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+            <span class="n">treatment_vals</span> <span class="o">=</span> <span class="n">treatment_vals</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="c1"># treatment_vals and data_df should have same number of rows</span>
+        <span class="k">if</span> <span class="n">treatment_vals</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provided treatment values and dataframe should have the same length.&quot;</span><span class="p">)</span>
+        <span class="c1"># Bulding the feature matrix</span>
+        <span class="n">n_samples</span> <span class="o">=</span> <span class="n">treatment_vals</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">treatment_2d</span> <span class="o">=</span> <span class="n">treatment_vals</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">n_samples</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">)))</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes_names</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-            <span class="n">features</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">treatment_2d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span><span class="p">),</span>
+            <span class="n">features</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">treatment_2d</span><span class="p">,</span> <span class="n">observed_common_causes_vals</span><span class="p">),</span>
                                   <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">features</span> <span class="o">=</span> <span class="n">treatment_2d</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">treatment_2d</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
                 <span class="n">curr_treatment</span> <span class="o">=</span> <span class="n">treatment_2d</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span>
-                <span class="n">new_features</span> <span class="o">=</span> <span class="n">curr_treatment</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifiers</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+                <span class="n">new_features</span> <span class="o">=</span> <span class="n">curr_treatment</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">effect_modifiers_vals</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
                 <span class="n">features</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">features</span><span class="p">,</span> <span class="n">new_features</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1"># converting to float in case of binary treatment and no other variables</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">add_constant</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">has_constant</span><span class="o">=</span><span class="s1">&#39;add&#39;</span><span class="p">)</span> <span class="c1"># to add an intercept term</span>
         <span class="k">return</span> <span class="n">features</span>
 
     <span class="k">def</span> <span class="nf">_build_linear_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_features</span><span class="p">()</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">linear_model</span><span class="o">.</span><span class="n">LinearRegression</span><span class="p">()</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">OLS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">,</span> <span class="n">features</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_do</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_do</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">treatment_val</span><span class="p">,</span> <span class="n">data_df</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">data_df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_linear_model</span><span class="p">:</span>
+            <span class="c1"># The model is always built on the entire data</span>
             <span class="n">_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_linear_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_linear_model</span><span class="p">()</span>
-        <span class="n">interventional_treatment_2d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">)),</span> <span class="n">x</span><span class="p">)</span>
-        <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_features</span><span class="p">()</span>
-        <span class="n">new_features</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">interventional_treatment_2d</span><span class="p">,</span> <span class="n">features</span><span class="p">[:,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">):</span> <span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># Replacing treatment values by given x</span>
+        <span class="n">interventional_treatment_2d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">data_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">)),</span> <span class="n">treatment_val</span><span class="p">)</span>
+        <span class="n">new_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_features</span><span class="p">(</span><span class="n">treatment_values</span><span class="o">=</span><span class="n">interventional_treatment_2d</span><span class="p">,</span>
+                <span class="n">data_df</span><span class="o">=</span><span class="n">data_df</span><span class="p">)</span>
         <span class="n">interventional_outcomes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_linear_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">new_features</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">interventional_outcomes</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="n">interventional_outcomes</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_estimate_confidence_intervals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">confidence_level</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">conf_ints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_linear_model</span><span class="o">.</span><span class="n">conf_int</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="o">-</span><span class="n">confidence_level</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">conf_ints</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="mi">1</span><span class="p">:(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">),:]</span>
+
+    <span class="k">def</span> <span class="nf">_estimate_std_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">std_error</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_linear_model</span><span class="o">.</span><span class="n">bse</span><span class="p">[</span><span class="mi">1</span><span class="p">:(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">std_error</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_test_significance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimate_value</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">pvalue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_linear_model</span><span class="o">.</span><span class="n">pvalues</span><span class="p">[</span><span class="mi">1</span><span class="p">:(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;p_value&#39;</span><span class="p">:</span> <span class="n">pvalue</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()}</span> </div>
 </pre></div>
 
            </div>
@@ -261,7 +319,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Microsoft
+        &copy; Copyright 2020, Microsoft
 
     </p>
   </div>

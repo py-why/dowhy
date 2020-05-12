@@ -21,12 +21,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
@@ -166,10 +166,10 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">from</span> <span class="nn">dowhy.causal_estimator</span> <span class="kn">import</span> <span class="n">CausalEstimate</span>
-<span class="kn">from</span> <span class="nn">dowhy.causal_estimator</span> <span class="kn">import</span> <span class="n">CausalEstimator</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_estimators.propensity_score_estimator</span> <span class="kn">import</span> <span class="n">PropensityScoreEstimator</span>
 
 
-<div class="viewcode-block" id="PropensityScoreStratificationEstimator"><a class="viewcode-back" href="../../../dowhy.causal_estimators.html#dowhy.causal_estimators.propensity_score_stratification_estimator.PropensityScoreStratificationEstimator">[docs]</a><span class="k">class</span> <span class="nc">PropensityScoreStratificationEstimator</span><span class="p">(</span><span class="n">CausalEstimator</span><span class="p">):</span>
+<div class="viewcode-block" id="PropensityScoreStratificationEstimator"><a class="viewcode-back" href="../../../dowhy.causal_estimators.html#dowhy.causal_estimators.propensity_score_stratification_estimator.PropensityScoreStratificationEstimator">[docs]</a><span class="k">class</span> <span class="nc">PropensityScoreStratificationEstimator</span><span class="p">(</span><span class="n">PropensityScoreEstimator</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Estimate effect of treatment by stratifying the data into bins with</span>
 <span class="sd">    identical common causes.</span>
 
@@ -178,26 +178,6 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">num_strata</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">clipping_threshold</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span>  <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="c1"># Checking if treatment is one-dimensional</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">error_msg</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; cannot handle more than one treatment variable.&quot;</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
-        <span class="c1"># Checking if treatment is binary</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_bool_dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]]):</span>
-            <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;Propensity Score Stratification method is only applicable for binary treatments. Try explictly setting dtype=bool for the treatment column.&quot;</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Back-door variables used:&quot;</span> <span class="o">+</span>
-                          <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">backdoor_variables</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">backdoor_variables</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes_names</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes_names</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span><span class="p">,</span> <span class="n">drop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span><span class="o">=</span> <span class="kc">None</span>
-            <span class="n">error_msg</span> <span class="o">=</span><span class="s2">&quot;No common causes/confounders present. Propensity score based methods are not applicable&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;INFO: Using Propensity Score Stratification Estimator&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">construct_symbolic_estimator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="p">)</span>
@@ -207,10 +187,12 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;clipping_threshold&#39;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">clipping_threshold</span> <span class="o">=</span> <span class="n">clipping_threshold</span>
 
-    <span class="k">def</span> <span class="nf">_estimate_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">propensity_score_model</span> <span class="o">=</span> <span class="n">linear_model</span><span class="o">.</span><span class="n">LogisticRegression</span><span class="p">()</span>
-        <span class="n">propensity_score_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s1">&#39;propensity_score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">propensity_score_model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span><span class="p">)[:,</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">_estimate_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recalculate_propensity_score</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_propensity_score_model</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">recalculate_propensity_score</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_propensity_score_model</span> <span class="o">=</span> <span class="n">linear_model</span><span class="o">.</span><span class="n">LogisticRegression</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_propensity_score_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s1">&#39;propensity_score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_propensity_score_model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span><span class="p">)[:,</span><span class="mi">1</span><span class="p">]</span>
+        
         <span class="c1"># sort the dataframe by propensity score</span>
         <span class="c1"># create a column &#39;strata&#39; for each element that marks what strata it belongs to</span>
         <span class="n">num_rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -287,7 +269,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Microsoft
+        &copy; Copyright 2020, Microsoft
 
     </p>
   </div>

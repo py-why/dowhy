@@ -21,12 +21,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -202,7 +202,7 @@
 <p>For a quick introduction to causal inference, check out <a class="reference external" href="https://github.com/amit-sharma/causal-inference-tutorial/">amit-sharma/causal-inference-tutorial</a>. We also gave a more comprehensive tutorial at the ACM Knowledge Discovery and Data Mining (<a class="reference external" href="http://www.kdd.org/kdd2018/">KDD 2018</a>) conference: <a class="reference external" href="http://causalinference.gitlab.io/kdd-tutorial/">causalinference.gitlab.io/kdd-tutorial</a>.</p>
 <p>Documentation for DoWhy is available at <a class="reference external" href="https://microsoft.github.io/dowhy/">microsoft.github.io/dowhy</a>.</p>
 <div class="contents topic" id="contents">
-<p class="topic-title first">Contents</p>
+<p class="topic-title">Contents</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#dowhy-making-causal-inference-easy" id="id4">DoWhy | Making causal inference easy</a></p>
 <ul>
@@ -284,7 +284,7 @@ the robustness of the estimate to violations.</p></li>
 </div>
 <p>If you prefer the latest dev version, clone this repository and run the following command from the top-most folder of
 the repository.</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python setup.py install
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install -e .
 </pre></div>
 </div>
 <p>If you face any problems, try installing dependencies manually.</p>
@@ -370,6 +370,17 @@ you can use the namespace as follows.</p>
 </pre></div>
 </div>
 <img alt="https://raw.githubusercontent.com/microsoft/dowhy/master/docs/images/do_barplot.png" src="https://raw.githubusercontent.com/microsoft/dowhy/master/docs/images/do_barplot.png" />
+<p>For some methods, the <code class="code docutils literal notranslate"><span class="pre">variable_types</span></code> field must be specified. It should be a <code class="code docutils literal notranslate"><span class="pre">dict</span></code>, where the keys are
+variable names, and values are ‘o’ for ordered discrete, ‘u’ for un-ordered discrete, ‘d’ for discrete, or ‘c’
+for continuous.</p>
+<p><strong>Note:If the</strong> <code class="code docutils literal notranslate"><span class="pre">variable_types</span></code> <strong>is not specified we make use of the following implicit conversions:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">int</span> <span class="o">-&gt;</span> <span class="s1">&#39;c&#39;</span>
+<span class="nb">float</span> <span class="o">-&gt;</span> <span class="s1">&#39;c&#39;</span>
+<span class="n">binary</span> <span class="o">-&gt;</span> <span class="s1">&#39;b&#39;</span>
+<span class="n">category</span> <span class="o">-&gt;</span> <span class="s1">&#39;d&#39;</span>
+</pre></div>
+</div>
+<p><strong>Currently we have not added support for time.</strong></p>
 <p>The <code class="code docutils literal notranslate"><span class="pre">do</span></code> method in the causal namespace generates a random sample from $P(outcome|do(X=x))$ of the
 same length as your data set, and returns this outcome as a new <code class="code docutils literal notranslate"><span class="pre">DataFrame</span></code>. You can continue to perform
 the usual <code class="code docutils literal notranslate"><span class="pre">DataFrame</span></code> operations with this sample, and so you can compute statistics and create plots
@@ -554,7 +565,7 @@ contact <a class="reference external" href="mailto:opencode&#37;&#52;&#48;micros
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="example_notebooks/dowhy_confounder_example.html#Let's-create-a-mystery-dataset-for-which-we-need-to-determine-whether-there-is-a-causal-effect.">Let’s create a mystery dataset for which we need to determine whether there is a causal effect.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_notebooks/dowhy_confounder_example.html#Let’s-create-a-mystery-dataset-for-which-we-need-to-determine-whether-there-is-a-causal-effect.">Let’s create a mystery dataset for which we need to determine whether there is a causal effect.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="example_notebooks/dowhy_confounder_example.html#Using-DoWhy-to-resolve-the-mystery:-Does-Treatment-cause-Outcome?">Using DoWhy to resolve the mystery: <em>Does Treatment cause Outcome?</em></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="example_notebooks/dowhy_confounder_example.html#STEP-1:-Model-the-problem-as-a-causal-graph">STEP 1: Model the problem as a causal graph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="example_notebooks/dowhy_confounder_example.html#STEP-2:-Identify-causal-effect-using-properties-of-the-formal-causal-graph">STEP 2: Identify causal effect using properties of the formal causal graph</a></li>
@@ -588,8 +599,12 @@ contact <a class="reference external" href="mailto:opencode&#37;&#52;&#48;micros
 </li>
 <li class="toctree-l2"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Works-with-any-EconML-method">Works with any EconML method</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Continuous-treatment,-Continuous-outcome">Continuous treatment, Continuous outcome</a></li>
-<li class="toctree-l3"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Binary-treatment,-Binary-outcome">Binary treatment, Binary outcome</a></li>
+<li class="toctree-l3"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Binary-treatment,-Binary-outcome">Binary treatment, Binary outcome</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Using-DRLearner-estimator">Using DRLearner estimator</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Instrumental-Variable-Method">Instrumental Variable Method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Metalearners">Metalearners</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Refuting-the-estimate">Refuting the estimate</a><ul>
@@ -655,8 +670,9 @@ contact <a class="reference external" href="mailto:opencode&#37;&#52;&#48;micros
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="code_repo.html">Code repository &amp; Versions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="code_repo.html#version-0-2-alpha-wip">Version 0.2-alpha (WIP)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="code_repo.html#version-0-1-1-alpha">Version 0.1.1-alpha</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code_repo.html#v0-4-beta-powerful-refutations-and-better-support-for-heterogeneous-treatment-effects">v0.4-beta: Powerful refutations and better support for heterogeneous treatment effects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code_repo.html#v0-2-alpha-cate-estimation-and-integration-with-econml">v0.2-alpha: CATE estimation and integration with EconML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code_repo.html#v0-1-1-alpha-first-release">v0.1.1-alpha: First release</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy.html">dowhy package</a><ul>
@@ -669,9 +685,11 @@ contact <a class="reference external" href="mailto:opencode&#37;&#52;&#48;micros
 </li>
 <li class="toctree-l3"><a class="reference internal" href="dowhy.causal_estimators.html">dowhy.causal_estimators package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="dowhy.causal_estimators.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.econml_cate_estimator">dowhy.causal_estimators.econml_cate_estimator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dowhy.causal_estimators.html#dowhy-causal-estimators-causalml-module">dowhy.causal_estimators.causalml module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dowhy.causal_estimators.html#dowhy-causal-estimators-econml-module">dowhy.causal_estimators.econml module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.instrumental_variable_estimator">dowhy.causal_estimators.instrumental_variable_estimator module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.linear_regression_estimator">dowhy.causal_estimators.linear_regression_estimator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.propensity_score_estimator">dowhy.causal_estimators.propensity_score_estimator module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.propensity_score_matching_estimator">dowhy.causal_estimators.propensity_score_matching_estimator module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.propensity_score_stratification_estimator">dowhy.causal_estimators.propensity_score_stratification_estimator module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.propensity_score_weighting_estimator">dowhy.causal_estimators.propensity_score_weighting_estimator module</a></li>
@@ -682,7 +700,9 @@ contact <a class="reference external" href="mailto:opencode&#37;&#52;&#48;micros
 <li class="toctree-l3"><a class="reference internal" href="dowhy.causal_refuters.html">dowhy.causal_refuters package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="dowhy.causal_refuters.html#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dowhy.causal_refuters.html#module-dowhy.causal_refuters.add_unobserved_common_cause">dowhy.causal_refuters.add_unobserved_common_cause module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dowhy.causal_refuters.html#module-dowhy.causal_refuters.bootstrap_refuter">dowhy.causal_refuters.bootstrap_refuter module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dowhy.causal_refuters.html#module-dowhy.causal_refuters.data_subset_refuter">dowhy.causal_refuters.data_subset_refuter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dowhy.causal_refuters.html#module-dowhy.causal_refuters.dummy_outcome_refuter">dowhy.causal_refuters.dummy_outcome_refuter module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dowhy.causal_refuters.html#module-dowhy.causal_refuters.placebo_treatment_refuter">dowhy.causal_refuters.placebo_treatment_refuter module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dowhy.causal_refuters.html#module-dowhy.causal_refuters.random_common_cause">dowhy.causal_refuters.random_common_cause module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dowhy.causal_refuters.html#module-dowhy.causal_refuters">Module contents</a></li>
@@ -697,7 +717,7 @@ contact <a class="reference external" href="mailto:opencode&#37;&#52;&#48;micros
 <li class="toctree-l3"><a class="reference internal" href="dowhy.do_samplers.html">dowhy.do_samplers package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="dowhy.do_samplers.html#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dowhy.do_samplers.html#module-dowhy.do_samplers.kernel_density_sampler">dowhy.do_samplers.kernel_density_sampler module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="dowhy.do_samplers.html#module-dowhy.do_samplers.mcmc_sampler">dowhy.do_samplers.mcmc_sampler module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dowhy.do_samplers.html#dowhy-do-samplers-mcmc-sampler-module">dowhy.do_samplers.mcmc_sampler module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dowhy.do_samplers.html#module-dowhy.do_samplers.multivariate_weighting_sampler">dowhy.do_samplers.multivariate_weighting_sampler module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dowhy.do_samplers.html#module-dowhy.do_samplers.weighting_sampler">dowhy.do_samplers.weighting_sampler module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dowhy.do_samplers.html#module-dowhy.do_samplers">Module contents</a></li>
@@ -757,7 +777,7 @@ contact <a class="reference external" href="mailto:opencode&#37;&#52;&#48;micros
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Microsoft
+        &copy; Copyright 2020, Microsoft
 
     </p>
   </div>

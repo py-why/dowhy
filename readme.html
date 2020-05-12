@@ -21,12 +21,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -102,10 +102,6 @@
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Linear-Model">Linear Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#EconML-methods">EconML methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Works-with-any-EconML-method">Works with any EconML method</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html#Refuting-the-estimate">Refuting the estimate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/load_graph_example.html">Different ways to load an input graph</a></li>
@@ -219,7 +215,7 @@
 <p>For a quick introduction to causal inference, check out <a class="reference external" href="https://github.com/amit-sharma/causal-inference-tutorial/">amit-sharma/causal-inference-tutorial</a>. We also gave a more comprehensive tutorial at the ACM Knowledge Discovery and Data Mining (<a class="reference external" href="http://www.kdd.org/kdd2018/">KDD 2018</a>) conference: <a class="reference external" href="http://causalinference.gitlab.io/kdd-tutorial/">causalinference.gitlab.io/kdd-tutorial</a>.</p>
 <p>Documentation for DoWhy is available at <a class="reference external" href="https://microsoft.github.io/dowhy/">microsoft.github.io/dowhy</a>.</p>
 <div class="contents topic" id="contents">
-<p class="topic-title first">Contents</p>
+<p class="topic-title">Contents</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#dowhy-making-causal-inference-easy" id="id4">DoWhy | Making causal inference easy</a></p>
 <ul>
@@ -300,7 +296,7 @@ the robustness of the estimate to violations.</p></li>
 </div>
 <p>If you prefer the latest dev version, clone this repository and run the following command from the top-most folder of
 the repository.</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python setup.py install
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install -e .
 </pre></div>
 </div>
 <p>If you face any problems, try installing dependencies manually.</p>
@@ -386,6 +382,17 @@ you can use the namespace as follows.</p>
 </pre></div>
 </div>
 <img alt="https://raw.githubusercontent.com/microsoft/dowhy/master/docs/images/do_barplot.png" src="https://raw.githubusercontent.com/microsoft/dowhy/master/docs/images/do_barplot.png" />
+<p>For some methods, the <code class="code docutils literal notranslate"><span class="pre">variable_types</span></code> field must be specified. It should be a <code class="code docutils literal notranslate"><span class="pre">dict</span></code>, where the keys are
+variable names, and values are ‘o’ for ordered discrete, ‘u’ for un-ordered discrete, ‘d’ for discrete, or ‘c’
+for continuous.</p>
+<p><strong>Note:If the</strong> <code class="code docutils literal notranslate"><span class="pre">variable_types</span></code> <strong>is not specified we make use of the following implicit conversions:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">int</span> <span class="o">-&gt;</span> <span class="s1">&#39;c&#39;</span>
+<span class="nb">float</span> <span class="o">-&gt;</span> <span class="s1">&#39;c&#39;</span>
+<span class="n">binary</span> <span class="o">-&gt;</span> <span class="s1">&#39;b&#39;</span>
+<span class="n">category</span> <span class="o">-&gt;</span> <span class="s1">&#39;d&#39;</span>
+</pre></div>
+</div>
+<p><strong>Currently we have not added support for time.</strong></p>
 <p>The <code class="code docutils literal notranslate"><span class="pre">do</span></code> method in the causal namespace generates a random sample from $P(outcome|do(X=x))$ of the
 same length as your data set, and returns this outcome as a new <code class="code docutils literal notranslate"><span class="pre">DataFrame</span></code>. You can continue to perform
 the usual <code class="code docutils literal notranslate"><span class="pre">DataFrame</span></code> operations with this sample, and so you can compute statistics and create plots
@@ -564,7 +571,7 @@ contact <a class="reference external" href="mailto:opencode&#37;&#52;&#48;micros
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Microsoft
+        &copy; Copyright 2020, Microsoft
 
     </p>
   </div>
