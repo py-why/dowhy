@@ -196,10 +196,12 @@ for continuous.
 
 **Note:If the** :code:`variable_types` **is not specified we make use of the following implicit conversions:**
 ::
+
    int -> 'c'
    float -> 'c'
    binary -> 'b'
    category -> 'd'
+
 **Currently we have not added support for time.**
 
 The :code:`do` method in the causal namespace generates a random sample from $P(outcome|do(X=x))$ of the
