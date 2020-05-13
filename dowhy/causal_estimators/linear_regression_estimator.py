@@ -44,7 +44,7 @@ class LinearRegressionEstimator(CausalEstimator):
             coefficients = self._linear_model.params[1:] # first coefficient is the intercept
             self.logger.debug("Coefficients of the fitted linear model: " +
                           ",".join(map(str, coefficients)))
-            print(self._linear_model.summary())
+            self.logger.debug(self._linear_model.summary())
         # All treatments are set to the same constant value
         effect_estimate = self._do(self._treatment_value, data_df) - self._do(self._control_value, data_df)
         conditional_effect_estimates = None
