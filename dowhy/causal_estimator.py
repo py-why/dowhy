@@ -100,7 +100,9 @@ class CausalEstimator:
             self.confidence_level = CausalEstimator.DEFAULT_CONFIDENCE_LEVEL
         if not hasattr(self, 'num_quantiles_to_discretize_cont_cols'):
             self.num_quantiles_to_discretize_cont_cols = CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS
-
+        # Estimate conditional estimates by default
+        if not hasattr(self, 'need_conditional_estimates'):
+            self.need_conditional_estimates = bool(self._effect_modifier_names)
         # Setting more values
         if self._data is not None:
             self._treatment = self._data[self._treatment_name]
