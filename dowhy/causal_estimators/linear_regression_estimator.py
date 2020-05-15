@@ -36,7 +36,7 @@ class LinearRegressionEstimator(CausalEstimator):
         if data_df is None:
             data_df = self._data
         if need_conditional_estimates is None:
-            need_conditional_estimates = bool(self._effect_modifier_names)
+            need_conditional_estimates = self.need_conditional_estimates
         # Checking if the model is already trained
         if not self._linear_model:
             # The model is always built on the entire data
