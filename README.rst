@@ -65,9 +65,34 @@ for causal inference, it is hard to compare their assumptions and robustness of 
 Installation
 -------------
 
+DoWhy support Python 3.5+. To install, you can use pip or conda. 
+
+**Latest Release**
+
+Install the latest `release <https://pypi.org/project/dowhy/>`_ using pip.
+
+.. code:: shell
+   
+   pip install dowhy
+   
+Install the latest `release <https://anaconda.org/conda-forge/dowhy>`_ using conda.
+
+.. code:: shell
+
+   conda install -c conda-forge dowhy
+
+**Development Version**
+
+If you prefer the latest dev version, clone this repository and run the following command from the top-most folder of
+the repository.
+
+.. code:: shell
+    
+    pip install -e .
+
 **Requirements**
 
-DoWhy support Python 3+. It requires the following packages:
+DoWhy requires the following packages:
 
 * numpy
 * scipy
@@ -76,19 +101,6 @@ DoWhy support Python 3+. It requires the following packages:
 * networkx  (for analyzing causal graphs)
 * matplotlib (for general plotting)
 * sympy (for rendering symbolic expressions)
-
-Install the latest release using pip. 
-
-.. code:: shell
-   
-   pip install dowhy
-   
-If you prefer the latest dev version, clone this repository and run the following command from the top-most folder of
-the repository.
-
-.. code:: shell
-    
-    pip install -e .
 
 If you face any problems, try installing dependencies manually.
 
