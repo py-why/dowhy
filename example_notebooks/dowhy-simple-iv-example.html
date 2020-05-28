@@ -231,33 +231,20 @@ div.nboutput.container div.prompt pre {
 /* all prompts */
 div.nbinput.container div.prompt,
 div.nboutput.container div.prompt {
-    width: 4.5ex;
-    padding-top: 5px;
-    position: relative;
-    user-select: none;
+    min-width: 5ex;
+    padding-top: 0.3rem;
+    padding-right: 0.3rem;
+    text-align: right;
+    flex: 0;
 }
-
-div.nbinput.container div.prompt > div,
-div.nboutput.container div.prompt > div {
-    position: absolute;
-    right: 0;
-    margin-right: 0.3ex;
-}
-
 @media (max-width: 540px) {
     div.nbinput.container div.prompt,
     div.nboutput.container div.prompt {
-        width: unset;
         text-align: left;
         padding: 0.4em;
     }
     div.nboutput.container div.prompt.empty {
         padding: 0;
-    }
-
-    div.nbinput.container div.prompt > div,
-    div.nboutput.container div.prompt > div {
-        position: unset;
     }
 }
 
@@ -350,7 +337,7 @@ div.nboutput.container div.output_area div[class*=highlight].math,
 div.nboutput.container div.output_area.rendered_html,
 div.nboutput.container div.output_area > div.output_javascript,
 div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 5px;
+    padding: 0.3rem;
 }
 
 /* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
@@ -427,14 +414,14 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>import numpy as np
-import pandas as pd
-import patsy as ps
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">patsy</span> <span class="k">as</span> <span class="nn">ps</span>
 
-from statsmodels.sandbox.regression.gmm import IV2SLS
-import os, sys
-sys.path.append(os.path.abspath(&quot;../../../&quot;))
-from dowhy import CausalModel
+<span class="kn">from</span> <span class="nn">statsmodels.sandbox.regression.gmm</span> <span class="kn">import</span> <span class="n">IV2SLS</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
+<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
 </pre></div>
 </div>
 </div>
@@ -443,30 +430,30 @@ from dowhy import CausalModel
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>n_points = 1000
-education_abilty = 1
-education_voucher = 0.5
-income_abilty = 2
-income_education = 4
+<span></span><span class="n">n_points</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">education_abilty</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">education_voucher</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">income_abilty</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">income_education</span> <span class="o">=</span> <span class="mi">4</span>
 
 
-# confounder
-ability = np.random.normal(0, 3, size=n_points)
+<span class="c1"># confounder</span>
+<span class="n">ability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_points</span><span class="p">)</span>
 
-# instrument
-voucher = np.random.normal(2, 1, size=n_points)
+<span class="c1"># instrument</span>
+<span class="n">voucher</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_points</span><span class="p">)</span>
 
-# treatment
-education = np.random.normal(5, 1, size=n_points) + education_abilty * ability +\
-            education_voucher * voucher
+<span class="c1"># treatment</span>
+<span class="n">education</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_points</span><span class="p">)</span> <span class="o">+</span> <span class="n">education_abilty</span> <span class="o">*</span> <span class="n">ability</span> <span class="o">+</span>\
+            <span class="n">education_voucher</span> <span class="o">*</span> <span class="n">voucher</span>
 
-# outcome
-income = np.random.normal(10, 3, size=n_points) +\
-         income_abilty * ability + income_education * education
+<span class="c1"># outcome</span>
+<span class="n">income</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_points</span><span class="p">)</span> <span class="o">+</span>\
+         <span class="n">income_abilty</span> <span class="o">*</span> <span class="n">ability</span> <span class="o">+</span> <span class="n">income_education</span> <span class="o">*</span> <span class="n">education</span>
 
-# build dataset
-data = np.stack([ability, education, income, voucher]).T
-df = pd.DataFrame(data, columns = [&#39;ability&#39;, &#39;education&#39;, &#39;income&#39;, &#39;voucher&#39;])
+<span class="c1"># build dataset</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">ability</span><span class="p">,</span> <span class="n">education</span><span class="p">,</span> <span class="n">income</span><span class="p">,</span> <span class="n">voucher</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ability&#39;</span><span class="p">,</span> <span class="s1">&#39;education&#39;</span><span class="p">,</span> <span class="s1">&#39;income&#39;</span><span class="p">,</span> <span class="s1">&#39;voucher&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -475,11 +462,11 @@ df = pd.DataFrame(data, columns = [&#39;ability&#39;, &#39;education&#39;, &#39;
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>income_vec, endog = ps.dmatrices(&quot;income ~ education&quot;, data=df)
-exog = ps.dmatrix(&quot;voucher&quot;, data=df)
+<span></span><span class="n">income_vec</span><span class="p">,</span> <span class="n">endog</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">dmatrices</span><span class="p">(</span><span class="s2">&quot;income ~ education&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="n">exog</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">dmatrix</span><span class="p">(</span><span class="s2">&quot;voucher&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
 
-m = IV2SLS(income_vec, endog, exog).fit()
-m.summary()
+<span class="n">m</span> <span class="o">=</span> <span class="n">IV2SLS</span><span class="p">(</span><span class="n">income_vec</span><span class="p">,</span> <span class="n">endog</span><span class="p">,</span> <span class="n">exog</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="n">m</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -549,20 +536,20 @@ m.summary()
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>model=CausalModel(
-        data = df,
-        treatment=&#39;education&#39;,
-        outcome=&#39;income&#39;,
-        common_causes=[&#39;ability&#39;],
-        instruments=[&#39;voucher&#39;]
-        )
+<span></span><span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
+        <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;education&#39;</span><span class="p">,</span>
+        <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;income&#39;</span><span class="p">,</span>
+        <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ability&#39;</span><span class="p">],</span>
+        <span class="n">instruments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;voucher&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
 
-identified_estimand = model.identify_effect()
+<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
 
-estimate = model.estimate_effect(identified_estimand,
-        method_name=&quot;iv.instrumental_variable&quot;, test_significance=True
-)
-print(estimate)
+<span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;iv.instrumental_variable&quot;</span><span class="p">,</span> <span class="n">test_significance</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
 
 </pre></div>
 </div>

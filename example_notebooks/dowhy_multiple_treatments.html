@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Different ways to load an input graph &mdash; DoWhy | Making Causal Inference Easy  documentation</title>
+  <title>Linear model &mdash; DoWhy | Making Causal Inference Easy  documentation</title>
   
 
   
@@ -37,9 +37,7 @@
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Simple example on using Instrumental Variables method for estimation" href="dowhy-simple-iv-example.html" />
-    <link rel="prev" title="Do-sampler Introduction" href="do_sampler_demo.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -84,7 +82,7 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">DoWhy | Making causal inference easy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
@@ -92,15 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Different ways to load an input graph</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#I.-Generating-dummy-data">I. Generating dummy data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#II.-Loading-GML-or-DOT-graphs">II. Loading GML or DOT graphs</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#GML-format">GML format</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#DOT-format">DOT format</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="load_graph_example.html">Different ways to load an input graph</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
@@ -152,15 +142,13 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="nb_index.html">&lt;no title&gt;</a> &raquo;</li>
-        
-      <li>Different ways to load an input graph</li>
+      <li>Linear model</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/example_notebooks/load_graph_example.ipynb.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/example_notebooks/dowhy_multiple_treatments.ipynb.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -415,53 +403,44 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Different-ways-to-load-an-input-graph">
-<h1>Different ways to load an input graph<a class="headerlink" href="#Different-ways-to-load-an-input-graph" title="Permalink to this headline">¶</a></h1>
-<p>We recommend using the GML graph format to load a graph. You can also use the DOT format, which requires additional dependencies (either pydot or pygraphviz).</p>
-<p>DoWhy supports both loading a graph as a string, or as a file (with the extensions ‘gml’ or ‘dot’).</p>
-<p>Below is an example showing the different ways of loading the same graph.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">random</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="kn">import</span> <span class="nn">dowhy</span>
 <span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+
+<span class="kn">import</span> <span class="nn">econml</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="I.-Generating-dummy-data">
-<h2>I. Generating dummy data<a class="headerlink" href="#I.-Generating-dummy-data" title="Permalink to this headline">¶</a></h2>
-<p>We generate some dummy data for three variables: X, Y and Z.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">z</span><span class="o">=</span><span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
-<span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="n">z</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">10</span><span class="p">)})</span>
-<span class="n">df</span>
+<span></span><span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">linear_dataset</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">num_common_causes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+                                    <span class="n">num_instruments</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_effect_modifiers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                                     <span class="n">num_treatments</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                                    <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                    <span class="n">num_discrete_common_causes</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                                    <span class="n">num_discrete_effect_modifiers</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                    <span class="n">one_hot_encode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">df</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span>
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -483,211 +462,126 @@ div.rendered_html tbody tr:hover {
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>Z</th>
-      <th>X</th>
-      <th>Y</th>
+      <th>X0</th>
+      <th>X1</th>
+      <th>W0</th>
+      <th>W1</th>
+      <th>W2</th>
+      <th>W3</th>
+      <th>v0</th>
+      <th>v1</th>
+      <th>y</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
-      <td>5</td>
-      <td>0</td>
-      <td>0</td>
+      <td>1.915092</td>
+      <td>1.620087</td>
+      <td>-0.734004</td>
+      <td>1.166135</td>
+      <td>1</td>
+      <td>1</td>
+      <td>4.812868</td>
+      <td>6.143449</td>
+      <td>315.635386</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>2</td>
-      <td>1</td>
-      <td>10</td>
+      <td>0.002147</td>
+      <td>0.669278</td>
+      <td>-0.488148</td>
+      <td>1.662905</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2.241058</td>
+      <td>-0.507441</td>
+      <td>20.008368</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>8</td>
-      <td>2</td>
-      <td>20</td>
+      <td>0.248668</td>
+      <td>0.744331</td>
+      <td>0.395333</td>
+      <td>0.363403</td>
+      <td>1</td>
+      <td>1</td>
+      <td>8.223679</td>
+      <td>9.169402</td>
+      <td>322.803160</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>9</td>
-      <td>3</td>
-      <td>30</td>
+      <td>1.391820</td>
+      <td>0.685058</td>
+      <td>2.196834</td>
+      <td>-0.031341</td>
+      <td>1</td>
+      <td>2</td>
+      <td>13.784811</td>
+      <td>16.208969</td>
+      <td>1188.634520</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>3</td>
-      <td>4</td>
-      <td>40</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>6</td>
-      <td>5</td>
-      <td>50</td>
-    </tr>
-    <tr>
-      <th>6</th>
+      <td>0.978381</td>
+      <td>0.656576</td>
+      <td>0.686080</td>
+      <td>0.260394</td>
+      <td>2</td>
       <td>1</td>
-      <td>6</td>
-      <td>60</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>4</td>
-      <td>7</td>
-      <td>70</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>0</td>
-      <td>8</td>
-      <td>80</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>7</td>
-      <td>9</td>
-      <td>90</td>
+      <td>12.353938</td>
+      <td>13.503698</td>
+      <td>785.596373</td>
     </tr>
   </tbody>
 </table>
 </div></div>
 </div>
-</div>
-<div class="section" id="II.-Loading-GML-or-DOT-graphs">
-<h2>II. Loading GML or DOT graphs<a class="headerlink" href="#II.-Loading-GML-or-DOT-graphs" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="GML-format">
-<h3>GML format<a class="headerlink" href="#GML-format" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># With GML string</span>
-<span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
-        <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">,</span>
-        <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span>
-        <span class="n">graph</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;graph[directed 1 node[id &quot;Z&quot; label &quot;Z&quot;]</span>
-<span class="s2">                    node[id &quot;X&quot; label &quot;X&quot;]</span>
-<span class="s2">                    node[id &quot;Y&quot; label &quot;Y&quot;]</span>
-<span class="s2">                    edge[source &quot;Z&quot; target &quot;X&quot;]</span>
-<span class="s2">                    edge[source &quot;Z&quot; target &quot;Y&quot;]</span>
-<span class="s2">                    edge[source &quot;X&quot; target &quot;Y&quot;]]&quot;&quot;&quot;</span>
-
-        <span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
-
-
-<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+<span></span><span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span>
+                    <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span> <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
+                    <span class="n">graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;gml_graph&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_graph:If this is observed data (not from a randomized experiment), there might always be missing confounders. Adding a node named &#34;Unobserved Confounders&#34; to reflect this.
-INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;X&#39;] on outcome [&#39;Y&#39;]
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
-<img alt="../_images/example_notebooks_load_graph_example_6_1.png" src="../_images/example_notebooks_load_graph_example_6_1.png" />
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># With GML file</span>
-<span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
-        <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">,</span>
-        <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span>
-        <span class="n">graph</span><span class="o">=</span><span class="s2">&quot;../example_graphs/simple_graph_example.gml&quot;</span>
-        <span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
-
-
-<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:dowhy.causal_graph:If this is observed data (not from a randomized experiment), there might always be missing confounders. Adding a node named &#34;Unobserved Confounders&#34; to reflect this.
-INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;X&#39;] on outcome [&#39;Y&#39;]
+INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#39;, &#39;v1&#39;] on outcome [&#39;y&#39;]
 </pre></div></div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/example_notebooks_load_graph_example_7_1.png" src="../_images/example_notebooks_load_graph_example_7_1.png" />
-</div>
-</div>
-</div>
-<div class="section" id="DOT-format">
-<h3>DOT format<a class="headerlink" href="#DOT-format" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># With DOT string</span>
-<span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
-        <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">,</span>
-        <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span>
-        <span class="n">graph</span><span class="o">=</span><span class="s2">&quot;digraph {Z -&gt; X;Z -&gt; Y;X -&gt; Y;}&quot;</span>
-        <span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
-
+<span></span><span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
 <span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
 <span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_graph:If this is observed data (not from a randomized experiment), there might always be missing confounders. Adding a node named &#34;Unobserved Confounders&#34; to reflect this.
-INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;X&#39;] on outcome [&#39;Y&#39;]
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_load_graph_example_9_1.png" src="../_images/example_notebooks_load_graph_example_9_1.png" />
+<img alt="../_images/example_notebooks_dowhy_multiple_treatments_3_0.png" src="../_images/example_notebooks_dowhy_multiple_treatments_3_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># With DOT file</span>
-<span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
-        <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">,</span>
-        <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span>
-        <span class="n">graph</span><span class="o">=</span><span class="s2">&quot;../example_graphs/simple_graph_example.dot&quot;</span>
-        <span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
-
-
-<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+<span></span><span class="n">identified_estimand</span><span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -696,19 +590,185 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;X&#39
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:dowhy.causal_graph:If this is observed data (not from a randomized experiment), there might always be missing confounders. Adding a node named &#34;Unobserved Confounders&#34; to reflect this.
-INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;X&#39;] on outcome [&#39;Y&#39;]
+INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;W0&#39;, &#39;Unobserved Confounders&#39;, &#39;W1&#39;, &#39;W2&#39;, &#39;W3&#39;]
+WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARN: Do you want to continue by ignoring any unobserved confounders? (use proceed_when_unidentifiable=True to disable this prompt) [y/n] y
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_load_graph_example_10_1.png" src="../_images/example_notebooks_load_graph_example_10_1.png" />
+<div class="highlight"><pre>
+Estimand type: nonparametric-ate
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+    d
+─────────(Expectation(y|W0,W1,W2,W3))
+d[v₀  v₁]
+Estimand assumption 1, Unconfoundedness: If U→{v0,v1} and U→y then P(y|v0,v1,W0,W1,W2,W3,U) = P(y|v0,v1,W0,W1,W2,W3)
+### Estimand : 2
+Estimand name: iv
+No such variable found!
+
+</pre></div></div>
+</div>
+<div class="section" id="Linear-model">
+<h1>Linear model<a class="headerlink" href="#Linear-model" title="Permalink to this headline">¶</a></h1>
+<p>Let us first see an example for a linear model. The control_value and treatment_value can be provided as a tuple/list when the treatment is multi-dimensional.</p>
+<p>The interpretation is change in y when v0 and v1 are changed from (0,0) to (1,1).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">linear_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+                                        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">,</span>
+                                       <span class="n">control_value</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+                                       <span class="n">treatment_value</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
+                                       <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;need_conditional_estimates&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">linear_estimate</span><span class="p">)</span>
+</pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.causal_estimator:INFO: Using Linear Regression Estimator
+INFO:dowhy.causal_estimator:b: y~v0+v1+W0+W1+W2+W3+v0*X0+v0*X1+v1*X0+v1*X1
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Identified estimand
+Estimand type: nonparametric-ate
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+    d
+─────────(Expectation(y|W0,W1,W2,W3))
+d[v₀  v₁]
+Estimand assumption 1, Unconfoundedness: If U→{v0,v1} and U→y then P(y|v0,v1,W0,W1,W2,W3,U) = P(y|v0,v1,W0,W1,W2,W3)
+### Estimand : 2
+Estimand name: iv
+No such variable found!
+
+## Realized estimand
+b: y~v0+v1+W0+W1+W2+W3+v0*X0+v0*X1+v1*X0+v1*X1
+Target units: ate
+
+## Estimate
+Mean value: 90.33055385892129
+
+</pre></div></div>
+</div>
+<p>You can estimate conditional effects, based on effect modifiers.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">linear_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+                                        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">,</span>
+                                       <span class="n">control_value</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+                                       <span class="n">treatment_value</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">linear_estimate</span><span class="p">)</span>
+</pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.causal_estimator:INFO: Using Linear Regression Estimator
+INFO:dowhy.causal_estimator:b: y~v0+v1+W0+W1+W2+W3+v0*X0+v0*X1+v1*X0+v1*X1
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Identified estimand
+Estimand type: nonparametric-ate
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+    d
+─────────(Expectation(y|W0,W1,W2,W3))
+d[v₀  v₁]
+Estimand assumption 1, Unconfoundedness: If U→{v0,v1} and U→y then P(y|v0,v1,W0,W1,W2,W3,U) = P(y|v0,v1,W0,W1,W2,W3)
+### Estimand : 2
+Estimand name: iv
+No such variable found!
+
+## Realized estimand
+b: y~v0+v1+W0+W1+W2+W3+v0*X0+v0*X1+v1*X0+v1*X1
+Target units: ate
+
+## Estimate
+Mean value: 90.33055385892129
+### Conditional Estimates
+__categorical__X0  __categorical__X1
+(-2.629, 0.14]     (-2.936, 0.0176]      -3.709237
+                   (0.0176, 0.586]       25.191433
+                   (0.586, 1.084]        43.708158
+                   (1.084, 1.661]        61.782760
+                   (1.661, 4.444]        90.521027
+(0.14, 0.72]       (-2.936, 0.0176]      24.438689
+                   (0.0176, 0.586]       54.299181
+                   (0.586, 1.084]        72.005026
+                   (1.084, 1.661]        90.203724
+                   (1.661, 4.444]       119.455480
+(0.72, 1.232]      (-2.936, 0.0176]      41.988317
+                   (0.0176, 0.586]       72.977085
+                   (0.586, 1.084]        90.270855
+                   (1.084, 1.661]       108.403973
+                   (1.661, 4.444]       136.661504
+(1.232, 1.845]     (-2.936, 0.0176]      58.596700
+                   (0.0176, 0.586]       90.604757
+                   (0.586, 1.084]       108.531656
+                   (1.084, 1.661]       126.376825
+                   (1.661, 4.444]       156.005501
+(1.845, 4.73]      (-2.936, 0.0176]      90.504006
+                   (0.0176, 0.586]      120.364554
+                   (0.586, 1.084]       137.619648
+                   (1.084, 1.661]       155.753611
+                   (1.661, 4.444]       185.702174
+dtype: float64
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="More-methods">
+<h1>More methods<a class="headerlink" href="#More-methods" title="Permalink to this headline">¶</a></h1>
+<p>You can also use methods from EconML or CausalML libraries that support multiple treatments. You can look at examples from the conditional effect notebook: <a class="reference external" href="https://microsoft.github.io/dowhy/example_notebooks/dowhy-conditional-treatment-effects.html">https://microsoft.github.io/dowhy/example_notebooks/dowhy-conditional-treatment-effects.html</a></p>
+<p>Propensity-based methods do not support multiple treatments currently.</p>
 </div>
 
 
@@ -716,15 +776,6 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;X&#39
            
           </div>
           <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="dowhy-simple-iv-example.html" class="btn btn-neutral float-right" title="Simple example on using Instrumental Variables method for estimation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="do_sampler_demo.html" class="btn btn-neutral float-left" title="Do-sampler Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
-    </div>
   
 
   <hr/>

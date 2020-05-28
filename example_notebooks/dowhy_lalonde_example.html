@@ -236,33 +236,20 @@ div.nboutput.container div.prompt pre {
 /* all prompts */
 div.nbinput.container div.prompt,
 div.nboutput.container div.prompt {
-    width: 4.5ex;
-    padding-top: 5px;
-    position: relative;
-    user-select: none;
+    min-width: 5ex;
+    padding-top: 0.3rem;
+    padding-right: 0.3rem;
+    text-align: right;
+    flex: 0;
 }
-
-div.nbinput.container div.prompt > div,
-div.nboutput.container div.prompt > div {
-    position: absolute;
-    right: 0;
-    margin-right: 0.3ex;
-}
-
 @media (max-width: 540px) {
     div.nbinput.container div.prompt,
     div.nboutput.container div.prompt {
-        width: unset;
         text-align: left;
         padding: 0.4em;
     }
     div.nboutput.container div.prompt.empty {
         padding: 0;
-    }
-
-    div.nbinput.container div.prompt > div,
-    div.nboutput.container div.prompt > div {
-        position: unset;
     }
 }
 
@@ -355,7 +342,7 @@ div.nboutput.container div.output_area div[class*=highlight].math,
 div.nboutput.container div.output_area.rendered_html,
 div.nboutput.container div.output_area > div.output_javascript,
 div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 5px;
+    padding: 0.3rem;
 }
 
 /* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
@@ -433,16 +420,16 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>import os, sys
-sys.path.append(os.path.abspath(&quot;../../../&quot;))
+<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
 
-import dowhy
-from dowhy import CausalModel
-from rpy2.robjects import r as R
-%load_ext rpy2.ipython
+<span class="kn">import</span> <span class="nn">dowhy</span>
+<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">from</span> <span class="nn">rpy2.robjects</span> <span class="kn">import</span> <span class="n">r</span> <span class="k">as</span> <span class="n">R</span>
+<span class="o">%</span><span class="k">load_ext</span> rpy2.ipython
 
-#%R install.packages(&quot;Matching&quot;)
-%R library(Matching)
+<span class="c1">#%R install.packages(&quot;Matching&quot;)</span>
+<span class="o">%</span><span class="k">R</span> library(Matching)
 
 </pre></div>
 </div>
@@ -483,9 +470,9 @@ array([&#39;Matching&#39;, &#39;MASS&#39;, &#39;tools&#39;, &#39;stats&#39;, &#3
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>%R data(lalonde)
-%R -o lalonde
-lalonde = lalonde.astype({&#39;treat&#39;:&#39;bool&#39;}, copy=False)
+<span></span><span class="o">%</span><span class="k">R</span> data(lalonde)
+<span class="o">%</span><span class="k">R</span> -o lalonde
+<span class="n">lalonde</span> <span class="o">=</span> <span class="n">lalonde</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="s1">&#39;treat&#39;</span><span class="p">:</span><span class="s1">&#39;bool&#39;</span><span class="p">},</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -497,16 +484,16 @@ lalonde = lalonde.astype({&#39;treat&#39;:&#39;bool&#39;}, copy=False)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>model=CausalModel(
-        data = lalonde,
-        treatment=&#39;treat&#39;,
-        outcome=&#39;re78&#39;,
-        common_causes=&#39;nodegr+black+hisp+age+educ+married&#39;.split(&#39;+&#39;))
-identified_estimand = model.identify_effect()
-estimate = model.estimate_effect(identified_estimand,
-        method_name=&quot;backdoor.propensity_score_weighting&quot;)
-#print(estimate)
-print(&quot;Causal Estimate is &quot; + str(estimate.value))
+<span></span><span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">lalonde</span><span class="p">,</span>
+        <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;treat&#39;</span><span class="p">,</span>
+        <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;re78&#39;</span><span class="p">,</span>
+        <span class="n">common_causes</span><span class="o">=</span><span class="s1">&#39;nodegr+black+hisp+age+educ+married&#39;</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">))</span>
+<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
+<span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_weighting&quot;</span><span class="p">)</span>
+<span class="c1">#print(estimate)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -565,17 +552,17 @@ Causal Estimate is 1614.0090222453164
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>df = model._data
-ps = df[&#39;ps&#39;]
-y = df[&#39;re78&#39;]
-z = df[&#39;treat&#39;]
+<span></span><span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_data</span>
+<span class="n">ps</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;ps&#39;</span><span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;re78&#39;</span><span class="p">]</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;treat&#39;</span><span class="p">]</span>
 
-ey1 = z*y/ps / sum(z/ps)
-ey0 = (1-z)*y/(1-ps) / sum((1-z)/(1-ps))
-ate = ey1.sum()-ey0.sum()
-print(&quot;Causal Estimate is &quot; + str(ate))
+<span class="n">ey1</span> <span class="o">=</span> <span class="n">z</span><span class="o">*</span><span class="n">y</span><span class="o">/</span><span class="n">ps</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="n">z</span><span class="o">/</span><span class="n">ps</span><span class="p">)</span>
+<span class="n">ey0</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">z</span><span class="p">)</span><span class="o">*</span><span class="n">y</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">ps</span><span class="p">)</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">z</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">ps</span><span class="p">))</span>
+<span class="n">ate</span> <span class="o">=</span> <span class="n">ey1</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">-</span><span class="n">ey0</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ate</span><span class="p">))</span>
 
-# correct -&gt; Causal Estimate is 1634.9868359746906
+<span class="c1"># correct -&gt; Causal Estimate is 1634.9868359746906</span>
 </pre></div>
 </div>
 </div>

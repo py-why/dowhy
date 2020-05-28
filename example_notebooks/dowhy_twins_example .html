@@ -227,33 +227,20 @@ div.nboutput.container div.prompt pre {
 /* all prompts */
 div.nbinput.container div.prompt,
 div.nboutput.container div.prompt {
-    width: 4.5ex;
-    padding-top: 5px;
-    position: relative;
-    user-select: none;
+    min-width: 5ex;
+    padding-top: 0.3rem;
+    padding-right: 0.3rem;
+    text-align: right;
+    flex: 0;
 }
-
-div.nbinput.container div.prompt > div,
-div.nboutput.container div.prompt > div {
-    position: absolute;
-    right: 0;
-    margin-right: 0.3ex;
-}
-
 @media (max-width: 540px) {
     div.nbinput.container div.prompt,
     div.nboutput.container div.prompt {
-        width: unset;
         text-align: left;
         padding: 0.4em;
     }
     div.nboutput.container div.prompt.empty {
         padding: 0;
-    }
-
-    div.nbinput.container div.prompt > div,
-    div.nboutput.container div.prompt > div {
-        position: unset;
     }
 }
 
@@ -346,7 +333,7 @@ div.nboutput.container div.output_area div[class*=highlight].math,
 div.nboutput.container div.output_area.rendered_html,
 div.nboutput.container div.output_area > div.output_javascript,
 div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 5px;
+    padding: 0.3rem;
 }
 
 /* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
@@ -423,13 +410,13 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>import os, sys
-sys.path.append(os.path.abspath(&quot;../../../&quot;))
-import pandas as pd
-import numpy as np
-import dowhy
-from dowhy import CausalModel
-from dowhy import causal_estimators
+<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">dowhy</span>
+<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">causal_estimators</span>
 </pre></div>
 </div>
 </div>
@@ -440,14 +427,14 @@ from dowhy import causal_estimators
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>#The covariates data has 46 features
-x = pd.read_csv(&quot;https://raw.githubusercontent.com/AMLab-Amsterdam/CEVAE/master/datasets/TWINS/twin_pairs_X_3years_samesex.csv&quot;)
+<span></span><span class="c1">#The covariates data has 46 features</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;https://raw.githubusercontent.com/AMLab-Amsterdam/CEVAE/master/datasets/TWINS/twin_pairs_X_3years_samesex.csv&quot;</span><span class="p">)</span>
 
-#The outcome data contains mortality of the lighter and heavier twin
-y = pd.read_csv(&quot;https://raw.githubusercontent.com/AMLab-Amsterdam/CEVAE/master/datasets/TWINS/twin_pairs_Y_3years_samesex.csv&quot;)
+<span class="c1">#The outcome data contains mortality of the lighter and heavier twin</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;https://raw.githubusercontent.com/AMLab-Amsterdam/CEVAE/master/datasets/TWINS/twin_pairs_Y_3years_samesex.csv&quot;</span><span class="p">)</span>
 
-#The treatment data contains weight in grams of both the twins
-t = pd.read_csv(&quot;https://raw.githubusercontent.com/AMLab-Amsterdam/CEVAE/master/datasets/TWINS/twin_pairs_T_3years_samesex.csv&quot;)
+<span class="c1">#The treatment data contains weight in grams of both the twins</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;https://raw.githubusercontent.com/AMLab-Amsterdam/CEVAE/master/datasets/TWINS/twin_pairs_T_3years_samesex.csv&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -456,25 +443,25 @@ t = pd.read_csv(&quot;https://raw.githubusercontent.com/AMLab-Amsterdam/CEVAE/ma
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>#_0 denotes features specific to the lighter twin and _1 denotes features specific to the heavier twin
-lighter_columns = [&#39;pldel&#39;, &#39;birattnd&#39;, &#39;brstate&#39;, &#39;stoccfipb&#39;, &#39;mager8&#39;,
-       &#39;ormoth&#39;, &#39;mrace&#39;, &#39;meduc6&#39;, &#39;dmar&#39;, &#39;mplbir&#39;, &#39;mpre5&#39;, &#39;adequacy&#39;,
-       &#39;orfath&#39;, &#39;frace&#39;, &#39;birmon&#39;, &#39;gestat10&#39;, &#39;csex&#39;, &#39;anemia&#39;, &#39;cardiac&#39;,
-       &#39;lung&#39;, &#39;diabetes&#39;, &#39;herpes&#39;, &#39;hydra&#39;, &#39;hemo&#39;, &#39;chyper&#39;, &#39;phyper&#39;,
-       &#39;eclamp&#39;, &#39;incervix&#39;, &#39;pre4000&#39;, &#39;preterm&#39;, &#39;renal&#39;, &#39;rh&#39;, &#39;uterine&#39;,
-       &#39;othermr&#39;, &#39;tobacco&#39;, &#39;alcohol&#39;, &#39;cigar6&#39;, &#39;drink5&#39;, &#39;crace&#39;,
-       &#39;data_year&#39;, &#39;nprevistq&#39;, &#39;dfageq&#39;, &#39;feduc6&#39;, &#39;infant_id_0&#39;,
-       &#39;dlivord_min&#39;, &#39;dtotord_min&#39;, &#39;bord_0&#39;,
-       &#39;brstate_reg&#39;, &#39;stoccfipb_reg&#39;, &#39;mplbir_reg&#39;]
-heavier_columns = [ &#39;pldel&#39;, &#39;birattnd&#39;, &#39;brstate&#39;, &#39;stoccfipb&#39;, &#39;mager8&#39;,
-       &#39;ormoth&#39;, &#39;mrace&#39;, &#39;meduc6&#39;, &#39;dmar&#39;, &#39;mplbir&#39;, &#39;mpre5&#39;, &#39;adequacy&#39;,
-       &#39;orfath&#39;, &#39;frace&#39;, &#39;birmon&#39;, &#39;gestat10&#39;, &#39;csex&#39;, &#39;anemia&#39;, &#39;cardiac&#39;,
-       &#39;lung&#39;, &#39;diabetes&#39;, &#39;herpes&#39;, &#39;hydra&#39;, &#39;hemo&#39;, &#39;chyper&#39;, &#39;phyper&#39;,
-       &#39;eclamp&#39;, &#39;incervix&#39;, &#39;pre4000&#39;, &#39;preterm&#39;, &#39;renal&#39;, &#39;rh&#39;, &#39;uterine&#39;,
-       &#39;othermr&#39;, &#39;tobacco&#39;, &#39;alcohol&#39;, &#39;cigar6&#39;, &#39;drink5&#39;, &#39;crace&#39;,
-       &#39;data_year&#39;, &#39;nprevistq&#39;, &#39;dfageq&#39;, &#39;feduc6&#39;,
-       &#39;infant_id_1&#39;, &#39;dlivord_min&#39;, &#39;dtotord_min&#39;, &#39;bord_1&#39;,
-       &#39;brstate_reg&#39;, &#39;stoccfipb_reg&#39;, &#39;mplbir_reg&#39;]
+<span></span><span class="c1">#_0 denotes features specific to the lighter twin and _1 denotes features specific to the heavier twin</span>
+<span class="n">lighter_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pldel&#39;</span><span class="p">,</span> <span class="s1">&#39;birattnd&#39;</span><span class="p">,</span> <span class="s1">&#39;brstate&#39;</span><span class="p">,</span> <span class="s1">&#39;stoccfipb&#39;</span><span class="p">,</span> <span class="s1">&#39;mager8&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;ormoth&#39;</span><span class="p">,</span> <span class="s1">&#39;mrace&#39;</span><span class="p">,</span> <span class="s1">&#39;meduc6&#39;</span><span class="p">,</span> <span class="s1">&#39;dmar&#39;</span><span class="p">,</span> <span class="s1">&#39;mplbir&#39;</span><span class="p">,</span> <span class="s1">&#39;mpre5&#39;</span><span class="p">,</span> <span class="s1">&#39;adequacy&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;orfath&#39;</span><span class="p">,</span> <span class="s1">&#39;frace&#39;</span><span class="p">,</span> <span class="s1">&#39;birmon&#39;</span><span class="p">,</span> <span class="s1">&#39;gestat10&#39;</span><span class="p">,</span> <span class="s1">&#39;csex&#39;</span><span class="p">,</span> <span class="s1">&#39;anemia&#39;</span><span class="p">,</span> <span class="s1">&#39;cardiac&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;lung&#39;</span><span class="p">,</span> <span class="s1">&#39;diabetes&#39;</span><span class="p">,</span> <span class="s1">&#39;herpes&#39;</span><span class="p">,</span> <span class="s1">&#39;hydra&#39;</span><span class="p">,</span> <span class="s1">&#39;hemo&#39;</span><span class="p">,</span> <span class="s1">&#39;chyper&#39;</span><span class="p">,</span> <span class="s1">&#39;phyper&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;eclamp&#39;</span><span class="p">,</span> <span class="s1">&#39;incervix&#39;</span><span class="p">,</span> <span class="s1">&#39;pre4000&#39;</span><span class="p">,</span> <span class="s1">&#39;preterm&#39;</span><span class="p">,</span> <span class="s1">&#39;renal&#39;</span><span class="p">,</span> <span class="s1">&#39;rh&#39;</span><span class="p">,</span> <span class="s1">&#39;uterine&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;othermr&#39;</span><span class="p">,</span> <span class="s1">&#39;tobacco&#39;</span><span class="p">,</span> <span class="s1">&#39;alcohol&#39;</span><span class="p">,</span> <span class="s1">&#39;cigar6&#39;</span><span class="p">,</span> <span class="s1">&#39;drink5&#39;</span><span class="p">,</span> <span class="s1">&#39;crace&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;data_year&#39;</span><span class="p">,</span> <span class="s1">&#39;nprevistq&#39;</span><span class="p">,</span> <span class="s1">&#39;dfageq&#39;</span><span class="p">,</span> <span class="s1">&#39;feduc6&#39;</span><span class="p">,</span> <span class="s1">&#39;infant_id_0&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;dlivord_min&#39;</span><span class="p">,</span> <span class="s1">&#39;dtotord_min&#39;</span><span class="p">,</span> <span class="s1">&#39;bord_0&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;brstate_reg&#39;</span><span class="p">,</span> <span class="s1">&#39;stoccfipb_reg&#39;</span><span class="p">,</span> <span class="s1">&#39;mplbir_reg&#39;</span><span class="p">]</span>
+<span class="n">heavier_columns</span> <span class="o">=</span> <span class="p">[</span> <span class="s1">&#39;pldel&#39;</span><span class="p">,</span> <span class="s1">&#39;birattnd&#39;</span><span class="p">,</span> <span class="s1">&#39;brstate&#39;</span><span class="p">,</span> <span class="s1">&#39;stoccfipb&#39;</span><span class="p">,</span> <span class="s1">&#39;mager8&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;ormoth&#39;</span><span class="p">,</span> <span class="s1">&#39;mrace&#39;</span><span class="p">,</span> <span class="s1">&#39;meduc6&#39;</span><span class="p">,</span> <span class="s1">&#39;dmar&#39;</span><span class="p">,</span> <span class="s1">&#39;mplbir&#39;</span><span class="p">,</span> <span class="s1">&#39;mpre5&#39;</span><span class="p">,</span> <span class="s1">&#39;adequacy&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;orfath&#39;</span><span class="p">,</span> <span class="s1">&#39;frace&#39;</span><span class="p">,</span> <span class="s1">&#39;birmon&#39;</span><span class="p">,</span> <span class="s1">&#39;gestat10&#39;</span><span class="p">,</span> <span class="s1">&#39;csex&#39;</span><span class="p">,</span> <span class="s1">&#39;anemia&#39;</span><span class="p">,</span> <span class="s1">&#39;cardiac&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;lung&#39;</span><span class="p">,</span> <span class="s1">&#39;diabetes&#39;</span><span class="p">,</span> <span class="s1">&#39;herpes&#39;</span><span class="p">,</span> <span class="s1">&#39;hydra&#39;</span><span class="p">,</span> <span class="s1">&#39;hemo&#39;</span><span class="p">,</span> <span class="s1">&#39;chyper&#39;</span><span class="p">,</span> <span class="s1">&#39;phyper&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;eclamp&#39;</span><span class="p">,</span> <span class="s1">&#39;incervix&#39;</span><span class="p">,</span> <span class="s1">&#39;pre4000&#39;</span><span class="p">,</span> <span class="s1">&#39;preterm&#39;</span><span class="p">,</span> <span class="s1">&#39;renal&#39;</span><span class="p">,</span> <span class="s1">&#39;rh&#39;</span><span class="p">,</span> <span class="s1">&#39;uterine&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;othermr&#39;</span><span class="p">,</span> <span class="s1">&#39;tobacco&#39;</span><span class="p">,</span> <span class="s1">&#39;alcohol&#39;</span><span class="p">,</span> <span class="s1">&#39;cigar6&#39;</span><span class="p">,</span> <span class="s1">&#39;drink5&#39;</span><span class="p">,</span> <span class="s1">&#39;crace&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;data_year&#39;</span><span class="p">,</span> <span class="s1">&#39;nprevistq&#39;</span><span class="p">,</span> <span class="s1">&#39;dfageq&#39;</span><span class="p">,</span> <span class="s1">&#39;feduc6&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;infant_id_1&#39;</span><span class="p">,</span> <span class="s1">&#39;dlivord_min&#39;</span><span class="p">,</span> <span class="s1">&#39;dtotord_min&#39;</span><span class="p">,</span> <span class="s1">&#39;bord_1&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;brstate_reg&#39;</span><span class="p">,</span> <span class="s1">&#39;stoccfipb_reg&#39;</span><span class="p">,</span> <span class="s1">&#39;mplbir_reg&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -483,31 +470,31 @@ heavier_columns = [ &#39;pldel&#39;, &#39;birattnd&#39;, &#39;brstate&#39;, &#39
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>#Since data has pair property,processing the data to get separate row for each twin so that each child can be treated as an instance
-data = []
+<span></span><span class="c1">#Since data has pair property,processing the data to get separate row for each twin so that each child can be treated as an instance</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
 
-for i in range(len(t.values)):
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">values</span><span class="p">)):</span>
 
-    #select only if both &lt;=2kg
-    if t.iloc[i].values[1]&gt;=2000 or t.iloc[i].values[2]&gt;=2000:
-        continue
+    <span class="c1">#select only if both &lt;=2kg</span>
+    <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;=</span><span class="mi">2000</span> <span class="ow">or</span> <span class="n">t</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">&gt;=</span><span class="mi">2000</span><span class="p">:</span>
+        <span class="k">continue</span>
 
-    this_instance_lighter = list(x.iloc[i][lighter_columns].values)
-    this_instance_heavier = list(x.iloc[i][heavier_columns].values)
+    <span class="n">this_instance_lighter</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">lighter_columns</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+    <span class="n">this_instance_heavier</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">heavier_columns</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 
-    #adding weight
-    this_instance_lighter.append(t.iloc[i].values[1])
-    this_instance_heavier.append(t.iloc[i].values[2])
+    <span class="c1">#adding weight</span>
+    <span class="n">this_instance_lighter</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">this_instance_heavier</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
-    #adding treatment, is_heavier
-    this_instance_lighter.append(0)
-    this_instance_heavier.append(1)
+    <span class="c1">#adding treatment, is_heavier</span>
+    <span class="n">this_instance_lighter</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">this_instance_heavier</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-    #adding the outcome
-    this_instance_lighter.append(y.iloc[i].values[1])
-    this_instance_heavier.append(y.iloc[i].values[2])
-    data.append(this_instance_lighter)
-    data.append(this_instance_heavier)
+    <span class="c1">#adding the outcome</span>
+    <span class="n">this_instance_lighter</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">this_instance_heavier</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">this_instance_lighter</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">this_instance_heavier</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -516,17 +503,17 @@ for i in range(len(t.values)):
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>cols = [ &#39;pldel&#39;, &#39;birattnd&#39;, &#39;brstate&#39;, &#39;stoccfipb&#39;, &#39;mager8&#39;,
-       &#39;ormoth&#39;, &#39;mrace&#39;, &#39;meduc6&#39;, &#39;dmar&#39;, &#39;mplbir&#39;, &#39;mpre5&#39;, &#39;adequacy&#39;,
-       &#39;orfath&#39;, &#39;frace&#39;, &#39;birmon&#39;, &#39;gestat10&#39;, &#39;csex&#39;, &#39;anemia&#39;, &#39;cardiac&#39;,
-       &#39;lung&#39;, &#39;diabetes&#39;, &#39;herpes&#39;, &#39;hydra&#39;, &#39;hemo&#39;, &#39;chyper&#39;, &#39;phyper&#39;,
-       &#39;eclamp&#39;, &#39;incervix&#39;, &#39;pre4000&#39;, &#39;preterm&#39;, &#39;renal&#39;, &#39;rh&#39;, &#39;uterine&#39;,
-       &#39;othermr&#39;, &#39;tobacco&#39;, &#39;alcohol&#39;, &#39;cigar6&#39;, &#39;drink5&#39;, &#39;crace&#39;,
-       &#39;data_year&#39;, &#39;nprevistq&#39;, &#39;dfageq&#39;, &#39;feduc6&#39;,
-       &#39;infant_id&#39;, &#39;dlivord_min&#39;, &#39;dtotord_min&#39;, &#39;bord&#39;,
-       &#39;brstate_reg&#39;, &#39;stoccfipb_reg&#39;, &#39;mplbir_reg&#39;,&#39;wt&#39;,&#39;treatment&#39;,&#39;outcome&#39;]
-df = pd.DataFrame(columns=cols,data=data)
-df.head()
+<span></span><span class="n">cols</span> <span class="o">=</span> <span class="p">[</span> <span class="s1">&#39;pldel&#39;</span><span class="p">,</span> <span class="s1">&#39;birattnd&#39;</span><span class="p">,</span> <span class="s1">&#39;brstate&#39;</span><span class="p">,</span> <span class="s1">&#39;stoccfipb&#39;</span><span class="p">,</span> <span class="s1">&#39;mager8&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;ormoth&#39;</span><span class="p">,</span> <span class="s1">&#39;mrace&#39;</span><span class="p">,</span> <span class="s1">&#39;meduc6&#39;</span><span class="p">,</span> <span class="s1">&#39;dmar&#39;</span><span class="p">,</span> <span class="s1">&#39;mplbir&#39;</span><span class="p">,</span> <span class="s1">&#39;mpre5&#39;</span><span class="p">,</span> <span class="s1">&#39;adequacy&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;orfath&#39;</span><span class="p">,</span> <span class="s1">&#39;frace&#39;</span><span class="p">,</span> <span class="s1">&#39;birmon&#39;</span><span class="p">,</span> <span class="s1">&#39;gestat10&#39;</span><span class="p">,</span> <span class="s1">&#39;csex&#39;</span><span class="p">,</span> <span class="s1">&#39;anemia&#39;</span><span class="p">,</span> <span class="s1">&#39;cardiac&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;lung&#39;</span><span class="p">,</span> <span class="s1">&#39;diabetes&#39;</span><span class="p">,</span> <span class="s1">&#39;herpes&#39;</span><span class="p">,</span> <span class="s1">&#39;hydra&#39;</span><span class="p">,</span> <span class="s1">&#39;hemo&#39;</span><span class="p">,</span> <span class="s1">&#39;chyper&#39;</span><span class="p">,</span> <span class="s1">&#39;phyper&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;eclamp&#39;</span><span class="p">,</span> <span class="s1">&#39;incervix&#39;</span><span class="p">,</span> <span class="s1">&#39;pre4000&#39;</span><span class="p">,</span> <span class="s1">&#39;preterm&#39;</span><span class="p">,</span> <span class="s1">&#39;renal&#39;</span><span class="p">,</span> <span class="s1">&#39;rh&#39;</span><span class="p">,</span> <span class="s1">&#39;uterine&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;othermr&#39;</span><span class="p">,</span> <span class="s1">&#39;tobacco&#39;</span><span class="p">,</span> <span class="s1">&#39;alcohol&#39;</span><span class="p">,</span> <span class="s1">&#39;cigar6&#39;</span><span class="p">,</span> <span class="s1">&#39;drink5&#39;</span><span class="p">,</span> <span class="s1">&#39;crace&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;data_year&#39;</span><span class="p">,</span> <span class="s1">&#39;nprevistq&#39;</span><span class="p">,</span> <span class="s1">&#39;dfageq&#39;</span><span class="p">,</span> <span class="s1">&#39;feduc6&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;infant_id&#39;</span><span class="p">,</span> <span class="s1">&#39;dlivord_min&#39;</span><span class="p">,</span> <span class="s1">&#39;dtotord_min&#39;</span><span class="p">,</span> <span class="s1">&#39;bord&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;brstate_reg&#39;</span><span class="p">,</span> <span class="s1">&#39;stoccfipb_reg&#39;</span><span class="p">,</span> <span class="s1">&#39;mplbir_reg&#39;</span><span class="p">,</span><span class="s1">&#39;wt&#39;</span><span class="p">,</span><span class="s1">&#39;treatment&#39;</span><span class="p">,</span><span class="s1">&#39;outcome&#39;</span><span class="p">]</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -707,16 +694,16 @@ df.head()
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>df = df.astype({&quot;treatment&quot;:&#39;bool&#39;}, copy=False) #explicitly assigning treatment column as boolean
+<span></span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="s2">&quot;treatment&quot;</span><span class="p">:</span><span class="s1">&#39;bool&#39;</span><span class="p">},</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1">#explicitly assigning treatment column as boolean</span>
 
-df.fillna(value=df.mean(),inplace=True)    #filling the missing values
-df.fillna(value=df.mode().loc[0],inplace=True)
+<span class="n">df</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>    <span class="c1">#filling the missing values</span>
+<span class="n">df</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">mode</span><span class="p">()</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-data_1 = df[df[&quot;treatment&quot;]==1]
-data_0 = df[df[&quot;treatment&quot;]==0]
-print(np.mean(data_1[&quot;outcome&quot;]))
-print(np.mean(data_0[&quot;outcome&quot;]))
-print(&quot;ATE&quot;, np.mean(data_1[&quot;outcome&quot;])- np.mean(data_0[&quot;outcome&quot;]))
+<span class="n">data_1</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;treatment&quot;</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">data_0</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;treatment&quot;</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_1</span><span class="p">[</span><span class="s2">&quot;outcome&quot;</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_0</span><span class="p">[</span><span class="s2">&quot;outcome&quot;</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ATE&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_1</span><span class="p">[</span><span class="s2">&quot;outcome&quot;</span><span class="p">])</span><span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_0</span><span class="p">[</span><span class="s2">&quot;outcome&quot;</span><span class="p">]))</span>
 </pre></div>
 </div>
 </div>
@@ -736,13 +723,13 @@ ATE -0.025200267022696926
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>#The causal model has &quot;treatment = is_heavier&quot;, &quot;outcome = mortality&quot; and &quot;gestat10 = gestational weeks before birth&quot;
-model=CausalModel(
-        data = df,
-        treatment=&#39;treatment&#39;,
-        outcome=&#39;outcome&#39;,
-        common_causes=&#39;gestat10&#39;
-        )
+<span></span><span class="c1">#The causal model has &quot;treatment = is_heavier&quot;, &quot;outcome = mortality&quot; and &quot;gestat10 = gestational weeks before birth&quot;</span>
+<span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
+        <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;treatment&#39;</span><span class="p">,</span>
+        <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;outcome&#39;</span><span class="p">,</span>
+        <span class="n">common_causes</span><span class="o">=</span><span class="s1">&#39;gestat10&#39;</span>
+        <span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -762,7 +749,7 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;treat
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>identified_estimand = model.identify_effect()
+<span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -798,13 +785,13 @@ INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[]
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>estimate = model.estimate_effect(identified_estimand,
-        method_name=&quot;backdoor.linear_regression&quot;, test_significance=True
-)
+<span></span><span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">,</span> <span class="n">test_significance</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
 
-print(estimate)
-print(&quot;ATE&quot;, np.mean(data_1[&quot;outcome&quot;])- np.mean(data_0[&quot;outcome&quot;]))
-print(&quot;Causal Estimate is &quot; + str(estimate.value))
+<span class="nb">print</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ATE&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_1</span><span class="p">[</span><span class="s2">&quot;outcome&quot;</span><span class="p">])</span><span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_0</span><span class="p">[</span><span class="s2">&quot;outcome&quot;</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -855,13 +842,13 @@ Causal Estimate is -0.025200267022696315
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>estimate = model.estimate_effect(identified_estimand,
-        method_name=&quot;backdoor.propensity_score_matching&quot;
-)
+<span></span><span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_matching&quot;</span>
+<span class="p">)</span>
 
-print(&quot;Causal Estimate is &quot; + str(estimate.value))
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
 
-print(&quot;ATE&quot;, np.mean(data_1[&quot;outcome&quot;])- np.mean(data_0[&quot;outcome&quot;]))
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ATE&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_1</span><span class="p">[</span><span class="s2">&quot;outcome&quot;</span><span class="p">])</span><span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_0</span><span class="p">[</span><span class="s2">&quot;outcome&quot;</span><span class="p">]))</span>
 </pre></div>
 </div>
 </div>
@@ -892,9 +879,9 @@ ATE -0.025200267022696926
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>refute_results=model.refute_estimate(identified_estimand, estimate,
-        method_name=&quot;random_common_cause&quot;)
-print(refute_results)
+<span></span><span class="n">refute_results</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;random_common_cause&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">refute_results</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -926,9 +913,9 @@ New effect:(-0.02891355140186916,)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>res_placebo=model.refute_estimate(identified_estimand, estimate,
-        method_name=&quot;placebo_treatment_refuter&quot;, placebo_type=&quot;permute&quot;)
-print(res_placebo)
+<span></span><span class="n">res_placebo</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;placebo_treatment_refuter&quot;</span><span class="p">,</span> <span class="n">placebo_type</span><span class="o">=</span><span class="s2">&quot;permute&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">res_placebo</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -960,9 +947,9 @@ New effect:(-0.16384345794392524,)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>res_subset=model.refute_estimate(identified_estimand, estimate,
-        method_name=&quot;data_subset_refuter&quot;, subset_fraction=0.9)
-print(res_subset)
+<span></span><span class="n">res_subset</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;data_subset_refuter&quot;</span><span class="p">,</span> <span class="n">subset_fraction</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">res_subset</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

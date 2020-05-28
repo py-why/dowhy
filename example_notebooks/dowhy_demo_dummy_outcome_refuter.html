@@ -227,33 +227,20 @@ div.nboutput.container div.prompt pre {
 /* all prompts */
 div.nbinput.container div.prompt,
 div.nboutput.container div.prompt {
-    width: 4.5ex;
-    padding-top: 5px;
-    position: relative;
-    user-select: none;
+    min-width: 5ex;
+    padding-top: 0.3rem;
+    padding-right: 0.3rem;
+    text-align: right;
+    flex: 0;
 }
-
-div.nbinput.container div.prompt > div,
-div.nboutput.container div.prompt > div {
-    position: absolute;
-    right: 0;
-    margin-right: 0.3ex;
-}
-
 @media (max-width: 540px) {
     div.nbinput.container div.prompt,
     div.nboutput.container div.prompt {
-        width: unset;
         text-align: left;
         padding: 0.4em;
     }
     div.nboutput.container div.prompt.empty {
         padding: 0;
-    }
-
-    div.nbinput.container div.prompt > div,
-    div.nboutput.container div.prompt > div {
-        position: unset;
     }
 }
 
@@ -346,7 +333,7 @@ div.nboutput.container div.output_area div[class*=highlight].math,
 div.nboutput.container div.output_area.rendered_html,
 div.nboutput.container div.output_area > div.output_javascript,
 div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 5px;
+    padding: 0.3rem;
 }
 
 /* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
@@ -426,11 +413,11 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>from dowhy import CausalModel
-import dowhy.datasets
-import pandas as pd
-import numpy as np
-import logging
+<span></span><span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 </pre></div>
 </div>
 </div>
@@ -474,22 +461,22 @@ import logging
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span># Value of the coefficient [BETA]
-BETA = 10
-# Number of Common Causes
-NUM_COMMON_CAUSES = 2
-# Number of Instruments
-NUM_INSTRUMENTS = 1
-# Number of Samples
-NUM_SAMPLES = 100000
-# Treatment is Binary
-TREATMENT_IS_BINARY = False
-data = dowhy.datasets.linear_dataset(beta=BETA,
-                                 num_common_causes=NUM_COMMON_CAUSES,
-                                 num_instruments=NUM_INSTRUMENTS,
-                                 num_samples=NUM_SAMPLES,
-                                 treatment_is_binary=TREATMENT_IS_BINARY)
-data[&#39;df&#39;].head()
+<span></span><span class="c1"># Value of the coefficient [BETA]</span>
+<span class="n">BETA</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="c1"># Number of Common Causes</span>
+<span class="n">NUM_COMMON_CAUSES</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="c1"># Number of Instruments</span>
+<span class="n">NUM_INSTRUMENTS</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="c1"># Number of Samples</span>
+<span class="n">NUM_SAMPLES</span> <span class="o">=</span> <span class="mi">100000</span>
+<span class="c1"># Treatment is Binary</span>
+<span class="n">TREATMENT_IS_BINARY</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">linear_dataset</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">BETA</span><span class="p">,</span>
+                                 <span class="n">num_common_causes</span><span class="o">=</span><span class="n">NUM_COMMON_CAUSES</span><span class="p">,</span>
+                                 <span class="n">num_instruments</span><span class="o">=</span><span class="n">NUM_INSTRUMENTS</span><span class="p">,</span>
+                                 <span class="n">num_samples</span><span class="o">=</span><span class="n">NUM_SAMPLES</span><span class="p">,</span>
+                                 <span class="n">treatment_is_binary</span><span class="o">=</span><span class="n">TREATMENT_IS_BINARY</span><span class="p">)</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -576,14 +563,14 @@ data[&#39;df&#39;].head()
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>model = CausalModel(
-    data = data[&#39;df&#39;],
-    treatment = data[&#39;treatment_name&#39;],
-    outcome = data[&#39;outcome_name&#39;],
-    graph = data[&#39;gml_graph&#39;],
-    instruments = data[&#39;instrument_names&#39;],
-    logging_level = logging.INFO
-)
+<span></span><span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">],</span>
+    <span class="n">treatment</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;treatment_name&#39;</span><span class="p">],</span>
+    <span class="n">outcome</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;outcome_name&#39;</span><span class="p">],</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;gml_graph&#39;</span><span class="p">],</span>
+    <span class="n">instruments</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;instrument_names&#39;</span><span class="p">],</span>
+    <span class="n">logging_level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -600,7 +587,7 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#3
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>model.view_model()
+<span></span><span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -629,8 +616,8 @@ INFO:dowhy.causal_graph:Using Matplotlib for plotting
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>identified_estimand = model.identify_effect()
-print(identified_estimand)
+<span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -689,11 +676,11 @@ Estimand assumption 2, Exclusion: If we remove {Z0}→{v0}, then ¬({Z0}→y)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>causal_estimate = model.estimate_effect( identified_estimand,
-                                       method_name=&quot;iv.instrumental_variable&quot;,
-                                       method_params={&#39;iv_instrument_name&#39;:&#39;Z0&#39;}
-                                       )
-print(causal_estimate)
+<span></span><span class="n">causal_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span> <span class="n">identified_estimand</span><span class="p">,</span>
+                                       <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;iv.instrumental_variable&quot;</span><span class="p">,</span>
+                                       <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;iv_instrument_name&#39;</span><span class="p">:</span><span class="s1">&#39;Z0&#39;</span><span class="p">}</span>
+                                       <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -765,11 +752,11 @@ Value: 10.006229589077737
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>ref = model.refute_estimate(identified_estimand,
-                           causal_estimate,
-                           method_name=&quot;dummy_outcome_refuter&quot;
-                           )
-print(ref)
+<span></span><span class="n">ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+                           <span class="n">causal_estimate</span><span class="p">,</span>
+                           <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;dummy_outcome_refuter&quot;</span>
+                           <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -816,11 +803,11 @@ p value:0.99
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>coefficients = np.array([1,2])
-bias = 3
-def linear_gen(df):
-    y_new = np.dot(df[[&#39;W0&#39;,&#39;W1&#39;]].values,coefficients) + 3
-    return y_new
+<span></span><span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">bias</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="k">def</span> <span class="nf">linear_gen</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="n">y_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;W0&#39;</span><span class="p">,</span><span class="s1">&#39;W1&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span><span class="n">coefficients</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span>
+    <span class="k">return</span> <span class="n">y_new</span>
 </pre></div>
 </div>
 </div>
@@ -831,13 +818,13 @@ def linear_gen(df):
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>ref = model.refute_estimate(identified_estimand,
-                           causal_estimate,
-                           method_name=&quot;dummy_outcome_refuter&quot;,
-                           outcome_function=linear_gen
-                           )
+<span></span><span class="n">ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+                           <span class="n">causal_estimate</span><span class="p">,</span>
+                           <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;dummy_outcome_refuter&quot;</span><span class="p">,</span>
+                           <span class="n">outcome_function</span><span class="o">=</span><span class="n">linear_gen</span>
+                           <span class="p">)</span>
 
-print(ref)
+<span class="nb">print</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

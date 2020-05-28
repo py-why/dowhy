@@ -227,33 +227,20 @@ div.nboutput.container div.prompt pre {
 /* all prompts */
 div.nbinput.container div.prompt,
 div.nboutput.container div.prompt {
-    width: 4.5ex;
-    padding-top: 5px;
-    position: relative;
-    user-select: none;
+    min-width: 5ex;
+    padding-top: 0.3rem;
+    padding-right: 0.3rem;
+    text-align: right;
+    flex: 0;
 }
-
-div.nbinput.container div.prompt > div,
-div.nboutput.container div.prompt > div {
-    position: absolute;
-    right: 0;
-    margin-right: 0.3ex;
-}
-
 @media (max-width: 540px) {
     div.nbinput.container div.prompt,
     div.nboutput.container div.prompt {
-        width: unset;
         text-align: left;
         padding: 0.4em;
     }
     div.nboutput.container div.prompt.empty {
         padding: 0;
-    }
-
-    div.nbinput.container div.prompt > div,
-    div.nboutput.container div.prompt > div {
-        position: unset;
     }
 }
 
@@ -346,7 +333,7 @@ div.nboutput.container div.output_area div[class*=highlight].math,
 div.nboutput.container div.output_area.rendered_html,
 div.nboutput.container div.output_area > div.output_javascript,
 div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 5px;
+    padding: 0.3rem;
 }
 
 /* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
@@ -423,10 +410,10 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>import dowhy
-from dowhy import CausalModel
-import pandas as pd
-import numpy as np
+<span></span><span class="kn">import</span> <span class="nn">dowhy</span>
+<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 </pre></div>
 </div>
 </div>
@@ -445,13 +432,13 @@ from college), whethershe worked during pregnancy, whether she received prenatal
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>data = pd.read_csv(&quot;https://raw.githubusercontent.com/AMLab-Amsterdam/CEVAE/master/datasets/IHDP/csv/ihdp_npci_1.csv&quot;, header = None)
-col =  [&quot;treatment&quot;, &quot;y_factual&quot;, &quot;y_cfactual&quot;, &quot;mu0&quot;, &quot;mu1&quot; ,]
-for i in range(1,26):
-    col.append(&quot;x&quot;+str(i))
-data.columns = col
-data = data.astype({&quot;treatment&quot;:&#39;bool&#39;}, copy=False)
-data.head()
+<span></span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;https://raw.githubusercontent.com/AMLab-Amsterdam/CEVAE/master/datasets/IHDP/csv/ihdp_npci_1.csv&quot;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
+<span class="n">col</span> <span class="o">=</span>  <span class="p">[</span><span class="s2">&quot;treatment&quot;</span><span class="p">,</span> <span class="s2">&quot;y_factual&quot;</span><span class="p">,</span> <span class="s2">&quot;y_cfactual&quot;</span><span class="p">,</span> <span class="s2">&quot;mu0&quot;</span><span class="p">,</span> <span class="s2">&quot;mu1&quot;</span> <span class="p">,]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">26</span><span class="p">):</span>
+    <span class="n">col</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+<span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">col</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="s2">&quot;treatment&quot;</span><span class="p">:</span><span class="s1">&#39;bool&#39;</span><span class="p">},</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -655,15 +642,15 @@ data.head()
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>from rpy2.robjects import r as R
+<span></span><span class="kn">from</span> <span class="nn">rpy2.robjects</span> <span class="kn">import</span> <span class="n">r</span> <span class="k">as</span> <span class="n">R</span>
 
-from os.path import expanduser
-home = expanduser(&quot;~&quot;)
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">expanduser</span>
+<span class="n">home</span> <span class="o">=</span> <span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">)</span>
 
-%reload_ext rpy2.ipython
+<span class="o">%</span><span class="k">reload_ext</span> rpy2.ipython
 
-# %R install.packages(&quot;Matching&quot;)
-%R library(Matching)
+<span class="c1"># %R install.packages(&quot;Matching&quot;)</span>
+<span class="o">%</span><span class="k">R</span> library(Matching)
 </pre></div>
 </div>
 </div>
@@ -701,10 +688,10 @@ array([&#39;Matching&#39;, &#39;MASS&#39;, &#39;tools&#39;, &#39;stats&#39;, &#3
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>%R data(lalonde)
-%R -o lalonde
-lalonde = lalonde.astype({&#39;treat&#39;:&#39;bool&#39;}, copy=False)
-lalonde.head()
+<span></span><span class="o">%</span><span class="k">R</span> data(lalonde)
+<span class="o">%</span><span class="k">R</span> -o lalonde
+<span class="n">lalonde</span> <span class="o">=</span> <span class="n">lalonde</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="s1">&#39;treat&#39;</span><span class="p">:</span><span class="s1">&#39;bool&#39;</span><span class="p">},</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">lalonde</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -837,20 +824,20 @@ lalonde.head()
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span># Create a causal model from the data and given common causes
+<span></span><span class="c1"># Create a causal model from the data and given common causes</span>
 
-common_causes = []
+<span class="n">common_causes</span> <span class="o">=</span> <span class="p">[]</span>
 
-for i in range(1, 26):
-    common_causes += [&quot;x&quot;+str(i)]
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">26</span><span class="p">):</span>
+    <span class="n">common_causes</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span>
 
-ihdp_model = CausalModel(
-                data=data,
-                treatment=&#39;treatment&#39;,
-                outcome=&#39;y_factual&#39;,
-                common_causes=common_causes
-            )
-ihdp_model
+<span class="n">ihdp_model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+                <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;treatment&#39;</span><span class="p">,</span>
+                <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;y_factual&#39;</span><span class="p">,</span>
+                <span class="n">common_causes</span><span class="o">=</span><span class="n">common_causes</span>
+            <span class="p">)</span>
+<span class="n">ihdp_model</span>
 </pre></div>
 </div>
 </div>
@@ -881,13 +868,13 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;treat
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>lalonde_model = CausalModel(
-                data=lalonde,
-                treatment=&#39;treat&#39;,
-                outcome=&#39;re78&#39;,
-                common_causes=&#39;nodegr+black+hisp+age+educ+married&#39;.split(&#39;+&#39;)
-            )
-lalonde_model
+<span></span><span class="n">lalonde_model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">lalonde</span><span class="p">,</span>
+                <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;treat&#39;</span><span class="p">,</span>
+                <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;re78&#39;</span><span class="p">,</span>
+                <span class="n">common_causes</span><span class="o">=</span><span class="s1">&#39;nodegr+black+hisp+age+educ+married&#39;</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">)</span>
+            <span class="p">)</span>
+<span class="n">lalonde_model</span>
 </pre></div>
 </div>
 </div>
@@ -921,8 +908,8 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;treat
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>#Identify the causal effect for the ihdp dataset
-ihdp_identified_estimand = ihdp_model.identify_effect()
+<span></span><span class="c1">#Identify the causal effect for the ihdp dataset</span>
+<span class="n">ihdp_identified_estimand</span> <span class="o">=</span> <span class="n">ihdp_model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -959,8 +946,8 @@ INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[]
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>#Identify the causal effect for the lalonde dataset
-lalonde_identified_estimand = lalonde_model.identify_effect()
+<span></span><span class="c1">#Identify the causal effect for the lalonde dataset</span>
+<span class="n">lalonde_identified_estimand</span> <span class="o">=</span> <span class="n">lalonde_model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1000,12 +987,12 @@ INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[]
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>ihdp_estimate = ihdp_model.estimate_effect(
-                    ihdp_identified_estimand,
-                    method_name=&quot;backdoor.propensity_score_weighting&quot;
-                )
+<span></span><span class="n">ihdp_estimate</span> <span class="o">=</span> <span class="n">ihdp_model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span>
+                    <span class="n">ihdp_identified_estimand</span><span class="p">,</span>
+                    <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_weighting&quot;</span>
+                <span class="p">)</span>
 
-print(&quot;The Causal Estimate is &quot; + str(ihdp_estimate.value))
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ihdp_estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -1043,12 +1030,12 @@ The Causal Estimate is 3.409737824404964
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>lalonde_estimate = lalonde_model.estimate_effect(
-                        lalonde_identified_estimand,
-                        method_name=&quot;backdoor.propensity_score_weighting&quot;
-                    )
+<span></span><span class="n">lalonde_estimate</span> <span class="o">=</span> <span class="n">lalonde_model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span>
+                        <span class="n">lalonde_identified_estimand</span><span class="p">,</span>
+                        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_weighting&quot;</span>
+                    <span class="p">)</span>
 
-print(&quot;The Causal Estimate is &quot; + str(lalonde_estimate.value))
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">lalonde_estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -1091,13 +1078,13 @@ The Causal Estimate is 1614.1203743033784
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>ihdp_refute_random_common_cause = ihdp_model.refute_estimate(
-                                        ihdp_identified_estimand,
-                                        ihdp_estimate,
-                                        method_name=&quot;random_common_cause&quot;
-                                    )
+<span></span><span class="n">ihdp_refute_random_common_cause</span> <span class="o">=</span> <span class="n">ihdp_model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span>
+                                        <span class="n">ihdp_identified_estimand</span><span class="p">,</span>
+                                        <span class="n">ihdp_estimate</span><span class="p">,</span>
+                                        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;random_common_cause&quot;</span>
+                                    <span class="p">)</span>
 
-print(ihdp_refute_random_common_cause)
+<span class="nb">print</span><span class="p">(</span><span class="n">ihdp_refute_random_common_cause</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1138,14 +1125,14 @@ New effect:(3.4082516978396793,)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>ihdp_refute_placebo_treatment = ihdp_model.refute_estimate(
-                                    ihdp_identified_estimand,
-                                    ihdp_estimate,
-                                    method_name=&quot;placebo_treatment_refuter&quot;,
-                                    placebo_type=&quot;permute&quot;
-                                )
+<span></span><span class="n">ihdp_refute_placebo_treatment</span> <span class="o">=</span> <span class="n">ihdp_model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span>
+                                    <span class="n">ihdp_identified_estimand</span><span class="p">,</span>
+                                    <span class="n">ihdp_estimate</span><span class="p">,</span>
+                                    <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;placebo_treatment_refuter&quot;</span><span class="p">,</span>
+                                    <span class="n">placebo_type</span><span class="o">=</span><span class="s2">&quot;permute&quot;</span>
+                                <span class="p">)</span>
 
-print(ihdp_refute_placebo_treatment)
+<span class="nb">print</span><span class="p">(</span><span class="n">ihdp_refute_placebo_treatment</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1186,13 +1173,13 @@ New effect:(-0.030843695817419192,)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>ihdp_refute_random_subset = ihdp_model.refute_estimate(
-                                    ihdp_identified_estimand,
-                                    ihdp_estimate,
-                                    method_name=&quot;data_subset_refuter&quot;,
-                                    subset_fraction=0.8
-                            )
-print(ihdp_refute_random_subset)
+<span></span><span class="n">ihdp_refute_random_subset</span> <span class="o">=</span> <span class="n">ihdp_model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span>
+                                    <span class="n">ihdp_identified_estimand</span><span class="p">,</span>
+                                    <span class="n">ihdp_estimate</span><span class="p">,</span>
+                                    <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;data_subset_refuter&quot;</span><span class="p">,</span>
+                                    <span class="n">subset_fraction</span><span class="o">=</span><span class="mf">0.8</span>
+                            <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ihdp_refute_random_subset</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1236,13 +1223,13 @@ New effect:(3.490166414737983,)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>lalonde_refute_random_common_cause = lalonde_model.refute_estimate(
-                                            lalonde_identified_estimand,
-                                            lalonde_estimate,
-                                            method_name=&quot;random_common_cause&quot;
-                                        )
+<span></span><span class="n">lalonde_refute_random_common_cause</span> <span class="o">=</span> <span class="n">lalonde_model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span>
+                                            <span class="n">lalonde_identified_estimand</span><span class="p">,</span>
+                                            <span class="n">lalonde_estimate</span><span class="p">,</span>
+                                            <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;random_common_cause&quot;</span>
+                                        <span class="p">)</span>
 
-print(lalonde_refute_random_common_cause)
+<span class="nb">print</span><span class="p">(</span><span class="n">lalonde_refute_random_common_cause</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1283,14 +1270,14 @@ New effect:(1623.995451276467,)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>lalonde_refute_placebo_treatment = lalonde_model.refute_estimate(
-                                        lalonde_identified_estimand,
-                                        lalonde_estimate,
-                                        method_name=&quot;placebo_treatment_refuter&quot;,
-                                        placebo_type=&quot;permute&quot;
-                                    )
+<span></span><span class="n">lalonde_refute_placebo_treatment</span> <span class="o">=</span> <span class="n">lalonde_model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span>
+                                        <span class="n">lalonde_identified_estimand</span><span class="p">,</span>
+                                        <span class="n">lalonde_estimate</span><span class="p">,</span>
+                                        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;placebo_treatment_refuter&quot;</span><span class="p">,</span>
+                                        <span class="n">placebo_type</span><span class="o">=</span><span class="s2">&quot;permute&quot;</span>
+                                    <span class="p">)</span>
 
-print(lalonde_refute_placebo_treatment)
+<span class="nb">print</span><span class="p">(</span><span class="n">lalonde_refute_placebo_treatment</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1331,14 +1318,14 @@ New effect:(913.2564092536604,)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>lalonde_refute_random_subset = lalonde_model.refute_estimate(
-                                    lalonde_identified_estimand,
-                                    lalonde_estimate,
-                                    method_name=&quot;data_subset_refuter&quot;,
-                                    subset_fraction=0.9
-                                )
+<span></span><span class="n">lalonde_refute_random_subset</span> <span class="o">=</span> <span class="n">lalonde_model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span>
+                                    <span class="n">lalonde_identified_estimand</span><span class="p">,</span>
+                                    <span class="n">lalonde_estimate</span><span class="p">,</span>
+                                    <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;data_subset_refuter&quot;</span><span class="p">,</span>
+                                    <span class="n">subset_fraction</span><span class="o">=</span><span class="mf">0.9</span>
+                                <span class="p">)</span>
 
-print(lalonde_refute_random_subset)
+<span class="nb">print</span><span class="p">(</span><span class="n">lalonde_refute_random_subset</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
