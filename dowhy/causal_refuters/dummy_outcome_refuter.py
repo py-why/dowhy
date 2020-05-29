@@ -50,6 +50,15 @@ class DummyOutcomeRefuter(CausalRefuter):
     * If a function from the above list is used
     [('knn',{'n_neighbors':5}), ('permute', {'permute_fraction': val} ), ('noise', {'std_dev': val} )]
 
+    - 'true_causal_effect': tuple, list, function, DummyOutcomeRefuter.DEFAULT_TRUE_CAUSAL_EFFECT
+    A function that is used used to get the True Causal Effect for the modelled dummy outcome. 
+    The equation for the dummy outcome is given by
+    y_hat = h(t) + f(W)
+    where:
+      - y_hat is the dummy outcome 
+      - h(t) is the function that gives the true causal effect 
+      - f(W) is the best estimate of y obtained keeping t constant.
+
     - 'required_variables': int, list, bool, True by default
     The inputs are either an integer value, list or bool.
         1. An integer argument refers to how many variables will be used for estimating the value of the outcome
@@ -86,12 +95,15 @@ class DummyOutcomeRefuter(CausalRefuter):
     MIN_DATA_POINT_THRESHOLD = 30
     # The Default Transformation, when no arguments are given, or if the number of data points are insufficient for an estimator
     DEFAULT_TRANSFORMATION = [("zero",""),("noise", {'std_dev': 1} )]
+    # The Default True Causal Effect, this is taken to be ZERO by default
+    DEFAULT_TRUE_CAUSAL_EFFECT = lambda x: 0
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
         self._num_simulations = kwargs.pop("num_simulations", CausalRefuter.DEFAULT_NUM_SIMULATIONS)
         self._transformation_list = kwargs.pop("transformation_list", DummyOutcomeRefuter.DEFAULT_TRANSFORMATION)
+        self._true_causal_effect = kwargs.pop("true_causal_effect", DummyOutcomeRefuter.DEFAULT_TRUE_CAUSAL_EFFECT)
         self._bucket_size_scale_factor = kwargs.pop("bucket_size_scale_factor", DummyOutcomeRefuter.DEFAULT_BUCKET_SCALE_FACTOR)
         self._min_data_point_threshold = kwargs.pop("min_data_point_threshold", DummyOutcomeRefuter.MIN_DATA_POINT_THRESHOLD)
         required_variables = kwargs.pop("required_variables", True)
@@ -157,7 +169,9 @@ class DummyOutcomeRefuter(CausalRefuter):
                         transformation_list = DummyOutcomeRefuter.DEFAULT_TRANSFORMATION
 
                     outcome_validation = self.process_data(X_train, outcome_train, X_validation, outcome_validation, transformation_list)
-                    
+
+            # Add h(t) to f(W) to get the dummy outcome
+            outcome_validation += self._true_causal_effect( validation_df[ self._target_estimand.treatment_name[0] ] )        
             new_data = validation_df.assign(dummy_outcome=outcome_validation)
             new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
