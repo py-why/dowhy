@@ -3,7 +3,7 @@ import math
 import numpy as np
 import pandas as pd
 import logging
-import pdb
+
 from collections import OrderedDict
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
@@ -347,7 +347,6 @@ class DummyOutcomeRefuter(CausalRefuter):
             num_bins = ( data.max() - data.min() )/ (self._bucket_size_scale_factor * std_dev)
             data['bins'] = pd.cut(data[treatment_variable_name], num_bins)
             groups = data.groupby('bins')
-            # pdb.set_trace()
             data.drop('bins', axis=1, inplace=True)
             return groups
 
