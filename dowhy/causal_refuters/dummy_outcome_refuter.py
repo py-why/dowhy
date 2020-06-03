@@ -135,8 +135,12 @@ class DummyOutcomeRefuter(CausalRefuter):
         refute_list = []
         no_estimator = self.check_for_estimator()
 
+        # The rationale behind ordering of the loops is the fact that we induce randomness everytime we create the 
+        # Train and the Validation Datasets. Thus, we run the simulation loop followed by the training and the validation
+        # loops. Thus, we can get different values everytime we get the estimator.
         for _ in range( self._num_simulations ):
             estimates = []
+            
             if no_estimator:
                 # We set X_train = 0 and outcome_train to be 0
                 validation_df = self._data
@@ -207,6 +211,7 @@ class DummyOutcomeRefuter(CausalRefuter):
             refute_list.append(refute)
 
         else:
+            # Iterating through the refutation for each category
             for category in simulation_results.shape[1]:
                 refute = CausalRefutation(
                     self._estimate.value,
