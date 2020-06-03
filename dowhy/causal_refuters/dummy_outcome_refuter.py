@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import logging
 import pdb
-
+from collections import OrderedDict
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
 from dowhy.causal_estimator import CausalEstimator,CausalEstimate
@@ -133,6 +133,11 @@ class DummyOutcomeRefuter(CausalRefuter):
 
         simulation_results = []
         refute_list = []
+        
+        # We use collections.OrderedDict to maintain the order in which the data is stored
+        causal_effect_map = OrderedDict()
+        
+        # Check if we are using an estimators in the transformation list 
         no_estimator = self.check_for_estimator()
 
         # The rationale behind ordering of the loops is the fact that we induce randomness everytime we create the 
@@ -151,6 +156,18 @@ class DummyOutcomeRefuter(CausalRefuter):
 
                 # Get the final outcome, after running through all the values in the transformation list
                 outcome_validation = self.process_data(X_train, outcome_train, X_validation, outcome_validation, self._transformation_list)
+                
+                # Check if the value of true effect has been already stored
+                # We use None as the key as we have no base category for this refutation
+                if None not in causal_effect_map:
+                    # As we currently support only one treatment
+                    causal_effect_map[None] = self._true_causal_effect( validation_df[ self._target_estimand.treatment_name[0] ] )  
+                
+                outcome_validation += causal_effect_map[None]     
+                new_data = validation_df.assign(dummy_outcome=outcome_validation)
+                new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
+                new_effect = new_estimator.estimate_effect()
+                estimates.append(new_effect.value)
 
             else:
                 groups = self.preprocess_data_by_treatment()
@@ -159,6 +176,9 @@ class DummyOutcomeRefuter(CausalRefuter):
                     outcome_train = groups.get_group(key_train)['y'].values
                     validation_df = []
                     transformation_list = self._transformation_list
+
+                    if key_train not in causal_effect_map:
+                        causal_effect_map[key_train] = None
 
                     for key_validation, _ in groups:
                         if key_validation != key_train:
@@ -174,14 +194,21 @@ class DummyOutcomeRefuter(CausalRefuter):
 
                     outcome_validation = self.process_data(X_train, outcome_train, X_validation, outcome_validation, transformation_list)
 
-            # Add h(t) to f(W) to get the dummy outcome
-            outcome_validation += self._true_causal_effect( validation_df[ self._target_estimand.treatment_name[0] ] )        
-            new_data = validation_df.assign(dummy_outcome=outcome_validation)
-            new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
-            new_effect = new_estimator.estimate_effect()
-            estimates.append(new_effect.value)
+                    # Check if the value of true effect has been already stored
+                    # This ensures that we calculate the causal effect only once.
+                    # We use key_train as we map data with respect to the base category of the data
+                    if key_train not in causal_effect_map:
+                        # As we currently support only one treatment
+                        causal_effect_map[key_train] = self._true_causal_effect( validation_df[ self._target_estimand.treatment_name[0] ] )
+                    
+                    # Add h(t) to f(W) to get the dummy outcome
+                    outcome_validation += causal_effect_map[key_train]        
+                    new_data = validation_df.assign(dummy_outcome=outcome_validation)
+                    new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
+                    new_effect = new_estimator.estimate_effect()
+                    estimates.append(new_effect.value)
 
-        simulation_results.append(estimates)
+            simulation_results.append(estimates)
 
         # We convert to ndarray for ease in indexing
         # The data is of the form
@@ -189,15 +216,19 @@ class DummyOutcomeRefuter(CausalRefuter):
         # sim2: cat1 cat2 ... catn
         simulation_results = np.array(simulation_results)
 
-        # Note: We hardcode the estimate value to ZERO as we want to check if it falls in the distribution of the refuter
+        # Note: We would hardcode the estimate value to ZERO as we want to check if it falls in the distribution of the refuter
         # Ideally we should expect that ZERO should fall in the distribution of the effect estimates as we have severed any causal 
         # relationship between the treatment and the outcome.
-        dummy_estimator = CausalEstimate(
-                estimate = 0,
-                target_estimand =self._estimate.target_estimand,
-                realized_estimand_expr=self._estimate.realized_estimand_expr)
+        # On the other hand, if we define a causal effect h(t) then we would like to do the same, that is, find if it falls in the 
+        # distribution of the refuter.
 
         if no_estimator:
+            
+            dummy_estimator = CausalEstimate(
+                    estimate = causal_effect_map[None],
+                    target_estimand =self._estimate.target_estimand,
+                    realized_estimand_expr=self._estimate.realized_estimand_expr)
+            
             refute = CausalRefutation(
                         self._estimate.value,
                         np.mean(simulation_results),
@@ -211,8 +242,15 @@ class DummyOutcomeRefuter(CausalRefuter):
             refute_list.append(refute)
 
         else:
+            # True Causal Effect list
+            causal_effect_list = list( causal_effect_map.values() )
             # Iterating through the refutation for each category
             for category in simulation_results.shape[1]:
+                dummy_estimator = CausalEstimate(
+                    estimate = causal_effect_list[category],
+                    target_estimand =self._estimate.target_estimand,
+                    realized_estimand_expr=self._estimate.realized_estimand_expr)
+                
                 refute = CausalRefutation(
                     self._estimate.value,
                     np.mean(simulation_results[:, category]),
