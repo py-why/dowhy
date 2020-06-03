@@ -107,7 +107,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         self._bucket_size_scale_factor = kwargs.pop("bucket_size_scale_factor", DummyOutcomeRefuter.DEFAULT_BUCKET_SCALE_FACTOR)
         self._min_data_point_threshold = kwargs.pop("min_data_point_threshold", DummyOutcomeRefuter.MIN_DATA_POINT_THRESHOLD)
         required_variables = kwargs.pop("required_variables", True)
-
+        
         if required_variables is False:
             raise ValueError("The value of required_variables cannot be False")
 
@@ -136,10 +136,10 @@ class DummyOutcomeRefuter(CausalRefuter):
         
         # We use collections.OrderedDict to maintain the order in which the data is stored
         causal_effect_map = OrderedDict()
-        
+
         # Check if we are using an estimators in the transformation list 
         no_estimator = self.check_for_estimator()
-
+        
         # The rationale behind ordering of the loops is the fact that we induce randomness everytime we create the 
         # Train and the Validation Datasets. Thus, we run the simulation loop followed by the training and the validation
         # loops. Thus, we can get different values everytime we get the estimator.
@@ -161,7 +161,7 @@ class DummyOutcomeRefuter(CausalRefuter):
                 # We use None as the key as we have no base category for this refutation
                 if None not in causal_effect_map:
                     # As we currently support only one treatment
-                    causal_effect_map[None] = self._true_causal_effect( validation_df[ self._target_estimand.treatment_name[0] ] )  
+                    causal_effect_map[None] = self._true_causal_effect( validation_df[ self._treatment_name[0] ] )  
                 
                 outcome_validation += causal_effect_map[None]     
                 new_data = validation_df.assign(dummy_outcome=outcome_validation)
@@ -176,9 +176,6 @@ class DummyOutcomeRefuter(CausalRefuter):
                     outcome_train = groups.get_group(key_train)['y'].values
                     validation_df = []
                     transformation_list = self._transformation_list
-
-                    if key_train not in causal_effect_map:
-                        causal_effect_map[key_train] = None
 
                     for key_validation, _ in groups:
                         if key_validation != key_train:
@@ -197,12 +194,13 @@ class DummyOutcomeRefuter(CausalRefuter):
                     # Check if the value of true effect has been already stored
                     # This ensures that we calculate the causal effect only once.
                     # We use key_train as we map data with respect to the base category of the data
+                    
                     if key_train not in causal_effect_map:
                         # As we currently support only one treatment
-                        causal_effect_map[key_train] = self._true_causal_effect( validation_df[ self._target_estimand.treatment_name[0] ] )
+                        causal_effect_map[key_train] = self._true_causal_effect( validation_df[ self._treatment_name[0] ] )
                     
                     # Add h(t) to f(W) to get the dummy outcome
-                    outcome_validation += causal_effect_map[key_train]        
+                    outcome_validation += causal_effect_map[key_train]      
                     new_data = validation_df.assign(dummy_outcome=outcome_validation)
                     new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
                     new_effect = new_estimator.estimate_effect()
@@ -245,7 +243,7 @@ class DummyOutcomeRefuter(CausalRefuter):
             # True Causal Effect list
             causal_effect_list = list( causal_effect_map.values() )
             # Iterating through the refutation for each category
-            for category in simulation_results.shape[1]:
+            for category in range(simulation_results.shape[1]):
                 dummy_estimator = CausalEstimate(
                     estimate = causal_effect_list[category],
                     target_estimand =self._estimate.target_estimand,
@@ -334,7 +332,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         """
         assert len(self._treatment_name) == 1, "At present, DoWhy supports a simgle treatment variable"
         
-        treatment_variable_name = self._target_estimand.treatment_name[0] # As we only have a single treatment
+        treatment_variable_name = self._treatment_name[0] # As we only have a single treatment
         variable_type = self._data[treatment_variable_name].dtypes
         
         if bool == variable_type:
@@ -349,7 +347,8 @@ class DummyOutcomeRefuter(CausalRefuter):
             num_bins = ( data.max() - data.min() )/ (self._bucket_size_scale_factor * std_dev)
             data['bins'] = pd.cut(data[treatment_variable_name], num_bins)
             groups = data.groupby('bins')
-            data.drop('bins')
+            # pdb.set_trace()
+            data.drop('bins', axis=1, inplace=True)
             return groups
 
         elif 'categorical' in variable_type.name:
