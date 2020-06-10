@@ -13,30 +13,36 @@ class BootstrapRefuter(CausalRefuter):
     
     It supports additional parameters that can be specified in the refute_estimate() method.
     
-    Parameters
-    -----------
-    -'num_simulations': int, CausalRefuter.DEFAULT_NUM_SIMULATIONS by default
-    The number of simulations to be run
-    - 'sample_size': int, Size of the original data by default
-    The size of each bootstrap sample
-    - 'required_variables': int, list, bool, True by default
-    A user can input either an integer value, list or bool.
-        1. An integer argument refers to how many variables will be modified
-        2. A list allows the user to explicitly refer to which variables should be selected to be made noisy
+    Attributes:
+        num_simulations (int): The number of simulations to be run, ``CausalRefuter.DEFAULT_NUM_SIMULATIONS`` by default
+
+        sample_size (int): The size of each bootstrap sample and is the size of the original data by default
+
+        required_variables (int, list, bool): A user can input either an integer value, list or bool.
+            The value is ``True`` by default. This means that we select all variables except the treatment and the outcome
+
+            1. An integer argument refers to how many variables will be modified
+
+            2. A list allows the user to explicitly refer to which variables should be selected to be made noisy
             Furthermore, a user can either choose to select the variables desired. Or they can deselect the variables,
-            that they do not want in their analysis. 
+            that they do not want in their analysis.
+            
             For example:
-            We need to pass required_variables = [W0,W1] is we want W0 and W1.
-            We need to pass required_variables = [-W0,-W1] if we want all variables excluding W0 and W1.
-        3. If the user passes True, noise is added to  confounders, instrumental variables and effect modifiers
-           If the value is False, we just Bootstrap the existing dataset  
-    - 'noise': float, BootstrapRefuter.DEFAULT_STD_DEV by default
-    The standard deviation of the noise to be added to the data
-    - 'probability_of_change': float, 'noise' by default if the value is less than 1
-    It specifies the probability with which we change the data for a boolean or categorical variable
-    - 'random_state': int, RandomState, None by default
-    The seed value to be added if we wish to repeat the same random behavior. For this purpose, 
-    we repeat the same seed in the psuedo-random generator.
+                
+            We need to pass required_variables = ``[W0,W1]`` is we want ``W0`` and ``W1``.
+                
+            We need to pass required_variables = ``[-W0,-W1]`` if we want all variables excluding ``W0`` and ``W1``.
+            
+            3. If the user passes True, noise is added to  confounders, instrumental variables and effect modifiers
+            If the value is False, we just Bootstrap the existing dataset  
+        
+        noise (float): The standard deviation of the noise to be added to the data and is ``BootstrapRefuter.DEFAULT_STD_DEV`` by default
+
+        probability_of_change (float): It specifies the probability with which we change the data for a boolean or categorical variable
+            It is ``noise`` by default, only if the value of ``noise`` is less than 1.
+            
+        random_state (int, RandomState): The seed value to be added if we wish to repeat the same random behavior. For this purpose, we repeat the same seed in the psuedo-random generator.
+
     """
 
     DEFAULT_STD_DEV = 0.1
