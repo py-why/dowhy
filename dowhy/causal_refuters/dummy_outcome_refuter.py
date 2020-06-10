@@ -272,11 +272,9 @@ class DummyOutcomeRefuter(CausalRefuter):
         # sim2: cat1 cat2 ... catn
         simulation_results = np.array(simulation_results)
 
-        # Note: We would hardcode the estimate value to ZERO as we want to check if it falls in the distribution of the refuter
-        # Ideally we should expect that ZERO should fall in the distribution of the effect estimates as we have severed any causal 
-        # relationship between the treatment and the outcome.
-        # On the other hand, if we define a causal effect h(t) then we would like to do the same, that is, find if it falls in the 
-        # distribution of the refuter.
+        # Note: We would like the causal_estimator to find the true causal estimate that we have specified through this 
+        # refuter. Let the value of the true causal effect be h(t). In the following section of code, we wish to find out if h(t) falls in the 
+        # distribution of the refuter. 
 
         if no_estimator:
             
