@@ -280,19 +280,19 @@ class DummyOutcomeRefuter(CausalRefuter):
 
         if no_estimator:
             
-            dummy_estimator = CausalEstimate(
+            dummy_estimate = CausalEstimate(
                     estimate = causal_effect_map[None],
                     target_estimand =self._estimate.target_estimand,
                     realized_estimand_expr=self._estimate.realized_estimand_expr)
             
             refute = CausalRefutation(
-                        self._estimate.value,
+                        dummy_estimate.value,
                         np.mean(simulation_results),
                         refutation_type="Refute: Use a Dummy Outcome"
                     )
 
             refute.add_significance_test_results(
-                self.test_significance(dummy_estimator, simulation_results)
+                self.test_significance(dummy_estimate, simulation_results)
             )
 
             refute_list.append(refute)
@@ -302,19 +302,19 @@ class DummyOutcomeRefuter(CausalRefuter):
             causal_effect_list = list( causal_effect_map.values() )
             # Iterating through the refutation for each category
             for category in range(simulation_results.shape[1]):
-                dummy_estimator = CausalEstimate(
+                dummy_estimate = CausalEstimate(
                     estimate = causal_effect_list[category],
                     target_estimand =self._estimate.target_estimand,
                     realized_estimand_expr=self._estimate.realized_estimand_expr)
                 
                 refute = CausalRefutation(
-                    self._estimate.value,
+                    dummy_estimate.value,
                     np.mean(simulation_results[:, category]),
                     refutation_type="Refute: Use a Dummy Outcome"
                 )
 
                 refute.add_significance_test_results(
-                    self.test_significance(dummy_estimator, simulation_results[:, category])
+                    self.test_significance(dummy_estimate, simulation_results[:, category])
                 )
 
                 refute_list.append(refute)
