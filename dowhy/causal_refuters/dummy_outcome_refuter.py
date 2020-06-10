@@ -246,6 +246,8 @@ class DummyOutcomeRefuter(CausalRefuter):
                     # If the number of data points is too few, run the default transformation: [("zero",""),("noise", {'std_dev':1} )]
                     if X_train.shape[0] <= self._min_data_point_threshold:
                         transformation_list = DummyOutcomeRefuter.DEFAULT_TRANSFORMATION
+                        self.logger.warning("Using Default as the number of data points in X_train:{} is less than threshold:{}".format(X_train.shape[0], self._min_data_point_threshold))
+                        self.logger.warning("Usering the transformation list:{}".format(transformation_list))
 
                     outcome_validation = self.process_data(X_train, outcome_train, X_validation, outcome_validation, transformation_list)
 
