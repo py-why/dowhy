@@ -93,7 +93,7 @@ class DummyOutcomeRefuter(CausalRefuter):
             * If a function from the above list is used
               ``[('knn',{'n_neighbors':5}), ('permute', {'permute_fraction': val} ), ('noise', {'std_dev': val} )]``
 
-        true_causal_effect (tuple, list, function): A function that is used used to get the True Causal Effect for the modelled dummy outcome. 
+        true_causal_effect (function): A function that is used used to get the True Causal Effect for the modelled dummy outcome. 
             It defaults to ``DummyOutcomeRefuter.DEFAULT_TRUE_CAUSAL_EFFECT``, which means that there is no relationship between the treatment and outcome in the
             dummy data.
 
@@ -104,7 +104,9 @@ class DummyOutcomeRefuter(CausalRefuter):
 
             * ``y_hat`` is the dummy outcome 
             * ``h(t)`` is the function that gives the true causal effect 
-            * ``f(W)`` is the best estimate of ``y`` obtained keeping ``t`` constant.
+            * ``f(W)`` is the best estimate of ``y`` obtained keeping ``t`` constant. This ensures that the variation in output of function ``f(w)`` is not caused by `t`.
+
+            .. note:: The true causal effect should take an input of the same shape as the treatment and the output should match the shape of the outcome
 
         required_variables (int, list, bool) : The list of variables to be used as the input for ``y~f(W)``
             This is ``True`` by default, which in turn selects all variables leaving the treatment and the outcome
@@ -193,7 +195,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         # We use collections.OrderedDict to maintain the order in which the data is stored
         causal_effect_map = OrderedDict()
 
-        # Check if we are using an estimators in the transformation list 
+        # Check if we are using an estimator in the transformation list 
         no_estimator = self.check_for_estimator()
         
         # The rationale behind ordering of the loops is the fact that we induce randomness everytime we create the 

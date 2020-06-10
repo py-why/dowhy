@@ -10,7 +10,7 @@ def simple_linear_outcome_model(X_train, output_train):
     
 
 @pytest.mark.usefixtures("fixed_seed")
-class TestDummyOtcomeRefuter(object):
+class TestDummyOutcomeRefuter(object):
     @pytest.mark.parametrize(["error_tolerence","estimator_method"],
                              [(0.03, "iv.instrumental_variable")])
     def test_refutation_dummy_outcome_refuter_default_continuous_treatment(self, error_tolerence, estimator_method):
