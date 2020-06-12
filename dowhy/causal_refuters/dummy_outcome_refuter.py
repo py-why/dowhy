@@ -196,7 +196,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         causal_effect_map = OrderedDict()
 
         # Check if we are using an estimator in the transformation list 
-        no_estimator = self.check_for_estimator()
+        estimator_present = self.has_estimator()
         
         # The rationale behind ordering of the loops is the fact that we induce randomness everytime we create the 
         # Train and the Validation Datasets. Thus, we run the simulation loop followed by the training and the validation
@@ -204,7 +204,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         for _ in range( self._num_simulations ):
             estimates = []
             
-            if no_estimator:
+            if estimator_present == False:
                 # We set X_train = 0 and outcome_train to be 0
                 validation_df = self._data
                 X_train = None
@@ -367,7 +367,7 @@ class DummyOutcomeRefuter(CausalRefuter):
 
         return outcome_validation
             
-    def check_for_estimator(self):
+    def has_estimator(self):
         """
         This function checks if there is an estimator in the transformation list.
         If there are no estimators, it allows us to optimize processing by skipping the 
@@ -375,9 +375,9 @@ class DummyOutcomeRefuter(CausalRefuter):
         """
         for action,_ in self._transformation_list:
             if callable(action) or action in DummyOutcomeRefuter.SUPPORTED_ESTIMATORS:
-                return False
+                return True
             
-        return True
+        return False
 
     def preprocess_data_by_treatment(self):
         """
