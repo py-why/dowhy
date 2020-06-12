@@ -97,7 +97,7 @@ class DummyOutcomeRefuter(CausalRefuter):
             * If a function from the above list is used
               ``[('knn',{'n_neighbors':5}), ('permute', {'permute_fraction': val} ), ('noise', {'std_dev': val} )]``
 
-        true_causal_effect (function): A function that is used used to get the True Causal Effect for the modelled dummy outcome. 
+        true_causal_effect (function): A function that is used to get the True Causal Effect for the modelled dummy outcome. 
             It defaults to ``DummyOutcomeRefuter.DEFAULT_TRUE_CAUSAL_EFFECT``, which means that there is no relationship between the treatment and outcome in the
             dummy data.
 
@@ -250,8 +250,8 @@ class DummyOutcomeRefuter(CausalRefuter):
                     # If the number of data points is too few, run the default transformation: [("zero",""),("noise", {'std_dev':1} )]
                     if X_train.shape[0] <= self._min_data_point_threshold:
                         transformation_list = DummyOutcomeRefuter.DEFAULT_TRANSFORMATION
-                        self.logger.warning("Using Default as the number of data points in X_train:{} is less than threshold:{}".format(X_train.shape[0], self._min_data_point_threshold))
-                        self.logger.warning("Usering the transformation list:{}".format(transformation_list))
+                        self.logger.warning("The number of data points in X_train:{} for category:{} is less than threshold:{}".format(X_train.shape[0], key_train, self._min_data_point_threshold))
+                        self.logger.warning("Therefore, defaulting to the minimal set of transformations:{}".format(transformation_list))
 
                     outcome_validation = self.process_data(X_train, outcome_train, X_validation, outcome_validation, transformation_list)
 
