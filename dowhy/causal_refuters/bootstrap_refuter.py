@@ -13,36 +13,38 @@ class BootstrapRefuter(CausalRefuter):
     
     It supports additional parameters that can be specified in the refute_estimate() method.
     
-    Attributes:
-        num_simulations (int): The number of simulations to be run, ``CausalRefuter.DEFAULT_NUM_SIMULATIONS`` by default
+    :param num_simulations: The number of simulations to be run, ``CausalRefuter.DEFAULT_NUM_SIMULATIONS`` by default
+    :type num_simulations: int, optional
+    
+    :param sample_size: The size of each bootstrap sample and is the size of the original data by default
+    :type sample_size: int, optional
 
-        sample_size (int): The size of each bootstrap sample and is the size of the original data by default
+    :param required_variables: The list of variables to be used as the input for ``y~f(W)``
+      This is ``True`` by default, which in turn selects all variables leaving the treatment and the outcome
+    :type required_variables: int, list, bool, optional
 
-        required_variables (int, list, bool): A user can input either an integer value, list or bool.
-            The value is ``True`` by default. This means that we select all variables except the treatment and the outcome
+    1. An integer argument refers to how many variables will be used for estimating the value of the outcome
+    2. A list explicitly refers to which variables will be used to estimate the outcome
+       Furthermore, it gives the ability to explictly select or deselect the covariates present in the estimation of the 
+       outcome. This is done by either adding or explicitly removing variables from the list as shown below: 
+    
+    .. note:: 
+            * We need to pass required_variables = ``[W0,W1]`` if we want ``W0`` and ``W1``.
+            * We need to pass required_variables = ``[-W0,-W1]`` if we want all variables excluding ``W0`` and ``W1``.
+    
+    3. If the value is True, we wish to include all variables to estimate the value of the outcome.
 
-            1. An integer argument refers to how many variables will be modified
+    .. warning:: A ``False`` value is ``INVALID`` and will result in an ``error``.  
 
-            2. A list allows the user to explicitly refer to which variables should be selected to be made noisy
-            Furthermore, a user can either choose to select the variables desired. Or they can deselect the variables,
-            that they do not want in their analysis.
-            
-            For example:
-                
-            We need to pass required_variables = ``[W0,W1]`` is we want ``W0`` and ``W1``.
-                
-            We need to pass required_variables = ``[-W0,-W1]`` if we want all variables excluding ``W0`` and ``W1``.
-            
-            3. If the user passes True, noise is added to  confounders, instrumental variables and effect modifiers
-            If the value is False, we just Bootstrap the existing dataset  
-        
-        noise (float): The standard deviation of the noise to be added to the data and is ``BootstrapRefuter.DEFAULT_STD_DEV`` by default
+    :param noise: The standard deviation of the noise to be added to the data and is ``BootstrapRefuter.DEFAULT_STD_DEV`` by default
+    :type noise: float, optional
+    
+    :param probability_of_change: It specifies the probability with which we change the data for a boolean or categorical variable
+      It is ``noise`` by default, only if the value of ``noise`` is less than 1.
+    :type probability_of_change: float, optional
 
-        probability_of_change (float): It specifies the probability with which we change the data for a boolean or categorical variable
-            It is ``noise`` by default, only if the value of ``noise`` is less than 1.
-            
-        random_state (int, RandomState): The seed value to be added if we wish to repeat the same random behavior. For this purpose, we repeat the same seed in the psuedo-random generator.
-
+    :param random_state: The seed value to be added if we wish to repeat the same random behavior. For this purpose, we repeat the same seed in the psuedo-random generator.
+    :type random_state: int, RandomState, optional
     """
 
     DEFAULT_STD_DEV = 0.1
