@@ -50,101 +50,106 @@ class DummyOutcomeRefuter(CausalRefuter):
     
     Supports additional parameters that can be specified in the refute_estimate() method.
 
-    Attributes:
-        num_simulations (int, optional): The number of simulations to be run. 
-            This defaults to ``CausalRefuter.DEFAULT_NUM_SIMULATIONS``
+    :param num_simulations: The number of simulations to be run, which defaults to ``CausalRefuter.DEFAULT_NUM_SIMULATIONS`` 
+    :type num_simulations: int, optional
 
-        transformation_list (list, optional): The transformation_list is a list of actions to be performed to obtain the outcome.
-            ``DummyOutcomeRefuter.DEFAULT_TRANSFORMATION`` is the default transformation, in which the dummy outcome is white noise.
-            
-            Each of the actions within a transformation is one of the following types:
+    :param transformation_list: It is a list of actions to be performed to obtain the outcome, which defaults to ``DummyOutcomeRefuter.DEFAULT_TRANSFORMATION``.
+      The default transformation is as follows: ``[("zero",""),("noise", {'std_dev':1} )]``
+    :type transformation_list: list, optional
+        
+    Each of the actions within a transformation is one of the following types:
 
-            * function argument: function ``pd.Dataframe -> np.ndarray``
-              
-              It takes in a function that takes the input data frame as the input and outputs the outcome
-              variable. This allows us to create an output varable that only depends on the covariates and does not depend 
-              on the treatment variable.
+    * function argument: function ``pd.Dataframe -> np.ndarray``
+        
+        It takes in a function that takes the input data frame as the input and outputs the outcome
+        variable. This allows us to create an output varable that only depends on the covariates and does not depend 
+        on the treatment variable.
 
-            * string argument
+    * string argument
 
-                * Currently it supports some common estimators like
+        * Currently it supports some common estimators like
 
-                    1. Linear Regression
-                    2. K Nearest Neighbours
-                    3. Support Vector Machine
-                    4. Neural Network
-                    5. Random Forest
-                
-                * Or functions such as:
+            1. Linear Regression
+            2. K Nearest Neighbours
+            3. Support Vector Machine
+            4. Neural Network
+            5. Random Forest
+        
+        * Or functions such as:
 
-                    1. Permute
-                      This permutes the rows of the outcome, disassociating any effect of the treatment on the outcome.
-                    2. Noise
-                      This adds white noise to the outcome with white noise, reducing any causal relationship with the treatment.
-                    3. Zero
-                      It replaces all the values in the outcome by zero
-            
-            Examples:
+            1. Permute
+               This permutes the rows of the outcome, disassociating any effect of the treatment on the outcome.
+            2. Noise
+               This adds white noise to the outcome with white noise, reducing any causal relationship with the treatment.
+            3. Zero
+               It replaces all the values in the outcome by zero
+        
+        Examples:
+            The ``transformation_list`` is of the following form:
 
-            The transformation_list is of the following form:
+        * If the function ``pd.Dataframe -> np.ndarray`` is already defined.
+          ``[(func,func_params),('permute',{'permute_fraction':val}),('noise',{'std_dev':val})]``
+          
+          Every function should be able to support a minimum of two arguments ``X_train`` and  ``outcome_train`` which correspond to the training data and the outcome that
+          we want  to predict, along with additional parameters such as the learning rate or the momentum constant can be set with the help of ``func_args``.
+          
+          ``[(neural_network,{'alpha': 0.0001, 'beta': 0.9}),('permute',{'permute_fraction': 0.2}),('noise',{'std_dev': 0.1})]``
+          
+          The neural network is invoked as ``neural_network(X_train, outcome_train, **args)``. 
+        
+        * If a function from the above list is used
+          ``[('knn',{'n_neighbors':5}), ('permute', {'permute_fraction': val} ), ('noise', {'std_dev': val} )]``
 
-            * If the function ``pd.Dataframe -> np.ndarray`` is already defined.
-              ``[(func,func_params),('permute', {'permute_fraction': val} ), ('noise', {'std_dev': val} )]``
-              Every function should be able to support a minimum of two arguments ``X_train`` and  ``outcome_train`` which correspond to the training data and the outcome that
-              we want  to predict, along with additional parameters such as the learning rate or the momentum constant can be set with the help of ``func_args``
-              ``[(neural_network, {'alpha': 0.0001, 'beta': 0.9} ), ('permute', {'permute_fraction': 0.2} ), ('noise', {'std_dev': 0.1} )]``
-              The neural network is invoked as ``neural_network(X_train, outcome_train, **args)``. 
-            * If a function from the above list is used
-              ``[('knn',{'n_neighbors':5}), ('permute', {'permute_fraction': val} ), ('noise', {'std_dev': val} )]``
+    :param true_causal_effect: A function that is used to get the True Causal Effect for the modelled dummy outcome. 
+      It defaults to ``DummyOutcomeRefuter.DEFAULT_TRUE_CAUSAL_EFFECT``, which means that there is no relationship between the treatment and outcome in the
+      dummy data.
+    :type true_causal_effect: function
 
-        true_causal_effect (function): A function that is used to get the True Causal Effect for the modelled dummy outcome. 
-            It defaults to ``DummyOutcomeRefuter.DEFAULT_TRUE_CAUSAL_EFFECT``, which means that there is no relationship between the treatment and outcome in the
-            dummy data.
-
-            The equation for the dummy outcome is given by
-            ``y_hat = h(t) + f(W)``
-            
-            where
-
-            * ``y_hat`` is the dummy outcome 
-            * ``h(t)`` is the function that gives the true causal effect 
-            * ``f(W)`` is the best estimate of ``y`` obtained keeping ``t`` constant. This ensures that the variation in output of function ``f(w)`` is not caused by `t`.
-
-            .. note:: The true causal effect should take an input of the same shape as the treatment and the output should match the shape of the outcome
-
-        required_variables (int, list, bool) : The list of variables to be used as the input for ``y~f(W)``
-            This is ``True`` by default, which in turn selects all variables leaving the treatment and the outcome
-
-            1. An integer argument refers to how many variables will be used for estimating the value of the outcome
-            2. A list explicitly refers to which variables will be used to estimate the outcome
-               Furthermore, it gives the ability to explictly select or deselect the covariates present in the estimation of the 
-               outcome. This is done by either adding or explicitly removing variables from the list as shown below: 
-            
-                For example:
-
-                We need to pass required_variables = ``[W0,W1]`` if we want ``W0`` and ``W1``.
-                
-                We need to pass required_variables = ``[-W0,-W1]`` if we want all variables excluding ``W0`` and ``W1``.
-            
-            3. If the value is True, we wish to include all variables to estimate the value of the outcome.
-               A False value is INVALID and will result in an error. 
-            
-            .. note:: These inputs are fed to the function for estimating the outcome variable. The same set of required_variables is used for each
-                instance of an internal estimation function.
-
-        bucket_size_scale_factor (float): For continuous data, the scale factor helps us scale the size of the bucket used on the data.
-            The default scale factor is ``DummyOutcomeRefuter.DEFAULT_BUCKET_SCALE_FACTOR``
-            ::
-
-                The number of buckets is given by: 
-                    (max value - min value)
-                    ------------------------
-                    (scale_factor * std_dev)
-
-        min_data_point_threshold (int): The minimum number of data points for an estimator to run.
-            This defaults to ``DummyOutcomeRefuter.MIN_DATA_POINT_THRESHOLD``. If the number of data points is too few
-            for a certain category, we make use of the ``DummyOutcomeRefuter.DEFAULT_TRANSFORMATION`` for generaring the dummy outcome            
+    The equation for the dummy outcome is given by
+    ``y_hat = h(t) + f(W)``
     
+    where
+
+    * ``y_hat`` is the dummy outcome 
+    * ``h(t)`` is the function that gives the true causal effect 
+    * ``f(W)`` is the best estimate of ``y`` obtained keeping ``t`` constant. This ensures that the variation in output of function ``f(w)`` is not caused by ``t``.
+
+    .. note:: The true causal effect should take an input of the same shape as the treatment and the output should match the shape of the outcome
+
+    :param required_variables: The list of variables to be used as the input for ``y~f(W)``
+      This is ``True`` by default, which in turn selects all variables leaving the treatment and the outcome
+    :type required_variables: int, list, bool, optional
+
+    1. An integer argument refers to how many variables will be used for estimating the value of the outcome
+    2. A list explicitly refers to which variables will be used to estimate the outcome
+       Furthermore, it gives the ability to explictly select or deselect the covariates present in the estimation of the 
+       outcome. This is done by either adding or explicitly removing variables from the list as shown below: 
+    
+    .. note:: 
+            * We need to pass required_variables = ``[W0,W1]`` if we want ``W0`` and ``W1``.
+            * We need to pass required_variables = ``[-W0,-W1]`` if we want all variables excluding ``W0`` and ``W1``.
+    
+    3. If the value is True, we wish to include all variables to estimate the value of the outcome.
+
+    .. warning:: A ``False`` value is ``INVALID`` and will result in an ``error``. 
+    
+    .. note:: These inputs are fed to the function for estimating the outcome variable. The same set of required_variables is used for each
+        instance of an internal estimation function.
+
+    :param bucket_size_scale_factor: For continuous data, the scale factor helps us scale the size of the bucket used on the data.
+      The default scale factor is ``DummyOutcomeRefuter.DEFAULT_BUCKET_SCALE_FACTOR``.
+    :type bucket_size_scale_factor: float, optional
+        ::
+
+            The number of buckets is given by: 
+                (max value - min value)
+                ------------------------
+                (scale_factor * std_dev)
+
+    :param min_data_point_threshold: The minimum number of data points for an estimator to run.
+      This defaults to ``DummyOutcomeRefuter.MIN_DATA_POINT_THRESHOLD``. If the number of data points is too few
+      for a certain category, we make use of the ``DummyOutcomeRefuter.DEFAULT_TRANSFORMATION`` for generaring the dummy outcome            
+    :type min_data_point_threshold: int, optional
     """
     
     # The currently supported estimators
@@ -327,25 +332,26 @@ class DummyOutcomeRefuter(CausalRefuter):
 
     def process_data(self, X_train, outcome_train, X_validation, outcome_validation, transformation_list):
         """
-        We process the data by first training the estimators in the transformation_list on X_train and outcome_train.
-        We then apply the estimators on X_validation to get the value of the dummy outcome, which we store in outcome_validation.
+        We process the data by first training the estimators in the transformation_list on ``X_train`` and ``outcome_train``.
+        We then apply the estimators on ``X_validation`` to get the value of the dummy outcome, which we store in ``outcome_validation``.
 
-        Args:
-            X_train (np.ndarray): The data of the covariates which is used to train an estimator. It corresponds to the data of a single category of the treatment
-            
-            outcome_train (np.ndarray): This is used to hold the intermediate values of the outcome variable in the transformation list
-            
-            For Example:
+        :param X_train: The data of the covariates which is used to train an estimator. It corresponds to the data of a single category of the treatment
+        :type X_train: np.ndarray
+        :param outcome_train: This is used to hold the intermediate values of the outcome variable in the transformation list
+        :type outcome_train: np.ndarray
 
-            ``[ ('permute', {'permute_fraction': val} ), (func,func_params)]``
-            
-            The value obtained from permutation is used as an input for the custom estimator.
-            
-            X_validation (np.ndarray): The data of the covariates that is fed to a trained estimator to generate a dummy outcome
-            
-            outcome_validation (np.ndarray): This variable stores the dummy_outcome generated by the transformations
-            
-            transformation_list (np.ndarray): The list of transformations on the outcome data required to produce a dummy outcome 
+        For Example:
+
+        ``[ ('permute', {'permute_fraction': val} ), (func,func_params)]``
+        
+        The value obtained from permutation is used as an input for the custom estimator.
+        
+        :param X_validation: The data of the covariates that is fed to a trained estimator to generate a dummy outcome
+        :type X_validation: np.ndarray
+        :param outcome_validation: This variable stores the dummy_outcome generated by the transformations
+        :type outcome_validation: np.ndarray
+        :param transformation_list: The list of transformations on the outcome data required to produce a dummy outcome 
+        :type transformation_list: np.ndarray
         """
         for action, func_args in transformation_list:
             if callable(action):
@@ -374,7 +380,8 @@ class DummyOutcomeRefuter(CausalRefuter):
     def has_estimator(self):
         """
         This function checks if there is an estimator in the transformation list.
-        If there are no estimators, it allows us to optimize processing by skipping the 
+
+        If there are no estimators, we can optimize processing by skipping the 
         data preprocessing and running the transformations on the whole dataset.
         """
         for action,_ in self._transformation_list:
