@@ -13,12 +13,14 @@ class PlaceboTreatmentRefuter(CausalRefuter):
 
     Supports additional parameters that can be specified in the refute_estimate() method.
 
-    Attributes:
-        placebo_type  (str, optional): Default is to generate random values for the treatment. If placebo_type is "permute", then the original treatment values are permuted by row.
-        
-        num_simulations (int): The number of simulations to be run, which is ``CausalRefuter.DEFAULT_NUM_SIMULATIONS`` by default
-        
-        random_state (int, RandomState, optional): The seed value to be added if we wish to repeat the same random behavior. If we want to repeat the same behavior we push the same seed in the psuedo-random generator.
+    :param placebo_type: Default is to generate random values for the treatment. If placebo_type is "permute", then the original treatment values are permuted by row.
+    :type placebo_type: str, optional
+
+    :param num_simulations: The number of simulations to be run, which is ``CausalRefuter.DEFAULT_NUM_SIMULATIONS`` by default
+    :type num_simulations: int, optional
+
+    :param random_state: The seed value to be added if we wish to repeat the same random behavior. If we want to repeat the same behavior we push the same seed in the psuedo-random generator.
+    :type random_state: int, RandomState, optional
     """
 
     # Default value of the p value taken for the distribution

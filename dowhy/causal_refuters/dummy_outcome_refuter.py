@@ -36,7 +36,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         y_dummy = f(W)
 
                W
-            /    \\
+            /     \\
             t --|->y
         
         This ensures that we try to capture as much of W--->Y as possible
@@ -54,7 +54,9 @@ class DummyOutcomeRefuter(CausalRefuter):
     :type num_simulations: int, optional
 
     :param transformation_list: It is a list of actions to be performed to obtain the outcome, which defaults to ``DummyOutcomeRefuter.DEFAULT_TRANSFORMATION``.
-      The default transformation is as follows: ``[("zero",""),("noise", {'std_dev':1} )]``
+      The default transformation is as follows: 
+      
+      ``[("zero",""),("noise", {'std_dev':1} )]``
     :type transformation_list: list, optional
         
     Each of the actions within a transformation is one of the following types:
