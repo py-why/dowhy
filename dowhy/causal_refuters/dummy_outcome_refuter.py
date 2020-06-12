@@ -90,7 +90,10 @@ class DummyOutcomeRefuter(CausalRefuter):
 
             * If the function ``pd.Dataframe -> np.ndarray`` is already defined.
               ``[(func,func_params),('permute', {'permute_fraction': val} ), ('noise', {'std_dev': val} )]``
-              
+              Every function should be able to support a minimum of two arguments ``X_train`` and  ``outcome_train`` which correspond to the training data and the outcome that
+              we want  to predict, along with additional parameters such as the learning rate or the momentum constant can be set with the help of ``func_args``
+              ``[(neural_network, {'alpha': 0.0001, 'beta': 0.9} ), ('permute', {'permute_fraction': 0.2} ), ('noise', {'std_dev': 0.1} )]``
+              The neural network is invoked as ``neural_network(X_train, outcome_train, **args)``. 
             * If a function from the above list is used
               ``[('knn',{'n_neighbors':5}), ('permute', {'permute_fraction': val} ), ('noise', {'std_dev': val} )]``
 
