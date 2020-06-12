@@ -301,20 +301,20 @@ class DummyOutcomeRefuter(CausalRefuter):
             # True Causal Effect list
             causal_effect_list = list( causal_effect_map.values() )
             # Iterating through the refutation for each category
-            for base_category in range(simulation_results.shape[1]):
+            for validation_set_category in range(simulation_results.shape[1]):
                 dummy_estimate = CausalEstimate(
-                    estimate = causal_effect_list[base_category],
+                    estimate = causal_effect_list[validation_set_category],
                     target_estimand =self._estimate.target_estimand,
                     realized_estimand_expr=self._estimate.realized_estimand_expr)
                 
                 refute = CausalRefutation(
                     dummy_estimate.value,
-                    np.mean(simulation_results[:, base_category]),
+                    np.mean(simulation_results[:, validation_set_category]),
                     refutation_type="Refute: Use a Dummy Outcome"
                 )
 
                 refute.add_significance_test_results(
-                    self.test_significance(dummy_estimate, simulation_results[:, base_category])
+                    self.test_significance(dummy_estimate, simulation_results[:, validation_set_category])
                 )
 
                 refute_list.append(refute)
