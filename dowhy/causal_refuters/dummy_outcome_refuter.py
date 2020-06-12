@@ -90,6 +90,7 @@ class DummyOutcomeRefuter(CausalRefuter):
 
             * If the function ``pd.Dataframe -> np.ndarray`` is already defined.
               ``[(func,func_params),('permute', {'permute_fraction': val} ), ('noise', {'std_dev': val} )]``
+              
             * If a function from the above list is used
               ``[('knn',{'n_neighbors':5}), ('permute', {'permute_fraction': val} ), ('noise', {'std_dev': val} )]``
 
@@ -278,7 +279,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         # refuter. Let the value of the true causal effect be h(t). In the following section of code, we wish to find out if h(t) falls in the 
         # distribution of the refuter. 
 
-        if no_estimator:
+        if estimator_present == False:
             
             dummy_estimate = CausalEstimate(
                     estimate = causal_effect_map[None],
