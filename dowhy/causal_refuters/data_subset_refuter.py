@@ -8,15 +8,18 @@ class DataSubsetRefuter(CausalRefuter):
 
     Supports additional parameters that can be specified in the refute_estimate() method.
 
-    - 'subset_fraction': float, 0.8 by default
-    Fraction of the data to be used for re-estimation.
-    - 'num_simulations': int, CausalRefuter.DEFAULT_NUM_SIMULATIONS by default
-    The number of simulations to be run
-    - random_state': int, RandomState, None by default
-    The seed value to be added if we wish to repeat the same random behavior. If we with to repeat the
-    same behavior we push the same seed in the psuedo-random generator
+    :param subset_fraction: Fraction of the data to be used for re-estimation, which is ``DataSubsetRefuter.DEFAULT_SUBSET_FRACTION`` by default. 
+    :type  subset_fraction: float, optional 
+    
+    :param num_simulations: The number of simulations to be run, which is ``CausalRefuter.DEFAULT_NUM_SIMULATIONS`` by default
+    :type num_simulations: int, optional    
+    
+    :param random_state: The seed value to be added if we wish to repeat the same random behavior. If we with to repeat the same behavior we push the same seed in the psuedo-random generator
+    :type random_state: int, RandomState, optional    
     """
-
+    # The default subset of the data to be used
+    DEFAULT_SUBSET_FRACTION = 0.8
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._subset_fraction = kwargs.pop("subset_fraction", 0.8)

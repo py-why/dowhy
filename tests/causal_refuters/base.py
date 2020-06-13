@@ -167,7 +167,7 @@ class TestRefuter(object):
                 ref_list = model.refute_estimate(target_estimand,
                                             ate_estimate,
                                             method_name=self.refuter_method,
-                                            transformations = self.transformations,
+                                            transformation_list = self.transformations,
                                             params = self.params,
                                             num_simulations = 2
                                             )
