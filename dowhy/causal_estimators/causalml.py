@@ -85,11 +85,20 @@ class Causalml(CausalEstimator):
         matched_args = {
             arg: func_args[arg] for arg in func_args.keys() if arg in arg_names 
         }
+        print(matched_args)
         value_tuple = self.estimator.estimate_ate(**matched_args) 
+
+        # For CATEs
+        arg_names = inspect.getfullargspec(self.estimator.fit_predict)[0]
+        matched_args = {
+            arg: func_args[arg] for arg in func_args.keys() if arg in arg_names 
+        }
+        cate_estimates = self.estimator.fit_predict(**matched_args) 
 
         estimate = CausalEstimate(estimate=value_tuple[0],
                                   target_estimand=self._target_estimand,
                                   realized_estimand_expr=self.symbolic_estimator,
+                                  cate_estimates = cate_estimates,
                                   effect_intervals=(value_tuple[1],value_tuple[2]),
                                   _estimator_object=self.estimator)
 
