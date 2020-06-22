@@ -306,6 +306,7 @@ class DummyOutcomeRefuter(CausalRefuter):
                 self.test_significance(dummy_estimate, simulation_results)
             )
 
+            refute.add_refuter(self)
             refute_list.append(refute)
 
         else:
@@ -328,6 +329,7 @@ class DummyOutcomeRefuter(CausalRefuter):
                     self.test_significance(dummy_estimate, simulation_results[:, train_category])
                 )
 
+                refute.add_refuter(self)
                 refute_list.append(refute)
 
         return refute_list

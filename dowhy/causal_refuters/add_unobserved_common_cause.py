@@ -65,7 +65,7 @@ class AddUnobservedCommonCause(CausalRefuter):
                                     refutation_type="Refute: Add an Unobserved Common Cause")
             
             refute.new_effect = np.array(new_effect.value)
-            
+            refute.add_refuter(self)
             return refute
 
         else: # Deal with multiple value inputs
@@ -102,6 +102,7 @@ class AddUnobservedCommonCause(CausalRefuter):
 
                 refute.new_effect = results_matrix
                 # Store the values into the refute object
+                refute.add_refuter(self)
                 return refute
 
             elif isinstance(self.kappa_t, np.ndarray):
@@ -127,7 +128,8 @@ class AddUnobservedCommonCause(CausalRefuter):
                 ax.set_ylabel('New Effect')
                 plt.show() 
 
-                refute.new_effect = outcomes   
+                refute.new_effect = outcomes
+                refute.add_refuter(self)
                 return refute
 
             elif isinstance(self.kappa_y, np.ndarray):
@@ -154,6 +156,7 @@ class AddUnobservedCommonCause(CausalRefuter):
                 plt.show() 
 
                 refute.new_effect = outcomes
+                refute.add_refuter(self)
                 return refute
 
     def include_confounders_effect(self, new_data, kappa_t, kappa_y):
