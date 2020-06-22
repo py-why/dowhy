@@ -26,4 +26,5 @@ class RandomCommonCause(CausalRefuter):
         new_effect = new_estimator.estimate_effect()
         refute = CausalRefutation(self._estimate.value, new_effect.value,
                                   refutation_type="Refute: Add a Random Common Cause")
+        refute.add_refuter(self)
         return refute

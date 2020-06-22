@@ -132,6 +132,6 @@ class PlaceboTreatmentRefuter(CausalRefuter):
 
         refute.add_significance_test_results(
             self.test_significance(dummy_estimator, sample_estimates)
-        )        
-        
+        )
+        refute.add_refuter(self)
         return refute

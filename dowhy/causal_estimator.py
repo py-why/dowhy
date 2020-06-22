@@ -6,6 +6,7 @@ import sympy as sp
 from collections import namedtuple
 from sklearn.utils import resample
 
+import dowhy.interpreters as interpreters
 from dowhy.utils.api import parse_state
 
 class CausalEstimator:
@@ -33,6 +34,8 @@ class CausalEstimator:
     DEFAULT_NOTIMPLEMENTEDERROR_MSG = "not yet implemented for {0}. If you would this to be implemented in the next version, please raise an issue at https://github.com/microsoft/dowhy/issues"
 
     BootstrapEstimates = namedtuple('BootstrapEstimates', ['estimates', 'params'])
+
+    DEFAULT_INTERPRET_METHOD = ["textual_effect_interpreter"]
 
     def __init__(self, data, identified_estimand, treatment, outcome,
                  control_value=0, treatment_value=1,
@@ -82,6 +85,8 @@ class CausalEstimator:
         self._effect_modifiers = None
         self.method_params = params
 
+        # Setting the default interpret method
+        self.interpret_method = CausalEstimator.DEFAULT_INTERPRET_METHOD
         # Unpacking the keyword arguments
         if params is not None:
             for key, value in params.items():
@@ -709,6 +714,23 @@ class CausalEstimate:
         return self.estimator._estimate_conditional_effects(
                 self.estimator._estimate_effect_fn,
                 effect_modifiers, num_quantiles)
+
+    def interpret(self, method_name=None, **kwargs):
+        """Interpret the causal estimate.
+
+        :param method_name: Method used (string) or a list of methods. If None, then the default for the specific estimator is used.
+        :param kwargs:: Optional parameters that are directly passed to the interpreter method.
+
+        :returns: None
+
+        """
+        if method_name is None:
+            method_name = self.estimator.interpret_method
+        method_name_arr = parse_state(method_name)
+
+        for method in method_name_arr:
+            interpreter = interpreters.get_class_object(method)
+            interpreter(self, **kwargs).interpret()
 
     def __str__(self):
         s = "*** Causal Estimate ***\n"

@@ -144,6 +144,6 @@ class BootstrapRefuter(CausalRefuter):
             self.test_significance(self._estimate, sample_estimates)
         )
 
+        refute.add_refuter(self)
         return refute
 
-    

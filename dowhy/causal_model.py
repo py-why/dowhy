@@ -328,10 +328,36 @@ class CausalModel:
         """
         self._graph.view_graph(layout)
 
-    def summary(self):
-        """Print a text summary of the model.
+    def interpret(self, method_name=None, **kwargs):
+        """Interpret the causal model.
+
+        :param method_name: method used for interpreting the model. If None, 
+                            then default interpreter is chosen that describes the model summary and shows the associated causal graph.
+        :param kwargs:: Optional parameters that are directly passed to the interpreter method.
 
         :returns: None
 
         """
-        self.logger.info("Model to find the causal effect of treatment {0} on outcome {1}".format(self._treatment, self._outcome))
+        if method_name is None:
+            self.summary(print_to_stdout=True)
+            self.view_model()
+            return
+
+        method_name_arr = parse_state(method_name)
+        for method in method_name_arr:
+            interpreter = interpreters.get_class_object(method)
+            interpreter(self, **kwargs).interpret()
+
+    def summary(self, print_to_stdout=False):
+        """Print a text summary of the model.
+
+        :returns: a string containining the summary
+
+        """
+        summary_text = "Model to find the causal effect of treatment {0} on outcome {1}".format(self._treatment, self._outcome)
+        self.logger.info(summary_text)
+        if print_to_stdout:
+            print(summary_text)
+        return summary_text
+
+               

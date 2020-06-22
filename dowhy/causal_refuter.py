@@ -3,6 +3,8 @@ import numpy as np
 import scipy.stats as st
 import random
 
+from dowhy.utils.api import parse_state
+
 class CausalRefuter:
     
     """Base class for different refutation methods. 
@@ -231,6 +233,28 @@ class CausalRefutation:
 
         self.refutation_result = None
 
+    def add_significance_test_results(self, refutation_result):
+        self.refutation_result = refutation_result
+
+    def add_refuter(self, refuter_instance):
+        self.refuter = refuter_instance
+
+    def interpret(self, method_name=None, **kwargs):
+        """Interpret the refutation results.
+
+        :param method_name: Method used (string) or a list of methods. If None, then the default for the specific refuter is used.
+
+        :returns: None
+
+        """
+        if method_name is None:
+            method_name = self.refuter.interpret_method
+        method_name_arr = parse_state(method_name)
+
+        for method in method_name_arr:
+            interpreter = interpreters.get_class_object(method)
+            interpreter(self, **kwargs).interpret()
+
     def __str__(self):
         if self.refutation_result is None:
             return "{0}\nEstimated effect:{1}\nNew effect:{2}\n".format(
@@ -240,6 +264,4 @@ class CausalRefutation:
             return "{0}\nEstimated effect:{1}\nNew effect:{2}\np value:{3}\n".format(
                 self.refutation_type, self.estimated_effect, self.new_effect, self.refutation_result['p_value']
             )
-    
-    def add_significance_test_results(self, refutation_result):
-        self.refutation_result = refutation_result
+
