@@ -166,6 +166,8 @@ class DummyOutcomeRefuter(CausalRefuter):
     DEFAULT_TRANSFORMATION = [("zero",""),("noise", {'std_dev': 1} )]
     # The Default True Causal Effect, this is taken to be ZERO by default
     DEFAULT_TRUE_CAUSAL_EFFECT = lambda x: 0
+    # The Default Split for the number of data points that go into the base or the validation set
+    DEFAULT_TEST_VALIDATION_SPLIT = [.5, .5]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -175,6 +177,8 @@ class DummyOutcomeRefuter(CausalRefuter):
         self._true_causal_effect = kwargs.pop("true_causal_effect", DummyOutcomeRefuter.DEFAULT_TRUE_CAUSAL_EFFECT)
         self._bucket_size_scale_factor = kwargs.pop("bucket_size_scale_factor", DummyOutcomeRefuter.DEFAULT_BUCKET_SCALE_FACTOR)
         self._min_data_point_threshold = kwargs.pop("min_data_point_threshold", DummyOutcomeRefuter.MIN_DATA_POINT_THRESHOLD)
+        self._test_validation_split = kwargs.pop("test_validation_split", None)
+
         required_variables = kwargs.pop("required_variables", True)
         
         if required_variables is False:
@@ -368,12 +372,12 @@ class DummyOutcomeRefuter(CausalRefuter):
                 outcome_validation = estimator(X_validation)
             elif action == 'noise':
                 if X_train is not None:
-                    outcome_train = self._noise(outcome_train, **func_args)
-                outcome_validation = self._noise(outcome_validation, **func_args)
+                    outcome_train = self.noise(outcome_train, **func_args)
+                outcome_validation = self.noise(outcome_validation, **func_args)
             elif action == 'permute':
                 if X_train is not None:
-                    outcome_train = self._permute(outcome_train, **func_args)
-                outcome_validation = self._permute(outcome_validation, **func_args)
+                    outcome_train = self.permute(outcome_train, **func_args)
+                outcome_validation = self.permute(outcome_validation, **func_args)
             elif action =='zero':
                 if X_train is not None:
                     outcome_train = np.zeros(outcome_train.shape)
@@ -477,7 +481,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         else:
             raise ValueError("The function: {} is not supported by dowhy at the moment.".format(action))
 
-    def _permute(self, outcome, permute_fraction):
+    def permute(self, outcome, permute_fraction):
         '''
         If the permute_fraction is 1, we permute all the values in the outcome.
         Otherwise we make use of the Fisher Yates shuffle.
@@ -506,7 +510,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         else:
             raise ValueError("The value of permute_fraction is {}. Which is greater than 1.".format(permute_fraction))
 
-    def _noise(self, outcome, std_dev):
+    def noise(self, outcome, std_dev):
         """
         Add white noise with mean 0 and standard deviation = std_dev
 
