@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import logging
 
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
 from dowhy.causal_estimator import CausalEstimator,CausalEstimate
@@ -14,6 +14,8 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import SVR
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.neural_network import MLPRegressor
+
+TestValidationSplit = namedtuple('TestValidationSplit', ['base','other'])
 
 class DummyOutcomeRefuter(CausalRefuter):
     """Refute an estimate by replacing the outcome with a randomly generated variable.
@@ -166,6 +168,8 @@ class DummyOutcomeRefuter(CausalRefuter):
     DEFAULT_TRANSFORMATION = [("zero",""),("noise", {'std_dev': 1} )]
     # The Default True Causal Effect, this is taken to be ZERO by default
     DEFAULT_TRUE_CAUSAL_EFFECT = lambda x: 0
+    # The Default split for the number of data points that fall into the training and validation sets
+    DEFAULT_TEST_VALIDATION_SPLIT = TestValidationSplit(0.5, 0.5)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -175,6 +179,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         self._true_causal_effect = kwargs.pop("true_causal_effect", DummyOutcomeRefuter.DEFAULT_TRUE_CAUSAL_EFFECT)
         self._bucket_size_scale_factor = kwargs.pop("bucket_size_scale_factor", DummyOutcomeRefuter.DEFAULT_BUCKET_SCALE_FACTOR)
         self._min_data_point_threshold = kwargs.pop("min_data_point_threshold", DummyOutcomeRefuter.MIN_DATA_POINT_THRESHOLD)
+        self._test_validation_split = kwargs.pop("test_validation_split", DummyOutcomeRefuter.DEFAULT_TEST_VALIDATION_SPLIT)
         required_variables = kwargs.pop("required_variables", True)
         
         if required_variables is False:
@@ -207,7 +212,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         causal_effect_map = OrderedDict()
 
         # Check if we are using an estimator in the transformation list 
-        estimator_present = self.has_estimator()
+        estimator_present = self._has_estimator()
         
         # The rationale behind ordering of the loops is the fact that we induce randomness everytime we create the 
         # Train and the Validation Datasets. Thus, we run the simulation loop followed by the training and the validation
@@ -216,6 +221,11 @@ class DummyOutcomeRefuter(CausalRefuter):
             estimates = []
             
             if estimator_present == False:
+
+                # Warn the user that the specified parameter is not applicable when no estimator is present in the transformation
+                if self._test_validation_split != DummyOutcomeRefuter.DEFAULT_TEST_VALIDATION_SPLIT:
+                    self.logger.warning("'test_validation_split' is not applicable as there is no base treatment value.")
+                
                 # We set X_train = 0 and outcome_train to be 0
                 validation_df = self._data
                 X_train = None
@@ -241,14 +251,20 @@ class DummyOutcomeRefuter(CausalRefuter):
             else:
                 groups = self.preprocess_data_by_treatment()
                 for key_train, _ in groups:
-                    X_train = groups.get_group(key_train)[self._chosen_variables].values
-                    outcome_train = groups.get_group(key_train)['y'].values
+                    base_train = groups.get_group(key_train).sample(frac=self._test_validation_split.base)
+                    base_validation = groups.get_group(key_train) - base_train
+                    base_validation.dropna()
+
+                    X_train = base_train[self._chosen_variables].values
+                    outcome_train = base_train['y'].values
+                    
                     validation_df = []
                     transformation_list = self._transformation_list
+                    validation_df.append(base_validation)
 
                     for key_validation, _ in groups:
                         if key_validation != key_train:
-                            validation_df.append(groups.get_group(key_validation))
+                            validation_df.append(groups.get_group(key_validation).sample(frac=self._test_validation_split.other))
 
                     validation_df = pd.concat(validation_df)
                     X_validation = validation_df[self._chosen_variables].values
@@ -381,7 +397,7 @@ class DummyOutcomeRefuter(CausalRefuter):
 
         return outcome_validation
             
-    def has_estimator(self):
+    def _has_estimator(self):
         """
         This function checks if there is an estimator in the transformation list.
 
