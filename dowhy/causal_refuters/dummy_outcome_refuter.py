@@ -166,8 +166,6 @@ class DummyOutcomeRefuter(CausalRefuter):
     DEFAULT_TRANSFORMATION = [("zero",""),("noise", {'std_dev': 1} )]
     # The Default True Causal Effect, this is taken to be ZERO by default
     DEFAULT_TRUE_CAUSAL_EFFECT = lambda x: 0
-    # The Default Split for the number of data points that go into the base or the validation set
-    DEFAULT_TEST_VALIDATION_SPLIT = [.5, .5]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -177,8 +175,6 @@ class DummyOutcomeRefuter(CausalRefuter):
         self._true_causal_effect = kwargs.pop("true_causal_effect", DummyOutcomeRefuter.DEFAULT_TRUE_CAUSAL_EFFECT)
         self._bucket_size_scale_factor = kwargs.pop("bucket_size_scale_factor", DummyOutcomeRefuter.DEFAULT_BUCKET_SCALE_FACTOR)
         self._min_data_point_threshold = kwargs.pop("min_data_point_threshold", DummyOutcomeRefuter.MIN_DATA_POINT_THRESHOLD)
-        self._test_validation_split = kwargs.pop("test_validation_split", None)
-
         required_variables = kwargs.pop("required_variables", True)
         
         if required_variables is False:
