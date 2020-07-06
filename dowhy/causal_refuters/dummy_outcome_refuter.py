@@ -3,7 +3,7 @@ import math
 import numpy as np
 import pandas as pd
 import logging
-
+import pdb
 from collections import OrderedDict, namedtuple
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
@@ -252,8 +252,9 @@ class DummyOutcomeRefuter(CausalRefuter):
                 groups = self.preprocess_data_by_treatment()
                 for key_train, _ in groups:
                     base_train = groups.get_group(key_train).sample(frac=self._test_validation_split.base)
-                    base_validation = groups.get_group(key_train) - base_train
-                    base_validation.dropna()
+                    train_set = set( [ tuple(line) for line in base_train.values ] )
+                    total_set = set( [ tuple(line) for line in groups.get_group(key_train).values ] )
+                    base_validation = pd.DataFrame( list( total_set.difference(train_set) ), columns=base_train.columns )
 
                     X_train = base_train[self._chosen_variables].values
                     outcome_train = base_train['y'].values
@@ -265,7 +266,7 @@ class DummyOutcomeRefuter(CausalRefuter):
                     for key_validation, _ in groups:
                         if key_validation != key_train:
                             validation_df.append(groups.get_group(key_validation).sample(frac=self._test_validation_split.other))
-
+                    
                     validation_df = pd.concat(validation_df)
                     X_validation = validation_df[self._chosen_variables].values
                     outcome_validation = validation_df['y'].values
