@@ -147,9 +147,8 @@ class TestDummyOutcomeRefuter(object):
                                     transformations=transformations)
         refuter_tester.continuous_treatment_testsuite(num_samples=num_samples, tests_to_run="atleast-one-common-cause")
 
-    @pytest.mark.xfail
     @pytest.mark.parametrize(["error_tolerence","estimator_method","transformations", "num_samples"],
-                             [(0.01, "iv.instrumental_variable",[("svm",{'C':1,'epsilon':0.2}), ("zero",""), ("noise", {'std_dev': 1} )], 1000 )])
+                             [(0.01, "backdoor.propensity_score_matching",[("svm",{'C':1,'epsilon':0.2}), ("zero",""), ("noise", {'std_dev': 1} )], 1000 )])
     def test_refutation_dummy_outcome_refuter_internal_svm_binary_treatment(self, error_tolerence, estimator_method, transformations, num_samples):
         refuter_tester = TestRefuter(error_tolerence, 
                                     estimator_method, 
