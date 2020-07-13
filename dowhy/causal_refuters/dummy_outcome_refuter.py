@@ -3,8 +3,8 @@ import math
 import numpy as np
 import pandas as pd
 import logging
-
-from collections import OrderedDict
+import pdb
+from collections import OrderedDict, namedtuple
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
 from dowhy.causal_estimator import CausalEstimator,CausalEstimate
@@ -14,6 +14,8 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import SVR
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.neural_network import MLPRegressor
+
+TestFraction = namedtuple('TestFraction', ['base','other'])
 
 class DummyOutcomeRefuter(CausalRefuter):
     """Refute an estimate by replacing the outcome with a randomly generated variable.
@@ -166,6 +168,8 @@ class DummyOutcomeRefuter(CausalRefuter):
     DEFAULT_TRANSFORMATION = [("zero",""),("noise", {'std_dev': 1} )]
     # The Default True Causal Effect, this is taken to be ZERO by default
     DEFAULT_TRUE_CAUSAL_EFFECT = lambda x: 0
+    # The Default split for the number of data points that fall into the training and validation sets
+    DEFAULT_TEST_FRACTION = [TestFraction(0.5, 0.5)]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -175,6 +179,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         self._true_causal_effect = kwargs.pop("true_causal_effect", DummyOutcomeRefuter.DEFAULT_TRUE_CAUSAL_EFFECT)
         self._bucket_size_scale_factor = kwargs.pop("bucket_size_scale_factor", DummyOutcomeRefuter.DEFAULT_BUCKET_SCALE_FACTOR)
         self._min_data_point_threshold = kwargs.pop("min_data_point_threshold", DummyOutcomeRefuter.MIN_DATA_POINT_THRESHOLD)
+        self._test_fraction = kwargs.pop("_test_fraction", DummyOutcomeRefuter.DEFAULT_TEST_FRACTION)
         required_variables = kwargs.pop("required_variables", True)
         
         if required_variables is False:
@@ -207,7 +212,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         causal_effect_map = OrderedDict()
 
         # Check if we are using an estimator in the transformation list 
-        estimator_present = self.has_estimator()
+        estimator_present = self._has_estimator()
         
         # The rationale behind ordering of the loops is the fact that we induce randomness everytime we create the 
         # Train and the Validation Datasets. Thus, we run the simulation loop followed by the training and the validation
@@ -216,6 +221,11 @@ class DummyOutcomeRefuter(CausalRefuter):
             estimates = []
             
             if estimator_present == False:
+
+                # Warn the user that the specified parameter is not applicable when no estimator is present in the transformation
+                if self._test_fraction != DummyOutcomeRefuter.DEFAULT_TEST_FRACTION:
+                    self.logger.warning("'test_fraction' is not applicable as there is no base treatment value.")
+                
                 # We set X_train = 0 and outcome_train to be 0
                 validation_df = self._data
                 X_train = None
@@ -240,16 +250,28 @@ class DummyOutcomeRefuter(CausalRefuter):
 
             else:
                 groups = self.preprocess_data_by_treatment()
+                group_count = 0
+                
+                if len(self._test_fraction) == 1:
+                    self._test_fraction = len(groups) * self._test_fraction 
+
                 for key_train, _ in groups:
-                    X_train = groups.get_group(key_train)[self._chosen_variables].values
-                    outcome_train = groups.get_group(key_train)['y'].values
+                    base_train = groups.get_group(key_train).sample(frac=self._test_fraction[group_count].base)
+                    train_set = set( [ tuple(line) for line in base_train.values ] )
+                    total_set = set( [ tuple(line) for line in groups.get_group(key_train).values ] )
+                    base_validation = pd.DataFrame( list( total_set.difference(train_set) ), columns=base_train.columns )
+
+                    X_train = base_train[self._chosen_variables].values
+                    outcome_train = base_train['y'].values
+                    
                     validation_df = []
                     transformation_list = self._transformation_list
+                    validation_df.append(base_validation)
 
                     for key_validation, _ in groups:
                         if key_validation != key_train:
-                            validation_df.append(groups.get_group(key_validation))
-
+                            validation_df.append(groups.get_group(key_validation).sample(frac=self._test_fraction[group_count].other))
+                    
                     validation_df = pd.concat(validation_df)
                     X_validation = validation_df[self._chosen_variables].values
                     outcome_validation = validation_df['y'].values
@@ -276,6 +298,7 @@ class DummyOutcomeRefuter(CausalRefuter):
                     new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
                     new_effect = new_estimator.estimate_effect()
                     estimates.append(new_effect.value)
+                    group_count += 1
 
             simulation_results.append(estimates)
 
@@ -368,12 +391,12 @@ class DummyOutcomeRefuter(CausalRefuter):
                 outcome_validation = estimator(X_validation)
             elif action == 'noise':
                 if X_train is not None:
-                    outcome_train = self._noise(outcome_train, **func_args)
-                outcome_validation = self._noise(outcome_validation, **func_args)
+                    outcome_train = self.noise(outcome_train, **func_args)
+                outcome_validation = self.noise(outcome_validation, **func_args)
             elif action == 'permute':
                 if X_train is not None:
-                    outcome_train = self._permute(outcome_train, **func_args)
-                outcome_validation = self._permute(outcome_validation, **func_args)
+                    outcome_train = self.permute(outcome_train, **func_args)
+                outcome_validation = self.permute(outcome_validation, **func_args)
             elif action =='zero':
                 if X_train is not None:
                     outcome_train = np.zeros(outcome_train.shape)
@@ -381,7 +404,7 @@ class DummyOutcomeRefuter(CausalRefuter):
 
         return outcome_validation
             
-    def has_estimator(self):
+    def _has_estimator(self):
         """
         This function checks if there is an estimator in the transformation list.
 
@@ -477,7 +500,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         else:
             raise ValueError("The function: {} is not supported by dowhy at the moment.".format(action))
 
-    def _permute(self, outcome, permute_fraction):
+    def permute(self, outcome, permute_fraction):
         '''
         If the permute_fraction is 1, we permute all the values in the outcome.
         Otherwise we make use of the Fisher Yates shuffle.
@@ -506,7 +529,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         else:
             raise ValueError("The value of permute_fraction is {}. Which is greater than 1.".format(permute_fraction))
 
-    def _noise(self, outcome, std_dev):
+    def noise(self, outcome, std_dev):
         """
         Add white noise with mean 0 and standard deviation = std_dev
 
