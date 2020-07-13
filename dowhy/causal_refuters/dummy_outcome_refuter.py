@@ -15,7 +15,7 @@ from sklearn.svm import SVR
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.neural_network import MLPRegressor
 
-TestValidationSplit = namedtuple('TestValidationSplit', ['base','other'])
+TestFraction = namedtuple('TestFraction', ['base','other'])
 
 class DummyOutcomeRefuter(CausalRefuter):
     """Refute an estimate by replacing the outcome with a randomly generated variable.
@@ -169,7 +169,7 @@ class DummyOutcomeRefuter(CausalRefuter):
     # The Default True Causal Effect, this is taken to be ZERO by default
     DEFAULT_TRUE_CAUSAL_EFFECT = lambda x: 0
     # The Default split for the number of data points that fall into the training and validation sets
-    DEFAULT_TEST_VALIDATION_SPLIT = [TestValidationSplit(0.5, 0.5)]
+    DEFAULT_TEST_FRACTION = [TestFraction(0.5, 0.5)]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -179,7 +179,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         self._true_causal_effect = kwargs.pop("true_causal_effect", DummyOutcomeRefuter.DEFAULT_TRUE_CAUSAL_EFFECT)
         self._bucket_size_scale_factor = kwargs.pop("bucket_size_scale_factor", DummyOutcomeRefuter.DEFAULT_BUCKET_SCALE_FACTOR)
         self._min_data_point_threshold = kwargs.pop("min_data_point_threshold", DummyOutcomeRefuter.MIN_DATA_POINT_THRESHOLD)
-        self._test_validation_split = kwargs.pop("test_validation_split", DummyOutcomeRefuter.DEFAULT_TEST_VALIDATION_SPLIT)
+        self._test_fraction = kwargs.pop("_test_fraction", DummyOutcomeRefuter.DEFAULT_TEST_FRACTION)
         required_variables = kwargs.pop("required_variables", True)
         
         if required_variables is False:
@@ -223,8 +223,8 @@ class DummyOutcomeRefuter(CausalRefuter):
             if estimator_present == False:
 
                 # Warn the user that the specified parameter is not applicable when no estimator is present in the transformation
-                if self._test_validation_split != DummyOutcomeRefuter.DEFAULT_TEST_VALIDATION_SPLIT:
-                    self.logger.warning("'test_validation_split' is not applicable as there is no base treatment value.")
+                if self._test_fraction != DummyOutcomeRefuter.DEFAULT_TEST_FRACTION:
+                    self.logger.warning("'test_fraction' is not applicable as there is no base treatment value.")
                 
                 # We set X_train = 0 and outcome_train to be 0
                 validation_df = self._data
@@ -252,11 +252,11 @@ class DummyOutcomeRefuter(CausalRefuter):
                 groups = self.preprocess_data_by_treatment()
                 group_count = 0
                 
-                if len(self._test_validation_split) == 1:
-                    self._test_validation_split = len(groups) * self._test_validation_split 
+                if len(self._test_fraction) == 1:
+                    self._test_fraction = len(groups) * self._test_fraction 
 
                 for key_train, _ in groups:
-                    base_train = groups.get_group(key_train).sample(frac=self._test_validation_split[group_count].base)
+                    base_train = groups.get_group(key_train).sample(frac=self._test_fraction[group_count].base)
                     train_set = set( [ tuple(line) for line in base_train.values ] )
                     total_set = set( [ tuple(line) for line in groups.get_group(key_train).values ] )
                     base_validation = pd.DataFrame( list( total_set.difference(train_set) ), columns=base_train.columns )
@@ -270,7 +270,7 @@ class DummyOutcomeRefuter(CausalRefuter):
 
                     for key_validation, _ in groups:
                         if key_validation != key_train:
-                            validation_df.append(groups.get_group(key_validation).sample(frac=self._test_validation_split[group_count].other))
+                            validation_df.append(groups.get_group(key_validation).sample(frac=self._test_fraction[group_count].other))
                     
                     validation_df = pd.concat(validation_df)
                     X_validation = validation_df[self._chosen_variables].values
