@@ -169,7 +169,7 @@ class DummyOutcomeRefuter(CausalRefuter):
     # The Default True Causal Effect, this is taken to be ZERO by default
     DEFAULT_TRUE_CAUSAL_EFFECT = lambda x: 0
     # The Default split for the number of data points that fall into the training and validation sets
-    DEFAULT_TEST_VALIDATION_SPLIT = TestValidationSplit(0.5, 0.5)
+    DEFAULT_TEST_VALIDATION_SPLIT = [TestValidationSplit(0.5, 0.5)]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -250,8 +250,13 @@ class DummyOutcomeRefuter(CausalRefuter):
 
             else:
                 groups = self.preprocess_data_by_treatment()
+                group_count = 0
+                
+                if len(self._test_validation_split) == 1:
+                    self._test_validation_split = len(groups) * self._test_validation_split 
+
                 for key_train, _ in groups:
-                    base_train = groups.get_group(key_train).sample(frac=self._test_validation_split.base)
+                    base_train = groups.get_group(key_train).sample(frac=self._test_validation_split[group_count].base)
                     train_set = set( [ tuple(line) for line in base_train.values ] )
                     total_set = set( [ tuple(line) for line in groups.get_group(key_train).values ] )
                     base_validation = pd.DataFrame( list( total_set.difference(train_set) ), columns=base_train.columns )
@@ -265,7 +270,7 @@ class DummyOutcomeRefuter(CausalRefuter):
 
                     for key_validation, _ in groups:
                         if key_validation != key_train:
-                            validation_df.append(groups.get_group(key_validation).sample(frac=self._test_validation_split.other))
+                            validation_df.append(groups.get_group(key_validation).sample(frac=self._test_validation_split[group_count].other))
                     
                     validation_df = pd.concat(validation_df)
                     X_validation = validation_df[self._chosen_variables].values
@@ -293,6 +298,7 @@ class DummyOutcomeRefuter(CausalRefuter):
                     new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
                     new_effect = new_estimator.estimate_effect()
                     estimates.append(new_effect.value)
+                    group_count += 1
 
             simulation_results.append(estimates)
 
