@@ -35,7 +35,6 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         self._data['strata'] = (
             (self._data['propensity_score'].rank(ascending=True) / num_rows) * self.num_strata
         ).round(0)
-
         # for each strata, count how many treated and control units there are
         # throw away strata that have insufficient treatment or control
         # print("before clipping, here is the distribution of treatment and control per strata")
@@ -49,9 +48,9 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
             lambda strata: min(strata.loc[strata[self._treatment_name[0]] == 1].shape[0],
                                strata.loc[strata[self._treatment_name[0]] == 0].shape[0]) > self.clipping_threshold
         )
-        # print("after clipping at threshold, now we have:" )
-        #print(clipped.groupby(['strata',self._treatment_name])[self._outcome_name].count())
-
+        self.logger.debug("After using clipping_threshold={0}, here are the number of data points in each strata:\n {1}".format(self.clipping_threshold, clipped.groupby(['strata',self._treatment_name[0]])[self._outcome_name].count()))
+        if clipped.empty:
+            raise ValueError("Method requires strata with number of data points per treatment > clipping_threshold (={0}). No such strata exists. Consider decreasing 'num_strata' or 'clipping_threshold' parameters.".format(self.clipping_threshold))
         # sum weighted outcomes over all strata  (weight by treated population)
         weighted_outcomes = clipped.groupby('strata').agg({
             self._treatment_name[0]: ['sum'],
@@ -69,6 +68,7 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         total_treatment_population = weighted_outcomes[treatment_sum_name].sum()
         total_control_population = weighted_outcomes[control_sum_name].sum()
         total_population = total_treatment_population + total_control_population
+        self.logger.debug("Total number of data points is {0}, including {1} from treatment and {2} from control.". format(total_population, total_treatment_population, total_control_population))
 
         if self._target_units=="att":
             est = (weighted_outcomes['effect'] * weighted_outcomes[treatment_sum_name]).sum() / total_treatment_population
