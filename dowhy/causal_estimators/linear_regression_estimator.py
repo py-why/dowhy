@@ -4,10 +4,9 @@ import statsmodels.api as sm
 from sklearn import linear_model
 import itertools
 
-from dowhy.causal_estimator import CausalEstimate
-from dowhy.causal_estimator import CausalEstimator
+from dowhy.causal_estimators.regression_estimator import RegressionEstimator
 
-class LinearRegressionEstimator(CausalEstimator):
+class LinearRegressionEstimator(RegressionEstimator):
     """Compute effect of treatment using linear regression.
 
     Fits a regression model for estimating the outcome using treatment(s) and confounders. For a univariate treatment, the treatment effect is equivalent to the coefficient of the treatment variable.

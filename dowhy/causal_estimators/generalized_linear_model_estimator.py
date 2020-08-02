@@ -8,6 +8,9 @@ from dowhy.causal_estimators.regression_estimator import RegressionEstimator
 class GeneralizedLinearModelEstimator(RegressionEstimator):
     """Compute effect of treatment using a generalized linear model such as logistic regression.
 
+    Implementation uses statsmodels.api.GLM.
+    Needs an additional parameter, "glm_family" to be specified in method_params. The value of this parameter can be any valid statsmodels.api families object. For example, to use logistic regression, specify "glm_family" as statsmodels.api.families.Binomial(). 
+
     """
 
     def __init__(self, *args, **kwargs):
