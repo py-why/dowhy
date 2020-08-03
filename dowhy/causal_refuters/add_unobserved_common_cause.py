@@ -176,7 +176,7 @@ class AddUnobservedCommonCause(CausalRefuter):
 
         if self.effect_on_t == "binary_flip":
             new_data['temp_rand_no'] = np.random.random(num_rows)
-            new_data.loc[new_data['temp_rand_no'] <= kappa_t, self._treatment_name ]  = 1- new_data[self._treatment_name]
+            new_data.loc[new_data['temp_rand_no'] <= kappa_t, self._treatment_name ]  = 1- new_data.loc[new_data['temp_rand_no'] <= kappa_t, self._treatment_name]
             for tname in self._treatment_name:
                 if pd.api.types.is_bool_dtype(self._data[tname]):
                     new_data = new_data.astype({tname: 'bool'}, copy=False)
