@@ -114,10 +114,10 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
             y += W @ c2
         if num_effect_modifiers > 0:
             y += (X @ ce) * np.prod(t, axis=1)
+        if outcome_is_binary:
+            y = np.vectorize(stochastically_convert_to_binary)(y)
         return y
     y = _compute_y(t, W_with_dummy, X_with_categorical, beta, c2, ce)
-    if outcome_is_binary:
-        y = np.vectorize(stochastically_convert_to_binary)(y)
 
     data = np.column_stack((t, y))
     if num_common_causes > 0:
