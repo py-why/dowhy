@@ -1,4 +1,5 @@
 import logging
+import itertools
 
 import sympy as sp
 import sympy.stats as spstats
@@ -27,7 +28,7 @@ class CausalIdentifier:
         self._proceed_when_unidentifiable = proceed_when_unidentifiable
         self.logger = logging.getLogger(__name__)
 
-    def identify_effect(self): 
+    def identify_effect(self):
         """Main method that returns an identified estimand (if one exists). 
 
         Uses both backdoor and instrumental variable methods to check if an identified estimand exists, based on the causal graph. 
@@ -37,11 +38,11 @@ class CausalIdentifier:
         """
 
         estimands_dict = {}
-        causes_t = self._graph.get_causes(self.treatment_name)
-        causes_y = self._graph.get_causes(self.outcome_name, remove_edges={'sources':self.treatment_name, 'targets':self.outcome_name})
-        common_causes = list(causes_t.intersection(causes_y))
-        self.logger.info("Common causes of treatment and outcome:" + str(common_causes))
-        if self._graph.all_observed(common_causes):
+        backdoor_variables_dict = {}
+        backdoor_sets = self.identify_backdoor()
+        is_identified = [ self._graph.all_observed(bset) for bset in backdoor_sets ]
+        response = False
+        if all(is_identified):
             self.logger.info("All common causes are observed. Causal effect can be identified.")
         else:
             self.logger.warning("If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.")
@@ -50,20 +51,28 @@ class CausalIdentifier:
                     "Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True."
                 )
             else:
-                cli.query_yes_no(
+                response= cli.query_yes_no(
                     "WARN: Do you want to continue by ignoring any unobserved confounders? (use proceed_when_unidentifiable=True to disable this prompt)",
                     default=None
                 )
-        observed_common_causes = self._graph.filter_unobserved_variables(common_causes)
-        observed_common_causes = list(observed_common_causes)
+                if response is False:
+                    self.logger.warn("Identification failed due to unobserved variables.")
+                    backdoor_sets = []
 
-        backdoor_estimand_expr = self.construct_backdoor_estimand(
-            self.estimand_type, self._graph.treatment_name,
-            self._graph.outcome_name, observed_common_causes
-        )
+        if self._proceed_when_unidentifiable or response is True:
+            backdoor_sets = [list(self._graph.filter_unobserved_variables(bset)) for bset in backdoor_sets]
 
-        self.logger.debug("Identified expression = " + str(backdoor_estimand_expr))
-        estimands_dict["backdoor"] = backdoor_estimand_expr
+        for i in range(len(backdoor_sets)):
+            backdoor_estimand_expr = self.construct_backdoor_estimand(
+                self.estimand_type, self._graph.treatment_name,
+                self._graph.outcome_name, backdoor_sets[i])
+
+            self.logger.debug("Identified expression = " + str(backdoor_estimand_expr))
+            estimands_dict["backdoor"+str(i+1)] = backdoor_estimand_expr
+            backdoor_variables_dict["backdoor"+str(i+1)] = backdoor_sets[i]
+        # Adding a None estimand if no backdoor set found
+        if len(backdoor_sets) == 0:
+            estimands_dict["backdoor"] = None
 
         # Now checking if there is also a valid iv estimand
         instrument_names = self._graph.get_instruments(self.treatment_name,
@@ -87,11 +96,34 @@ class CausalIdentifier:
             outcome_variable=self._graph.outcome_name,
             estimand_type=self.estimand_type,
             estimands=estimands_dict,
-            backdoor_variables=observed_common_causes,
+            backdoor_variables=backdoor_variables_dict,
             instrumental_variables=instrument_names
         )
         return estimand
 
+    def identify_backdoor(self):
+        backdoor_sets = []
+        empty_set = set()
+        if self._graph.is_valid_backdoor_set(self.treatment_name, self.outcome_name, empty_set):
+            backdoor_sets.append(empty_set)
+        eligible_variables = self._graph.get_all_nodes() - set(self.treatment_name) - set(self.outcome_name)
+        eligible_variables -= self._graph.get_descendants(self.treatment_name)
+        print(eligible_variables)
+        for size_candidate_set in range(1, len(eligible_variables)+1):
+            for candidate_set in itertools.combinations(eligible_variables, size_candidate_set):
+                if self._graph.is_valid_backdoor_set(self.treatment_name, self.outcome_name, candidate_set):
+                    backdoor_sets.append(candidate_set)
+
+        #causes_t = self._graph.get_causes(self.treatment_name)
+        #causes_y = self._graph.get_causes(self.outcome_name, remove_edges={'sources':self.treatment_name, 'targets':self.outcome_name})
+        #common_causes = list(causes_t.intersection(causes_y))
+        #self.logger.info("Common causes of treatment and outcome:" + str(common_causes))
+        observed_backdoor_sets = [ bset for bset in backdoor_sets if self._graph.all_observed(bset)]
+        if len(observed_backdoor_sets)==0:
+            return backdoor_sets
+        else:
+            return observed_backdoor_sets
+ 
     def construct_backdoor_estimand(self, estimand_type, treatment_name,
                                     outcome_name, common_causes):
         # TODO: outputs string for now, but ideally should do symbolic
@@ -175,7 +207,7 @@ class IdentifiedEstimand:
                  backdoor_variables=None, instrumental_variables=None):
         self.treatment_variable = parse_state(treatment_variable)
         self.outcome_variable = parse_state(outcome_variable)
-        self.backdoor_variables = parse_state(backdoor_variables)
+        self.backdoor_variables = backdoor_variables
         self.instrumental_variables = parse_state(instrumental_variables)
         self.estimand_type = estimand_type
         self.estimands = estimands

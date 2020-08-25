@@ -21,9 +21,9 @@ class PropensityScoreEstimator(CausalEstimator):
             raise Exception(error_msg)
 
         self.logger.debug("Back-door variables used:" +
-                        ",".join(self._target_estimand.backdoor_variables))
+                        ",".join(self._target_estimand.backdoor_variables[self._target_estimand.identifier_method]))
         
-        self._observed_common_causes_names = self._target_estimand.backdoor_variables
+        self._observed_common_causes_names = self._target_estimand.backdoor_variables[self._target_estimand.identifier_method]
 
         if self._observed_common_causes_names:
             self._observed_common_causes = self._data[self._observed_common_causes_names]

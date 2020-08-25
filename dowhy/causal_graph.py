@@ -221,6 +221,11 @@ class CausalGraph:
             causes = causes.union(self.get_ancestors(v, new_graph=new_graph))
         return causes
 
+    def is_valid_backdoor_set(self, nodes1, nodes2, nodes3):
+        # also return the number of backdoor paths blocked by observed nodes
+        common_causes = self.get_common_causes(nodes1, nodes2)
+        return all(comm_cause in nodes3 for comm_cause in common_causes)
+
     def get_common_causes(self, nodes1, nodes2):
         """
         Assume that nodes1 causes nodes2 (e.g., nodes1 are the treatments and nodes2 are the outcomes)
@@ -260,8 +265,11 @@ class CausalGraph:
             graph=new_graph
         return set(nx.ancestors(graph, node_name))
 
-    def get_descendants(self, node_name):
-        return set(nx.descendants(self._graph, node_name))
+    def get_descendants(self, nodes):
+        descendants = set()
+        for node_name in nodes:
+            descendants = descendants.union(set(nx.descendants(self._graph, node_name)))
+        return descendants
 
     def all_observed(self, node_names):
         for node_name in node_names:
@@ -269,6 +277,9 @@ class CausalGraph:
                 return False
 
         return True
+
+    def get_all_nodes(self, include_unobserved=True):
+        return self._graph.nodes
 
     def filter_unobserved_variables(self, node_names):
         observed_node_names = list()
