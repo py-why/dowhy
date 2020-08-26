@@ -148,7 +148,7 @@ class CausalIdentifier:
         # Adding a None estimand if no backdoor set found
         if len(backdoor_sets_dict) == 0:
             return None
-        max_set_length = 0
+        max_set_length = -1
         default_key = None
         # Default set is the one with the most number of adjustment variables (optimizing for minimum (unknown) bias not for efficiency)
         for key, bdoor_set in backdoor_sets_dict.items():
@@ -253,8 +253,17 @@ class IdentifiedEstimand:
         self.identifier_method = identifier_name
 
     def get_backdoor_variables(self, key=None):
+        """ Return a list containing the backdoor variables.
+
+            If the calling estimator method is a backdoor method, return the 
+            backdoor variables corresponding to its target estimand. 
+            Otherwise, return the backdoor variables for the default backdoor estimand.
+        """
         if key is None:
-            return self.backdoor_variables[self.identifier_method]
+            if self.identifier_method.startswith("backdoor"):
+                return self.backdoor_variables[self.identifier_method]
+            else:
+                return self.backdoor_variables[self.default_backdoor_id]
         else:
             return self.backdoor_variables[key]
 
