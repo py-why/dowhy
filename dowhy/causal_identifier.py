@@ -79,8 +79,8 @@ class CausalIdentifier:
             backdoor_variables_dict["backdoor"+str(i+1)] = backdoor_sets_arr[i]
         # Setting default "backdoor" identification adjustment set
         default_backdoor_id = self.get_default_backdoor_set_id(backdoor_variables_dict)
-        estimands_dict["backdoor"] = estimands_dict.get("backdoor" + str(default_backdoor_id), None)
-        backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get("backdoor" + str(default_backdoor_id), None)
+        estimands_dict["backdoor"] = estimands_dict.get(str(default_backdoor_id), None)
+        backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
 
         # Now checking if there is also a valid iv estimand
         instrument_names = self._graph.get_instruments(self.treatment_name,
