@@ -124,7 +124,7 @@ class CausalIdentifier:
         for size_candidate_set in range(1, len(eligible_variables)+1):
             for candidate_set in itertools.combinations(eligible_variables, size_candidate_set):
                 check = self._graph.check_valid_backdoor_set(self.treatment_name, self.outcome_name, candidate_set)
-                print(candidate_set, check["is_dseparated"], check["num_paths_blocked_by_observed_nodes"])
+                self.logger.debug("Candidate backdoor set: {0}, is_dseparated: {1}, No. of paths blocked by observed_nodes: {2}".format(candidate_set, check["is_dseparated"], check["num_paths_blocked_by_observed_nodes"]))
                 if check["is_dseparated"]:
                     backdoor_sets.append({
                         'backdoor_set': candidate_set,
