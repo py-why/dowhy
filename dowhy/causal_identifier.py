@@ -100,12 +100,14 @@ class CausalIdentifier:
             estimands_dict["iv"] = None
 
         estimand = IdentifiedEstimand(
+            self,
             treatment_variable=self._graph.treatment_name,
             outcome_variable=self._graph.outcome_name,
             estimand_type=self.estimand_type,
             estimands=estimands_dict,
             backdoor_variables=backdoor_variables_dict,
-            instrumental_variables=instrument_names
+            instrumental_variables=instrument_names,
+            default_backdoor_id = default_backdoor_id
         )
         return estimand
 
@@ -229,15 +231,18 @@ class IdentifiedEstimand:
 
     """
 
-    def __init__(self, treatment_variable, outcome_variable,
+    def __init__(self, identifier, treatment_variable, outcome_variable,
                  estimand_type=None, estimands=None,
-                 backdoor_variables=None, instrumental_variables=None):
+                 backdoor_variables=None, instrumental_variables=None,
+                 default_backdoor_id=None):
+        self.identifier = identifier
         self.treatment_variable = parse_state(treatment_variable)
         self.outcome_variable = parse_state(outcome_variable)
         self.backdoor_variables = backdoor_variables
         self.instrumental_variables = parse_state(instrumental_variables)
         self.estimand_type = estimand_type
         self.estimands = estimands
+        self.default_backdoor_id = default_backdoor_id
         self.identifier_method = None
 
     def set_identifier_method(self, identifier_name):
@@ -248,18 +253,27 @@ class IdentifiedEstimand:
             return self.backdoor_variables[self.identifier_method]
         else:
             return self.backdoor_variables[key]
-    
+
     def set_backdoor_variables(self, bdoor_variables_arr, key=None):
         if key is None:
             key = self.identifier_method
         self.backdoor_variables[key] = bdoor_variables_arr
 
-    def __str__(self):
+    def __str__(self, only_target_estimand=False):
         s = "Estimand type: {0}\n".format(self.estimand_type)
         i = 1
+        has_valid_backdoor = sum("backdoor" in key for key in self.estimands.keys())
         for k, v in self.estimands.items():
-            s += "### Estimand : {0}\n".format(i)
-            s += "Estimand name: {0}\n".format(k)
+            # Do not show backdoor key unless it is the only backdoor set.
+            if k == "backdoor" and has_valid_backdoor > 1:
+                continue
+            if only_target_estimand and k != self.identifier_method:
+                continue
+            s += "\n### Estimand : {0}\n".format(i)
+            s += "Estimand name: {0}".format(k)
+            if k == self.default_backdoor_id:
+                s += " (Default)"
+            s += "\n"
             if v is None:
                 s += "No such variable found!\n"
             else:

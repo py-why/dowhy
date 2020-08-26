@@ -734,7 +734,7 @@ class CausalEstimate:
 
     def __str__(self):
         s = "*** Causal Estimate ***\n"
-        s += "\n## Identified estimand\n{0}".format(self.target_estimand)
+        s += "\n## Identified estimand\n{0}".format(self.target_estimand.__str__(only_target_estimand=True))
         s += "\n## Realized estimand\n{0}".format(self.realized_estimand_expr)
         s += "\nTarget units: {0}\n".format(self.estimator.target_units_tostr())
         s += "\n## Estimate\n"
