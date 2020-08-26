@@ -113,8 +113,10 @@ class CausalIdentifier:
 
     def identify_backdoor(self):
         backdoor_sets = []
+        backdoor_paths = self._graph.get_backdoor_paths(self.treatment_name, self.outcome_name)
         empty_set = set()
-        check = self._graph.check_valid_backdoor_set(self.treatment_name, self.outcome_name, empty_set)
+        check = self._graph.check_valid_backdoor_set(self.treatment_name, self.outcome_name, empty_set,
+                backdoor_paths=backdoor_paths)
         if check["is_dseparated"]:
             backdoor_sets.append({
                 'backdoor_set':empty_set,
@@ -123,7 +125,8 @@ class CausalIdentifier:
         eligible_variables -= self._graph.get_descendants(self.treatment_name)
         for size_candidate_set in range(1, len(eligible_variables)+1):
             for candidate_set in itertools.combinations(eligible_variables, size_candidate_set):
-                check = self._graph.check_valid_backdoor_set(self.treatment_name, self.outcome_name, candidate_set)
+                check = self._graph.check_valid_backdoor_set(self.treatment_name,
+                        self.outcome_name, candidate_set, backdoor_paths=backdoor_paths)
                 self.logger.debug("Candidate backdoor set: {0}, is_dseparated: {1}, No. of paths blocked by observed_nodes: {2}".format(candidate_set, check["is_dseparated"], check["num_paths_blocked_by_observed_nodes"]))
                 if check["is_dseparated"]:
                     backdoor_sets.append({

@@ -221,9 +221,10 @@ class CausalGraph:
             causes = causes.union(self.get_ancestors(v, new_graph=new_graph))
         return causes
 
-    def check_valid_backdoor_set(self, nodes1, nodes2, nodes3):
+    def check_valid_backdoor_set(self, nodes1, nodes2, nodes3, backdoor_paths=None):
         # also return the number of backdoor paths blocked by observed nodes
-        backdoor_paths = self.get_backdoor_paths(nodes1, nodes2)
+        if backdoor_paths is None:
+            backdoor_paths = self.get_backdoor_paths(nodes1, nodes2)
         d_separated = all([self.is_blocked(path, nodes3) for path in backdoor_paths])
         observed_nodes3 = self.filter_unobserved_variables(nodes3)
         num_paths_blocked = sum([self.is_blocked(path, observed_nodes3) for path in backdoor_paths])
