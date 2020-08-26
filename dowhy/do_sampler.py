@@ -53,6 +53,7 @@ class DoSampler:
         self._data = data.copy()
         self._causal_model = causal_model
         self._target_estimand = self._causal_model.identify_effect()
+        self._target_estimand.set_identifier_method("backdoor")
         self._treatment_names = parse_state(self._causal_model._treatment)
         self._outcome_names = parse_state(self._causal_model._outcome)
         self._estimate = None

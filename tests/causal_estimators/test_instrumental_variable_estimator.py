@@ -9,13 +9,16 @@ class TestInstrumentalVariableEstimator(object):
     @pytest.mark.parametrize(["error_tolerance", "Estimator",
         "num_common_causes", "num_instruments",
         "num_effect_modifiers", "num_treatments",
-        "treatment_is_binary", "outcome_is_binary"],
-                             [(0.4, InstrumentalVariableEstimator, [0,1], [1,2], [0,], [1, 2], [False, True], [False,]),])
+        "treatment_is_binary", "outcome_is_binary",
+        "identifier_method"],
+                             [(0.4, InstrumentalVariableEstimator, [0,1], [1,2], [0,], [1, 2], [False, True], [False,], "iv"),])
     def test_average_treatment_effect(self, error_tolerance, Estimator,
             num_common_causes, num_instruments, num_effect_modifiers,
-            num_treatments, treatment_is_binary, outcome_is_binary
+            num_treatments, treatment_is_binary, outcome_is_binary,
+            identifier_method
             ):
-        estimator_tester = TestEstimator(error_tolerance, Estimator)
+        estimator_tester = TestEstimator(error_tolerance, Estimator,
+                identifier_method=identifier_method)
         # Not using testsuite from .base/TestEstimtor, custom code below
         args_dict = {
                 'num_common_causes': num_common_causes,
