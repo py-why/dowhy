@@ -1,5 +1,6 @@
 import logging
 import itertools
+import copy
 
 import sympy as sp
 import sympy.stats as spstats
@@ -237,7 +238,7 @@ class IdentifiedEstimand:
     def __init__(self, identifier, treatment_variable, outcome_variable,
                  estimand_type=None, estimands=None,
                  backdoor_variables=None, instrumental_variables=None,
-                 default_backdoor_id=None):
+                 default_backdoor_id=None, identifier_method=None):
         self.identifier = identifier
         self.treatment_variable = parse_state(treatment_variable)
         self.outcome_variable = parse_state(outcome_variable)
@@ -246,7 +247,7 @@ class IdentifiedEstimand:
         self.estimand_type = estimand_type
         self.estimands = estimands
         self.default_backdoor_id = default_backdoor_id
-        self.identifier_method = None
+        self.identifier_method = identifier_method
 
     def set_identifier_method(self, identifier_name):
         self.identifier_method = identifier_name
@@ -261,6 +262,19 @@ class IdentifiedEstimand:
         if key is None:
             key = self.identifier_method
         self.backdoor_variables[key] = bdoor_variables_arr
+
+    def __deepcopy__(self, memo):
+        return IdentifiedEstimand(
+                self.identifier, # not deep copied
+                copy.deepcopy(self.treatment_variable),
+                copy.deepcopy(self.outcome_variable),
+                estimand_type=copy.deepcopy(self.estimand_type),
+                estimands=copy.deepcopy(self.estimands),
+                backdoor_variables=copy.deepcopy(self.backdoor_variables),
+                instrumental_variables=copy.deepcopy(self.instrumental_variables),
+                default_backdoor_id=copy.deepcopy(self.default_backdoor_id),
+                identifier_method=copy.deepcopy(self.identifier_method)
+            )
 
     def __str__(self, only_target_estimand=False):
         s = "Estimand type: {0}\n".format(self.estimand_type)
