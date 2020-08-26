@@ -10,7 +10,7 @@ class KernelDensitySampler(DoSampler):
 
 
         self.logger.info("Using KernelDensitySampler for do sampling.")
-        if len(self._data) > 300 or max(len(self._treatment_names+self._target_estimand.backdoor_variables),len(self._outcome_names+self._target_estimand.backdoor_variables)) >= 3:
+        if len(self._data) > 300 or max(len(self._treatment_names+self._target_estimand.get_backdoor_variables()),len(self._outcome_names+self._target_estimand.get_backdoor_variables())) >= 3:
             self.defaults=EstimatorSettings(n_jobs=4, efficient=True)
         else:
             self.defaults=EstimatorSettings(n_jobs=-1, efficient=False)
@@ -24,7 +24,7 @@ class KernelDensitySampler(DoSampler):
 
     def _fit_conditional(self):
         self.conditional_density = KDEMultivariateConditional(endog=self._data[self._outcome_names],
-                                                              exog=self._data[self._treatment_names + self._target_estimand.backdoor_variables],
+                                                              exog=self._data[self._treatment_names + self._target_estimand.get_backdoor_variables()],
                                                               dep_type=''.join(self.dep_type),
                                                               indep_type=''.join(self.indep_type),
                                                               bw=self.bw,
@@ -36,7 +36,7 @@ class KernelDensitySampler(DoSampler):
 
     def _construct_sampler(self):
         return KernelSampler(self.outcome_upper_support, self.outcome_lower_support, self._outcome_names, self._treatment_names,
-                             self._target_estimand.backdoor_variables, self._data, self.dep_type, self.indep_type,
+                             self._target_estimand.get_backdoor_variables(), self._data, self.dep_type, self.indep_type,
                              self.bw, self.defaults)
 
 

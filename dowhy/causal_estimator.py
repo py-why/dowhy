@@ -760,7 +760,7 @@ class RealizedEstimand(object):
     def __init__(self, identified_estimand, estimator_name):
         self.treatment_variable = identified_estimand.treatment_variable
         self.outcome_variable = identified_estimand.outcome_variable
-        self.backdoor_variables = identified_estimand.backdoor_variables
+        self.backdoor_variables = identified_estimand.get_backdoor_variables()
         self.instrumental_variables = identified_estimand.instrumental_variables
         self.estimand_type = identified_estimand.estimand_type
         self.estimand_expression = None

@@ -40,10 +40,13 @@ class CausalIdentifier:
         estimands_dict = {}
         backdoor_variables_dict = {}
         backdoor_sets = self.identify_backdoor()
-        is_identified = [ self._graph.all_observed(bset) for bset in backdoor_sets ]
+        is_identified = [ self._graph.all_observed(bset["backdoor_set"]) for bset in backdoor_sets ]
         response = False
         if all(is_identified):
             self.logger.info("All common causes are observed. Causal effect can be identified.")
+            backdoor_sets_arr = [list(
+                bset["backdoor_set"])
+                for bset in backdoor_sets]
         else:
             self.logger.warning("If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.")
             if self._proceed_when_unidentifiable:
@@ -57,22 +60,27 @@ class CausalIdentifier:
                 )
                 if response is False:
                     self.logger.warn("Identification failed due to unobserved variables.")
-                    backdoor_sets = []
+                    backdoor_sets_arr = []
 
         if self._proceed_when_unidentifiable or response is True:
-            backdoor_sets = [list(self._graph.filter_unobserved_variables(bset)) for bset in backdoor_sets]
+            max_paths_blocked = max( bset['num_paths_blocked_by_observed_nodes'] for bset in backdoor_sets)
+            backdoor_sets_arr = [list(
+                self._graph.filter_unobserved_variables(bset["backdoor_set"]))
+                for bset in backdoor_sets
+                if bset["num_paths_blocked_by_observed_nodes"]==max_paths_blocked]
 
-        for i in range(len(backdoor_sets)):
+        for i in range(len(backdoor_sets_arr)):
             backdoor_estimand_expr = self.construct_backdoor_estimand(
                 self.estimand_type, self._graph.treatment_name,
-                self._graph.outcome_name, backdoor_sets[i])
+                self._graph.outcome_name, backdoor_sets_arr[i])
 
             self.logger.debug("Identified expression = " + str(backdoor_estimand_expr))
             estimands_dict["backdoor"+str(i+1)] = backdoor_estimand_expr
-            backdoor_variables_dict["backdoor"+str(i+1)] = backdoor_sets[i]
-        # Adding a None estimand if no backdoor set found
-        if len(backdoor_sets) == 0:
-            estimands_dict["backdoor"] = None
+            backdoor_variables_dict["backdoor"+str(i+1)] = backdoor_sets_arr[i]
+        # Setting default "backdoor" identification adjustment set
+        default_backdoor_id = self.get_default_backdoor_set_id(backdoor_variables_dict)
+        estimands_dict["backdoor"] = estimands_dict.get("backdoor" + str(default_backdoor_id), None)
+        backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get("backdoor" + str(default_backdoor_id), None)
 
         # Now checking if there is also a valid iv estimand
         instrument_names = self._graph.get_instruments(self.treatment_name,
@@ -104,26 +112,45 @@ class CausalIdentifier:
     def identify_backdoor(self):
         backdoor_sets = []
         empty_set = set()
-        if self._graph.is_valid_backdoor_set(self.treatment_name, self.outcome_name, empty_set):
-            backdoor_sets.append(empty_set)
+        check = self._graph.check_valid_backdoor_set(self.treatment_name, self.outcome_name, empty_set)
+        if check["is_dseparated"]:
+            backdoor_sets.append({
+                'backdoor_set':empty_set,
+                'num_paths_blocked_by_observed_nodes': check["num_paths_blocked_by_observed_nodes"]})
         eligible_variables = self._graph.get_all_nodes() - set(self.treatment_name) - set(self.outcome_name)
         eligible_variables -= self._graph.get_descendants(self.treatment_name)
-        print(eligible_variables)
         for size_candidate_set in range(1, len(eligible_variables)+1):
             for candidate_set in itertools.combinations(eligible_variables, size_candidate_set):
-                if self._graph.is_valid_backdoor_set(self.treatment_name, self.outcome_name, candidate_set):
-                    backdoor_sets.append(candidate_set)
+                check = self._graph.check_valid_backdoor_set(self.treatment_name, self.outcome_name, candidate_set)
+                print(candidate_set, check["is_dseparated"], check["num_paths_blocked_by_observed_nodes"])
+                if check["is_dseparated"]:
+                    backdoor_sets.append({
+                        'backdoor_set': candidate_set,
+                        'num_paths_blocked_by_observed_nodes': check["num_paths_blocked_by_observed_nodes"]})
 
         #causes_t = self._graph.get_causes(self.treatment_name)
         #causes_y = self._graph.get_causes(self.outcome_name, remove_edges={'sources':self.treatment_name, 'targets':self.outcome_name})
         #common_causes = list(causes_t.intersection(causes_y))
         #self.logger.info("Common causes of treatment and outcome:" + str(common_causes))
-        observed_backdoor_sets = [ bset for bset in backdoor_sets if self._graph.all_observed(bset)]
+        observed_backdoor_sets = [ bset for bset in backdoor_sets if self._graph.all_observed(bset["backdoor_set"])]
         if len(observed_backdoor_sets)==0:
             return backdoor_sets
         else:
             return observed_backdoor_sets
- 
+    
+    def get_default_backdoor_set_id(self, backdoor_sets_dict):
+        # Adding a None estimand if no backdoor set found
+        if len(backdoor_sets_dict) == 0:
+            return None
+        max_set_length = 0
+        default_key = None
+        # Default set is the one with the most number of adjustment variables (optimizing for minimum (unknown) bias not for efficiency)
+        for key, bdoor_set in backdoor_sets_dict.items():
+            if len(bdoor_set) > max_set_length:
+                max_set_length = len(bdoor_set)
+                default_key = key
+        return default_key
+
     def construct_backdoor_estimand(self, estimand_type, treatment_name,
                                     outcome_name, common_causes):
         # TODO: outputs string for now, but ideally should do symbolic
@@ -215,6 +242,17 @@ class IdentifiedEstimand:
 
     def set_identifier_method(self, identifier_name):
         self.identifier_method = identifier_name
+
+    def get_backdoor_variables(self, key=None):
+        if key is None:
+            return self.backdoor_variables[self.identifier_method]
+        else:
+            return self.backdoor_variables[key]
+    
+    def set_backdoor_variables(self, bdoor_variables_arr, key=None):
+        if key is None:
+            key = self.identifier_method
+        self.backdoor_variables[key] = bdoor_variables_arr
 
     def __str__(self):
         s = "Estimand type: {0}\n".format(self.estimand_type)

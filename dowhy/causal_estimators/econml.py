@@ -13,7 +13,7 @@ class Econml(CausalEstimator):
         super().__init__(*args, **kwargs)
         self.logger.info("INFO: Using EconML Estimator")
         self.identifier_method = self._target_estimand.identifier_method
-        self._observed_common_causes_names = self._target_estimand.backdoor_variables.copy()
+        self._observed_common_causes_names = self._target_estimand.get_backdoor_variables().copy()
         # Checking if effect modifiers are a subset of common causes
         x_subsetof_w = True
         unique_effect_modifier_names = []

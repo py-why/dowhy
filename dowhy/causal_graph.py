@@ -221,10 +221,46 @@ class CausalGraph:
             causes = causes.union(self.get_ancestors(v, new_graph=new_graph))
         return causes
 
-    def is_valid_backdoor_set(self, nodes1, nodes2, nodes3):
+    def check_valid_backdoor_set(self, nodes1, nodes2, nodes3):
         # also return the number of backdoor paths blocked by observed nodes
-        common_causes = self.get_common_causes(nodes1, nodes2)
-        return all(comm_cause in nodes3 for comm_cause in common_causes)
+        backdoor_paths = self.get_backdoor_paths(nodes1, nodes2)
+        d_separated = all([self.is_blocked(path, nodes3) for path in backdoor_paths])
+        observed_nodes3 = self.filter_unobserved_variables(nodes3)
+        num_paths_blocked = sum([self.is_blocked(path, observed_nodes3) for path in backdoor_paths])
+        return {'is_dseparated': d_separated,
+                'num_paths_blocked_by_observed_nodes': num_paths_blocked}
+
+    def get_backdoor_paths(self, nodes1, nodes2):
+        paths = []
+        undirected_graph = self._graph.to_undirected()
+        for node1 in nodes1:
+            for node2 in nodes2:
+                backdoor_paths = [
+                        pth 
+                        for pth in nx.all_simple_paths(undirected_graph, source=node1, target=node2) 
+                        if self._graph.has_edge(pth[1], pth[0])]
+                paths.extend(backdoor_paths)
+        self.logger.debug("Backdoor paths: " + str(paths))
+        return paths
+                
+    def is_blocked(self, path, conditioned_nodes):
+        blocked_by_conditioning = False
+        has_unconditioned_collider = False
+        for i in range(len(path)-2):
+            if self._graph.has_edge(path[i], path[i+1]) and self._graph.has_edge(path[i+2], path[i+1]): # collider
+                collider_descendants = nx.descendants(self._graph, path[i+1])
+                if path[i+1] not in conditioned_nodes and all(cdesc not in conditioned_nodes for cdesc in collider_descendants):
+                    has_unconditioned_collider=True
+            else: # chain, fork
+                if path[i+1] in conditioned_nodes:
+                    blocked_by_conditioning = True
+                    break
+        if blocked_by_conditioning:
+            return True
+        elif has_unconditioned_collider:
+            return True
+        else:
+            return False
 
     def get_common_causes(self, nodes1, nodes2):
         """
