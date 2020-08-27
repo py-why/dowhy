@@ -122,7 +122,10 @@ class CausalIdentifier:
             backdoor_sets.append({
                 'backdoor_set':empty_set,
                 'num_paths_blocked_by_observed_nodes': check["num_paths_blocked_by_observed_nodes"]})
-        eligible_variables = self._graph.get_all_nodes() - set(self.treatment_name) - set(self.outcome_name)
+        eligible_variables = self._graph.get_all_nodes() \
+            - set(self.treatment_name) \
+            - set(self.outcome_name) \
+            - set(self._graph.get_instruments(self.treatment_name, self.outcome_name))
         eligible_variables -= self._graph.get_descendants(self.treatment_name)
         for size_candidate_set in range(1, len(eligible_variables)+1):
             for candidate_set in itertools.combinations(eligible_variables, size_candidate_set):
