@@ -6,10 +6,11 @@ from dowhy import CausalModel
 
 
 class TestEstimator(object):
-    def __init__(self, error_tolerance, Estimator):
+    def __init__(self, error_tolerance, Estimator, identifier_method="backdoor"):
         print("Error tolerance is", error_tolerance)
         self._error_tolerance = error_tolerance
         self._Estimator = Estimator
+        self._identifier_method = identifier_method
 
     def average_treatment_effect_test(self, dataset="linear", beta=10,
             num_common_causes=1, num_instruments=1,
@@ -47,6 +48,7 @@ class TestEstimator(object):
             test_significance=test_significance
         )
         target_estimand = model.identify_effect()
+        target_estimand.set_identifier_method(self._identifier_method)
         estimator_ate = self._Estimator(
             data['df'],
             identified_estimand=target_estimand,

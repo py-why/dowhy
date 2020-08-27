@@ -734,7 +734,7 @@ class CausalEstimate:
 
     def __str__(self):
         s = "*** Causal Estimate ***\n"
-        s += "\n## Identified estimand\n{0}".format(self.target_estimand)
+        s += "\n## Identified estimand\n{0}".format(self.target_estimand.__str__(only_target_estimand=True))
         s += "\n## Realized estimand\n{0}".format(self.realized_estimand_expr)
         s += "\nTarget units: {0}\n".format(self.estimator.target_units_tostr())
         s += "\n## Estimate\n"
@@ -760,7 +760,7 @@ class RealizedEstimand(object):
     def __init__(self, identified_estimand, estimator_name):
         self.treatment_variable = identified_estimand.treatment_variable
         self.outcome_variable = identified_estimand.outcome_variable
-        self.backdoor_variables = identified_estimand.backdoor_variables
+        self.backdoor_variables = identified_estimand.get_backdoor_variables()
         self.instrumental_variables = identified_estimand.instrumental_variables
         self.estimand_type = identified_estimand.estimand_type
         self.estimand_expression = None

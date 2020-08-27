@@ -22,7 +22,7 @@ class LinearRegressionEstimator(RegressionEstimator):
 
     def construct_symbolic_estimator(self, estimand):
         expr = "b: " + ",".join(estimand.outcome_variable) + "~"
-        var_list = estimand.treatment_variable + estimand.backdoor_variables
+        var_list = estimand.treatment_variable + estimand.get_backdoor_variables()
         expr += "+".join(var_list)
         if self._effect_modifier_names:
             interaction_terms = ["{0}*{1}".format(x[0], x[1]) for x in itertools.product(estimand.treatment_variable, self._effect_modifier_names)]

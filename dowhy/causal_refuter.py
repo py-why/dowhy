@@ -35,7 +35,7 @@ class CausalRefuter:
 
         # Concatenate the confounders, instruments and effect modifiers
         try:
-            self._variables_of_interest = self._target_estimand.backdoor_variables + \
+            self._variables_of_interest = self._target_estimand.get_backdoor_variables() + \
                                         self._target_estimand.instrumental_variables + \
                                         self._estimate.params['effect_modifiers']
         except AttributeError as attr_error:

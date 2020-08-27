@@ -17,8 +17,8 @@ class RegressionEstimator(CausalEstimator):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.logger.debug("Back-door variables used:" +
-                          ",".join(self._target_estimand.backdoor_variables))
-        self._observed_common_causes_names = self._target_estimand.backdoor_variables
+                          ",".join(self._target_estimand.get_backdoor_variables()))
+        self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
         if len(self._observed_common_causes_names)>0:
             self._observed_common_causes = self._data[self._observed_common_causes_names]
             self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)

@@ -9,6 +9,6 @@ class MockRefuter(CausalRefuter):
 
 
 def test_causal_refuter_placeholder_method():
-	refuter = MockRefuter(None, IdentifiedEstimand(None, None), None)
+	refuter = MockRefuter(None, IdentifiedEstimand(None, None, None), None)
 	with pytest.raises(NotImplementedError):
 		refuter.refute_estimate()

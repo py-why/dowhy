@@ -9,6 +9,7 @@ class TestRefuter(object):
             effect_strength_on_y=None, **kwargs):
         self._error_tolerance = error_tolerance
         self.estimator_method = estimator_method
+        self.identifier_method = estimator_method.split(".")[0]
         self.refuter_method = refuter_method
         self.transformations = transformations
         self.params = params
@@ -48,6 +49,7 @@ class TestRefuter(object):
             test_significance=None
         )
         target_estimand = model.identify_effect()
+        target_estimand.set_identifier_method(self.identifier_method)
         ate_estimate = model.estimate_effect(
             identified_estimand=target_estimand,
             method_name=self.estimator_method,
