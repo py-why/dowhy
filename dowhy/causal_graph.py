@@ -234,17 +234,26 @@ class CausalGraph:
     def get_backdoor_paths(self, nodes1, nodes2):
         paths = []
         undirected_graph = self._graph.to_undirected()
+        nodes12 = set(nodes1).union(nodes2)
         for node1 in nodes1:
             for node2 in nodes2:
                 backdoor_paths = [
-                        pth 
-                        for pth in nx.all_simple_paths(undirected_graph, source=node1, target=node2) 
+                        pth
+                        for pth in nx.all_simple_paths(undirected_graph, source=node1, target=node2)
                         if self._graph.has_edge(pth[1], pth[0])]
-                paths.extend(backdoor_paths)
+                # remove paths that have nodes1\node1 or nodes2\node2 as intermediate nodes
+                filtered_backdoor_paths = [
+                        pth
+                        for pth in backdoor_paths
+                        if len(nodes12.intersection(pth[1:-1]))==0]
+                paths.extend(filtered_backdoor_paths)
         self.logger.debug("Backdoor paths: " + str(paths))
         return paths
-                
+
     def is_blocked(self, path, conditioned_nodes):
+        """ Uses d-separation criteria to decide if conditioned_nodes block given path.
+        """
+
         blocked_by_conditioning = False
         has_unconditioned_collider = False
         for i in range(len(path)-2):
@@ -252,7 +261,7 @@ class CausalGraph:
                 collider_descendants = nx.descendants(self._graph, path[i+1])
                 if path[i+1] not in conditioned_nodes and all(cdesc not in conditioned_nodes for cdesc in collider_descendants):
                     has_unconditioned_collider=True
-            else: # chain, fork
+            else: # chain or fork
                 if path[i+1] in conditioned_nodes:
                     blocked_by_conditioning = True
                     break
@@ -337,11 +346,10 @@ class CausalGraph:
         ancestors_outcome = set()
         for node in outcome_nodes:
             ancestors_outcome = ancestors_outcome.union(nx.ancestors(g_no_parents_treatment, node))
-
         # [TODO: double check these work with multivariate implementation:]
         # Exclusion
         candidate_instruments = parents_treatment.difference(ancestors_outcome)
-        self.logger.debug("Candidate instruments after exclusion %s",
+        self.logger.debug("Candidate instruments after satisfying exclusion: %s",
                           candidate_instruments)
         # As-if-random setup
         children_causes_outcome = [nx.descendants(g_no_parents_treatment, v)
@@ -352,4 +360,6 @@ class CausalGraph:
 
         # As-if-random
         instruments = candidate_instruments.difference(children_causes_outcome)
+        self.logger.debug("Candidate instruments after satisfying exclusion and as-if-random: %s",
+                instruments)
         return list(instruments)

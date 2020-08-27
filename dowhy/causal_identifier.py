@@ -39,10 +39,11 @@ class CausalIdentifier:
         """
 
         estimands_dict = {}
+        # First, checking if there are any valid backdoor adjustment sets
         backdoor_variables_dict = {}
         backdoor_sets = self.identify_backdoor()
         is_identified = [ self._graph.all_observed(bset["backdoor_set"]) for bset in backdoor_sets ]
-        response = False
+
         if all(is_identified):
             self.logger.info("All common causes are observed. Causal effect can be identified.")
             backdoor_sets_arr = [list(
@@ -50,6 +51,7 @@ class CausalIdentifier:
                 for bset in backdoor_sets]
         else:
             self.logger.warning("If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.")
+            response = False # user response
             if self._proceed_when_unidentifiable:
                 self.logger.info(
                     "Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True."
@@ -62,13 +64,12 @@ class CausalIdentifier:
                 if response is False:
                     self.logger.warn("Identification failed due to unobserved variables.")
                     backdoor_sets_arr = []
-
-        if self._proceed_when_unidentifiable or response is True:
-            max_paths_blocked = max( bset['num_paths_blocked_by_observed_nodes'] for bset in backdoor_sets)
-            backdoor_sets_arr = [list(
-                self._graph.filter_unobserved_variables(bset["backdoor_set"]))
-                for bset in backdoor_sets
-                if bset["num_paths_blocked_by_observed_nodes"]==max_paths_blocked]
+            if self._proceed_when_unidentifiable or response is True:
+                max_paths_blocked = max( bset['num_paths_blocked_by_observed_nodes'] for bset in backdoor_sets)
+                backdoor_sets_arr = [list(
+                    self._graph.filter_unobserved_variables(bset["backdoor_set"]))
+                    for bset in backdoor_sets
+                    if bset["num_paths_blocked_by_observed_nodes"]==max_paths_blocked]
 
         for i in range(len(backdoor_sets_arr)):
             backdoor_estimand_expr = self.construct_backdoor_estimand(
