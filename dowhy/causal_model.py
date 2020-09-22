@@ -158,11 +158,11 @@ class CausalModel:
             * Propensity Score Stratification: "backdoor.propensity_score_stratification"
             * Propensity Score-based Inverse Weighting: "backdoor.propensity_score_weighting"
             * Linear Regression: "backdoor.linear_regression"
+            * Generalized Linear Models (e.g., logistic regression): "backdoor.generalized_linear_model"
             * Instrumental Variables: "iv.instrumental_variable"
             * Regression Discontinuity: "iv.regression_discontinuity"
 
-        In addition, you can directly call any of the EconML estimation methods. The convention is "backdoor.econml.path-to-estimator-class". For example, for the double machine learning estimator ("DMLCateEstimator" class) that is located inside "dml" module of EconML, you can use the method name, "backdoor.econml.dml.DMLCateEstimator".
-
+        In addition, you can directly call any of the EconML estimation methods. The convention is "backdoor.econml.path-to-estimator-class". For example, for the double machine learning estimator ("DMLCateEstimator" class) that is located inside "dml" module of EconML, you can use the method name, "backdoor.econml.dml.DMLCateEstimator". CausalML estimators can also be called. See `this demo notebook <https://microsoft.github.io/dowhy/example_notebooks/dowhy-conditional-treatment-effects.html>`_.
 
 
         :param identified_estimand: a probability expression
