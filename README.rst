@@ -285,8 +285,8 @@ DoWhy brings three key differences compared to available software for causal inf
     automatically run sensitivity and robustness checks on the obtained estimate.
 
 Finally, DoWhy is easily extensible, allowing other implementations of the
-four verbs to co-exist (we hope to integrate with external
-implementations in the future). The four verbs are mutually independent, so their
+four verbs to co-exist (e.g., we already support implementations of the *estimation* verb from 
+EconML and CausalML libraries). The four verbs are mutually independent, so their
 implementations can be combined in any way.
 
 
