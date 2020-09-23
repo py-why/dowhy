@@ -299,6 +299,12 @@ class CausalGraph:
         modifiers = modifiers.difference(nodes1)
         for node in nodes1:
             modifiers = modifiers.difference(self.get_ancestors(node))
+        # removing all mediators
+        for node1 in nodes1:
+            for node2 in nodes2:
+                all_directed_paths = nx.all_simple_paths(self._graph, node1, node2)
+                for path in all_directed_paths:
+                    modifiers=modifiers.difference(path)
         return list(modifiers)
 
     def get_parents(self, node_name):
@@ -363,3 +369,24 @@ class CausalGraph:
         self.logger.debug("Candidate instruments after satisfying exclusion and as-if-random: %s",
                 instruments)
         return list(instruments)
+
+
+    def get_all_directed_paths(self, nodes1, nodes2):
+        """ Get all directed paths between sets of nodes.
+
+        Currently only supports singleton sets.
+        """
+        node1 = nodes1[0]
+        node2 = nodes2[0]
+        return nx.all_simple_paths(self._graph, source=node1, target=node2)
+
+    def check_valid_frontdoor_set(self, nodes1, nodes2, candidate_nodes, frontdoor_paths=None):
+        """Check if valid the frontdoor variables for set of treatments, nodes1 to set of outcomes, nodes2.
+        """
+        if frontdoor_paths is None:
+            frontdoor_paths = self.get_all_directed_paths(nodes1, nodes2)
+
+        d_separated = all([self.is_blocked(path, candidate_nodes) for path in frontdoor_paths])
+        return d_separated
+
+
