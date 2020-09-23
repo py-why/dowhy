@@ -213,6 +213,7 @@ class CausalIdentifier:
                 max_set_length = len(bdoor_set)
                 default_key = key
         return default_key
+    
     def construct_backdoor_estimand(self, estimand_type, treatment_name,
                                     outcome_name, common_causes):
         # TODO: outputs string for now, but ideally should do symbolic
@@ -296,18 +297,20 @@ class CausalIdentifier:
             sym_frontdoor_symbols = [sp.Symbol(inst) for inst in frontdoor_variables_names]
             sym_frontdoor = sp.Array(sym_frontdoor_symbols)  # ",".join(instrument_names))
             sym_outcome_derivative = sp.Derivative(sym_outcome, sym_frontdoor)
-            sym_treatment_derivative = sp.Derivative(sym_treatment, sym_frontdoor)
-            sym_effect = spstats.Expectation(sym_outcome_derivative / sym_treatment_derivative)
+            sym_treatment_derivative = sp.Derivative(sym_frontdoor, sym_treatment)
+            sym_effect = spstats.Expectation(sym_treatment_derivative * sym_outcome_derivative)
             sym_assumptions = {
-                "As-if-random": (
-                    "If U\N{RIGHTWARDS ARROW}\N{RIGHTWARDS ARROW}{0} then "
-                    "\N{NOT SIGN}(U \N{RIGHTWARDS ARROW}\N{RIGHTWARDS ARROW}{{{1}}})"
-                ).format(outcome_name, ",".join(frontdoor_variables_names)),
-                "Exclusion": (
-                    u"If we remove {{{0}}}\N{RIGHTWARDS ARROW}{{{1}}}, then "
-                    u"\N{NOT SIGN}({{{0}}}\N{RIGHTWARDS ARROW}{2})"
-                ).format(",".join(frontdoor_variables_names), ",".join(treatment_name),
-                         outcome_name)
+                "Full-mediation": (
+                    "{2} intercepts (blocks) all directed paths from {0} to {1}."
+                ).format(",".join(treatment_name), ",".join(outcome_name), ",".join(frontdoor_variables_names)),
+                "First-stage-unconfoundedness": (
+                    u"If U\N{RIGHTWARDS ARROW}{{{0}}} and U\N{RIGHTWARDS ARROW}{{{1}}}"
+                    " then P({1}|{0},U) = P({1}|{0})"
+                ).format(",".join(treatment_name), ",".join(frontdoor_variables_names)),
+                "Second-stage-unconfoundedness": (
+                    u"If U\N{RIGHTWARDS ARROW}{{{2}}} and U\N{RIGHTWARDS ARROW}{{{1}}}"
+                    " then P({1}|{2}, {0}, U) = P({1}|{2}, {0})"
+                ).format(",".join(treatment_name), ",".join(outcome_name), ",".join(frontdoor_variables_names))
             }
         else:
             raise ValueError("Estimand type not supported. Supported estimand types are 'non-parametric-ate'.")
