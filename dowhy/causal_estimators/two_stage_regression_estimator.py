@@ -10,7 +10,7 @@ from dowhy.causal_estimators.linear_regression_estimator import LinearRegression
 class TwoStageRegressionEstimator(CausalEstimator):
     """Compute treatment effect whenever the effect is fully mediated by another variable (front-door) or when there is an instrument available.
 
-    More details to follow.
+    Currently only supports a linear model for the effects.
     """
     DEFAULT_FIRST_STAGE_MODEL = linear_model.LinearRegression
     DEFAULT_SECOND_STAGE_MODEL = LinearRegressionEstimator
@@ -50,12 +50,12 @@ class TwoStageRegressionEstimator(CausalEstimator):
             self.first_stage_model = self.method_params['first_stage_model']
         else:
             self.first_stage_model = self.__class__.DEFAULT_FIRST_STAGE_MODEL
-            self.logger.warn("First stage model not provided. Defaulting to sklearn.linear_model.LinearRegression.")
+            self.logger.warning("First stage model not provided. Defaulting to sklearn.linear_model.LinearRegression.")
         if 'second_stage_model' in self.method_params:
             self.second_stage_model = self.method_params['second_stage_model']
         else:
             self.second_stage_model = self.__class__.DEFAULT_SECOND_STAGE_MODEL
-            self.logger.warn("Second stage model not provided. Defaulting to backdoor.linear_regression.")
+            self.logger.warning("Second stage model not provided. Defaulting to backdoor.linear_regression.")
 
         self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
 
