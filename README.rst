@@ -225,14 +225,14 @@ The :code:`do` method is built on top of the lower-level :code:`dowhy` objects, 
 identification automatically when you provide a graph instead of :code:`common_causes`.
 
 Graphical Models and Potential Outcomes: Best of both worlds
-------------------------------------------------------------
+============================================================
 DoWhy builds on two of the most powerful frameworks for causal inference:
 graphical models and potential outcomes. It uses graph-based criteria and
 do-calculus for modeling assumptions and identifying a non-parametric causal effect.
 For estimation, it switches to methods based primarily on potential outcomes.
 
 A unifying language for causal inference
-=========================================
+----------------------------------------
 
 DoWhy is based on a simple unifying language for causal inference. Causal
 inference may seem tricky, but almost all methods follow four key steps:
@@ -255,6 +255,8 @@ graph-based methods to identify the causal effect, *estimate* uses
 statistical methods for estimating the identified estimand, and finally *refute* 
 tries to refute the obtained estimate by testing robustness to assumptions.
 
+Key differences compared to available causal inference software
+----------------------------------------------------------------
 DoWhy brings three key differences compared to available software for causal inference:
 
 **Explicit identifying assumptions**
@@ -292,9 +294,10 @@ implementations can be combined in any way.
 Below are more details about the current implementation of each of these verbs.
 
 Four steps of causal inference
-------------------------------
+===============================
 
-I. **Model a causal problem**
+I. Model a causal problem
+-----------------------------
 
 DoWhy creates an underlying causal graphical model for each problem. This
 serves to make each causal assumption explicit. This graph need not be
@@ -311,7 +314,8 @@ instead of providing a graph.
 
 .. i comment image:: causal_model.png
 
-II. **Identify a target estimand under the model**
+II. Identify a target estimand under the model
+----------------------------------------------
 
 Based on the causal graph, DoWhy finds all possible ways of identifying a desired causal effect based on
 the graphical model. It uses graph-based criteria and do-calculus to find
@@ -323,7 +327,8 @@ the following identification criteria.
 * Instrumental Variables
 * Mediation (Direct and indirect effect identification)
 
-III. **Estimate causal effect based on the identified estimand**
+III. Estimate causal effect based on the identified estimand
+------------------------------------------------------------
 
 DoWhy supports methods based on both back-door criterion and instrumental
 variables. It also provides a non-parametric confidence intervals and permutation test for testing
@@ -349,8 +354,8 @@ Here are the currently supported estimation methods.
     * Two-stage linear regression
 
 
-IV. **Refute the obtained estimate**
-
+IV. Refute the obtained estimate
+-------------------------------------
 Having access to multiple refutation methods to verify a causal inference is
 a key benefit of using DoWhy.
 
@@ -361,7 +366,7 @@ DoWhy supports the following refutation methods.
 * Subset validation
 
 Citing this package
--------------------
+====================
 If you find DoWhy useful for your research work, please cite us as follows:
 
 Amit Sharma, Emre Kiciman, et al. DoWhy: A Python package for causal inference. 2019. https://github.com/microsoft/dowhy
