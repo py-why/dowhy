@@ -232,7 +232,7 @@ do-calculus for modeling assumptions and identifying a non-parametric causal eff
 For estimation, it switches to methods based primarily on potential outcomes.
 
 A unifying language for causal inference
-----------------------------------------
+=========================================
 
 DoWhy is based on a simple unifying language for causal inference. Causal
 inference may seem tricky, but almost all methods follow four key steps:
@@ -315,15 +315,21 @@ II. **Identify a target estimand under the model**
 
 Based on the causal graph, DoWhy finds all possible ways of identifying a desired causal effect based on
 the graphical model. It uses graph-based criteria and do-calculus to find
-potential ways find expressions that can identify the causal effect.
+potential ways find expressions that can identify the causal effect. It support
+the following identification criteria.
+
+* Back-door criterion
+* Front-door criterion
+* Instrumental Variables
+* Mediation (Direct and indirect effect identification)
 
 III. **Estimate causal effect based on the identified estimand**
 
 DoWhy supports methods based on both back-door criterion and instrumental
-variables. It also provides a non-parametric permutation test for testing
+variables. It also provides a non-parametric confidence intervals and permutation test for testing
 the statistical significance of obtained estimate. 
 
-Currently supported back-door criterion methods.
+Here are the currently supported estimation methods. 
 
 * Methods based on estimating the treatment assignment
     * Propensity-based Stratification
@@ -331,12 +337,16 @@ Currently supported back-door criterion methods.
     * Inverse Propensity Weighting
 
 * Methods based on estimating the response surface
-    * Regression
+    * Linear Regression
+    * Generalized Linear Models
 
-Currently supported methods based on instrumental variables.
+* Methods based on the instrumental variable equation
+    * Binary Instrument/Wald Estimator
+    * Two-stage least squares
+    * Regression discontinuity
 
-* Binary Instrument/Wald Estimator
-* Regression discontinuity
+* Methods for front-door criterion and general mediation
+    * Two-stage linear regression
 
 
 IV. **Refute the obtained estimate**
