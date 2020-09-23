@@ -319,8 +319,10 @@ II. Identify a target estimand under the model
 
 Based on the causal graph, DoWhy finds all possible ways of identifying a desired causal effect based on
 the graphical model. It uses graph-based criteria and do-calculus to find
-potential ways find expressions that can identify the causal effect. It support
-the following identification criteria.
+potential ways find expressions that can identify the causal effect. 
+
+Supported identification criteria
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * Back-door criterion
 * Front-door criterion
@@ -334,7 +336,8 @@ DoWhy supports methods based on both back-door criterion and instrumental
 variables. It also provides a non-parametric confidence intervals and permutation test for testing
 the statistical significance of obtained estimate. 
 
-Here are the currently supported estimation methods. 
+Supported estimation methods 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * Methods based on estimating the treatment assignment
     * Propensity-based Stratification
@@ -353,13 +356,41 @@ Here are the currently supported estimation methods.
 * Methods for front-door criterion and general mediation
     * Two-stage linear regression
 
+Using EconML and CausalML estimation methods in DoWhy
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+It is easy to call external estimation methods using DoWhy. Currently we
+support integrations with the `EconML <https://github.com/microsoft/econml>`_ and `CausalML <https://github.com/uber/causalml>`_ packages. Here's an example
+of estimating conditional treatment effects using EconML's double machine
+learning estimator.
+
+.. code:: python
+	
+	from sklearn.preprocessing import PolynomialFeatures
+	from sklearn.linear_model import LassoCV
+	from sklearn.ensemble import GradientBoostingRegressor
+	dml_estimate = model.estimate_effect(identified_estimand, method_name="backdoor.econml.dml.DMLCateEstimator",
+                                     	control_value = 0,
+                                     	treatment_value = 1,
+                                 		target_units = lambda df: df["X0"]>1,
+                                 		confidence_intervals=False,
+                                		method_params={"init_params":{'model_y':GradientBoostingRegressor(),
+                                                              'model_t': GradientBoostingRegressor(),
+                                                              "model_final":LassoCV(), 
+                                                              'featurizer':PolynomialFeatures(degree=1, include_bias=True)},
+                                               		   "fit_params":{}}
+										)
+
+
+More examples are in this `notebook
+<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_. 
 
 IV. Refute the obtained estimate
 -------------------------------------
 Having access to multiple refutation methods to verify a causal inference is
 a key benefit of using DoWhy.
 
-DoWhy supports the following refutation methods.
+Supported refutation methods
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * Placebo Treatment
 * Irrelevant Additional Confounder
@@ -382,11 +413,11 @@ Bibtex::
 
 
 Roadmap 
------------
+=======
 The `projects <https://github.com/microsoft/dowhy/projects>`_ page lists the next steps for DoWhy. If you would like to contribute, have a look at the current projects. If you have a specific request for DoWhy, please raise an issue `here <https://github.com/microsoft/dowhy/issues>`_.
 
 Contributing
--------------
+============
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
