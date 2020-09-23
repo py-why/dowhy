@@ -50,13 +50,14 @@ def construct_col_names(name, num_vars, num_discrete_vars,
 def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
                    num_effect_modifiers=0,
                    num_treatments = 1,
+                   num_frontdoor_variables=0,
                    treatment_is_binary=True,
                    outcome_is_binary=False,
                    num_discrete_common_causes=0,
                    num_discrete_instruments=0,
                    num_discrete_effect_modifiers=0,
                    one_hot_encode = False):
-    W, X, Z, c1, c2, ce, cz = [None]*7
+    W, X, Z, FD, c1, c2, ce, cz, cfd1, cfd2 = [None]*10
     W_with_dummy, X_with_categorical  = (None, None)
     beta = float(beta)
     # Making beta an array
@@ -108,8 +109,23 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
     if treatment_is_binary:
         t = np.vectorize(stochastically_convert_to_binary)(t)
 
-    def _compute_y(t, W, X, beta, c2, ce):
-        y =  t @ beta  # + np.random.normal(0,0.01)
+    # Generating frontdoor variables if asked for
+    if num_frontdoor_variables > 0:
+        range_cfd1 = max(beta)*0.5
+        range_cfd2 = max(beta)*0.5
+        cfd1 = np.random.uniform(0, range_cfd1, (num_treatments, num_frontdoor_variables))
+        cfd2 = np.random.uniform(0, range_cfd2, num_frontdoor_variables)
+        FD_noise = np.random.normal(0, 1, (num_samples, num_frontdoor_variables))
+        FD = FD_noise
+        FD += t @ cfd1
+        print("cfd1=", cfd1)
+
+    def _compute_y(t, W, X, FD, beta, c2, ce, cfd2):
+        y = np.random.normal(0,0.01, num_samples)
+        if num_frontdoor_variables > 0:
+            y += FD @ cfd2
+        else:
+            y += t @ beta
         if num_common_causes > 0:
             y += W @ c2
         if num_effect_modifiers > 0:
@@ -117,7 +133,8 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         if outcome_is_binary:
             y = np.vectorize(stochastically_convert_to_binary)(y)
         return y
-    y = _compute_y(t, W_with_dummy, X_with_categorical, beta, c2, ce)
+
+    y = _compute_y(t, W_with_dummy, X_with_categorical, FD, beta, c2, ce, cfd2)
 
     data = np.column_stack((t, y))
     if num_common_causes > 0:
@@ -126,21 +143,32 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         data = np.column_stack((Z, data))
     if num_effect_modifiers > 0:
         data = np.column_stack((X_with_categorical, data))
+    if num_frontdoor_variables > 0:
+        data = np.column_stack((FD, data))
+
+    # Computing ATE
+    FD_T1, FD_T0 = None, None
+    T1 = np.ones((num_samples, num_treatments))
+    T0 = np.zeros((num_samples, num_treatments))
+    if num_frontdoor_variables > 0:
+        FD_T1 = FD_noise + (T1 @ cfd1)
+        FD_T0 = FD_noise + (T0 @ cfd1)
+    ate = np.mean(
+            _compute_y(T1, W_with_dummy, X_with_categorical, FD_T1, beta, c2, ce, cfd2) -
+            _compute_y(T0, W_with_dummy, X_with_categorical, FD_T0, beta, c2, ce, cfd2))
 
     treatments = [("v" + str(i)) for i in range(0, num_treatments)]
     outcome = "y"
+    # constructing column names for one-hot encoded discrete features
     common_causes = construct_col_names("W", num_common_causes, num_discrete_common_causes,
             num_discrete_levels=4, one_hot_encode=one_hot_encode)
-
-    ate = np.mean(
-            _compute_y(np.ones((num_samples, num_treatments)), W_with_dummy, X_with_categorical, beta, c2, ce) -
-            _compute_y(np.zeros((num_samples, num_treatments)), W_with_dummy, X_with_categorical, beta, c2, ce))
     instruments = [("Z" + str(i)) for i in range(0, num_instruments)]
+    frontdoor_variables = [("FD" + str(i)) for i in range(0, num_frontdoor_variables)]
     effect_modifiers = construct_col_names("X", num_effect_modifiers,
             num_discrete_effect_modifiers,
             num_discrete_levels=4, one_hot_encode=one_hot_encode)
     other_variables = None
-    col_names = effect_modifiers + instruments + common_causes + treatments + [outcome]
+    col_names = frontdoor_variables + effect_modifiers + instruments + common_causes + treatments + [outcome]
     data = pd.DataFrame(data, columns=col_names)
     # Specifying the correct dtypes
     if treatment_is_binary:
@@ -155,9 +183,9 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         data = data.astype({emodname:'category' for emodname in effect_modifiers[num_cont_effect_modifiers:]}, copy=False)
 
     # Now specifying the corresponding graph strings
-    dot_graph = create_dot_graph(treatments, outcome, common_causes, instruments, effect_modifiers)
+    dot_graph = create_dot_graph(treatments, outcome, common_causes, instruments, effect_modifiers, frontdoor_variables)
     # Now writing the gml graph
-    gml_graph = create_gml_graph(treatments, outcome, common_causes, instruments, effect_modifiers)
+    gml_graph = create_gml_graph(treatments, outcome, common_causes, instruments, effect_modifiers, frontdoor_variables)
     ret_dict = {
         "df": data,
         "treatment_name": treatments,
@@ -165,6 +193,7 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         "common_causes_names": common_causes,
         "instrument_names": instruments,
         "effect_modifier_names": effect_modifiers,
+        "frontdoor_variables_names": frontdoor_variables,
         "dot_graph": dot_graph,
         "gml_graph": gml_graph,
         "ate": ate
@@ -236,23 +265,27 @@ def simple_iv_dataset(beta, num_samples,
     return ret_dict
 
 def create_dot_graph(treatments, outcome, common_causes,
-        instruments, effect_modifiers=[]):
+        instruments, effect_modifiers=[], frontdoor_variables=[]):
     dot_graph = ('digraph {{'
                  ' U[label="Unobserved Confounders"];'
                  ' U->{0};'
                  ).format(outcome)
     for currt in treatments:
-        dot_graph += '{0}->{1}; U->{0};'.format(currt, outcome)
+        if len(frontdoor_variables) == 0:
+            dot_graph += '{0}->{1};'.format(currt, outcome)
+        dot_graph +=  'U->{0};'.format(currt)
         dot_graph +=  " ".join([v + "-> " + currt + ";" for v in common_causes])
         dot_graph += " ".join([v + "-> " + currt + ";" for v in instruments])
+        dot_graph += " ".join([currt + "-> " + v + ";" for v in frontdoor_variables])
 
     dot_graph += " ".join([v + "-> " + outcome + ";" for v in common_causes])
     dot_graph += " ".join([v + "-> " + outcome + ";" for v in effect_modifiers])
+    dot_graph += " ".join([v + "-> " + outcome + ";" for v in frontdoor_variables])
     dot_graph = dot_graph + "}"
     return dot_graph
 
 def create_gml_graph(treatments, outcome, common_causes,
-        instruments, effect_modifiers=[]):
+        instruments, effect_modifiers=[], frontdoor_variables=[]):
     gml_graph = ('graph[directed 1'
                  'node[ id "{0}" label "{0}"]'
                  'node[ id "{1}" label "{1}"]'
@@ -261,16 +294,20 @@ def create_gml_graph(treatments, outcome, common_causes,
 
     gml_graph +=  " ".join(['node[ id "{0}" label "{0}"]'.format(v) for v in common_causes])
     gml_graph += " ".join(['node[ id "{0}" label "{0}"]'.format(v) for v in instruments])
+    gml_graph += " ".join(['node[ id "{0}" label "{0}"]'.format(v) for v in frontdoor_variables])
     for currt in treatments:
         gml_graph += ('node[ id "{0}" label "{0}"]'
-                     'edge[source "{0}" target "{1}"]'
-                     'edge[source "{2}" target "{0}"]'
-                     ).format(currt, outcome, "Unobserved Confounders")
+                     'edge[source "{1}" target "{0}"]'
+                     ).format(currt, "Unobserved Confounders")
+        if len(frontdoor_variables) == 0:
+            gml_graph += 'edge[source "{0}" target "{1}"]'.format(currt, outcome)
         gml_graph +=  " ".join(['edge[ source "{0}" target "{1}"]'.format(v, currt) for v in common_causes])
         gml_graph += " ".join(['edge[ source "{0}" target "{1}"]'.format(v, currt) for v in instruments])
+        gml_graph += " ".join(['edge[ source "{0}" target "{1}"]'.format(currt, v) for v in frontdoor_variables])
 
     gml_graph = gml_graph + " ".join(['edge[ source "{0}" target "{1}"]'.format(v, outcome) for v in common_causes])
     gml_graph = gml_graph + " ".join(['node[ id "{0}" label "{0}"] edge[ source "{0}" target "{1}"]'.format(v, outcome) for v in effect_modifiers])
+    gml_graph = gml_graph + " ".join(['edge[ source "{0}" target "{1}"]'.format(v, outcome) for v in frontdoor_variables])
     gml_graph = gml_graph + ']'
     return gml_graph
 

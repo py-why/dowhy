@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import itertools
+import copy
 from sklearn import linear_model
 
 from dowhy.causal_estimator import CausalEstimator
@@ -66,8 +67,10 @@ class TwoStageRegressionEstimator(CausalEstimator):
                           ",".join(map(str, fs_model.coef_)))
         residuals = self._frontdoor_variables - fs_model.predict(first_stage_features)
         self._data["residual"] = residuals
+        modified_target_estimand = copy.deepcopy(self._target_estimand)
+        modified_target_estimand.treatment_variable = ["residual",]
         estimate = self.second_stage_model(self._data, 
-                self._target_estimand,  ["residual",], self._outcome_name,
+                 modified_target_estimand,  ["residual",], self._outcome_name,
                  control_value=self._control_value, 
                  treatment_value=self._treatment_value,
                  test_significance=self._significance_test, 
@@ -76,6 +79,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
                  target_units=self._target_units, 
                  effect_modifiers=self._effect_modifier_names,
                  params=self.method_params)._estimate_effect()
+        estimate.value = estimate.value*fs_model.coef_[0]
         return estimate
     
     def build_first_stage_features(self):
