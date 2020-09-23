@@ -11,8 +11,8 @@ class TwoStageRegressionEstimator(CausalEstimator):
 
     More details to follow.
     """
-    DEFAULT_FIRST_STAGE_METHOD = "linear_regression"
-    DEFAULT_SECOND_STAGE_METHOD = "linear_regression"
+    DEFAULT_FIRST_STAGE_MODEL = linear_model.LinearRegression
+    DEFAULT_SECOND_STAGE_MODEL = LinearRegressionEstimator
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -45,28 +45,28 @@ class TwoStageRegressionEstimator(CausalEstimator):
                 error_msg = "No instrumental variable present. Two stage regression is not applicable"
                 self.logger.error(error_msg)
 
-        if 'first_stage_method' in self.method_params:
-            self.first_stage_model = self.method_params['first_stage_method']
+        if 'first_stage_model' in self.method_params:
+            self.first_stage_model = self.method_params['first_stage_model']
         else:
-            self.first_stage_model = self.__class__.DEFAULT_FIRST_STAGE_METHOD
-            self.logger.warn("First stage method not provided. Defaulting to backdoor.linear_regression.")
-        if 'second_stage_method' in self.method_params:
-            self.second_stage_model = self.method_params['second_stage_method']
+            self.first_stage_model = self.__class__.DEFAULT_FIRST_STAGE_MODEL
+            self.logger.warn("First stage model not provided. Defaulting to sklearn.linear_model.LinearRegression.")
+        if 'second_stage_model' in self.method_params:
+            self.second_stage_model = self.method_params['second_stage_model']
         else:
-            self.second_stage_model = self.__class__.DEFAULT_SECOND_STAGE_METHOD
-            self.logger.warn("Second stage method not provided. Defaulting to backdoor.linear_regression.")
+            self.second_stage_model = self.__class__.DEFAULT_SECOND_STAGE_MODEL
+            self.logger.warn("Second stage model not provided. Defaulting to backdoor.linear_regression.")
 
         self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
 
     def _estimate_effect(self):
         first_stage_features = self.build_first_stage_features()
-        fs_model = linear_model.LinearRegression()
+        fs_model = self.first_stage_model()
         fs_model.fit(first_stage_features, self._frontdoor_variables)
         self.logger.debug("Coefficients of the fitted model: " +
                           ",".join(map(str, fs_model.coef_)))
         residuals = self._frontdoor_variables - fs_model.predict(first_stage_features)
         self._data["residual"] = residuals
-        estimate = LinearRegressionEstimator(self._data, 
+        estimate = self.second_stage_model(self._data, 
                 self._target_estimand,  ["residual",], self._outcome_name,
                  control_value=self._control_value, 
                  treatment_value=self._treatment_value,
