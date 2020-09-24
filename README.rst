@@ -369,16 +369,17 @@ learning estimator.
 	from sklearn.linear_model import LassoCV
 	from sklearn.ensemble import GradientBoostingRegressor
 	dml_estimate = model.estimate_effect(identified_estimand, method_name="backdoor.econml.dml.DMLCateEstimator",
-                                     	control_value = 0,
-                                     	treatment_value = 1,
-                                 		target_units = lambda df: df["X0"]>1,
-                                 		confidence_intervals=False,
-                                		method_params={"init_params":{'model_y':GradientBoostingRegressor(),
-                                                              'model_t': GradientBoostingRegressor(),
-                                                              "model_final":LassoCV(), 
-                                                              'featurizer':PolynomialFeatures(degree=1, include_bias=True)},
-                                               		   "fit_params":{}}
-										)
+                        control_value = 0,
+                        treatment_value = 1,
+                        target_units = lambda df: df["X0"]>1,
+                        confidence_intervals=False,
+                        method_params={
+                            "init_params":{'model_y':GradientBoostingRegressor(),
+                                           'model_t': GradientBoostingRegressor(),
+                                           'model_final':LassoCV(), 
+                                           'featurizer':PolynomialFeatures(degree=1, include_bias=True)},
+                            "fit_params":{}}
+						)
 
 
 More examples are in this `notebook
@@ -392,9 +393,27 @@ a key benefit of using DoWhy.
 Supported refutation methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* Placebo Treatment
-* Irrelevant Additional Confounder
-* Subset validation
+* Add Random Common Cause: Does the estimation method change its estimate after
+  we add an independent random variable as a common cause to the dataset?
+  (*Hint: It should not*)
+* Placebo Treatment: What happens to the estimated causal effect when we
+  replace the true treatment variable with an independent random variable?
+  (*Hint: the effect should go to zero)
+* Dummy Outcome: What happens to the estimated causal effect when we replace
+  the true outcome variable with an independent random variable? (*Hint: The
+  effect should go to zero*)
+* Simulated Outcome: What happens to the estimated causal effect when we
+  replace the dataset with a simulated dataset based on a known data-generating
+  process closest to the given dataset? (*Hint: It should match the effect parameter
+  from the data-generating process*)
+* Add Unobserved Common Causes: How sensitive is the effect estimate when we
+  add an additional common cause (confounder) to the dataset that is correlated
+  with the treatment and the outcome? (*Hint: It should not be too sensitive*)
+* Data Subsets Validation: Does the estimated effect change significantly when
+  we replace the given dataset with a randomly selected subset? (*Hint: It
+  should not*)
+* Bootstrap Validation: Does the estimated effect change significantly when the
+  we use bootstrapped samples of the given dataset? (*Hint: It should not*)
 
 Citing this package
 ====================
