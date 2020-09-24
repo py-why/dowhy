@@ -151,21 +151,21 @@ DoWhy supports two formats for providing the causal graph: `gml <https://github.
 
 .. code:: python
 
-    # Create a causal model from the data and given graph.
+    # I. Create a causal model from the data and given graph.
     model = CausalModel(
         data=data["df"],
         treatment=data["treatment_name"],
         outcome=data["outcome_name"],
         graph=data["gml_graph"])
 
-    # Identify causal effect and return target estimands
+    # II. Identify causal effect and return target estimands
     identified_estimand = model.identify_effect()
 
-    # Estimate the target estimand using a statistical method.
+    # III. Estimate the target estimand using a statistical method.
     estimate = model.estimate_effect(identified_estimand,
                                      method_name="backdoor.propensity_score_matching")
 
-    # Refute the obtained estimate using multiple robustness checks.
+    # IV. Refute the obtained estimate using multiple robustness checks.
     refute_results = model.refute_estimate(identified_estimand, estimate,
                                            method_name="random_common_cause")
 
@@ -175,7 +175,7 @@ estimate (if any). Here's a sample output of the linear regression estimator.
 
 .. image:: https://raw.githubusercontent.com/microsoft/dowhy/master/docs/images/regression_output.png
 
-For detailed code examples, check out the Jupyter notebooks in `docs/source/example_notebooks <https://github.com/microsoft/dowhy/tree/master/docs/source/example_notebooks/>`_, or try them online at `Binder <https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F>`_. A good starting point is the `Getting Started with DoWhy <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_ notebook. 
+For a full code example, check out the `Getting Started with DoWhy <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_ notebook. You can also use estimation methods from other libraries such as EconML and CausalML, as shown in the `Conditional Treatment Effects <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_ notebook. For more examples of using DoWhy, check out the Jupyter notebooks in `docs/source/example_notebooks <https://github.com/microsoft/dowhy/tree/master/docs/source/example_notebooks/>`_, or try them online at `Binder <https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F>`_. 
 
 
 A High-level Pandas API
