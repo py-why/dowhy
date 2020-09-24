@@ -65,6 +65,7 @@ for causal inference, it is hard to compare their assumptions and robustness of 
 To see DoWhy in action, check out how it can be applied to estimate the effect
 of a subscription or rewards program for customers [`Rewards notebook
 <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb>`_] and for implementing and evaluating causal inference methods on benchmark datasets like the `Infant Health and Development Program (IHDP) <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_ihdp_data_example.ipynb>`_ dataset, `Infant Mortality (Twins) <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_twins_example%20.ipynb>`_ dataset and the `Lalonde Jobs <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_lalonde_example.ipynb>`_ dataset.
+
 Installation
 -------------
 
@@ -227,8 +228,8 @@ The :code:`do` method is built on top of the lower-level :code:`dowhy` objects, 
 identification automatically when you provide a graph instead of :code:`common_causes`.
 
 For more details, check out the `Pandas API
-<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_causal_api.ipynb>`_ or the `Do Sampler <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/do_sampler_demo.ipynb>`_
-notebooks. 
+<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_causal_api.ipynb>`_ notebook or the `Do Sampler <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/do_sampler_demo.ipynb>`_
+notebook. 
 
 Graphical Models and Potential Outcomes: Best of both worlds
 ============================================================
@@ -291,7 +292,7 @@ DoWhy brings three key differences compared to available software for causal inf
     automatically run sensitivity and robustness checks on the obtained estimate.
 
 Finally, DoWhy is easily extensible, allowing other implementations of the
-four verbs to co-exist (e.g., we already support implementations of the *estimation* verb from 
+four verbs to co-exist (e.g., we support implementations of the *estimation* verb from 
 EconML and CausalML libraries). The four verbs are mutually independent, so their
 implementations can be combined in any way.
 
@@ -348,17 +349,13 @@ Supported identification criteria
 * Mediation (Direct and indirect effect identification)
 
 Different notebooks illustrate how to use these identification criteria. Check
-out the `Simple Backdoor
-<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_confounder_example.ipynb>`_ notebook for the back-door criterion, and the `Simple
-
-IV
-<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy-simple-iv-example.ipynb>`_ notebook for the instrumental variable criterion.
+out the `Simple Backdoor <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_confounder_example.ipynb>`_ notebook for the back-door criterion, and the `Simple IV <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy-simple-iv-example.ipynb>`_ notebook for the instrumental variable criterion.
 
 III. Estimate causal effect based on the identified estimand
 ------------------------------------------------------------
 
 DoWhy supports methods based on both back-door criterion and instrumental
-variables. It also provides a non-parametric confidence intervals and permutation test for testing
+variables. It also provides a non-parametric confidence intervals and a permutation test for testing
 the statistical significance of obtained estimate. 
 
 Supported estimation methods 
