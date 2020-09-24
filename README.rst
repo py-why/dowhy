@@ -311,6 +311,18 @@ Currently, DoWhy supports two formats for graph input: `gml <https://github.com/
 While not recommended, you can also specify common causes and/or instruments directly
 instead of providing a graph.
 
+Supported formats for specifying causal assumptions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* **Graph**: Provide a causal graph in either gml or dot format. Can be a text file
+  or a string.
+* **Named variable sets**: Instead of the graph, provide variable names that
+  correspond to relevant categories, such as common causes, instrumental variables, effect
+  modifiers, frontdoor variables, etc.
+
+Examples of how to instantiate a causal model are in the `Getting Started
+<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_
+notebook.
 
 .. i comment image:: causal_model.png
 
@@ -329,6 +341,13 @@ Supported identification criteria
 * Instrumental Variables
 * Mediation (Direct and indirect effect identification)
 
+Different notebooks illustrate how to use these identification criteria. Check
+out the `Simple Backdoor
+<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_confounder_example.ipynb>`_ notebook for the back-door criterion, and the `Simple
+
+IV
+<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy-simple-iv-example.ipynb>`_ notebook for the instrumental variable criterion.
+
 III. Estimate causal effect based on the identified estimand
 ------------------------------------------------------------
 
@@ -344,7 +363,7 @@ Supported estimation methods
     * Propensity Score Matching
     * Inverse Propensity Weighting
 
-* Methods based on estimating the response surface
+* Methods based on estimating the outcome model
     * Linear Regression
     * Generalized Linear Models
 
@@ -355,6 +374,10 @@ Supported estimation methods
 
 * Methods for front-door criterion and general mediation
     * Two-stage linear regression
+
+Examples of using these methods are in the `Estimation methods
+<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_estimation_methods.ipynb>`_
+notebook. 
 
 Using EconML and CausalML estimation methods in DoWhy
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -382,38 +405,42 @@ learning estimator.
 						)
 
 
-More examples are in this `notebook
-<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_. 
+More examples are in the `Conditional Treatment Effects with DoWhy
+<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_ notebook. 
 
 IV. Refute the obtained estimate
 -------------------------------------
-Having access to multiple refutation methods to verify a causal inference is
+Having access to multiple refutation methods to validate an effect estimate from a
+causal estimator is
 a key benefit of using DoWhy.
 
 Supported refutation methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* Add Random Common Cause: Does the estimation method change its estimate after
+* **Add Random Common Cause**: Does the estimation method change its estimate after
   we add an independent random variable as a common cause to the dataset?
   (*Hint: It should not*)
-* Placebo Treatment: What happens to the estimated causal effect when we
+* **Placebo Treatment**: What happens to the estimated causal effect when we
   replace the true treatment variable with an independent random variable?
   (*Hint: the effect should go to zero)
-* Dummy Outcome: What happens to the estimated causal effect when we replace
+* **Dummy Outcome**: What happens to the estimated causal effect when we replace
   the true outcome variable with an independent random variable? (*Hint: The
   effect should go to zero*)
-* Simulated Outcome: What happens to the estimated causal effect when we
+* **Simulated Outcome**: What happens to the estimated causal effect when we
   replace the dataset with a simulated dataset based on a known data-generating
   process closest to the given dataset? (*Hint: It should match the effect parameter
   from the data-generating process*)
-* Add Unobserved Common Causes: How sensitive is the effect estimate when we
+* **Add Unobserved Common Causes**: How sensitive is the effect estimate when we
   add an additional common cause (confounder) to the dataset that is correlated
   with the treatment and the outcome? (*Hint: It should not be too sensitive*)
-* Data Subsets Validation: Does the estimated effect change significantly when
+* **Data Subsets Validation**: Does the estimated effect change significantly when
   we replace the given dataset with a randomly selected subset? (*Hint: It
   should not*)
-* Bootstrap Validation: Does the estimated effect change significantly when the
-  we use bootstrapped samples of the given dataset? (*Hint: It should not*)
+* **Bootstrap Validation**: Does the estimated effect change significantly when we 
+  replace the given dataset with bootstrapped samples from the same dataset? (*Hint: It should not*)
+
+Examples of using refutation methods are in the `Refutations <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_refuter_notebook.ipynb>`_ notebook. For an advanced refutation that uses a simulated dataset based on user-provided or learnt data-generating processes, check out the `Dummy Outcome Refuter <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_demo_dummy_outcome_refuter.ipynb>`_ notebook. 
+As a practical example, `this notebook <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_refutation_testing.ipynb>`_ shows an application of refutation methods on evaluating effect estimators for the Infant Health and Development Program (IHDP) and Lalonde datasets. 
 
 Citing this package
 ====================
