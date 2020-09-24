@@ -62,6 +62,9 @@ for causal inference, it is hard to compare their assumptions and robustness of 
 3. Automatically tests for the validity of assumptions if possible and assesses
    the robustness of the estimate to violations.
 
+To see DoWhy in action, check out how it can be applied to estimate the effect
+of a subscription or rewards program for customers [`Rewards notebook
+<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb>`_] and for implementing and evaluating causal inference methods on benchmark datasets like the `Infant Health and Development Program (IHDP) <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_ihdp_data_example.ipynb>`_ dataset, `Infant Mortality (Twins) <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_twins_example%20.ipynb>`_ dataset and the `Lalonde Jobs <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_lalonde_example.ipynb>`_ dataset.
 Installation
 -------------
 
@@ -171,14 +174,13 @@ estimate (if any). Here's a sample output of the linear regression estimator.
 
 .. image:: https://raw.githubusercontent.com/microsoft/dowhy/master/docs/images/regression_output.png
 
-For detailed code examples, check out the Jupyter notebooks in `docs/source/example_notebooks <https://github.com/microsoft/dowhy/tree/master/docs/source/example_notebooks/>`_, or try them online at `Binder <https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F>`_.
+For detailed code examples, check out the Jupyter notebooks in `docs/source/example_notebooks <https://github.com/microsoft/dowhy/tree/master/docs/source/example_notebooks/>`_, or try them online at `Binder <https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F>`_. A good starting point is the `Getting Started with DoWhy <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_ notebook. 
 
 
 A High-level Pandas API
 -----------------------
 
-We've made an even simpler API for dowhy which is a light layer on top of the standard one. The goal
-was to make causal analysis much more like regular exploratory analysis. To use this API, simply
+We've made an even simpler API for dowhy which is a light layer on top of the standard one. The goal is to make causal analysis much more like regular exploratory analysis. To use this API, simply
 import :code:`dowhy.api`. This will magically add the :code:`causal` namespace to your
 :code:`pandas.DataFrame` s. Then,
 you can use the namespace as follows.
@@ -214,7 +216,7 @@ for continuous.
    binary -> 'b'
    category -> 'd'
 
-**Currently we have not added support for time.**
+**Currently we have not added support for timestamps.**
 
 The :code:`do` method in the causal namespace generates a random sample from $P(outcome|do(X=x))$ of the
 same length as your data set, and returns this outcome as a new :code:`DataFrame`. You can continue to perform
@@ -223,6 +225,10 @@ for causal outcomes!
 
 The :code:`do` method is built on top of the lower-level :code:`dowhy` objects, so can still take a graph and perform
 identification automatically when you provide a graph instead of :code:`common_causes`.
+
+For more details, check out the `Pandas API
+<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_causal_api.ipynb>`_ or the `Do Sampler <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/do_sampler_demo.ipynb>`_
+notebooks. 
 
 Graphical Models and Potential Outcomes: Best of both worlds
 ============================================================
