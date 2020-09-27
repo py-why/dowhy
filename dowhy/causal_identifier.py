@@ -20,6 +20,9 @@ class CausalIdentifier:
     If you'd like to contribute, please raise an issue or a pull request on Github.  
 
     """
+    NONPARAMETRIC_ATE="nonparametric-ate"
+    NONPARAMETRIC_NDE="nonparametric-nde"
+    NONPARAMETRIC_NIE="nonparametric-nie"
 
     def __init__(self, graph, estimand_type, proceed_when_unidentifiable=False):
         self._graph = graph
@@ -32,12 +35,24 @@ class CausalIdentifier:
     def identify_effect(self):
         """Main method that returns an identified estimand (if one exists). 
 
-        Uses both backdoor and instrumental variable methods to check if an identified estimand exists, based on the causal graph. 
+        If estimand_type is non-parametric ATE, then  uses backdoor, instrumental variable and frontdoor identification methods,  to check if an identified estimand exists, based on the causal graph. 
 
         :param self: instance of the CausalEstimator class (or its subclass)
         :returns:  target estimand, an instance of the IdentifiedEstimand class
         """
+        if self.estimand_type == CausalIdentifier.NONPARAMETRIC_ATE:
+            return self.identify_ate_effect()
+        elif self.estimand_type == CausalIdentifier.NONPARAMETRIC_NDE:
+            return self.identify_nde_effect()
+        elif self.estimand_type == CausalIdentifier.NONPARAMETRIC_NIE:
+            return self.identify_nie_effect()
+        else:
+            raise ValueError("Estimand type is not supported. Use either {0}, {1}, or {2}.".format(
+                CausalIdentifier.NONPARAMETRIC_ATE,
+                CausalIdentifier.NONPARAMETRIC_NDE,
+                CausalIdentifier.NONPARAMETRIC_NIE))
 
+    def identify_ate_effect(self):
         estimands_dict = {}
         mediation_first_stage_confounders = None
         mediation_second_stage_confounders = None
@@ -90,25 +105,6 @@ class CausalIdentifier:
             mediation_second_stage_confounders = self.identify_mediation_second_stage_confounders(frontdoor_variables_names, self.outcome_name)
         else:
             estimands_dict["frontdoor"] = None
-        ### 4. MEDIATOR IDENTIFICATION
-        # Now checking if there are valid mediator variables
-        # Now checking if there is a valid frontdoor variable
-        mediators_names = self.identify_mediation()
-        self.logger.info("Mediators for treatment and outcome:" +
-                str(mediators_names))
-        if len(mediators_names) >0:
-            mediation_estimand_expr = self.construct_mediation_estimand(
-                self.estimand_type,
-                self._graph.treatment_name,
-                self._graph.outcome_name,
-                mediators_names
-            )
-            self.logger.debug("Identified expression = " + str(mediation_estimand_expr))
-            estimands_dict["mediation"] = mediation_estimand_expr
-            mediation_first_stage_confounders = self.identify_mediation_first_stage_confounders(self.treatment_name, mediators_names)
-            mediation_second_stage_confounders = self.identify_mediation_second_stage_confounders(mediators_names, self.outcome_name)
-        else:
-            estimands_dict["mediation"] = None
 
         # Finally returning the estimand object
         estimand = IdentifiedEstimand(
@@ -125,6 +121,113 @@ class CausalIdentifier:
             default_backdoor_id = default_backdoor_id
         )
         return estimand
+
+    def identify_nde_effect(self):
+        estimands_dict = {}
+        ### 1. FIRST DOING BACKDOOR IDENTIFICATION
+        # First, checking if there are any valid backdoor adjustment sets
+        backdoor_sets = self.identify_backdoor(self.treatment_name, self.outcome_name)
+        estimands_dict, backdoor_variables_dict = self.build_backdoor_estimands_dict(
+                self.treatment_name,
+                self.outcome_name,
+                backdoor_sets,
+                estimands_dict)
+        # Setting default "backdoor" identification adjustment set
+        default_backdoor_id = self.get_default_backdoor_set_id(backdoor_variables_dict)
+        backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
+
+        ### 2. SECOND, CHECKING FOR MEDIATORS
+        # Now checking if there are valid mediator variables
+        estimands_dict = {} # Need to reinitialize this dictionary to avoid including the backdoor sets
+        mediation_first_stage_confounders = None
+        mediation_second_stage_confounders = None
+        mediators_names = self.identify_mediation()
+        self.logger.info("Mediators for treatment and outcome:" +
+                str(mediators_names))
+        if len(mediators_names) >0:
+            mediation_estimand_expr = self.construct_mediation_estimand(
+                self.estimand_type,
+                self._graph.treatment_name,
+                self._graph.outcome_name,
+                mediators_names
+            )
+            self.logger.debug("Identified expression = " + str(mediation_estimand_expr))
+            estimands_dict["mediation"] = mediation_estimand_expr
+            mediation_first_stage_confounders = self.identify_mediation_first_stage_confounders(self.treatment_name, mediators_names)
+            mediation_second_stage_confounders = self.identify_mediation_second_stage_confounders(mediators_names, self.outcome_name)
+        else:
+            estimands_dict["mediation"] = None
+        # Finally returning the estimand object
+        estimand = IdentifiedEstimand(
+            self,
+            treatment_variable=self._graph.treatment_name,
+            outcome_variable=self._graph.outcome_name,
+            estimand_type=self.estimand_type,
+            estimands=estimands_dict,
+            backdoor_variables=backdoor_variables_dict,
+            instrumental_variables=None,
+            frontdoor_variables=None,
+            mediator_variables=mediators_names,
+            mediation_first_stage_confounders=mediation_first_stage_confounders,
+            mediation_second_stage_confounders=mediation_second_stage_confounders,
+            default_backdoor_id = None
+        )
+        return estimand
+
+    def identify_nie_effect(self):
+        estimands_dict = {}
+        ### 1. FIRST DOING BACKDOOR IDENTIFICATION
+        # First, checking if there are any valid backdoor adjustment sets
+        backdoor_sets = self.identify_backdoor(self.treatment_name, self.outcome_name)
+        estimands_dict, backdoor_variables_dict = self.build_backdoor_estimands_dict(
+                self.treatment_name,
+                self.outcome_name,
+                backdoor_sets,
+                estimands_dict)
+        # Setting default "backdoor" identification adjustment set
+        default_backdoor_id = self.get_default_backdoor_set_id(backdoor_variables_dict)
+        backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
+
+        ### 2. SECOND, CHECKING FOR MEDIATORS
+        # Now checking if there are valid mediator variables
+        estimands_dict = {}
+        mediation_first_stage_confounders = None
+        mediation_second_stage_confounders = None
+        mediators_names = self.identify_mediation()
+        self.logger.info("Mediators for treatment and outcome:" +
+                str(mediators_names))
+        if len(mediators_names) >0:
+            mediation_estimand_expr = self.construct_mediation_estimand(
+                self.estimand_type,
+                self._graph.treatment_name,
+                self._graph.outcome_name,
+                mediators_names
+            )
+            self.logger.debug("Identified expression = " + str(mediation_estimand_expr))
+            estimands_dict["mediation"] = mediation_estimand_expr
+            mediation_first_stage_confounders = self.identify_mediation_first_stage_confounders(self.treatment_name, mediators_names)
+            mediation_second_stage_confounders = self.identify_mediation_second_stage_confounders(mediators_names, self.outcome_name)
+        else:
+            estimands_dict["mediation"] = None
+        # Finally returning the estimand object
+        estimand = IdentifiedEstimand(
+            self,
+            treatment_variable=self._graph.treatment_name,
+            outcome_variable=self._graph.outcome_name,
+            estimand_type=self.estimand_type,
+            estimands=estimands_dict,
+            backdoor_variables=backdoor_variables_dict,
+            instrumental_variables=None,
+            frontdoor_variables=None,
+            mediator_variables=mediators_names,
+            mediation_first_stage_confounders=mediation_first_stage_confounders,
+            mediation_second_stage_confounders=mediation_second_stage_confounders,
+            default_backdoor_id = None
+        )
+        return estimand
+
+ 
+        
 
     def identify_backdoor(self, treatment_name, outcome_name):
         backdoor_sets = []
@@ -312,29 +415,26 @@ class CausalIdentifier:
         # TODO Better support for multivariate treatments
 
         expr = None
-        if estimand_type == "nonparametric-ate":
-            outcome_name = outcome_name[0]
-            num_expr_str = outcome_name
-            if len(common_causes)>0:
-                num_expr_str += "|" + ",".join(common_causes)
-            expr = "d(" + num_expr_str + ")/d" + ",".join(treatment_name)
-            sym_mu = sp.Symbol("mu")
-            sym_sigma = sp.Symbol("sigma", positive=True)
-            sym_outcome = spstats.Normal(num_expr_str, sym_mu, sym_sigma)
-            # sym_common_causes = [sp.stats.Normal(common_cause, sym_mu, sym_sigma) for common_cause in common_causes]
-            sym_treatment_symbols = [sp.Symbol(t) for t in treatment_name]
-            sym_treatment = sp.Array(sym_treatment_symbols)
-            sym_conditional_outcome = spstats.Expectation(sym_outcome)
-            sym_effect = sp.Derivative(sym_conditional_outcome, sym_treatment)
+        outcome_name = outcome_name[0]
+        num_expr_str = outcome_name
+        if len(common_causes)>0:
+            num_expr_str += "|" + ",".join(common_causes)
+        expr = "d(" + num_expr_str + ")/d" + ",".join(treatment_name)
+        sym_mu = sp.Symbol("mu")
+        sym_sigma = sp.Symbol("sigma", positive=True)
+        sym_outcome = spstats.Normal(num_expr_str, sym_mu, sym_sigma)
+        # sym_common_causes = [sp.stats.Normal(common_cause, sym_mu, sym_sigma) for common_cause in common_causes]
+        sym_treatment_symbols = [sp.Symbol(t) for t in treatment_name]
+        sym_treatment = sp.Array(sym_treatment_symbols)
+        sym_conditional_outcome = spstats.Expectation(sym_outcome)
+        sym_effect = sp.Derivative(sym_conditional_outcome, sym_treatment)
 
-            sym_assumptions = {
-                'Unconfoundedness': (
-                    u"If U\N{RIGHTWARDS ARROW}{{{0}}} and U\N{RIGHTWARDS ARROW}{1}"
-                    " then P({1}|{0},{2},U) = P({1}|{0},{2})"
-                ).format(",".join(treatment_name), outcome_name, ",".join(common_causes))
-            }
-        else:
-            raise ValueError("Estimand type not supported. Supported estimand types are 'non-parametric-ate'.")
+        sym_assumptions = {
+            'Unconfoundedness': (
+                u"If U\N{RIGHTWARDS ARROW}{{{0}}} and U\N{RIGHTWARDS ARROW}{1}"
+                " then P({1}|{0},{2},U) = P({1}|{0},{2})"
+            ).format(",".join(treatment_name), outcome_name, ",".join(common_causes))
+        }
 
         estimand = {
             'estimand': sym_effect,
@@ -346,29 +446,26 @@ class CausalIdentifier:
                               outcome_name, instrument_names):
         # TODO: support multivariate treatments better.
         expr = None
-        if estimand_type == "nonparametric-ate":
-            outcome_name = outcome_name[0]
-            sym_outcome = spstats.Normal(outcome_name, 0, 1)
-            sym_treatment_symbols = [spstats.Normal(t, 0, 1) for t in treatment_name]
-            sym_treatment = sp.Array(sym_treatment_symbols)
-            sym_instrument_symbols = [sp.Symbol(inst) for inst in instrument_names]
-            sym_instrument = sp.Array(sym_instrument_symbols)  # ",".join(instrument_names))
-            sym_outcome_derivative = sp.Derivative(sym_outcome, sym_instrument)
-            sym_treatment_derivative = sp.Derivative(sym_treatment, sym_instrument)
-            sym_effect = spstats.Expectation(sym_outcome_derivative / sym_treatment_derivative)
-            sym_assumptions = {
-                "As-if-random": (
-                    "If U\N{RIGHTWARDS ARROW}\N{RIGHTWARDS ARROW}{0} then "
-                    "\N{NOT SIGN}(U \N{RIGHTWARDS ARROW}\N{RIGHTWARDS ARROW}{{{1}}})"
-                ).format(outcome_name, ",".join(instrument_names)),
-                "Exclusion": (
-                    u"If we remove {{{0}}}\N{RIGHTWARDS ARROW}{{{1}}}, then "
-                    u"\N{NOT SIGN}({{{0}}}\N{RIGHTWARDS ARROW}{2})"
-                ).format(",".join(instrument_names), ",".join(treatment_name),
-                         outcome_name)
-            }
-        else:
-            raise ValueError("Estimand type not supported. Supported estimand types are 'non-parametric-ate'.")
+        outcome_name = outcome_name[0]
+        sym_outcome = spstats.Normal(outcome_name, 0, 1)
+        sym_treatment_symbols = [spstats.Normal(t, 0, 1) for t in treatment_name]
+        sym_treatment = sp.Array(sym_treatment_symbols)
+        sym_instrument_symbols = [sp.Symbol(inst) for inst in instrument_names]
+        sym_instrument = sp.Array(sym_instrument_symbols)  # ",".join(instrument_names))
+        sym_outcome_derivative = sp.Derivative(sym_outcome, sym_instrument)
+        sym_treatment_derivative = sp.Derivative(sym_treatment, sym_instrument)
+        sym_effect = spstats.Expectation(sym_outcome_derivative / sym_treatment_derivative)
+        sym_assumptions = {
+            "As-if-random": (
+                "If U\N{RIGHTWARDS ARROW}\N{RIGHTWARDS ARROW}{0} then "
+                "\N{NOT SIGN}(U \N{RIGHTWARDS ARROW}\N{RIGHTWARDS ARROW}{{{1}}})"
+            ).format(outcome_name, ",".join(instrument_names)),
+            "Exclusion": (
+                u"If we remove {{{0}}}\N{RIGHTWARDS ARROW}{{{1}}}, then "
+                u"\N{NOT SIGN}({{{0}}}\N{RIGHTWARDS ARROW}{2})"
+            ).format(",".join(instrument_names), ",".join(treatment_name),
+                     outcome_name)
+        }
 
         estimand = {
             'estimand': sym_effect,
@@ -380,31 +477,28 @@ class CausalIdentifier:
                               outcome_name, frontdoor_variables_names):
         # TODO: support multivariate treatments better.
         expr = None
-        if estimand_type == "nonparametric-ate":
-            outcome_name = outcome_name[0]
-            sym_outcome = spstats.Normal(outcome_name, 0, 1)
-            sym_treatment_symbols = [spstats.Normal(t, 0, 1) for t in treatment_name]
-            sym_treatment = sp.Array(sym_treatment_symbols)
-            sym_frontdoor_symbols = [sp.Symbol(inst) for inst in frontdoor_variables_names]
-            sym_frontdoor = sp.Array(sym_frontdoor_symbols)  # ",".join(instrument_names))
-            sym_outcome_derivative = sp.Derivative(sym_outcome, sym_frontdoor)
-            sym_treatment_derivative = sp.Derivative(sym_frontdoor, sym_treatment)
-            sym_effect = spstats.Expectation(sym_treatment_derivative * sym_outcome_derivative)
-            sym_assumptions = {
-                "Full-mediation": (
-                    "{2} intercepts (blocks) all directed paths from {0} to {1}."
-                ).format(",".join(treatment_name), ",".join(outcome_name), ",".join(frontdoor_variables_names)),
-                "First-stage-unconfoundedness": (
-                    u"If U\N{RIGHTWARDS ARROW}{{{0}}} and U\N{RIGHTWARDS ARROW}{{{1}}}"
-                    " then P({1}|{0},U) = P({1}|{0})"
-                ).format(",".join(treatment_name), ",".join(frontdoor_variables_names)),
-                "Second-stage-unconfoundedness": (
-                    u"If U\N{RIGHTWARDS ARROW}{{{2}}} and U\N{RIGHTWARDS ARROW}{{{1}}}"
-                    " then P({1}|{2}, {0}, U) = P({1}|{2}, {0})"
-                ).format(",".join(treatment_name), ",".join(outcome_name), ",".join(frontdoor_variables_names))
-            }
-        else:
-            raise ValueError("Estimand type not supported. Supported estimand types are 'non-parametric-ate'.")
+        outcome_name = outcome_name[0]
+        sym_outcome = spstats.Normal(outcome_name, 0, 1)
+        sym_treatment_symbols = [spstats.Normal(t, 0, 1) for t in treatment_name]
+        sym_treatment = sp.Array(sym_treatment_symbols)
+        sym_frontdoor_symbols = [sp.Symbol(inst) for inst in frontdoor_variables_names]
+        sym_frontdoor = sp.Array(sym_frontdoor_symbols)  # ",".join(instrument_names))
+        sym_outcome_derivative = sp.Derivative(sym_outcome, sym_frontdoor)
+        sym_treatment_derivative = sp.Derivative(sym_frontdoor, sym_treatment)
+        sym_effect = spstats.Expectation(sym_treatment_derivative * sym_outcome_derivative)
+        sym_assumptions = {
+            "Full-mediation": (
+                "{2} intercepts (blocks) all directed paths from {0} to {1}."
+            ).format(",".join(treatment_name), ",".join(outcome_name), ",".join(frontdoor_variables_names)),
+            "First-stage-unconfoundedness": (
+                u"If U\N{RIGHTWARDS ARROW}{{{0}}} and U\N{RIGHTWARDS ARROW}{{{1}}}"
+                " then P({1}|{0},U) = P({1}|{0})"
+            ).format(",".join(treatment_name), ",".join(frontdoor_variables_names)),
+            "Second-stage-unconfoundedness": (
+                u"If U\N{RIGHTWARDS ARROW}{{{2}}} and U\N{RIGHTWARDS ARROW}{{{1}}}"
+                " then P({1}|{2}, {0}, U) = P({1}|{2}, {0})"
+            ).format(",".join(treatment_name), ",".join(outcome_name), ",".join(frontdoor_variables_names))
+        }
 
         estimand = {
             'estimand': sym_effect,
@@ -416,7 +510,7 @@ class CausalIdentifier:
                               outcome_name, mediators_names):
         # TODO: support multivariate treatments better.
         expr = None
-        if estimand_type == "nonparametric-ate":
+        if estimand_type in (CausalIdentifier.NONPARAMETRIC_NDE, CausalIdentifier.NONPARAMETRIC_NIE):
             outcome_name = outcome_name[0]
             sym_outcome = spstats.Normal(outcome_name, 0, 1)
             sym_treatment_symbols = [spstats.Normal(t, 0, 1) for t in treatment_name]
@@ -425,7 +519,10 @@ class CausalIdentifier:
             sym_mediators = sp.Array(sym_mediators_symbols)
             sym_outcome_derivative = sp.Derivative(sym_outcome, sym_mediators)
             sym_treatment_derivative = sp.Derivative(sym_mediators, sym_treatment)
-            sym_effect = spstats.Expectation(sym_treatment_derivative * sym_outcome_derivative)
+            if estimand_type == CausalIdentifier.NONPARAMETRIC_NDE:
+                sym_effect = spstats.Expectation(sym_treatment_derivative * sym_outcome_derivative)
+            elif estimand_type == CausalIdentifier.NONPARAMETRIC_NIE:
+                sym_effect = ""
             sym_assumptions = {
                 "Mediation": (
                     "{2} intercepts (blocks) all directed paths from {0} to {1} except the path {{{0}}}\N{RIGHTWARDS ARROW}{{{1}}}."
@@ -440,7 +537,9 @@ class CausalIdentifier:
                 ).format(",".join(treatment_name), ",".join(outcome_name), ",".join(mediators_names))
             }
         else:
-            raise ValueError("Estimand type not supported. Supported estimand types are 'non-parametric-ate'.")
+            raise ValueError("Estimand type not supported. Supported estimand types are {0} or {1}'.".format(
+                CausalIdentifier.NONPARAMETRIC_NDE,
+                CausalIdentifier.NONPARAMETRIC_NIE))
 
         estimand = {
             'estimand': sym_effect,
@@ -459,6 +558,7 @@ class IdentifiedEstimand:
                  estimand_type=None, estimands=None,
                  backdoor_variables=None, instrumental_variables=None,
                  frontdoor_variables=None,
+                 mediator_variables=None,
                  mediation_first_stage_confounders=None,
                  mediation_second_stage_confounders=None,
                  default_backdoor_id=None, identifier_method=None):
@@ -468,6 +568,7 @@ class IdentifiedEstimand:
         self.backdoor_variables = backdoor_variables
         self.instrumental_variables = parse_state(instrumental_variables)
         self.frontdoor_variables = parse_state(frontdoor_variables)
+        self.mediator_variables = parse_state(mediator_variables)
         self.mediation_first_stage_confounders=mediation_first_stage_confounders
         self.mediation_second_stage_confounders=mediation_second_stage_confounders
         self.estimand_type = estimand_type
@@ -503,6 +604,10 @@ class IdentifiedEstimand:
         """
         return self.frontdoor_variables
 
+    def get_mediator_variables(self):
+        """Return a list containing the mediator variables (if present)
+        """
+        return self.mediator_variables
     def get_instrumental_variables(self):
         """Return a list containing the instrumental variables (if present)
         """
@@ -517,6 +622,8 @@ class IdentifiedEstimand:
                 estimands=copy.deepcopy(self.estimands),
                 backdoor_variables=copy.deepcopy(self.backdoor_variables),
                 instrumental_variables=copy.deepcopy(self.instrumental_variables),
+                frontdoor_variables=copy.deepcopy(self.frontdoor_variables),
+                mediator_variables=copy.deepcopy(self.mediator_variables),
                 default_backdoor_id=copy.deepcopy(self.default_backdoor_id),
                 identifier_method=copy.deepcopy(self.identifier_method)
             )

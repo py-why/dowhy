@@ -5,6 +5,7 @@ import copy
 from sklearn import linear_model
 
 from dowhy.causal_estimator import CausalEstimator, CausalEstimate
+from dowhy.causal_identifier import CausalIdentifier
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 from dowhy.utils.api import parse_state
 
@@ -37,8 +38,8 @@ class TwoStageRegressionEstimator(CausalEstimator):
                 self.logger.error(error_msg)
         elif self._target_estimand.identifier_method == "mediation":
             self.logger.debug("Mediators used:" +
-                            ",".join(self._target_estimand.get_mediators()))
-            self._mediators_names = self._target_estimand.get_mediators()
+                            ",".join(self._target_estimand.get_mediator_variables()))
+            self._mediators_names = self._target_estimand.get_mediator_variables()
 
             if self._mediators_names:
                self._mediators = self._data[self._mediators_names]
@@ -69,8 +70,6 @@ class TwoStageRegressionEstimator(CausalEstimator):
             self.second_stage_model = self.__class__.DEFAULT_SECOND_STAGE_MODEL
             self.logger.warning("Second stage model not provided. Defaulting to backdoor.linear_regression.")
 
-        self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
-
     def _estimate_effect(self):
         #first_stage_features = self.build_first_stage_features()
         #fs_model = self.first_stage_model()
@@ -83,7 +82,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         #                  ",".join(map(str, fs_model.coef_)))
         #residuals = self._frontdoor_variables - fs_model.predict(first_stage_features)
         #self._data["residual"] = residuals
-
+        estimate_value = None
         # First stage
         modified_target_estimand = copy.deepcopy(self._target_estimand)
         modified_target_estimand.identifier_method="backdoor"
@@ -129,14 +128,40 @@ class TwoStageRegressionEstimator(CausalEstimator):
                  params=self.method_params)._estimate_effect()
         # Combining the two estimates
         natural_direct_effect = first_stage_estimate.value * second_stage_estimate.value
+        estimate_value = natural_direct_effect
         self.symbolic_estimator = self.construct_symbolic_estimator(
                 first_stage_estimate.realized_estimand_expr,
-                second_stage_estimate.realized_estimand_expr)
-        estimate = CausalEstimate(estimate=natural_direct_effect,
+                second_stage_estimate.realized_estimand_expr, 
+                estimand_type=CausalIdentifier.NONPARAMETRIC_NDE)
+
+        if self._target_estimand.estimand_type == CausalIdentifier.NONPARAMETRIC_NIE:
+            # Total  effect of treatment
+            modified_target_estimand = copy.deepcopy(self._target_estimand)
+            modified_target_estimand.identifier_method="backdoor"
+
+            total_effect_estimate = self.second_stage_model(self._data, 
+                     modified_target_estimand,
+                     self._treatment_name,
+                     self._outcome_name,
+                     control_value=self._control_value, 
+                     treatment_value=self._treatment_value,
+                     test_significance=self._significance_test, 
+                     evaluate_effect_strength=self._effect_strength_eval,
+                     confidence_intervals = self._confidence_intervals,
+                     target_units=self._target_units, 
+                     effect_modifiers=self._effect_modifier_names,
+                     params=self.method_params)._estimate_effect()
+            natural_indirect_effect = total_effect_estimate.value - natural_direct_effect
+            estimate_value = natural_indirect_effect
+            self.symbolic_estimator = self.construct_symbolic_estimator(
+                    first_stage_estimate.realized_estimand_expr,
+                    second_stage_estimate.realized_estimand_expr,
+                    total_effect_estimate.realized_estimand_expr,
+                    estimand_type=self._target_estimand.estimand_type)
+        return CausalEstimate(estimate=estimate_value,
                               target_estimand=self._target_estimand,
                               realized_estimand_expr=self.symbolic_estimator)
-        return estimate
-    
+
     def build_first_stage_features(self):
         data_df = self._data
         treatment_vals = data_df[self._treatment_name]
@@ -168,5 +193,11 @@ class TwoStageRegressionEstimator(CausalEstimator):
         #features = sm.add_constant(features, has_constant='add') # to add an intercept term
         return features
 
-    def construct_symbolic_estimator(self, first_stage_symbolic, second_stage_symbolic):
-        return "(" + first_stage_symbolic + ") * (" + second_stage_symbolic + ")"
+    def construct_symbolic_estimator(self, first_stage_symbolic,
+            second_stage_symbolic, total_effect_symbolic=None, estimand_type=None):
+        nde_symbolic = "(" + first_stage_symbolic + ") * (" + second_stage_symbolic + ")"
+        if estimand_type == CausalIdentifier.NONPARAMETRIC_NDE:
+            return nde_symbolic
+        elif estimand_type == CausalIdentifier.NONPARAMETRIC_NIE:
+            return total_effect_symbolic + "-" + nde_symbolic
+
