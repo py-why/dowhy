@@ -4,8 +4,9 @@ import itertools
 import copy
 from sklearn import linear_model
 
-from dowhy.causal_estimator import CausalEstimator
+from dowhy.causal_estimator import CausalEstimator, CausalEstimate
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
+from dowhy.utils.api import parse_state
 
 class TwoStageRegressionEstimator(CausalEstimator):
     """Compute treatment effect whenever the effect is fully mediated by another variable (front-door) or when there is an instrument available.
@@ -34,6 +35,17 @@ class TwoStageRegressionEstimator(CausalEstimator):
                 self._frontdoor_variables = None
                 error_msg = "No front-door variable present. Two stage regression is not applicable"
                 self.logger.error(error_msg)
+        elif self._target_estimand.identifier_method == "mediation":
+            self.logger.debug("Mediators used:" +
+                            ",".join(self._target_estimand.get_mediators()))
+            self._mediators_names = self._target_estimand.get_mediators()
+
+            if self._mediators_names:
+               self._mediators = self._data[self._mediators_names]
+            else:
+                self._mediators = None
+                error_msg = "No mediator variable present. Two stage regression is not applicable"
+                self.logger.error(error_msg)
         elif self._target_estimand.identifier_method=="iv":
             self.logger.debug("Instrumental variables used:" +
                             ",".join(self._target_estimand.get_instrumental_variables()))
@@ -60,17 +72,31 @@ class TwoStageRegressionEstimator(CausalEstimator):
         self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
 
     def _estimate_effect(self):
-        first_stage_features = self.build_first_stage_features()
-        fs_model = self.first_stage_model()
-        fs_model.fit(first_stage_features, self._frontdoor_variables)
-        self.logger.debug("Coefficients of the fitted model: " +
-                          ",".join(map(str, fs_model.coef_)))
-        residuals = self._frontdoor_variables - fs_model.predict(first_stage_features)
-        self._data["residual"] = residuals
+        #first_stage_features = self.build_first_stage_features()
+        #fs_model = self.first_stage_model()
+        #if self._target_estimand.identifier_method=="frontdoor":
+        #    first_stage_outcome = self._frontdoor_variables
+        #elif self._target_estimand.identifier_method=="mediation":
+        #    first_stage_outcome = self._mediators
+        #fs_model.fit(first_stage_features, self._frontdoor_variables)
+        #self.logger.debug("Coefficients of the fitted model: " +
+        #                  ",".join(map(str, fs_model.coef_)))
+        #residuals = self._frontdoor_variables - fs_model.predict(first_stage_features)
+        #self._data["residual"] = residuals
+
+        # First stage
         modified_target_estimand = copy.deepcopy(self._target_estimand)
-        modified_target_estimand.treatment_variable = ["residual",]
-        estimate = self.second_stage_model(self._data, 
-                 modified_target_estimand,  ["residual",], self._outcome_name,
+        modified_target_estimand.identifier_method="backdoor"
+        modified_target_estimand.backdoor_variables = self._target_estimand.mediation_first_stage_confounders
+        if self._target_estimand.identifier_method=="frontdoor":
+            modified_target_estimand.outcome_variable = parse_state(self._frontdoor_variables_names)
+        elif self._target_estimand.identifier_method=="mediation":
+            modified_target_estimand.outcome_variable = parse_state(self._mediators_names)
+
+        first_stage_estimate = self.first_stage_model(self._data, 
+                 modified_target_estimand,
+                 self._treatment_name,
+                 parse_state(modified_target_estimand.outcome_variable), 
                  control_value=self._control_value, 
                  treatment_value=self._treatment_value,
                  test_significance=self._significance_test, 
@@ -79,7 +105,36 @@ class TwoStageRegressionEstimator(CausalEstimator):
                  target_units=self._target_units, 
                  effect_modifiers=self._effect_modifier_names,
                  params=self.method_params)._estimate_effect()
-        estimate.value = estimate.value*fs_model.coef_[0]
+
+        # Second Stage
+        modified_target_estimand = copy.deepcopy(self._target_estimand)
+        modified_target_estimand.identifier_method="backdoor"
+        modified_target_estimand.backdoor_variables = self._target_estimand.mediation_second_stage_confounders
+        if self._target_estimand.identifier_method=="frontdoor":
+            modified_target_estimand.treatment_variable = parse_state(self._frontdoor_variables_names)
+        elif self._target_estimand.identifier_method=="mediation":
+            modified_target_estimand.treatment_variable = parse_state(self._mediators_names)
+
+        second_stage_estimate = self.second_stage_model(self._data, 
+                 modified_target_estimand,
+                 parse_state(modified_target_estimand.treatment_variable), 
+                 self._outcome_name,
+                 control_value=self._control_value, 
+                 treatment_value=self._treatment_value,
+                 test_significance=self._significance_test, 
+                 evaluate_effect_strength=self._effect_strength_eval,
+                 confidence_intervals = self._confidence_intervals,
+                 target_units=self._target_units, 
+                 effect_modifiers=self._effect_modifier_names,
+                 params=self.method_params)._estimate_effect()
+        # Combining the two estimates
+        natural_direct_effect = first_stage_estimate.value * second_stage_estimate.value
+        self.symbolic_estimator = self.construct_symbolic_estimator(
+                first_stage_estimate.realized_estimand_expr,
+                second_stage_estimate.realized_estimand_expr)
+        estimate = CausalEstimate(estimate=natural_direct_effect,
+                              target_estimand=self._target_estimand,
+                              realized_estimand_expr=self.symbolic_estimator)
         return estimate
     
     def build_first_stage_features(self):
@@ -112,3 +167,6 @@ class TwoStageRegressionEstimator(CausalEstimator):
         features = features.astype(float, copy=False) # converting to float in case of binary treatment and no other variables
         #features = sm.add_constant(features, has_constant='add') # to add an intercept term
         return features
+
+    def construct_symbolic_estimator(self, first_stage_symbolic, second_stage_symbolic):
+        return "(" + first_stage_symbolic + ") * (" + second_stage_symbolic + ")"

@@ -118,6 +118,11 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         FD_noise = np.random.normal(0, 1, (num_samples, num_frontdoor_variables))
         FD = FD_noise
         FD += t @ cfd1
+        if num_common_causes >0:
+            range_c1_frontdoor = range_c1/10.0
+            c1_frontdoor = np.random.uniform(0, range_c1_frontdoor,
+                    (W_with_dummy.shape[1], num_frontdoor_variables))
+            FD += W_with_dummy @ c1_frontdoor
         print("cfd1=", cfd1)
 
     def _compute_y(t, W, X, FD, beta, c2, ce, cfd2):
@@ -282,6 +287,9 @@ def create_dot_graph(treatments, outcome, common_causes,
     dot_graph += " ".join([v + "-> " + outcome + ";" for v in effect_modifiers])
     dot_graph += " ".join([v + "-> " + outcome + ";" for v in frontdoor_variables])
     dot_graph = dot_graph + "}"
+    # Adding edges between common causes and the frontdoor mediator
+    for v1 in common_causes:
+            dot_graph += " ".join([v1 + "-> " + v2 + ";" for v2 in frontdoor_variables])
     return dot_graph
 
 def create_gml_graph(treatments, outcome, common_causes,
@@ -308,6 +316,8 @@ def create_gml_graph(treatments, outcome, common_causes,
     gml_graph = gml_graph + " ".join(['edge[ source "{0}" target "{1}"]'.format(v, outcome) for v in common_causes])
     gml_graph = gml_graph + " ".join(['node[ id "{0}" label "{0}"] edge[ source "{0}" target "{1}"]'.format(v, outcome) for v in effect_modifiers])
     gml_graph = gml_graph + " ".join(['edge[ source "{0}" target "{1}"]'.format(v, outcome) for v in frontdoor_variables])
+    for v1 in common_causes:
+        gml_graph = gml_graph + " ".join(['edge[ source "{0}" target "{1}"]'.format(v1, v2) for v2 in frontdoor_variables])
     gml_graph = gml_graph + ']'
     return gml_graph
 
