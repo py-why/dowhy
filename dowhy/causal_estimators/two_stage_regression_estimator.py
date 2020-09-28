@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import itertools
 import copy
-from sklearn import linear_model
 
 from dowhy.causal_estimator import CausalEstimator, CausalEstimate
 from dowhy.causal_identifier import CausalIdentifier
@@ -14,7 +13,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
 
     Currently only supports a linear model for the effects.
     """
-    DEFAULT_FIRST_STAGE_MODEL = linear_model.LinearRegression
+    DEFAULT_FIRST_STAGE_MODEL = LinearRegressionEstimator
     DEFAULT_SECOND_STAGE_MODEL = LinearRegressionEstimator
 
     def __init__(self, *args, **kwargs):
