@@ -389,4 +389,13 @@ class CausalGraph:
         d_separated = all([self.is_blocked(path, candidate_nodes) for path in frontdoor_paths])
         return d_separated
 
+    def check_valid_mediation_set(self, nodes1, nodes2, candidate_nodes, mediation_paths=None):
+        """Check if candidate nodes are valid mediators for set of treatments, nodes1 to set of outcomes, nodes2.
+        """
+        if mediation_paths is None:
+            mediation_paths = self.get_all_directed_paths(nodes1, nodes2)
+
+        is_mediator = any([self.is_blocked(path, candidate_nodes) for path in mediation_paths])
+        return is_mediator
+
 
