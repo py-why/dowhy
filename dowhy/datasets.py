@@ -123,7 +123,6 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
             c1_frontdoor = np.random.uniform(0, range_c1_frontdoor,
                     (W_with_dummy.shape[1], num_frontdoor_variables))
             FD += W_with_dummy @ c1_frontdoor
-        print("cfd1=", cfd1)
 
     def _compute_y(t, W, X, FD, beta, c2, ce, cfd2):
         y = np.random.normal(0,0.01, num_samples)
