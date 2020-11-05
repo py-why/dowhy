@@ -320,11 +320,15 @@ def create_gml_graph(treatments, outcome, common_causes,
     gml_graph = gml_graph + ']'
     return gml_graph
 
-def xy_dataset(num_samples, effect=True, sd_error=1):
-    treatment = 'Treatment'
+def xy_dataset(num_samples, effect=True,
+        num_common_causes=1,
+        is_linear=True,
+        sd_error=1):
+    treatment = 'Action'
     outcome = 'Outcome'
-    common_causes = ['w0']
+    common_causes = ['w'+str(i) for i in range(num_common_causes)]
     time_var = 's'
+    # Error terms
     E1 = np.random.normal(loc=0, scale=sd_error, size=num_samples)
     E2 = np.random.normal(loc=0, scale=sd_error, size=num_samples)
 
@@ -333,21 +337,43 @@ def xy_dataset(num_samples, effect=True, sd_error=1):
     T1[S >= 5] = 0
     T2 = (S - 7) * (S - 7) - 4
     T2[S <= 5] = 0
-    W = T1 + T2  # hidden confounder
-    if effect:
-        U = None
-        V = 6 + W + E1
-        Y = 6 + V + W + E2  # + (V-8)*(V-8)
+    W0 = T1 + T2  # hidden confounder
+    tterm, yterm = 0,0
+    if num_common_causes > 1:
+        means = np.random.uniform(-1, 1, num_common_causes-1)
+        cov_mat = np.diag(np.ones(num_common_causes-1))
+        otherW = np.random.multivariate_normal(means, cov_mat, num_samples)
+        c1 = np.random.uniform(0, 1, (otherW.shape[1], 1))
+        c2 = np.random.uniform(0, 1, (otherW.shape[1], 1))
+        tterm = (otherW @ c1)[:,0]
+        yterm = (otherW @ c2)[:,0]
+
+    if is_linear:
+        V = 6 + W0 + tterm +  E1
+        Y = 6 + W0 + yterm + E2  # + (V-8)*(V-8)
+        if effect:
+            Y += V
+        else:
+            Y += (6 + W0)
     else:
-        U = W  # np.random.normal(0, 1, num_samples)
-        V = 6 + W + E1
-        Y = 12 + W + W + E2  # E2_new
+        V = 6 + W0*W0 + tterm +  E1
+        Y = 6 + W0*W0 + yterm + E2  # + (V-8)*(V-8)
+        if effect:
+            Y += V #/20 # divide by 10 to scale the value of Y to be comparable to V
+        else:
+            Y += (6 + W0)
+    #else:
+    #    V = 6 + W0 + tterm + E1
+    #    Y = 12 + W0*W0 + W0*W0 + yterm + E2  # E2_new
     dat = {
         treatment: V,
         outcome: Y,
-        common_causes[0]: W,
+        common_causes[0]: W0,
         time_var: S
     }
+    if num_common_causes > 1:
+        for i in range(otherW.shape[1]):
+            dat[common_causes[i+1]] = otherW[:,i]
     data = pd.DataFrame(data=dat)
     ret_dict = {
         "df": data,
