@@ -5,7 +5,7 @@ You can help us make DoWhy better,
 problems
 
 * Helping implement a new method for any of the four steps of causal analysis:
-  model, identify, estimate, refute
+  model, identify, estimate, refute.
 
 * Integrating DoWhy's API with external implementations for any of the four steps, so that external libraries can be called seamlessly from the `identify_effect`, `estimate_effect` or `refute_estimate` methods.
  
