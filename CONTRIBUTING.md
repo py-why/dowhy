@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Contributors ✨
@@ -15,6 +15,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/emrekiciman"><img src="https://avatars3.githubusercontent.com/u/5982160?v=4" width="100px;" alt=""/><br /><sub><b>emrekiciman</b></sub></a><br /><a href="https://github.com/microsoft/dowhy/commits?author=emrekiciman" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/amit-sharma"><img src="https://avatars3.githubusercontent.com/u/1775381?v=4" width="100px;" alt=""/><br /><sub><b>Amit Sharma</b></sub></a><br /><a href="https://github.com/microsoft/dowhy/commits?author=amit-sharma" title="Code">💻</a></td>
     <td align="center"><a href="http://adamkelleher.com"><img src="https://avatars0.githubusercontent.com/u/1762368?v=4" width="100px;" alt=""/><br /><sub><b>Adam Kelleher</b></sub></a><br /><a href="https://github.com/microsoft/dowhy/commits?author=akelleh" title="Code">💻</a> <a href="#content-akelleh" title="Content">🖋</a></td>
+    <td align="center"><a href="https://github.com/Tanmay-Kulkarni101"><img src="https://avatars3.githubusercontent.com/u/17275495?v=4" width="100px;" alt=""/><br /><sub><b>Tanmay Kulkarni</b></sub></a><br /><a href="https://github.com/microsoft/dowhy/commits?author=Tanmay-Kulkarni101" title="Code">💻</a> <a href="https://github.com/microsoft/dowhy/commits?author=Tanmay-Kulkarni101" title="Documentation">📖</a></td>
   </tr>
 </table>
 
