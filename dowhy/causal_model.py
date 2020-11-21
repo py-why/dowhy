@@ -301,7 +301,7 @@ class CausalModel:
         :param estimand: target estimand, an instance of the IdentifiedEstimand class (typically, the output of identify_effect)
         :param estimate: estimate to be refuted, an instance of the CausalEstimate class (typically, the output of estimate_effect)
         :param method_name: name of the refutation method
-        :param **kwargs:  (optional) additional arguments that are passed directly to the refutation method. Can specify a random seed here to ensure reproducible results ('random_seed' parameter). For method-specific parameters, consult the documentation for the specific method. All refutation methods are in the causal_refuters subpackage.
+        :param kwargs:  (optional) additional arguments that are passed directly to the refutation method. Can specify a random seed here to ensure reproducible results ('random_seed' parameter). For method-specific parameters, consult the documentation for the specific method. All refutation methods are in the causal_refuters subpackage.
 
         :returns: an instance of the RefuteResult class
 

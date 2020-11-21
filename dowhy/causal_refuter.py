@@ -6,15 +6,15 @@ import random
 from dowhy.utils.api import parse_state
 
 class CausalRefuter:
-    
-    """Base class for different refutation methods. 
 
-    Subclasses implement specific refutations methods. 
+    """Base class for different refutation methods.
+
+    Subclasses implement specific refutations methods.
 
     """
     # Default value for the number of simulations to be conducted
     DEFAULT_NUM_SIMULATIONS = 100
-          
+
     def __init__(self, data, identified_estimand, estimate, **kwargs):
         self._data = data
         self._target_estimand = identified_estimand
@@ -26,7 +26,7 @@ class CausalRefuter:
         if "random_seed" in kwargs:
             self._random_seed = kwargs['random_seed']
             np.random.seed(self._random_seed)
-        
+
         if 'logging_level' in kwargs:
             logging.basicConfig(level=kwargs['logging_level'])
         else:
@@ -46,21 +46,21 @@ class CausalRefuter:
             This method provides a way to choose the confounders whose values we wish to
             modify for finding its effect on the ability of the treatment to affect the outcome.
         '''
-        
+
         invert = None
 
         if required_variables is False:
-           
+
             self.logger.info("All variables required: Running bootstrap adding noise to confounders, instrumental variables and effect modifiers.")
             return None
-        
+
         elif required_variables is True:
-            
+
             self.logger.info("All variables required: Running bootstrap adding noise to confounders, instrumental variables and effect modifiers.")
             return self._variables_of_interest
-        
+
         elif type(required_variables) is int:
-            
+
             if len(self._variables_of_interest) < required_variables:
                 self.logger.error("Too many variables passed.\n The number of  variables is: {}.\n The number of variables passed: {}".format(
                     len(self._variables_of_interest),
@@ -68,12 +68,12 @@ class CausalRefuter:
                 )
                 raise ValueError("The number of variables in the required_variables is greater than the number of confounders, instrumental variables and effect modifiers")
             else:
-                # Shuffle the confounders 
+                # Shuffle the confounders
                 random.shuffle(self._variables_of_interest)
                 return self._variables_of_interest[:required_variables]
-        
+
         elif type(required_variables) is list:
-           
+
            # Check if all are select or deselect variables
             if all(variable[0] == '-' for variable in required_variables):
                 invert = True
@@ -82,56 +82,51 @@ class CausalRefuter:
                 invert = False
             else:
                 self.logger.error("{} has both select and delect variables".format(required_variables))
-                raise ValueError("It appears that there are some select and deselect variables. Note you can either select or delect variables at a time, but not both") 
-            
+                raise ValueError("It appears that there are some select and deselect variables. Note you can either select or delect variables at a time, but not both")
+
             # Check if all the required_variables belong to confounders, instrumental variables or effect
             if set(required_variables) - set(self._variables_of_interest) != set([]):
                 self.logger.error("{} are not confounder, instrumental variable or effect modifier".format( list( set(required_variables) - set(self._variables_of_interest) ) ))
-                raise ValueError("At least one of required_variables is not a valid variable name, or it is not a confounder, instrumental variable or effect modifier") 
-            
+                raise ValueError("At least one of required_variables is not a valid variable name, or it is not a confounder, instrumental variable or effect modifier")
+
             if invert is False:
                 return required_variables
             elif invert is True:
                 return list( set(self._variables_of_interest) - set(required_variables) )
-        
+
         else:
             self.logger.error("Incorrect type: {}. Expected an int,list or bool".format( type(required_variables) ) )
             raise TypeError("Expected int, list or bool. Got an unexpected datatype")
-    
+
     def test_significance(self, estimate, simulations, test_type='auto',significance_level=0.05):
-        """
-        Tests the statistical significance of the estimate obtained to the simulations produced by a refuter
+        """ Tests the statistical significance of the estimate obtained to the simulations produced by a refuter.
 
         The basis behind using the sample statistics of the refuter when we are in fact testing the estimate,
         is due to the fact that, we would ideally expect them to follow the same distribition
 
         For refutation tests (e.g., placebo refuters), consider the null distribution as a distribution of effect
         estimates over multiple simulations with placebo treatment, and compute how likely the true estimate (e.g.,
-         zero for placebo test) is under the null. If the probability of true effect estimate is lower than the 
-         p-value, then estimator method fails the test.
-        
+        zero for placebo test) is under the null. If the probability of true effect estimate is lower than the
+        p-value, then estimator method fails the test.
+
         For sensitivity analysis tests (e.g., bootstrap, subset or common cause refuters), the null distribution captures
-        the distribution of effect estimates under the "true" dataset (e.g., with an additional confounder or different 
-        sampling), and we compute the probability of the obtained estimate under this distribution. If the probability is 
+        the distribution of effect estimates under the "true" dataset (e.g., with an additional confounder or different
+        sampling), and we compute the probability of the obtained estimate under this distribution. If the probability is
         lower than the p-value, then the estimator method fails the test
 
         Null Hypothesis: The estimate is a part of the distribution
         Alternative Hypothesis: The estimate does not fall in the distribution.
 
-        Parameters
-        -----------
-        'estimate': CausalEstimate
+        :param 'estimate': CausalEstimate
         The estimate obtained from the estimator for the original data.
-        'simulations': np.array
+        :param 'simulations': np.array
         An array containing the result of the refuter for the simulations
-        'test_type': string, default 'auto'
+        :param 'test_type': string, default 'auto'
         The type of test the user wishes to perform.
-        'significance_level': float, default 0.05
+        :param 'significance_level': float, default 0.05
         The significance level for the statistical test
 
-        Returns
-        --------
-        significance_dict: Dict
+        :returns: significance_dict: Dict
         A Dict containing the p_value and a boolean that indicates if the result is statistically significant
         """
         # Initializing the p_value
@@ -149,7 +144,7 @@ class CausalRefuter:
             else:
                 self.logger.warning("We assume a Normal Distribution as the sample has less than 100 examples.\n \
                 Note: The underlying distribution may not be Normal. We assume that it approaches normal with the increase in sample size.")
-            
+
                 # Perform Normal Tests of Significance with the original estimate and the set of refutations
                 p_value = self.perform_normal_distribution_test(estimate, simulations)
 
@@ -208,8 +203,8 @@ class CausalRefuter:
         std_dev_refute_values = np.std(simulations)
         # Get the Z Score [(val - mean)/ std_dev ]
         z_score = (estimate.value - mean_refute_values)/ std_dev_refute_values
-        
-        
+
+
         if z_score > 0: # Right Tail
             p_value = 1 - st.norm.cdf(z_score)
         else: # Left Tail

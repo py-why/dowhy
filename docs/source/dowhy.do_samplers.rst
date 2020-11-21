@@ -36,7 +36,6 @@ dowhy.do\_samplers.weighting\_sampler module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

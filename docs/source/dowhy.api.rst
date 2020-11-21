@@ -12,7 +12,6 @@ dowhy.api.causal\_data\_frame module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 
