@@ -15,7 +15,7 @@ DoWhy | An end-to-end library for causal inference
 `Amit Sharma <http://www.amitsharma.in>`_,
 `Emre Kiciman <http://www.kiciman.org>`_
 
-  Introducing DoWhy and the 4 steps of causal inference | `Microsoft Research Blog <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Arxiv <https://arxiv.org/abs/2011.04216>`_ | `Slides <https://www2.slideshare.net/AmitSharma315/dowhy-an-endtoend-library-for-causal-inference>`_
+  Introducing DoWhy and the 4 steps of causal inference | `Microsoft Research Blog <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Arxiv Paper <https://arxiv.org/abs/2011.04216>`_ | `Slides <https://www2.slideshare.net/AmitSharma315/dowhy-an-endtoend-library-for-causal-inference>`_
 
   Read the `docs <https://microsoft.github.io/dowhy/>`_ | Try it online! |AzureNotebooks|_ |Binder|_ 
 
