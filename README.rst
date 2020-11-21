@@ -9,13 +9,15 @@
 .. |BuildStatus| image:: https://dev.azure.com/ms/dowhy/_apis/build/status/microsoft.dowhy?branchName=master
 .. _BuildStatus: https://dev.azure.com/ms/dowhy/_build/latest?definitionId=179&branchName=master
 
-DoWhy | Making causal inference easy
-====================================
+DoWhy | An end-to-end library for causal inference
+===================================================
 
 `Amit Sharma <http://www.amitsharma.in>`_,
 `Emre Kiciman <http://www.kiciman.org>`_
 
-  Blog: `Introducing DoWhy <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | Read the `docs <https://microsoft.github.io/dowhy/>`_ | Try it online! |AzureNotebooks|_ |Binder|_ 
+  Introducing DoWhy and the 4 steps of causal inference | `Microsoft Research Blog <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Arxiv <https://arxiv.org/abs/2011.04216>`_ | `Presentation at the Causal Data Science meeting <https://www2.slideshare.net/AmitSharma315/dowhy-an-endtoend-library-for-causal-inference>`_
+
+  Read the `docs <https://microsoft.github.io/dowhy/>`_ | Try it online! |AzureNotebooks|_ |Binder|_ 
 
 .. |AzureNotebooks| image:: https://notebooks.azure.com/launch.svg
 .. _AzureNotebooks: https://notebooks.azure.com/amshar/projects/dowhy/tree/docs/source
@@ -65,6 +67,8 @@ for causal inference, it is hard to compare their assumptions and robustness of 
 To see DoWhy in action, check out how it can be applied to estimate the effect
 of a subscription or rewards program for customers [`Rewards notebook
 <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb>`_] and for implementing and evaluating causal inference methods on benchmark datasets like the `Infant Health and Development Program (IHDP) <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_ihdp_data_example.ipynb>`_ dataset, `Infant Mortality (Twins) <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_twins_example%20.ipynb>`_ dataset, and the `Lalonde Jobs <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_lalonde_example.ipynb>`_ dataset.
+
+.. image:: https://raw.githubusercontent.com/microsoft/dowhy/master/docs/images/dowhy-schematic.png
 
 Installation
 -------------
