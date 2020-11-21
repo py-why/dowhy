@@ -6,6 +6,50 @@ DoWhy is hosted on GitHub.
 You can browse the code in a html-friendly format `here
 <https://github.com/Microsoft/dowhy>`_.
 
+v0.5-beta: Enhanced documentation and support for causal mediation
+-------------------------------------------------------------------
+
+**Installation**
+
+* DoWhy can be installed on Conda now! 
+
+**Code**
+
+* Support for identification by mediation formula
+
+* Support for the front-door criterion
+
+* Linear estimation methods for mediation
+
+* Generalized backdoor criterion implementation using paths and d-separation
+
+* Added GLM estimators, including logistic regression
+
+* New API for interpreting causal models, estimates and refuters. First
+  interpreter by @ErikHambardzumyan visualizes how the distribution of confounder changes
+
+* Friendlier error messages for propensity score stratification estimator when there is not enough data in a bin
+
+* Enhancements to the dummy outcome refuter with machine learned components--now can simulate non-zero effects too. Ready for alpha testing
+
+
+**Docs**
+
+* New case studies using DoWhy on `hotel booking cancellations <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.ipynb>`_ and `membership rewards programs <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb>`_
+
+* New `notebook <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_multiple_treatments.ipynb>`_ on using DoWhy+EconML for estimating effect of multiple treatments
+
+* A `tutorial  <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/tutorial-causalinference-machinelearning-using-dowhy-econml.ipynb>`_ on causal inference using DoWhy and EconML
+
+* Better organization of docs and notebooks on the `documentation website <https://microsoft.github.io/dowhy/>`_.
+
+**Community**
+
+* Created a `contributors page <https://github.com/microsoft/dowhy/blob/master/CONTRIBUTING.md>`_ with guidelines for contributing
+
+* Added allcontributors bot so that new contributors can added just after their pull requests are merged
+
+A big thanks to @Tanmay-Kulkarni101, @ErikHambardzumyan, @Sid-darthvader for their contributions. 
 
 v0.4-beta: Powerful refutations and better support for heterogeneous treatment effects
 --------------------------------------------------------------------------------------
@@ -30,7 +74,7 @@ v0.4-beta: Powerful refutations and better support for heterogeneous treatment e
 
 * Better coverage for tests. Also, tests are now seeded with a random seed, so more dependable tests.
 
-Thanks to @Tanmay-Kulkarni101 and @Arshiaarya  for their contributions!
+Thanks to @Tanmay-Kulkarni101 and @Arshiaarya for their contributions!
 
 v0.2-alpha: CATE estimation and integration with EconML
 -------------------------------------------------------
