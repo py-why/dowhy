@@ -20,6 +20,14 @@ dowhy.causal\_estimators.econml module
    :undoc-members:
    :show-inheritance:
 
+dowhy.causal\_estimators.generalized\_linear\_model\_estimator module
+---------------------------------------------------------------------
+
+.. automodule:: dowhy.causal_estimators.generalized_linear_model_estimator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.causal\_estimators.instrumental\_variable\_estimator module
 -----------------------------------------------------------------
 
@@ -76,6 +84,21 @@ dowhy.causal\_estimators.regression\_discontinuity\_estimator module
    :undoc-members:
    :show-inheritance:
 
+dowhy.causal\_estimators.regression\_estimator module
+-----------------------------------------------------
+
+.. automodule:: dowhy.causal_estimators.regression_estimator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.causal\_estimators.two\_stage\_regression\_estimator module
+-----------------------------------------------------------------
+
+.. automodule:: dowhy.causal_estimators.two_stage_regression_estimator
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------

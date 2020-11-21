@@ -1,0 +1,953 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Estimating the effect of a Member Rewards program &mdash; DoWhy | An end-to-end library for causal inference  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="DoWhy example on ihdp (Infant Health and Development Program) dataset" href="dowhy_ihdp_data_example.html" />
+    <link rel="prev" title="DoWhy-The Causal Story Behind Hotel Booking Cancellations" href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> DoWhy | An end-to-end library for causal inference
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introducing DoWhy</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">DoWhy | An end-to-end library for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html#graphical-models-and-potential-outcomes-best-of-both-worlds">Graphical Models and Potential Outcomes: Best of both worlds</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html#four-steps-of-causal-inference">Four steps of causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html#citing-this-package">Citing this package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html#roadmap">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html#contributing">Contributing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Quick-Start Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Starter Notebooks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Case Study Notebooks</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">DoWhy-The Causal Story Behind Hotel Booking Cancellations</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Estimating the effect of a Member Rewards program</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#I.-Formulating-the-causal-model">I. Formulating the causal model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#The-importance-of-time">The importance of time</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#II.-Identifying-the-causal-effect">II. Identifying the causal effect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#III.-Estimating-the-effect">III. Estimating the effect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#IV.-Refuting-the-estimate">IV. Refuting the estimate</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_twins_example.html">DoWhy example on Twins dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refutation_testing.html">Applying refutation tests to the Lalonde and IHDP datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Advanced Notebooks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_multiple_treatments.html">Estimating effect of multiple treatments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Package</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../code_repo.html">Code repository &amp; Versions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dowhy.html">dowhy package</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DoWhy | An end-to-end library for causal inference</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="nb_casestudies_index.html">&lt;no title&gt;</a> &raquo;</li>
+        
+      <li>Estimating the effect of a Member Rewards program</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="Estimating-the-effect-of-a-Member-Rewards-program">
+<h1>Estimating the effect of a Member Rewards program<a class="headerlink" href="#Estimating-the-effect-of-a-Member-Rewards-program" title="Permalink to this headline">¶</a></h1>
+<p>An example on how DoWhy can be used to estimate the effect of a subscription or a rewards program for customers.</p>
+<p>Suppose that a website has a membership rewards program where customers receive additional benefits if they sign up. How do we know if the program is effective? Here the relevant causal question is: &gt; What is the impact of offering the membership rewards program on total sales?</p>
+<p>And the equivalent counterfactual question is, &gt; If the current members had not signed up for the program, how much less would they have spent on the website?</p>
+<p>In formal language, we are interested in the Average Treatment Effect on the Treated (ATT).</p>
+<div class="section" id="I.-Formulating-the-causal-model">
+<h2>I. Formulating the causal model<a class="headerlink" href="#I.-Formulating-the-causal-model" title="Permalink to this headline">¶</a></h2>
+<p>Suppose that the rewards program was introduced in January 2019. The outcome variable is the total spends at the end of the year. We have data on all monthly transactions of every user and on the time of signup for those who chose to signup for the rewards program. Here’s what the data looks like.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Creating some simulated data for our example example</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="n">num_users</span> <span class="o">=</span> <span class="mi">10000</span>
+<span class="n">num_months</span> <span class="o">=</span> <span class="mi">12</span>
+
+<span class="n">signup_months</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_months</span><span class="p">),</span> <span class="n">num_users</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">num_users</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">&#39;user_id&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_users</span><span class="p">),</span> <span class="n">num_months</span><span class="p">),</span>
+    <span class="s1">&#39;signup_month&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">signup_months</span><span class="p">,</span> <span class="n">num_months</span><span class="p">),</span> <span class="c1"># signup month == 0 means customer did not sign up</span>
+    <span class="s1">&#39;month&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_months</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">num_users</span><span class="p">),</span> <span class="c1"># months are from 1 to 12</span>
+    <span class="s1">&#39;spend&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="n">num_users</span><span class="o">*</span><span class="n">num_months</span><span class="p">)</span> <span class="c1">#np.random.beta(a=2, b=5, size=num_users * num_months)*1000 # centered at 500</span>
+<span class="p">})</span>
+<span class="c1"># Assigning a treatment value based on the signup month</span>
+<span class="n">df</span><span class="p">[</span><span class="s2">&quot;treatment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;signup_month&quot;</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+<span class="c1"># Simulating effect of month (monotonically increasing--customers buy the most in December)</span>
+<span class="n">df</span><span class="p">[</span><span class="s2">&quot;spend&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;spend&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">]</span><span class="o">*</span><span class="mi">10</span>
+<span class="c1"># The treatment effect (simulating a simple treatment effect of 100)</span>
+<span class="n">after_signup</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;signup_month&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;signup_month&quot;</span><span class="p">]</span> <span class="o">!=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">after_signup</span><span class="p">,</span><span class="s2">&quot;spend&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">after_signup</span><span class="p">][</span><span class="s2">&quot;spend&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">100</span>
+<span class="n">df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>user_id</th>
+      <th>signup_month</th>
+      <th>month</th>
+      <th>spend</th>
+      <th>treatment</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>5</td>
+      <td>1</td>
+      <td>489</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0</td>
+      <td>5</td>
+      <td>2</td>
+      <td>510</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0</td>
+      <td>5</td>
+      <td>3</td>
+      <td>491</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0</td>
+      <td>5</td>
+      <td>4</td>
+      <td>450</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0</td>
+      <td>5</td>
+      <td>5</td>
+      <td>420</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>119995</th>
+      <td>9999</td>
+      <td>10</td>
+      <td>8</td>
+      <td>429</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>119996</th>
+      <td>9999</td>
+      <td>10</td>
+      <td>9</td>
+      <td>408</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>119997</th>
+      <td>9999</td>
+      <td>10</td>
+      <td>10</td>
+      <td>405</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>119998</th>
+      <td>9999</td>
+      <td>10</td>
+      <td>11</td>
+      <td>476</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>119999</th>
+      <td>9999</td>
+      <td>10</td>
+      <td>12</td>
+      <td>473</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+<p>120000 rows × 5 columns</p>
+</div></div>
+</div>
+<div class="section" id="The-importance-of-time">
+<h3>The importance of time<a class="headerlink" href="#The-importance-of-time" title="Permalink to this headline">¶</a></h3>
+<p>Time plays a crucial role in modeling this problem.</p>
+<p>Rewards signup can affect the future transactions, but not those that happened before it. In fact, the transaction prior to the rewards signup can be assumed to cause the rewards signup decision. Therefore we can split up the variables for each user in terms of</p>
+<ol class="arabic simple">
+<li><p>Activity prior to the treatment (causes the treatment)</p></li>
+<li><p>Activity after the treatment (is the outcome of applying treatment)</p></li>
+</ol>
+<p>Of course, many important variables that affect signup and total spend are missing (e.g., the type of products bought, length of a user’s account, geography, etc.). So we’ll need a node denoting <code class="docutils literal notranslate"><span class="pre">Unobserved</span> <span class="pre">Confounders</span></code>.</p>
+<p>Below is the causal graph for a user who signed up in month <code class="docutils literal notranslate"><span class="pre">i=3</span></code>. The analysis will be similar for any <code class="docutils literal notranslate"><span class="pre">i</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
+<span class="kn">import</span> <span class="nn">dowhy</span>
+
+<span class="c1"># Setting the signup month (for ease of analysis)</span>
+<span class="n">i</span> <span class="o">=</span> <span class="mi">6</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+
+
+<span></span><span class="n">causal_graph</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;digraph {</span>
+<span class="s2">treatment[label=&quot;Program Signup in month i&quot;];</span>
+<span class="s2">pre_spends;</span>
+<span class="s2">post_spends;</span>
+<span class="s2">Z-&gt;treatment;</span>
+<span class="s2">U[label=&quot;Unobserved Confounders&quot;];</span>
+<span class="s2">pre_spends -&gt; treatment;</span>
+<span class="s2">treatment-&gt;post_spends;</span>
+<span class="s2">signup_month-&gt;post_spends; signup_month-&gt;pre_spends;</span>
+<span class="s2">signup_month-&gt;treatment;</span>
+<span class="s2">U-&gt;treatment; U-&gt;pre_spends; U-&gt;post_spends;</span>
+<span class="s2">}&quot;&quot;&quot;</span>
+
+<span class="c1"># Post-process the data based on the graph and the month of the treatment (signup)</span>
+<span class="n">df_i_signupmonth</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">signup_month</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="p">])]</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;user_id&quot;</span><span class="p">,</span> <span class="s2">&quot;signup_month&quot;</span><span class="p">,</span> <span class="s2">&quot;treatment&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="s1">&#39;pre_spends&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">month</span> <span class="o">&lt;</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">spend</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">month</span><span class="o">&lt;</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)),</span>
+                        <span class="s1">&#39;post_spends&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">month</span> <span class="o">&gt;</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">spend</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">month</span><span class="o">&gt;</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span> <span class="p">})</span>
+<span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_i_signupmonth</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">CausalModel</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df_i_signupmonth</span><span class="p">,</span>
+                     <span class="n">graph</span><span class="o">=</span><span class="n">causal_graph</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">),</span>
+                     <span class="n">treatment</span><span class="o">=</span><span class="s2">&quot;treatment&quot;</span><span class="p">,</span>
+                     <span class="n">outcome</span><span class="o">=</span><span class="s2">&quot;post_spends&quot;</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;treatment&#39;] on outcome [&#39;post_spends&#39;]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+      user_id  signup_month  treatment  pre_spends  post_spends
+0           4             0      False       462.4   401.666667
+1           7             0      False       467.4   410.000000
+2          14             0      False       466.8   399.833333
+3          16             0      False       461.0   403.666667
+4          17             0      False       467.8   404.166667
+...       ...           ...        ...         ...          ...
+5394     9991             0      False       453.2   385.166667
+5395     9992             0      False       482.2   404.333333
+5396     9994             0      False       469.6   409.833333
+5397     9996             0      False       462.8   399.000000
+5398     9997             0      False       484.4   407.333333
+
+[5399 rows x 5 columns]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_dowhy_example_effect_of_memberrewards_program_5_2.png" src="../_images/example_notebooks_dowhy_example_effect_of_memberrewards_program_5_2.png" />
+</div>
+</div>
+<p>More generally, we can include any activity data for the customer in the above graph. All prior- and post-activity data will occupy the same place (and have the same edges) as the Amount spent node (prior and post respectively).</p>
+</div>
+</div>
+<div class="section" id="II.-Identifying-the-causal-effect">
+<h2>II. Identifying the causal effect<a class="headerlink" href="#II.-Identifying-the-causal-effect" title="Permalink to this headline">¶</a></h2>
+<p>For the sake of this example, let us assume that unobserved confounding does not play a big part.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
+INFO:dowhy.causal_identifier:Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True.
+INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[&#39;Z&#39;]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Estimand type: nonparametric-ate
+
+### Estimand : 1
+Estimand name: backdoor1 (Default)
+Estimand expression:
+     d
+────────────(Expectation(post_spends|signup_month,pre_spends))
+d[treatment]
+Estimand assumption 1, Unconfoundedness: If U→{treatment} and U→post_spends then P(post_spends|treatment,signup_month,pre_spends,U) = P(post_spends|treatment,signup_month,pre_spends)
+
+### Estimand : 2
+Estimand name: iv
+Estimand expression:
+Expectation(Derivative(post_spends, [Z])*Derivative([treatment], [Z])**(-1))
+Estimand assumption 1, As-if-random: If U→→post_spends then ¬(U →→{Z})
+Estimand assumption 2, Exclusion: If we remove {Z}→{treatment}, then ¬({Z}→post_spends)
+
+</pre></div></div>
+</div>
+<p>Based on the graph, DoWhy determines that the signup month and amount spent in the pre-treatment months (<code class="docutils literal notranslate"><span class="pre">signup_month</span></code>, <code class="docutils literal notranslate"><span class="pre">pre_spend</span></code>) needs to be conditioned on.</p>
+</div>
+<div class="section" id="III.-Estimating-the-effect">
+<h2>III. Estimating the effect<a class="headerlink" href="#III.-Estimating-the-effect" title="Permalink to this headline">¶</a></h2>
+<p>We now estimate the effect based on the backdoor estimand, setting the target units to “att”.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+                                 <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor1.propensity_score_matching&quot;</span><span class="p">,</span>
+                                <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;att&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: post_spends~treatment+signup_month+pre_spends
+/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Identified estimand
+Estimand type: nonparametric-ate
+
+### Estimand : 1
+Estimand name: backdoor1 (Default)
+Estimand expression:
+     d
+────────────(Expectation(post_spends|signup_month,pre_spends))
+d[treatment]
+Estimand assumption 1, Unconfoundedness: If U→{treatment} and U→post_spends then P(post_spends|treatment,signup_month,pre_spends,U) = P(post_spends|treatment,signup_month,pre_spends)
+
+## Realized estimand
+b: post_spends~treatment+signup_month+pre_spends
+Target units: att
+
+## Estimate
+Mean value: 95.22363945578238
+
+</pre></div></div>
+</div>
+<p>The analysis tells us the Average Treatment Effect on the Treated (ATT). That is, the average effect on total spend for the customers that signed up for the Rewards Program in month <code class="docutils literal notranslate"><span class="pre">i=3</span></code> (compared to the case where they had not signed up). We can similarly calculate the effects for customers who signed up in any other month by changing the value of <code class="docutils literal notranslate"><span class="pre">i</span></code>(line 2 above) and then rerunning the analysis.</p>
+<p>Note that the estimation suffers from left and right-censoring. 1. <strong>Left-censoring</strong>: If a customer signs up in the first month, we do not have enough transaction history to match them to similar customers who did not sign up (and thus apply the backdoor identified estimand). 2. <strong>Right-censoring</strong>: If a customer signs up in the last month, we do not enough <em>future</em> (post-treatment) transactions to estimate the outcome after signup.</p>
+<p>Thus, even if the effect of signup was the same across all months, the <em>estimated effects</em> may be different by month of signup, due to lack of data (and thus high variance in estimated pre-treatment or post-treatment transactions activity).</p>
+</div>
+<div class="section" id="IV.-Refuting-the-estimate">
+<h2>IV. Refuting the estimate<a class="headerlink" href="#IV.-Refuting-the-estimate" title="Permalink to this headline">¶</a></h2>
+<p>We refute the estimate using the placebo treatment refuter. This refuter substitutes the treatment by an independent random variable and checks whether our estimate now goes to zero (it should!).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">refutation</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;placebo_treatment_refuter&quot;</span><span class="p">,</span>
+                     <span class="n">placebo_type</span><span class="o">=</span><span class="s2">&quot;permute&quot;</span><span class="p">,</span> <span class="n">num_simulations</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">refutation</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.causal_refuters.placebo_treatment_refuter:Refutation over 2 simulated datasets of permute treatment
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: post_spends~placebo+signup_month+pre_spends
+/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: post_spends~placebo+signup_month+pre_spends
+/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+WARNING:dowhy.causal_refuters.placebo_treatment_refuter:We assume a Normal Distribution as the sample has less than 100 examples.
+                 Note: The underlying distribution may not be Normal. We assume that it approaches normal with the increase in sample size.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Refute: Use a Placebo Treatment
+Estimated effect:95.22363945578238
+New effect:0.30931122448979725
+p value:0.39121893285584125
+
+</pre></div></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="dowhy_ihdp_data_example.html" class="btn btn-neutral float-right" title="DoWhy example on ihdp (Infant Health and Development Program) dataset" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html" class="btn btn-neutral float-left" title="DoWhy-The Causal Story Behind Hotel Booking Cancellations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Microsoft
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

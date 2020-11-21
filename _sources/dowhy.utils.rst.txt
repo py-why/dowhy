@@ -28,7 +28,6 @@ dowhy.utils.propensity\_score module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 
