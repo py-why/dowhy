@@ -11,7 +11,7 @@ import dowhy.utils.cli_helpers as cli
 from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_graph import CausalGraph
 from dowhy.causal_identifier import CausalIdentifier
-
+import dowhy.interpreters as interpreters
 from dowhy.utils.api import parse_state
 
 init_printing()  # To display symbolic math symbols
@@ -211,7 +211,7 @@ class CausalModel:
                     # Define the third-party estimation method to be used
                     method_params["_" + third_party_estimator_package + "_methodname"] = estimator_name
             else: # For older dowhy methods
-                # Process the dowhy estimators 
+                # Process the dowhy estimators
                 causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
 
         # Check if estimator's target estimand is identified
@@ -333,7 +333,7 @@ class CausalModel:
     def interpret(self, method_name=None, **kwargs):
         """Interpret the causal model.
 
-        :param method_name: method used for interpreting the model. If None, 
+        :param method_name: method used for interpreting the model. If None,
                             then default interpreter is chosen that describes the model summary and shows the associated causal graph.
         :param kwargs:: Optional parameters that are directly passed to the interpreter method.
 
@@ -362,4 +362,4 @@ class CausalModel:
             print(summary_text)
         return summary_text
 
-               
+
