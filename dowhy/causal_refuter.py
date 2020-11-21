@@ -4,7 +4,6 @@ import scipy.stats as st
 import random
 
 from dowhy.utils.api import parse_state
-import dowhy.interpreters as interpreters
 
 class CausalRefuter:
 
@@ -246,7 +245,7 @@ class CausalRefutation:
         if method_name is None:
             method_name = self.refuter.interpret_method
         method_name_arr = parse_state(method_name)
-
+        import dowhy.interpreters as interpreters
         for method in method_name_arr:
             interpreter = interpreters.get_class_object(method)
             interpreter(self, **kwargs).interpret()

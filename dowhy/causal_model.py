@@ -11,7 +11,6 @@ import dowhy.utils.cli_helpers as cli
 from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_graph import CausalGraph
 from dowhy.causal_identifier import CausalIdentifier
-import dowhy.interpreters as interpreters
 from dowhy.utils.api import parse_state
 
 init_printing()  # To display symbolic math symbols
@@ -346,6 +345,7 @@ class CausalModel:
             return
 
         method_name_arr = parse_state(method_name)
+        import dowhy.interpreters as interpreters
         for method in method_name_arr:
             interpreter = interpreters.get_class_object(method)
             interpreter(self, **kwargs).interpret()
