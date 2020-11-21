@@ -15,10 +15,10 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 def plot_treatment_outcome(treatment, outcome, time_var):
     fig, ax = plt.subplots()
-    ax.plot(time_var, treatment, 'o')
-    ax.plot(time_var, outcome, 'r^')
+    tline = ax.plot(time_var, treatment, 'o', label="Treatment")
+    oline = ax.plot(time_var, outcome, 'r^', label="Outcome")
 
-    plt.legend(loc="upper left", bbox_to_anchor=(0.4, 1))
+    ax.legend(loc="upper left", bbox_to_anchor=(1.04, 1))
     plt.xlabel("Time")
     fig.set_size_inches(8, 6)
     fig.savefig("obs_data" + datetime.now().strftime("%H-%M-%S") + ".png",
