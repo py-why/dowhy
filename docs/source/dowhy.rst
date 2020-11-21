@@ -12,6 +12,7 @@ Subpackages
    dowhy.causal_refuters
    dowhy.data_transformers
    dowhy.do_samplers
+   dowhy.interpreters
    dowhy.utils
 
 Submodules
@@ -81,6 +82,14 @@ dowhy.do\_sampler module
    :undoc-members:
    :show-inheritance:
 
+dowhy.interpreter module
+------------------------
+
+.. automodule:: dowhy.interpreter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.plotter module
 --------------------
 
@@ -88,7 +97,6 @@ dowhy.plotter module
    :members:
    :undoc-members:
    :show-inheritance:
-
 
 Module contents
 ---------------

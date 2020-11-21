@@ -12,7 +12,6 @@ dowhy.data\_transformers.pca\_reducer module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

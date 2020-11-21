@@ -19,12 +19,12 @@ sys.path.insert(0, os.path.abspath("../../"))
 
 # -- Project information -----------------------------------------------------
 
-project = 'DoWhy | Making Causal Inference Easy'
+project = 'DoWhy | An end-to-end library for causal inference'
 copyright = '2020, Microsoft'
 author = 'Amit Sharma, Emre Kiciman'
 
 # The short X.Y version
-version = ''
+version = '0.5'
 # The full version, including alpha/beta/rc tags
 release = ''
 
@@ -42,8 +42,11 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.todo',
-    'nbsphinx'
+    'nbsphinx',
+    'sphinx_rtd_theme'
 ]
+
+autodoc_mock_imports = ['matplotlib', 'causalml', 'pymc3']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

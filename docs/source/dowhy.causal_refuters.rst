@@ -52,7 +52,6 @@ dowhy.causal\_refuters.random\_common\_cause module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 
