@@ -78,13 +78,13 @@ DoWhy support Python 3.5+. To install, you can use pip or conda.
 
 **Latest Release**
 
-Install the latest `release <https://pypi.org/project/dowhy/>`_ using pip.
+Install the latest `release <https://pypi.org/project/dowhy/>`__ using pip.
 
 .. code:: shell
    
    pip install dowhy
    
-Install the latest `release <https://anaconda.org/conda-forge/dowhy>`_ using conda.
+Install the latest `release <https://anaconda.org/conda-forge/dowhy>`__ using conda.
 
 .. code:: shell
 
@@ -430,7 +430,7 @@ Supported refutation methods
   (*Hint: It should not*)
 * **Placebo Treatment**: What happens to the estimated causal effect when we
   replace the true treatment variable with an independent random variable?
-  (*Hint: the effect should go to zero)
+  (*Hint: the effect should go to zero*)
 * **Dummy Outcome**: What happens to the estimated causal effect when we replace
   the true outcome variable with an independent random variable? (*Hint: The
   effect should go to zero*)
