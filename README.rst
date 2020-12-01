@@ -459,12 +459,24 @@ Amit Sharma, Emre Kiciman, et al. DoWhy: A Python package for causal inference. 
 Bibtex::
 
   @misc{dowhy,
-  authors={Sharma, Amit and Kiciman, Emre and others},
+  author={Sharma, Amit and Kiciman, Emre and others},
   title={Do{W}hy: {A Python package for causal inference}},
-  howpublished={https://github.com/microsoft/dowhy}
+  howpublished={https://github.com/microsoft/dowhy},
   year={2019}
   }
 
+Alternatively, you can cite our Arxiv paper on DoWhy. 
+
+Amit Sharma, Emre Kiciman. DoWhy: An End-to-End Library for Causal Inference. 2020. https://arxiv.org/abs/2011.04216
+
+Bibtex::
+
+  @article{dowhypaper,
+  title={DoWhy: An End-to-End Library for Causal Inference},
+  author={Sharma, Amit and Kiciman, Emre},
+  journal={arXiv preprint arXiv:2011.04216},
+  year={2020}
+  }
 
 Roadmap 
 =======
