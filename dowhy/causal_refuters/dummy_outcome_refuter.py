@@ -354,7 +354,6 @@ class DummyOutcomeRefuter(CausalRefuter):
 
                 refute.add_refuter(self)
                 refute_list.append(refute)
-        refute_list.append(new_data)
         return refute_list
 
     def process_data(self, X_train, outcome_train, X_validation, outcome_validation, transformation_list):

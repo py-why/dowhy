@@ -57,7 +57,6 @@ class TestRefuter(object):
         )
         true_ate = data["ate"]
         self.logger.debug(true_ate)
-        print(true_ate, ate_estimate.value)
 
         if self.refuter_method == "add_unobserved_common_cause":
         # To test if there are any exceptions
