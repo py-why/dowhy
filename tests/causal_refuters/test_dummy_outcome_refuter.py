@@ -112,7 +112,7 @@ class TestDummyOutcomeRefuter(object):
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
 
     @pytest.mark.parametrize(["error_tolerence","estimator_method","transformations","num_samples"],
-                             [(0.1, "backdoor.propensity_score_matching",[("linear_regression",{}) , ("zero",""), ("noise", {'std_dev': 1} )], 1000 )])
+                             [(0.2, "backdoor.propensity_score_matching",[("linear_regression",{}) , ("zero",""), ("noise", {'std_dev': 1} )], 1000 )])
     def test_refutation_dummy_outcome_refuter_internal_linear_regression_binary_treatment(self, error_tolerence, estimator_method, transformations, num_samples):
         refuter_tester = TestRefuter(error_tolerence,
                                     estimator_method,
@@ -121,7 +121,7 @@ class TestDummyOutcomeRefuter(object):
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
 
     @pytest.mark.parametrize(["error_tolerence","estimator_method", "transformations"],
-                             [(0.01, "iv.instrumental_variable",[("knn",{'n_neighbors':5}), ("zero",""), ("noise", {'std_dev': 1} )] )])
+                             [(0.1, "iv.instrumental_variable",[("knn",{'n_neighbors':5}), ("zero",""), ("noise", {'std_dev': 1} )] )])
     def test_refutation_dummy_outcome_refuter_internal_knn_continuous_treatment(self, error_tolerence, estimator_method, transformations):
         refuter_tester = TestRefuter(error_tolerence,
                                     estimator_method,
