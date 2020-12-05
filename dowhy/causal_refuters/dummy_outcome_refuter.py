@@ -326,7 +326,7 @@ class DummyOutcomeRefuter(CausalRefuter):
                     )
 
             refute.add_significance_test_results(
-                self.test_significance(dummy_estimate, simulation_results)
+                self.test_significance(dummy_estimate, np.ravel(simulation_results))
             )
 
             refute.add_refuter(self)
@@ -354,7 +354,7 @@ class DummyOutcomeRefuter(CausalRefuter):
 
                 refute.add_refuter(self)
                 refute_list.append(refute)
-
+        refute_list.append(new_data)
         return refute_list
 
     def process_data(self, X_train, outcome_train, X_validation, outcome_validation, transformation_list):
