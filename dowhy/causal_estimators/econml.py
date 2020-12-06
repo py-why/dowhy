@@ -102,16 +102,23 @@ class Econml(CausalEstimator):
         est = self.estimator.effect(X_test, T0=T0_test, T1=T1_test)
         ate = np.mean(est)
 
-        est_interval = None
+        self.effect_intervals = None
         if self._confidence_intervals:
-            est_interval = self.estimator.effect_interval(X_test, T0=T0_test, T1=T1_test)
+            self.effect_intervals = self.estimator.effect_interval(
+                    X_test, T0=T0_test, T1=T1_test,
+                    alpha=1-self.confidence_level)
         estimate = CausalEstimate(estimate=ate,
                                   target_estimand=self._target_estimand,
                                   realized_estimand_expr=self.symbolic_estimator,
                                   cate_estimates=est,
-                                  effect_intervals=est_interval,
+                                  effect_intervals=self.effect_intervals,
                                   _estimator_object=self.estimator)
         return estimate
+
+    def _estimate_confidence_intervals(self, confidence_level=None, method=None):
+        """ Returns None if the confidence interval has not been calculated.
+        """
+        return self.effect_intervals
 
     def _do(self, x):
         raise NotImplementedError

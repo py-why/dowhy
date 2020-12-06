@@ -739,10 +739,11 @@ class CausalEstimate:
         s += "\n## Estimate\n"
         s += "Mean value: {0}\n".format(self.value)
         s += ""
+        if hasattr(self, "cate_estimates"):
+            s += "Effect estimates: {0}\n".format(self.cate_estimates)
         if self.estimator._significance_test:
             s += "p-value: {0}\n".format(self.estimator.signif_results_tostr(self.test_stat_significance()))
         if self.estimator._confidence_intervals:
-            s += "Standard error: {0}\n".format(self.get_standard_error())
             s += "{0}% confidence interval: {1}\n".format(100 * self.estimator.confidence_level, self.get_confidence_intervals())
         if self.conditional_estimates is not None:
             s += "### Conditional Estimates\n"
