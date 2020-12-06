@@ -19,9 +19,15 @@ advanced_notebooks = [
                       "dowhy_refuter_notebook.ipynb",
                       "DoWhy-The Causal Story Behind Hotel Booking Cancellations.ipynb",  # needs xgboost too
                       ]
-os.chdir(NOTEBOOKS_PATH)
 
-def _notebook_run(filename):
+# Adding the dowhy root folder to the python path so that jupyter notebooks
+# can import dowhy
+if 'PYTHONPATH' not in os.environ:
+        os.environ['PYTHONPATH'] = os.getcwd()
+elif os.getcwd() not in os.environ['PYTHONPATH'].split(os.pathsep):
+        os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + os.getcwd()
+
+def _notebook_run(filepath):
     """Execute a notebook via nbconvert and collect output.
        :returns (parsed nb object, execution errors)
 
@@ -31,7 +37,7 @@ def _notebook_run(filename):
         args = ["jupyter", "nbconvert", "--to", "notebook", "--execute",
 #          "--ExecutePreprocessor.timeout=600",
             "-y", "--no-prompt",
-          "--output", fout.name, filename]
+          "--output", fout.name, filepath]
         subprocess.check_call(args)
 
         fout.seek(0)
@@ -64,6 +70,6 @@ for nb in notebooks_list:
 
 @pytest.mark.parametrize("notebook_filename", parameter_list)
 def test_notebook(notebook_filename):
-    nb, errors = _notebook_run(notebook_filename)
+    nb, errors = _notebook_run(NOTEBOOKS_PATH + notebook_filename)
     assert errors == []
 
