@@ -104,7 +104,7 @@ class CausalGraph:
                     arrowstyle="-|>",
                     style="dashed",
                     arrowsize=12)
-            
+
             labels = nx.draw_networkx_labels(self._graph, pos)
 
             plt.axis('off')
@@ -113,7 +113,7 @@ class CausalGraph:
 
     def build_graph(self, common_cause_names, instrument_names, effect_modifier_names):
         """ Creates nodes and edges based on variable names and their semantics.
-        
+
         Currently only considers the graphical representation of "direct" effect modifiers. Thus, all effect modifiers are assumed to be "direct" unless otherwise expressed using a graph. Based on the taxonomy of effect modifiers by VanderWheele and Robins: "Four types of effect modification: A classification based on directed acyclic graphs. Epidemiology. 2007."
         """
 

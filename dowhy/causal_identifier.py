@@ -281,7 +281,7 @@ class CausalIdentifier:
                             'backdoor_set': candidate_set,
                             'num_paths_blocked_by_observed_nodes': check["num_paths_blocked_by_observed_nodes"]})
         else:
-            raise ValueError("Identifier method " + self.method_name + "not supported. Try 'default' or 'exhaustive-search'.")
+            raise ValueError("Identifier method " + self.method_name + " not supported. Try 'default' or 'exhaustive-search'.")
             #causes_t = self._graph.get_causes(self.treatment_name)
         #causes_y = self._graph.get_causes(self.outcome_name, remove_edges={'sources':self.treatment_name, 'targets':self.outcome_name})
         #common_causes = list(causes_t.intersection(causes_y))
