@@ -63,22 +63,22 @@ class AddUnobservedCommonCause(CausalRefuter):
             new_effect = new_estimator.estimate_effect()
             refute = CausalRefutation(self._estimate.value, new_effect.value,
                                     refutation_type="Refute: Add an Unobserved Common Cause")
-            
+
             refute.new_effect = np.array(new_effect.value)
             refute.add_refuter(self)
             return refute
 
         else: # Deal with multiple value inputs
-            
+
             if isinstance(self.kappa_t, np.ndarray) and isinstance(self.kappa_y, np.ndarray): # Deal with range inputs
-                                
+
                 # Get a 2D matrix of values
                 x,y =  np.meshgrid(self.kappa_t, self.kappa_y) # x,y are both MxN
-                
+
                 results_matrix = np.random.rand(len(x),len(y)) # Matrix to hold all the results of NxM
                 print(results_matrix.shape)
                 orig_data = copy.deepcopy(self._data)
-                
+
                 for i in range(0,len(x[0])):
                     for j in range(0,len(y)):
                         new_data = self.include_confounders_effect(orig_data, x[0][i], y[j][0])
@@ -88,10 +88,10 @@ class AddUnobservedCommonCause(CausalRefuter):
                                                 refutation_type="Refute: Add an Unobserved Common Cause")
                         self.logger.debug(refute)
                         results_matrix[i][j] = refute.estimated_effect # Populate the results
-                
+
                 fig = plt.figure(figsize=(6,5))
                 left, bottom, width, height = 0.1, 0.1, 0.8, 0.8
-                ax = fig.add_axes([left, bottom, width, height]) 
+                ax = fig.add_axes([left, bottom, width, height])
 
                 cp = plt.contourf(x, y, results_matrix)
                 plt.colorbar(cp)
@@ -120,13 +120,13 @@ class AddUnobservedCommonCause(CausalRefuter):
 
                 fig = plt.figure(figsize=(6,5))
                 left, bottom, width, height = 0.1, 0.1, 0.8, 0.8
-                ax = fig.add_axes([left, bottom, width, height]) 
+                ax = fig.add_axes([left, bottom, width, height])
 
                 plt.plot(self.kappa_t, outcomes)
                 ax.set_title('Effect of Unobserved Common Cause')
                 ax.set_xlabel('Value of Linear Constant on Treatment')
                 ax.set_ylabel('New Effect')
-                plt.show() 
+                plt.show()
 
                 refute.new_effect = outcomes
                 refute.add_refuter(self)
@@ -144,7 +144,7 @@ class AddUnobservedCommonCause(CausalRefuter):
                                             refutation_type="Refute: Add an Unobserved Common Cause")
                     self.logger.debug(refute)
                     outcomes[i] = refute.estimated_effect # Populate the results
-                
+
                 fig = plt.figure(figsize=(6,5))
                 left, bottom, width, height = 0.1, 0.1, 0.8, 0.8
                 ax = fig.add_axes([left, bottom, width, height])
@@ -153,7 +153,7 @@ class AddUnobservedCommonCause(CausalRefuter):
                 ax.set_title('Effect of Unobserved Common Cause')
                 ax.set_xlabel('Value of Linear Constant on Outcome')
                 ax.set_ylabel('New Effect')
-                plt.show() 
+                plt.show()
 
                 refute.new_effect = outcomes
                 refute.add_refuter(self)
@@ -161,7 +161,7 @@ class AddUnobservedCommonCause(CausalRefuter):
 
     def include_confounders_effect(self, new_data, kappa_t, kappa_y):
         """
-        This function deals with the change in the value of the data due to the effect of the unobserved confounder. 
+        This function deals with the change in the value of the data due to the effect of the unobserved confounder.
         In the case of a binary flip, we flip only if the random number is greater than the threshold set.
         In the case of a linear effect, we use the variable as the linear regression constant.
 
