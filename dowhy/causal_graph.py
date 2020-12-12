@@ -129,7 +129,7 @@ class CausalGraph:
             self._graph.add_node(outcome, observed="yes", penwidth=2)
         for treatment, outcome in itertools.product(self.treatment_name, self.outcome_name):
             # adding penwidth to make the edge bold
-            self._graph.add_edge(treatment, outcome, penwidth=2, label="?")
+            self._graph.add_edge(treatment, outcome, penwidth=2)
 
         # Adding common causes
         if common_cause_names is not None:
