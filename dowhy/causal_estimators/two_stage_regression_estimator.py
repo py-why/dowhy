@@ -127,13 +127,13 @@ class TwoStageRegressionEstimator(CausalEstimator):
                  params=self.method_params)._estimate_effect()
         # Combining the two estimates
         natural_indirect_effect = first_stage_estimate.value * second_stage_estimate.value
-        if self._target_estimand.estimand_type == CausalIdentifier.NONPARAMETRIC_NIE:
-            estimate_value = natural_indirect_effect
-            self.symbolic_estimator = self.construct_symbolic_estimator(
+        # This same estimate is valid for frontdoor as well as mediation (NIE)
+        estimate_value = natural_indirect_effect
+        self.symbolic_estimator = self.construct_symbolic_estimator(
                 first_stage_estimate.realized_estimand_expr,
                 second_stage_estimate.realized_estimand_expr,
                 estimand_type=CausalIdentifier.NONPARAMETRIC_NIE)
-        elif self._target_estimand.estimand_type == CausalIdentifier.NONPARAMETRIC_NDE:
+        if self._target_estimand.estimand_type == CausalIdentifier.NONPARAMETRIC_NDE:
             # Total  effect of treatment
             modified_target_estimand = copy.deepcopy(self._target_estimand)
             modified_target_estimand.identifier_method="backdoor"
