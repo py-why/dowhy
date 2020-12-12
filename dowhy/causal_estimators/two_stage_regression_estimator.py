@@ -91,16 +91,16 @@ class TwoStageRegressionEstimator(CausalEstimator):
         elif self._target_estimand.identifier_method=="mediation":
             modified_target_estimand.outcome_variable = parse_state(self._mediators_names)
 
-        first_stage_estimate = self.first_stage_model(self._data, 
+        first_stage_estimate = self.first_stage_model(self._data,
                  modified_target_estimand,
                  self._treatment_name,
-                 parse_state(modified_target_estimand.outcome_variable), 
-                 control_value=self._control_value, 
+                 parse_state(modified_target_estimand.outcome_variable),
+                 control_value=self._control_value,
                  treatment_value=self._treatment_value,
-                 test_significance=self._significance_test, 
+                 test_significance=self._significance_test,
                  evaluate_effect_strength=self._effect_strength_eval,
                  confidence_intervals = self._confidence_intervals,
-                 target_units=self._target_units, 
+                 target_units=self._target_units,
                  effect_modifiers=self._effect_modifier_names,
                  params=self.method_params)._estimate_effect()
 
@@ -113,45 +113,45 @@ class TwoStageRegressionEstimator(CausalEstimator):
         elif self._target_estimand.identifier_method=="mediation":
             modified_target_estimand.treatment_variable = parse_state(self._mediators_names)
 
-        second_stage_estimate = self.second_stage_model(self._data, 
+        second_stage_estimate = self.second_stage_model(self._data,
                  modified_target_estimand,
-                 parse_state(modified_target_estimand.treatment_variable), 
+                 parse_state(modified_target_estimand.treatment_variable),
                  self._outcome_name,
-                 control_value=self._control_value, 
+                 control_value=self._control_value,
                  treatment_value=self._treatment_value,
-                 test_significance=self._significance_test, 
+                 test_significance=self._significance_test,
                  evaluate_effect_strength=self._effect_strength_eval,
                  confidence_intervals = self._confidence_intervals,
-                 target_units=self._target_units, 
+                 target_units=self._target_units,
                  effect_modifiers=self._effect_modifier_names,
                  params=self.method_params)._estimate_effect()
         # Combining the two estimates
-        natural_direct_effect = first_stage_estimate.value * second_stage_estimate.value
-        estimate_value = natural_direct_effect
-        self.symbolic_estimator = self.construct_symbolic_estimator(
-                first_stage_estimate.realized_estimand_expr,
-                second_stage_estimate.realized_estimand_expr, 
-                estimand_type=CausalIdentifier.NONPARAMETRIC_NDE)
-
+        natural_indirect_effect = first_stage_estimate.value * second_stage_estimate.value
         if self._target_estimand.estimand_type == CausalIdentifier.NONPARAMETRIC_NIE:
+            estimate_value = natural_indirect_effect
+            self.symbolic_estimator = self.construct_symbolic_estimator(
+                first_stage_estimate.realized_estimand_expr,
+                second_stage_estimate.realized_estimand_expr,
+                estimand_type=CausalIdentifier.NONPARAMETRIC_NIE)
+        elif self._target_estimand.estimand_type == CausalIdentifier.NONPARAMETRIC_NDE:
             # Total  effect of treatment
             modified_target_estimand = copy.deepcopy(self._target_estimand)
             modified_target_estimand.identifier_method="backdoor"
 
-            total_effect_estimate = self.second_stage_model(self._data, 
+            total_effect_estimate = self.second_stage_model(self._data,
                      modified_target_estimand,
                      self._treatment_name,
                      self._outcome_name,
-                     control_value=self._control_value, 
+                     control_value=self._control_value,
                      treatment_value=self._treatment_value,
-                     test_significance=self._significance_test, 
+                     test_significance=self._significance_test,
                      evaluate_effect_strength=self._effect_strength_eval,
                      confidence_intervals = self._confidence_intervals,
-                     target_units=self._target_units, 
+                     target_units=self._target_units,
                      effect_modifiers=self._effect_modifier_names,
                      params=self.method_params)._estimate_effect()
-            natural_indirect_effect = total_effect_estimate.value - natural_direct_effect
-            estimate_value = natural_indirect_effect
+            natural_direct_effect = total_effect_estimate.value - natural_indirect_effect
+            estimate_value = natural_direct_effect
             self.symbolic_estimator = self.construct_symbolic_estimator(
                     first_stage_estimate.realized_estimand_expr,
                     second_stage_estimate.realized_estimand_expr,
@@ -194,9 +194,9 @@ class TwoStageRegressionEstimator(CausalEstimator):
 
     def construct_symbolic_estimator(self, first_stage_symbolic,
             second_stage_symbolic, total_effect_symbolic=None, estimand_type=None):
-        nde_symbolic = "(" + first_stage_symbolic + ") * (" + second_stage_symbolic + ")"
-        if estimand_type == CausalIdentifier.NONPARAMETRIC_NDE:
-            return nde_symbolic
-        elif estimand_type == CausalIdentifier.NONPARAMETRIC_NIE:
-            return total_effect_symbolic + "-" + nde_symbolic
+        nie_symbolic = "(" + first_stage_symbolic + ")*(" + second_stage_symbolic + ")"
+        if estimand_type == CausalIdentifier.NONPARAMETRIC_NIE:
+            return nie_symbolic
+        elif estimand_type == CausalIdentifier.NONPARAMETRIC_NDE:
+            return "(" + total_effect_symbolic + ") - (" + nie_symbolic + ")"
 

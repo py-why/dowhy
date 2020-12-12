@@ -126,7 +126,7 @@ class CausalIdentifier:
         )
         return estimand
 
-    def identify_nde_effect(self):
+    def identify_nie_effect(self):
         estimands_dict = {}
         ### 1. FIRST DOING BACKDOOR IDENTIFICATION
         # First, checking if there are any valid backdoor adjustment sets
@@ -178,7 +178,7 @@ class CausalIdentifier:
         )
         return estimand
 
-    def identify_nie_effect(self):
+    def identify_nde_effect(self):
         estimands_dict = {}
         ### 1. FIRST DOING BACKDOOR IDENTIFICATION
         # First, checking if there are any valid backdoor adjustment sets
@@ -449,7 +449,6 @@ class CausalIdentifier:
         sym_mu = sp.Symbol("mu")
         sym_sigma = sp.Symbol("sigma", positive=True)
         sym_outcome = spstats.Normal(num_expr_str, sym_mu, sym_sigma)
-        # sym_common_causes = [sp.stats.Normal(common_cause, sym_mu, sym_sigma) for common_cause in common_causes]
         sym_treatment_symbols = [sp.Symbol(t) for t in treatment_name]
         sym_treatment = sp.Array(sym_treatment_symbols)
         sym_conditional_outcome = spstats.Expectation(sym_outcome)
@@ -545,10 +544,18 @@ class CausalIdentifier:
             sym_mediators = sp.Array(sym_mediators_symbols)
             sym_outcome_derivative = sp.Derivative(sym_outcome, sym_mediators)
             sym_treatment_derivative = sp.Derivative(sym_mediators, sym_treatment)
-            if estimand_type == CausalIdentifier.NONPARAMETRIC_NDE:
+            # For direct effect
+            num_expr_str = outcome_name
+            if len(mediators_names)>0:
+                num_expr_str += "|" + ",".join(mediators_names)
+            sym_mu = sp.Symbol("mu")
+            sym_sigma = sp.Symbol("sigma", positive=True)
+            sym_conditional_outcome = spstats.Normal(num_expr_str, sym_mu, sym_sigma)
+            sym_directeffect_derivative = sp.Derivative(sym_conditional_outcome, sym_treatment)
+            if estimand_type == CausalIdentifier.NONPARAMETRIC_NIE:
                 sym_effect = spstats.Expectation(sym_treatment_derivative * sym_outcome_derivative)
-            elif estimand_type == CausalIdentifier.NONPARAMETRIC_NIE:
-                sym_effect = ""
+            elif estimand_type == CausalIdentifier.NONPARAMETRIC_NDE:
+                sym_effect = spstats.Expectation(sym_directeffect_derivative)
             sym_assumptions = {
                 "Mediation": (
                     "{2} intercepts (blocks) all directed paths from {0} to {1} except the path {{{0}}}\N{RIGHTWARDS ARROW}{{{1}}}."
