@@ -15,7 +15,7 @@ DoWhy | An end-to-end library for causal inference
 `Amit Sharma <http://www.amitsharma.in>`_,
 `Emre Kiciman <http://www.kiciman.org>`_
 
-  Introducing DoWhy and the 4 steps of causal inference | `Microsoft Research Blog <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Arxiv Paper <https://arxiv.org/abs/2011.04216>`_ | `Slides <https://www2.slideshare.net/AmitSharma315/dowhy-an-endtoend-library-for-causal-inference>`_
+  Introducing DoWhy and the 4 steps of causal inference | `Microsoft Research Blog <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Video Tutorial <https://note.microsoft.com/MSR-Webinar-DoWhy-Library-Registration-On-Demand.html>`_ | `Arxiv Paper <https://arxiv.org/abs/2011.04216>`_ | `Slides <https://www2.slideshare.net/AmitSharma315/dowhy-an-endtoend-library-for-causal-inference>`_
 
   Read the `docs <https://microsoft.github.io/dowhy/>`_ | Try it online! |AzureNotebooks|_ |Binder|_ 
 
@@ -29,11 +29,11 @@ DoWhy | An end-to-end library for causal inference
 
 .. image:: https://raw.githubusercontent.com/microsoft/dowhy/master/docs/images/dowhy-schematic.png
 
-As computing systems are more frequently and more actively intervening in societally critical domains such as healthcare, education, and governance, it is critical to correctly predict and understand the causal effects of these interventions. Without an A/B test, conventional machine learning methods, built on pattern recognition and correlational analyses, are insufficient for causal reasoning. 
+As computing systems are more frequently and more actively intervening in societally critical domains such as healthcare, education, and governance, it is critical to correctly predict and understand the causal effects of these interventions. Without an A/B test, conventional machine learning methods, built on pattern recognition and correlational analyses, are insufficient for decision-making. 
 
-Much like machine learning libraries have done for prediction, **"DoWhy" is a Python library that aims to spark causal thinking and analysis**. DoWhy provides a unified interface for causal inference methods and automatically tests many assumptions, thus making inference accessible to non-experts.
+Much like machine learning libraries have done for prediction, **"DoWhy" is a Python library that aims to spark causal thinking and analysis**. DoWhy provides a principled four-step interface for causal inference that focuses on explicitly modeling causal assumptions and validating them as much as possible. The key feature of DoWhy is its state-of-the-art refutation API that can automatically test causal assumptions for any estimation method, thus making inference more robust and accessible to non-experts. DoWhy supports estimation of the average causal effect for backdoor, frontdoor, instrumental variable and other identification methods, and estimation of the conditional effect (CATE) through an integration with the EconML library.  
 
-For a quick introduction to causal inference, check out `amit-sharma/causal-inference-tutorial <https://github.com/amit-sharma/causal-inference-tutorial/>`_. We also gave a more comprehensive tutorial at the ACM Knowledge Discovery and Data Mining (`KDD 2018 <http://www.kdd.org/kdd2018/>`_) conference: `causalinference.gitlab.io/kdd-tutorial <http://causalinference.gitlab.io/kdd-tutorial/>`_.
+For a quick introduction to causal inference, check out `amit-sharma/causal-inference-tutorial <https://github.com/amit-sharma/causal-inference-tutorial/>`_. We also gave a more comprehensive tutorial at the ACM Knowledge Discovery and Data Mining (`KDD 2018 <http://www.kdd.org/kdd2018/>`_) conference: `causalinference.gitlab.io/kdd-tutorial <http://causalinference.gitlab.io/kdd-tutorial/>`_. For an introduction to the four steps of causal inference and its implications for machine learning, you can access this video tutorial from Microsoft Research: `DoWhy Webinar <https://note.microsoft.com/MSR-Webinar-DoWhy-Library-Registration-On-Demand.html>`_.
 
 Documentation for DoWhy is available at `microsoft.github.io/dowhy <https://microsoft.github.io/dowhy/>`_.
 
@@ -74,7 +74,7 @@ of a subscription or rewards program for customers [`Rewards notebook
 Installation
 -------------
 
-DoWhy support Python 3.5+. To install, you can use pip or conda. 
+DoWhy support Python 3.6+. To install, you can use pip or conda. 
 
 **Latest Release**
 
@@ -182,7 +182,7 @@ estimate (if any). Here's a sample output of the linear regression estimator.
 
 .. image:: https://raw.githubusercontent.com/microsoft/dowhy/master/docs/images/regression_output.png
 
-For a full code example, check out the `Getting Started with DoWhy <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_ notebook. You can also use estimation methods from other libraries such as EconML and CausalML, as shown in the `Conditional Treatment Effects <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_ notebook. For more examples of using DoWhy, check out the Jupyter notebooks in `docs/source/example_notebooks <https://github.com/microsoft/dowhy/tree/master/docs/source/example_notebooks/>`_ or try them online at `Binder <https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F>`_. 
+For a full code example, check out the `Getting Started with DoWhy <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_ notebook. You can also use Conditional Average Treatment Effect (CATE) estimation methods from other libraries such as EconML and CausalML, as shown in the `Conditional Treatment Effects <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_ notebook. For more examples of using DoWhy, check out the Jupyter notebooks in `docs/source/example_notebooks <https://github.com/microsoft/dowhy/tree/master/docs/source/example_notebooks/>`_ or try them online at `Binder <https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F>`_. 
 
 
 A high-level Pandas API
