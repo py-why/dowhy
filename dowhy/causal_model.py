@@ -318,7 +318,13 @@ class CausalModel:
             estimate=estimate,
             **kwargs
         )
-        res = refuter.refute_estimate()
+        try:
+            new_data_with_unobserved_confounding = kwargs.pop("new_data_with_unobserved_confounding")
+            print("before res", new_data_with_unobserved_confounding)
+            res = refuter.refute_estimate(new_data_with_unobserved_confounding)
+        except Exception as e:
+            print("Error message is ", e)
+            res = refuter.refute_estimate()
         return res
 
     def view_model(self, layout="dot"):
