@@ -228,7 +228,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         # The rationale behind ordering of the loops is the fact that we induce randomness everytime we create the 
         # Train and the Validation Datasets. Thus, we run the simulation loop followed by the training and the validation
         # loops. Thus, we can get different values everytime we get the estimator.
-        correlation_list = []
+        
         for _ in range( self._num_simulations ):
             estimates = []
             
@@ -340,6 +340,7 @@ class DummyOutcomeRefuter(CausalRefuter):
 
                     estimates.append(new_effect.value)
                     group_count += 1
+                    
 
             simulation_results.append(estimates)
 

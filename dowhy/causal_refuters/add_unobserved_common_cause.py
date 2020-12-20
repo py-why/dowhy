@@ -217,11 +217,11 @@ class AddUnobservedCommonCause(CausalRefuter):
         print("observed_variables", observed_variables)
 
         new_data = given_data
-        new_data = new_data[observed_variables+['t1', 'y']]
-        new_data['t1'] = new_data['t1'].astype('int64')
+        new_data = new_data[observed_variables+[self._treatment_name, self._outcome_name]]
+        new_data[self._treatment_name] = new_data[self._treatment_name].astype('int64')
         #outcome model 
-        y = new_data['y']
-        l = observed_variables + ['t1']
+        y = new_data[self._outcome_name]
+        l = observed_variables + [self._treatment_name]
         
         X = new_data[l]
         
@@ -234,7 +234,7 @@ class AddUnobservedCommonCause(CausalRefuter):
 
         #treatment model 
         
-        t = new_data['t1'].astype('int64')
+        t = new_data[self._treatment_name].astype('int64')
         l = observed_variables
         X = new_data[l]
         
@@ -256,12 +256,12 @@ class AddUnobservedCommonCause(CausalRefuter):
 
         for i in observed_variables:
             column1 = given_data[i]
-            column2 = given_data['y']
+            column2 = given_data[self._outcome_name]
             correlation_y = column1.corr(column2)
             print("correlation_y with ", i, correlation_y)
             if correlation_y>=max_correlation_with_y:
                 max_correlation_with_y = correlation_y
-                column3 = new_data['t1']
+                column3 = new_data[self._treatment_name]
                 max_correlation_with_z = column1.corr(column3)
 
 
@@ -288,11 +288,11 @@ class AddUnobservedCommonCause(CausalRefuter):
             final_U = U - results.fittedvalues.values
             new_data['simulated'] = final_U
             column1 = new_data['simulated']
-            column2 = given_data['y']
+            column2 = given_data[self._outcome_name]
             correlation_y = column1.corr(column2)
             correlation_y_list.append(correlation_y)
 
-            column3 = new_data['t1']
+            column3 = new_data[self._treatment_name]
             correlation_z = column1.corr(column3)
             correlation_z_list.append(correlation_z)
 
@@ -343,14 +343,14 @@ class AddUnobservedCommonCause(CausalRefuter):
                 simulated_variable_mean = c1*d_y[j]+c2*d_z[j]
                 simulated_variable_stddev = 1
                 U.append(np.random.normal(simulated_variable_mean, simulated_variable_stddev, 1))
-            #print("print new_data shape", new_data.shape)
+             
             U = np.array(U)
             
             #debiasing the variable U 
 
             model = sm.OLS(U,X)
             results = model.fit()
-            influence = results.get_influence()
+            
 
             
         
@@ -361,10 +361,10 @@ class AddUnobservedCommonCause(CausalRefuter):
             new_data['simulated'] = final_U
 
             column1 = new_data['simulated']
-            column2 = given_data['y']
+            column2 = given_data[self._outcome_name]
             correlation_y = column1.corr(column2)
 
-            column3 = new_data['t1']
+            column3 = new_data[self._treatment_name]
             correlation_z = column1.corr(column3)
 
             new_metric_simulated = correlation_y*correlation_z
@@ -419,7 +419,6 @@ class AddUnobservedCommonCause(CausalRefuter):
             simulated_variable_mean = c1*d_y[j]+c2*d_z[j]
             simulated_variable_stddev = 1
             U.append(np.random.normal(simulated_variable_mean, simulated_variable_stddev, 1))
-        print("print new_data shape", new_data.shape)
         U = np.array(U)
 
         #debiasing the variable U 
@@ -428,14 +427,14 @@ class AddUnobservedCommonCause(CausalRefuter):
         results = model.fit()
 
         U = U.reshape(-1, )
-        print("U shape", U.shape)
+        
         final_U = U - results.fittedvalues.values
     
 
         new_data['simulated'] = final_U
 
-        #new_data = new_data.drop(['y','t1'], axis = 1)
-        new_data['t1'] = new_data['t1'].astype('bool')
+        
+        new_data[self._treatment_name] = new_data[self._treatment_name].astype('bool')
         return new_data 
         
         
