@@ -20,7 +20,6 @@ class CausalRefuter:
         self._target_estimand = identified_estimand
         self._estimate = estimate
         self._treatment_name = self._target_estimand.treatment_variable
-        print("self._treatment_name", self._treatment_name)
         self._outcome_name = self._target_estimand.outcome_variable
         self._random_seed = None
 

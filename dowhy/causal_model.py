@@ -318,7 +318,6 @@ class CausalModel:
             estimate=estimate,
             **kwargs
         )
-            
         res = refuter.refute_estimate()
         return res
 
