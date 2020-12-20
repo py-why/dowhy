@@ -270,6 +270,7 @@ class CausalGraph:
 
         blocked_by_conditioning = False
         has_unconditioned_collider = False
+
         for i in range(len(path)-2):
             if self._graph.has_edge(path[i], path[i+1]) and self._graph.has_edge(path[i+2], path[i+1]): # collider
                 collider_descendants = nx.descendants(self._graph, path[i+1])
@@ -392,7 +393,8 @@ class CausalGraph:
         """
         node1 = nodes1[0]
         node2 = nodes2[0]
-        return nx.all_simple_paths(self._graph, source=node1, target=node2)
+        # convert the outputted generator into a list
+        return [p for p in nx.all_simple_paths(self._graph, source=node1, target=node2)]
 
     def check_valid_frontdoor_set(self, nodes1, nodes2, candidate_nodes, frontdoor_paths=None):
         """Check if valid the frontdoor variables for set of treatments, nodes1 to set of outcomes, nodes2.

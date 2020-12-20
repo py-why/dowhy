@@ -116,7 +116,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         second_stage_estimate = self.second_stage_model(self._data,
                  modified_target_estimand,
                  parse_state(modified_target_estimand.treatment_variable),
-                 self._outcome_name,
+                 parse_state(self._outcome_name), # to convert it to array before passing to causal estimator
                  control_value=self._control_value,
                  treatment_value=self._treatment_value,
                  test_significance=self._significance_test,
@@ -141,7 +141,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
             total_effect_estimate = self.second_stage_model(self._data,
                      modified_target_estimand,
                      self._treatment_name,
-                     self._outcome_name,
+                     parse_state(self._outcome_name),
                      control_value=self._control_value,
                      treatment_value=self._treatment_value,
                      test_significance=self._significance_test,

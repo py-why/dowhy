@@ -520,9 +520,9 @@ class CausalIdentifier:
                 " then P({1}|{0},U) = P({1}|{0})"
             ).format(",".join(treatment_name), ",".join(frontdoor_variables_names)),
             "Second-stage-unconfoundedness": (
-                u"If U\N{RIGHTWARDS ARROW}{{{2}}} and U\N{RIGHTWARDS ARROW}{{{1}}}"
+                u"If U\N{RIGHTWARDS ARROW}{{{2}}} and U\N{RIGHTWARDS ARROW}{1}"
                 " then P({1}|{2}, {0}, U) = P({1}|{2}, {0})"
-            ).format(",".join(treatment_name), ",".join(outcome_name), ",".join(frontdoor_variables_names))
+            ).format(",".join(treatment_name), outcome_name, ",".join(frontdoor_variables_names))
         }
 
         estimand = {
@@ -565,9 +565,9 @@ class CausalIdentifier:
                     " then P({1}|{0},U) = P({1}|{0})"
                 ).format(",".join(treatment_name), ",".join(mediators_names)),
                 "Second-stage-unconfoundedness": (
-                    u"If U\N{RIGHTWARDS ARROW}{{{2}}} and U\N{RIGHTWARDS ARROW}{{{1}}}"
+                    u"If U\N{RIGHTWARDS ARROW}{{{2}}} and U\N{RIGHTWARDS ARROW}{1}"
                     " then P({1}|{2}, {0}, U) = P({1}|{2}, {0})"
-                ).format(",".join(treatment_name), ",".join(outcome_name), ",".join(mediators_names))
+                ).format(",".join(treatment_name), outcome_name, ",".join(mediators_names))
             }
         else:
             raise ValueError("Estimand type not supported. Supported estimand types are {0} or {1}'.".format(
