@@ -40,8 +40,8 @@ class AddUnobservedCommonCause(CausalRefuter):
 
         self.effect_on_t = kwargs["confounders_effect_on_treatment"] if "confounders_effect_on_treatment" in kwargs else "binary_flip"
         self.effect_on_y = kwargs["confounders_effect_on_outcome"] if "confounders_effect_on_outcome" in kwargs else "linear"
-        #self.kappa_t = kwargs["effect_strength_on_treatment"] 
-        #self.kappa_y = kwargs["effect_strength_on_outcome"] 
+        self.kappa_t = kwargs["effect_strength_on_treatment"] if "effect_strength_on_treatment" in kwargs else None
+        self.kappa_y = kwargs["effect_strength_on_outcome"] if "effect_strength_on_outcome" in kwargs else None
 
         if 'logging_level' in kwargs:
             logging.basicConfig(level=kwargs['logging_level'])
@@ -199,33 +199,76 @@ class AddUnobservedCommonCause(CausalRefuter):
             raise NotImplementedError("'" + self.effect_on_y+ "' method not supported for confounders' effect on outcome")
         return new_data
 
-    def include_simulated_confounder(self, sample_size, given_data, convergence_threshold):
- 
+
+
+    def include_simulated_confounder(self, given_data, c_star_max, convergence_threshold):
+        '''
+        This function simulates an unobserved confounder based on the data using the following steps:
+            1. It calculates the "residuals"  from the treatment and outcome model 
+                i.) The outcome model has outcome as the dependent variable and all the observed variables including treatment as independent variables
+                ii.) The treatment model has treatment as the dependent variable and all the observed variables as independent variables.
+
+            2. U is an intermediate random variable drawn from the normal distribution with the weighted average of residuals as mean and a unit variance
+               U ~ N(c1*d_y + c2*d_z, 1)
+               where 
+                *d_y and d_z are residuals from the treatment and outcome model
+                *c1 and c2 are coefficients to the residuals 
+                
+            3. The final U, which is the simulated unobserved confounder is obtained by debiasing the intermediate variable U by residualising it with X
+
+
+        Choosing the coefficients c1 and c2:
+        The coefficients are chosen based on these basic assumptions:
+            1. There is a hyperbolic relationship satisfying c1*c2 = c_star
+            2. c_star is chosen from a range of possible values based on the correlation of the obtained simulated variable with outcome and treatment.  
+            3. The product of correlations with treatment and outcome should be at a minimum distance to the maximum correlations with treatment and outcome in any of the observed confounders
+            4. The ratio of the weights should be such that they maintain the ratio of the maximum possible observed coefficients within some confidence interval 
+
+
+        :param given_data : The data which is fed for which the unobserved confounder is simulated 
+        :type Pandas DataFrame
+        :param c_star_max: The maximum possible value for the hyperbolic curve on which the coefficients to the residuals lie. It defaults to 1000 in the code if not specified by the user. 
+        :type int 
+        :param convergence_threshold: The threshold to check the plateauing of the correlation while selecting a c_star
+        :type float
+
+        :returns final_U: The simulated values of the unobserved confounder based on the data 
+        :type pandas.core.series.Series
+
+        '''
+
+        #Obtaining the list of observed variables 
         required_variables = True
         observed_variables = self.choose_variables(required_variables)
 
         new_data = given_data
         observed_variables_with_treatment_and_outcome = observed_variables + self._treatment_name + self._outcome_name
+
+        #Taking a subset of the dataframe that has only observed variables 
         new_data = new_data[observed_variables_with_treatment_and_outcome]
         new_data[self._treatment_name[0]] = new_data[self._treatment_name[0]].astype('int64')
 
-        #outcome model 
+        #Residuals from the outcome model obtained by fitting a linear model 
         y = new_data[self._outcome_name[0]]
         l = observed_variables + self._treatment_name
         X = new_data[l]
-        
         model = sm.OLS(y,X)
         results = model.fit()
         standardized_residuals_y = y - results.fittedvalues
+        d_y = list(pd.Series(standardized_residuals_y))
 
-        #treatment model 
+
+        #Residuals from the treatment model obtained by fitting a linear model 
         t = new_data[self._treatment_name[0]].astype('int64')
         l = observed_variables
         X = new_data[l]
         model = sm.OLS(t,X)
         results = model.fit()
         standardized_residuals_z = t - results.fittedvalues
+        d_z = list(pd.Series(standardized_residuals_z))
 
+
+        #Finding the maximum correlation with treatment and outcome in the observed variables 
         max_correlation_with_y = -10000000000
         max_correlation_with_z = 0
 
@@ -238,28 +281,31 @@ class AddUnobservedCommonCause(CausalRefuter):
                 column3 = new_data[self._treatment_name[0]]
                 max_correlation_with_z = column1.corr(column3)
 
+        
+        #The user has an option to give the the effect_strength_on_y and effect_strength_on_t which can be then used instead of maximum correlation with treatment and outcome in the observed variables as it specifies the desired effect.
+        if self.kappa_t is not None:
+            max_correlation_with_z = self.kappa_t
+        if self.kappa_y is not None:
+            max_correlation_with_y = self.kappa_y
+
+
+        #Choosing a c_star based on the data. 
+        #The correlations stop increasing upon increasing c_star after a certain value, that is it plateaus and we choose the value of c_star to be the value it plateaus.
+        
         correlation_y_list = []
         correlation_z_list = []
         new_metric_simulated_list = []    
         x_list = []
 
-        for i in range(0, 1000, 100):
+        if c_star_max is None:
+            c_star_max = 1000
+
+        step = int(c_star_max/10)
+        for i in range(0, int(c_star_max), step):
             c1 = math.sqrt(i)
             c2 = c1
-            U = []
-            d_y = list(pd.Series(standardized_residuals_y))
-            d_z = list(pd.Series(standardized_residuals_z))
-            for j in range(len(d_z)):
-                simulated_variable_mean = c1*d_y[j]+c2*d_z[j]
-                simulated_variable_stddev = 0.01
-                U.append(np.random.normal(simulated_variable_mean, simulated_variable_stddev, 1))
-            U = np.array(U)
-            model = sm.OLS(U,X)
-            results = model.fit()
-            U = U.reshape(-1, )
-            final_U = U - results.fittedvalues.values
-            new_data['simulated'] = final_U
-            column1 = new_data['simulated']
+            final_U = self.find_final_U(c1, c2, d_y, d_z, X)
+            column1 = final_U #new_data['simulated']
             column2 = given_data[self._outcome_name[0]]
             correlation_y = column1.corr(column2)
             correlation_y_list.append(correlation_y)
@@ -279,47 +325,41 @@ class AddUnobservedCommonCause(CausalRefuter):
         index = 1
         while index<len(correlation_y_list):
             if (correlation_y_list[index]-correlation_y_list[index-1])<=convergence_threshold:
-                c_star_max = x_list[index]
+                c_star = x_list[index]
                 break
             index = index+1
 
-        x = [i for i in range(0, 1000, 100)]
+        x = [i for i in range(0, c_star_max, 100)]
 
         plt.plot(x, correlation_y_list, marker='o', markerfacecolor='blue', markersize=8, color='skyblue', linewidth=2)
         plt.plot( x, correlation_z_list, marker='o', markerfacecolor='red', markersize=8, color='red', linewidth=2)
         plt.plot( x , new_metric_simulated_list, marker='o', markerfacecolor='olive', markersize=8, color='green', linewidth=2)
         plt.savefig('newmetricplot.png')
 
-        c1_final = 0
-        c2_final = 0
+
+        
+        #Choosing c1 and c2 based on the hyperbolic relationship once c_star is chosen by going over various combinations of c1 and c2 values and choosing the combination which 
+        #which maintains the minimum distance between the product of correlations of the simulated variable and the product of maximum correlations of one of the observed variables 
+        # and additionally checks if the ratio of the weights are such that they maintain the ratio of the maximum possible observed coefficients within some confidence interval 
+
+
+        #c1_final and c2_final are initialised to the values on the hyperbolic curve such that c1_final = c2_final  and c1_final*c2_final = c_star
+        c1_final = math.sqrt(c_star)
+        c2_final = math.sqrt(c_star)
+
+        
 
         ans_c1_c2 = 10
         i = 0.05
 
-        threshold = c_star_max/0.05
+        threshold = c_star/0.05
 
         while i<=threshold:
             c2 = i
-            c1 = c_star_max/c2
-            U = []
-            d_y = list(pd.Series(standardized_residuals_y))
-            d_z = list(pd.Series(standardized_residuals_z))
-            for j in range(len(d_z)):
-                simulated_variable_mean = c1*d_y[j]+c2*d_z[j]
-                simulated_variable_stddev = 1
-                U.append(np.random.normal(simulated_variable_mean, simulated_variable_stddev, 1))
-             
-            U = np.array(U)
-            
-            #debiasing the variable U 
-            model = sm.OLS(U,X)
-            results = model.fit()
-            U = U.reshape(-1, )
-            final_U = U - results.fittedvalues.values
+            c1 = c_star/c2
+            final_U = self.find_final_U(c1, c2, d_y, d_z, X)
 
-            new_data['simulated'] = final_U
-
-            column1 = new_data['simulated']
+            column1 = final_U #new_data['simulated']
             column2 = given_data[self._outcome_name[0]]
             correlation_y = column1.corr(column2)
 
@@ -338,15 +378,6 @@ class AddUnobservedCommonCause(CausalRefuter):
                 
             i = i*1.5
 
-        if c1_final!=0:
-            c1 =  c1_final 
-        else:
-            c1 = math.sqrt(c_star_max)
-        if c2_final!=0:
-            c2 =  c2_final 
-        else:
-            c2 = math.sqrt(c_star_max)
-
         '''#closed form solution
 
         print("c_star_max before closed form", c_star_max)
@@ -360,23 +391,45 @@ class AddUnobservedCommonCause(CausalRefuter):
             c2 = math.sqrt(c_star_max/additional_condition)
             c1 = c_star_max/c2'''
 
+        
+        final_U = self.find_final_U(c1_final, c2_final, d_y, d_z, X)
+    
+        
+        return final_U
+
+
+    def find_final_U(self, c1, c2, d_y, d_z, X):
+        '''
+        This function takes the residuals from the treatment and outcome model and their coefficients and simulates the intermediate random variable U by taking
+        the row wise normal distribution corresponding to each residual value and then debiasing the intermediate variable to get the final variable
+
+        :param c1: coefficient to the residual from the outcome model
+        :type float 
+        :param c2: coefficient to the residual from the treatment model 
+        :type float 
+        :param d_y: residuals from the outcome model 
+        :type list
+        :param d_z: residuals from the treatment model 
+        :type list 
+
+        :returns final_U: The simulated values of the unobserved confounder based on the data
+        :type pandas.core.series.Series
+
+        '''
         U = []
-        d_y = list(pd.Series(standardized_residuals_y))
-        d_z = list(pd.Series(standardized_residuals_z))
         for j in range(len(d_z)):
             simulated_variable_mean = c1*d_y[j]+c2*d_z[j]
-            simulated_variable_stddev = 1
+            simulated_variable_stddev = 0.01
             U.append(np.random.normal(simulated_variable_mean, simulated_variable_stddev, 1))
-        U = np.array(U)
 
-        #debiasing the variable U 
+        U = np.array(U)
         model = sm.OLS(U,X)
         results = model.fit()
         U = U.reshape(-1, )
         final_U = U - results.fittedvalues.values
-        new_data['simulated'] = final_U
-        new_data[self._treatment_name[0]] = new_data[self._treatment_name[0]].astype('bool')
-        return new_data 
+        final_U = pd.Series(U)
+
+        return final_U
         
         
 

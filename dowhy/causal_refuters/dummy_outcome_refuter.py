@@ -174,7 +174,7 @@ class DummyOutcomeRefuter(CausalRefuter):
     # The Default split for the number of data points that fall into the training and validation sets
     DEFAULT_TEST_FRACTION = [TestFraction(0.5, 0.5)]
 
-    DEFAULT_NEW_DATA_WITH_UNOBSERVED_CONFOUNDING = pd.Series()
+    DEFAULT_NEW_DATA_WITH_UNOBSERVED_CONFOUNDING = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -185,7 +185,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         self._bucket_size_scale_factor = kwargs.pop("bucket_size_scale_factor", DummyOutcomeRefuter.DEFAULT_BUCKET_SCALE_FACTOR)
         self._min_data_point_threshold = kwargs.pop("min_data_point_threshold", DummyOutcomeRefuter.MIN_DATA_POINT_THRESHOLD)
         self._test_fraction = kwargs.pop("_test_fraction", DummyOutcomeRefuter.DEFAULT_TEST_FRACTION)
-        self._new_data_with_unobserved_confounding = kwargs.pop("new_data_with_unobserved_confounding", DummyOutcomeRefuter.DEFAULT_NEW_DATA_WITH_UNOBSERVED_CONFOUNDING)
+        self._unobserved_confounder_values = kwargs.pop("unobserved_confounder_values", DummyOutcomeRefuter.DEFAULT_NEW_DATA_WITH_UNOBSERVED_CONFOUNDING)
         required_variables = kwargs.pop("required_variables", True)
         
         if required_variables is False:
@@ -234,12 +234,11 @@ class DummyOutcomeRefuter(CausalRefuter):
                     self.logger.warning("'test_fraction' is not applicable as there is no base treatment value.")
                 
                 # We set X_train = 0 and outcome_train to be 0
-                if not self._new_data_with_unobserved_confounding.empty:
-                    validation_df = self._new_data_with_unobserved_confounding
+                if self._unobserved_confounder_values is not None:
+                    self._data['simulated'] = self._unobserved_confounder_values
                     self._chosen_variables.append('simulated')
-                else:
-                    validation_df = self._data
-                
+                    
+                validation_df = self._data
                 X_train = None
                 outcome_train = None
                 X_validation_df = validation_df[self._chosen_variables]
@@ -417,7 +416,6 @@ class DummyOutcomeRefuter(CausalRefuter):
                 outcome_validation = estimator(X_validation)
             elif action in DummyOutcomeRefuter.SUPPORTED_ESTIMATORS:
                 estimator = self._estimate_dummy_outcome(action, X_train, outcome_train, **func_args)
-                X_train = np.nan_to_num(X_train)
                 outcome_train = estimator(X_train)
                 outcome_validation = estimator(X_validation)
             elif action == 'noise':
@@ -464,8 +462,8 @@ class DummyOutcomeRefuter(CausalRefuter):
         assert len(self._treatment_name) == 1, "At present, DoWhy supports a simgle treatment variable"
 
          
-        if not self._new_data_with_unobserved_confounding.empty:
-            self._data = self._new_data_with_unobserved_confounding
+        if self._unobserved_confounder_values is not None:
+            self._data['simulated'] = self._unobserved_confounder_values
             self._chosen_variables.append('simulated')
         
         treatment_variable_name = self._treatment_name[0] # As we only have a single treatment
@@ -511,7 +509,6 @@ class DummyOutcomeRefuter(CausalRefuter):
         X = X_train
         y = outcome
 
-        X = np.nan_to_num(X)
         estimator = estimator.fit(X, y)
         
         return estimator.predict
