@@ -42,6 +42,7 @@ class AddUnobservedCommonCause(CausalRefuter):
         self.effect_on_y = kwargs["confounders_effect_on_outcome"] if "confounders_effect_on_outcome" in kwargs else "linear"
         self.kappa_t = kwargs["effect_strength_on_treatment"] if "effect_strength_on_treatment" in kwargs else None
         self.kappa_y = kwargs["effect_strength_on_outcome"] if "effect_strength_on_outcome" in kwargs else None
+        self.simulated_method_name = kwargs["simulated_method_name"] if "simulated_method_name" in kwargs else "linear_based"
 
         if 'logging_level' in kwargs:
             logging.basicConfig(level=kwargs['logging_level'])
@@ -60,7 +61,6 @@ class AddUnobservedCommonCause(CausalRefuter):
         if not isinstance(self.kappa_t, np.ndarray) and not isinstance(self.kappa_y, np.ndarray): # Deal with single value inputs
             new_data = copy.deepcopy(self._data)
             new_data = self.include_confounders_effect(new_data, self.kappa_t, self.kappa_y)
-
             new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
             refute = CausalRefutation(self._estimate.value, new_effect.value,
@@ -201,7 +201,7 @@ class AddUnobservedCommonCause(CausalRefuter):
 
 
 
-    def include_simulated_confounder(self, **kwargs):
+    def include_simulated_confounder(self, convergence_threshold = 0.1, c_star_max = 1000):
         '''
         This function simulates an unobserved confounder based on the data using the following steps:
             1. It calculates the "residuals"  from the treatment and outcome model 
@@ -224,20 +224,15 @@ class AddUnobservedCommonCause(CausalRefuter):
             3. The product of correlations with treatment and outcome should be at a minimum distance to the maximum correlations with treatment and outcome in any of the observed confounders
             4. The ratio of the weights should be such that they maintain the ratio of the maximum possible observed coefficients within some confidence interval 
 
-
-        
         :param c_star_max: The maximum possible value for the hyperbolic curve on which the coefficients to the residuals lie. It defaults to 1000 in the code if not specified by the user. 
-        :type int 
-        :param convergence_threshold: The threshold to check the plateauing of the correlation while selecting a c_star
+        :type int
+        :param convergence_threshold: The threshold to check the plateauing of the correlation while selecting a c_star. It defaults to 0.1 in the code if not specified by the user
         :type float
-
         :returns final_U: The simulated values of the unobserved confounder based on the data 
         :type pandas.core.series.Series
 
         '''
 
-        convergence_threshold = kwargs["convergence_threshold"] if "convergence_threshold" in kwargs else 0.1 
-        c_star_max = kwargs["c_star_max"] if "c_star_max" in kwargs else int(1000) 
 
         #Obtaining the list of observed variables 
         required_variables = True
@@ -267,25 +262,27 @@ class AddUnobservedCommonCause(CausalRefuter):
         d_t = list(pd.Series(residuals_t))
 
 
-        #Finding the maximum correlation with treatment and outcome in the observed variables 
-        max_correlation_with_y = -10000000000
-        max_correlation_with_t = 0
+        #Initialising product_cor_metric_observed with a really low value as finding maximum 
+        product_cor_metric_observed = -10000000000
 
         for i in observed_variables:
             current_obs_confounder = self._data[i]
             outcome_values = self._data[self._outcome_name[0]]
             correlation_y = current_obs_confounder.corr(outcome_values)
-            if correlation_y>=max_correlation_with_y:
-                max_correlation_with_y = correlation_y
-                treatment_values = t
-                max_correlation_with_t = current_obs_confounder.corr(treatment_values)
+            treatment_values = t
+            correlation_t = current_obs_confounder.corr(treatment_values)
+            product_cor_metric_current = correlation_y*correlation_t
+            if product_cor_metric_current>=product_cor_metric_observed:
+                product_cor_metric_observed = product_cor_metric_current
+                correlation_t_observed = correlation_t
+                correlation_y_observed = correlation_y
 
         
         #The user has an option to give the the effect_strength_on_y and effect_strength_on_t which can be then used instead of maximum correlation with treatment and outcome in the observed variables as it specifies the desired effect.
         if self.kappa_t is not None:
-            max_correlation_with_t = self.kappa_t
+            correlation_t_observed = self.kappa_t
         if self.kappa_y is not None:
-            max_correlation_with_y = self.kappa_y
+            correlation_y_observed = self.kappa_y
 
 
         #Choosing a c_star based on the data. 
@@ -313,7 +310,7 @@ class AddUnobservedCommonCause(CausalRefuter):
 
             product_cor_metric_simulated = correlation_y*correlation_t
             product_cor_metric_simulated_list.append(product_cor_metric_simulated)
-            product_cor_metric_observed = max_correlation_with_y*max_correlation_with_t
+            
 
             x_list.append(i)
 
@@ -355,10 +352,9 @@ class AddUnobservedCommonCause(CausalRefuter):
 
             product_cor_metric_simulated = correlation_y*correlation_t
             
-            product_cor_metric_observed = max_correlation_with_y*max_correlation_with_t
             if min_distance_between_product_cor_metrics>=abs(product_cor_metric_simulated - product_cor_metric_observed):
                 min_distance_between_product_cor_metrics = abs(product_cor_metric_simulated - product_cor_metric_observed)
-                additional_condition = (max_correlation_with_y/max_correlation_with_t)
+                additional_condition = (correlation_y_observed/correlation_t_observed)
                 if ((c1/c2) <= (additional_condition + 0.3*additional_condition)) and ((c1/c2) >= (additional_condition - 0.3*additional_condition)): #choose minimum positive value 
                     c1_final = c1
                     c2_final = c2
@@ -378,9 +374,7 @@ class AddUnobservedCommonCause(CausalRefuter):
             c2 = math.sqrt(c_star_max/additional_condition)
             c1 = c_star_max/c2'''
 
-        
         final_U = self.generate_confounder_from_residuals(c1_final, c2_final, d_y, d_t, X)
-    
         
         return final_U
 
@@ -404,9 +398,10 @@ class AddUnobservedCommonCause(CausalRefuter):
 
         '''
         U = []
+
         for j in range(len(d_t)):
             simulated_variable_mean = c1*d_y[j]+c2*d_t[j]
-            simulated_variable_stddev = 0.01
+            simulated_variable_stddev = 1
             U.append(np.random.normal(simulated_variable_mean, simulated_variable_stddev, 1))
 
         U = np.array(U)
