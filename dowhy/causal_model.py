@@ -127,7 +127,7 @@ class CausalModel:
         self.summary()
 
     def identify_effect(self, estimand_type=None,
-            method_name="auto", proceed_when_unidentifiable=None):
+            method_name="default", proceed_when_unidentifiable=None):
         """Identify the causal effect to be estimated, using properties of the causal graph.
 
         :param proceed_when_unidentifiable: Binary flag indicating whether identification should proceed in the presence of (potential) unobserved confounders.

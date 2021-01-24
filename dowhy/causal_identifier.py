@@ -1,12 +1,11 @@
-import logging
-import itertools
 import copy
+import itertools
+import logging
 
 import sympy as sp
 import sympy.stats as spstats
 
 import dowhy.utils.cli_helpers as cli
-
 from dowhy.utils.api import parse_state
 
 
@@ -24,9 +23,10 @@ class CausalIdentifier:
     NONPARAMETRIC_NDE="nonparametric-nde"
     NONPARAMETRIC_NIE="nonparametric-nie"
     MAX_BACKDOOR_ITERATIONS = 100000
+    VALID_METHOD_NAMES = {"default", "exhaustive-search"}
 
     def __init__(self, graph, estimand_type,
-            method_name = None,
+            method_name = "default",
             proceed_when_unidentifiable=False):
         self._graph = graph
         self.estimand_type = estimand_type
@@ -253,7 +253,7 @@ class CausalIdentifier:
 
         num_iterations = 0
         found_valid_adjustment_set = False
-        if self.method_name == "auto":
+        if self.method_name in CausalIdentifier.VALID_METHOD_NAMES:
             for size_candidate_set in range(len(eligible_variables), 0, -1):
                 for candidate_set in itertools.combinations(eligible_variables, size_candidate_set):
                     check = self._graph.check_valid_backdoor_set(treatment_name,
@@ -266,23 +266,13 @@ class CausalIdentifier:
                         if self._graph.all_observed(candidate_set):
                             found_valid_adjustment_set = True
                     num_iterations += 1
-                    if num_iterations > CausalIdentifier.MAX_BACKDOOR_ITERATIONS:
+                    if self.method_name == "default" and num_iterations > CausalIdentifier.MAX_BACKDOOR_ITERATIONS:
                         break
-                if found_valid_adjustment_set:
+                if self.method_name == "default" and found_valid_adjustment_set:
                     break
-        elif self.method_name == "exhaustive-search":
-            for size_candidate_set in range(1, len(eligible_variables)+1):
-                for candidate_set in itertools.combinations(eligible_variables, size_candidate_set):
-                    check = self._graph.check_valid_backdoor_set(treatment_name,
-                            outcome_name, candidate_set, backdoor_paths=backdoor_paths)
-                    self.logger.debug("Candidate backdoor set: {0}, is_dseparated: {1}, No. of paths blocked by observed_nodes: {2}".format(candidate_set, check["is_dseparated"], check["num_paths_blocked_by_observed_nodes"]))
-                    if check["is_dseparated"]:
-                        backdoor_sets.append({
-                            'backdoor_set': candidate_set,
-                            'num_paths_blocked_by_observed_nodes': check["num_paths_blocked_by_observed_nodes"]})
         else:
-            raise ValueError("Identifier method " + self.method_name + " not supported. Try 'default' or 'exhaustive-search'.")
-            #causes_t = self._graph.get_causes(self.treatment_name)
+            raise ValueError(f"Identifier method {self.method_name} not supported. Try one of the following: {CausalIdentifier.VALID_METHOD_NAMES}")
+        #causes_t = self._graph.get_causes(self.treatment_name)
         #causes_y = self._graph.get_causes(self.outcome_name, remove_edges={'sources':self.treatment_name, 'targets':self.outcome_name})
         #common_causes = list(causes_t.intersection(causes_y))
         #self.logger.info("Common causes of treatment and outcome:" + str(common_causes))
