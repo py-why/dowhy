@@ -91,9 +91,10 @@ class Econml(CausalEstimator):
         named_data_args = {'Y': Y, 'T': T, 'X': X, 'W': W, 'Z': Z}
 
         # Calling the econml estimator's fit method
-        estimator_named_args = inspect.getfullargspec(
-            inspect.unwrap(self.estimator.fit)
-            )[0]
+        estimator_argspec = inspect.getfullargspec(
+            inspect.unwrap(self.estimator.fit))
+        # As of v0.9, econml has some kewyord only arguments
+        estimator_named_args = estimator_argspec.args + estimator_argspec.kwonlyargs
         estimator_data_args = {
             arg: named_data_args[arg] for arg in named_data_args.keys() if arg in estimator_named_args
             }
