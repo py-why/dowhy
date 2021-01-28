@@ -50,7 +50,6 @@ class CausalModel:
         :param estimand_type: the type of estimand requested (currently only "nonparametric-ate" is supported). In the future, may support other specific parametric forms of identification.
         :param proceed_when_unidentifiable: does the identification proceed by ignoring potential unobserved confounders. Binary flag.
         :param missing_nodes_as_confounders: Binary flag indicating whether variables in the dataframe that are not included in the causal graph, should be  automatically included as confounder nodes.
-        :param `**kwargs`: More optional parameters that can be passed to the causal model. Currently supported params: "logging_level" to indicate the level of logging needed. Possible values are logging.CRITICAL, logging.ERROR, logging.INFO, logging.WARNING,and logging.DEBUG. Default is logging.INFO.
         :returns: an instance of CausalModel class
 
         """
@@ -61,12 +60,6 @@ class CausalModel:
         self._estimand_type = estimand_type
         self._proceed_when_unidentifiable = proceed_when_unidentifiable
         self._missing_nodes_as_confounders = missing_nodes_as_confounders
-        if 'logging_level' in kwargs:
-            logging.basicConfig(level=kwargs['logging_level'])
-        else:
-            logging.basicConfig(level=logging.INFO)
-
-        # TODO: move the logging level argument to a json file. Tue 20 Feb 2018 06:56:27 PM DST
         self.logger = logging.getLogger(__name__)
 
         if graph is None:

@@ -193,11 +193,6 @@ class DummyOutcomeRefuter(CausalRefuter):
 
         self._chosen_variables = self.choose_variables(required_variables)
 
-        if 'logging_level' in kwargs:
-            logging.basicConfig(level=kwargs['logging_level'])
-        else:
-            logging.basicConfig(level=logging.INFO)
-        
         self.logger = logging.getLogger(__name__)
 
     def refute_estimate(self):
