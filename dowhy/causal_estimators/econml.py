@@ -14,17 +14,6 @@ class Econml(CausalEstimator):
         self.logger.info("INFO: Using EconML Estimator")
         self.identifier_method = self._target_estimand.identifier_method
         self._observed_common_causes_names = self._target_estimand.get_backdoor_variables().copy()
-        # Checking if effect modifiers are a subset of common causes
-        x_subsetof_w = True
-        unique_effect_modifier_names = []
-        for em_name in self._effect_modifier_names:
-            if em_name not in self._observed_common_causes_names:
-                x_subsetof_w = False
-                unique_effect_modifier_names.append(em_name)
-        if not x_subsetof_w:
-            self.logger.warn("Effect modifiers are not a subset of common causes. For efficiency in estimation, EconML will consider all effect modifiers as common causes too.")
-            self._observed_common_causes_names.extend(unique_effect_modifier_names)
-
         # For metalearners only--issue a warning if w contains variables not in x
         (module_name, _, class_name) = self._econml_methodname.rpartition(".")
         if module_name.endswith("metalearners"):
@@ -80,14 +69,14 @@ class Econml(CausalEstimator):
         X = None  # Effect modifiers
         W = None  # common causes/ confounders
         Z = None  # Instruments
-        Y = np.array(self._outcome)
-        T = np.array(self._treatment)
+        Y = self._outcome
+        T = self._treatment
         if self._effect_modifiers is not None:
-            X = np.reshape(np.array(self._effect_modifiers), (n_samples, self._effect_modifiers.shape[1]))
+            X = self._effect_modifiers
         if self._observed_common_causes_names:
-            W = np.reshape(np.array(self._observed_common_causes), (n_samples, self._observed_common_causes.shape[1]))
+            W = self._observed_common_causes
         if self._instrumental_variable_names:
-            Z = np.array(self._instrumental_variables)
+            Z = self._instrumental_variables
         named_data_args = {'Y': Y, 'T': T, 'X': X, 'W': W, 'Z': Z}
 
         # Calling the econml estimator's fit method
