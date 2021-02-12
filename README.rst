@@ -17,10 +17,7 @@ DoWhy | An end-to-end library for causal inference
 
   Introducing DoWhy and the 4 steps of causal inference | `Microsoft Research Blog <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Video Tutorial <https://note.microsoft.com/MSR-Webinar-DoWhy-Library-Registration-On-Demand.html>`_ | `Arxiv Paper <https://arxiv.org/abs/2011.04216>`_ | `Slides <https://www2.slideshare.net/AmitSharma315/dowhy-an-endtoend-library-for-causal-inference>`_
 
-  Read the `docs <https://microsoft.github.io/dowhy/>`_ | Try it online! |AzureNotebooks|_ |Binder|_ 
-
-.. |AzureNotebooks| image:: https://notebooks.azure.com/launch.svg
-.. _AzureNotebooks: https://notebooks.azure.com/amshar/projects/dowhy/tree/docs/source
+  Read the `docs <https://microsoft.github.io/dowhy/>`_ | Try it online! |Binder|_ 
 
 .. |Binder| image:: https://mybinder.org/badge_logo.svg
 .. _Binder: https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F
