@@ -610,7 +610,7 @@ class IdentifiedEstimand:
             Otherwise, return the backdoor variables for the default backdoor estimand.
         """
         if key is None:
-            if self.identifier_method.startswith("backdoor"):
+            if self.identifier_method and self.identifier_method.startswith("backdoor"):
                 return self.backdoor_variables[self.identifier_method]
             else:
                 return self.backdoor_variables[self.default_backdoor_id]
