@@ -40,11 +40,6 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         self._num_simulations = kwargs.pop("num_simulations",CausalRefuter.DEFAULT_NUM_SIMULATIONS)
         self._random_state = kwargs.pop("random_state",None)
 
-        if 'logging_level' in kwargs:
-            logging.basicConfig(level=kwargs['logging_level'])
-        else:
-            logging.basicConfig(level=logging.INFO)
-
         self.logger = logging.getLogger(__name__)
 
 

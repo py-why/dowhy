@@ -61,10 +61,6 @@ class BootstrapRefuter(CausalRefuter):
         self._probability_of_change = kwargs.pop("probability_of_change", None)
         self._random_state = kwargs.pop("random_state", None)
 
-        if 'logging_level' in kwargs:
-            logging.basicConfig(level=kwargs['logging_level'])
-        else:
-            logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
         
         self._chosen_variables = self.choose_variables(required_variables)

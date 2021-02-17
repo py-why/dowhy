@@ -17,13 +17,7 @@ class TestRefuter(object):
         self.confounders_effect_on_y = confounders_effect_on_y
         self.effect_strength_on_t = effect_strength_on_t
         self.effect_strength_on_y = effect_strength_on_y
-
-        if 'logging_level' in kwargs:
-            logging.basicConfig(level=kwargs['logging_level'])
-        else:
-            logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
-
         self.logger.debug(self._error_tolerance)
 
     def null_refutation_test(self, data=None, dataset="linear", beta=10,

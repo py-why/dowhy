@@ -27,10 +27,6 @@ class CausalRefuter:
             self._random_seed = kwargs['random_seed']
             np.random.seed(self._random_seed)
 
-        if 'logging_level' in kwargs:
-            logging.basicConfig(level=kwargs['logging_level'])
-        else:
-            logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
 
         # Concatenate the confounders, instruments and effect modifiers

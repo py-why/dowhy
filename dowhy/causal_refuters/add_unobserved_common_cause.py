@@ -44,10 +44,6 @@ class AddUnobservedCommonCause(CausalRefuter):
         self.kappa_y = kwargs["effect_strength_on_outcome"] if "effect_strength_on_outcome" in kwargs else None
         self.simulated_method_name = kwargs["simulated_method_name"] if "simulated_method_name" in kwargs else "linear_based"
 
-        if 'logging_level' in kwargs:
-            logging.basicConfig(level=kwargs['logging_level'])
-        else:
-            logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
 
     def refute_estimate(self):
