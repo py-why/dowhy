@@ -158,7 +158,7 @@ class CausalModel:
             * Instrumental Variables: "iv.instrumental_variable"
             * Regression Discontinuity: "iv.regression_discontinuity"
 
-        In addition, you can directly call any of the EconML estimation methods. The convention is "backdoor.econml.path-to-estimator-class". For example, for the double machine learning estimator ("DMLCateEstimator" class) that is located inside "dml" module of EconML, you can use the method name, "backdoor.econml.dml.DMLCateEstimator". CausalML estimators can also be called. See `this demo notebook <https://microsoft.github.io/dowhy/example_notebooks/dowhy-conditional-treatment-effects.html>`_.
+        In addition, you can directly call any of the EconML estimation methods. The convention is "backdoor.econml.path-to-estimator-class". For example, for the double machine learning estimator ("DML" class) that is located inside "dml" module of EconML, you can use the method name, "backdoor.econml.dml.DML". CausalML estimators can also be called. See `this demo notebook <https://microsoft.github.io/dowhy/example_notebooks/dowhy-conditional-treatment-effects.html>`_.
 
 
         :param identified_estimand: a probability expression

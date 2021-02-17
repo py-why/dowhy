@@ -398,7 +398,7 @@ learning estimator.
 	from sklearn.preprocessing import PolynomialFeatures
 	from sklearn.linear_model import LassoCV
 	from sklearn.ensemble import GradientBoostingRegressor
-	dml_estimate = model.estimate_effect(identified_estimand, method_name="backdoor.econml.dml.DMLCateEstimator",
+	dml_estimate = model.estimate_effect(identified_estimand, method_name="backdoor.econml.dml.DML",
                         control_value = 0,
                         treatment_value = 1,
                         target_units = lambda df: df["X0"]>1,
