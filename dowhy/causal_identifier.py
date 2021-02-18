@@ -297,6 +297,8 @@ class CausalIdentifier:
 
     def build_backdoor_estimands_dict(self, treatment_name, outcome_name,
             backdoor_sets, estimands_dict, proceed_when_unidentifiable=None):
+        """Build the final dict for backdoor sets by filtering unobserved variables if needed.
+        """
         backdoor_variables_dict = {}
         if proceed_when_unidentifiable is None:
             proceed_when_unidentifiable = self._proceed_when_unidentifiable
@@ -653,14 +655,19 @@ class IdentifiedEstimand:
                 identifier_method=copy.deepcopy(self.identifier_method)
             )
 
-    def __str__(self, only_target_estimand=False):
+    def __str__(self, only_target_estimand=False, show_all_backdoor_sets=False):
         s = "Estimand type: {0}\n".format(self.estimand_type)
         i = 1
         has_valid_backdoor = sum("backdoor" in key for key in self.estimands.keys())
         for k, v in self.estimands.items():
-            # Do not show backdoor key unless it is the only backdoor set.
-            if k == "backdoor" and has_valid_backdoor > 1:
-                continue
+            if show_all_backdoor_sets:
+                # Do not show backdoor key unless it is the only backdoor set.
+                if k == "backdoor" and has_valid_backdoor > 1:
+                    continue
+            else:
+                # Just show the default backdoor set
+                if k.startswith("backdoor") and k != "backdoor":
+                    continue
             if only_target_estimand and k != self.identifier_method:
                 continue
             s += "\n### Estimand : {0}\n".format(i)
