@@ -612,8 +612,10 @@ class IdentifiedEstimand:
         if key is None:
             if self.identifier_method and self.identifier_method.startswith("backdoor"):
                 return self.backdoor_variables[self.identifier_method]
-            else:
+            elif self.backdoor_variables is not None:
                 return self.backdoor_variables[self.default_backdoor_id]
+            else:
+                return []
         else:
             return self.backdoor_variables[key]
 
