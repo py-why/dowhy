@@ -6,8 +6,8 @@
 .. |PythonSupport| image:: https://img.shields.io/pypi/pyversions/dowhy.svg
 .. _PythonSupport: https://pypi.org/project/dowhy/
 
-.. |BuildStatus| image:: https://dev.azure.com/ms/dowhy/_apis/build/status/microsoft.dowhy?branchName=master
-.. _BuildStatus: https://dev.azure.com/ms/dowhy/_build/latest?definitionId=179&branchName=master
+.. |BuildStatus| image:: https://github.com/microsoft/dowhy/workflows/Python%20package/badge.svg
+.. _BuildStatus: https://github.com/microsoft/dowhy/actions
 
 DoWhy | An end-to-end library for causal inference
 ===================================================
