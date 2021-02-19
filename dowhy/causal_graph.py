@@ -76,8 +76,6 @@ class CausalGraph:
             self._graph = self.add_missing_nodes_as_common_causes(observed_node_names)
         # Adding node attributes
         self._graph = self.add_node_attributes(observed_node_names)
-        #TODO do not add it here. CausalIdentifier should call causal_graph to add an unobserved common cause if needed. This also ensures that we do not need get_common_causes in this class.
-        self._graph = self.add_unobserved_common_cause(observed_node_names)
 
     def view_graph(self, layout="dot"):
         out_filename = "causal_model.png"
