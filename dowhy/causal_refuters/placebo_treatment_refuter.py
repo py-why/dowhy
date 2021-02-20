@@ -2,7 +2,7 @@ import copy
 
 import numpy as np
 import pandas as pd
-import logging 
+import logging
 
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
@@ -67,8 +67,8 @@ class PlaceboTreatmentRefuter(CausalRefuter):
                 if self._random_state is None:
                     new_treatment = self._data[self._treatment_name].sample(frac=1).values
                 else:
-                    new_treatment = self._data[self._treatment_name].sample(frac=1, 
-                                                                    random_state=self._random_state).values                    
+                    new_treatment = self._data[self._treatment_name].sample(frac=1,
+                                                                    random_state=self._random_state).values
             else:
                 if 'float' in type_dict[treatment_name].name :
                     self.logger.info("Using a Normal Distribution with Mean:{} and Variance:{}"
@@ -76,8 +76,8 @@ class PlaceboTreatmentRefuter(CausalRefuter):
                                      ,PlaceboTreatmentRefuter.DEFAULT_STD_DEV_OF_NORMAL)
                                      )
                     new_treatment = np.random.randn(num_rows)*PlaceboTreatmentRefuter.DEFAULT_STD_DEV_OF_NORMAL + \
-                                    PlaceboTreatmentRefuter.DEFAULT_MEAN_OF_NORMAL 
-                
+                                    PlaceboTreatmentRefuter.DEFAULT_MEAN_OF_NORMAL
+
                 elif 'bool' in type_dict[treatment_name].name :
                     self.logger.info("Using a Binomial Distribution with {} trials and {} probability of success"
                                     .format(PlaceboTreatmentRefuter.DEFAULT_NUMBER_OF_TRIALS
@@ -86,7 +86,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
                     new_treatment = np.random.binomial(PlaceboTreatmentRefuter.DEFAULT_NUMBER_OF_TRIALS,
                                                        PlaceboTreatmentRefuter.DEFAULT_PROBABILITY_OF_BINOMIAL,
                                                        num_rows).astype(bool)
-                
+
                 elif 'int' in type_dict[treatment_name].name :
                     self.logger.info("Using a Discrete Uniform Distribution lying between {} and {}"
                     .format(self._data[treatment_name].min()
@@ -113,16 +113,18 @@ class PlaceboTreatmentRefuter(CausalRefuter):
             new_effect = new_estimator.estimate_effect()
             sample_estimates[index] = new_effect.value
 
-        refute = CausalRefutation(self._estimate.value, 
+        refute = CausalRefutation(self._estimate.value,
                                   np.mean(sample_estimates),
                                   refutation_type="Refute: Use a Placebo Treatment")
-                                  
+
         # Note: We hardcode the estimate value to ZERO as we want to check if it falls in the distribution of the refuter
         # Ideally we should expect that ZERO should fall in the distribution of the effect estimates as we have severed any causal
         # relationship between the treatment and the outcome.
         dummy_estimator = CausalEstimate(
-                estimate = 0,
-                target_estimand =self._estimate.target_estimand,
+                estimate=0,
+                control_value=self._estimate.control_value,
+                treatment_value=self._estimate.treatment_value,
+                target_estimand=self._estimate.target_estimand,
                 realized_estimand_expr=self._estimate.realized_estimand_expr)
 
         refute.add_significance_test_results(

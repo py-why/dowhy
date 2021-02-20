@@ -23,7 +23,7 @@ class RegressionEstimator(CausalEstimator):
             self._observed_common_causes = self._data[self._observed_common_causes_names]
             self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
         else:
-            self._observed_common_causes = None 
+            self._observed_common_causes = None
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
         self.model = None
@@ -51,6 +51,8 @@ class RegressionEstimator(CausalEstimator):
                     effect_modifier_names=self._effect_modifier_names)
         intercept_parameter = self.model.params[0]
         estimate = CausalEstimate(estimate=effect_estimate,
+                              control_value=self._control_value,
+                              treatment_value=self._treatment_value,
                               conditional_estimates=conditional_effect_estimates,
                               target_estimand=self._target_estimand,
                               realized_estimand_expr=self.symbolic_estimator,

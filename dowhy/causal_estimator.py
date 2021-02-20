@@ -141,6 +141,8 @@ class CausalEstimator:
                 new_data,
                 identified_estimand,
                 identified_estimand.treatment_variable, identified_estimand.outcome_variable, #names of treatment and outcome
+                control_value=estimate.control_value,
+                treatment_value=estimate.treatment_value,
                 test_significance=False,
                 evaluate_effect_strength=False,
                 confidence_intervals = estimate.params["confidence_intervals"],
@@ -148,6 +150,7 @@ class CausalEstimator:
                 effect_modifiers = estimate.params["effect_modifiers"],
                 params = estimate.params["method_params"]
                 )
+
         return new_estimator
 
 
@@ -183,7 +186,7 @@ class CausalEstimator:
         df_withtreatment = self._data.loc[self._data[self._treatment_name] == 1]
         df_notreatment = self._data.loc[self._data[self._treatment_name]== 0]
         est = np.mean(df_withtreatment[self._outcome_name]) - np.mean(df_notreatment[self._outcome_name])
-        return CausalEstimate(est, None, None)
+        return CausalEstimate(est, None, None, control_value=0, treatment_value=1)
 
     def _estimate_effect_fn(self, data_df):
         """Function used in conditional effect estimation. This function is to be overridden by each child estimator.
@@ -624,10 +627,14 @@ class CausalEstimate:
     """
 
     def __init__(self, estimate, target_estimand, realized_estimand_expr,
+            control_value,
+            treatment_value,
             conditional_estimates = None, **kwargs):
         self.value = estimate
         self.target_estimand = target_estimand
         self.realized_estimand_expr = realized_estimand_expr
+        self.control_value = control_value
+        self.treatment_value = treatment_value
         self.conditional_estimates = conditional_estimates
         self.params = kwargs
         if self.params is not None:

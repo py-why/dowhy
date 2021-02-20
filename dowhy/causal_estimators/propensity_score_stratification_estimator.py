@@ -28,7 +28,7 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
             self._propensity_score_model = linear_model.LogisticRegression()
             self._propensity_score_model.fit(self._observed_common_causes, self._treatment)
             self._data['propensity_score'] = self._propensity_score_model.predict_proba(self._observed_common_causes)[:,1]
-        
+
         # sort the dataframe by propensity score
         # create a column 'strata' for each element that marks what strata it belongs to
         num_rows = self._data[self._outcome_name].shape[0]
@@ -82,6 +82,8 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         # TODO - how can we add additional information into the returned estimate?
         #        such as how much clipping was done, or per-strata info for debugging?
         estimate = CausalEstimate(estimate=est,
+                                  control_value=self._control_value,
+                                  treatment_value=self._treatment_value,
                                   target_estimand=self._target_estimand,
                                   realized_estimand_expr=self.symbolic_estimator,
                                   propensity_scores = self._data["propensity_score"])

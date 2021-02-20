@@ -211,7 +211,9 @@ class CausalModel:
         # Check if estimator's target estimand is identified
         if identified_estimand.estimands[identifier_name] is None:
             self.logger.warning("No valid identified estimand available.")
-            estimate = CausalEstimate(None, None, None)
+            estimate = CausalEstimate(None, None, None,
+                                  control_value=control_value,
+                                  treatment_value=treatment_value)
         else:
             causal_estimator = causal_estimator_class(
                 self._data,
@@ -228,6 +230,8 @@ class CausalModel:
             )
             estimate = causal_estimator.estimate_effect()
             # Store parameters inside estimate object for refutation methods
+            # TODO: This add_params needs to move to the estimator class
+            # inside estimate_effect and estimate_conditional_effect
             estimate.add_params(
                 estimand_type=identified_estimand.estimand_type,
                 estimator_class=causal_estimator_class,
@@ -267,7 +271,7 @@ class CausalModel:
         # Check if estimator's target estimand is identified
         if identified_estimand.estimands[identifier_name] is None:
             self.logger.warning("No valid identified estimand for using instrumental variables method")
-            estimate = CausalEstimate(None, None, None)
+            estimate = CausalEstimate(None, None, None, None, None)
         else:
             causal_estimator = causal_estimator_class(
                 self._data,
