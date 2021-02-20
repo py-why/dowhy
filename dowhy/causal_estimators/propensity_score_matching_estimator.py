@@ -71,7 +71,7 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
 
         estimate = CausalEstimate(estimate=est,
                                   control_value=self._control_value,
-                                  treatment_value=treatment_value,
+                                  treatment_value=self._treatment_value,
                                   target_estimand=self._target_estimand,
                                   realized_estimand_expr=self.symbolic_estimator,
                                   propensity_scores=self._data["propensity_score"])

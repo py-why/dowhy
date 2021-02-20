@@ -52,7 +52,7 @@ class RegressionEstimator(CausalEstimator):
         intercept_parameter = self.model.params[0]
         estimate = CausalEstimate(estimate=effect_estimate,
                               control_value=self._control_value,
-                              treatment_value=treatment_value,
+                              treatment_value=self._treatment_value,
                               conditional_estimates=conditional_effect_estimates,
                               target_estimand=self._target_estimand,
                               realized_estimand_expr=self.symbolic_estimator,

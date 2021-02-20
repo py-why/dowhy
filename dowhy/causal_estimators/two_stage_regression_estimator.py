@@ -159,7 +159,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
                     estimand_type=self._target_estimand.estimand_type)
         return CausalEstimate(estimate=estimate_value,
                               control_value=self._control_value,
-                              treatment_value=treatment_value,
+                              treatment_value=self._treatment_value,
                               target_estimand=self._target_estimand,
                               realized_estimand_expr=self.symbolic_estimator)
 
