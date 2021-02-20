@@ -116,6 +116,8 @@ class Econml(CausalEstimator):
                     X_test, T0=T0_test, T1=T1_test,
                     alpha=1-self.confidence_level)
         estimate = CausalEstimate(estimate=ate,
+                                  control_value=self._control_value,
+                                  treatment_value=self._treatment_value,
                                   target_estimand=self._target_estimand,
                                   realized_estimand_expr=self.symbolic_estimator,
                                   cate_estimates=est,

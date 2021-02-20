@@ -356,6 +356,8 @@ class DummyOutcomeRefuter(CausalRefuter):
 
             dummy_estimate = CausalEstimate(
                     estimate = causal_effect_map[None],
+                    control_value = self._estimate.control_value,
+                    treatment_value=self._estimate.treatment_value,
                     target_estimand =self._estimate.target_estimand,
                     realized_estimand_expr=self._estimate.realized_estimand_expr)
 
@@ -379,8 +381,10 @@ class DummyOutcomeRefuter(CausalRefuter):
             # Iterating through the refutation for each category
             for train_category in range(simulation_results.shape[1]):
                 dummy_estimate = CausalEstimate(
-                    estimate = causal_effect_list[train_category],
-                    target_estimand =self._estimate.target_estimand,
+                    estimate=causal_effect_list[train_category],
+                    control_value=self._estimate.control_value,
+                    treatment_value=self._estimate.treatment_value,
+                    target_estimand=self._estimate.target_estimand,
                     realized_estimand_expr=self._estimate.realized_estimand_expr)
 
                 refute = CausalRefutation(

@@ -33,7 +33,7 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
             self._propensity_score_model = linear_model.LogisticRegression()
             self._propensity_score_model.fit(self._observed_common_causes, self._treatment)
             self._data['ps'] = self._propensity_score_model.predict_proba(self._observed_common_causes)[:,1]
-        
+
         # trim propensity score weights
         self._data['ps'] = np.minimum(self.max_ps_score, self._data['ps'])
         self._data['ps'] = np.maximum(self.min_ps_score, self._data['ps'])
@@ -130,6 +130,8 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
 
         # TODO - how can we add additional information into the returned estimate?
         estimate = CausalEstimate(estimate=est,
+                                  control_value=self._control_value,
+                                  treatment_value=treatment_value,
                                   target_estimand=self._target_estimand,
                                   realized_estimand_expr=self.symbolic_estimator,
                                   propensity_scores = self._data["ps"])

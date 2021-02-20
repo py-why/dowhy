@@ -35,7 +35,7 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
         distances, indices = control_neighbors.kneighbors(treated['propensity_score'].values.reshape(-1, 1))
         self.logger.debug("distances:")
         self.logger.debug(distances)
-        
+
         att = 0
         numtreatedunits = treated.shape[0]
         for i in range(numtreatedunits):
@@ -70,6 +70,8 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
             raise ValueError("Target units string value not supported")
 
         estimate = CausalEstimate(estimate=est,
+                                  control_value=self._control_value,
+                                  treatment_value=treatment_value,
                                   target_estimand=self._target_estimand,
                                   realized_estimand_expr=self.symbolic_estimator,
                                   propensity_scores=self._data["propensity_score"])
