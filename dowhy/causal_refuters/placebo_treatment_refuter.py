@@ -7,6 +7,7 @@ import logging
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
 from dowhy.causal_estimator import CausalEstimator, CausalEstimate
+from dowhy.utils.api import parse_state
 
 class PlaceboTreatmentRefuter(CausalRefuter):
     """Refute an estimate by replacing treatment with a randomly-generated placebo variable.
@@ -48,7 +49,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         if self._target_estimand.identifier_method.startswith("iv"):
             if self._placebo_type != "permute":
                 self.logger.error("Only placebo_type=''permute'' is supported for creating placebo for instrumental variable estimation methods")
-                raise ValueError
+                raise ValueError("Only placebo_type=''permute'' is supported for creating placebo for instrumental variable estimation methods.")
 
         # We need to change the identified estimand
         # We make a copy as a safety measure, we don't want to change the
@@ -60,8 +61,8 @@ class PlaceboTreatmentRefuter(CausalRefuter):
             # For IV methods, the estimating_instrument_names should also be
             # changed. So we change it inside the estimate and then restore it
             # back at the end of this method.
-            if "iv_instrument_name" in self._estimate.params["method_params"]:
-                self._estimate.params["method_params"]["iv_instrument_name"] =
+            if self._estimate.params["method_params"] is not None and "iv_instrument_name" in self._estimate.params["method_params"]:
+                self._estimate.params["method_params"]["iv_instrument_name"] = \
                 ["placebo_" + s for s in parse_state(self._estimate.params["method_params"]["iv_instrument_name"])]
 
         sample_estimates = np.zeros(self._num_simulations)
@@ -87,8 +88,9 @@ class PlaceboTreatmentRefuter(CausalRefuter):
                             size=self._data.shape[0], replace=False)
                 new_treatment = self._data[self._treatment_name].iloc[permuted_idx].values
                 if self._target_estimand.identifier_method.startswith("iv"):
-                    new_instruments_df = self._data[self._estimate.estimator.estimating_instrument_names].iloc[permuted_idx]
-                    new_instruments_df.columns = ["placebo_" + s for s in new_instruments_df.columns]
+                    new_instruments_values = self._data[self._estimate.estimator.estimating_instrument_names].iloc[permuted_idx].values
+                    new_instruments_df = pd.DataFrame(new_instruments_values,
+                            columns=["placebo_" + s for s in self._data[self._estimate.estimator.estimating_instrument_names].columns])
             else:
                 if 'float' in type_dict[treatment_name].name :
                     self.logger.info("Using a Normal Distribution with Mean:{} and Variance:{}"
@@ -125,20 +127,18 @@ class PlaceboTreatmentRefuter(CausalRefuter):
 
             # Create a new column in the data by the name of placebo
             new_data = self._data.assign(placebo=new_treatment)
-            new_data = pd.concat(new_data, new_instruments_df)
+            new_data = pd.concat((new_data, new_instruments_df), axis=1)
             # Sanity check the data
             self.logger.debug(new_data[0:10])
-
             new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
             sample_estimates[index] = new_effect.value
 
         # Restoring the value of iv_instrument_name
         if self._target_estimand.identifier_method.startswith("iv"):
-            if "iv_instrument_name" in self._estimate.params["method_params"]:
-                self._estimate.params["method_params"]["iv_instrument_name"] =
+            if self._estimate.params["method_params"] is not None and "iv_instrument_name" in self._estimate.params["method_params"]:
+                self._estimate.params["method_params"]["iv_instrument_name"] = \
                 [s.replace("placebo_","",1) for s in parse_state(self._estimate.params["method_params"]["iv_instrument_name"])]
-
         refute = CausalRefutation(self._estimate.value,
                                   np.mean(sample_estimates),
                                   refutation_type="Refute: Use a Placebo Treatment")
