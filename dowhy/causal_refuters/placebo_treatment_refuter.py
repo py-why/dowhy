@@ -127,7 +127,8 @@ class PlaceboTreatmentRefuter(CausalRefuter):
 
             # Create a new column in the data by the name of placebo
             new_data = self._data.assign(placebo=new_treatment)
-            new_data = pd.concat((new_data, new_instruments_df), axis=1)
+            if self._target_estimand.identifier_method.startswith("iv"):
+                new_data = pd.concat((new_data, new_instruments_df), axis=1)
             # Sanity check the data
             self.logger.debug(new_data[0:10])
             new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
