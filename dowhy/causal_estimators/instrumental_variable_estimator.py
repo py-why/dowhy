@@ -23,16 +23,13 @@ class InstrumentalVariableEstimator(CausalEstimator):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.logger.debug("Instrumental Variables used:" +
-                          ",".join(self._target_estimand.instrumental_variables))
-
-
         # choosing the instrumental variable to use
         if getattr(self, 'iv_instrument_name', None) is None:
             self.estimating_instrument_names = self._target_estimand.instrumental_variables
         else:
             self.estimating_instrument_names = parse_state(self.iv_instrument_name)
-
+        self.logger.debug("Instrumental Variables used:" +
+                          ",".join(self.estimating_instrument_names))
         if not self.estimating_instrument_names:
             raise ValueError("No valid instruments found. IV Method not applicable")
         if len(self.estimating_instrument_names) < len(self._treatment_name):

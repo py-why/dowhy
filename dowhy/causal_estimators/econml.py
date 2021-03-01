@@ -4,8 +4,11 @@ import pandas as pd
 
 from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_estimator import CausalEstimator
+from dowhy.utils.api import parse_state
+
 from importlib import import_module
 import econml
+
 
 class Econml(CausalEstimator):
 
@@ -40,12 +43,16 @@ class Econml(CausalEstimator):
         self.logger.debug("Back-door variables used:" +
                           ",".join(self._observed_common_causes_names))
         # Instrumental variables names, if present
-        self._instrumental_variable_names = self._target_estimand.instrumental_variables
-        if self._instrumental_variable_names:
-            self._instrumental_variables = self._data[self._instrumental_variable_names]
-            self._instrumental_variables = pd.get_dummies(self._instrumental_variables, drop_first=True)
+        # choosing the instrumental variable to use
+        if getattr(self, 'iv_instrument_name', None) is None:
+            self.estimating_instrument_names = self._target_estimand.instrumental_variables
         else:
-            self._instrumental_variables = None
+            self.estimating_instrument_names = parse_state(self.iv_instrument_name)
+        if self.estimating_instrument_names:
+            self._estimating_instruments = self._data[self.estimating_instrument_names]
+            self._estimating_instruments = pd.get_dummies(self._estimating_instruments, drop_first=True)
+        else:
+            self._estimating_instruments = None
 
         estimator_class = self._get_econml_class_object(self._econml_methodname)
         self.estimator = estimator_class(**self.method_params["init_params"])
@@ -75,8 +82,8 @@ class Econml(CausalEstimator):
             X = self._effect_modifiers
         if self._observed_common_causes_names:
             W = self._observed_common_causes
-        if self._instrumental_variable_names:
-            Z = self._instrumental_variables
+        if self.estimating_instrument_names:
+            Z = self._estimating_instruments
         named_data_args = {'Y': Y, 'T': T, 'X': X, 'W': W, 'Z': Z}
 
         # Calling the econml estimator's fit method
