@@ -20,6 +20,14 @@ dowhy.utils.cli\_helpers module
    :undoc-members:
    :show-inheritance:
 
+dowhy.utils.dgp module
+----------------------
+
+.. automodule:: dowhy.utils.dgp
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.utils.propensity\_score module
 ------------------------------------
 

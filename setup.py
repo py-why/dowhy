@@ -39,7 +39,7 @@ setup(
     license='MIT',
     long_description=long_description,
     url='https://github.com/microsoft/dowhy',  # Optional
-    download_url='https://github.com/microsoft/dowhy/archive/v0.5.1.tar.gz',
+    download_url='https://github.com/microsoft/dowhy/archive/v0.6.tar.gz',
     author='Amit Sharma, Emre Kiciman',
     classifiers=[  # Optional
         'Development Status :: 4 - Beta',
