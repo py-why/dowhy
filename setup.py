@@ -19,6 +19,14 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
     install_requires = f.read().splitlines()
 
+# Plotting packages are optional to install
+extras = ["plotting"]
+extras_require = dict()
+for e in extras:
+    req_file = "requirements-{0}.txt".format(e)
+    with open(req_file) as f:
+        extras_require[e] = [line.strip() for line in f]
+
 # Loading version number
 with open(path.join(here, 'dowhy', 'VERSION')) as version_file:
     version = version_file.read().strip()
@@ -45,6 +53,7 @@ setup(
     packages=find_packages(exclude=['docs', 'tests']),
     python_requires='>=3.5',
     install_requires=install_requires,
+    extras_require=extras_require,
     include_package_data=True,
     package_data={'dowhy':['VERSION']}
 )

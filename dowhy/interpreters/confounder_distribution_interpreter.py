@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 from dowhy.interpreters.visual_interpreter import VisualInterpreter
 from dowhy.causal_estimators.propensity_score_weighting_estimator import PropensityScoreWeightingEstimator
@@ -83,6 +82,7 @@ class ConfounderDistributionInterpreter(VisualInterpreter):
         title1 = "Distribution of " + self.var_name + " before applying the weights"
         title2 = "Distribution of " + self.var_name + " after applying the weights"
 
+        import matplotlib.pyplot as plt
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=self.fig_size)
         iterable = zip([barplot_df_before, barplot_df_after], [ax1, ax2], [title1, title2])
         for plot_df, ax, title in iterable:

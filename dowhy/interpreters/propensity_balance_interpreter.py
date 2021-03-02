@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 from dowhy.interpreters.visual_interpreter import VisualInterpreter
 from dowhy.causal_estimators.propensity_score_estimator import PropensityScoreEstimator
@@ -61,6 +60,8 @@ class PropensityBalanceInterpreter(VisualInterpreter):
         mean_diff_strata["sample"]="PropensityAdjusted"
         mean_diff_overall["sample"] = "Unadjusted"
         plot_df = pd.concat([mean_diff_overall, mean_diff_strata])
+
+        import matplotlib.pyplot as plt
         plt.style.use("seaborn-white")
         fig, ax = plt.subplots(1,1)
         for label, subdf in plot_df.groupby('common_cause_id'):
