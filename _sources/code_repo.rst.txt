@@ -6,6 +6,25 @@ DoWhy is hosted on GitHub.
 You can browse the code in a html-friendly format `here
 <https://github.com/Microsoft/dowhy>`_.
 
+v0.6: Better Refuters for unobserved confounders and placebo treatment
+----------------------------------------------------------------------
+
+* **[Major]** Placebo refuter also works for IV methods
+
+* **[Major]** Moved matplotlib to an optional dependency. Can be installed using `pip install dowhy[plotting]`
+
+* **[Major]** A new method for generating unobserved confounder for refutation
+
+* Update to align with EconML's new API
+
+* All refuters now support control and treatment values for continuous treatments
+
+* Better logging configuration
+
+* Dummyoutcomerefuter supports unobserved confounder
+
+A big thanks to @arshiaarya, @n8sty, @moprescu and @vojavocni
+
 v0.5-beta: Enhanced documentation and support for causal mediation
 -------------------------------------------------------------------
 

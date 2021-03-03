@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -485,38 +485,9 @@ div.rendered_html tbody tr:hover {
 <div class="section" id="Getting-started-with-DoWhy:-A-simple-example">
 <h1>Getting started with DoWhy: A simple example<a class="headerlink" href="#Getting-started-with-DoWhy:-A-simple-example" title="Permalink to this headline">¶</a></h1>
 <p>This is a quick introduction to the DoWhy causal inference library. We will load in a sample dataset and estimate the causal effect of a (pre-specified)treatment variable on a (pre-specified) outcome variable.</p>
-<p>First, let us add the required path for Python to find the DoWhy code and load all required packages.</p>
+<p>First, let us load all required packages.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-<p>Let’s check the python version.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-3.6.6 (default, Sep  3 2018, 20:31:24)
-[GCC 5.4.0 20160609]
-</pre></div></div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -526,13 +497,32 @@ div.rendered_html tbody tr:hover {
 <span class="kn">import</span> <span class="nn">dowhy</span>
 <span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
 <span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+
+<span class="c1"># Avoid printing dataconversion warnings from sklearn</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">sklearn.exceptions</span> <span class="kn">import</span> <span class="n">DataConversionWarning</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">DataConversionWarning</span><span class="p">)</span>
+
+<span class="c1"># Config dict to set the logging level</span>
+<span class="kn">import</span> <span class="nn">logging.config</span>
+<span class="n">DEFAULT_LOGGING</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;disable_existing_loggers&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s1">&#39;loggers&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;WARN&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="n">DEFAULT_LOGGING</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>Now, let us load a dataset. For simplicity, we simulate a dataset with linear relationships between common causes and treatment, and common causes and outcome.</p>
 <p>Beta is the true causal effect.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -540,7 +530,7 @@ div.rendered_html tbody tr:hover {
         <span class="n">num_common_causes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
         <span class="n">num_instruments</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
         <span class="n">num_effect_modifiers</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">num_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+        <span class="n">num_samples</span><span class="o">=</span><span class="mi">20000</span><span class="p">,</span>
         <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">num_discrete_common_causes</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">]</span>
@@ -557,30 +547,31 @@ div.rendered_html tbody tr:hover {
 <div class="output_area docutils container">
 <div class="highlight"><pre>
          X0   Z0        Z1        W0        W1        W2        W3 W4     v0  \
-0  1.418641  0.0  0.251127  0.237823  1.294957 -2.197657  0.671354  1   True
-1  0.050088  0.0  0.041706 -1.199278  3.143332 -1.738985 -2.766051  1  False
-2 -0.480051  0.0  0.974275 -1.957273 -0.065116  0.175567 -1.829176  1   True
-3  0.338169  1.0  0.727792 -0.245409  0.099252  0.998839 -0.870295  0   True
-4 -1.026205  0.0  0.983040 -0.147827  1.538178  0.441017  0.343857  2   True
+0 -1.030109  0.0  0.779284 -0.394498 -0.385477 -0.367360  0.645206  3   True
+1 -2.030467  0.0  0.535372 -1.006139 -0.926995 -0.138417 -1.484328  0  False
+2 -1.586061  0.0  0.913209 -0.759918 -0.338319  1.081894  2.015009  1   True
+3 -0.252026  0.0  0.240364  0.289508 -1.560852  2.178684  1.255095  2   True
+4 -0.202098  1.0  0.455254  0.713760 -0.968544  0.454407 -0.410060  0   True
 
            y
-0  19.477585
-1  -5.857091
-2   2.179680
-3   7.307447
-4  15.688496
-digraph { U[label=&#34;Unobserved Confounders&#34;]; U-&gt;y;v0-&gt;y; U-&gt;v0;W0-&gt; v0; W1-&gt; v0; W2-&gt; v0; W3-&gt; v0; W4-&gt; v0;Z0-&gt; v0; Z1-&gt; v0;W0-&gt; y; W1-&gt; y; W2-&gt; y; W3-&gt; y; W4-&gt; y;X0-&gt; y;}
+0  13.574042
+1 -14.557342
+2  14.659045
+3  13.701713
+4   7.247772
+digraph { U[label=&#34;Unobserved Confounders&#34;]; U-&gt;y;v0-&gt;y;U-&gt;v0;W0-&gt; v0; W1-&gt; v0; W2-&gt; v0; W3-&gt; v0; W4-&gt; v0;Z0-&gt; v0; Z1-&gt; v0;W0-&gt; y; W1-&gt; y; W2-&gt; y; W3-&gt; y; W4-&gt; y;X0-&gt; y;}
 
 
-graph[directed 1node[ id &#34;y&#34; label &#34;y&#34;]node[ id &#34;Unobserved Confounders&#34; label &#34;Unobserved Confounders&#34;]edge[source &#34;Unobserved Confounders&#34; target &#34;y&#34;]node[ id &#34;W0&#34; label &#34;W0&#34;] node[ id &#34;W1&#34; label &#34;W1&#34;] node[ id &#34;W2&#34; label &#34;W2&#34;] node[ id &#34;W3&#34; label &#34;W3&#34;] node[ id &#34;W4&#34; label &#34;W4&#34;]node[ id &#34;Z0&#34; label &#34;Z0&#34;] node[ id &#34;Z1&#34; label &#34;Z1&#34;]node[ id &#34;v0&#34; label &#34;v0&#34;]edge[source &#34;v0&#34; target &#34;y&#34;]edge[source &#34;Unobserved Confounders&#34; target &#34;v0&#34;]edge[ source &#34;W0&#34; target &#34;v0&#34;] edge[ source &#34;W1&#34; target &#34;v0&#34;] edge[ source &#34;W2&#34; target &#34;v0&#34;] edge[ source &#34;W3&#34; target &#34;v0&#34;] edge[ source &#34;W4&#34; target &#34;v0&#34;]edge[ source &#34;Z0&#34; target &#34;v0&#34;] edge[ source &#34;Z1&#34; target &#34;v0&#34;]edge[ source &#34;W0&#34; target &#34;y&#34;] edge[ source &#34;W1&#34; target &#34;y&#34;] edge[ source &#34;W2&#34; target &#34;y&#34;] edge[ source &#34;W3&#34; target &#34;y&#34;] edge[ source &#34;W4&#34; target &#34;y&#34;]node[ id &#34;X0&#34; label &#34;X0&#34;] edge[ source &#34;X0&#34; target &#34;y&#34;]]
+graph[directed 1node[ id &#34;y&#34; label &#34;y&#34;]node[ id &#34;Unobserved Confounders&#34; label &#34;Unobserved Confounders&#34;]edge[source &#34;Unobserved Confounders&#34; target &#34;y&#34;]node[ id &#34;W0&#34; label &#34;W0&#34;] node[ id &#34;W1&#34; label &#34;W1&#34;] node[ id &#34;W2&#34; label &#34;W2&#34;] node[ id &#34;W3&#34; label &#34;W3&#34;] node[ id &#34;W4&#34; label &#34;W4&#34;]node[ id &#34;Z0&#34; label &#34;Z0&#34;] node[ id &#34;Z1&#34; label &#34;Z1&#34;]node[ id &#34;v0&#34; label &#34;v0&#34;]edge[source &#34;Unobserved Confounders&#34; target &#34;v0&#34;]edge[source &#34;v0&#34; target &#34;y&#34;]edge[ source &#34;W0&#34; target &#34;v0&#34;] edge[ source &#34;W1&#34; target &#34;v0&#34;] edge[ source &#34;W2&#34; target &#34;v0&#34;] edge[ source &#34;W3&#34; target &#34;v0&#34;] edge[ source &#34;W4&#34; target &#34;v0&#34;]edge[ source &#34;Z0&#34; target &#34;v0&#34;] edge[ source &#34;Z1&#34; target &#34;v0&#34;]edge[ source &#34;W0&#34; target &#34;y&#34;] edge[ source &#34;W1&#34; target &#34;y&#34;] edge[ source &#34;W2&#34; target &#34;y&#34;] edge[ source &#34;W3&#34; target &#34;y&#34;] edge[ source &#34;W4&#34; target &#34;y&#34;]node[ id &#34;X0&#34; label &#34;X0&#34;] edge[ source &#34;X0&#34; target &#34;y&#34;]]
 </pre></div></div>
 </div>
 <p>Note that we are using a pandas dataframe to load the data. At present, DoWhy only supports pandas dataframe as input.</p>
 <div class="section" id="Interface-1-(recommended):-Input-causal-graph">
 <h2>Interface 1 (recommended): Input causal graph<a class="headerlink" href="#Interface-1-(recommended):-Input-causal-graph" title="Permalink to this headline">¶</a></h2>
 <p>We now input a causal graph in the GML graph format (recommended). You can also use the DOT format.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<p>To create the causal graph for your dataset, you can use a tool like <a class="reference external" href="http://dagitty.net/dags.html#">DAGitty</a> that provides a GUI to construct the graph. You can export the graph string that it generates. The graph string is very close to the DOT format: just rename <code class="docutils literal notranslate"><span class="pre">dag</span></code> to <code class="docutils literal notranslate"><span class="pre">digraph</span></code>, remove newlines and add a semicolon after every line, to convert it to the DOT format and input to DoWhy.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -594,16 +585,8 @@ graph[directed 1node[ id &#34;y&#34; label &#34;y&#34;]node[ id &#34;Unobserved 
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#39;] on outcome [&#39;y&#39;]
-</pre></div></div>
-</div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -612,7 +595,7 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#3
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -625,7 +608,7 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#3
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_dowhy_simple_example_12_0.png" src="../_images/example_notebooks_dowhy_simple_example_12_0.png" />
+<img alt="../_images/example_notebooks_dowhy_simple_example_9_0.png" src="../_images/example_notebooks_dowhy_simple_example_9_0.png" />
 </div>
 </div>
 <p>The above causal graph shows the assumptions encoded in the causal model. We can now use this graph to first identify the causal effect (go from a causal estimand to a probability expression), and then estimate the causal effect.</p>
@@ -635,74 +618,7 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#3
 <li><p>Identification</p></li>
 </ul>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-WARN: Do you want to continue by ignoring any unobserved confounders? (use proceed_when_unidentifiable=True to disable this prompt) [y/n] y
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[&#39;Z0&#39;, &#39;Z1&#39;]
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Estimand type: nonparametric-ate
-
-### Estimand : 1
-Estimand name: backdoor1
-Estimand expression:
-  d
-─────(Expectation(y|W1,W2,W3,W0,W4))
-d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W2,W3,W0,W4,U) = P(y|v0,W1,W2,W3,W0,W4)
-
-### Estimand : 2
-Estimand name: backdoor2 (Default)
-Estimand expression:
-  d
-─────(Expectation(y|W1,W2,W3,W0,W4,X0))
-d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W2,W3,W0,W4,X0,U) = P(y|v0,W1,W2,W3,W0,W4,X0)
-
-### Estimand : 3
-Estimand name: iv
-Estimand expression:
-Expectation(Derivative(y, [Z0, Z1])*Derivative([v0], [Z0, Z1])**(-1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
-Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
-
-</pre></div></div>
-</div>
-<p>If you want to disable the warning for ignoring unobserved confounders, you can add a parameter flag ( <em>proceed_when_unidentifiable</em> ). The same parameter can also be added when instantiating the CausalModel object.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -711,16 +627,6 @@ Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}�
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
-INFO:dowhy.causal_identifier:Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True.
-INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[&#39;Z0&#39;, &#39;Z1&#39;]
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
@@ -729,35 +635,32 @@ INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[&
 Estimand type: nonparametric-ate
 
 ### Estimand : 1
-Estimand name: backdoor1
+Estimand name: backdoor
 Estimand expression:
   d
-─────(Expectation(y|W1,W2,W3,W0,W4))
+─────(Expectation(y|W3,W1,W4,W0,W2,X0))
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W2,W3,W0,W4,U) = P(y|v0,W1,W2,W3,W0,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W1,W4,W0,W2,X0,U) = P(y|v0,W3,W1,W4,W0,W2,X0)
 
 ### Estimand : 2
-Estimand name: backdoor2 (Default)
-Estimand expression:
-  d
-─────(Expectation(y|W1,W2,W3,W0,W4,X0))
-d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W2,W3,W0,W4,X0,U) = P(y|v0,W1,W2,W3,W0,W4,X0)
-
-### Estimand : 3
 Estimand name: iv
 Estimand expression:
-Expectation(Derivative(y, [Z0, Z1])*Derivative([v0], [Z0, Z1])**(-1))
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
-Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
+Expectation(Derivative(y, [Z1, Z0])*Derivative([v0], [Z1, Z0])**(-1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z1,Z0})
+Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→{v0}, then ¬({Z1,Z0}→y)
+
+### Estimand : 3
+Estimand name: frontdoor
+No such variable found!
 
 </pre></div></div>
 </div>
+<p>Note the parameter flag <em>proceed_when_unidentifiable</em>. It needs to be set to <em>True</em> to convey the assumption that we are ignoring any unobserved confounding. The default behavior is to prompt the user to double-check that the unobserved confounders can be ignored.</p>
 <ul class="simple">
 <li><p>Estimation</p></li>
 </ul>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -767,17 +670,6 @@ Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}�
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">causal_estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W1+W2+W3+W0+W4+X0
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
@@ -789,19 +681,27 @@ INFO:dowhy.causal_estimator:b: y~v0+W1+W2+W3+W0+W4+X0
 ## Identified estimand
 Estimand type: nonparametric-ate
 
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(Expectation(y|W3,W1,W4,W0,W2,X0))
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W1,W4,W0,W2,X0,U) = P(y|v0,W3,W1,W4,W0,W2,X0)
+
 ## Realized estimand
-b: y~v0+W1+W2+W3+W0+W4+X0
+b: y~v0+W3+W1+W4+W0+W2+X0
 Target units: ate
 
 ## Estimate
-Mean value: 8.937706276657458
+Mean value: 9.566139500556192
 
-Causal Estimate is 8.937706276657458
+Causal Estimate is 9.566139500556192
 </pre></div></div>
 </div>
 <p>You can input additional parameters to the estimate_effect method. For instance, to estimate the effect on any subset of the units, you can specify the “target_units” parameter which can be a string (“ate”, “att”, or “atc”), lambda function that filters rows of the data frame, or a new dataframe on which to compute the effect. You can also specify “effect modifiers” to estimate heterogeneous effects across these variables. See <code class="docutils literal notranslate"><span class="pre">help(CausalModel.estimate_effect)</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -814,17 +714,6 @@ Causal Estimate is 8.937706276657458
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W1+W2+W3+W0+W4+X0
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
@@ -835,21 +724,29 @@ INFO:dowhy.causal_estimator:b: y~v0+W1+W2+W3+W0+W4+X0
 ## Identified estimand
 Estimand type: nonparametric-ate
 
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(Expectation(y|W3,W1,W4,W0,W2,X0))
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W1,W4,W0,W2,X0,U) = P(y|v0,W3,W1,W4,W0,W2,X0)
+
 ## Realized estimand
-b: y~v0+W1+W2+W3+W0+W4+X0
+b: y~v0+W3+W1+W4+W0+W2+X0
 Target units: atc
 
 ## Estimate
-Mean value: 8.98008676434637
+Mean value: 9.573808685737262
 
-Causal Estimate is 8.98008676434637
+Causal Estimate is 9.573808685737262
 </pre></div></div>
 </div>
 </div>
 <div class="section" id="Interface-2:-Specify-common-causes-and-instruments">
 <h2>Interface 2: Specify common causes and instruments<a class="headerlink" href="#Interface-2:-Specify-common-causes-and-instruments" title="Permalink to this headline">¶</a></h2>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -863,18 +760,8 @@ Causal Estimate is 8.98008676434637
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING:dowhy.causal_model:Causal Graph not provided. DoWhy will construct a graph based on data inputs.
-INFO:dowhy.causal_graph:If this is observed data (not from a randomized experiment), there might always be missing confounders. Adding a node named &#34;Unobserved Confounders&#34; to reflect this.
-INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#39;] on outcome [&#39;y&#39;]
-</pre></div></div>
-</div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -883,7 +770,7 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#3
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -896,12 +783,12 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#3
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_dowhy_simple_example_25_0.png" src="../_images/example_notebooks_dowhy_simple_example_25_0.png" />
+<img alt="../_images/example_notebooks_dowhy_simple_example_21_0.png" src="../_images/example_notebooks_dowhy_simple_example_21_0.png" />
 </div>
 </div>
 <p>We get the same causal graph. Now identification and estimation is done as before.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -909,21 +796,11 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#3
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
-INFO:dowhy.causal_identifier:Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True.
-INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[]
-</pre></div></div>
-</div>
 <ul class="simple">
 <li><p>Estimation</p></li>
 </ul>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -933,17 +810,6 @@ INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[]
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
@@ -955,14 +821,22 @@ INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
 ## Identified estimand
 Estimand type: nonparametric-ate
 
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(Expectation(y|W0,W3,W1,W2,W4))
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W2,W4,U) = P(y|v0,W0,W3,W1,W2,W4)
+
 ## Realized estimand
-b: y~v0+W2+W3+W0+W1+W4
+b: y~v0+W0+W3+W1+W2+W4
 Target units: ate
 
 ## Estimate
-Mean value: 9.124260741049653
+Mean value: 9.60353896239299
 
-Causal Estimate is 9.124260741049653
+Causal Estimate is 9.60353896239299
 </pre></div></div>
 </div>
 </div>
@@ -972,7 +846,7 @@ Causal Estimate is 9.124260741049653
 <div class="section" id="Adding-a-random-common-cause-variable">
 <h3>Adding a random common cause variable<a class="headerlink" href="#Adding-a-random-common-cause-variable" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -981,25 +855,14 @@ Causal Estimate is 9.124260741049653
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4+w_random
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a Random Common Cause
-Estimated effect:9.124260741049653
-New effect:9.13487620983324
+Estimated effect:9.60353896239299
+New effect:9.602995259163794
 
 </pre></div></div>
 </div>
@@ -1007,7 +870,7 @@ New effect:9.13487620983324
 <div class="section" id="Adding-an-unobserved-common-cause-variable">
 <h3>Adding an unobserved common cause variable<a class="headerlink" href="#Adding-an-unobserved-common-cause-variable" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1018,25 +881,14 @@ New effect:9.13487620983324
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add an Unobserved Common Cause
-Estimated effect:9.124260741049653
-New effect:8.129085846396725
+Estimated effect:9.60353896239299
+New effect:7.591550789699005
 
 </pre></div></div>
 </div>
@@ -1044,7 +896,7 @@ New effect:8.129085846396725
 <div class="section" id="Replacing-treatment-with-a-random-(placebo)-variable">
 <h3>Replacing treatment with a random (placebo) variable<a class="headerlink" href="#Replacing-treatment-with-a-random-(placebo)-variable" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1054,425 +906,15 @@ New effect:8.129085846396725
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_refuters.placebo_treatment_refuter:Refutation over 100 simulated datasets of permute treatment
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~placebo+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_refuters.placebo_treatment_refuter:Making use of Bootstrap as we have more than 100 examples.
-                 Note: The greater the number of examples, the more accurate are the confidence estimates
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:9.124260741049653
-New effect:-0.010832019791737903
-p value:0.48
+Estimated effect:9.60353896239299
+New effect:0.005166426876598622
+p value:0.47
 
 </pre></div></div>
 </div>
@@ -1480,7 +922,7 @@ p value:0.48
 <div class="section" id="Removing-a-random-subset-of-the-data">
 <h3>Removing a random subset of the data<a class="headerlink" href="#Removing-a-random-subset-of-the-data" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1491,431 +933,21 @@ p value:0.48
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_refuters.data_subset_refuter:Refutation over 0.9 simulated datasets of size 9000.0 each
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_refuters.data_subset_refuter:Making use of Bootstrap as we have more than 100 examples.
-                 Note: The greater the number of examples, the more accurate are the confidence estimates
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a subset of data
-Estimated effect:9.124260741049653
-New effect:9.090515505813006
-p value:0.37
+Estimated effect:9.60353896239299
+New effect:9.6152898407909
+p value:0.42
 
 </pre></div></div>
 </div>
 <p>As you can see, the propensity score stratification estimator is reasonably robust to refutations. For reproducibility, you can add a parameter “random_seed” to any refutation method, as shown below.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1925,425 +957,15 @@ p value:0.37
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_refuters.data_subset_refuter:Refutation over 0.9 simulated datasets of size 9000.0 each
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Stratification Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W2+W3+W0+W1+W4
-/home/amit/python-virtual-envs/env3.6/lib/python3.6/site-packages/sklearn/utils/validation.py:73: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  return f(**kwargs)
-INFO:dowhy.causal_refuters.data_subset_refuter:Making use of Bootstrap as we have more than 100 examples.
-                 Note: The greater the number of examples, the more accurate are the confidence estimates
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a subset of data
-Estimated effect:9.124260741049653
-New effect:9.084368615909547
-p value:0.28
+Estimated effect:9.60353896239299
+New effect:9.618271557173077
+p value:0.33
 
 </pre></div></div>
 </div>

@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -493,16 +493,6 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -510,8 +500,20 @@ div.rendered_html tbody tr:hover {
 <span class="kn">import</span> <span class="nn">dowhy</span>
 <span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
 <span class="kn">import</span> <span class="nn">dowhy.datasets</span><span class="o">,</span> <span class="nn">dowhy.plotter</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;dowhy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+
+<span class="c1"># Config dict to set the logging level</span>
+<span class="kn">import</span> <span class="nn">logging.config</span>
+<span class="n">DEFAULT_LOGGING</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;disable_existing_loggers&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s1">&#39;loggers&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;INFO&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="n">DEFAULT_LOGGING</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -519,7 +521,7 @@ div.rendered_html tbody tr:hover {
 <h2>Let’s create a mystery dataset for which we need to determine whether there is a causal effect.<a class="headerlink" href="#Let’s-create-a-mystery-dataset-for-which-we-need-to-determine-whether-there-is-a-causal-effect." title="Permalink to this headline">¶</a></h2>
 <p>Creating the dataset. It is generated from either one of two models: * <strong>Model 1</strong>: Treatment does cause outcome. * <strong>Model 2</strong>: Treatment does not cause outcome. All observed correlation is due to a common cause.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -538,15 +540,15 @@ div.rendered_html tbody tr:hover {
 <div class="output_area docutils container">
 <div class="highlight"><pre>
    Treatment    Outcome        w0
-0   4.424284   8.937867 -1.420934
-1  10.131230  20.200164  3.987792
-2   2.728258   5.274174 -3.358227
-3   2.550623   5.114946 -3.416812
-4   4.286140   8.704681 -1.410838
+0  10.362613  21.104370  4.505220
+1   2.263830   4.294143 -3.798739
+2   2.626503   4.822208 -3.550164
+3   8.196241  16.881973  2.401275
+4   3.094419   6.385033 -2.857286
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -559,7 +561,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_dowhy_confounder_example_5_0.png" src="../_images/example_notebooks_dowhy_confounder_example_5_0.png" />
+<img alt="../_images/example_notebooks_dowhy_confounder_example_4_0.png" src="../_images/example_notebooks_dowhy_confounder_example_4_0.png" />
 </div>
 </div>
 </div>
@@ -568,8 +570,8 @@ div.rendered_html tbody tr:hover {
 <div class="section" id="STEP-1:-Model-the-problem-as-a-causal-graph">
 <h3>STEP 1: Model the problem as a causal graph<a class="headerlink" href="#STEP-1:-Model-the-problem-as-a-causal-graph" title="Permalink to this headline">¶</a></h3>
 <p>Initializing the causal model.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -583,17 +585,9 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING:dowhy.causal_model:Causal Graph not provided. DoWhy will construct a graph based on data inputs.
-</pre></div></div>
-</div>
 <p>Showing the causal model stored in the local file “causal_model.png”</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -606,7 +600,7 @@ WARNING:dowhy.causal_model:Causal Graph not provided. DoWhy will construct a gra
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_dowhy_confounder_example_9_0.png" src="../_images/example_notebooks_dowhy_confounder_example_9_0.png" />
+<img alt="../_images/example_notebooks_dowhy_confounder_example_8_0.png" src="../_images/example_notebooks_dowhy_confounder_example_8_0.png" />
 </div>
 </div>
 </div>
@@ -614,33 +608,24 @@ WARNING:dowhy.causal_model:Causal Graph not provided. DoWhy will construct a gra
 <h3>STEP 2: Identify causal effect using properties of the formal causal graph<a class="headerlink" href="#STEP-2:-Identify-causal-effect-using-properties-of-the-formal-causal-graph" title="Permalink to this headline">¶</a></h3>
 <p>Identify the causal effect using properties of the causal graph.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
+<span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-WARN: Do you want to continue by ignoring any unobserved confounders? (use proceed_when_unidentifiable=True to disable this prompt) [y/n] y
 Estimand type: nonparametric-ate
 
 ### Estimand : 1
-Estimand name: backdoor1 (Default)
+Estimand name: backdoor
 Estimand expression:
      d
 ────────────(Expectation(Outcome|w0))
@@ -663,7 +648,7 @@ No such variable found!
 <p>Once we have identified the estimand, we can use any statistical method to estimate the causal effect.</p>
 <p>Let’s use Linear Regression for simplicity.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -681,21 +666,21 @@ No such variable found!
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Causal Estimate is 0.9905610344994829
+Causal Estimate is 0.00469169526948221
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_dowhy_confounder_example_13_1.png" src="../_images/example_notebooks_dowhy_confounder_example_13_1.png" />
+<img alt="../_images/example_notebooks_dowhy_confounder_example_12_1.png" src="../_images/example_notebooks_dowhy_confounder_example_12_1.png" />
 </div>
 </div>
 </div>
 <div class="section" id="Checking-if-the-estimate-is-correct">
 <h3>Checking if the estimate is correct<a class="headerlink" href="#Checking-if-the-estimate-is-correct" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -709,8 +694,8 @@ Causal Estimate is 0.9905610344994829
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-DoWhy estimate is 0.9905610344994829
-Actual true causal effect was 1
+DoWhy estimate is 0.00469169526948221
+Actual true causal effect was 0
 </pre></div></div>
 </div>
 </div>
@@ -721,7 +706,7 @@ Actual true causal effect was 1
 <div class="section" id="Adding-a-random-common-cause-variable">
 <h3>Adding a random common cause variable<a class="headerlink" href="#Adding-a-random-common-cause-variable" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -736,8 +721,8 @@ Actual true causal effect was 1
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a Random Common Cause
-Estimated effect:0.9905610344994829
-New effect:0.9904200614048078
+Estimated effect:0.00469169526948221
+New effect:0.004663014187681114
 
 </pre></div></div>
 </div>
@@ -745,7 +730,7 @@ New effect:0.9904200614048078
 <div class="section" id="Replacing-treatment-with-a-random-(placebo)-variable">
 <h3>Replacing treatment with a random (placebo) variable<a class="headerlink" href="#Replacing-treatment-with-a-random-(placebo)-variable" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -761,9 +746,9 @@ New effect:0.9904200614048078
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:0.9905610344994829
-New effect:3.0487607018869765e-06
-p value:0.45
+Estimated effect:0.00469169526948221
+New effect:-7.444932894999923e-05
+p value:0.47
 
 </pre></div></div>
 </div>
@@ -771,7 +756,7 @@ p value:0.45
 <div class="section" id="Removing-a-random-subset-of-the-data">
 <h3>Removing a random subset of the data<a class="headerlink" href="#Removing-a-random-subset-of-the-data" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -788,9 +773,9 @@ p value:0.45
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a subset of data
-Estimated effect:0.9905610344994829
-New effect:0.990524809173428
-p value:0.48
+Estimated effect:0.00469169526948221
+New effect:0.004670042418977669
+p value:0.45
 
 </pre></div></div>
 </div>

@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -479,13 +479,28 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">dowhy</span>
 <span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
 <span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">causal_estimators</span>
+
+<span class="c1"># Config dict to set the logging level</span>
+<span class="kn">import</span> <span class="nn">logging.config</span>
+<span class="n">DEFAULT_LOGGING</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;disable_existing_loggers&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s1">&#39;loggers&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;WARN&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="n">DEFAULT_LOGGING</span><span class="p">)</span>
+<span class="c1"># Disabling warnings output</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">sklearn.exceptions</span> <span class="kn">import</span> <span class="n">DataConversionWarning</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">DataConversionWarning</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -787,7 +802,7 @@ ATE -0.025200267022696926
 </pre></div></div>
 </div>
 <p><strong>1. Model</strong></p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
@@ -802,49 +817,40 @@ ATE -0.025200267022696926
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING:dowhy.causal_model:Causal Graph not provided. DoWhy will construct a graph based on data inputs.
-INFO:dowhy.causal_graph:If this is observed data (not from a randomized experiment), there might always be missing confounders. Adding a node named &#34;Unobserved Confounders&#34; to reflect this.
-INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;treatment&#39;] on outcome [&#39;outcome&#39;]
-</pre></div></div>
-</div>
 <p><strong>2. Identify</strong></p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
+<span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;gestat10&#39;, &#39;U&#39;]
-WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-WARN: Do you want to continue by ignoring any unobserved confounders? (use proceed_when_unidentifiable=True to disable this prompt) [y/n] y
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area stderr docutils container">
+<div class="output_area docutils container">
 <div class="highlight"><pre>
-INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[]
+Estimand type: nonparametric-ate
+
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+     d
+────────────(Expectation(outcome|gestat10))
+d[treatment]
+Estimand assumption 1, Unconfoundedness: If U→{treatment} and U→outcome then P(outcome|treatment,gestat10,U) = P(outcome|treatment,gestat10)
+
+### Estimand : 2
+Estimand name: iv
+No such variable found!
+
+### Estimand : 3
+Estimand name: frontdoor
+No such variable found!
+
 </pre></div></div>
 </div>
 <p><strong>3. Estimate Using Various Methods</strong></p>
@@ -864,15 +870,6 @@ INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[]
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using Linear Regression Estimator
-INFO:dowhy.causal_estimator:b: outcome~treatment+gestat10
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
@@ -880,8 +877,9 @@ INFO:dowhy.causal_estimator:b: outcome~treatment+gestat10
 <div class="highlight"><pre>
 *** Causal Estimate ***
 
-## Target estimand
+## Identified estimand
 Estimand type: nonparametric-ate
+
 ### Estimand : 1
 Estimand name: backdoor
 Estimand expression:
@@ -889,20 +887,17 @@ Estimand expression:
 ────────────(Expectation(outcome|gestat10))
 d[treatment]
 Estimand assumption 1, Unconfoundedness: If U→{treatment} and U→outcome then P(outcome|treatment,gestat10,U) = P(outcome|treatment,gestat10)
-### Estimand : 2
-Estimand name: iv
-No such variable found!
 
 ## Realized estimand
 b: outcome~treatment+gestat10
-## Estimate
-Value: -0.025200267022696315
+Target units: ate
 
-## Statistical Significance
-p-value: &lt;0.001
+## Estimate
+Mean value: -0.025200267022700423
+p-value: [7.18902894e-08]
 
 ATE -0.025200267022696926
-Causal Estimate is -0.025200267022696315
+Causal Estimate is -0.025200267022700423
 </pre></div></div>
 </div>
 <p><strong>3.2 Using Propensity Score Matching</strong></p>
@@ -926,10 +921,8 @@ Causal Estimate is -0.025200267022696315
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
-INFO:dowhy.causal_estimator:b: outcome~treatment+gestat10
-/home/arshia/anaconda3/lib/python3.6/site-packages/sklearn/utils/validation.py:760: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -959,10 +952,8 @@ ATE -0.025200267022696926
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
-INFO:dowhy.causal_estimator:b: outcome~treatment+gestat10+w_random
-/home/arshia/anaconda3/lib/python3.6/site-packages/sklearn/utils/validation.py:760: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -971,8 +962,8 @@ INFO:dowhy.causal_estimator:b: outcome~treatment+gestat10+w_random
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a Random Common Cause
-Estimated effect:(-0.012600133511348465,)
-New effect:(-0.02891355140186916,)
+Estimated effect:-0.012600133511348465
+New effect:-0.02728638184245661
 
 </pre></div></div>
 </div>
@@ -983,7 +974,8 @@ New effect:(-0.02891355140186916,)
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">res_placebo</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span>
-        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;placebo_treatment_refuter&quot;</span><span class="p">,</span> <span class="n">placebo_type</span><span class="o">=</span><span class="s2">&quot;permute&quot;</span><span class="p">)</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;placebo_treatment_refuter&quot;</span><span class="p">,</span> <span class="n">placebo_type</span><span class="o">=</span><span class="s2">&quot;permute&quot;</span><span class="p">,</span>
+        <span class="n">num_simulations</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">res_placebo</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -993,10 +985,46 @@ New effect:(-0.02891355140186916,)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
-INFO:dowhy.causal_estimator:b: outcome~placebo+gestat10
-/home/arshia/anaconda3/lib/python3.6/site-packages/sklearn/utils/validation.py:760: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1005,8 +1033,9 @@ INFO:dowhy.causal_estimator:b: outcome~placebo+gestat10
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:(-0.012600133511348465,)
-New effect:(-0.16384345794392524,)
+Estimated effect:-0.012600133511348465
+New effect:-0.01735856141522029
+p value:0.43718357128183105
 
 </pre></div></div>
 </div>
@@ -1017,7 +1046,8 @@ New effect:(-0.16384345794392524,)
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">res_subset</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span>
-        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;data_subset_refuter&quot;</span><span class="p">,</span> <span class="n">subset_fraction</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;data_subset_refuter&quot;</span><span class="p">,</span> <span class="n">subset_fraction</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+        <span class="n">num_simulations</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">res_subset</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1027,10 +1057,46 @@ New effect:(-0.16384345794392524,)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
-INFO:dowhy.causal_estimator:b: outcome~treatment+gestat10
-/home/arshia/anaconda3/lib/python3.6/site-packages/sklearn/utils/validation.py:760: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
+/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/validation.py:72: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  return f(**kwargs)
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1039,19 +1105,11 @@ INFO:dowhy.causal_estimator:b: outcome~treatment+gestat10
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a subset of data
-Estimated effect:(-0.012600133511348465,)
-New effect:(0.15136062305873627,)
+Estimated effect:-0.012600133511348465
+New effect:-0.04436048398312549
+p value:0.3529814152616
 
 </pre></div></div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>
-</pre></div>
-</div>
 </div>
 </div>
 

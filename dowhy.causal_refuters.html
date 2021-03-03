@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -281,9 +281,34 @@
 <p>TODO: Needs scaled version of the parameters and an interpretation module
 (e.g., in comparison to biggest effect of known confounder)</p>
 <dl class="py method">
+<dt id="dowhy.causal_refuters.add_unobserved_common_cause.AddUnobservedCommonCause.generate_confounder_from_residuals">
+<code class="sig-name descname">generate_confounder_from_residuals</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">c1</span></em>, <em class="sig-param"><span class="n">c2</span></em>, <em class="sig-param"><span class="n">d_y</span></em>, <em class="sig-param"><span class="n">d_t</span></em>, <em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/add_unobserved_common_cause.html#AddUnobservedCommonCause.generate_confounder_from_residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_refuters.add_unobserved_common_cause.AddUnobservedCommonCause.generate_confounder_from_residuals" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes the residuals from the treatment and outcome model and their coefficients and simulates the intermediate random variable U by taking
+the row wise normal distribution corresponding to each residual value and then debiasing the intermediate variable to get the final variable</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>c1</strong> – coefficient to the residual from the outcome model</p>
+</dd>
+</dl>
+<p>:type float
+:param c2: coefficient to the residual from the treatment model
+:type float
+:param d_y: residuals from the outcome model
+:type list
+:param d_t: residuals from the treatment model
+:type list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns final_U</dt>
+<dd class="field-odd"><p>The simulated values of the unobserved confounder based on the data</p>
+</dd>
+</dl>
+<p>:type pandas.core.series.Series</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="dowhy.causal_refuters.add_unobserved_common_cause.AddUnobservedCommonCause.include_confounders_effect">
 <code class="sig-name descname">include_confounders_effect</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">new_data</span></em>, <em class="sig-param"><span class="n">kappa_t</span></em>, <em class="sig-param"><span class="n">kappa_y</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/add_unobserved_common_cause.html#AddUnobservedCommonCause.include_confounders_effect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_refuters.add_unobserved_common_cause.AddUnobservedCommonCause.include_confounders_effect" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function deals with the change in the value of the data due to the effect of the unobserved confounder. 
+<dd><p>This function deals with the change in the value of the data due to the effect of the unobserved confounder.
 In the case of a binary flip, we flip only if the random number is greater than the threshold set.
 In the case of a linear effect, we use the variable as the linear regression constant.</p>
 <dl class="field-list simple">
@@ -298,6 +323,51 @@ In the case of a linear effect, we use the variable as the linear regression con
 <dd class="field-even"><p>pandas.DataFrame: The DataFrame that includes the effects of the unobserved confounder.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dowhy.causal_refuters.add_unobserved_common_cause.AddUnobservedCommonCause.include_simulated_confounder">
+<code class="sig-name descname">include_simulated_confounder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">convergence_threshold</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">c_star_max</span><span class="o">=</span><span class="default_value">1000</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/add_unobserved_common_cause.html#AddUnobservedCommonCause.include_simulated_confounder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_refuters.add_unobserved_common_cause.AddUnobservedCommonCause.include_simulated_confounder" title="Permalink to this definition">¶</a></dt>
+<dd><dl>
+<dt>This function simulates an unobserved confounder based on the data using the following steps:</dt><dd><ol class="arabic">
+<li><dl class="simple">
+<dt>It calculates the “residuals”  from the treatment and outcome model</dt><dd><p>i.) The outcome model has outcome as the dependent variable and all the observed variables including treatment as independent variables
+ii.) The treatment model has treatment as the dependent variable and all the observed variables as independent variables.</p>
+</dd>
+</dl>
+</li>
+<li><p>U is an intermediate random variable drawn from the normal distribution with the weighted average of residuals as mean and a unit variance
+U ~ N(c1*d_y + c2*d_t, 1)
+where</p>
+<blockquote>
+<div><p><a href="#id1"><span class="problematic" id="id2">*</span></a>d_y and d_t are residuals from the treatment and outcome model
+<a href="#id3"><span class="problematic" id="id4">*</span></a>c1 and c2 are coefficients to the residuals</p>
+</div></blockquote>
+</li>
+<li><p>The final U, which is the simulated unobserved confounder is obtained by debiasing the intermediate variable U by residualising it with X</p></li>
+</ol>
+</dd>
+</dl>
+<p>Choosing the coefficients c1 and c2:
+The coefficients are chosen based on these basic assumptions:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>There is a hyperbolic relationship satisfying c1*c2 = c_star</p></li>
+<li><p>c_star is chosen from a range of possible values based on the correlation of the obtained simulated variable with outcome and treatment.</p></li>
+<li><p>The product of correlations with treatment and outcome should be at a minimum distance to the maximum correlations with treatment and outcome in any of the observed confounders</p></li>
+<li><p>The ratio of the weights should be such that they maintain the ratio of the maximum possible observed coefficients within some confidence interval</p></li>
+</ol>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>c_star_max</strong> – The maximum possible value for the hyperbolic curve on which the coefficients to the residuals lie. It defaults to 1000 in the code if not specified by the user.</p>
+</dd>
+</dl>
+<p>:type int
+:param convergence_threshold: The threshold to check the plateauing of the correlation while selecting a c_star. It defaults to 0.1 in the code if not specified by the user
+:type float
+:returns final_U: The simulated values of the unobserved confounder based on the data
+:type pandas.core.series.Series</p>
 </dd></dl>
 
 <dl class="py method">
@@ -425,20 +495,35 @@ It is <code class="docutils literal notranslate"><span class="pre">noise</span><
 <dt id="dowhy.causal_refuters.dummy_outcome_refuter.DummyOutcomeRefuter">
 <em class="property">class </em><code class="sig-prename descclassname">dowhy.causal_refuters.dummy_outcome_refuter.</code><code class="sig-name descname">DummyOutcomeRefuter</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/dummy_outcome_refuter.html#DummyOutcomeRefuter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_refuters.dummy_outcome_refuter.DummyOutcomeRefuter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="dowhy.html#dowhy.causal_refuter.CausalRefuter" title="dowhy.causal_refuter.CausalRefuter"><code class="xref py py-class docutils literal notranslate"><span class="pre">dowhy.causal_refuter.CausalRefuter</span></code></a></p>
-<p>Refute an estimate by replacing the outcome with a randomly generated variable.</p>
-<p>This allows us to have a well defined effect of the treatment on the outcome.</p>
-<ol class="arabic simple">
-<li><p>We find f(W) for a fixed value of t</p></li>
-<li><p>For all the other values of t. We obtain the value of dummy outcome as:
-<code class="docutils literal notranslate"><span class="pre">y_dummy</span> <span class="pre">=</span> <span class="pre">h(t)</span> <span class="pre">+</span> <span class="pre">f(W)</span></code></p></li>
-</ol>
+<p>Refute an estimate by replacing the outcome with a simulated variable
+for which the true causal effect is known.</p>
+<p>In the simplest case, the dummy outcome is an independent, randomly
+generated variable. By definition, the true causal effect should be zero.</p>
+<p>More generally, the dummy outcome uses the observed relationship between
+confounders and outcome (conditional on treatment) to create a more
+realistic outcome for which the treatment effect is known to be zero. If
+the goal is to simulate a dummy outcome with a non-zero true causal effect,
+then we can add an arbitrary function h(t) to the dummy outcome’s
+generation process and then the causal effect becomes h(t=1)-h(t=0).</p>
+<p>Note that this general procedure only works for the backdoor criterion.</p>
+<p>1. We find f(W) for a each value of treatment. That is, keeping the treatment
+constant, we fit a predictor to estimate the effect of confounders W on
+outcome y. Note that since f(W) simply defines a new DGP for the simulated
+outcome, it need not be the correct structural equation from W to y.
+2. We obtain the value of dummy outcome as:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">y_dummy</span> <span class="pre">=</span> <span class="pre">h(t)</span> <span class="pre">+</span> <span class="pre">f(W)</span></code></p>
+</div></blockquote>
+<p>To prevent overfitting, we fit f(W) for one value of T and then use it to
+generate data for other values of t. Future support for identification
+based on instrumental variable and mediation.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">If</span> <span class="n">we</span> <span class="n">originally</span> <span class="n">started</span> <span class="n">out</span> <span class="k">with</span>
 
        <span class="n">W</span>
     <span class="o">/</span>    \
     <span class="n">t</span> <span class="o">---&gt;</span><span class="n">y</span>
 
-<span class="n">On</span> <span class="n">estimating</span><span class="p">,</span>
+<span class="n">On</span> <span class="n">estimating</span> <span class="n">the</span> <span class="n">following</span> <span class="k">with</span> <span class="n">constant</span> <span class="n">t</span><span class="p">,</span>
 <span class="n">y_dummy</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">W</span><span class="p">)</span>
 
        <span class="n">W</span>
@@ -588,6 +673,11 @@ for a certain category, we make use of the <code class="docutils literal notrans
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt id="dowhy.causal_refuters.dummy_outcome_refuter.DummyOutcomeRefuter.DEFAULT_NEW_DATA_WITH_UNOBSERVED_CONFOUNDING">
+<code class="sig-name descname">DEFAULT_NEW_DATA_WITH_UNOBSERVED_CONFOUNDING</code><em class="property"> = None</em><a class="headerlink" href="#dowhy.causal_refuters.dummy_outcome_refuter.DummyOutcomeRefuter.DEFAULT_NEW_DATA_WITH_UNOBSERVED_CONFOUNDING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt id="dowhy.causal_refuters.dummy_outcome_refuter.DummyOutcomeRefuter.DEFAULT_STD_DEV">
 <code class="sig-name descname">DEFAULT_STD_DEV</code><em class="property"> = 0.1</em><a class="headerlink" href="#dowhy.causal_refuters.dummy_outcome_refuter.DummyOutcomeRefuter.DEFAULT_STD_DEV" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -621,19 +711,12 @@ for a certain category, we make use of the <code class="docutils literal notrans
 <dt id="dowhy.causal_refuters.dummy_outcome_refuter.DummyOutcomeRefuter.noise">
 <code class="sig-name descname">noise</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">outcome</span></em>, <em class="sig-param"><span class="n">std_dev</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/dummy_outcome_refuter.html#DummyOutcomeRefuter.noise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dowhy.causal_refuters.dummy_outcome_refuter.DummyOutcomeRefuter.noise" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add white noise with mean 0 and standard deviation = std_dev</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>'outcome'</strong> – np.ndarray</p>
-</dd>
-</dl>
+<ul class="simple">
+<li><p>‘outcome’: np.ndarray</p></li>
+</ul>
 <p>The outcome variable, to which the white noise is added.
-:param ‘std_dev’: float
+- ‘std_dev’: float
 The standard deviation of the white noise.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>input with added noise.</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">

@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -107,7 +107,11 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Simple example on using Instrumental Variables method for estimation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Simple example on using Instrumental Variables method for estimation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Loading-the-dataset">Loading the dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Using-DoWhy-to-estimate-the-causal-effect-of-education-on-future-income">Using DoWhy to estimate the causal effect of education on future income</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="load_graph_example.html">Different ways to load an input graph</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
@@ -478,14 +482,8 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">patsy</span> <span class="k">as</span> <span class="nn">ps</span>
-
-<span class="kn">from</span> <span class="nn">statsmodels.sandbox.regression.gmm</span> <span class="kn">import</span> <span class="n">IV2SLS</span>
-<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
-<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
 </pre></div>
 </div>
 </div>
@@ -494,9 +492,27 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">patsy</span> <span class="k">as</span> <span class="nn">ps</span>
+
+<span class="kn">from</span> <span class="nn">statsmodels.sandbox.regression.gmm</span> <span class="kn">import</span> <span class="n">IV2SLS</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="Loading-the-dataset">
+<h2>Loading the dataset<a class="headerlink" href="#Loading-the-dataset" title="Permalink to this headline">¶</a></h2>
+<p>We create a fictitious dataset with the goal of estimating the impact of education on future earnings of an individual. The <code class="docutils literal notranslate"><span class="pre">ability</span></code> of the individual is a confounder and being given an <code class="docutils literal notranslate"><span class="pre">education_voucher</span></code> is the instrument.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">n_points</span> <span class="o">=</span> <span class="mi">1000</span>
 <span class="n">education_abilty</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">education_voucher</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">education_voucher</span> <span class="o">=</span> <span class="mi">2</span>
 <span class="n">income_abilty</span> <span class="o">=</span> <span class="mi">2</span>
 <span class="n">income_education</span> <span class="o">=</span> <span class="mi">4</span>
 
@@ -515,150 +531,100 @@ div.rendered_html tbody tr:hover {
 <span class="n">income</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_points</span><span class="p">)</span> <span class="o">+</span>\
          <span class="n">income_abilty</span> <span class="o">*</span> <span class="n">ability</span> <span class="o">+</span> <span class="n">income_education</span> <span class="o">*</span> <span class="n">education</span>
 
-<span class="c1"># build dataset</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">ability</span><span class="p">,</span> <span class="n">education</span><span class="p">,</span> <span class="n">income</span><span class="p">,</span> <span class="n">voucher</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ability&#39;</span><span class="p">,</span> <span class="s1">&#39;education&#39;</span><span class="p">,</span> <span class="s1">&#39;income&#39;</span><span class="p">,</span> <span class="s1">&#39;voucher&#39;</span><span class="p">])</span>
+<span class="c1"># build dataset (exclude confounder `ability` which we assume to be unobserved)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">education</span><span class="p">,</span> <span class="n">income</span><span class="p">,</span> <span class="n">voucher</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;education&#39;</span><span class="p">,</span> <span class="s1">&#39;income&#39;</span><span class="p">,</span> <span class="s1">&#39;voucher&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
-</pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">income_vec</span><span class="p">,</span> <span class="n">endog</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">dmatrices</span><span class="p">(</span><span class="s2">&quot;income ~ education&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
-<span class="n">exog</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">dmatrix</span><span class="p">(</span><span class="s2">&quot;voucher&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
-
-<span class="n">m</span> <span class="o">=</span> <span class="n">IV2SLS</span><span class="p">(</span><span class="n">income_vec</span><span class="p">,</span> <span class="n">endog</span><span class="p">,</span> <span class="n">exog</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-<span class="n">m</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
-</pre></div>
-</div>
-<div class="output_area rendered_html docutils container">
-<table class="simpletable">
-<caption>IV2SLS Regression Results</caption>
-<tr>
-  <th>Dep. Variable:</th>         <td>income</td>      <th>  R-squared:         </th> <td>   0.899</td>
-</tr>
-<tr>
-  <th>Model:</th>                 <td>IV2SLS</td>      <th>  Adj. R-squared:    </th> <td>   0.899</td>
-</tr>
-<tr>
-  <th>Method:</th>               <td>Two Stage</td>    <th>  F-statistic:       </th> <td>   160.6</td>
-</tr>
-<tr>
-  <th></th>                    <td>Least Squares</td>  <th>  Prob (F-statistic):</th> <td>3.05e-34</td>
-</tr>
-<tr>
-  <th>Date:</th>             <td>Tue, 07 Jan 2020</td> <th>                     </th>     <td> </td>
-</tr>
-<tr>
-  <th>Time:</th>                 <td>14:32:06</td>     <th>                     </th>     <td> </td>
-</tr>
-<tr>
-  <th>No. Observations:</th>      <td>  1000</td>      <th>                     </th>     <td> </td>
-</tr>
-<tr>
-  <th>Df Residuals:</th>          <td>   998</td>      <th>                     </th>     <td> </td>
-</tr>
-<tr>
-  <th>Df Model:</th>              <td>     1</td>      <th>                     </th>     <td> </td>
-</tr>
-</table>
-<table class="simpletable">
-<tr>
-      <td></td>         <th>coef</th>     <th>std err</th>      <th>t</th>      <th>P>|t|</th>  <th>[0.025</th>    <th>0.975]</th>
-</tr>
-<tr>
-  <th>Intercept</th> <td>    8.3670</td> <td>    1.987</td> <td>    4.211</td> <td> 0.000</td> <td>    4.468</td> <td>   12.266</td>
-</tr>
-<tr>
-  <th>education</th> <td>    4.2607</td> <td>    0.336</td> <td>   12.674</td> <td> 0.000</td> <td>    3.601</td> <td>    4.920</td>
-</tr>
-</table>
-<table class="simpletable">
-<tr>
-  <th>Omnibus:</th>       <td> 0.871</td> <th>  Durbin-Watson:     </th> <td>   2.058</td>
-</tr>
-<tr>
-  <th>Prob(Omnibus):</th> <td> 0.647</td> <th>  Jarque-Bera (JB):  </th> <td>   0.953</td>
-</tr>
-<tr>
-  <th>Skew:</th>          <td> 0.059</td> <th>  Prob(JB):          </th> <td>   0.621</td>
-</tr>
-<tr>
-  <th>Kurtosis:</th>      <td> 2.904</td> <th>  Cond. No.          </th> <td>    14.3</td>
-</tr>
-</table></div>
-</div>
+<div class="section" id="Using-DoWhy-to-estimate-the-causal-effect-of-education-on-future-income">
+<h2>Using DoWhy to estimate the causal effect of education on future income<a class="headerlink" href="#Using-DoWhy-to-estimate-the-causal-effect-of-education-on-future-income" title="Permalink to this headline">¶</a></h2>
+<p>We follow the four steps: 1) model the problem using causal graph,</p>
+<ol class="arabic simple" start="2">
+<li><p>identify if the causal effect can be estimated from the observed variables,</p></li>
+<li><p>estimate the effect, and</p></li>
+<li><p>check the robustness of the estimate.</p></li>
+</ol>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
+<span></span><span class="c1">#Step 1: Model</span>
+<span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
         <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;education&#39;</span><span class="p">,</span>
         <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;income&#39;</span><span class="p">,</span>
-        <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ability&#39;</span><span class="p">],</span>
+        <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;U&#39;</span><span class="p">],</span>
         <span class="n">instruments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;voucher&#39;</span><span class="p">]</span>
         <span class="p">)</span>
-
-<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
-
-<span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
-        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;iv.instrumental_variable&quot;</span><span class="p">,</span> <span class="n">test_significance</span><span class="o">=</span><span class="kc">True</span>
-<span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
-
+<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
+<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING:dowhy.causal_model:Causal Graph not provided. DoWhy will construct a graph based on data inputs.
-INFO:dowhy.causal_graph:If this is observed data (not from a randomized experiment), there might always be missing confounders. Adding a node named &#34;Unobserved Confounders&#34; to reflect this.
-INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;education&#39;] on outcome [&#39;income&#39;]
-INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;U&#39;, &#39;ability&#39;]
-WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
-</pre></div></div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_dowhy-simple-iv-example_6_0.png" src="../_images/example_notebooks_dowhy-simple-iv-example_6_0.png" />
 </div>
-<div class="nboutput docutils container">
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Step 2: Identify</span>
+<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-WARN: Do you want to continue by ignoring any unobserved confounders? (use proceed_when_unidentifiable=True to disable this prompt) [y/n] y
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[&#39;voucher&#39;]
-INFO:dowhy.causal_estimator:INFO: Using Instrumental Variable Estimator
-INFO:dowhy.causal_estimator:Realized estimand: Wald Estimator
-Realized estimand type: nonparametric-ate
+Estimand type: nonparametric-ate
+
+### Estimand : 1
+Estimand name: backdoor
 Estimand expression:
+     d
+────────────(Expectation(income))
+d[education]
+Estimand assumption 1, Unconfoundedness: If U→{education} and U→income then P(income|education,,U) = P(income|education,)
 
-Expectation(Derivative(income, voucher))⋅Expectation(Derivative(education, vou
-
-      -1
-cher))
+### Estimand : 2
+Estimand name: iv
+Estimand expression:
+Expectation(Derivative(income, [voucher])*Derivative([education], [voucher])**
+(-1))
 Estimand assumption 1, As-if-random: If U→→income then ¬(U →→{voucher})
 Estimand assumption 2, Exclusion: If we remove {voucher}→{education}, then ¬({voucher}→income)
-Estimand assumption 3, treatment_effect_homogeneity: Each unit&#39;s treatment [&#39;education&#39;] is affected in the same way by common causes of [&#39;education&#39;] and income
-Estimand assumption 4, outcome_effect_homogeneity: Each unit&#39;s outcome income is affected in the same way by common causes of [&#39;education&#39;] and income
+
+### Estimand : 3
+Estimand name: frontdoor
+No such variable found!
 
 </pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Step 3: Estimate</span>
+<span class="c1">#Choose the second estimand: using IV</span>
+<span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;iv.instrumental_variable&quot;</span><span class="p">,</span> <span class="n">test_significance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
@@ -667,16 +633,10 @@ Estimand assumption 4, outcome_effect_homogeneity: Each unit&#39;s outcome incom
 <div class="highlight"><pre>
 *** Causal Estimate ***
 
-## Target estimand
+## Identified estimand
 Estimand type: nonparametric-ate
+
 ### Estimand : 1
-Estimand name: backdoor
-Estimand expression:
-     d
-────────────(Expectation(income|ability))
-d[education]
-Estimand assumption 1, Unconfoundedness: If U→{education} and U→income then P(income|education,ability,U) = P(income|education,ability)
-### Estimand : 2
 Estimand name: iv
 Estimand expression:
 Expectation(Derivative(income, [voucher])*Derivative([education], [voucher])**
@@ -698,13 +658,116 @@ Estimand assumption 2, Exclusion: If we remove {voucher}→{education}, then ¬(
 Estimand assumption 3, treatment_effect_homogeneity: Each unit&#39;s treatment [&#39;education&#39;] is affected in the same way by common causes of [&#39;education&#39;] and income
 Estimand assumption 4, outcome_effect_homogeneity: Each unit&#39;s outcome income is affected in the same way by common causes of [&#39;education&#39;] and income
 
-## Estimate
-Value: 4.2606685045720365
+Target units: ate
 
-## Statistical Significance
-p-value: &lt;0.001
+## Estimate
+Mean value: 3.984270555650861
+p-value: [0, 0.001]
 
 </pre></div></div>
+</div>
+<p>We have an estimate, indicating that increasing <code class="docutils literal notranslate"><span class="pre">education</span></code> by one unit increases <code class="docutils literal notranslate"><span class="pre">income</span></code> by 4 points.</p>
+<p>Next we check the robustness of the estimate using a Placebo refutation test. In this test, the treatment is replaced by an independent random variable (while preserving the correlation with the instrument), so that the true causal effect should be zero. We check if our estimator also provides the correct answer of zero.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Step 4: Refute</span>
+<span class="n">ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;placebo_treatment_refuter&quot;</span><span class="p">,</span> <span class="n">placebo_type</span><span class="o">=</span><span class="s2">&quot;permute&quot;</span><span class="p">)</span> <span class="c1"># only permute placebo_type works with IV estimate</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Refute: Use a Placebo Treatment
+Estimated effect:3.984270555650861
+New effect:-0.004644847508369445
+p value:0.43999999999999995
+
+</pre></div></div>
+</div>
+<p>The refutation gives confidence that the estimate is not capturing any noise in the data.</p>
+<p>Since this is simulated data, we also know the true causal effect is <code class="docutils literal notranslate"><span class="pre">4</span></code> (see the <code class="docutils literal notranslate"><span class="pre">income_education</span></code> parameter of the data-generating process above)</p>
+<p>Finally, we show the same estimation by another method to verify the result from DoWhy.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">income_vec</span><span class="p">,</span> <span class="n">endog</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">dmatrices</span><span class="p">(</span><span class="s2">&quot;income ~ education&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="n">exog</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">dmatrix</span><span class="p">(</span><span class="s2">&quot;voucher&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+
+<span class="n">m</span> <span class="o">=</span> <span class="n">IV2SLS</span><span class="p">(</span><span class="n">income_vec</span><span class="p">,</span> <span class="n">endog</span><span class="p">,</span> <span class="n">exog</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="n">m</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<table class="simpletable">
+<caption>IV2SLS Regression Results</caption>
+<tr>
+  <th>Dep. Variable:</th>         <td>income</td>      <th>  R-squared:         </th> <td>   0.887</td>
+</tr>
+<tr>
+  <th>Model:</th>                 <td>IV2SLS</td>      <th>  Adj. R-squared:    </th> <td>   0.887</td>
+</tr>
+<tr>
+  <th>Method:</th>               <td>Two Stage</td>    <th>  F-statistic:       </th> <td>   1370.</td>
+</tr>
+<tr>
+  <th></th>                    <td>Least Squares</td>  <th>  Prob (F-statistic):</th> <td>1.69e-189</td>
+</tr>
+<tr>
+  <th>Date:</th>             <td>Tue, 02 Mar 2021</td> <th>                     </th>     <td> </td>
+</tr>
+<tr>
+  <th>Time:</th>                 <td>21:15:13</td>     <th>                     </th>     <td> </td>
+</tr>
+<tr>
+  <th>No. Observations:</th>      <td>  1000</td>      <th>                     </th>     <td> </td>
+</tr>
+<tr>
+  <th>Df Residuals:</th>          <td>   998</td>      <th>                     </th>     <td> </td>
+</tr>
+<tr>
+  <th>Df Model:</th>              <td>     1</td>      <th>                     </th>     <td> </td>
+</tr>
+</table>
+<table class="simpletable">
+<tr>
+      <td></td>         <th>coef</th>     <th>std err</th>      <th>t</th>      <th>P>|t|</th>  <th>[0.025</th>    <th>0.975]</th>
+</tr>
+<tr>
+  <th>Intercept</th> <td>    9.8119</td> <td>    0.986</td> <td>    9.953</td> <td> 0.000</td> <td>    7.877</td> <td>   11.746</td>
+</tr>
+<tr>
+  <th>education</th> <td>    3.9843</td> <td>    0.108</td> <td>   37.020</td> <td> 0.000</td> <td>    3.773</td> <td>    4.195</td>
+</tr>
+</table>
+<table class="simpletable">
+<tr>
+  <th>Omnibus:</th>       <td> 2.309</td> <th>  Durbin-Watson:     </th> <td>   1.949</td>
+</tr>
+<tr>
+  <th>Prob(Omnibus):</th> <td> 0.315</td> <th>  Jarque-Bera (JB):  </th> <td>   2.075</td>
+</tr>
+<tr>
+  <th>Skew:</th>          <td>-0.014</td> <th>  Prob(JB):          </th> <td>   0.354</td>
+</tr>
+<tr>
+  <th>Kurtosis:</th>      <td> 2.779</td> <th>  Cond. No.          </th> <td>    25.2</td>
+</tr>
+</table></div>
+</div>
 </div>
 </div>
 

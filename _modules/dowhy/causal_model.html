@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -248,7 +248,6 @@
 <span class="sd">        :param estimand_type: the type of estimand requested (currently only &quot;nonparametric-ate&quot; is supported). In the future, may support other specific parametric forms of identification.</span>
 <span class="sd">        :param proceed_when_unidentifiable: does the identification proceed by ignoring potential unobserved confounders. Binary flag.</span>
 <span class="sd">        :param missing_nodes_as_confounders: Binary flag indicating whether variables in the dataframe that are not included in the causal graph, should be  automatically included as confounder nodes.</span>
-<span class="sd">        :param `**kwargs`: More optional parameters that can be passed to the causal model. Currently supported params: &quot;logging_level&quot; to indicate the level of logging needed. Possible values are logging.CRITICAL, logging.ERROR, logging.INFO, logging.WARNING,and logging.DEBUG. Default is logging.INFO.</span>
 <span class="sd">        :returns: an instance of CausalModel class</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -259,12 +258,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_estimand_type</span> <span class="o">=</span> <span class="n">estimand_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_proceed_when_unidentifiable</span> <span class="o">=</span> <span class="n">proceed_when_unidentifiable</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_missing_nodes_as_confounders</span> <span class="o">=</span> <span class="n">missing_nodes_as_confounders</span>
-        <span class="k">if</span> <span class="s1">&#39;logging_level&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;logging_level&#39;</span><span class="p">])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
-
-        <span class="c1"># TODO: move the logging level argument to a json file. Tue 20 Feb 2018 06:56:27 PM DST</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">graph</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -324,7 +317,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_other_variables</span> <span class="o">=</span> <span class="n">kwargs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
 
-<div class="viewcode-block" id="CausalModel.identify_effect"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_model.CausalModel.identify_effect">[docs]</a>    <span class="k">def</span> <span class="nf">identify_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimand_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="CausalModel.identify_effect"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_model.CausalModel.identify_effect">[docs]</a>    <span class="k">def</span> <span class="nf">identify_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimand_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Identify the causal effect to be estimated, using properties of the causal graph.</span>
 
 <span class="sd">        :param proceed_when_unidentifiable: Binary flag indicating whether identification should proceed in the presence of (potential) unobserved confounders.</span>
@@ -338,6 +332,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">CausalIdentifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span>
                                            <span class="n">estimand_type</span><span class="p">,</span>
+                                           <span class="n">method_name</span><span class="p">,</span>
                                            <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="n">proceed_when_unidentifiable</span><span class="p">)</span>
         <span class="n">identified_estimand</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
 
@@ -361,7 +356,7 @@
 <span class="sd">            * Instrumental Variables: &quot;iv.instrumental_variable&quot;</span>
 <span class="sd">            * Regression Discontinuity: &quot;iv.regression_discontinuity&quot;</span>
 
-<span class="sd">        In addition, you can directly call any of the EconML estimation methods. The convention is &quot;backdoor.econml.path-to-estimator-class&quot;. For example, for the double machine learning estimator (&quot;DMLCateEstimator&quot; class) that is located inside &quot;dml&quot; module of EconML, you can use the method name, &quot;backdoor.econml.dml.DMLCateEstimator&quot;. CausalML estimators can also be called. See `this demo notebook &lt;https://microsoft.github.io/dowhy/example_notebooks/dowhy-conditional-treatment-effects.html&gt;`_.</span>
+<span class="sd">        In addition, you can directly call any of the EconML estimation methods. The convention is &quot;backdoor.econml.path-to-estimator-class&quot;. For example, for the double machine learning estimator (&quot;DML&quot; class) that is located inside &quot;dml&quot; module of EconML, you can use the method name, &quot;backdoor.econml.dml.DML&quot;. CausalML estimators can also be called. See `this demo notebook &lt;https://microsoft.github.io/dowhy/example_notebooks/dowhy-conditional-treatment-effects.html&gt;`_.</span>
 
 
 <span class="sd">        :param identified_estimand: a probability expression</span>
@@ -414,7 +409,9 @@
         <span class="c1"># Check if estimator&#39;s target estimand is identified</span>
         <span class="k">if</span> <span class="n">identified_estimand</span><span class="o">.</span><span class="n">estimands</span><span class="p">[</span><span class="n">identifier_name</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No valid identified estimand available.&quot;</span><span class="p">)</span>
-            <span class="n">estimate</span> <span class="o">=</span> <span class="n">CausalEstimate</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">estimate</span> <span class="o">=</span> <span class="n">CausalEstimate</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>
+                                  <span class="n">control_value</span><span class="o">=</span><span class="n">control_value</span><span class="p">,</span>
+                                  <span class="n">treatment_value</span><span class="o">=</span><span class="n">treatment_value</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">causal_estimator</span> <span class="o">=</span> <span class="n">causal_estimator_class</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
@@ -431,6 +428,8 @@
             <span class="p">)</span>
             <span class="n">estimate</span> <span class="o">=</span> <span class="n">causal_estimator</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">()</span>
             <span class="c1"># Store parameters inside estimate object for refutation methods</span>
+            <span class="c1"># TODO: This add_params needs to move to the estimator class</span>
+            <span class="c1"># inside estimate_effect and estimate_conditional_effect</span>
             <span class="n">estimate</span><span class="o">.</span><span class="n">add_params</span><span class="p">(</span>
                 <span class="n">estimand_type</span><span class="o">=</span><span class="n">identified_estimand</span><span class="o">.</span><span class="n">estimand_type</span><span class="p">,</span>
                 <span class="n">estimator_class</span><span class="o">=</span><span class="n">causal_estimator_class</span><span class="p">,</span>
@@ -470,7 +469,7 @@
         <span class="c1"># Check if estimator&#39;s target estimand is identified</span>
         <span class="k">if</span> <span class="n">identified_estimand</span><span class="o">.</span><span class="n">estimands</span><span class="p">[</span><span class="n">identifier_name</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No valid identified estimand for using instrumental variables method&quot;</span><span class="p">)</span>
-            <span class="n">estimate</span> <span class="o">=</span> <span class="n">CausalEstimate</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">estimate</span> <span class="o">=</span> <span class="n">CausalEstimate</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">causal_estimator</span> <span class="o">=</span> <span class="n">causal_estimator_class</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>

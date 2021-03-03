@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -128,6 +128,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#Connections-to-fundamental-machine-learning-challenges">Connections to fundamental machine learning challenges</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Further-resources">Further resources</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#DoWhy+EconML-libraries">DoWhy+EconML libraries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Video-Lecture-on-causal-inference-and-its-connections-to-machine-learning">Video Lecture on causal inference and its connections to machine learning</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Detailed-KDD-Tutorial-on-Causal-Inference">Detailed KDD Tutorial on Causal Inference</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Book-chapters-on-causality-and-machine-learning">Book chapters on causality and machine learning</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Causality-and-Machine-Learning-group-at-Microsoft">Causality and Machine Learning group at Microsoft</a></li>
@@ -534,9 +535,10 @@ div.rendered_html tbody tr:hover {
 </li></ul></li><li><p>4  Connections to fundamental machine learning challenges</p>
 </li><li><p>5  Further resources</p>
 <ul class="toc-item"><li><p>5.1  DoWhy+EconML libraries</p>
-</li><li><p>5.2  Detailed KDD Tutorial on Causal Inference</p>
-</li><li><p>5.3  Book chapters on causality and machine learning</p>
-</li><li><p>5.4  Causality and Machine Learning group at Microsoft</p>
+</li><li><p>5.2  Video Lecture on causal inference and its connections to machine learning</p>
+</li><li><p>5.3  Detailed KDD Tutorial on Causal Inference</p>
+</li><li><p>5.4  Book chapters on causality and machine learning</p>
+</li><li><p>5.5  Causality and Machine Learning group at Microsoft</p>
 </li></ul></li></ul></div><div class="section" id="Why-causal-inference?">
 <h2>Why causal inference?<a class="headerlink" href="#Why-causal-inference?" title="Permalink to this headline">¶</a></h2>
 <p>Many key data science tasks are about decision-making. Data scientists are regularly called upon to support decision-makers at all levels, helping them make the best use of data in support of achieving desired outcomes. For example, an executive making investment and resourcing decisions, a marketer determining discounting policies, a product team prioritizing which features to ship, or a doctor deciding which treatment to administer to a patient.</p>
@@ -609,7 +611,7 @@ been more likely to receive the new drug, and so on. The goal of causal inferenc
 <li><p><strong>Confounders</strong>: These are variables that cause both the action and the outcome. As a result, any observed correlation between the action and the outcome may simply be due to the confounder variables, and not due to any causal relationship from the action to the outcome.</p></li>
 <li><p><strong>Instrumental Variables</strong>: These are special variables that cause the action, but do not directly affect the outcome. In addition, they are not affected by any variable that affects the outcome. Instrumental variables can help reduce bias, if used in the correct way.</p></li>
 </ol>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
@@ -623,14 +625,6 @@ been more likely to receive the new drug, and so on. The goal of causal inferenc
     <span class="n">intrumental_variables</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;instrument_names&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING:dowhy.causal_model:Causal Graph not provided. DoWhy will construct a graph based on data inputs.
-</pre></div></div>
 </div>
 <p>To visualize the graph, we can write,</p>
 <div class="nbinput docutils container">
@@ -689,34 +683,25 @@ on estimating the effect of the instrument on the action and the outcome to esti
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># II. Identify causal effect and return target estimands</span>
-<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
+<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-WARN: Do you want to continue by ignoring any unobserved confounders? (use proceed_when_unidentifiable=True to disable this prompt) [y/n] y
 Estimand type: nonparametric-ate
 
 ### Estimand : 1
-Estimand name: backdoor1 (Default)
+Estimand name: backdoor
 Estimand expression:
   d
-─────(Expectation(y|W4,W1,W3,W0,W2))
+─────(Expectation(y|W0,W2,W1,W3,W4))
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W1,W3,W0,W2,U) = P(y|v0,W4,W1,W3,W0,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,W3,W4,U) = P(y|v0,W0,W2,W1,W3,W4)
 
 ### Estimand : 2
 Estimand name: iv
@@ -757,12 +742,20 @@ No such variable found!
 ## Identified estimand
 Estimand type: nonparametric-ate
 
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(Expectation(y|W0,W2,W1,W3,W4))
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,W3,W4,U) = P(y|v0,W0,W2,W1,W3,W4)
+
 ## Realized estimand
-b: y~v0+W4+W1+W3+W0+W2
+b: y~v0+W0+W2+W1+W3+W4
 Target units: ate
 
 ## Estimate
-Mean value: 10.07942871979479
+Mean value: 10.014616535147312
 
 </pre></div></div>
 </div>
@@ -776,7 +769,7 @@ Mean value: 10.07942871979479
 <span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LassoCV</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostingRegressor</span>
 <span class="n">dml_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
-                                    <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.econml.dml.DMLCateEstimator&quot;</span><span class="p">,</span>
+                                    <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.econml.dml.DML&quot;</span><span class="p">,</span>
                                     <span class="n">method_params</span><span class="o">=</span><span class="p">{</span>
                                         <span class="s1">&#39;init_params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;model_y&#39;</span><span class="p">:</span><span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
                                                         <span class="s1">&#39;model_t&#39;</span><span class="p">:</span> <span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
@@ -786,17 +779,6 @@ Mean value: 10.07942871979479
 <span class="nb">print</span><span class="p">(</span><span class="n">dml_estimate</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/deprecation.py:143: FutureWarning: The sklearn.ensemble.forest module is  deprecated in version 0.22 and will be removed in version 0.24. The corresponding classes / functions should instead be imported from sklearn.ensemble. Anything that cannot be imported from sklearn.ensemble is now part of the private API.
-  warnings.warn(message, FutureWarning)
-/home/amit/py-envs/env3.8/lib/python3.8/site-packages/sklearn/utils/deprecation.py:143: FutureWarning: The sklearn.ensemble.base module is  deprecated in version 0.22 and will be removed in version 0.24. The corresponding classes / functions should instead be imported from sklearn.ensemble. Anything that cannot be imported from sklearn.ensemble is now part of the private API.
-  warnings.warn(message, FutureWarning)
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
@@ -808,12 +790,22 @@ Mean value: 10.07942871979479
 ## Identified estimand
 Estimand type: nonparametric-ate
 
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(Expectation(y|W0,W2,W1,W3,W4))
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,W3,W4,U) = P(y|v0,W0,W2,W1,W3,W4)
+
 ## Realized estimand
-b: y~v0+W4+W1+W3+W0+W2 |
+b: y~v0+W0+W2+W1+W3+W4 |
 Target units: ate
 
 ## Estimate
-Mean value: 9.880472520481266
+Mean value: 10.023701526335056
+Effect estimates: [10.02370153 10.02370153 10.02370153 ... 10.02370153 10.02370153
+ 10.02370153]
 
 </pre></div></div>
 </div>
@@ -838,9 +830,9 @@ estimate value of 0 when the action variable is replaced by a random variable, i
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:10.07942871979479
-New effect:0.0025304754486525395
-p value:0.48
+Estimated effect:10.014616535147312
+New effect:-0.001240824909823009
+p value:0.45
 
 </pre></div></div>
 </div>
@@ -894,11 +886,11 @@ than learning a new toolkit. The power of EconML is that you can now implement t
 <div class="output_area docutils container">
 <div class="highlight"><pre>
    Treatment    Outcome        w0         s        w1
-0   6.123326  12.206652 -0.048005  5.012038  0.387936
-1  11.602212  23.370264 -2.344564  8.286637  0.157263
-2   8.435096  17.044952  1.544191  4.567102  0.389267
-3   9.335240  17.608799 -1.789557  8.486756 -0.779766
-4  21.459765  42.175010 -3.957357  7.206502 -2.076722
+0  12.630846  24.623801 -2.580494  0.434753 -1.347023
+1  10.746278  20.853413  2.111399  1.625736 -0.569495
+2  21.689118  42.446524 -3.925405  7.273121 -1.034146
+3  21.720635  42.706588  3.999241  2.972445 -2.468980
+4  10.409912  20.036106  2.067560  1.609878 -1.512199
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -910,7 +902,7 @@ than learning a new toolkit. The power of EconML is that you can now implement t
 </div>
 <div class="section" id="Model-assumptions-about-the-data-generating-process-using-a-causal-graph">
 <h4>Model assumptions about the data-generating process using a causal graph<a class="headerlink" href="#Model-assumptions-about-the-data-generating-process-using-a-causal-graph" title="Permalink to this headline">¶</a></h4>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
@@ -925,14 +917,6 @@ than learning a new toolkit. The power of EconML is that you can now implement t
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING:dowhy.causal_model:Causal Graph not provided. DoWhy will construct a graph based on data inputs.
-</pre></div></div>
-</div>
 </div>
 <div class="section" id="Identify-the-correct-estimand-for-the-target-quantity-based-on-the-causal-model">
 <h4>Identify the correct estimand for the target quantity based on the causal model<a class="headerlink" href="#Identify-the-correct-estimand-for-the-target-quantity-based-on-the-causal-model" title="Permalink to this headline">¶</a></h4>
@@ -941,34 +925,25 @@ WARNING:dowhy.causal_model:Causal Graph not provided. DoWhy will construct a gra
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
+<span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-WARN: Do you want to continue by ignoring any unobserved confounders? (use proceed_when_unidentifiable=True to disable this prompt) [y/n] y
 Estimand type: nonparametric-ate
 
 ### Estimand : 1
-Estimand name: backdoor1 (Default)
+Estimand name: backdoor
 Estimand expression:
      d
-────────────(Expectation(Outcome|w1,w0))
+────────────(Expectation(Outcome|w0,w1))
 d[Treatment]
-Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w1,w0,U) = P(Outcome|Treatment,w1,w0)
+Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w0,w1,U) = P(Outcome|Treatment,w0,w1)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1009,14 +984,22 @@ No such variable found!
 ## Identified estimand
 Estimand type: nonparametric-ate
 
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+     d
+────────────(Expectation(Outcome|w0,w1))
+d[Treatment]
+Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w0,w1,U) = P(Outcome|Treatment,w0,w1)
+
 ## Realized estimand
-b: Outcome~Treatment+w1+w0
+b: Outcome~Treatment+w0+w1
 Target units: ate
 
 ## Estimate
-Mean value: 1.9976327875094593
+Mean value: 1.9991154434265186
 
-Causal Estimate is 1.9976327875094593
+Causal Estimate is 1.9991154434265186
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1037,7 +1020,7 @@ Causal Estimate is 1.9976327875094593
 <span></span><span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">PolynomialFeatures</span>
 <span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LassoCV</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostingRegressor</span>
-<span class="n">dml_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.econml.dml.DMLCateEstimator&quot;</span><span class="p">,</span>
+<span class="n">dml_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.econml.dml.DML&quot;</span><span class="p">,</span>
                                      <span class="n">control_value</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                                      <span class="n">treatment_value</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
                                  <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -1060,12 +1043,21 @@ Causal Estimate is 1.9976327875094593
 ## Identified estimand
 Estimand type: nonparametric-ate
 
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+     d
+────────────(Expectation(Outcome|w0,w1))
+d[Treatment]
+Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w0,w1,U) = P(Outcome|Treatment,w0,w1)
+
 ## Realized estimand
-b: Outcome~Treatment+w1+w0 |
+b: Outcome~Treatment+w0+w1 |
 Target units: ate
 
 ## Estimate
-Mean value: 1.0737290021085444
+Mean value: 0.9640759858071759
+Effect estimates: [0.96407599 0.96407599 0.96407599 ... 0.96407599 0.96407599 0.96407599]
 
 </pre></div></div>
 </div>
@@ -1089,8 +1081,8 @@ Mean value: 1.0737290021085444
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a Random Common Cause
-Estimated effect:1.0737290021085444
-New effect:1.057555912932793
+Estimated effect:0.9640759858071759
+New effect:0.9331218724624653
 
 </pre></div></div>
 </div>
@@ -1106,24 +1098,15 @@ New effect:1.057555912932793
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING:dowhy.causal_refuters.placebo_treatment_refuter:We assume a Normal Distribution as the sample has less than 100 examples.
-                 Note: The underlying distribution may not be Normal. We assume that it approaches normal with the increase in sample size.
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:1.0737290021085444
-New effect:0.00016734550968132794
-p value:0.3879482859381036
+Estimated effect:0.9640759858071759
+New effect:9.847648418438584e-06
+p value:0.4920449538936432
 
 </pre></div></div>
 </div>
@@ -1168,6 +1151,10 @@ refutation methods that can check the robustness of the estimate.</p>
 <p>DoWhy notebooks: <a class="reference external" href="https://github.com/microsoft/dowhy/tree/master/docs/source/example_notebooks">https://github.com/microsoft/dowhy/tree/master/docs/source/example_notebooks</a></p>
 <p>EconML code: <a class="reference external" href="https://github.com/microsoft/econml">https://github.com/microsoft/econml</a></p>
 <p>EconML notebooks: <a class="reference external" href="https://github.com/microsoft/EconML/tree/master/notebooks">https://github.com/microsoft/EconML/tree/master/notebooks</a></p>
+</div>
+<div class="section" id="Video-Lecture-on-causal-inference-and-its-connections-to-machine-learning">
+<h3>Video Lecture on causal inference and its connections to machine learning<a class="headerlink" href="#Video-Lecture-on-causal-inference-and-its-connections-to-machine-learning" title="Permalink to this headline">¶</a></h3>
+<p>Microsoft Research Webinar: <a class="reference external" href="https://note.microsoft.com/MSR-Webinar-DoWhy-Library-Registration-On-Demand.html">https://note.microsoft.com/MSR-Webinar-DoWhy-Library-Registration-On-Demand.html</a></p>
 </div>
 <div class="section" id="Detailed-KDD-Tutorial-on-Causal-Inference">
 <h3>Detailed KDD Tutorial on Causal Inference<a class="headerlink" href="#Detailed-KDD-Tutorial-on-Causal-Inference" title="Permalink to this headline">¶</a></h3>

@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -214,17 +214,38 @@
 <span class="kn">from</span> <span class="nn">sklearn.svm</span> <span class="kn">import</span> <span class="n">SVR</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
 <span class="kn">from</span> <span class="nn">sklearn.neural_network</span> <span class="kn">import</span> <span class="n">MLPRegressor</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="kn">from</span> <span class="nn">dowhy.causal_refuters.add_unobserved_common_cause</span> <span class="kn">import</span> <span class="n">AddUnobservedCommonCause</span>
 
 <span class="n">TestFraction</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;TestFraction&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;base&#39;</span><span class="p">,</span><span class="s1">&#39;other&#39;</span><span class="p">])</span>
 
 <div class="viewcode-block" id="DummyOutcomeRefuter"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.dummy_outcome_refuter.DummyOutcomeRefuter">[docs]</a><span class="k">class</span> <span class="nc">DummyOutcomeRefuter</span><span class="p">(</span><span class="n">CausalRefuter</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Refute an estimate by replacing the outcome with a randomly generated variable.</span>
+    <span class="sd">&quot;&quot;&quot;Refute an estimate by replacing the outcome with a simulated variable</span>
+<span class="sd">    for which the true causal effect is known.</span>
 
-<span class="sd">    This allows us to have a well defined effect of the treatment on the outcome.</span>
+<span class="sd">    In the simplest case, the dummy outcome is an independent, randomly</span>
+<span class="sd">    generated variable. By definition, the true causal effect should be zero.</span>
 
-<span class="sd">    1. We find f(W) for a fixed value of t</span>
-<span class="sd">    2. For all the other values of t. We obtain the value of dummy outcome as:</span>
+<span class="sd">    More generally, the dummy outcome uses the observed relationship between</span>
+<span class="sd">    confounders and outcome (conditional on treatment) to create a more</span>
+<span class="sd">    realistic outcome for which the treatment effect is known to be zero. If</span>
+<span class="sd">    the goal is to simulate a dummy outcome with a non-zero true causal effect,</span>
+<span class="sd">    then we can add an arbitrary function h(t) to the dummy outcome&#39;s</span>
+<span class="sd">    generation process and then the causal effect becomes h(t=1)-h(t=0).</span>
+
+<span class="sd">    Note that this general procedure only works for the backdoor criterion.</span>
+
+<span class="sd">    1. We find f(W) for a each value of treatment. That is, keeping the treatment</span>
+<span class="sd">    constant, we fit a predictor to estimate the effect of confounders W on</span>
+<span class="sd">    outcome y. Note that since f(W) simply defines a new DGP for the simulated</span>
+<span class="sd">    outcome, it need not be the correct structural equation from W to y.</span>
+<span class="sd">    2. We obtain the value of dummy outcome as:</span>
 <span class="sd">       ``y_dummy = h(t) + f(W)``</span>
+
+<span class="sd">    To prevent overfitting, we fit f(W) for one value of T and then use it to</span>
+<span class="sd">    generate data for other values of t. Future support for identification</span>
+<span class="sd">    based on instrumental variable and mediation.</span>
 
 <span class="sd">    ::</span>
 
@@ -234,7 +255,7 @@
 <span class="sd">            /    \\</span>
 <span class="sd">            t ---&gt;y</span>
 
-<span class="sd">        On estimating,</span>
+<span class="sd">        On estimating the following with constant t,</span>
 <span class="sd">        y_dummy = f(W)</span>
 
 <span class="sd">               W</span>
@@ -371,6 +392,8 @@
     <span class="c1"># The Default split for the number of data points that fall into the training and validation sets</span>
     <span class="n">DEFAULT_TEST_FRACTION</span> <span class="o">=</span> <span class="p">[</span><span class="n">TestFraction</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)]</span>
 
+    <span class="n">DEFAULT_NEW_DATA_WITH_UNOBSERVED_CONFOUNDING</span> <span class="o">=</span> <span class="kc">None</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -380,18 +403,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_bucket_size_scale_factor</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;bucket_size_scale_factor&quot;</span><span class="p">,</span> <span class="n">DummyOutcomeRefuter</span><span class="o">.</span><span class="n">DEFAULT_BUCKET_SCALE_FACTOR</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_min_data_point_threshold</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;min_data_point_threshold&quot;</span><span class="p">,</span> <span class="n">DummyOutcomeRefuter</span><span class="o">.</span><span class="n">MIN_DATA_POINT_THRESHOLD</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_test_fraction</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;_test_fraction&quot;</span><span class="p">,</span> <span class="n">DummyOutcomeRefuter</span><span class="o">.</span><span class="n">DEFAULT_TEST_FRACTION</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unobserved_confounder_values</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;unobserved_confounder_values&quot;</span><span class="p">,</span> <span class="n">DummyOutcomeRefuter</span><span class="o">.</span><span class="n">DEFAULT_NEW_DATA_WITH_UNOBSERVED_CONFOUNDING</span><span class="p">)</span>
         <span class="n">required_variables</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;required_variables&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">required_variables</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The value of required_variables cannot be False&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_chosen_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">choose_variables</span><span class="p">(</span><span class="n">required_variables</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="s1">&#39;logging_level&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;logging_level&#39;</span><span class="p">])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
-
+        <span class="c1"># Assuming that outcome is one-dimensional</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DummyOutcomeRefuter.refute_estimate"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.dummy_outcome_refuter.DummyOutcomeRefuter.refute_estimate">[docs]</a>    <span class="k">def</span> <span class="nf">refute_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -417,6 +437,7 @@
         <span class="c1"># The rationale behind ordering of the loops is the fact that we induce randomness everytime we create the</span>
         <span class="c1"># Train and the Validation Datasets. Thus, we run the simulation loop followed by the training and the validation</span>
         <span class="c1"># loops. Thus, we can get different values everytime we get the estimator.</span>
+
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_simulations</span> <span class="p">):</span>
             <span class="n">estimates</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -426,12 +447,19 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_fraction</span> <span class="o">!=</span> <span class="n">DummyOutcomeRefuter</span><span class="o">.</span><span class="n">DEFAULT_TEST_FRACTION</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;&#39;test_fraction&#39; is not applicable as there is no base treatment value.&quot;</span><span class="p">)</span>
 
+                <span class="c1"># Adding an unobserved confounder if provided by the user</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unobserved_confounder_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s1">&#39;simulated&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unobserved_confounder_values</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_chosen_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;simulated&#39;</span><span class="p">)</span>
                 <span class="c1"># We set X_train = 0 and outcome_train to be 0</span>
                 <span class="n">validation_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
                 <span class="n">X_train</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="n">outcome_train</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="n">X_validation</span> <span class="o">=</span> <span class="n">validation_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_chosen_variables</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-                <span class="n">outcome_validation</span> <span class="o">=</span> <span class="n">validation_df</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+                <span class="n">X_validation_df</span> <span class="o">=</span> <span class="n">validation_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_chosen_variables</span><span class="p">]</span>
+
+
+                <span class="n">X_validation</span> <span class="o">=</span> <span class="n">X_validation_df</span><span class="o">.</span><span class="n">values</span>
+                <span class="n">outcome_validation</span> <span class="o">=</span> <span class="n">validation_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name_str</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
 
                 <span class="c1"># Get the final outcome, after running through all the values in the transformation list</span>
                 <span class="n">outcome_validation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_data</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">outcome_train</span><span class="p">,</span> <span class="n">X_validation</span><span class="p">,</span> <span class="n">outcome_validation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transformation_list</span><span class="p">)</span>
@@ -443,12 +471,17 @@
                     <span class="n">causal_effect_map</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_true_causal_effect</span><span class="p">(</span> <span class="n">validation_df</span><span class="p">[</span> <span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">]</span> <span class="p">)</span>
 
                 <span class="n">outcome_validation</span> <span class="o">+=</span> <span class="n">causal_effect_map</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+
+
                 <span class="n">new_data</span> <span class="o">=</span> <span class="n">validation_df</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">dummy_outcome</span><span class="o">=</span><span class="n">outcome_validation</span><span class="p">)</span>
+
+
                 <span class="n">new_estimator</span> <span class="o">=</span> <span class="n">CausalEstimator</span><span class="o">.</span><span class="n">get_estimator_object</span><span class="p">(</span><span class="n">new_data</span><span class="p">,</span> <span class="n">identified_estimand</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="p">)</span>
                 <span class="n">new_effect</span> <span class="o">=</span> <span class="n">new_estimator</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">()</span>
                 <span class="n">estimates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_effect</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
             <span class="k">else</span><span class="p">:</span>
+
                 <span class="n">groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocess_data_by_treatment</span><span class="p">()</span>
                 <span class="n">group_count</span> <span class="o">=</span> <span class="mi">0</span>
 
@@ -460,9 +493,10 @@
                     <span class="n">train_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span> <span class="p">[</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">base_train</span><span class="o">.</span><span class="n">values</span> <span class="p">]</span> <span class="p">)</span>
                     <span class="n">total_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span> <span class="p">[</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">key_train</span><span class="p">)</span><span class="o">.</span><span class="n">values</span> <span class="p">]</span> <span class="p">)</span>
                     <span class="n">base_validation</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span> <span class="n">total_set</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">train_set</span><span class="p">)</span> <span class="p">),</span> <span class="n">columns</span><span class="o">=</span><span class="n">base_train</span><span class="o">.</span><span class="n">columns</span> <span class="p">)</span>
+                    <span class="n">X_train_df</span> <span class="o">=</span> <span class="n">base_train</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_chosen_variables</span><span class="p">]</span>
 
-                    <span class="n">X_train</span> <span class="o">=</span> <span class="n">base_train</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_chosen_variables</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-                    <span class="n">outcome_train</span> <span class="o">=</span> <span class="n">base_train</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+                    <span class="n">X_train</span> <span class="o">=</span> <span class="n">X_train_df</span><span class="o">.</span><span class="n">values</span>
+                    <span class="n">outcome_train</span> <span class="o">=</span> <span class="n">base_train</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name_str</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
 
                     <span class="n">validation_df</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="n">transformation_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transformation_list</span>
@@ -473,8 +507,10 @@
                             <span class="n">validation_df</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">groups</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">key_validation</span><span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_fraction</span><span class="p">[</span><span class="n">group_count</span><span class="p">]</span><span class="o">.</span><span class="n">other</span><span class="p">))</span>
 
                     <span class="n">validation_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">validation_df</span><span class="p">)</span>
-                    <span class="n">X_validation</span> <span class="o">=</span> <span class="n">validation_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_chosen_variables</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-                    <span class="n">outcome_validation</span> <span class="o">=</span> <span class="n">validation_df</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+                    <span class="n">X_validation_df</span> <span class="o">=</span> <span class="n">validation_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_chosen_variables</span><span class="p">]</span>
+
+                    <span class="n">X_validation</span> <span class="o">=</span> <span class="n">X_validation_df</span><span class="o">.</span><span class="n">values</span>
+                    <span class="n">outcome_validation</span> <span class="o">=</span> <span class="n">validation_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name_str</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
 
                     <span class="c1"># If the number of data points is too few, run the default transformation: [(&quot;zero&quot;,&quot;&quot;),(&quot;noise&quot;, {&#39;std_dev&#39;:1} )]</span>
                     <span class="k">if</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_data_point_threshold</span><span class="p">:</span>
@@ -494,13 +530,17 @@
 
                     <span class="c1"># Add h(t) to f(W) to get the dummy outcome</span>
                     <span class="n">outcome_validation</span> <span class="o">+=</span> <span class="n">causal_effect_map</span><span class="p">[</span><span class="n">key_train</span><span class="p">]</span>
+
                     <span class="n">new_data</span> <span class="o">=</span> <span class="n">validation_df</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">dummy_outcome</span><span class="o">=</span><span class="n">outcome_validation</span><span class="p">)</span>
                     <span class="n">new_estimator</span> <span class="o">=</span> <span class="n">CausalEstimator</span><span class="o">.</span><span class="n">get_estimator_object</span><span class="p">(</span><span class="n">new_data</span><span class="p">,</span> <span class="n">identified_estimand</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="p">)</span>
                     <span class="n">new_effect</span> <span class="o">=</span> <span class="n">new_estimator</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">()</span>
+
                     <span class="n">estimates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_effect</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
                     <span class="n">group_count</span> <span class="o">+=</span> <span class="mi">1</span>
 
+
             <span class="n">simulation_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">estimates</span><span class="p">)</span>
+
 
         <span class="c1"># We convert to ndarray for ease in indexing</span>
         <span class="c1"># The data is of the form</span>
@@ -516,6 +556,8 @@
 
             <span class="n">dummy_estimate</span> <span class="o">=</span> <span class="n">CausalEstimate</span><span class="p">(</span>
                     <span class="n">estimate</span> <span class="o">=</span> <span class="n">causal_effect_map</span><span class="p">[</span><span class="kc">None</span><span class="p">],</span>
+                    <span class="n">control_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="o">.</span><span class="n">control_value</span><span class="p">,</span>
+                    <span class="n">treatment_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="o">.</span><span class="n">treatment_value</span><span class="p">,</span>
                     <span class="n">target_estimand</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="o">.</span><span class="n">target_estimand</span><span class="p">,</span>
                     <span class="n">realized_estimand_expr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="o">.</span><span class="n">realized_estimand_expr</span><span class="p">)</span>
 
@@ -526,10 +568,11 @@
                     <span class="p">)</span>
 
             <span class="n">refute</span><span class="o">.</span><span class="n">add_significance_test_results</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">test_significance</span><span class="p">(</span><span class="n">dummy_estimate</span><span class="p">,</span> <span class="n">simulation_results</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">test_significance</span><span class="p">(</span><span class="n">dummy_estimate</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">simulation_results</span><span class="p">))</span>
             <span class="p">)</span>
 
             <span class="n">refute</span><span class="o">.</span><span class="n">add_refuter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
             <span class="n">refute_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">refute</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
@@ -538,8 +581,10 @@
             <span class="c1"># Iterating through the refutation for each category</span>
             <span class="k">for</span> <span class="n">train_category</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">simulation_results</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
                 <span class="n">dummy_estimate</span> <span class="o">=</span> <span class="n">CausalEstimate</span><span class="p">(</span>
-                    <span class="n">estimate</span> <span class="o">=</span> <span class="n">causal_effect_list</span><span class="p">[</span><span class="n">train_category</span><span class="p">],</span>
-                    <span class="n">target_estimand</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="o">.</span><span class="n">target_estimand</span><span class="p">,</span>
+                    <span class="n">estimate</span><span class="o">=</span><span class="n">causal_effect_list</span><span class="p">[</span><span class="n">train_category</span><span class="p">],</span>
+                    <span class="n">control_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="o">.</span><span class="n">control_value</span><span class="p">,</span>
+                    <span class="n">treatment_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="o">.</span><span class="n">treatment_value</span><span class="p">,</span>
+                    <span class="n">target_estimand</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="o">.</span><span class="n">target_estimand</span><span class="p">,</span>
                     <span class="n">realized_estimand_expr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="o">.</span><span class="n">realized_estimand_expr</span><span class="p">)</span>
 
                 <span class="n">refute</span> <span class="o">=</span> <span class="n">CausalRefutation</span><span class="p">(</span>
@@ -554,6 +599,7 @@
 
                 <span class="n">refute</span><span class="o">.</span><span class="n">add_refuter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
                 <span class="n">refute_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">refute</span><span class="p">)</span>
+
 
         <span class="k">return</span> <span class="n">refute_list</span></div>
 
@@ -632,6 +678,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;At present, DoWhy supports a simgle treatment variable&quot;</span>
 
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unobserved_confounder_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s1">&#39;simulated&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unobserved_confounder_values</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chosen_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;simulated&#39;</span><span class="p">)</span>
+
         <span class="n">treatment_variable_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># As we only have a single treatment</span>
         <span class="n">variable_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">treatment_variable_name</span><span class="p">]</span><span class="o">.</span><span class="n">dtypes</span>
 
@@ -674,6 +725,7 @@
         <span class="n">estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_regressor_object</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="o">**</span><span class="n">func_args</span><span class="p">)</span>
         <span class="n">X</span> <span class="o">=</span> <span class="n">X_train</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">outcome</span>
+
         <span class="n">estimator</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">estimator</span><span class="o">.</span><span class="n">predict</span>
@@ -713,8 +765,8 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="n">permute_fraction</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">outcome</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span>
-            <span class="n">outcome</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
-            <span class="k">return</span> <span class="n">outcome</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">outcome</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name_str</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">outcome</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name_str</span><span class="p">]</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
         <span class="k">elif</span> <span class="n">permute_fraction</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">permute_fraction</span> <span class="o">/=</span> <span class="mi">2</span> <span class="c1"># We do this as every swap leads to two changes</span>
             <span class="n">changes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">outcome</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">permute_fraction</span> <span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># As this is tuple containing a single element (array[...])</span>
@@ -730,14 +782,13 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The value of permute_fraction is </span><span class="si">{}</span><span class="s2">. Which is greater than 1.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">permute_fraction</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="DummyOutcomeRefuter.noise"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.dummy_outcome_refuter.DummyOutcomeRefuter.noise">[docs]</a>    <span class="k">def</span> <span class="nf">noise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">std_dev</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Add white noise with mean 0 and standard deviation = std_dev</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add white noise with mean 0 and standard deviation = std_dev</span>
 
-<span class="sd">        :param &#39;outcome&#39;: np.ndarray</span>
+<span class="sd">        - &#39;outcome&#39;: np.ndarray</span>
 <span class="sd">        The outcome variable, to which the white noise is added.</span>
-<span class="sd">        :param &#39;std_dev&#39;: float</span>
+<span class="sd">        - &#39;std_dev&#39;: float</span>
 <span class="sd">        The standard deviation of the white noise.</span>
-
-<span class="sd">        :returns: input with added noise.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">outcome</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="n">std_dev</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="n">outcome</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div></div>
 </pre></div>

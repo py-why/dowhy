@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -129,7 +129,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#Creating-a-dataset">Creating a dataset</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Step-1:-Modeling-the-causal-mechanism">Step 1: Modeling the causal mechanism</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Step-2:-Identifying-the-natural-direct-and-indirect-effects">Step 2: Identifying the natural direct and indirect effects</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Step-3:-Estimation-of-the-effect">Step 3: Estimation of the effect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Step-3:-Estimation-of-the-effect">Step 3: Estimation of the effect</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Natural-Indirect-Effect">Natural Indirect Effect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Natural-Direct-Effect">Natural Direct Effect</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#Step-4:-Refutations">Step 4: Refutations</a></li>
 </ul>
 </li>
@@ -494,8 +498,6 @@ div.rendered_html tbody tr:hover {
 <span class="c1"># Warnings and logging</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;dowhy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -523,12 +525,12 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-         FD0        W0        v0          y
-0  11.009406  0.521425  2.654356  33.373490
-1  -6.848972 -0.637748 -1.947278 -22.097380
-2  -0.710087 -0.192628 -0.120618  -2.832689
-3  -0.092251 -0.314083 -0.229222  -1.640303
-4  13.049299  1.138318  3.028420  41.798294
+         FD0        W0        v0           y
+0 -24.766460 -1.390853 -5.320208 -106.930248
+1  30.601065  2.605898  6.336803  133.087050
+2  -2.585961 -0.190542 -0.531693  -11.210317
+3   0.085982  0.094062 -0.227000    0.469403
+4  10.951420  0.637002  2.034312   47.314086
 </pre></div></div>
 </div>
 </div>
@@ -543,8 +545,7 @@ div.rendered_html tbody tr:hover {
 <span></span><span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span><span class="n">df</span><span class="p">,</span>
                     <span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
                     <span class="n">data</span><span class="p">[</span><span class="s2">&quot;gml_graph&quot;</span><span class="p">],</span>
-                   <span class="n">missing_nodes_as_confounders</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                   <span class="n">logging_level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+                   <span class="n">missing_nodes_as_confounders</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
 <span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
@@ -552,26 +553,19 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#39;] on outcome [&#39;y&#39;]
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_dowhy_mediation_analysis_5_1.png" src="../_images/example_notebooks_dowhy_mediation_analysis_5_1.png" />
+<img alt="../_images/example_notebooks_dowhy_mediation_analysis_5_0.png" src="../_images/example_notebooks_dowhy_mediation_analysis_5_0.png" />
 </div>
 </div>
 </div>
 <div class="section" id="Step-2:-Identifying-the-natural-direct-and-indirect-effects">
 <h2>Step 2: Identifying the natural direct and indirect effects<a class="headerlink" href="#Step-2:-Identifying-the-natural-direct-and-indirect-effects" title="Permalink to this headline">¶</a></h2>
 <p>We use the <code class="docutils literal notranslate"><span class="pre">estimand_type</span></code> argument to specify that the target estimand should be for a <strong>natural direct effect</strong> or the <strong>natural indirect effect</strong>. For definitions, see <a class="reference external" href="https://ftp.cs.ucla.edu/pub/stat_ser/r389-imai-etal-commentary-r421-reprint.pdf">Interpretation and Identification of Causal Mediation</a> by Judea Pearl.</p>
-<p>Natural direct effect: Effect due to the path v0-&gt;y Natural indirect effect: Effece due to the path v0-&gt;FD0-&gt;y (mediated by FD0).</p>
+<p><strong>Natural direct effect</strong>: Effect due to the path v0-&gt;y</p>
+<p><strong>Natural indirect effect</strong>: Effect due to the path v0-&gt;FD0-&gt;y (mediated by FD0).</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
@@ -584,18 +578,6 @@ INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#3
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
-INFO:dowhy.causal_identifier:Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True.
-INFO:dowhy.causal_identifier:Mediators for treatment and outcome:[&#39;FD0&#39;]
-INFO:dowhy.causal_identifier:All common causes are observed. Causal effect can be identified.
-INFO:dowhy.causal_identifier:All common causes are observed. Causal effect can be identified.
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
@@ -606,10 +588,10 @@ Estimand type: nonparametric-nde
 ### Estimand : 1
 Estimand name: mediation
 Estimand expression:
-Expectation(Derivative(y, [FD0])*Derivative([FD0], [v0]))
+Expectation(Derivative(y|FD0, [v0]))
 Estimand assumption 1, Mediation: FD0 intercepts (blocks) all directed paths from v0 to y except the path {v0}→{y}.
 Estimand assumption 2, First-stage-unconfoundedness: If U→{v0} and U→{FD0} then P(FD0|v0,U) = P(FD0|v0)
-Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→{y} then P(y|FD0, v0, U) = P(y|FD0, v0)
+Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→y then P(y|FD0, v0, U) = P(y|FD0, v0)
 
 </pre></div></div>
 </div>
@@ -625,18 +607,6 @@ Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→{y} t
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
-INFO:dowhy.causal_identifier:Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True.
-INFO:dowhy.causal_identifier:Mediators for treatment and outcome:[&#39;FD0&#39;]
-INFO:dowhy.causal_identifier:All common causes are observed. Causal effect can be identified.
-INFO:dowhy.causal_identifier:All common causes are observed. Causal effect can be identified.
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
@@ -647,10 +617,10 @@ Estimand type: nonparametric-nie
 ### Estimand : 1
 Estimand name: mediation
 Estimand expression:
-
+Expectation(Derivative(y, [FD0])*Derivative([FD0], [v0]))
 Estimand assumption 1, Mediation: FD0 intercepts (blocks) all directed paths from v0 to y except the path {v0}→{y}.
 Estimand assumption 2, First-stage-unconfoundedness: If U→{v0} and U→{FD0} then P(FD0|v0,U) = P(FD0|v0)
-Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→{y} then P(y|FD0, v0, U) = P(y|FD0, v0)
+Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→y then P(y|FD0, v0, U) = P(y|FD0, v0)
 
 </pre></div></div>
 </div>
@@ -658,15 +628,16 @@ Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→{y} t
 <div class="section" id="Step-3:-Estimation-of-the-effect">
 <h2>Step 3: Estimation of the effect<a class="headerlink" href="#Step-3:-Estimation-of-the-effect" title="Permalink to this headline">¶</a></h2>
 <p>Currently only two stage linear regression is supported for estimation. We plan to add a non-parametric Monte Carlo method soon as described in <a class="reference external" href="https://projecteuclid.org/euclid.ss/1280841733">Imai, Keele and Yamamoto (2010)</a>.</p>
+<div class="section" id="Natural-Indirect-Effect">
+<h3>Natural Indirect Effect<a class="headerlink" href="#Natural-Indirect-Effect" title="Permalink to this headline">¶</a></h3>
 <p>The estimator converts the mediation effect estimation to a series of backdoor effect estimations. 1. The first-stage model estimates the effect from treatment (v0) to the mediator (FD0). 2. The second-stage model estimates the effect from mediator (FD0) to the outcome (Y).</p>
-<p>For estimating the natural indirect effect, there is also an additional second-stage model that estimates the effect of treatment on the outcome, conditioned on the mediator. It assumes the same model as given for for the <code class="docutils literal notranslate"><span class="pre">second_stage_model</span></code> parameter.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">dowhy.causal_estimators.linear_regression_estimator</span>
-<span class="n">causal_estimate_nde</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand_nde</span><span class="p">,</span>
+<span class="n">causal_estimate_nde</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand_nie</span><span class="p">,</span>
                                         <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;mediation.two_stage_regression&quot;</span><span class="p">,</span>
                                        <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                        <span class="n">test_significance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -679,18 +650,6 @@ Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→{y} t
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using Two Stage Regression Estimator
-INFO:dowhy.causal_estimator:b: FD0~v0+W0
-INFO:dowhy.causal_estimator:INFO: Using Linear Regression Estimator
-INFO:dowhy.causal_estimator:b: y~FD0+v0+W0
-INFO:dowhy.causal_estimator:INFO: Using Linear Regression Estimator
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
@@ -699,7 +658,7 @@ INFO:dowhy.causal_estimator:INFO: Using Linear Regression Estimator
 *** Causal Estimate ***
 
 ## Identified estimand
-Estimand type: nonparametric-nde
+Estimand type: nonparametric-nie
 
 ### Estimand : 1
 Estimand name: mediation
@@ -707,18 +666,18 @@ Estimand expression:
 Expectation(Derivative(y, [FD0])*Derivative([FD0], [v0]))
 Estimand assumption 1, Mediation: FD0 intercepts (blocks) all directed paths from v0 to y except the path {v0}→{y}.
 Estimand assumption 2, First-stage-unconfoundedness: If U→{v0} and U→{FD0} then P(FD0|v0,U) = P(FD0|v0)
-Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→{y} then P(y|FD0, v0, U) = P(y|FD0, v0)
+Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→y then P(y|FD0, v0, U) = P(y|FD0, v0)
 
 ## Realized estimand
-(b: FD0~v0+W0) * (b: y~FD0+v0+W0)
+(b: FD0~v0+W0)*(b: y~FD0+v0+W0)
 Target units: ate
 
 ## Estimate
-Mean value: 11.704233518070275
+Mean value: 19.43485415766647
 
 </pre></div></div>
 </div>
-<p>Note that the value equals the true value of the natural direct effect (up to random noise).</p>
+<p>Note that the value equals the true value of the natural indirect effect (up to random noise).</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
@@ -733,16 +692,20 @@ Mean value: 11.704233518070275
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-11.704233518070275 11.712215459759832
+19.43485415766647 19.42468979102858
 </pre></div></div>
 </div>
-<p>The parameter is called ate because in the simulated dataset, the indirect effect is set to be zero. Now let us check whether the indirect effect estimator returns the (correct) estimate of zero.</p>
+<p>The parameter is called <code class="docutils literal notranslate"><span class="pre">ate</span></code> because in the simulated dataset, the direct effect is set to be zero.</p>
+</div>
+<div class="section" id="Natural-Direct-Effect">
+<h3>Natural Direct Effect<a class="headerlink" href="#Natural-Direct-Effect" title="Permalink to this headline">¶</a></h3>
+<p>Now let us check whether the direct effect estimator returns the (correct) estimate of zero.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">causal_estimate_nie</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand_nie</span><span class="p">,</span>
+<span></span><span class="n">causal_estimate_nie</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand_nde</span><span class="p">,</span>
                                         <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;mediation.two_stage_regression&quot;</span><span class="p">,</span>
                                        <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                        <span class="n">test_significance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -755,20 +718,6 @@ Mean value: 11.704233518070275
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:dowhy.causal_estimator:INFO: Using Two Stage Regression Estimator
-INFO:dowhy.causal_estimator:b: FD0~v0+W0
-INFO:dowhy.causal_estimator:INFO: Using Linear Regression Estimator
-INFO:dowhy.causal_estimator:b: y~FD0+v0+W0
-INFO:dowhy.causal_estimator:INFO: Using Linear Regression Estimator
-INFO:dowhy.causal_estimator:b: y~v0+W0
-INFO:dowhy.causal_estimator:INFO: Using Linear Regression Estimator
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
@@ -777,24 +726,25 @@ INFO:dowhy.causal_estimator:INFO: Using Linear Regression Estimator
 *** Causal Estimate ***
 
 ## Identified estimand
-Estimand type: nonparametric-nie
+Estimand type: nonparametric-nde
 
 ### Estimand : 1
 Estimand name: mediation
 Estimand expression:
-
+Expectation(Derivative(y|FD0, [v0]))
 Estimand assumption 1, Mediation: FD0 intercepts (blocks) all directed paths from v0 to y except the path {v0}→{y}.
 Estimand assumption 2, First-stage-unconfoundedness: If U→{v0} and U→{FD0} then P(FD0|v0,U) = P(FD0|v0)
-Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→{y} then P(y|FD0, v0, U) = P(y|FD0, v0)
+Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→y then P(y|FD0, v0, U) = P(y|FD0, v0)
 
 ## Realized estimand
-b: y~v0+W0-(b: FD0~v0+W0) * (b: y~FD0+v0+W0)
+(b: y~v0+W0) - ((b: FD0~v0+W0)*(b: y~FD0+v0+W0))
 Target units: ate
 
 ## Estimate
-Mean value: 0.000848600067884675
+Mean value: 0.0006101936244320427
 
 </pre></div></div>
+</div>
 </div>
 </div>
 <div class="section" id="Step-4:-Refutations">

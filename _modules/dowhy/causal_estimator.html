@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -339,6 +339,8 @@
                 <span class="n">new_data</span><span class="p">,</span>
                 <span class="n">identified_estimand</span><span class="p">,</span>
                 <span class="n">identified_estimand</span><span class="o">.</span><span class="n">treatment_variable</span><span class="p">,</span> <span class="n">identified_estimand</span><span class="o">.</span><span class="n">outcome_variable</span><span class="p">,</span> <span class="c1">#names of treatment and outcome</span>
+                <span class="n">control_value</span><span class="o">=</span><span class="n">estimate</span><span class="o">.</span><span class="n">control_value</span><span class="p">,</span>
+                <span class="n">treatment_value</span><span class="o">=</span><span class="n">estimate</span><span class="o">.</span><span class="n">treatment_value</span><span class="p">,</span>
                 <span class="n">test_significance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">evaluate_effect_strength</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">confidence_intervals</span> <span class="o">=</span> <span class="n">estimate</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;confidence_intervals&quot;</span><span class="p">],</span>
@@ -346,6 +348,7 @@
                 <span class="n">effect_modifiers</span> <span class="o">=</span> <span class="n">estimate</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;effect_modifiers&quot;</span><span class="p">],</span>
                 <span class="n">params</span> <span class="o">=</span> <span class="n">estimate</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;method_params&quot;</span><span class="p">]</span>
                 <span class="p">)</span>
+
         <span class="k">return</span> <span class="n">new_estimator</span></div>
 
 
@@ -381,7 +384,7 @@
         <span class="n">df_withtreatment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
         <span class="n">df_notreatment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">]</span><span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
         <span class="n">est</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">df_withtreatment</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">df_notreatment</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">CausalEstimate</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">CausalEstimate</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">control_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">treatment_value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_estimate_effect_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_df</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Function used in conditional effect estimation. This function is to be overridden by each child estimator.</span>
@@ -822,10 +825,14 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span> <span class="n">target_estimand</span><span class="p">,</span> <span class="n">realized_estimand_expr</span><span class="p">,</span>
+            <span class="n">control_value</span><span class="p">,</span>
+            <span class="n">treatment_value</span><span class="p">,</span>
             <span class="n">conditional_estimates</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">estimate</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_estimand</span> <span class="o">=</span> <span class="n">target_estimand</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">realized_estimand_expr</span> <span class="o">=</span> <span class="n">realized_estimand_expr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">control_value</span> <span class="o">=</span> <span class="n">control_value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">treatment_value</span> <span class="o">=</span> <span class="n">treatment_value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">conditional_estimates</span> <span class="o">=</span> <span class="n">conditional_estimates</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">kwargs</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -937,10 +944,11 @@
         <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">## Estimate</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Mean value: </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
         <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;cate_estimates&quot;</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Effect estimates: </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cate_estimates</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">_significance_test</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;p-value: </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">signif_results_tostr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_stat_significance</span><span class="p">()))</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">_confidence_intervals</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Standard error: </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_standard_error</span><span class="p">())</span>
             <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">{0}% c</span><span class="s2">onfidence interval: </span><span class="si">{1}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">confidence_level</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_confidence_intervals</span><span class="p">())</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">conditional_estimates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;### Conditional Estimates</span><span class="se">\n</span><span class="s2">&quot;</span>
