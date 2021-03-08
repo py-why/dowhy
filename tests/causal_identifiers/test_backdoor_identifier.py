@@ -4,8 +4,8 @@ from dowhy.causal_identifier import CausalIdentifier
 
 from .base import IdentificationTestGraphSolution, example_graph_solution
 
-# TODO: How to differentiate when no adjustment is needed from when no adjustment exists?
 
+# TODO: How to differentiate when no adjustment is needed from when no adjustment exists?
 class TestBackdoorIdentification(object):
 
     def test_identify_backdoor_no_biased_sets(self, example_graph_solution: IdentificationTestGraphSolution):

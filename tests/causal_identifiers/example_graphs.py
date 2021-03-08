@@ -12,6 +12,7 @@ Each example graph is contained of the following values:
 """
 
 TEST_GRAPH_SOLUTIONS = {
+    # Example is selected from Pearl J. "Causality" 2nd Edition, from chapter 3.3.1 on backoor criterion.
     "pearl_backdoor_example_graph": dict(
         graph_str = """graph[directed 1 node[id "Z1" label "Z1"]  
                         node[id "Z2" label "Z2"]
@@ -135,7 +136,7 @@ TEST_GRAPH_SOLUTIONS = {
         biased_sets = [("Z2",), ("Z1", "Z2")],
         expected_sets = [("Z1",), ("Z3",)]
     ),
-    # The following are examples given in the "Book of Why" by Judea Pearl.
+    # The following are examples given in the "Book of Why" by Judea Pearl, chapter "The Do-operator and the Back-Door Criterion"
     "book_of_why_game2": dict(
         graph_str = """graph[directed 1 node[id "A" label "A"]
                 node[id "B" label "B"]
