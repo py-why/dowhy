@@ -247,8 +247,7 @@ class CausalIdentifier:
         # Second, checking for all other sets of variables
         eligible_variables = self._graph.get_all_nodes() \
             - set(treatment_name) \
-            - set(outcome_name) \
-            - set(self._graph.get_instruments(treatment_name, outcome_name))
+            - set(outcome_name) 
         eligible_variables -= self._graph.get_descendants(treatment_name)
 
         num_iterations = 0
