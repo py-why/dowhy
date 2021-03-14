@@ -233,7 +233,7 @@ class CausalIdentifier:
 
 
 
-    def identify_backdoor(self, treatment_name, outcome_name):
+    def identify_backdoor(self, treatment_name, outcome_name, include_unobserved=False):
         backdoor_sets = []
         backdoor_paths = self._graph.get_backdoor_paths(treatment_name, outcome_name)
         # First, checking if empty set is a valid backdoor set
@@ -275,11 +275,11 @@ class CausalIdentifier:
         #causes_y = self._graph.get_causes(self.outcome_name, remove_edges={'sources':self.treatment_name, 'targets':self.outcome_name})
         #common_causes = list(causes_t.intersection(causes_y))
         #self.logger.info("Common causes of treatment and outcome:" + str(common_causes))
-        observed_backdoor_sets = [ bset for bset in backdoor_sets if self._graph.all_observed(bset["backdoor_set"])]
-        if len(observed_backdoor_sets)==0:
+        
+        if include_unobserved:
             return backdoor_sets
         else:
-            return observed_backdoor_sets
+            return [bset for bset in backdoor_sets if self._graph.all_observed(bset["backdoor_set"])]
 
     def get_default_backdoor_set_id(self, backdoor_sets_dict):
         # Adding a None estimand if no backdoor set found
