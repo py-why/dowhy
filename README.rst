@@ -1,4 +1,4 @@
-|BuildStatus|_ |PyPiVersion|_ |PythonSupport|_
+|BuildStatus|_ |PyPiVersion|_ |PythonSupport|_ |Downloads|_
 
 .. |PyPiVersion| image:: https://img.shields.io/pypi/v/dowhy.svg
 .. _PyPiVersion: https://pypi.org/project/dowhy/
@@ -8,6 +8,9 @@
 
 .. |BuildStatus| image:: https://github.com/microsoft/dowhy/workflows/Python%20package/badge.svg
 .. _BuildStatus: https://github.com/microsoft/dowhy/actions
+
+.. |Downloads| image:: https://pepy.tech/badge/dowhy
+.. _Downloads: https://pepy.tech/project/dowhy
 
 DoWhy | An end-to-end library for causal inference
 ===================================================
@@ -484,7 +487,11 @@ The `projects <https://github.com/microsoft/dowhy/projects>`_ page lists the nex
 Contributing
 ============
 
-This project welcomes contributions and suggestions. For a guide to contributing and a list of all contributors, check out `CONTRIBUTING.md <https://github.com/microsoft/dowhy/blob/master/CONTRIBUTING.md>`_.
+This project welcomes contributions and suggestions. For a guide to contributing and a list of all contributors, check out `CONTRIBUTING.md <https://github.com/microsoft/dowhy/blob/master/CONTRIBUTING.md>`_. You can also join the DoWhy development channel on Discord: |discord|_
+
+.. |discord| image:: https://img.shields.io/discord/818456847551168542
+.. _discord: https://discord.gg/cSBGb3vsZb
+
 
 Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
