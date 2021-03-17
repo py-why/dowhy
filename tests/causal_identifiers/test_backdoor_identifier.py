@@ -13,7 +13,7 @@ class TestBackdoorIdentification(object):
         biased_sets = example_graph_solution.biased_sets
         identifier = CausalIdentifier(graph, "nonparametric-ate", method_name="exhaustive-search")
         
-        backdoor_results = identifier.identify_backdoor("X", "Y")
+        backdoor_results = identifier.identify_backdoor("X", "Y", include_unobserved=False)
         backdoor_sets = [
             set(backdoor_result_dict["backdoor_set"]) 
             for backdoor_result_dict in backdoor_results
@@ -34,7 +34,7 @@ class TestBackdoorIdentification(object):
         observed_variables = example_graph_solution.observed_variables
         identifier = CausalIdentifier(graph, "nonparametric-ate", method_name="exhaustive-search")
 
-        backdoor_results = identifier.identify_backdoor("X", "Y")
+        backdoor_results = identifier.identify_backdoor("X", "Y", include_unobserved=False)
         backdoor_sets = [
             set(backdoor_result_dict["backdoor_set"]) 
             for backdoor_result_dict in backdoor_results
@@ -48,7 +48,7 @@ class TestBackdoorIdentification(object):
         expected_sets = example_graph_solution.expected_sets
         identifier = CausalIdentifier(graph, "nonparametric-ate", method_name="exhaustive-search", proceed_when_unidentifiable=False)
         
-        backdoor_results = identifier.identify_backdoor("X", "Y")
+        backdoor_results = identifier.identify_backdoor("X", "Y", include_unobserved=False)
         backdoor_sets = [
             set(backdoor_result_dict["backdoor_set"]) 
             for backdoor_result_dict in backdoor_results
