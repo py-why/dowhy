@@ -27,8 +27,8 @@ class CausalIdentifier:
     # Backdoor method names
     BACKDOOR_DEFAULT="default"
     BACKDOOR_EXHAUSTIVE="exhaustive-search"
-    BACKDOOR_MIN="minimum-sufficient"
-    BACKDOOR_MAX="maximum-possible"
+    BACKDOOR_MIN="minimal-adjustment"
+    BACKDOOR_MAX="maximal-adjustment"
     METHOD_NAMES = {BACKDOOR_DEFAULT, BACKDOOR_EXHAUSTIVE, BACKDOOR_MIN, BACKDOOR_MAX}
     DEFAULT_BACKDOOR_METHOD = BACKDOOR_MAX
 
