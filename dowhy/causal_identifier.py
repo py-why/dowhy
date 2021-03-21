@@ -243,6 +243,7 @@ class CausalIdentifier:
     def identify_backdoor(self, treatment_name, outcome_name, include_unobserved=True):
         backdoor_sets = []
         backdoor_paths = self._graph.get_backdoor_paths(treatment_name, outcome_name)
+        method_name = self.method_name if self.method_name != CausalIdentifier.BACKDOOR_DEFAULT else CausalIdentifier.DEFAULT_BACKDOOR_METHOD
         # First, checking if empty set is a valid backdoor set
         empty_set = set()
         check = self._graph.check_valid_backdoor_set(treatment_name, outcome_name, empty_set,
@@ -251,6 +252,10 @@ class CausalIdentifier:
             backdoor_sets.append({
                 'backdoor_set':empty_set,
                 'num_paths_blocked_by_observed_nodes': check["num_paths_blocked_by_observed_nodes"]})
+            # If the method is `minimal-adjustment`, return the empty set right away.
+            if method_name == CausalIdentifier.BACKDOOR_MIN:
+                return backdoor_sets
+
         # Second, checking for all other sets of variables
         eligible_variables = self._graph.get_all_nodes() \
             - set(treatment_name) \
@@ -259,9 +264,10 @@ class CausalIdentifier:
         
         num_iterations = 0
         found_valid_adjustment_set = False
-        method_name = self.method_name if self.method_name != CausalIdentifier.BACKDOOR_DEFAULT else CausalIdentifier.DEFAULT_BACKDOOR_METHOD
         if method_name in CausalIdentifier.METHOD_NAMES:
-            for size_candidate_set in range(len(eligible_variables), 0, -1):
+            # If `minimal-adjustment` method is specified, start the search from the set with minimum size. Otherwise, start from the largest.
+            set_sizes = range(1, len(eligible_variables) + 1, 1) if method_name == CausalIdentifier.BACKDOOR_MIN else range(len(eligible_variables), 0, -1)
+            for size_candidate_set in set_sizes:
                 for candidate_set in itertools.combinations(eligible_variables, size_candidate_set):
                     # If include_unobserved is false, make sure the candidate set contains only observed variables.
                     if include_unobserved or self._graph.all_observed(candidate_set):
@@ -276,16 +282,11 @@ class CausalIdentifier:
                         num_iterations += 1
                         if method_name == CausalIdentifier.BACKDOOR_EXHAUSTIVE and num_iterations > CausalIdentifier.MAX_BACKDOOR_ITERATIONS:
                             break
-                # If the backdoor method is `maximal-adjustment`, return the first valid adjustment set, which is the maximum possible one.
-                if method_name == CausalIdentifier.BACKDOOR_MAX and found_valid_adjustment_set:
+                # If the backdoor method is `maximal-adjustment` or `minimal-adjustment`, return the first found adjustment set.
+                if method_name in {CausalIdentifier.BACKDOOR_MAX, CausalIdentifier.BACKDOOR_MIN} and found_valid_adjustment_set:
                     break
         else:
             raise ValueError(f"Identifier method {method_name} not supported. Try one of the following: {CausalIdentifier.METHOD_NAMES}")
-        
-        # If method name is `minimal-adjustment` return the backdoor sets with lowest possible cardinality.
-        if method_name == CausalIdentifier.BACKDOOR_MIN and len(backdoor_sets) > 0:
-            min_set_size = min([len(bset["backdoor_set"]) for bset in backdoor_sets])
-            backdoor_sets = [bset for bset in backdoor_sets if len(bset["backdoor_set"]) == min_set_size]
         
         return backdoor_sets
 
@@ -293,7 +294,7 @@ class CausalIdentifier:
         # Adding a None estimand if no backdoor set found
         if len(backdoor_sets_dict) == 0:
             return None
-
+        
         # Default set contains minimum possible number of instrumental variables, to prevent lowering variance in the treatment variable. 
         instrument_names = set(self._graph.get_instruments(self.treatment_name, self.outcome_name))
         iv_count_dict = {key: len(set(bdoor_set).intersection(instrument_names)) for key, bdoor_set in backdoor_sets_dict.items()}
