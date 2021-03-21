@@ -276,13 +276,13 @@ class CausalIdentifier:
                         num_iterations += 1
                         if method_name == CausalIdentifier.BACKDOOR_EXHAUSTIVE and num_iterations > CausalIdentifier.MAX_BACKDOOR_ITERATIONS:
                             break
-                # If the backdoor method is `maximum-possible`, return the first valid adjustment set, which is the maximum possible one.
+                # If the backdoor method is `maximal-adjustment`, return the first valid adjustment set, which is the maximum possible one.
                 if method_name == CausalIdentifier.BACKDOOR_MAX and found_valid_adjustment_set:
                     break
         else:
             raise ValueError(f"Identifier method {method_name} not supported. Try one of the following: {CausalIdentifier.METHOD_NAMES}")
         
-        # If method name is `minimum-sufficient` return the backdoor sets with lowest possible cardinality.
+        # If method name is `minimal-adjustment` return the backdoor sets with lowest possible cardinality.
         if method_name == CausalIdentifier.BACKDOOR_MIN and len(backdoor_sets) > 0:
             min_set_size = min([len(bset["backdoor_set"]) for bset in backdoor_sets])
             backdoor_sets = [bset for bset in backdoor_sets if len(bset["backdoor_set"]) == min_set_size]
