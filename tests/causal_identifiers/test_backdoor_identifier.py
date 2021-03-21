@@ -43,25 +43,57 @@ class TestBackdoorIdentification(object):
 
         assert all([variable in observed_variables for backdoor_set in backdoor_sets for variable in backdoor_set]) # All variables used in the backdoor sets must be observed.
 
-    def test_identify_backdoor_expected_sets(self, example_graph_solution: IdentificationTestGraphSolution):
+    def test_identify_backdoor_minimal_adjustment(self, example_graph_solution: IdentificationTestGraphSolution):
         graph = example_graph_solution.graph
-        expected_sets = example_graph_solution.expected_sets
-        identifier = CausalIdentifier(graph, "nonparametric-ate", method_name="exhaustive-search", proceed_when_unidentifiable=False)
+        expected_sets = example_graph_solution.minimal_adjustment_sets
+        identifier = CausalIdentifier(graph, "nonparametric-ate", method_name="minimal-adjustment", proceed_when_unidentifiable=False)
         
         backdoor_results = identifier.identify_backdoor("X", "Y", include_unobserved=False)
         backdoor_sets = [
             set(backdoor_result_dict["backdoor_set"]) 
             for backdoor_result_dict in backdoor_results
-            if len(backdoor_result_dict["backdoor_set"]) > 0
         ]
-
+        print(backdoor_results)
         assert (
-            ((len(backdoor_sets) == 0) and (len(expected_sets) == 0)) # No adjustments needed and that's expected.
+            ((len(backdoor_sets) == 0) and (len(expected_sets) == 0)) # No adjustments exist and that's expected.
             or
             all([
                 set(expected_set) in backdoor_sets 
                 for expected_set in expected_sets
-            ]) # The solution contains all the minimal sufficient adjustment sets.
+            ])
         )
 
+    def test_identify_backdoor_maximal_adjustment(self, example_graph_solution: IdentificationTestGraphSolution):
+        graph = example_graph_solution.graph
+        expected_sets = example_graph_solution.maximal_adjustment_sets
+        identifier = CausalIdentifier(graph, "nonparametric-ate", method_name="maximal-adjustment", proceed_when_unidentifiable=False)
+        
+        backdoor_results = identifier.identify_backdoor("X", "Y", include_unobserved=False)
+        
+        backdoor_sets = [
+            set(backdoor_result_dict["backdoor_set"]) 
+            for backdoor_result_dict in backdoor_results
+        ]
+        
+        assert (
+            ((len(backdoor_sets) == 0) and (len(expected_sets) == 0)) # No adjustments exist and that's expected.
+            or
+            all([
+                set(expected_set) in backdoor_sets 
+                for expected_set in expected_sets
+            ])
+        )
+
+    def test_identify_backdoor_adjustment_not_necessary(self, example_graph_solution: IdentificationTestGraphSolution):
+        graph = example_graph_solution.graph
+        adjustment_not_necessary = example_graph_solution.adjustment_not_necessary
+        identifier = CausalIdentifier(graph, "nonparametric-ate", method_name="exhaustive-search", proceed_when_unidentifiable=False)
+        
+        backdoor_results = identifier.identify_backdoor("X", "Y", include_unobserved=False)
+        res_adjustment_not_necessary = any([
+            len(backdoor_result_dict["backdoor_set"]) == 0 
+            for backdoor_result_dict in backdoor_results
+        ])
+
+        assert res_adjustment_not_necessary == adjustment_not_necessary
     
