@@ -53,7 +53,7 @@ class TestBackdoorIdentification(object):
             set(backdoor_result_dict["backdoor_set"]) 
             for backdoor_result_dict in backdoor_results
         ]
-        print(backdoor_results)
+        
         assert (
             ((len(backdoor_sets) == 0) and (len(expected_sets) == 0)) # No adjustments exist and that's expected.
             or
@@ -83,17 +83,3 @@ class TestBackdoorIdentification(object):
                 for expected_set in expected_sets
             ])
         )
-
-    def test_identify_backdoor_adjustment_not_necessary(self, example_graph_solution: IdentificationTestGraphSolution):
-        graph = example_graph_solution.graph
-        adjustment_not_necessary = example_graph_solution.adjustment_not_necessary
-        identifier = CausalIdentifier(graph, "nonparametric-ate", method_name="exhaustive-search", proceed_when_unidentifiable=False)
-        
-        backdoor_results = identifier.identify_backdoor("X", "Y", include_unobserved=False)
-        res_adjustment_not_necessary = any([
-            len(backdoor_result_dict["backdoor_set"]) == 0 
-            for backdoor_result_dict in backdoor_results
-        ])
-
-        assert res_adjustment_not_necessary == adjustment_not_necessary
-    

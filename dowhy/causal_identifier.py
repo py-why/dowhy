@@ -254,9 +254,9 @@ class CausalIdentifier:
         # Second, checking for all other sets of variables
         eligible_variables = self._graph.get_all_nodes() \
             - set(treatment_name) \
-            - set(outcome_name) 
+            - set(outcome_name)
         eligible_variables -= self._graph.get_descendants(treatment_name)
-
+        
         num_iterations = 0
         found_valid_adjustment_set = False
         method_name = self.method_name if self.method_name != CausalIdentifier.BACKDOOR_DEFAULT else CausalIdentifier.DEFAULT_BACKDOOR_METHOD
