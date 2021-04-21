@@ -63,7 +63,7 @@ class Causalml(CausalEstimator):
             estimator_class = getattr(estimator_module, class_name)
 
         except (AttributeError, AssertionError, ImportError):
-            raise ImportError('Error loading {}.{}. Double-check the method name and ensure that all econml dependencies are installed.'.format(module_name, class_name))
+            raise ImportError('Error loading {}.{}. Double-check the method name and ensure that all causalml dependencies are installed.'.format(module_name, class_name))
         return estimator_class
 
     def _estimate_effect(self):
