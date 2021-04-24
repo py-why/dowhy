@@ -1,6 +1,8 @@
+import logging
+
 import dowhy.datasets
 from dowhy import CausalModel
-import logging
+
 
 class TestRefuter(object):
     def __init__(self, error_tolerance, estimator_method, refuter_method,
@@ -42,7 +44,7 @@ class TestRefuter(object):
             proceed_when_unidentifiable=True,
             test_significance=None
         )
-        target_estimand = model.identify_effect()
+        target_estimand = model.identify_effect(method_name="exhaustive-search")
         target_estimand.set_identifier_method(self.identifier_method)
         ate_estimate = model.estimate_effect(
             identified_estimand=target_estimand,

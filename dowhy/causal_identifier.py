@@ -23,7 +23,14 @@ class CausalIdentifier:
     NONPARAMETRIC_NDE="nonparametric-nde"
     NONPARAMETRIC_NIE="nonparametric-nie"
     MAX_BACKDOOR_ITERATIONS = 100000
-    VALID_METHOD_NAMES = {"default", "exhaustive-search"}
+
+    # Backdoor method names
+    BACKDOOR_DEFAULT="default"
+    BACKDOOR_EXHAUSTIVE="exhaustive-search"
+    BACKDOOR_MIN="minimal-adjustment"
+    BACKDOOR_MAX="maximal-adjustment"
+    METHOD_NAMES = {BACKDOOR_DEFAULT, BACKDOOR_EXHAUSTIVE, BACKDOOR_MIN, BACKDOOR_MAX}
+    DEFAULT_BACKDOOR_METHOD = BACKDOOR_MAX
 
     def __init__(self, graph, estimand_type,
             method_name = "default",
@@ -233,9 +240,10 @@ class CausalIdentifier:
 
 
 
-    def identify_backdoor(self, treatment_name, outcome_name):
+    def identify_backdoor(self, treatment_name, outcome_name, include_unobserved=True):
         backdoor_sets = []
         backdoor_paths = self._graph.get_backdoor_paths(treatment_name, outcome_name)
+        method_name = self.method_name if self.method_name != CausalIdentifier.BACKDOOR_DEFAULT else CausalIdentifier.DEFAULT_BACKDOOR_METHOD
         # First, checking if empty set is a valid backdoor set
         empty_set = set()
         check = self._graph.check_valid_backdoor_set(treatment_name, outcome_name, empty_set,
@@ -244,17 +252,22 @@ class CausalIdentifier:
             backdoor_sets.append({
                 'backdoor_set':empty_set,
                 'num_paths_blocked_by_observed_nodes': check["num_paths_blocked_by_observed_nodes"]})
-        # Second, checking for all other sets of variables
-        eligible_variables = self._graph.get_all_nodes() \
-            - set(treatment_name) \
-            - set(outcome_name) \
-            - set(self._graph.get_instruments(treatment_name, outcome_name))
-        eligible_variables -= self._graph.get_descendants(treatment_name)
+            # If the method is `minimal-adjustment`, return the empty set right away.
+            if method_name == CausalIdentifier.BACKDOOR_MIN:
+                return backdoor_sets
 
+        # Second, checking for all other sets of variables. If include_unobserved is false, then only observed variables are eligible.
+        eligible_variables = self._graph.get_all_nodes(include_unobserved=include_unobserved) \
+            - set(treatment_name) \
+            - set(outcome_name)
+        eligible_variables -= self._graph.get_descendants(treatment_name)
+        
         num_iterations = 0
         found_valid_adjustment_set = False
-        if self.method_name in CausalIdentifier.VALID_METHOD_NAMES:
-            for size_candidate_set in range(len(eligible_variables), 0, -1):
+        if method_name in CausalIdentifier.METHOD_NAMES:
+            # If `minimal-adjustment` method is specified, start the search from the set with minimum size. Otherwise, start from the largest.
+            set_sizes = range(1, len(eligible_variables) + 1, 1) if method_name == CausalIdentifier.BACKDOOR_MIN else range(len(eligible_variables), 0, -1)
+            for size_candidate_set in set_sizes:
                 for candidate_set in itertools.combinations(eligible_variables, size_candidate_set):
                     check = self._graph.check_valid_backdoor_set(treatment_name,
                             outcome_name, candidate_set, backdoor_paths=backdoor_paths)
@@ -263,33 +276,34 @@ class CausalIdentifier:
                         backdoor_sets.append({
                             'backdoor_set': candidate_set,
                             'num_paths_blocked_by_observed_nodes': check["num_paths_blocked_by_observed_nodes"]})
-                        if self._graph.all_observed(candidate_set):
-                            found_valid_adjustment_set = True
+                        found_valid_adjustment_set = True
                     num_iterations += 1
-                    if self.method_name == "default" and num_iterations > CausalIdentifier.MAX_BACKDOOR_ITERATIONS:
+                    if method_name == CausalIdentifier.BACKDOOR_EXHAUSTIVE and num_iterations > CausalIdentifier.MAX_BACKDOOR_ITERATIONS:
                         break
-                if self.method_name == "default" and found_valid_adjustment_set:
+                # If the backdoor method is `maximal-adjustment` or `minimal-adjustment`, return the first found adjustment set.
+                if method_name in {CausalIdentifier.BACKDOOR_MAX, CausalIdentifier.BACKDOOR_MIN} and found_valid_adjustment_set:
                     break
         else:
-            raise ValueError(f"Identifier method {self.method_name} not supported. Try one of the following: {CausalIdentifier.VALID_METHOD_NAMES}")
-        #causes_t = self._graph.get_causes(self.treatment_name)
-        #causes_y = self._graph.get_causes(self.outcome_name, remove_edges={'sources':self.treatment_name, 'targets':self.outcome_name})
-        #common_causes = list(causes_t.intersection(causes_y))
-        #self.logger.info("Common causes of treatment and outcome:" + str(common_causes))
-        observed_backdoor_sets = [ bset for bset in backdoor_sets if self._graph.all_observed(bset["backdoor_set"])]
-        if len(observed_backdoor_sets)==0:
-            return backdoor_sets
-        else:
-            return observed_backdoor_sets
+            raise ValueError(f"Identifier method {method_name} not supported. Try one of the following: {CausalIdentifier.METHOD_NAMES}")
+        
+        return backdoor_sets
 
     def get_default_backdoor_set_id(self, backdoor_sets_dict):
         # Adding a None estimand if no backdoor set found
         if len(backdoor_sets_dict) == 0:
             return None
+        
+        # Default set contains minimum possible number of instrumental variables, to prevent lowering variance in the treatment variable. 
+        instrument_names = set(self._graph.get_instruments(self.treatment_name, self.outcome_name))
+        iv_count_dict = {key: len(set(bdoor_set).intersection(instrument_names)) for key, bdoor_set in backdoor_sets_dict.items()}
+        min_iv_count = min(iv_count_dict.values())
+        min_iv_keys = {key for key, iv_count in iv_count_dict.items() if iv_count == min_iv_count}
+        min_iv_backdoor_sets_dict = {key: backdoor_sets_dict[key] for key in min_iv_keys}
+
+        # Default set is the one with the most number of adjustment variables (optimizing for minimum (unknown) bias not for efficiency)
         max_set_length = -1
         default_key = None
-        # Default set is the one with the most number of adjustment variables (optimizing for minimum (unknown) bias not for efficiency)
-        for key, bdoor_set in backdoor_sets_dict.items():
+        for key, bdoor_set in min_iv_backdoor_sets_dict.items():
             if len(bdoor_set) > max_set_length:
                 max_set_length = len(bdoor_set)
                 default_key = key
@@ -412,19 +426,6 @@ class CausalIdentifier:
         estimands_dict["backdoor"] = estimands_dict.get(str(default_backdoor_id), None)
         backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
         return backdoor_variables_dict
-
-    def get_default_backdoor_set_id(self, backdoor_sets_dict):
-        # Adding a None estimand if no backdoor set found
-        if len(backdoor_sets_dict) == 0:
-            return None
-        max_set_length = -1
-        default_key = None
-        # Default set is the one with the most number of adjustment variables (optimizing for minimum (unknown) bias not for efficiency)
-        for key, bdoor_set in backdoor_sets_dict.items():
-            if len(bdoor_set) > max_set_length:
-                max_set_length = len(bdoor_set)
-                default_key = key
-        return default_key
 
     def construct_backdoor_estimand(self, estimand_type, treatment_name,
                                     outcome_name, common_causes):

@@ -1,8 +1,10 @@
+import itertools
 import logging
 import re
+
 import networkx as nx
+
 from dowhy.utils.api import parse_state
-import itertools
 
 
 class CausalGraph:
@@ -344,7 +346,11 @@ class CausalGraph:
         return True
 
     def get_all_nodes(self, include_unobserved=True):
-        return self._graph.nodes
+        nodes = self._graph.nodes
+        if not include_unobserved:
+            nodes = set(self.filter_unobserved_variables(nodes))
+        
+        return nodes
 
     def filter_unobserved_variables(self, node_names):
         observed_node_names = list()
