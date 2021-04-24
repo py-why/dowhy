@@ -300,12 +300,12 @@ class CausalIdentifier:
         iv_count_dict = {key: len(set(bdoor_set).intersection(instrument_names)) for key, bdoor_set in backdoor_sets_dict.items()}
         min_iv_count = min(iv_count_dict.values())
         min_iv_keys = {key for key, iv_count in iv_count_dict.items() if iv_count == min_iv_count}
-        backdoor_sets_dict = {key: backdoor_sets_dict[key] for key in min_iv_keys}
+        min_iv_backdoor_sets_dict = {key: backdoor_sets_dict[key] for key in min_iv_keys}
 
         # Default set is the one with the most number of adjustment variables (optimizing for minimum (unknown) bias not for efficiency)
         max_set_length = -1
         default_key = None
-        for key, bdoor_set in backdoor_sets_dict.items():
+        for key, bdoor_set in min_iv_backdoor_sets_dict.items():
             if len(bdoor_set) > max_set_length:
                 max_set_length = len(bdoor_set)
                 default_key = key
