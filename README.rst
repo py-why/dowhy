@@ -132,8 +132,6 @@ first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL).
     pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" \
     --install-option="--library-path=/usr/lib/graphviz/"
 
-Keep in mind that pygraphviz installation can be problematic on the latest versions of Python3. Tested to work with Python 3.5.
-
 Sample causal inference analysis in DoWhy
 -------------------------------------------
 Most DoWhy
