@@ -74,7 +74,7 @@ class ConfounderDistributionInterpreter(VisualInterpreter):
         # before weights are applied we count number rows in each category
         # which is equivalent to summing over weight=1
         barplot_df_before = df.groupby([self.var_name, treated]).size().reset_index(name="count")
-
+        
         # after weights are applied we need to sum over the given weights
         barplot_df_after = df.groupby([self.var_name, treated]).agg({'weight': np.sum}).reset_index()
         barplot_df_after.rename(columns={'weight': 'count'}, inplace=True)
@@ -86,13 +86,15 @@ class ConfounderDistributionInterpreter(VisualInterpreter):
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=self.fig_size)
         iterable = zip([barplot_df_before, barplot_df_after], [ax1, ax2], [title1, title2])
         for plot_df, ax, title in iterable:
-            aggreagted_not_treated = plot_df[plot_df["treat"] == False]
-            aggreagted_treated = plot_df[plot_df["treat"] == True]
+            aggregated_not_treated = plot_df[plot_df[treated] == False].reset_index()
+            aggregated_treated = plot_df[plot_df[treated] == True].reset_index()
+            # aggregated_not_treated = plot_df[plot_df["treat"] == False]
+            # aggregated_treated = plot_df[plot_df["treat"] == True]
 
-            labels = aggreagted_not_treated[self.var_name]
-            not_treated_counts = aggreagted_not_treated['count']
+            labels = aggregated_not_treated[self.var_name].astype('float')
+            not_treated_counts = aggregated_not_treated['count']
 
-            treated_counts = aggreagted_treated['count']
+            treated_counts = aggregated_treated['count']
             self.discrete_dist_plot(labels, not_treated_counts, treated_counts, ax, title,
                                     self.var_name, self.font_size)
 
