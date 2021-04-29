@@ -30,12 +30,11 @@ class DistanceMatchingEstimator(CausalEstimator):
 
         if getattr(self, 'exact_match_cols', None) is None:
             self.exact_match_cols = None
-        
+
         self.logger.debug("Back-door variables used:" +
                         ",".join(self._target_estimand.get_backdoor_variables()))
 
         self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
-
         if self._observed_common_causes_names:
             if self.exact_match_cols is not None:
                 self._observed_common_causes_names = [v for v in self._observed_common_causes_names if v not in self.exact_match_cols]
@@ -143,8 +142,7 @@ class DistanceMatchingEstimator(CausalEstimator):
                     self.logger.debug("distances:")
                     self.logger.debug(distances)
 
-
-                    for i in range(treated.shape[0]):
+                    for i in range(numtreatedunits):
                         treated_outcome = treated.iloc[i][self._outcome_name].item()
                         control_outcome = np.mean(control.iloc[indices[i]][self._outcome_name].values)
                         att += treated_outcome - control_outcome
