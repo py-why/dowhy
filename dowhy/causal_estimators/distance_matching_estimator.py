@@ -11,7 +11,6 @@ class DistanceMatchingEstimator(CausalEstimator):
     Valid_Dist_Metric_Params = ['p', 'V', 'VI', 'w']
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         # Check if the treatment is one-dimensional
         if len(self._treatment_name) > 1:
             error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
@@ -22,12 +21,23 @@ class DistanceMatchingEstimator(CausalEstimator):
             self.logger.error(error_msg)
             raise Exception(error_msg)
 
+        # Setting the number of matches per data point
+        if getattr(self, 'num_matches_per_unit', None) is None:
+            self.num_matches_per_unit = 1
+        # Default distance metric if not provided by the user
+        if getattr(self, 'distance_metric', None) is None:
+            self.distance_metric = 'minkowski' # corresponds to euclidean metric with p=2
+
+        if getattr(self, 'exact_match_cols', None) is None:
+            self.exact_match_cols = None
+
         self.logger.debug("Back-door variables used:" +
                         ",".join(self._target_estimand.get_backdoor_variables()))
 
         self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
-
         if self._observed_common_causes_names:
+            if self.exact_match_cols is not None:
+                self._observed_common_causes_names = [v for v in self._observed_common_causes_names if v not in self.exact_match_cols]
             self._observed_common_causes = self._data[self._observed_common_causes_names]
             # Convert the categorical variables into dummy/indicator variables
             # Basically, this gives a one hot encoding for each category
@@ -39,13 +49,6 @@ class DistanceMatchingEstimator(CausalEstimator):
             self.logger.error(error_msg)
             raise Exception(error_msg)
 
-
-        # Setting the number of matches per data point
-        if getattr(self, 'num_matches_per_unit', None) is None:
-            self.num_matches_per_unit = 1
-        # Default distance metric if not provided by the user
-        if getattr(self, 'distance_metric', None) is None:
-            self.distance_metric = 'minkowski' # corresponds to euclidean metric with p=2
 
         # Dictionary of any user-provided params for the distance metric
         # that will be passed to sklearn nearestneighbors
@@ -64,8 +67,12 @@ class DistanceMatchingEstimator(CausalEstimator):
 
     def _estimate_effect(self):
         # this assumes a binary treatment regime
-        treated = self._data.loc[self._data[self._treatment_name[0]] == 1]
-        control = self._data.loc[self._data[self._treatment_name[0]] == 0]
+        updated_df = pd.concat([self._observed_common_causes,
+            self._data[[self._outcome_name, self._treatment_name[0]]]], axis=1)
+        if self.exact_match_cols is not None:
+            updated_df = pd.concat([updated_df, self._data[self.exact_match_cols]], axis=1)
+        treated = updated_df.loc[self._data[self._treatment_name[0]] == 1]
+        control = updated_df.loc[self._data[self._treatment_name[0]] == 0]
         numtreatedunits = treated.shape[0]
         numcontrolunits = control.shape[0]
 
@@ -84,36 +91,69 @@ class DistanceMatchingEstimator(CausalEstimator):
 
         if fit_att:
             # estimate ATT on treated by summing over difference between matched neighbors
-            control_neighbors = (
-                NearestNeighbors(n_neighbors=self.num_matches_per_unit,
-                    metric=self.distance_metric,
-                    algorithm='ball_tree',
-                    **self.distance_metric_params)
-                .fit(control[self._observed_common_causes.columns].values)
-            )
-            distances, indices = control_neighbors.kneighbors(
-                    treated[self._observed_common_causes.columns].values)
-            self.logger.debug("distances:")
-            self.logger.debug(distances)
+            if self.exact_match_cols is None:
+                control_neighbors = (
+                    NearestNeighbors(n_neighbors=self.num_matches_per_unit,
+                        metric=self.distance_metric,
+                        algorithm='ball_tree',
+                        **self.distance_metric_params)
+                    .fit(control[self._observed_common_causes.columns].values)
+                )
+                distances, indices = control_neighbors.kneighbors(
+                        treated[self._observed_common_causes.columns].values)
+                self.logger.debug("distances:")
+                self.logger.debug(distances)
 
-            att = 0
+                att = 0
 
-            for i in range(numtreatedunits):
-                treated_outcome = treated.iloc[i][self._outcome_name].item()
-                control_outcome = np.mean(control.iloc[indices[i]][self._outcome_name].values)
-                att += treated_outcome - control_outcome
+                for i in range(numtreatedunits):
+                    treated_outcome = treated.iloc[i][self._outcome_name].item()
+                    control_outcome = np.mean(control.iloc[indices[i]][self._outcome_name].values)
+                    att += treated_outcome - control_outcome
 
-            att /= numtreatedunits
-            if self._target_units == "att":
-                est = att
-            elif self._target_units == "ate":
-                est = att*numtreatedunits
+                att /= numtreatedunits
+                if self._target_units == "att":
+                    est = att
+                elif self._target_units == "ate":
+                    est = att*numtreatedunits
 
-            # Return indices in the original dataframe
-            self.matched_indices_att = {}
-            treated_df_index = treated.index.tolist()
-            for i in range(numtreatedunits):
-                self.matched_indices_att[treated_df_index[i]] = control.iloc[indices[i]].index.tolist()
+                # Return indices in the original dataframe
+                self.matched_indices_att = {}
+                treated_df_index = treated.index.tolist()
+                for i in range(numtreatedunits):
+                    self.matched_indices_att[treated_df_index[i]] = control.iloc[indices[i]].index.tolist()
+            else:
+                grouped = updated_df.groupby(self.exact_match_cols)
+                att = 0
+                for name, group in grouped:
+                    treated = group.loc[group[self._treatment_name[0]] == 1]
+                    control = group.loc[group[self._treatment_name[0]] == 0]
+                    if treated.shape[0] == 0:
+                        continue
+                    control_neighbors = (
+                        NearestNeighbors(n_neighbors=self.num_matches_per_unit,
+                            metric=self.distance_metric,
+                            algorithm='ball_tree',
+                            **self.distance_metric_params)
+                        .fit(control[self._observed_common_causes.columns].values)
+                    )
+                    distances, indices = control_neighbors.kneighbors(
+                            treated[self._observed_common_causes.columns].values)
+                    self.logger.debug("distances:")
+                    self.logger.debug(distances)
+
+                    for i in range(numtreatedunits):
+                        treated_outcome = treated.iloc[i][self._outcome_name].item()
+                        control_outcome = np.mean(control.iloc[indices[i]][self._outcome_name].values)
+                        att += treated_outcome - control_outcome
+                        #self.matched_indices_att[treated_df_index[i]] = control.iloc[indices[i]].index.tolist()
+
+                att /= numtreatedunits
+
+                if self._target_units == "att":
+                    est = att
+                elif self._target_units == "ate":
+                    est = att*numtreatedunits
 
         if fit_atc:
             #Now computing ATC
