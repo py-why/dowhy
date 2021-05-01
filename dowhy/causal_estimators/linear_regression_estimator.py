@@ -37,11 +37,11 @@ class LinearRegressionEstimator(RegressionEstimator):
     def _estimate_confidence_intervals(self, confidence_level,
             method=None):
         conf_ints = self.model.conf_int(alpha=1-confidence_level)
-        return conf_ints.to_numpy()[1:(len(self._treatment_name)+1),:]
+        return (self._treatment_value - self._control_value) * conf_ints.to_numpy()[1:(len(self._treatment_name)+1),:]
 
     def _estimate_std_error(self, method=None):
         std_error = self.model.bse[1:(len(self._treatment_name)+1)]
-        return std_error.to_numpy()
+        return (self._treatment_value - self._control_value) * std_error.to_numpy()
 
     def _test_significance(self, estimate_value, method=None):
         pvalue = self.model.pvalues[1:(len(self._treatment_name)+1)]
