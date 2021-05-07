@@ -86,13 +86,13 @@ class ConfounderDistributionInterpreter(VisualInterpreter):
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=self.fig_size)
         iterable = zip([barplot_df_before, barplot_df_after], [ax1, ax2], [title1, title2])
         for plot_df, ax, title in iterable:
-            aggreagted_not_treated = plot_df[plot_df["treat"] == False]
-            aggreagted_treated = plot_df[plot_df["treat"] == True]
+            aggregated_not_treated = plot_df[plot_df[treated] == False].reset_index()
+            aggregated_treated = plot_df[plot_df[treated] == True].reset_index()
 
-            labels = aggreagted_not_treated[self.var_name]
-            not_treated_counts = aggreagted_not_treated['count']
+            labels = aggregated_not_treated[self.var_name].astype('float')
+            not_treated_counts = aggregated_not_treated['count']
 
-            treated_counts = aggreagted_treated['count']
+            treated_counts = aggregated_treated['count']
             self.discrete_dist_plot(labels, not_treated_counts, treated_counts, ax, title,
                                     self.var_name, self.font_size)
 
