@@ -37,10 +37,18 @@ class LinearRegressionEstimator(RegressionEstimator):
     def _estimate_confidence_intervals(self, confidence_level,
             method=None):
         conf_ints = self.model.conf_int(alpha=1-confidence_level)
+
+        # For a linear regression model, the causal effect of a variable is equal to the coefficient corresponding to the 
+        # variable. Hence, the model by default outputs the confidence interval corresponding to treatment=1 and control=0.
+        # So for custom treatment and control values, we must multiply the confidence interval by the difference of the two.
         return (self._treatment_value - self._control_value) * conf_ints.to_numpy()[1:(len(self._treatment_name)+1),:]
 
     def _estimate_std_error(self, method=None):
         std_error = self.model.bse[1:(len(self._treatment_name)+1)]
+        
+        # For a linear regression model, the causal effect of a variable is equal to the coefficient corresponding to the 
+        # variable. Hence, the model by default outputs the standard error corresponding to treatment=1 and control=0.
+        # So for custom treatment and control values, we must multiply the standard error by the difference of the two.
         return (self._treatment_value - self._control_value) * std_error.to_numpy()
 
     def _test_significance(self, estimate_value, method=None):
