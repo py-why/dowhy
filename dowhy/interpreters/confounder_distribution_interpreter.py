@@ -64,12 +64,13 @@ class ConfounderDistributionInterpreter(VisualInterpreter):
         """
 
         cols = self.estimator._observed_common_causes_names + self.estimator._treatment_name
-        df = self.estimator._data[cols]
+        df = self.estimator._data[cols].copy()
         treated = self.estimator._treatment_name[0]
         propensity = self.estimate.propensity_scores
 
         # add weight column
-        df["weight"] = df[treated] * (propensity) ** (-1) + (1 - df[treated]) * (1 - propensity) ** (-1)
+        df.loc[:,"weight"] = df.loc[:, treated] * (propensity) ** (-1) + (1 - df.loc[:, treated]) * (1 - propensity) ** (-1)
+        # df["weight"] = df[treated] * (propensity) ** (-1) + (1 - df[treated]) * (1 - propensity) ** (-1)
 
         # before weights are applied we count number rows in each category
         # which is equivalent to summing over weight=1
