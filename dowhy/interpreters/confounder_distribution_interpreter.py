@@ -70,8 +70,7 @@ class ConfounderDistributionInterpreter(VisualInterpreter):
 
         # add weight column
         df.loc[:,"weight"] = df.loc[:, treated] * (propensity) ** (-1) + (1 - df.loc[:, treated]) * (1 - propensity) ** (-1)
-        # df["weight"] = df[treated] * (propensity) ** (-1) + (1 - df[treated]) * (1 - propensity) ** (-1)
-
+        
         # before weights are applied we count number rows in each category
         # which is equivalent to summing over weight=1
         barplot_df_before = df.groupby([self.var_name, treated]).size().reset_index(name="count")
