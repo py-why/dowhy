@@ -5,6 +5,7 @@ import logging
 
 from sympy import init_printing
 
+import dowhy.causal_discoverers as causal_discoverers
 import dowhy.causal_estimators as causal_estimators
 import dowhy.causal_refuters as causal_refuters
 import dowhy.utils.cli_helpers as cli
@@ -118,6 +119,49 @@ class CausalModel:
 
         self._other_variables = kwargs
         self.summary()
+
+    def learn_graph(self, method_name="cdt.lingam", render=False, view=False, *args, **kwargs):
+        '''
+        Learn graph from the data.
+        '''
+
+        if method_name is None:
+            #TODO add LiNGAM as default backdoor method, DirectLiNGAM as default LiNGAM method, add an informational message to show which method has been selected.
+            pass
+        else:
+            num_components = len(method_name.split("."))
+            str_arr = method_name.split(".", maxsplit=1)
+            library_name = str_arr[0]
+            discovery_name = str_arr[1]
+            
+            causal_discovery_class = causal_discoverers.get_class_object(library_name)
+    
+        model = causal_discovery_class(self._data, discovery_name.lower(), *args, **kwargs)
+        graph = model.discover()
+        graph = model._get_dot_graph()
+
+        # Create causal graph object
+        self._graph = CausalGraph(
+                self._treatment,
+                self._outcome,
+                graph,
+                effect_modifier_names=self._effect_modifiers,
+                observed_node_names=self._data.columns.tolist(),
+                missing_nodes_as_confounders = self._missing_nodes_as_confounders
+            )
+        self._common_causes = self._graph.get_common_causes(self._treatment, self._outcome)
+        self._instruments = self._graph.get_instruments(self._treatment,
+                                                        self._outcome)
+        # Sometimes, effect modifiers from the graph may not match those provided by the user.
+        # (Because some effect modifiers may also be common causes)
+        # In such cases, the user-provided modifiers are used.
+        # If no effect modifiers are provided,  then the ones from the graph are used.
+        if self._effect_modifiers is None or not self._effect_modifiers:
+            self._effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
+        
+        # Save and/or view the graph
+        if render:
+            model.render("image.png", view=view)
 
     def identify_effect(self, estimand_type=None,
             method_name="default", proceed_when_unidentifiable=None):
