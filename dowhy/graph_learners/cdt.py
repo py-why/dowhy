@@ -3,30 +3,22 @@ import networkx as nx
 from .utils import *
 from cdt.causality.graph import LiNGAM, PC, GES
 
-from dowhy.causal_discovery import CausalDiscovery
+from dowhy.graph_learners import GraphLearner
 
-functions = {
-    'lingam' : LiNGAM,
-    'pc' : PC,
-    'ges' : GES,
-}
+class CDT(GraphLearner):
 
-class CDT(CausalDiscovery):
-
-    def __init__(self, data, method_name, *args, **kwargs):
-        super().__init__(data, method_name, *args, **kwargs)
+    def __init__(self, data, library_class, *args, **kwargs):
+        super().__init__(data, library_class, *args, **kwargs)
         
-        self._method = functions[method_name](*args, **kwargs)
+        self._method = library_class(*args, **kwargs)
     
     def discover(self):
         '''
         Discover causal graph.
 
         '''
-        self.labels = list(self._data.columns)
         self.graph = self._method.predict(self._data)
-        return self.graph
-
+        
     def _get_adjacency_matrix(self):
         '''
         Get adjacency matrix from the networkx graph
@@ -45,16 +37,10 @@ class CDT(CausalDiscovery):
 
         # If labels not provided
         if labels is not None:
-            self.labels = labels
+            self._labels = labels
 
-        graph_dot = make_graph(adj_matrix, self.labels)
+        graph_dot = make_graph(adj_matrix, self._labels)
         
         # Obtain valid DOT format
         graph_dot = str_to_dot(graph_dot.source)
         return graph_dot
-        
-    def render(self, filename, labels=None, view=True):
-        print("Graph for %s"%(self._method_name))
-        graph_dot = self._get_dot_graph(labels=labels)
-        graph_dot.render(filename, view=view)
-        
