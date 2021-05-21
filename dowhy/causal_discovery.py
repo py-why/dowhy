@@ -10,9 +10,9 @@ class GraphLearner:
 		self._data = data
 		self._labels = list(self._data.columns)
 		
-	def discover(self):
+	def learn_graph(self):
 		'''
-		Discover causal graph.
+		Discover causal graph and the graph in DOT format.
 
 		'''
 		raise NotImplementedError
@@ -23,14 +23,7 @@ class GraphLearner:
 		
 		'''
 		raise NotImplementedError
-		
-	def _get_dot_graph(self, labels=None):
-		'''
-		Return graph in DOT format.
-
-		'''
-		raise NotImplementedError
-		
+				
 	def render(self, filename, labels=None, view=True):
 		print("Rendering graph for %s"%(self._method_name))
 		

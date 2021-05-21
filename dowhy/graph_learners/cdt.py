@@ -1,9 +1,9 @@
 import numpy as np
 import networkx as nx
-from .utils import *
-from cdt.causality.graph import LiNGAM, PC, GES
+# from cdt.causality.graph import LiNGAM, PC, GES
 
 from dowhy.graph_learners import GraphLearner
+from dowhy.utils.graph_operations import *
 
 class CDT(GraphLearner):
 
@@ -12,35 +12,30 @@ class CDT(GraphLearner):
         
         self._method = library_class(*args, **kwargs)
     
-    def discover(self):
+    def learn_graph(self, labels=None):
         '''
-        Discover causal graph.
+        Discover causal graph and return the graph in DOT format.
 
         '''
         self.graph = self._method.predict(self._data)
         
-    def _get_adjacency_matrix(self):
-        '''
-        Get adjacency matrix from the networkx graph
-        
-        '''
-        adj_matrix = nx.to_numpy_matrix(self.graph)
-        adj_matrix = np.asarray(adj_matrix)
-        return adj_matrix
-
-    def _get_dot_graph(self, labels=None):
-        '''
-        Return graph in DOT format.
-
-        '''
-        adj_matrix = self._get_adjacency_matrix()
+        # Get adjacency matrix
+        self.adj_matrix = nx.to_numpy_matrix(self.graph)
+        self.adj_matrix = np.asarray(self.adj_matrix)
 
         # If labels not provided
         if labels is not None:
             self._labels = labels
 
-        graph_dot = make_graph(adj_matrix, self._labels)
+        graph_dot = adjacency_matrix_to_graph(self.adj_matrix, self._labels)
         
         # Obtain valid DOT format
         graph_dot = str_to_dot(graph_dot.source)
         return graph_dot
+
+    def _get_adjacency_matrix(self):
+        '''
+        Get adjacency matrix from the networkx graph
+        
+        '''
+        return self.adj_matrix

@@ -1,7 +1,7 @@
 import numpy as np
 import graphviz
 
-def make_graph(adjacency_matrix, labels=None):
+def adjacency_matrix_to_graph(adjacency_matrix, labels=None):
     idx = np.abs(adjacency_matrix) > 0.01
     dirs = np.where(idx)
     d = graphviz.Digraph(engine='dot')

@@ -93,36 +93,41 @@ class CausalModel:
 					observed_node_names=self._data.columns.tolist()
 				)
 			else:
-				cli.query_yes_no(
-					"WARN: Are you sure that there are no common causes of treatment and outcome?",
-					default=None
-				)
+				self._graph = None
 
 		else:
-			self._graph = CausalGraph(
-				self._treatment,
-				self._outcome,
-				graph,
-				effect_modifier_names=self._effect_modifiers,
-				observed_node_names=self._data.columns.tolist(),
-				missing_nodes_as_confounders = self._missing_nodes_as_confounders
-			)
-			self._common_causes = self._graph.get_common_causes(self._treatment, self._outcome)
-			self._instruments = self._graph.get_instruments(self._treatment,
-															self._outcome)
-			# Sometimes, effect modifiers from the graph may not match those provided by the user.
-			# (Because some effect modifiers may also be common causes)
-			# In such cases, the user-provided modifiers are used.
-			# If no effect modifiers are provided,  then the ones from the graph are used.
-			if self._effect_modifiers is None or not self._effect_modifiers:
-				self._effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
-
+			self.init_graph(graph=graph)
+			
 		self._other_variables = kwargs
 		self.summary()
 
-	def learn_graph(self, method_name="cdt.lingam", render=False, view=False, *args, **kwargs):
+	def init_graph(self, graph):
 		'''
-		Learn graph from the data.
+		Initialize self._graph using graph provided by the user.
+
+		'''
+		# Create causal graph object
+		self._graph = CausalGraph(
+			self._treatment,
+			self._outcome,
+			graph,
+			effect_modifier_names=self._effect_modifiers,
+			observed_node_names=self._data.columns.tolist(),
+			missing_nodes_as_confounders = self._missing_nodes_as_confounders
+		)
+		self._common_causes = self._graph.get_common_causes(self._treatment, self._outcome)
+		self._instruments = self._graph.get_instruments(self._treatment,
+														self._outcome)
+		# Sometimes, effect modifiers from the graph may not match those provided by the user.
+		# (Because some effect modifiers may also be common causes)
+		# In such cases, the user-provided modifiers are used.
+		# If no effect modifiers are provided,  then the ones from the graph are used.
+		if self._effect_modifiers is None or not self._effect_modifiers:
+			self._effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
+
+	def learn_graph(self, method_name="cdt.causality.graph.LiNGAM", render=False, view=False, *args, **kwargs):
+		'''
+		Learn causal graph from the data.
 		'''
 
 		if method_name is None:
@@ -137,27 +142,10 @@ class CausalModel:
 			causal_discovery_class = graph_learners.get_discovery_class_object(library_name)
 	
 		model = causal_discovery_class(self._data, library_class, *args, **kwargs)
-		model.discover()
-		graph = model._get_dot_graph()
-
-		# Create causal graph object
-		self._graph = CausalGraph(
-				self._treatment,
-				self._outcome,
-				graph,
-				effect_modifier_names=self._effect_modifiers,
-				observed_node_names=self._data.columns.tolist(),
-				missing_nodes_as_confounders = self._missing_nodes_as_confounders
-			)
-		self._common_causes = self._graph.get_common_causes(self._treatment, self._outcome)
-		self._instruments = self._graph.get_instruments(self._treatment,
-														self._outcome)
-		# Sometimes, effect modifiers from the graph may not match those provided by the user.
-		# (Because some effect modifiers may also be common causes)
-		# In such cases, the user-provided modifiers are used.
-		# If no effect modifiers are provided,  then the ones from the graph are used.
-		if self._effect_modifiers is None or not self._effect_modifiers:
-			self._effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
+		graph = model.learn_graph()
+		
+		# Initialize causal graph object
+		self.init_graph(graph=graph)
 		
 		# Save and/or view the graph
 		if render:
