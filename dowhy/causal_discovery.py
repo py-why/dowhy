@@ -9,6 +9,8 @@ class GraphLearner:
 
 		self._data = data
 		self._labels = list(self._data.columns)
+		self._adj_matrix = None
+		self._graph_dot = None
 		
 	def learn_graph(self):
 		'''
@@ -22,14 +24,9 @@ class GraphLearner:
 		Get adjacency matrix from the networkx graph
 		
 		'''
-		raise NotImplementedError
+		return self._adj_matrix
 				
 	def render(self, filename, labels=None, view=True):
 		print("Rendering graph for %s"%(self._method_name))
 		
-		# If labels not provided
-		if labels is not None:
-			self._labels = labels
-
-		graph_dot = self._get_dot_graph(labels=self._labels)
-		graph_dot.render(filename, view=view)
+		self._graph_dot.render(filename, view=view)
