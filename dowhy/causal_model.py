@@ -36,7 +36,8 @@ class CausalModel:
 		Also checks and finds the common causes and instruments for treatment
 		and outcome.
 
-		At least one of graph, common_causes or instruments must be provided.
+		At least one of graph, common_causes or instruments must be provided. If 
+		none of these variables are provided, then learn_graph() can be used later.
 
 		:param data: a pandas dataframe containing treatment, outcome and other
 		variables.
@@ -93,6 +94,7 @@ class CausalModel:
 					observed_node_names=self._data.columns.tolist()
 				)
 			else:
+				self.logger.warning("Sufficient variables to build causal graph not provided. DoWhy will learn the graph from the data inputs using learn_graph().")
 				self._graph = None
 
 		else:
@@ -125,7 +127,7 @@ class CausalModel:
 		if self._effect_modifiers is None or not self._effect_modifiers:
 			self._effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
 
-	def learn_graph(self, method_name="cdt.causality.graph.LiNGAM", render=False, view=False, *args, **kwargs):
+	def learn_graph(self, method_name="cdt.causality.graph.LiNGAM", render=False, view=False, image_path="image.png", *args, **kwargs):
 		'''
 		Learn causal graph from the data.
 		'''
@@ -137,7 +139,6 @@ class CausalModel:
 			library_class = graph_learners.get_library_class_object(method_name)
 			str_arr = method_name.split(".", maxsplit=1)
 			library_name = str_arr[0]
-			# discovery_name = str_arr[1]
 			
 			causal_discovery_class = graph_learners.get_discovery_class_object(library_name)
 	
@@ -149,7 +150,7 @@ class CausalModel:
 		
 		# Save and/or view the graph
 		if render:
-			model.render("image.png", view=view)
+			model.render(image_path, view=view)
 
 	def identify_effect(self, estimand_type=None,
 			method_name="default", proceed_when_unidentifiable=None):

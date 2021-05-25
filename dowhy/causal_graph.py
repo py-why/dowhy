@@ -400,6 +400,13 @@ class CausalGraph:
         # convert the outputted generator into a list
         return [p for p in nx.all_simple_paths(self._graph, source=node1, target=node2)]
 
+    def get_adjacency_matrix(self, *args, **kwargs):
+        '''
+        Get adjacency matrix from the networkx graph
+        
+        '''
+        return nx.convert_matrix.to_numpy_matrix(self._graph, *args, **kwargs)
+
     def check_valid_frontdoor_set(self, nodes1, nodes2, candidate_nodes, frontdoor_paths=None):
         """Check if valid the frontdoor variables for set of treatments, nodes1 to set of outcomes, nodes2.
         """

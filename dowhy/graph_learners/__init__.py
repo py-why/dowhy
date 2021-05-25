@@ -1,7 +1,7 @@
 import string
 from importlib import import_module
 
-from dowhy.causal_discovery import GraphLearner
+from dowhy.graph_learner import GraphLearner
 
 def get_discovery_class_object(method_name, *args, **kwargs):
 	'''
@@ -13,7 +13,6 @@ def get_discovery_class_object(method_name, *args, **kwargs):
 		module_name = method_name
 		class_name = module_name.upper()
 		
-		# import dowhy.causal_discoverers.lingam
 		discovery_module = import_module('.' + module_name, package="dowhy.graph_learners")
 		discovery_class = getattr(discovery_module, class_name)
 		assert issubclass(discovery_class, GraphLearner)
@@ -32,7 +31,7 @@ def get_library_class_object(module_method_name, *args, **kwargs):
 		(module_name, _, class_name) = module_method_name.rpartition(".")
 		discovery_module = import_module(module_name)
 		discovery_class = getattr(discovery_module, class_name)
-
+		
 	except (AttributeError, AssertionError, ImportError):
 		raise ImportError('Error loading {}.{}. Double-check the method name and ensure that all library dependencies are installed.'.format(module_name, class_name))
 	return discovery_class

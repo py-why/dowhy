@@ -9,17 +9,6 @@ class LINGAM(GraphLearner):
 	def __init__(self, data, library_class, *args, **kwargs):
 		super().__init__(data, library_class, *args, **kwargs)
 		
-		# if 'use_prior_knowledge' in kwargs and kwargs['use_prior_knowledge']:
-		# 	from lingam.utils import make_prior_knowledge
-		# 	pk = make_prior_knowledge(
-		# 		n_variables=len(self._data.columns),
-		# 		sink_variables=kwargs['sink_variables'])
-		# 	# print(functions[method_name], method_name)
-		# 	self._method = functions[method_name](prior_knowledge=pk)#, *args, **kwargs)
-		# 	# self._method = lingam.DirectLiNGAM(prior_knowledge=pk, *args, **kwargs)
-		# else:
-		# 	self._method = functions[method_name](*args, **kwargs)
-		
 		self._method = library_class(*args, **kwargs)
 
 	def learn_graph(self, labels=None):

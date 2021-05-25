@@ -1,5 +1,5 @@
 class GraphLearner:
-	"""Base class for an causal discovery methods.
+	"""Base class for causal discovery methods.
 
 	Subclasses implement different discovery methods. All discovery methods are in the package "dowhy.causal_discoverers"
 
@@ -25,8 +25,3 @@ class GraphLearner:
 		
 		'''
 		return self._adj_matrix
-				
-	def render(self, filename, labels=None, view=True):
-		print("Rendering graph for %s"%(self._method_name))
-		
-		self._graph_dot.render(filename, view=view)
