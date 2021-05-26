@@ -6,7 +6,10 @@ from dowhy.graph_learners import GraphLearner
 from dowhy.utils.graph_operations import *
 
 class CDT(GraphLearner):
-
+	'''
+	Causal discivery using the Causal Discovery Toolbox.
+	Link: https://github.com/FenTechSolutions/CausalDiscoveryToolbox
+	'''
 	def __init__(self, data, full_method_name, *args, **kwargs):
 		super().__init__(data, full_method_name, *args, **kwargs)
 		

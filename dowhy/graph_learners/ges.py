@@ -1,28 +1,28 @@
 import numpy as np
 import networkx as nx
+from importlib import import_module
 
-from . import get_library_class_object
 from dowhy.graph_learners import GraphLearner
 from dowhy.utils.graph_operations import *
 
-class LINGAM(GraphLearner):
+class GES(GraphLearner):
 	'''
-	Causal discovery using the lingam library.
-	Link: https://github.com/cdt15/lingam
+	Causal Discovery using GES method.
+	Link: https://pypi.org/project/ges/
 	'''
 	def __init__(self, data, full_method_name, *args, **kwargs):
 		super().__init__(data, full_method_name, *args, **kwargs)
 		
-		library_class = get_library_class_object(full_method_name)
-		self._method = library_class(*args, **kwargs)
+		library_class = import_module(full_method_name)
+		self._method = library_class
 
 	def learn_graph(self, labels=None):
 		'''
 		Discover causal graph and return the graph in DOT format.
 
 		'''
-		self._method.fit(self._data)
-		self._adjacency_matrix = self._method.adjacency_matrix_
+		self._adjacency_matrix, self.score = self._method.fit_bic(self._data.to_numpy())
+		self._adjacency_matrix = np.asarray(self._adjacency_matrix)
 
 		# If labels provided
 		if labels is not None:
