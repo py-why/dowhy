@@ -127,22 +127,22 @@ class CausalModel:
 		if self._effect_modifiers is None or not self._effect_modifiers:
 			self._effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
 
-	def learn_graph(self, method_name="cdt.causality.graph.LiNGAM", render=False, view=False, image_path="image.png", *args, **kwargs):
+	def learn_graph(self, full_method_name="cdt.causality.graph.LiNGAM", render=False, view=False, image_path="image.png", *args, **kwargs):
 		'''
 		Learn causal graph from the data.
 		'''
 
-		if method_name is None:
+		if full_method_name is None:
 			#TODO add LiNGAM as default backdoor method, DirectLiNGAM as default LiNGAM method, add an informational message to show which method has been selected.
 			pass
 		else:
-			library_class = graph_learners.get_library_class_object(method_name)
-			str_arr = method_name.split(".", maxsplit=1)
+			# library_class = graph_learners.get_library_class_object(method_name)
+			str_arr = full_method_name.split(".", maxsplit=1)
 			library_name = str_arr[0]
-			
 			causal_discovery_class = graph_learners.get_discovery_class_object(library_name)
 	
-		model = causal_discovery_class(self._data, library_class, *args, **kwargs)
+		model = causal_discovery_class(self._data, full_method_name, *args, **kwargs)
+		# model = causal_discovery_class(self._data, library_class, *args, **kwargs)
 		graph = model.learn_graph()
 		
 		# Initialize causal graph object

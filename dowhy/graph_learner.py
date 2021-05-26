@@ -9,7 +9,7 @@ class GraphLearner:
 
 		self._data = data
 		self._labels = list(self._data.columns)
-		self._adj_matrix = None
+		self._adjacency_matrix = None
 		self._graph_dot = None
 		
 	def learn_graph(self):
