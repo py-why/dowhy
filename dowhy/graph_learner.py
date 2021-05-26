@@ -18,10 +18,3 @@ class GraphLearner:
 
 		'''
 		raise NotImplementedError
-
-	def _get_adjacency_matrix(self):
-		'''
-		Get adjacency matrix from the networkx graph
-		
-		'''
-		return self._adj_matrix

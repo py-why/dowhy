@@ -94,7 +94,7 @@ class CausalModel:
 					observed_node_names=self._data.columns.tolist()
 				)
 			else:
-				self.logger.warning("Sufficient variables to build causal graph not provided. DoWhy will learn the graph from the data inputs using learn_graph().")
+				self.logger.warning("Relevant variables to build causal graph not provided. You may want to use the learn_graph() function to construct the causal graph.")
 				self._graph = None
 
 		else:
@@ -127,31 +127,23 @@ class CausalModel:
 		if self._effect_modifiers is None or not self._effect_modifiers:
 			self._effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
 
-	def learn_graph(self, full_method_name="cdt.causality.graph.LiNGAM", render=False, view=False, image_path="image.png", *args, **kwargs):
+	def learn_graph(self, method_name="cdt.causality.graph.LiNGAM", *args, **kwargs):
 		'''
 		Learn causal graph from the data.
-		'''
 
-		if full_method_name is None:
-			#TODO add LiNGAM as default backdoor method, DirectLiNGAM as default LiNGAM method, add an informational message to show which method has been selected.
-			pass
-		else:
-			# library_class = graph_learners.get_library_class_object(method_name)
-			str_arr = full_method_name.split(".", maxsplit=1)
-			library_name = str_arr[0]
-			causal_discovery_class = graph_learners.get_discovery_class_object(library_name)
+		TODO : Add input variable functions
+		'''
+		# Import causal discovery class
+		str_arr = method_name.split(".", maxsplit=1)
+		library_name = str_arr[0]
+		causal_discovery_class = graph_learners.get_discovery_class_object(library_name)
 	
-		model = causal_discovery_class(self._data, full_method_name, *args, **kwargs)
-		# model = causal_discovery_class(self._data, library_class, *args, **kwargs)
+		model = causal_discovery_class(self._data, method_name, *args, **kwargs)
 		graph = model.learn_graph()
 		
 		# Initialize causal graph object
 		self.init_graph(graph=graph)
 		
-		# Save and/or view the graph
-		if render:
-			model.render(image_path, view=view)
-
 	def identify_effect(self, estimand_type=None,
 			method_name="default", proceed_when_unidentifiable=None):
 		"""Identify the causal effect to be estimated, using properties of the causal graph.

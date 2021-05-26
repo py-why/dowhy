@@ -2,6 +2,7 @@ import numpy as np
 import graphviz
 
 def adjacency_matrix_to_graph(adjacency_matrix, labels=None):
+    # Only consider edges have absolute edge weight > 0.01
     idx = np.abs(adjacency_matrix) > 0.01
     dirs = np.where(idx)
     d = graphviz.Digraph(engine='dot')

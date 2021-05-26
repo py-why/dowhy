@@ -79,8 +79,7 @@ class CausalGraph:
         # Adding node attributes
         self._graph = self.add_node_attributes(observed_node_names)
 
-    def view_graph(self, layout="dot"):
-        out_filename = "causal_model.png"
+    def view_graph(self, layout="dot", out_filename = "causal_model.png"):
         try:
             import pygraphviz as pgv
             agraph = nx.drawing.nx_agraph.to_agraph(self._graph)

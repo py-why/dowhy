@@ -28,5 +28,5 @@ class LINGAM(GraphLearner):
 		self._graph_dot = adjacency_matrix_to_graph(self._adjacency_matrix, self._labels)
 		
 		# Return in valid DOT format
-		graph_str = str_to_dot(self._graph_dot.source)
-		return graph_str
+		self._graph_dot = str_to_dot(self._graph_dot.source)
+		return self._graph_dot
