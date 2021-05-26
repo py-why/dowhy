@@ -318,7 +318,7 @@ class CausalModel:
         res = refuter.refute_estimate()
         return res
 
-    def view_model(self, layout="dot"):
+    def view_model(self, layout="dot", size=(8, 6), file_name="causal_model"):
         """View the causal DAG.
 
         :param layout: string specifying the layout of the graph.
@@ -326,7 +326,7 @@ class CausalModel:
         :returns: a visualization of the graph
 
         """
-        self._graph.view_graph(layout)
+        self._graph.view_graph(layout, size, file_name)
 
     def interpret(self, method_name=None, **kwargs):
         """Interpret the causal model.
