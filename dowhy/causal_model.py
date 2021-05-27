@@ -129,9 +129,11 @@ class CausalModel:
 
 	def learn_graph(self, method_name="cdt.causality.graph.LiNGAM", *args, **kwargs):
 		'''
-		Learn causal graph from the data.
+		Learn causal graph from the data. This function takes the method name as input and initializes the 
+		causal graph object using the learnt graph.
 
-		TODO : Add input variable functions
+		Input variables:
+		method_name: Exact method name of the object to be imported from the concerned library.
 		'''
 		# Import causal discovery class
 		str_arr = method_name.split(".", maxsplit=1)
