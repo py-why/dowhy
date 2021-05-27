@@ -322,6 +322,8 @@ class CausalModel:
         """View the causal DAG.
 
         :param layout: string specifying the layout of the graph.
+        :param size: tuple (x, y) specifying the width and height of the figure in inches.
+        :param file_name: string specifying the file name for the saved causal graph png.
 
         :returns: a visualization of the graph
 
