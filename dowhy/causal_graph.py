@@ -79,17 +79,18 @@ class CausalGraph:
         # Adding node attributes
         self._graph = self.add_node_attributes(observed_node_names)
 
-    def view_graph(self, layout="dot"):
-        out_filename = "causal_model.png"
+    def view_graph(self, layout="dot", size=(8, 6), file_name="causal_model"):
+        out_filename = "{}.png".format(file_name)
         try:
             import pygraphviz as pgv
             agraph = nx.drawing.nx_agraph.to_agraph(self._graph)
+            agraph.graph_attr.update(size="{},{}!".format(size[0], size[0]))
             agraph.draw(out_filename, format="png", prog=layout)
         except:
             self.logger.warning("Warning: Pygraphviz cannot be loaded. Check that graphviz and pygraphviz are installed.")
             self.logger.info("Using Matplotlib for plotting")
             import matplotlib.pyplot as plt
-
+            plt.figure(figsize=size)
             solid_edges = [(n1,n2) for n1,n2, e in self._graph.edges(data=True) if 'style' not in e ]
             dashed_edges =[(n1,n2) for n1,n2, e in self._graph.edges(data=True) if ('style' in e and e['style']=="dashed") ]
             plt.clf()
