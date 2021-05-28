@@ -346,11 +346,11 @@ class CausalEstimator:
         lower_bound_index = int((1 - confidence_level) * len(sorted_bootstrap_variations))
         upper_bound_index = int(confidence_level * len(sorted_bootstrap_variations))
 
-        # get the values
+        # Get the lower and upper bounds by subtracting the variations from the estimate
         lower_bound = estimate_value - sorted_bootstrap_variations[lower_bound_index]
         upper_bound = estimate_value - sorted_bootstrap_variations[upper_bound_index]
 
-        return (lower_bound, upper_bound)
+        return lower_bound, upper_bound
 
     def _estimate_confidence_intervals(self, confidence_level=None, method=None,
             **kwargs):
