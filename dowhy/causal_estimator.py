@@ -289,6 +289,8 @@ class CausalEstimator:
                 new_data,
                 self._target_estimand,
                 self._target_estimand.treatment_variable, self._target_estimand.outcome_variable, #names of treatment and outcome
+                treatment_value = self._treatment_value,
+                control_value = self._control_value,
                 test_significance=False,
                 evaluate_effect_strength=False,
                 confidence_intervals = False,
@@ -337,19 +339,17 @@ class CausalEstimator:
                     num_simulations, sample_size_fraction)
         # Now use the data obtained from the simulations to get the value of the confidence estimates
         bootstrap_estimates = self._bootstrap_estimates.estimates
-
         # Get the variations of each bootstrap estimate and sort
         bootstrap_variations = [bootstrap_estimate - estimate_value for bootstrap_estimate in bootstrap_estimates]
         sorted_bootstrap_variations = np.sort(bootstrap_variations)
 
         # Now we take the (1- p)th and the (p)th variations, where p is the chosen confidence level
-        lower_bound_index = int((1 - confidence_level) * len(sorted_bootstrap_variations))
-        upper_bound_index = int(confidence_level * len(sorted_bootstrap_variations))
+        upper_bound_index = int((1 - confidence_level) * len(sorted_bootstrap_variations))
+        lower_bound_index = int(confidence_level * len(sorted_bootstrap_variations))
 
         # Get the lower and upper bounds by subtracting the variations from the estimate
         lower_bound = estimate_value - sorted_bootstrap_variations[lower_bound_index]
         upper_bound = estimate_value - sorted_bootstrap_variations[upper_bound_index]
-
         return lower_bound, upper_bound
 
     def _estimate_confidence_intervals(self, confidence_level=None, method=None,
