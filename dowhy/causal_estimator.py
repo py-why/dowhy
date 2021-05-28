@@ -173,8 +173,8 @@ class CausalEstimator:
         if self._significance_test:
             self.test_significance(est.value, method=self._significance_test)
         if self._confidence_intervals:
-            self.estimate_confidence_intervals(method=self._confidence_intervals,
-                    confidence_level=self.confidence_level)
+            self.estimate_confidence_intervals(est.value, confidence_level=self.confidence_level,
+                                               method=self._confidence_intervals)
         if self._effect_strength_eval:
             effect_strength_dict = self.evaluate_effect_strength(est)
             est.add_effect_strength(effect_strength_dict)
@@ -305,12 +305,13 @@ class CausalEstimator:
         return estimates
 
 
-    def _estimate_confidence_intervals_with_bootstrap(self,
+    def _estimate_confidence_intervals_with_bootstrap(self, estimate_value,
             confidence_level=None,
             num_simulations=None, sample_size_fraction=None):
         '''
             Method to compute confidence interval using bootstrapped sampling.
 
+            :param estimate_value: obtained estimate's value
             :param confidence_level: The level for which to compute CI (e.g., 95% confidence level translates to confidence_level=0.95)
             :param num_simulations: The number of simulations to be performed to get the bootstrap confidence intervals.
             :param sample_size_fraction: The fraction of the dataset to be resampled.
@@ -335,19 +336,23 @@ class CausalEstimator:
             self._bootstrap_estimates = self._generate_bootstrap_estimates(
                     num_simulations, sample_size_fraction)
         # Now use the data obtained from the simulations to get the value of the confidence estimates
-        # Sort the simulations
-        bootstrap_estimates = np.sort(self._bootstrap_estimates.estimates)
-        # Now we take the (1- p)th and the (p)th values, where p is the chosen confidence level
-        lower_bound_index = int( ( 1 - confidence_level ) * len(bootstrap_estimates) )
-        upper_bound_index = int( confidence_level * len(bootstrap_estimates) )
+        bootstrap_estimates = self._bootstrap_estimates.estimates
+
+        # Get the variations of each bootstrap estimate and sort
+        bootstrap_variations = [bootstrap_estimate - estimate_value for bootstrap_estimate in bootstrap_estimates]
+        sorted_bootstrap_variations = np.sort(bootstrap_variations)
+
+        # Now we take the (1- p)th and the (p)th variations, where p is the chosen confidence level
+        lower_bound_index = int((1 - confidence_level) * len(sorted_bootstrap_variations))
+        upper_bound_index = int(confidence_level * len(sorted_bootstrap_variations))
 
         # get the values
-        lower_bound = bootstrap_estimates[lower_bound_index]
-        upper_bound = bootstrap_estimates[upper_bound_index]
+        lower_bound = estimate_value - sorted_bootstrap_variations[lower_bound_index]
+        upper_bound = estimate_value - sorted_bootstrap_variations[upper_bound_index]
 
         return (lower_bound, upper_bound)
 
-    def _estimate_confidence_intervals(self, confidence_level, method=None,
+    def _estimate_confidence_intervals(self, confidence_level=None, method=None,
             **kwargs):
         '''
             This method is to be overriden by the child classes, so that they
@@ -356,7 +361,7 @@ class CausalEstimator:
         '''
         raise NotImplementedError(("This method for estimating confidence intervals is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG + " Meanwhile, you can try the bootstrap method (method='bootstrap') to estimate confidence intervals.").format(self.__class__))
 
-    def estimate_confidence_intervals(self, confidence_level=None, method=None,
+    def estimate_confidence_intervals(self, estimate_value, confidence_level=None, method=None,
              **kwargs):
         ''' Find the confidence intervals corresponding to any estimator
             By default, this is done with the help of bootstrapped confidence intervals
@@ -364,6 +369,7 @@ class CausalEstimator:
 
             If the method provided is not bootstrap, this function calls the implementation of the specific estimator.
 
+            :param estimate_value: obtained estimate's value
             :param method: Method for estimating confidence intervals.
             :param confidence_level: The confidence level of the confidence intervals of the estimate.
             :param kwargs: Other optional args to be passed to the CI method.
@@ -380,13 +386,13 @@ class CausalEstimator:
         if method == "default" or method is True: # user has not provided any method
             try:
                 confidence_intervals = self._estimate_confidence_intervals(
-                        confidence_level, method=method, **kwargs)
+                    confidence_level, method=method, **kwargs)
             except NotImplementedError:
-                confidence_intervals = self._estimate_confidence_intervals_with_bootstrap(
+                confidence_intervals = self._estimate_confidence_intervals_with_bootstrap(estimate_value,
                          confidence_level, **kwargs)
         else:
             if method == "bootstrap":
-                confidence_intervals = self._estimate_confidence_intervals_with_bootstrap(
+                confidence_intervals = self._estimate_confidence_intervals_with_bootstrap(estimate_value,
                          confidence_level, **kwargs)
             else:
                 confidence_intervals = self._estimate_confidence_intervals(
@@ -667,6 +673,7 @@ class CausalEstimate:
         :returns: The obtained confidence interval.
         """
         confidence_intervals = self.estimator.estimate_confidence_intervals(
+                estimate_value=self.value,
                 confidence_level=confidence_level,
                 method=method,
                 **kwargs)
