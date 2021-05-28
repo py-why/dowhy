@@ -132,8 +132,9 @@ class CausalModel:
 		Learn causal graph from the data. This function takes the method name as input and initializes the 
 		causal graph object using the learnt graph.
 
-		Input variables:
-		method_name: Exact method name of the object to be imported from the concerned library.
+		:param self: instance of the CausalModel class (or its subclass)
+		:param method_name: Exact method name of the object to be imported from the concerned library.
+		:returns: an instance of the CausalGraph class initialized with the learned graph.
 		'''
 		# Import causal discovery class
 		str_arr = method_name.split(".", maxsplit=1)
@@ -145,6 +146,8 @@ class CausalModel:
 		
 		# Initialize causal graph object
 		self.init_graph(graph=graph)
+
+		return self._graph
 		
 	def identify_effect(self, estimand_type=None,
 			method_name="default", proceed_when_unidentifiable=None):
