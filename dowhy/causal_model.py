@@ -5,6 +5,7 @@ import logging
 
 from sympy import init_printing
 
+import dowhy.graph_learners as graph_learners
 import dowhy.causal_estimators as causal_estimators
 import dowhy.causal_refuters as causal_refuters
 import dowhy.utils.cli_helpers as cli
@@ -35,7 +36,8 @@ class CausalModel:
         Also checks and finds the common causes and instruments for treatment
         and outcome.
 
-        At least one of graph, common_causes or instruments must be provided.
+        At least one of graph, common_causes or instruments must be provided. If 
+        none of these variables are provided, then learn_graph() can be used later.
 
         :param data: a pandas dataframe containing treatment, outcome and other
         variables.
@@ -92,33 +94,61 @@ class CausalModel:
                     observed_node_names=self._data.columns.tolist()
                 )
             else:
-                cli.query_yes_no(
-                    "WARN: Are you sure that there are no common causes of treatment and outcome?",
-                    default=None
-                )
+                self.logger.warning("Relevant variables to build causal graph not provided. You may want to use the learn_graph() function to construct the causal graph.")
+                self._graph = None
 
         else:
-            self._graph = CausalGraph(
-                self._treatment,
-                self._outcome,
-                graph,
-                effect_modifier_names=self._effect_modifiers,
-                observed_node_names=self._data.columns.tolist(),
-                missing_nodes_as_confounders = self._missing_nodes_as_confounders
-            )
-            self._common_causes = self._graph.get_common_causes(self._treatment, self._outcome)
-            self._instruments = self._graph.get_instruments(self._treatment,
-                                                            self._outcome)
-            # Sometimes, effect modifiers from the graph may not match those provided by the user.
-            # (Because some effect modifiers may also be common causes)
-            # In such cases, the user-provided modifiers are used.
-            # If no effect modifiers are provided,  then the ones from the graph are used.
-            if self._effect_modifiers is None or not self._effect_modifiers:
-                self._effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
-
+            self.init_graph(graph=graph)
+            
         self._other_variables = kwargs
         self.summary()
 
+    def init_graph(self, graph):
+        '''
+        Initialize self._graph using graph provided by the user.
+
+        '''
+        # Create causal graph object
+        self._graph = CausalGraph(
+            self._treatment,
+            self._outcome,
+            graph,
+            effect_modifier_names=self._effect_modifiers,
+            observed_node_names=self._data.columns.tolist(),
+            missing_nodes_as_confounders = self._missing_nodes_as_confounders
+        )
+        self._common_causes = self._graph.get_common_causes(self._treatment, self._outcome)
+        self._instruments = self._graph.get_instruments(self._treatment,
+                                                        self._outcome)
+        # Sometimes, effect modifiers from the graph may not match those provided by the user.
+        # (Because some effect modifiers may also be common causes)
+        # In such cases, the user-provided modifiers are used.
+        # If no effect modifiers are provided,  then the ones from the graph are used.
+        if self._effect_modifiers is None or not self._effect_modifiers:
+            self._effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
+
+    def learn_graph(self, method_name="cdt.causality.graph.LiNGAM", *args, **kwargs):
+        '''
+        Learn causal graph from the data. This function takes the method name as input and initializes the 
+        causal graph object using the learnt graph.
+
+        :param self: instance of the CausalModel class (or its subclass)
+        :param method_name: Exact method name of the object to be imported from the concerned library.
+        :returns: an instance of the CausalGraph class initialized with the learned graph.
+        '''
+        # Import causal discovery class
+        str_arr = method_name.split(".", maxsplit=1)
+        library_name = str_arr[0]
+        causal_discovery_class = graph_learners.get_discovery_class_object(library_name)
+    
+        model = causal_discovery_class(self._data, method_name, *args, **kwargs)
+        graph = model.learn_graph()
+        
+        # Initialize causal graph object
+        self.init_graph(graph=graph)
+
+        return self._graph
+        
     def identify_effect(self, estimand_type=None,
             method_name="default", proceed_when_unidentifiable=None):
         """Identify the causal effect to be estimated, using properties of the causal graph.
@@ -317,7 +347,7 @@ class CausalModel:
         )
         res = refuter.refute_estimate()
         return res
-
+    
     def view_model(self, layout="dot", size=(8, 6), file_name="causal_model"):
         """View the causal DAG.
 
