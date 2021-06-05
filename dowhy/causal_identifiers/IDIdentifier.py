@@ -48,7 +48,9 @@ class IDIdentifier:
             treatment_names = self._treatment_names
         if outcome_names is None:
             outcome_names = self._outcome_names
-
+        # print(adjacency_matrix, treatment_names, outcome_names)
+        # print(self._node_names)
+        # exit()
         # Line 1
         if len(treatment_names) == 0:
             estimator = {}
@@ -58,27 +60,40 @@ class IDIdentifier:
             return self._estimators
         
         # Line 2 - Remove ancestral nodes that don't affect output
-        ancestors = self._find_ancestor(outcome_names)
-        if self._node_names.difference_update(ancestors) != None: # If there are elements which are not the ancestor of the outcome variables
+        ancestors = self._find_ancestor(outcome_names, adjacency_matrix)
+        node_names = self._node_names.copy()
+        if len(node_names - ancestors) != 0: # If there are elements which are not the ancestor of the outcome variables
             # Modify list of valid nodes
-            set_wo_treatment = self._node_names.difference_update(treatment_names)
+            set_wo_treatment = self._node_names - treatment_names
             treatment_names = treatment_names.intersection(ancestors)
             self._node_names = set_wo_treatment | treatment_names
-            adjacency_matrix = self._induced_graph(self._node_names)
-            return self.identify(adjacency_matrix=adjacency_matrix)
+            for i, node in enumerate(self._node_names):
+                self._node2idx[node] = i
+                self._idx2node[i] = node
+            adjacency_matrix = self._induced_graph(self._node_names, adjacency_matrix)
+            return self.identify(treatment_names=treatment_names, adjacency_matrix=adjacency_matrix)
         
         # Line 3
+        # Modify adjacency matrix to obtain that corresponding to do(X)
+        adjacency_matrix_do_x = adjacency_matrix.copy()
+        for x in treatment_names:
+            x_idx = self._node2idx[x]
+            for i in range(len(self._node_names)):
+                adjacency_matrix_do_x[i, x_idx] = 0
+        ancestors = self._find_ancestor(outcome_names, adjacency_matrix_do_x)
+        W = self._node_names - treatment_names - ancestors
+        if len(W) != 0:
+            return self.identify(treatment_names = treatment_names.union(W), adjacency_matrix=adjacency_matrix)
 
 
-
-    def _find_ancestor(self, node_set):
+    def _find_ancestor(self, node_set, adjacency_matrix):
         ancestors = set()
         for node in node_set:
-            a = self._find_ancestor_help(node)
+            a = self._find_ancestor_help(node, adjacency_matrix)
             ancestors = ancestors.union(a)
         return ancestors
 
-    def _find_ancestor_help(self, node_name):
+    def _find_ancestor_help(self, node_name, adjacency_matrix):
         
         ancestors = set()
         
@@ -88,14 +103,18 @@ class IDIdentifier:
             child = nodes_to_visit.get()
             ancestors.add(self._idx2node[child])
             for i in range(len(self._node_names)):
-                if self._idx2node[i] not in ancestors and self._adjacency_matrix[i, child] == 1:
+                # print(i, self._idx2node[i], child, self._idx2node[child])
+                # print(self._idx2node[i])
+                # print(self._idx2node[i] not in ancestors)
+                # print(adjacency_matrix.shape, i, child)
+                if self._idx2node[i] not in ancestors and adjacency_matrix[i, child] == 1: # For edge a->b, a is along height and b is along width of adjacency matrix
                     nodes_to_visit.put(i)
         
         return ancestors
 
-    def _induced_graph(self, node_set):
+    def _induced_graph(self, node_set, adjacency_matrix):
         node_idx_list = [self._node2idx[node] for node in node_set].sort()
-        adjacency_matrix = self._adjacency_matrix[node_idx_list]
+        adjacency_matrix = adjacency_matrix[node_idx_list]
         adjacency_matrix = adjacency_matrix[:, node_idx_list]
         return adjacency_matrix        
 
