@@ -53,7 +53,7 @@ class IDIdentifier:
         if len(treatment_names) == 0:
             estimator = {}
             estimator['condition_vars'] = set()
-            estimator['marginalize_vars'] = self.node_names - outcome_names
+            estimator['marginalize_vars'] = self._node_names - outcome_names
             self._estimators.append(estimator)
             return self._estimators
         
@@ -84,9 +84,34 @@ class IDIdentifier:
             return self.identify(treatment_names = treatment_names.union(W), adjacency_matrix=adjacency_matrix)
         
         # Line 4
-        c_components = self._find_c_components(adjacency_matrix)
-        print(c_components)
+        # Modify adjacency matrix to remove treatment variables
+        adjacency_matrix_minus_x = self._induced_graph(node_set=self._node_names-treatment_names, adjacency_matrix=adjacency_matrix)
+        c_components = self._find_c_components(adjacency_matrix_minus_x, node_set=self._node_names-treatment_names)
+        # TODO: Take care of adding over v\(y union x)
+        if len(c_components)>1:
+            estimators_list = []
+            for component in c_components:
+                estimators_list.append(self.identify(treatment_names=self._node_names-component, outcome_names=component, adjacency_matrix=adjacency_matrix))
+            sum_over_set = self._node_names - outcome_names.union(treatment_names)
+            for estimator in estimators_list:
+                estimator['marginalize_vars'] = estimator['marginalize_vars'].union(sum_over_set)
+                self._estimators.append(estimator)
+            return self._estimators
+        
+        # Line 5
+        S = list(c_components)[0]
+        c_components_G = self._find_c_components(adjacency_matrix)
+        if len(c_components_G)==1 and list(c_components_G)[0] == self._node_names:
+            return "FAIL"
 
+        # Line 6
+        if S in c_components_G:
+            pass
+
+        # Line 7
+        for component in c_components_G:
+            if S - component is None:
+                return identify(treatment_names=treatment_names.intersection(component), outcome_names=outcome_names, adjacency_matrix=self._induced_graph(node_set=component, adjacency_matrix=adjacency_matrix))
 
     def _find_ancestor(self, node_set, adjacency_matrix):
         ancestors = set()
@@ -111,13 +136,17 @@ class IDIdentifier:
         return ancestors
 
     def _induced_graph(self, node_set, adjacency_matrix):
-        node_idx_list = [self._node2idx[node] for node in node_set].sort()
-        adjacency_matrix = adjacency_matrix[node_idx_list]
-        adjacency_matrix = adjacency_matrix[:, node_idx_list]
-        return adjacency_matrix        
+        node_idx_list = [self._node2idx[node] for node in node_set]
+        node_idx_list.sort()
+        adjacency_matrix_induced = adjacency_matrix.copy()
+        adjacency_matrix_induced = adjacency_matrix_induced[node_idx_list]
+        adjacency_matrix_induced = adjacency_matrix_induced[:, node_idx_list]
+        return adjacency_matrix_induced        
 
-    def _find_c_components(self, adjacency_matrix):
-        num_nodes = len(self._node_names)
+    def _find_c_components(self, adjacency_matrix, node_set=None):
+        if node_set is None:
+            node_set = self._node_names
+        num_nodes = len(node_set)
         adjacency_list = [[] for _ in range(num_nodes)]
 
         # Modify graph such that it only contains bidirected edges
