@@ -48,9 +48,7 @@ class IDIdentifier:
             treatment_names = self._treatment_names
         if outcome_names is None:
             outcome_names = self._outcome_names
-        # print(adjacency_matrix, treatment_names, outcome_names)
-        # print(self._node_names)
-        # exit()
+        
         # Line 1
         if len(treatment_names) == 0:
             estimator = {}
@@ -84,6 +82,10 @@ class IDIdentifier:
         W = self._node_names - treatment_names - ancestors
         if len(W) != 0:
             return self.identify(treatment_names = treatment_names.union(W), adjacency_matrix=adjacency_matrix)
+        
+        # Line 4
+        c_components = self._find_c_components(adjacency_matrix)
+        print(c_components)
 
 
     def _find_ancestor(self, node_set, adjacency_matrix):
@@ -103,10 +105,6 @@ class IDIdentifier:
             child = nodes_to_visit.get()
             ancestors.add(self._idx2node[child])
             for i in range(len(self._node_names)):
-                # print(i, self._idx2node[i], child, self._idx2node[child])
-                # print(self._idx2node[i])
-                # print(self._idx2node[i] not in ancestors)
-                # print(adjacency_matrix.shape, i, child)
                 if self._idx2node[i] not in ancestors and adjacency_matrix[i, child] == 1: # For edge a->b, a is along height and b is along width of adjacency matrix
                     nodes_to_visit.put(i)
         
@@ -117,4 +115,38 @@ class IDIdentifier:
         adjacency_matrix = adjacency_matrix[node_idx_list]
         adjacency_matrix = adjacency_matrix[:, node_idx_list]
         return adjacency_matrix        
+
+    def _find_c_components(self, adjacency_matrix):
+        num_nodes = len(self._node_names)
+        adjacency_list = [[] for _ in range(num_nodes)]
+
+        # Modify graph such that it only contains bidirected edges
+        for h in range(0, num_nodes-1):
+            for w in range(h+1, num_nodes):
+                if adjacency_matrix[h, w]==1 and adjacency_matrix[w, h]==1:
+                    adjacency_list[h].append(w)
+                    adjacency_list[w].append(h)
+                else:
+                    adjacency_matrix[h, w] = 0
+                    adjacency_matrix[w, h] = 0
+
+        # Find c components by finding connected components on the undirected graph
+        visited = [False for _ in range(num_nodes)]
+
+        def dfs(node, component):
+            visited[node] = True
+            component.add(node)
+            for neighbour in adjacency_list[node]:
+                if visited[neighbour] == False:
+                    dfs(neighbour)
+
+        c_components = []
+        for i in range(num_nodes):
+            if visited[i] == False:
+                component = set()
+                dfs(i, component)
+                c_components.append(component)
+
+        return c_components
+
 
