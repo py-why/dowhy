@@ -5,19 +5,22 @@ import networkx as nx
 from queue import LifoQueue
 from ordered_set import OrderedSet
 
+from dowhy.causal_identifier import CausalIdentifier
 from dowhy.utils.api import parse_state
 
-class IDIdentifier:
+class IDIdentifier: #(CausalIdentifier):
 
-    def __init__(self, treatment_names=None, outcome_names=None, causal_model=None):# adjacency_matrix=None, node_names=None):
+    def __init__(self, treatment_names=None, outcome_names=None, causal_model=None):
         '''
         Class to perform identification using the ID algorithm.
 
         :param self: instance of the IDIdentifier class.
         :param treatment_names: list of treatment variables.
         :param outcome_names: list of outcome variables.
-        :param graph: A CausalGraph object.
+        :param causal_model: A CausalModel object.
         '''
+
+        # super().__init__(treatment_names=None, outcome_names=None, causal_model=None)
         
         self._treatment_names = OrderedSet(parse_state(treatment_names))
         self._outcome_names = OrderedSet(parse_state(outcome_names))
@@ -28,15 +31,15 @@ class IDIdentifier:
             self._adjacency_matrix = causal_model._graph.get_adjacency_matrix()
             self._tsort_node_names = OrderedSet(list(nx.topological_sort(causal_model._graph._graph))) # topological sorting of graph nodes
             self._node_names = OrderedSet(causal_model._graph._graph.nodes)
-            print("Original Ordering of nodes:", causal_model._graph._graph.nodes)
-            print("Current ordering of nodes:", self._node_names)
-            print("Adjacency Matrix:")
-            print(self._adjacency_matrix)
+            # print("Original Ordering of nodes:", causal_model._graph._graph.nodes)
+            # print("Current ordering of nodes:", self._node_names)
+            # print("Adjacency Matrix:")
+            # print(self._adjacency_matrix)
             
         # Estimators list for returning after identification
         self._estimators = []
 
-    def identify(self, treatment_names=None, outcome_names=None, adjacency_matrix=None, node_names=None):
+    def identify_effect(self, treatment_names=None, outcome_names=None, adjacency_matrix=None, node_names=None):
         if adjacency_matrix is None:
             adjacency_matrix = self._adjacency_matrix
         if treatment_names is None:
@@ -46,14 +49,14 @@ class IDIdentifier:
         if node_names is None:
             node_names = self._node_names
         node2idx, idx2node = self._idx_node_mapping(node_names)
-        print("####################################################################################")
-        print(treatment_names, outcome_names, node_names)
-        print(node2idx, idx2node)
+        # print("####################################################################################")
+        # print(treatment_names, outcome_names, node_names)
+        # print(node2idx, idx2node)
 
         # Line 1
-        print("Line 1")
+        # print("Line 1")
         if len(treatment_names) == 0:
-            print("Line 1 if")
+            # print("Line 1 if")
             estimator = {}
             estimator['outcome_vars'] = outcome_names
             estimator['condition_vars'] = OrderedSet()
@@ -62,12 +65,12 @@ class IDIdentifier:
             return self._estimators
         
         # Line 2 - Remove ancestral nodes that don't affect output
-        print("Line 2")
+        # print("Line 2")
         ancestors = self._find_ancestor(outcome_names, node_names, adjacency_matrix, node2idx, idx2node)
-        print("Line 2 Ancestors:", ancestors)
-        print("Line 2 Adj Matrix Shape:", adjacency_matrix.shape)
+        # print("Line 2 Ancestors:", ancestors)
+        # print("Line 2 Adj Matrix Shape:", adjacency_matrix.shape)
         if len(node_names - ancestors) != 0: # If there are elements which are not the ancestor of the outcome variables
-            print("Line 2 if")
+            # print("Line 2 if")
             # Modify list of valid nodes
             # set_wo_treatment = self._node_names - treatment_names
             # treatment_names = list(set(treatment_names).intersection(set(ancestors)))
@@ -80,7 +83,7 @@ class IDIdentifier:
             # return self.identify(treatment_names=treatment_names, adjacency_matrix=adjacency_matrix, node_names=node_names)
         
         # Line 3
-        print("Line 3")
+        # print("Line 3")
         # Modify adjacency matrix to obtain that corresponding to do(X)
         adjacency_matrix_do_x = adjacency_matrix.copy()
         for x in treatment_names:
@@ -90,41 +93,43 @@ class IDIdentifier:
         ancestors = self._find_ancestor(outcome_names, node_names, adjacency_matrix_do_x, node2idx, idx2node)
         W = node_names - treatment_names - ancestors
         if len(W) != 0:
-            print("Line 3 if")
+            # print("Line 3 if")
             return self.identify(treatment_names = treatment_names | W, outcome_names=outcome_names, adjacency_matrix=adjacency_matrix, node_names=node_names)
     
         # Line 4
-        print("Line 4")
+        # print("Line 4")
         # Modify adjacency matrix to remove treatment variables
         adjacency_matrix_minus_x = self._induced_graph(node_set=node_names-treatment_names, adjacency_matrix=adjacency_matrix, node2idx=node2idx)
         c_components = self._find_c_components(adjacency_matrix_minus_x, node_set=node_names-treatment_names, idx2node=idx2node)
-        print("C Components:", c_components)
+        # print("C Components:", c_components)
         # TODO: Take care of adding over v\(y union x)
         if len(c_components)>1:
-            print("Line 4 if")
+            # print("Line 4 if")
             estimators_list = []
             for component in c_components:
                 estimators_list.append(self.identify(treatment_names=node_names-component, outcome_names=OrderedSet(list(component)), adjacency_matrix=adjacency_matrix, node_names=node_names))
             # estimators_list = sum(estimators_list, []) # Convert 2D list to 1D list
             estimators_list = [j for sub in estimators_list for j in sub] # Convert 2D list to 1D list
             sum_over_set = node_names - (outcome_names | treatment_names)
-            print("Line 4 print:", sum_over_set, treatment_names, outcome_names, node_names)
-            print("Line 4 estimators list:", estimators_list)
+            # print("Line 4 print:", sum_over_set, treatment_names, outcome_names, node_names)
+            # print("Line 4 estimators list:", estimators_list)
             for estimator in estimators_list:
                 estimator['marginalize_vars'] |= sum_over_set
                 self._estimators.append(estimator)
             return self._estimators
         
         # Line 5
-        print("Line 5")
+        # print("Line 5")
         S = c_components[0]
         c_components_G = self._find_c_components(adjacency_matrix, node_set=node_names, idx2node=idx2node)
         if len(c_components_G)==1 and c_components_G[0] == node_names:
-            print("Line 5 if")
+            # print("Line 5 if")
             return ["FAIL"]
 
         # Line 6
+        # print("Line 6")
         if S in c_components_G:
+            # print("Line 6 if")
             # Obtain topological ordering of nodes in S
             topological_order = []
             for node in self._tsort_node_names:
@@ -141,29 +146,23 @@ class IDIdentifier:
                 self._estimators.append(estimator)
                 prev_nodes.append(node)
             return self._estimators
-            # print("**************************************************")
-            # print(self._tsort_node_names)
-            # print(S, node_names, c_components_G)
-            # exit()
 
         # Line 7
+        # print("Line 7")
         for component in c_components_G:
             if S - component is None:
+                # print("Line 7 if")
                 return self.identify(treatment_names=treatment_names & component, outcome_names=outcome_names, adjacency_matrix=self._induced_graph(node_set=component, adjacency_matrix=adjacency_matrix,node2idx=node2idx), node_names=node_names)
-
-        # return []
 
     def _find_ancestor(self, node_set, node_names, adjacency_matrix, node2idx, idx2node):
         ancestors = OrderedSet()
         for node_name in node_set:
-            a = self._find_ancestor_help(node_name, node_names, adjacency_matrix, node2idx, idx2node)
-            ancestors |= a
+            ancestors |= self._find_ancestor_help(node_name, node_names, adjacency_matrix, node2idx, idx2node)
         return ancestors
 
     def _find_ancestor_help(self, node_name, node_names, adjacency_matrix, node2idx, idx2node):
         ancestors = OrderedSet()
         nodes_to_visit = LifoQueue(maxsize = len(self._node_names))
-        # print(nodes_to_visit, self._node2idx[node_name])
         nodes_to_visit.put(node2idx[node_name])
         while not nodes_to_visit.empty():
             child = nodes_to_visit.get()
