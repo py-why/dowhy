@@ -1,149 +1,161 @@
 from networkx.algorithms.assortativity.pairs import node_attribute_xy
 import numpy as np
 import pandas as pd
+import networkx as nx
 from queue import LifoQueue
 
 from dowhy.utils.api import parse_state
 
 class IDIdentifier:
 
-    def __init__(self, treatment_names=[], outcome_names=[], adjacency_matrix=None, node_names=None):
+    def __init__(self, treatment_names=None, outcome_names=None, causal_model=None):# adjacency_matrix=None, node_names=None):
         '''
         Class to perform identification using the ID algorithm.
 
         :param self: instance of the IDIdentifier class.
-        :param treatment: list of treatment variables.
-        :param outcome: list of outcome variables.
+        :param treatment_names: list of treatment variables.
+        :param outcome_names: list of outcome variables.
         :param graph: A CausalGraph object.
         '''
         
-        # TODO - Covert to lists if not provided as lists
         self._treatment_names = set(parse_state(treatment_names))
         self._outcome_names = set(parse_state(outcome_names))
         
-        if adjacency_matrix is None:
-            raise Exception("Graph must be provided for ID identification algorithm.")
+        if causal_model is None:
+            raise Exception("A CausalModel object must be provided for ID identification algorithm.")
         else:
-            # self._adjacency_matrix = graph.get_adjacency_matrix()
-            self._adjacency_matrix = adjacency_matrix
-            if node_names == None:
-                self._node_names = [str(i) for i in range(self._adjacency_matrix.shape[0])]
-            else:
-                # self._node_names = graph._graph.nodes
-                self._node_names = node_names
-            self._node2idx = {}
-            self._idx2node = {}
-            for i, node in enumerate(self._node_names):
-                self._node2idx[node] = i
-                self._idx2node[i] = node
-            self._node_names = set(self._node_names)
-        
+            self._adjacency_matrix = causal_model._graph.get_adjacency_matrix()
+            self._tsort_node_names = list(nx.topological_sort(causal_model._graph._graph)) # topological sorting of graph nodes
+            self._node_names = set(self._tsort_node_names)
+            
         # Estimators list for returning after identification
         self._estimators = []
 
-    def identify(self, treatment_names=None, outcome_names=None, adjacency_matrix=None):
+    def identify(self, treatment_names=None, outcome_names=None, adjacency_matrix=None, node_names=None):
         if adjacency_matrix is None:
             adjacency_matrix = self._adjacency_matrix
         if treatment_names is None:
             treatment_names = self._treatment_names
         if outcome_names is None:
             outcome_names = self._outcome_names
-        
+        if node_names is None:
+            node_names = self._node_names
+        node2idx, idx2node = self._idx_node_mapping(node_names)
+        print(treatment_names, outcome_names, node_names)
+        print(node2idx, idx2node)
+
         # Line 1
+        print("Line 1")
         if len(treatment_names) == 0:
+            print("ENTERED 1")
             estimator = {}
             estimator['condition_vars'] = set()
-            estimator['marginalize_vars'] = self._node_names - outcome_names
+            estimator['marginalize_vars'] = node_names - outcome_names
             self._estimators.append(estimator)
             return self._estimators
         
         # Line 2 - Remove ancestral nodes that don't affect output
-        ancestors = self._find_ancestor(outcome_names, adjacency_matrix)
-        node_names = self._node_names.copy()
+        print("Line 2")
+        ancestors = self._find_ancestor(outcome_names, node_names, adjacency_matrix, node2idx, idx2node)
+        print("Line 2 Ancestors:", ancestors)
+        print("Line 2 Adj Matrix Shape:", adjacency_matrix.shape)
         if len(node_names - ancestors) != 0: # If there are elements which are not the ancestor of the outcome variables
+            print("Line 2 if")
             # Modify list of valid nodes
-            set_wo_treatment = self._node_names - treatment_names
+            # set_wo_treatment = self._node_names - treatment_names
             treatment_names = treatment_names.intersection(ancestors)
-            self._node_names = set_wo_treatment | treatment_names
-            for i, node in enumerate(self._node_names):
-                self._node2idx[node] = i
-                self._idx2node[i] = node
-            adjacency_matrix = self._induced_graph(self._node_names, adjacency_matrix)
-            return self.identify(treatment_names=treatment_names, adjacency_matrix=adjacency_matrix)
+            # node_names = set_wo_treatment | treatment_names
+            # for i, node in enumerate(node_names):
+            for i, node in enumerate(ancestors):
+                node2idx[node] = i
+                idx2node[i] = node
+            adjacency_matrix = self._induced_graph(node_set=ancestors, adjacency_matrix=adjacency_matrix, node2idx=node2idx)
+            # adjacency_matrix = self._induced_graph(node_names, adjacency_matrix)
+            return self.identify(treatment_names=treatment_names, outcome_names=outcome_names, adjacency_matrix=adjacency_matrix, node_names=ancestors)
+            # return self.identify(treatment_names=treatment_names, adjacency_matrix=adjacency_matrix, node_names=node_names)
         
         # Line 3
+        print("Line 3")
         # Modify adjacency matrix to obtain that corresponding to do(X)
         adjacency_matrix_do_x = adjacency_matrix.copy()
         for x in treatment_names:
-            x_idx = self._node2idx[x]
-            for i in range(len(self._node_names)):
+            x_idx = node2idx[x]
+            for i in range(len(node_names)):
                 adjacency_matrix_do_x[i, x_idx] = 0
-        ancestors = self._find_ancestor(outcome_names, adjacency_matrix_do_x)
-        W = self._node_names - treatment_names - ancestors
+        ancestors = self._find_ancestor(outcome_names, node_names, adjacency_matrix_do_x, node2idx, idx2node)
+        W = node_names - treatment_names - ancestors
         if len(W) != 0:
-            return self.identify(treatment_names = treatment_names.union(W), adjacency_matrix=adjacency_matrix)
-        
+            print("Line 3 if")
+            return self.identify(treatment_names = treatment_names.union(W), outcome_names=outcome_names, adjacency_matrix=adjacency_matrix, node_names=node_names)
+    
         # Line 4
+        print("Line 4")
         # Modify adjacency matrix to remove treatment variables
-        adjacency_matrix_minus_x = self._induced_graph(node_set=self._node_names-treatment_names, adjacency_matrix=adjacency_matrix)
-        c_components = self._find_c_components(adjacency_matrix_minus_x, node_set=self._node_names-treatment_names)
+        adjacency_matrix_minus_x = self._induced_graph(node_set=node_names-treatment_names, adjacency_matrix=adjacency_matrix, node2idx=node2idx)
+        c_components = self._find_c_components(adjacency_matrix_minus_x, node_set=node_names-treatment_names, idx2node=idx2node)
+        print("C Components:", c_components)
         # TODO: Take care of adding over v\(y union x)
         if len(c_components)>1:
+            print("Line 4 if")
             estimators_list = []
             for component in c_components:
-                estimators_list.append(self.identify(treatment_names=self._node_names-component, outcome_names=component, adjacency_matrix=adjacency_matrix))
-            sum_over_set = self._node_names - outcome_names.union(treatment_names)
+                estimators_list.append(self.identify(treatment_names=node_names-component, outcome_names=component, adjacency_matrix=adjacency_matrix, node_names=node_names))
+            sum_over_set = node_names - outcome_names.union(treatment_names)
+            print("Line 4 print:", sum_over_set, treatment_names, outcome_names, node_names)
+            print("Line 4 estimators list:", estimators_list)
             for estimator in estimators_list:
+                # print("Line 3 Estimator:", estimator)
                 estimator['marginalize_vars'] = estimator['marginalize_vars'].union(sum_over_set)
                 self._estimators.append(estimator)
             return self._estimators
         
         # Line 5
+        print("Line 5")
         S = list(c_components)[0]
-        c_components_G = self._find_c_components(adjacency_matrix)
-        if len(c_components_G)==1 and list(c_components_G)[0] == self._node_names:
+        c_components_G = self._find_c_components(adjacency_matrix, node_set=node_names, idx2node=idx2node)
+        if len(c_components_G)==1 and list(c_components_G)[0] == node_names:
+            print("Line 5 if")
             return "FAIL"
 
-        # Line 6
-        if S in c_components_G:
-            pass
+        # # Line 6
+        # if S in c_components_G:
+        #     pass
 
         # Line 7
         for component in c_components_G:
             if S - component is None:
-                return identify(treatment_names=treatment_names.intersection(component), outcome_names=outcome_names, adjacency_matrix=self._induced_graph(node_set=component, adjacency_matrix=adjacency_matrix))
+                return self.identify(treatment_names=treatment_names.intersection(component), outcome_names=outcome_names, adjacency_matrix=self._induced_graph(node_set=component, adjacency_matrix=adjacency_matrix,node2idx=node2idx), node_names=node_names)
 
-    def _find_ancestor(self, node_set, adjacency_matrix):
+    def _find_ancestor(self, node_set, node_names, adjacency_matrix, node2idx, idx2node):
         ancestors = set()
-        for node in node_set:
-            a = self._find_ancestor_help(node, adjacency_matrix)
+        # print(node_set)
+        for node_name in node_set:
+            a = self._find_ancestor_help(node_name, node_names, adjacency_matrix, node2idx, idx2node)
             ancestors = ancestors.union(a)
         return ancestors
 
-    def _find_ancestor_help(self, node_name, adjacency_matrix):
-        
+    def _find_ancestor_help(self, node_name, node_names, adjacency_matrix, node2idx, idx2node):
         ancestors = set()
-        
         nodes_to_visit = LifoQueue(maxsize = len(self._node_names))
-        nodes_to_visit.put(self._node2idx[node_name])
+        # print(nodes_to_visit, self._node2idx[node_name])
+        nodes_to_visit.put(node2idx[node_name])
         while not nodes_to_visit.empty():
             child = nodes_to_visit.get()
-            ancestors.add(self._idx2node[child])
-            for i in range(len(self._node_names)):
-                if self._idx2node[i] not in ancestors and adjacency_matrix[i, child] == 1: # For edge a->b, a is along height and b is along width of adjacency matrix
+            ancestors.add(idx2node[child])
+            for i in range(len(node_names)):
+                if idx2node[i] not in ancestors and adjacency_matrix[i, child] == 1: # For edge a->b, a is along height and b is along width of adjacency matrix
                     nodes_to_visit.put(i)
-        
         return ancestors
 
-    def _induced_graph(self, node_set, adjacency_matrix):
-        node_idx_list = [self._node2idx[node] for node in node_set]
+    def _induced_graph(self, node_set, adjacency_matrix, node2idx):
+        node_idx_list = [node2idx[node] for node in node_set]
         node_idx_list.sort()
         adjacency_matrix_induced = adjacency_matrix.copy()
         adjacency_matrix_induced = adjacency_matrix_induced[node_idx_list]
         adjacency_matrix_induced = adjacency_matrix_induced[:, node_idx_list]
         return adjacency_matrix_induced        
 
-    def _find_c_components(self, adjacency_matrix, node_set=None):
+    def _find_c_components(self, adjacency_matrix, node_set, idx2node):
         if node_set is None:
             node_set = self._node_names
         num_nodes = len(node_set)
@@ -162,10 +174,10 @@ class IDIdentifier:
         # Find c components by finding connected components on the undirected graph
         visited = [False for _ in range(num_nodes)]
 
-        def dfs(node, component):
-            visited[node] = True
-            component.add(node)
-            for neighbour in adjacency_list[node]:
+        def dfs(node_idx, component):
+            visited[node_idx] = True
+            component.add(idx2node[node_idx])
+            for neighbour in adjacency_list[node_idx]:
                 if visited[neighbour] == False:
                     dfs(neighbour)
 
@@ -177,5 +189,11 @@ class IDIdentifier:
                 c_components.append(component)
 
         return c_components
-
-
+    
+    def _idx_node_mapping(self, node_names):
+        node2idx = {}
+        idx2node = {}
+        for i, node in enumerate(node_names):
+            node2idx[node] = i
+            idx2node[i] = node
+        return node2idx, idx2node
