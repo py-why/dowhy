@@ -35,11 +35,14 @@ class IDIdentifier: #(CausalIdentifier):
             # print("Current ordering of nodes:", self._node_names)
             # print("Adjacency Matrix:")
             # print(self._adjacency_matrix)
-            
+        
         # Estimators list for returning after identification
         self._estimators = []
+        self._estimator_set = set()
 
     def identify_effect(self, treatment_names=None, outcome_names=None, adjacency_matrix=None, node_names=None):
+        # print("Before Adjacency Matrix:")
+        # print(adjacency_matrix)
         if adjacency_matrix is None:
             adjacency_matrix = self._adjacency_matrix
         if treatment_names is None:
@@ -50,7 +53,9 @@ class IDIdentifier: #(CausalIdentifier):
             node_names = self._node_names
         node2idx, idx2node = self._idx_node_mapping(node_names)
         # print("####################################################################################")
-        # print(treatment_names, outcome_names, node_names)
+        # print("Before Line 1:", treatment_names, outcome_names, node_names)
+        # print("Adjacency Matrix:")
+        # print(adjacency_matrix)
         # print(node2idx, idx2node)
 
         # Line 1
@@ -61,26 +66,25 @@ class IDIdentifier: #(CausalIdentifier):
             estimator['outcome_vars'] = outcome_names
             estimator['condition_vars'] = OrderedSet()
             estimator['marginalize_vars'] = node_names - outcome_names
-            self._estimators.append(estimator)
+            # Check if estimator already added 
+            if not self._is_present(estimator):
+                self._estimators.append(estimator)
+                # print("Line 1 estimator:", estimator)
             return self._estimators
-        
+        # exit()
+
         # Line 2 - Remove ancestral nodes that don't affect output
         # print("Line 2")
         ancestors = self._find_ancestor(outcome_names, node_names, adjacency_matrix, node2idx, idx2node)
         # print("Line 2 Ancestors:", ancestors)
-        # print("Line 2 Adj Matrix Shape:", adjacency_matrix.shape)
         if len(node_names - ancestors) != 0: # If there are elements which are not the ancestor of the outcome variables
             # print("Line 2 if")
             # Modify list of valid nodes
-            # set_wo_treatment = self._node_names - treatment_names
-            # treatment_names = list(set(treatment_names).intersection(set(ancestors)))
             treatment_names = treatment_names & ancestors
-            # node_names = set_wo_treatment | treatment_names
-            # for i, node in enumerate(node_names):
-            node2idx, idx2node = self._idx_node_mapping(ancestors)
-            adjacency_matrix = self._induced_graph(node_set=ancestors, adjacency_matrix=adjacency_matrix, node2idx=node2idx)
-            return self.identify(treatment_names=treatment_names, outcome_names=outcome_names, adjacency_matrix=adjacency_matrix, node_names=ancestors)
-            # return self.identify(treatment_names=treatment_names, adjacency_matrix=adjacency_matrix, node_names=node_names)
+            node_names = node_names & ancestors
+            # node2idx, idx2node = self._idx_node_mapping(ancestors)
+            adjacency_matrix = self._induced_graph(node_set=node_names, adjacency_matrix=adjacency_matrix, node2idx=node2idx)
+            return self.identify_effect(treatment_names=treatment_names, outcome_names=outcome_names, adjacency_matrix=adjacency_matrix, node_names=node_names)
         
         # Line 3
         # print("Line 3")
@@ -94,56 +98,56 @@ class IDIdentifier: #(CausalIdentifier):
         W = node_names - treatment_names - ancestors
         if len(W) != 0:
             # print("Line 3 if")
-            return self.identify(treatment_names = treatment_names | W, outcome_names=outcome_names, adjacency_matrix=adjacency_matrix, node_names=node_names)
-    
+            return self.identify_effect(treatment_names = treatment_names | W, outcome_names=outcome_names, adjacency_matrix=adjacency_matrix, node_names=node_names)
+        
         # Line 4
         # print("Line 4")
         # Modify adjacency matrix to remove treatment variables
-        adjacency_matrix_minus_x = self._induced_graph(node_set=node_names-treatment_names, adjacency_matrix=adjacency_matrix, node2idx=node2idx)
-        c_components = self._find_c_components(adjacency_matrix_minus_x, node_set=node_names-treatment_names, idx2node=idx2node)
-        # print("C Components:", c_components)
+        node_names_minus_x = node_names - treatment_names
+        node2idx_minus_x, idx2node_minus_x = self._idx_node_mapping(node_names_minus_x)
+        adjacency_matrix_minus_x = self._induced_graph(node_set=node_names_minus_x, adjacency_matrix=adjacency_matrix, node2idx=node2idx)
+        c_components = self._find_c_components(adjacency_matrix=adjacency_matrix_minus_x, node_set=node_names_minus_x, idx2node=idx2node_minus_x)
         # TODO: Take care of adding over v\(y union x)
         if len(c_components)>1:
             # print("Line 4 if")
-            estimators_list = []
-            for component in c_components:
-                estimators_list.append(self.identify(treatment_names=node_names-component, outcome_names=OrderedSet(list(component)), adjacency_matrix=adjacency_matrix, node_names=node_names))
-            # estimators_list = sum(estimators_list, []) # Convert 2D list to 1D list
-            estimators_list = [j for sub in estimators_list for j in sub] # Convert 2D list to 1D list
             sum_over_set = node_names - (outcome_names | treatment_names)
-            # print("Line 4 print:", sum_over_set, treatment_names, outcome_names, node_names)
-            # print("Line 4 estimators list:", estimators_list)
-            for estimator in estimators_list:
-                estimator['marginalize_vars'] |= sum_over_set
-                self._estimators.append(estimator)
+            for component in c_components:
+                # print("Line 4 if For")
+                estimators = self.identify_effect(treatment_names=node_names-component, outcome_names=OrderedSet(list(component)), adjacency_matrix=adjacency_matrix, node_names=node_names)
+                for estimator in estimators:
+                    estimator['marginalize_vars'] |= sum_over_set
+                    # Check if estimator already added 
+                    if not self._is_present(estimator):
+                        self._estimators.append(estimator)
+                        # print("Line 4 estimator:", estimator)
             return self._estimators
         
         # Line 5
         # print("Line 5")
         S = c_components[0]
-        c_components_G = self._find_c_components(adjacency_matrix, node_set=node_names, idx2node=idx2node)
+        c_components_G = self._find_c_components(adjacency_matrix=adjacency_matrix, node_set=node_names, idx2node=idx2node)
         if len(c_components_G)==1 and c_components_G[0] == node_names:
             # print("Line 5 if")
             return ["FAIL"]
-
+    
         # Line 6
         # print("Line 6")
         if S in c_components_G:
             # print("Line 6 if")
-            # Obtain topological ordering of nodes in S
-            topological_order = []
-            for node in self._tsort_node_names:
-                if node in S:
-                    topological_order.append(node)
-            
             sum_over_set = S - outcome_names
             prev_nodes = []
-            for node in topological_order:
-                estimator = {}
-                estimator['outcome_vars'] = OrderedSet(node)
-                estimator['condition_vars'] = OrderedSet(prev_nodes)
-                estimator['marginalize_vars'] = sum_over_set
-                self._estimators.append(estimator)
+            for node in self._tsort_node_names:
+                if node in S:
+                    # print("Line 6 estimator node:", node)
+                    estimator = {}
+                    estimator['outcome_vars'] = OrderedSet([node])
+                    estimator['condition_vars'] = OrderedSet(prev_nodes)
+                    estimator['marginalize_vars'] = sum_over_set
+                    # print("Line 6 estimator before if:", estimator)
+                    # Check if estimator already added 
+                    if not self._is_present(estimator):
+                        self._estimators.append(estimator)
+                        # print("Line 6 estimator:", estimator)
                 prev_nodes.append(node)
             return self._estimators
 
@@ -152,7 +156,7 @@ class IDIdentifier: #(CausalIdentifier):
         for component in c_components_G:
             if S - component is None:
                 # print("Line 7 if")
-                return self.identify(treatment_names=treatment_names & component, outcome_names=outcome_names, adjacency_matrix=self._induced_graph(node_set=component, adjacency_matrix=adjacency_matrix,node2idx=node2idx), node_names=node_names)
+                return self.identify_effect(treatment_names=treatment_names & component, outcome_names=outcome_names, adjacency_matrix=self._induced_graph(node_set=component, adjacency_matrix=adjacency_matrix,node2idx=node2idx), node_names=node_names)
 
     def _find_ancestor(self, node_set, node_names, adjacency_matrix, node2idx, idx2node):
         ancestors = OrderedSet()
@@ -181,9 +185,11 @@ class IDIdentifier: #(CausalIdentifier):
         return adjacency_matrix_induced        
 
     def _find_c_components(self, adjacency_matrix, node_set, idx2node):
+
         if node_set is None:
             node_set = self._node_names
         num_nodes = len(node_set)
+        adj_matrix = adjacency_matrix.copy()
         adjacency_list = [[] for _ in range(num_nodes)]
 
         # Modify graph such that it only contains bidirected edges
@@ -193,8 +199,8 @@ class IDIdentifier: #(CausalIdentifier):
                     adjacency_list[h].append(w)
                     adjacency_list[w].append(h)
                 else:
-                    adjacency_matrix[h, w] = 0
-                    adjacency_matrix[w, h] = 0
+                    adj_matrix[h, w] = 0
+                    adj_matrix[w, h] = 0
 
         # Find c components by finding connected components on the undirected graph
         visited = [False for _ in range(num_nodes)]
@@ -204,7 +210,7 @@ class IDIdentifier: #(CausalIdentifier):
             component.add(idx2node[node_idx])
             for neighbour in adjacency_list[node_idx]:
                 if visited[neighbour] == False:
-                    dfs(neighbour)
+                    dfs(neighbour, component)
 
         c_components = []
         for i in range(num_nodes):
@@ -222,3 +228,21 @@ class IDIdentifier: #(CausalIdentifier):
             node2idx[node] = i
             idx2node[i] = node
         return node2idx, idx2node
+
+    def _is_present(self, estimator):
+        string = ""
+        for node in estimator['outcome_vars']:
+            string += node
+        string += "|"
+        for node in estimator['condition_vars']:
+            string += node
+        string += "|"
+        for node in estimator['marginalize_vars']:
+            string += node
+    
+        if string not in self._estimator_set:
+            self._estimator_set.add(string)
+            return False
+        return True
+    
+    
