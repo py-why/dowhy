@@ -15,7 +15,7 @@ advanced_notebooks = [
                       "dowhy_lalonde_example.ipynb",
                       "lalonde_pandas_api.ipynb",
                       # requires Rpy2 for causal discovery
-                      "dowhy_causal_discovery_example.ipynb"
+                      "dowhy_causal_discovery_example.ipynb",
                       # very slow
                       "dowhy-conditional-treatment-effects.ipynb",
                       "dowhy_refuter_notebook.ipynb",
