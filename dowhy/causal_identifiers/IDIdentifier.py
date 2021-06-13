@@ -5,8 +5,9 @@ from networkx.algorithms.assortativity.pairs import node_attribute_xy
 import numpy as np
 import pandas as pd
 import networkx as nx
-from queue import LifoQueue
 from ordered_set import OrderedSet
+
+from dowhy.utils.graph_operations import find_c_components, induced_graph, find_ancestor
 
 # from dowhy.causal_identifier import CausalIdentifier
 from dowhy.utils.api import parse_state
@@ -87,12 +88,13 @@ class IDIdentifier:
             return self._estimators
 
         # Line 2 - Remove ancestral nodes that don't affect output
-        ancestors = self._find_ancestor(outcome_names, node_names, adjacency_matrix, node2idx, idx2node)
+        ancestors = find_ancestor(outcome_names, node_names, adjacency_matrix, node2idx, idx2node)
+        # ancestors = self._find_ancestor(outcome_names, node_names, adjacency_matrix, node2idx, idx2node)
         if len(node_names - ancestors) != 0: # If there are elements which are not the ancestor of the outcome variables
             # Modify list of valid nodes
             treatment_names = treatment_names & ancestors
             node_names = node_names & ancestors
-            adjacency_matrix = self._induced_graph(node_set=node_names, adjacency_matrix=adjacency_matrix, node2idx=node2idx)
+            adjacency_matrix = induced_graph(node_set=node_names, adjacency_matrix=adjacency_matrix, node2idx=node2idx)
             return self.identify_effect(treatment_names=treatment_names, outcome_names=outcome_names, adjacency_matrix=adjacency_matrix, node_names=node_names)
         
         # Line 3
@@ -102,7 +104,7 @@ class IDIdentifier:
             x_idx = node2idx[x]
             for i in range(len(node_names)):
                 adjacency_matrix_do_x[i, x_idx] = 0
-        ancestors = self._find_ancestor(outcome_names, node_names, adjacency_matrix_do_x, node2idx, idx2node)
+        ancestors = find_ancestor(outcome_names, node_names, adjacency_matrix_do_x, node2idx, idx2node)
         W = node_names - treatment_names - ancestors
         if len(W) != 0:
             return self.identify_effect(treatment_names = treatment_names | W, outcome_names=outcome_names, adjacency_matrix=adjacency_matrix, node_names=node_names)
@@ -111,8 +113,8 @@ class IDIdentifier:
         # Modify adjacency matrix to remove treatment variables
         node_names_minus_x = node_names - treatment_names
         node2idx_minus_x, idx2node_minus_x = self._idx_node_mapping(node_names_minus_x)
-        adjacency_matrix_minus_x = self._induced_graph(node_set=node_names_minus_x, adjacency_matrix=adjacency_matrix, node2idx=node2idx)
-        c_components = self._find_c_components(adjacency_matrix=adjacency_matrix_minus_x, node_set=node_names_minus_x, idx2node=idx2node_minus_x)
+        adjacency_matrix_minus_x = induced_graph(node_set=node_names_minus_x, adjacency_matrix=adjacency_matrix, node2idx=node2idx)
+        c_components = find_c_components(adjacency_matrix=adjacency_matrix_minus_x, node_set=node_names_minus_x, idx2node=idx2node_minus_x)
         if len(c_components)>1:
             identifier = IDExpression()
             sum_over_set = node_names - (outcome_names | treatment_names)
@@ -127,7 +129,8 @@ class IDIdentifier:
         
         # Line 5
         S = c_components[0]
-        c_components_G = self._find_c_components(adjacency_matrix=adjacency_matrix, node_set=node_names, idx2node=idx2node)
+        c_components_G = find_c_components(adjacency_matrix=adjacency_matrix, node_set=node_names, idx2node=idx2node)
+        # c_components_G = self._find_c_components(adjacency_matrix=adjacency_matrix, node_set=node_names, idx2node=idx2node)
         if len(c_components_G)==1 and c_components_G[0] == node_names:
             return ["FAIL"]
     
@@ -152,69 +155,6 @@ class IDIdentifier:
         for component in c_components_G:
             if S - component is None:
                 return self.identify_effect(treatment_names=treatment_names & component, outcome_names=outcome_names, adjacency_matrix=self._induced_graph(node_set=component, adjacency_matrix=adjacency_matrix,node2idx=node2idx), node_names=node_names)
-
-    def _find_ancestor(self, node_set, node_names, adjacency_matrix, node2idx, idx2node):
-        ancestors = OrderedSet()
-        for node_name in node_set:
-            ancestors |= self._find_ancestor_help(node_name, node_names, adjacency_matrix, node2idx, idx2node)
-        return ancestors
-
-    def _find_ancestor_help(self, node_name, node_names, adjacency_matrix, node2idx, idx2node):
-        ancestors = OrderedSet()
-        nodes_to_visit = LifoQueue(maxsize = len(self._node_names))
-        nodes_to_visit.put(node2idx[node_name])
-        while not nodes_to_visit.empty():
-            child = nodes_to_visit.get()
-            ancestors.add(idx2node[child])
-            for i in range(len(node_names)):
-                if idx2node[i] not in ancestors and adjacency_matrix[i, child] == 1: # For edge a->b, a is along height and b is along width of adjacency matrix
-                    nodes_to_visit.put(i)
-        return ancestors
-
-    def _induced_graph(self, node_set, adjacency_matrix, node2idx):
-        node_idx_list = [node2idx[node] for node in node_set]
-        node_idx_list.sort()
-        adjacency_matrix_induced = adjacency_matrix.copy()
-        adjacency_matrix_induced = adjacency_matrix_induced[node_idx_list]
-        adjacency_matrix_induced = adjacency_matrix_induced[:, node_idx_list]
-        return adjacency_matrix_induced        
-
-    def _find_c_components(self, adjacency_matrix, node_set, idx2node):
-
-        if node_set is None:
-            node_set = self._node_names
-        num_nodes = len(node_set)
-        adj_matrix = adjacency_matrix.copy()
-        adjacency_list = [[] for _ in range(num_nodes)]
-
-        # Modify graph such that it only contains bidirected edges
-        for h in range(0, num_nodes-1):
-            for w in range(h+1, num_nodes):
-                if adjacency_matrix[h, w]==1 and adjacency_matrix[w, h]==1:
-                    adjacency_list[h].append(w)
-                    adjacency_list[w].append(h)
-                else:
-                    adj_matrix[h, w] = 0
-                    adj_matrix[w, h] = 0
-
-        # Find c components by finding connected components on the undirected graph
-        visited = [False for _ in range(num_nodes)]
-
-        def dfs(node_idx, component):
-            visited[node_idx] = True
-            component.add(idx2node[node_idx])
-            for neighbour in adjacency_list[node_idx]:
-                if visited[neighbour] == False:
-                    dfs(neighbour, component)
-
-        c_components = []
-        for i in range(num_nodes):
-            if visited[i] == False:
-                component = OrderedSet()
-                dfs(i, component)
-                c_components.append(component)
-
-        return c_components
     
     def _idx_node_mapping(self, node_names):
         node2idx = {}
