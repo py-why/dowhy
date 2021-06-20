@@ -1,6 +1,3 @@
-from builtins import isinstance
-import warnings
-
 from networkx.algorithms.assortativity.pairs import node_attribute_xy
 import numpy as np
 import pandas as pd
@@ -103,7 +100,7 @@ class IDIdentifier(CausalIdentifier):
         self._node_names = OrderedSet(graph._graph.nodes)
         
         # Estimators list for returning after identification
-        self._estimators = IDExpression() #[]
+        self._estimators = IDExpression()
 
     def identify_effect(self, treatment_names=None, outcome_names=None, adjacency_matrix=None, node_names=None):
         if adjacency_matrix is None:
@@ -207,37 +204,3 @@ class IDIdentifier(CausalIdentifier):
             node2idx[node] = i
             idx2node[i] = node
         return node2idx, idx2node
-
-    # def _print_estimator(self, estimator, prefix):
-    #     string = ""
-    #     if isinstance(estimator, IDExpression):
-    #         s = True if len(estimator.get_val(return_type="sum"))>0 else False
-    #         if s:
-    #             sum_vars = "{"
-    #             for i, var in enumerate(list(estimator.get_val(return_type="sum"))):
-    #                 sum_vars += var
-    #                 if i < len(list(estimator.get_val(return_type="sum")))-1:
-    #                     sum_vars += ","
-    #             string += prefix + "Sum over " + sum_vars + "}:\n"
-    #             prefix += "\t"
-    #         for expression in estimator.get_val(return_type='prod'):
-    #             string += self._print_estimator(expression, prefix)#+"\t")
-    #     else:
-    #         string += prefix + "Predictor: P("
-    #         outcome_vars = list(estimator['outcome_vars'])
-    #         for i, var in enumerate(outcome_vars):
-    #             string += var
-    #             if i<len(outcome_vars)-1:
-    #                 string += ","
-    #         condition_vars = list(estimator['condition_vars'])
-    #         if len(condition_vars)>0:
-    #             string += "|"
-    #             for i, var in enumerate(condition_vars):
-    #                 string += var
-    #                 if i<len(condition_vars)-1:
-    #                     string += ","
-    #         string += ")\n"
-    #     return string
-
-    # def __str__(self):
-    #     return self._print_estimator(self._estimators, prefix="")
