@@ -97,7 +97,8 @@ class TestEconMLEstimator:
             treatment=data["treatment_name"],
             outcome=data["outcome_name"],
             effect_modifiers=data["effect_modifier_names"],
-            graph=data["gml_graph"]
+            graph=data["gml_graph"],
+            identify_vars=True
         )
         identified_estimand = model.identify_effect(
             proceed_when_unidentifiable=True)
