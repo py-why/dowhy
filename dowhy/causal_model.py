@@ -29,6 +29,7 @@ class CausalModel:
                  estimand_type="nonparametric-ate",
                  proceed_when_unidentifiable=False,
                  missing_nodes_as_confounders=False,
+                 identify_vars=False,
                  **kwargs):
         """Initialize data and create a causal graph instance.
 
@@ -98,12 +99,12 @@ class CausalModel:
                 self._graph = None
 
         else:
-            self.init_graph(graph=graph)
+            self.init_graph(graph=graph, identify_vars=identify_vars)
             
         self._other_variables = kwargs
         self.summary()
 
-    def init_graph(self, graph):
+    def init_graph(self, graph, identify_vars):
         '''
         Initialize self._graph using graph provided by the user.
 
@@ -117,15 +118,29 @@ class CausalModel:
             observed_node_names=self._data.columns.tolist(),
             missing_nodes_as_confounders = self._missing_nodes_as_confounders
         )
+
+        if identify_vars:
+            self._common_causes = self._graph.get_common_causes(self._treatment, self._outcome)
+            self._instruments = self._graph.get_instruments(self._treatment,
+                                                            self._outcome)
+            # Sometimes, effect modifiers from the graph may not match those provided by the user.
+            # (Because some effect modifiers may also be common causes)
+            # In such cases, the user-provided modifiers are used.
+            # If no effect modifiers are provided,  then the ones from the graph are used.
+            if self._effect_modifiers is None or not self._effect_modifiers:
+                self._effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
+
+    def get_common_causes(self):
         self._common_causes = self._graph.get_common_causes(self._treatment, self._outcome)
-        self._instruments = self._graph.get_instruments(self._treatment,
-                                                        self._outcome)
-        # Sometimes, effect modifiers from the graph may not match those provided by the user.
-        # (Because some effect modifiers may also be common causes)
-        # In such cases, the user-provided modifiers are used.
-        # If no effect modifiers are provided,  then the ones from the graph are used.
-        if self._effect_modifiers is None or not self._effect_modifiers:
-            self._effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
+        return self._common_causes
+
+    def get_instruments(self):
+        self._instruments = self._graph.get_instruments(self._treatment, self._outcome)
+        return self._instruments
+
+    def get_effect_modifiers(self):
+        self._effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
+        return self._effect_modifiers
 
     def learn_graph(self, method_name="cdt.causality.graph.LiNGAM", *args, **kwargs):
         '''
@@ -209,8 +224,11 @@ class CausalModel:
 
         """
         if effect_modifiers is None:
-            effect_modifiers = self._effect_modifiers
-
+            if self._effect_modifiers is None:
+                effect_modifiers = self.get_effect_modifiers()
+            else:
+                effect_modifiers = self._effect_modifiers
+                
         if method_name is None:
             #TODO add propensity score as default backdoor method, iv as default iv method, add an informational message to show which method has been selected.
             pass
