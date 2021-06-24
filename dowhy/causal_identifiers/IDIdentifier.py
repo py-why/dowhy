@@ -12,17 +12,15 @@ from dowhy.utils.api import parse_state
 class IDExpression:
 
     def __init__(self):
-        self._product = []#OrderedSet()
-        self._sum = []#OrderedSet()
+        self._product = []
+        self._sum = []
     
     def add_product(self, element):
         self._product.append(element)
-        # self._product.add(element)
-    
+        
     def add_sum(self, element):
         for el in element:
             self._sum.append(el)
-        # self._sum.add(element)
 
     def get_val(self, return_type):
         """type = prod or sum"""
@@ -122,12 +120,10 @@ class IDIdentifier(CausalIdentifier):
             identifier.add_product(estimator)
             identifier.add_sum(node_names - outcome_names)
             self._estimators.add_product(identifier)
-            # self._estimators.append(identifier)
             return self._estimators
 
         # Line 2 - Remove ancestral nodes that don't affect output
         ancestors = find_ancestor(outcome_names, node_names, adjacency_matrix, node2idx, idx2node)
-        # ancestors = self._find_ancestor(outcome_names, node_names, adjacency_matrix, node2idx, idx2node)
         if len(node_names - ancestors) != 0: # If there are elements which are not the ancestor of the outcome variables
             # Modify list of valid nodes
             treatment_names = treatment_names & ancestors
@@ -158,19 +154,15 @@ class IDIdentifier(CausalIdentifier):
             sum_over_set = node_names - (outcome_names | treatment_names)
             for component in c_components:
                 expressions = self.identify_effect(treatment_names=node_names-component, outcome_names=OrderedSet(list(component)), adjacency_matrix=adjacency_matrix, node_names=node_names)
-                # estimators = self.identify_effect(treatment_names=node_names-component, outcome_names=OrderedSet(list(component)), adjacency_matrix=adjacency_matrix, node_names=node_names)
-                # for expression in expressions:
                 for expression in expressions.get_val(return_type="prod"):
                     identifier.add_product(expression)
             identifier.add_sum(sum_over_set)
             self._estimators.add_product(identifier)
-            # self._estimators.append(identifier)
             return self._estimators
         
         # Line 5
         S = c_components[0]
         c_components_G = find_c_components(adjacency_matrix=adjacency_matrix, node_set=node_names, idx2node=idx2node)
-        # c_components_G = self._find_c_components(adjacency_matrix=adjacency_matrix, node_set=node_names, idx2node=idx2node)
         if len(c_components_G)==1 and c_components_G[0] == node_names:
             return ["FAIL"]
     
@@ -188,7 +180,6 @@ class IDIdentifier(CausalIdentifier):
                     identifier.add_sum(sum_over_set)
                     # Check if estimator already added
                     self._estimators.add_product(identifier)
-                    # self._estimators.append(identifier) 
                 prev_nodes.append(node)
             return self._estimators
 
