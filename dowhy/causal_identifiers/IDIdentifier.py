@@ -97,9 +97,6 @@ class IDIdentifier(CausalIdentifier):
             raise Exception("The graph must be a directed acyclic graph (DAG).")
         self._node_names = OrderedSet(graph._graph.nodes)
         
-        # # Estimators list for returning after identification
-        # self._estimators = IDExpression()
-
     def identify_effect(self, treatment_names=None, outcome_names=None, adjacency_matrix=None, node_names=None):
         if adjacency_matrix is None:
             adjacency_matrix = self._adjacency_matrix
@@ -110,6 +107,8 @@ class IDIdentifier(CausalIdentifier):
         if node_names is None:
             node_names = self._node_names
         node2idx, idx2node = self._idx_node_mapping(node_names)
+
+        # Estimators list for returning after identification
         estimators = IDExpression()
 
         # Line 1
@@ -120,8 +119,6 @@ class IDIdentifier(CausalIdentifier):
             estimator['condition_vars'] = OrderedSet()
             identifier.add_product(estimator)
             identifier.add_sum(node_names - outcome_names)
-            # self._estimators.add_product(identifier)
-            # return self._estimators
             estimators.add_product(identifier)
             return estimators
 
@@ -161,8 +158,6 @@ class IDIdentifier(CausalIdentifier):
                 for expression in expressions.get_val(return_type="prod"):
                     identifier.add_product(expression)
             identifier.add_sum(sum_over_set)
-            # self._estimators.add_product(identifier)
-            # return self._estimators
             estimators.add_product(identifier)
             return estimators
 
@@ -185,11 +180,8 @@ class IDIdentifier(CausalIdentifier):
                     estimator['condition_vars'] = OrderedSet(prev_nodes)
                     identifier.add_product(estimator)
                     identifier.add_sum(sum_over_set)
-                    # Check if estimator already added
-                    # self._estimators.add_product(identifier)
                     estimators.add_product(identifier)
                 prev_nodes.append(node)
-            # return self._estimators
             return estimators
 
 
