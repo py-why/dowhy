@@ -64,12 +64,14 @@ class CausalIdentifier:
                 CausalIdentifier.NONPARAMETRIC_NIE))
 
     def identify_ate_effect(self):
+        print("Entered")
         estimands_dict = {}
         mediation_first_stage_confounders = None
         mediation_second_stage_confounders = None
         ### 1. BACKDOOR IDENTIFICATION
         # First, checking if there are any valid backdoor adjustment sets
         backdoor_sets = self.identify_backdoor(self.treatment_name, self.outcome_name)
+        print("1 Level 1 done")
         estimands_dict, backdoor_variables_dict = self.build_backdoor_estimands_dict(
                 self.treatment_name,
                 self.outcome_name,
@@ -79,6 +81,7 @@ class CausalIdentifier:
         default_backdoor_id = self.get_default_backdoor_set_id(backdoor_variables_dict)
         estimands_dict["backdoor"] = estimands_dict.get(str(default_backdoor_id), None)
         backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
+        print("1 done")
 
         ### 2. INSTRUMENTAL VARIABLE IDENTIFICATION
         # Now checking if there is also a valid iv estimand
@@ -97,7 +100,8 @@ class CausalIdentifier:
             estimands_dict["iv"] = iv_estimand_expr
         else:
             estimands_dict["iv"] = None
-
+        print("2 done")
+        
         ### 3. FRONTDOOR IDENTIFICATION
         # Now checking if there is a valid frontdoor variable
         frontdoor_variables_names = self.identify_frontdoor()
@@ -116,7 +120,8 @@ class CausalIdentifier:
             mediation_second_stage_confounders = self.identify_mediation_second_stage_confounders(frontdoor_variables_names, self.outcome_name)
         else:
             estimands_dict["frontdoor"] = None
-
+        print("3 done")
+        
         # Finally returning the estimand object
         estimand = IdentifiedEstimand(
             self,
@@ -131,6 +136,7 @@ class CausalIdentifier:
             mediation_second_stage_confounders=mediation_second_stage_confounders,
             default_backdoor_id = default_backdoor_id
         )
+        print("Final")
         return estimand
 
     def identify_nie_effect(self):
@@ -243,8 +249,10 @@ class CausalIdentifier:
     def identify_backdoor(self, treatment_name, outcome_name, include_unobserved=True):
         backdoor_sets = []
         backdoor_paths = self._graph.get_backdoor_paths(treatment_name, outcome_name)
+        print("1 Level 1 Backdoor Paths found")
         method_name = self.method_name if self.method_name != CausalIdentifier.BACKDOOR_DEFAULT else CausalIdentifier.DEFAULT_BACKDOOR_METHOD
         # First, checking if empty set is a valid backdoor set
+        print("1 Level 1 Section 1")
         empty_set = set()
         check = self._graph.check_valid_backdoor_set(treatment_name, outcome_name, empty_set,
                 backdoor_paths=backdoor_paths)
@@ -257,6 +265,7 @@ class CausalIdentifier:
                 return backdoor_sets
 
         # Second, checking for all other sets of variables. If include_unobserved is false, then only observed variables are eligible.
+        print("1 Level 1 Section 2")
         eligible_variables = self._graph.get_all_nodes(include_unobserved=include_unobserved) \
             - set(treatment_name) \
             - set(outcome_name)
