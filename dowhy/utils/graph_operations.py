@@ -1,7 +1,7 @@
 import numpy as np
 import graphviz
 from queue import LifoQueue
-from ordered_set import OrderedSet
+from dowhy.utils.ordered_set import OrderedSet
 
 def adjacency_matrix_to_graph(adjacency_matrix, labels=None):
     # Only consider edges have absolute edge weight > 0.01
@@ -41,8 +41,8 @@ def find_ancestor(node_set, node_names, adjacency_matrix, node2idx, idx2node):
         return ancestors
 
     ancestors = OrderedSet()
-    for node_name in node_set:
-        ancestors |= find_ancestor_help(node_name, node_names, adjacency_matrix, node2idx, idx2node)
+    for node_name in node_set.get_all():
+        ancestors = ancestors.union(find_ancestor_help(node_name, node_names, adjacency_matrix, node2idx, idx2node))
     return ancestors
 
 def induced_graph(node_set, adjacency_matrix, node2idx):

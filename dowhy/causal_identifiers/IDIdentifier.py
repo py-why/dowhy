@@ -1,8 +1,8 @@
-from networkx.algorithms.assortativity.pairs import node_attribute_xy
 import numpy as np
 import pandas as pd
 import networkx as nx
-from ordered_set import OrderedSet
+from dowhy.utils.ordered_set import OrderedSet
+
 
 from dowhy.utils.graph_operations import find_c_components, induced_graph, find_ancestor
 
@@ -31,7 +31,7 @@ class IDExpression:
         else:
             raise Exception("Provide correct return type.")
 
-    def _print_estimator(self, prefix, estimator=None):
+    def _print_estimator(self, prefix, estimator=None, start=False):
         if estimator is None:
             estimator = self
 
@@ -63,16 +63,18 @@ class IDExpression:
                     if i<len(condition_vars)-1:
                         string += ","
             string += ")\n"
+        if start:
+            string = string[:-1]
         return string
 
     def __str__(self):
-        return self._print_estimator(prefix="")
+        return self._print_estimator(prefix="", start=True)
 
 class IDIdentifier(CausalIdentifier):
 
     def __init__(self, graph, estimand_type,
             method_name = "default",
-            proceed_when_unidentifiable=False):
+            proceed_when_unidentifiable=None):
         '''
         Class to perform identification using the ID algorithm.
 
@@ -90,7 +92,7 @@ class IDIdentifier(CausalIdentifier):
         self._treatment_names = OrderedSet(parse_state(graph.treatment_name))
         self._outcome_names = OrderedSet(parse_state(graph.outcome_name))
         self._adjacency_matrix = graph.get_adjacency_matrix()
-        
+
         try:
             self._tsort_node_names = OrderedSet(list(nx.topological_sort(graph._graph))) # topological sorting of graph nodes
         except:
@@ -107,7 +109,7 @@ class IDIdentifier(CausalIdentifier):
         if node_names is None:
             node_names = self._node_names
         node2idx, idx2node = self._idx_node_mapping(node_names)
-
+        
         # Estimators list for returning after identification
         estimators = IDExpression()
 
@@ -118,17 +120,17 @@ class IDIdentifier(CausalIdentifier):
             estimator['outcome_vars'] = outcome_names
             estimator['condition_vars'] = OrderedSet()
             identifier.add_product(estimator)
-            identifier.add_sum(node_names - outcome_names)
+            identifier.add_sum(node_names.difference(outcome_names))
             estimators.add_product(identifier)
             return estimators
 
 
         # Line 2 - Remove ancestral nodes that don't affect output
         ancestors = find_ancestor(outcome_names, node_names, adjacency_matrix, node2idx, idx2node)
-        if len(node_names - ancestors) != 0: # If there are elements which are not the ancestor of the outcome variables
+        if len(node_names.difference(ancestors)) != 0: # If there are elements which are not the ancestor of the outcome variables
             # Modify list of valid nodes
-            treatment_names = treatment_names & ancestors
-            node_names = node_names & ancestors
+            treatment_names = treatment_names.intersection(ancestors)
+            node_names = node_names.intersection(ancestors)
             adjacency_matrix = induced_graph(node_set=node_names, adjacency_matrix=adjacency_matrix, node2idx=node2idx)
             return self.identify_effect(treatment_names=treatment_names, outcome_names=outcome_names, adjacency_matrix=adjacency_matrix, node_names=node_names)
         
@@ -140,21 +142,21 @@ class IDIdentifier(CausalIdentifier):
             for i in range(len(node_names)):
                 adjacency_matrix_do_x[i, x_idx] = 0
         ancestors = find_ancestor(outcome_names, node_names, adjacency_matrix_do_x, node2idx, idx2node)
-        W = node_names - treatment_names - ancestors
+        W = node_names.difference(treatment_names).difference(ancestors)
         if len(W) != 0:
-            return self.identify_effect(treatment_names = treatment_names | W, outcome_names=outcome_names, adjacency_matrix=adjacency_matrix, node_names=node_names)
+            return self.identify_effect(treatment_names = treatment_names.union(W), outcome_names=outcome_names, adjacency_matrix=adjacency_matrix, node_names=node_names)
         
         # Line 4
         # Modify adjacency matrix to remove treatment variables
-        node_names_minus_x = node_names - treatment_names
+        node_names_minus_x = node_names.difference(treatment_names)
         node2idx_minus_x, idx2node_minus_x = self._idx_node_mapping(node_names_minus_x)
         adjacency_matrix_minus_x = induced_graph(node_set=node_names_minus_x, adjacency_matrix=adjacency_matrix, node2idx=node2idx)
         c_components = find_c_components(adjacency_matrix=adjacency_matrix_minus_x, node_set=node_names_minus_x, idx2node=idx2node_minus_x)
         if len(c_components)>1:
             identifier = IDExpression()
-            sum_over_set = node_names - (outcome_names | treatment_names)
+            sum_over_set = node_names.difference(outcome_names.union(treatment_names))
             for component in c_components:
-                expressions = self.identify_effect(treatment_names=node_names-component, outcome_names=OrderedSet(list(component)), adjacency_matrix=adjacency_matrix, node_names=node_names)
+                expressions = self.identify_effect(treatment_names=node_names.difference(component), outcome_names=OrderedSet(list(component)), adjacency_matrix=adjacency_matrix, node_names=node_names)
                 for expression in expressions.get_val(return_type="prod"):
                     identifier.add_product(expression)
             identifier.add_sum(sum_over_set)
@@ -170,7 +172,7 @@ class IDIdentifier(CausalIdentifier):
     
         # Line 6
         if S in c_components_G:
-            sum_over_set = S - outcome_names
+            sum_over_set = S.difference(outcome_names) ##################### CHECK ###########################
             prev_nodes = []
             for node in self._tsort_node_names:
                 if node in S:
@@ -187,13 +189,14 @@ class IDIdentifier(CausalIdentifier):
 
         # Line 7
         for component in c_components_G:
-            if S - component is None:
-                return self.identify_effect(treatment_names=treatment_names & component, outcome_names=outcome_names, adjacency_matrix=self._induced_graph(node_set=component, adjacency_matrix=adjacency_matrix,node2idx=node2idx), node_names=node_names)
+            C = S.difference(component)
+            if C.is_empty() is None: #################### CHECK #######################
+                return self.identify_effect(treatment_names=treatment_names.intersection(component), outcome_names=outcome_names, adjacency_matrix=induced_graph(node_set=component, adjacency_matrix=adjacency_matrix,node2idx=node2idx), node_names=node_names)
     
     def _idx_node_mapping(self, node_names):
         node2idx = {}
         idx2node = {}
-        for i, node in enumerate(node_names):
+        for i, node in enumerate(node_names.get_all()):
             node2idx[node] = i
             idx2node[i] = node
         return node2idx, idx2node
