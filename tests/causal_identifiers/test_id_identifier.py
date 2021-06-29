@@ -25,15 +25,9 @@ class TestIDIdentification(object):
         identified_estimand = causal_model.identify_effect(method_name="id")
 
         # Only P(Y|T) should be present for test to succeed.
-        assert (
-            (len(identified_estimand.get_val("prod")) == 1 and len(identified_estimand.get_val("sum")) == 0)
-            and
-            (
-                (len(identified_estimand.get_val("prod")[0].get_val("prod")[0]['outcome_vars']) == 1 and identified_estimand.get_val("prod")[0].get_val("prod")[0]['outcome_vars'][0] == 'Y')
-                and
-                (len(identified_estimand.get_val("prod")[0].get_val("prod")[0]['condition_vars']) == 1 and identified_estimand.get_val("prod")[0].get_val("prod")[0]['condition_vars'][0] == 'T')
-            )
-        )
+        identified_str = identified_estimand.__str__()
+        gt_str = "Predictor: P(Y|T)"
+        assert identified_str == gt_str
 
     def test_2(self):
         '''
@@ -44,8 +38,7 @@ class TestIDIdentification(object):
         treatment = "T"
         outcome = "Y"
         causal_graph = "digraph{T->Y; Y->T;}"
-        # df = pd.DataFrame(np.random.randint(0, 100, size=(10000, len(variables))), columns=variables)
-
+        
         # T 
         df = pd.DataFrame(np.random.randint(0, 100, size=(10000, 1)), columns=[treatment])
 
@@ -89,6 +82,11 @@ class TestIDIdentification(object):
         causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
         identified_estimand = causal_model.identify_effect(method_name="id")
 
+        # Compare with ground truth
+        identified_str = identified_estimand.__str__()
+        gt_str = "Sum over {X1}:\n\tPredictor: P(X1|T)\n\tPredictor: P(Y|T,X1)"
+        assert identified_str == gt_str
+
     def test_4(self):
         #Random data
         treatment = "T"
@@ -113,6 +111,12 @@ class TestIDIdentification(object):
         # Calculate causal effect twice: once for unit (t=1, c=0), once for specific increase (t=100, c=50)
         causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
         identified_estimand = causal_model.identify_effect(method_name="id")
+
+        # Compare with ground truth
+        identified_str = identified_estimand.__str__()
+        gt_str = "Sum over {X1}:\n\tPredictor: P(Y|T,X1)\n\tPredictor: P(X1|T)"
+        assert identified_str == gt_str
+
     
     def test_5(self):
         # Random data
@@ -135,3 +139,37 @@ class TestIDIdentification(object):
         # Calculate causal effect twice: once for unit (t=1, c=0), once for specific increase (t=100, c=50)
         causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
         identified_estimand = causal_model.identify_effect(method_name="id")
+
+        # Compare with ground truth
+        identified_str = identified_estimand.__str__()
+        gt_str = "Sum over {X1}:\n\tPredictor: P(Y|X2,X1,T)\n\tPredictor: P(X1)"
+        assert identified_str == gt_str
+
+    def test_6(self):
+        # Random data
+        treatment = "T"
+        outcome = "Y"
+        variables = ["X1"]
+        causal_graph = "digraph{T;X1->Y;}"
+
+        # T
+        df = pd.DataFrame(np.random.randint(0, 100, size=(10000, 1)), columns=[treatment])
+
+        # X1
+        df["X1"] = pd.DataFrame(np.random.randint(0, 100, size=(10000, len(variables))), columns=variables)
+
+        # Y = 2*X1
+        df[outcome] = df["X1"]*2
+
+        # Add some noise
+        noise = np.random.normal(0, 25, 10000)
+        df[outcome] = df[outcome] + noise
+
+        # Calculate causal effect twice: once for unit (t=1, c=0), once for specific increase (t=100, c=50)
+        causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
+        identified_estimand = causal_model.identify_effect(method_name="id")
+
+        # Compare with ground truth
+        identified_str = identified_estimand.__str__()
+        gt_str = "Sum over {X1}:\n\tPredictor: P(X1,Y)"
+        assert identified_str == gt_str
