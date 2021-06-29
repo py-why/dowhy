@@ -88,9 +88,9 @@ class IDIdentifier(CausalIdentifier):
         Class to perform identification using the ID algorithm.
 
         :param self: instance of the IDIdentifier class.
-        :param treatment_names: list of treatment variables.
-        :param outcome_names: list of outcome variables.
-        :param causal_model: A CausalModel object.
+        :param estimand_type: Type of estimand ("nonparametric-ate", "nonparametric-nde" or "nonparametric-nie").
+        :param method_name: Identification method ("id" in this case).
+        :param proceed_when_unidentifiable: If True, proceed with identification even in the presence of unobserved/missing variables.
         '''
 
         super().__init__(graph, estimand_type, method_name, proceed_when_unidentifiable)
