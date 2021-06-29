@@ -33,7 +33,7 @@ class IDExpression:
 
     def _print_estimator(self, prefix, estimator=None, start=False):
         if estimator is None:
-            estimator = self
+            return "This estimator is not identifiable."
 
         string = ""
         if isinstance(estimator, IDExpression):
@@ -68,7 +68,7 @@ class IDExpression:
         return string
 
     def __str__(self):
-        return self._print_estimator(prefix="", start=True)
+        return self._print_estimator(prefix="", estimator=self, start=True)
 
 class IDIdentifier(CausalIdentifier):
 
@@ -117,13 +117,12 @@ class IDIdentifier(CausalIdentifier):
         if len(treatment_names) == 0:
             identifier = IDExpression()
             estimator = {}
-            estimator['outcome_vars'] = outcome_names
+            estimator['outcome_vars'] = node_names
             estimator['condition_vars'] = OrderedSet()
             identifier.add_product(estimator)
             identifier.add_sum(node_names.difference(outcome_names))
             estimators.add_product(identifier)
             return estimators
-
 
         # Line 2 - Remove ancestral nodes that don't affect output
         ancestors = find_ancestor(outcome_names, node_names, adjacency_matrix, node2idx, idx2node)
@@ -168,7 +167,7 @@ class IDIdentifier(CausalIdentifier):
         S = c_components[0]
         c_components_G = find_c_components(adjacency_matrix=adjacency_matrix, node_set=node_names, idx2node=idx2node)
         if len(c_components_G)==1 and c_components_G[0] == node_names:
-            return ["FAIL"]
+            return None
     
         # Line 6
         if S in c_components_G:
