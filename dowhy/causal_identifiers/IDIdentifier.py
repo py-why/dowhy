@@ -33,7 +33,8 @@ class IDExpression:
 
     def _print_estimator(self, prefix, estimator=None, start=False):
         if estimator is None:
-            return "This estimator is not identifiable."
+            return None
+            # return "This estimator is not identifiable."
 
         string = ""
         if isinstance(estimator, IDExpression):
@@ -47,7 +48,11 @@ class IDExpression:
                 string += prefix + "Sum over " + sum_vars + "}:\n"
                 prefix += "\t"
             for expression in estimator.get_val(return_type='prod'):
-                string += self._print_estimator(prefix, expression)
+                add_string = self._print_estimator(prefix, expression)
+                if add_string is None:
+                    return None
+                else:
+                    string += add_string
         else:
             string += prefix + "Predictor: P("
             outcome_vars = list(estimator['outcome_vars'])
@@ -68,7 +73,11 @@ class IDExpression:
         return string
 
     def __str__(self):
-        return self._print_estimator(prefix="", estimator=self, start=True)
+        string = self._print_estimator(prefix="", estimator=self, start=True)
+        if string is None:
+            return "The graph is not identifiable."
+        else:
+            return string
 
 class IDIdentifier(CausalIdentifier):
 
