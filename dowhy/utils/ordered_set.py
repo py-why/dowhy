@@ -1,7 +1,7 @@
 class OrderedSet:
     '''
     Python class for ordered set.
-    Inspired from https://github.com/buyalsky/ordered-hash-set/tree/5198b23e01faeac3f5398ab2c08cb013d14b3702.
+    Code taken from https://github.com/buyalsky/ordered-hash-set/tree/5198b23e01faeac3f5398ab2c08cb013d14b3702.
     '''
     def __init__(self, items=None):
         self._set = {}
@@ -13,10 +13,10 @@ class OrderedSet:
         
     def add(self, item):
         """
-        Adds the item to set if it is not exist.
-        Returns the index of added item (or already existing item) in the respective set.
-        Raises TypeError if specified item is not hashable
-        :param item: (object), item to be added.
+        Function to add an item to do set if it does not exit.
+        Raises TypeError if the item is not hashable.
+        :param item: item to be added.
+        :return: Index of the added (or existing item) in the set.
         """
         if not self._start:
             self._start = item
@@ -31,24 +31,23 @@ class OrderedSet:
 
     def get_all(self):
         """
-        Returns a list containing all items.
-        :return: (list), Specified list that contains all items in the set.
+        Function to return list of all items in the set.
+        :return: List of all items in the set.
         """
-        return [_ for _ in self]
+        return list(self)
 
     def is_empty(self):
         """
-        Determines whether this set is empty or not.
-        :return: (bool), ``True`` if this set is empty, ``False`` otherwise.
+        Function to determine if the set is empty or not.
+        :return: ``True`` if the set is empty, ``False`` otherwise.
         """
         return self.__len__() == 0
 
     def intersection(self, *other):
         """
-        Returns a new ordered set with elements common to the set and all others.
-        
-        :param *other: (list | set | OrderedSet), The sets to check common.
-        :return: (OrderedSet) the set with elements common to the OrderedSet object and all ``*other``.
+        Function to compute the intersection of the set and others.        
+        :param *other: The sets to obtain intersection with. Can be a list, set or OrderedSet.
+        :return: New OrderedSet representing the set with elements common to the OrderedSet object and all others.
         """
         new_ordered_set = OrderedSet()
 
@@ -63,11 +62,10 @@ class OrderedSet:
 
     def difference(self, *other):
         """
-        Returns a new set with elements in the set that are not in the others.
-        :param *other: (list | set | OrderedSet), The sets to check difference.
-        :return: (OrderedSet) The set of the different elements.
+        Function to remove elements in the set which are also present in others.
+        :param *other: The sets to obtain difference with. Can be a list, set or OrderedSet.
+        :return: New OrderedSet representing the difference of elements in the set and others.
         """
-        
         new_ordered_set = OrderedSet()
 
         for element in self:
@@ -81,9 +79,9 @@ class OrderedSet:
 
     def union(self, *other):
         """
-        Returns a new set with elements from the set and all others.
-        :param *other: (list | set | OrderedSet), The sets for union.
-        :return: (OrderedSet) The new set with elements from the OrderedSet object and all others.
+        Function to compute the union of set and others.        
+        :param *other: The sets to obtain union with. Can be a list, set or OrderedSet.
+        :return: New OrderedSet representing the set with elements from the OrderedSet object and all others.
         """
         
         new_ordered_set = OrderedSet()

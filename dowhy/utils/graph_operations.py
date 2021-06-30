@@ -4,6 +4,12 @@ from queue import LifoQueue
 from dowhy.utils.ordered_set import OrderedSet
 
 def adjacency_matrix_to_graph(adjacency_matrix, labels=None):
+    '''
+    Convert a given graph adjacency matrix to DOT format.
+    :param adjacency_matrix: A numpy array representing the graph adjacency matrix.
+    :param labels: List of labels.
+    :return: Graph in DOT format.
+    '''
     # Only consider edges have absolute edge weight > 0.01
     idx = np.abs(adjacency_matrix) > 0.01
     dirs = np.where(idx)
@@ -18,6 +24,8 @@ def adjacency_matrix_to_graph(adjacency_matrix, labels=None):
 def str_to_dot(string):
     '''
     Converts input string from graphviz library to valid DOT graph format.
+    :param string: Graph in DOT format.
+    :return: DOT string converted to a suitable format for the DoWhy library.
     '''
     graph = string.replace('\n', ';').replace('\t','')
     graph = graph[:9] + graph[10:-2] + graph[-1] # Removing unnecessary characters from string
@@ -26,6 +34,12 @@ def str_to_dot(string):
 def find_ancestor(node_set, node_names, adjacency_matrix, node2idx, idx2node):
     '''
     Finds ancestors of a given set of nodes in a given graph.
+    :param node_set: Set of nodes whos ancestors must be obtained.
+    :param node_names: Name of all nodes in the graph.
+    :param adjacency_matrix: Graph adjacency matrix.
+    :param node2idx: A dictionary mapping node names to their row or column index in the adjacency matrix.
+    :param idx2node: A dictionary mapping the row or column indices in the adjacency matrix to the corresponding node names.
+    :return: OrderedSet containing ancestors of all nodes in the node_set.
     '''
 
     def find_ancestor_help(node_name, node_names, adjacency_matrix, node2idx, idx2node):
@@ -46,6 +60,13 @@ def find_ancestor(node_set, node_names, adjacency_matrix, node2idx, idx2node):
     return ancestors
 
 def induced_graph(node_set, adjacency_matrix, node2idx):
+    '''
+    To obtain the induced graph corresponding to a subset of nodes.
+    :param node_set: Set of nodes whos ancestors must be obtained.
+    :param adjacency_matrix: Graph adjacency matrix.
+    :param node2idx: A dictionary mapping node names to their row or column index in the adjacency matrix.
+    :return: Numpy array represented the adjacency matrix of the induced graph.
+    '''
     node_idx_list = [node2idx[node] for node in node_set]
     node_idx_list.sort()
     adjacency_matrix_induced = adjacency_matrix.copy()
@@ -54,6 +75,13 @@ def induced_graph(node_set, adjacency_matrix, node2idx):
     return adjacency_matrix_induced        
 
 def find_c_components(adjacency_matrix, node_set, idx2node):
+    '''
+    Obtain C-components in a graph.
+    :param adjacency_matrix: Graph adjacency matrix.
+    :param node_set: Set of nodes whos ancestors must be obtained.
+    :param idx2node: A dictionary mapping the row or column indices in the adjacency matrix to the corresponding node names.
+    :return: List of C-components in the graph.
+    '''
     num_nodes = len(node_set)
     adj_matrix = adjacency_matrix.copy()
     adjacency_list = [[] for _ in range(num_nodes)]

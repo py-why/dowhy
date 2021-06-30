@@ -10,21 +10,35 @@ from dowhy.causal_identifier import CausalIdentifier
 from dowhy.utils.api import parse_state
 
 class IDExpression:
-
+    """
+    Class for storing a causal estimand, as a result of the identification step using the ID algorithm.
+    The object stores a list of estimators(self._product) whose porduct must be obtained and a list of variables (self._sum) over which the product must be marginalized.
+    """
     def __init__(self):
         self._product = []
         self._sum = []
     
     def add_product(self, element):
+        '''
+        Add an estimator to the list of product.
+        :param element: Estimator to append to the product list.
+        '''
         self._product.append(element)
         
     def add_sum(self, element):
+        '''
+        Add variables to the list.
+        :param element: Set of variables to append to the list self._sum.
+        '''
         for el in element:
             self._sum.append(el)
 
     def get_val(self, return_type):
-        """type = prod or sum"""
-        if return_type=='prod':
+        """
+        Get either the list of estimators (for product) or list of variables (for the marginalization).
+        :param return_type: "prod" to return the list of estimators or "sum" to return the list of variables.
+        """
+        if return_type=="prod":
             return self._product
         elif return_type=="sum":
             return self._sum
@@ -32,10 +46,12 @@ class IDExpression:
             raise Exception("Provide correct return type.")
 
     def _print_estimator(self, prefix, estimator=None, start=False):
+        '''
+        Print the IDExpression object.
+        '''
         if estimator is None:
             return None
-            # return "This estimator is not identifiable."
-
+            
         string = ""
         if isinstance(estimator, IDExpression):
             s = True if len(estimator.get_val(return_type="sum"))>0 else False
@@ -89,7 +105,7 @@ class IDIdentifier(CausalIdentifier):
 
         :param self: instance of the IDIdentifier class.
         :param estimand_type: Type of estimand ("nonparametric-ate", "nonparametric-nde" or "nonparametric-nie").
-        :param method_name: Identification method ("id" in this case).
+        :param method_name: Identification method ("id-algorithm" in this case).
         :param proceed_when_unidentifiable: If True, proceed with identification even in the presence of unobserved/missing variables.
         '''
 
@@ -109,6 +125,11 @@ class IDIdentifier(CausalIdentifier):
         self._node_names = OrderedSet(graph._graph.nodes)
         
     def identify_effect(self, treatment_names=None, outcome_names=None, adjacency_matrix=None, node_names=None):
+        '''
+        Implementation of the ID algorithm.
+        Link - https://ftp.cs.ucla.edu/pub/stat_ser/shpitser-thesis.pdf
+        The pseudo code has been provided on Pg 40.
+        '''
         if adjacency_matrix is None:
             adjacency_matrix = self._adjacency_matrix
         if treatment_names is None:
@@ -123,6 +144,7 @@ class IDIdentifier(CausalIdentifier):
         estimators = IDExpression()
 
         # Line 1
+        # If no action has been taken, the effect on Y is just the marginal of the observational distribution P(v) on Y. 
         if len(treatment_names) == 0:
             identifier = IDExpression()
             estimator = {}
@@ -133,7 +155,8 @@ class IDIdentifier(CausalIdentifier):
             estimators.add_product(identifier)
             return estimators
 
-        # Line 2 - Remove ancestral nodes that don't affect output
+        # Line 2
+        # If we are interested in the effect on Y, it is sufficient to restrict our attention on the parts of the model ancestral to Y.
         ancestors = find_ancestor(outcome_names, node_names, adjacency_matrix, node2idx, idx2node)
         if len(node_names.difference(ancestors)) != 0: # If there are elements which are not the ancestor of the outcome variables
             # Modify list of valid nodes
@@ -142,7 +165,7 @@ class IDIdentifier(CausalIdentifier):
             adjacency_matrix = induced_graph(node_set=node_names, adjacency_matrix=adjacency_matrix, node2idx=node2idx)
             return self.identify_effect(treatment_names=treatment_names, outcome_names=outcome_names, adjacency_matrix=adjacency_matrix, node_names=node_names)
         
-        # Line 3
+        # Line 3 - forces an action on any node where such an action would have no effect on Y – assuming we already acted on X. 
         # Modify adjacency matrix to obtain that corresponding to do(X)
         adjacency_matrix_do_x = adjacency_matrix.copy()
         for x in treatment_names:
@@ -154,7 +177,8 @@ class IDIdentifier(CausalIdentifier):
         if len(W) != 0:
             return self.identify_effect(treatment_names = treatment_names.union(W), outcome_names=outcome_names, adjacency_matrix=adjacency_matrix, node_names=node_names)
         
-        # Line 4
+        # Line 4 - Decomposes the problem into a set of smaller problems using the key property of C-component factorization of causal models.
+        # If the entire graph is a single C-component already, further problem decomposition is impossible, and we must provide base cases.
         # Modify adjacency matrix to remove treatment variables
         node_names_minus_x = node_names.difference(treatment_names)
         node2idx_minus_x, idx2node_minus_x = self._idx_node_mapping(node_names_minus_x)
@@ -172,15 +196,15 @@ class IDIdentifier(CausalIdentifier):
             return estimators
 
         
-        # Line 5
+        # Line 5 - The algorithms fails due to the presence of a hedge - the graph G, and a subgraph S that does not contain any X nodes.
         S = c_components[0]
         c_components_G = find_c_components(adjacency_matrix=adjacency_matrix, node_set=node_names, idx2node=idx2node)
         if len(c_components_G)==1 and c_components_G[0] == node_names:
             return None
     
-        # Line 6
+        # Line 6 - If there are no bidirected arcs from X to the other nodes in the current subproblem under consideration, then we can replace acting on X by conditioning, and thus solve the subproblem.
         if S in c_components_G:
-            sum_over_set = S.difference(outcome_names) ##################### CHECK ###########################
+            sum_over_set = S.difference(outcome_names)
             prev_nodes = []
             for node in self._tsort_node_names:
                 if node in S:
@@ -195,13 +219,18 @@ class IDIdentifier(CausalIdentifier):
             return estimators
 
 
-        # Line 7
+        # Line 7 - This is the most complicated case in the algorithm. Explain in the second last paragraph on Pg 41 of the link provided in the docstring above.
         for component in c_components_G:
             C = S.difference(component)
-            if C.is_empty() is None: #################### CHECK #######################
+            if C.is_empty() is None:
                 return self.identify_effect(treatment_names=treatment_names.intersection(component), outcome_names=outcome_names, adjacency_matrix=induced_graph(node_set=component, adjacency_matrix=adjacency_matrix,node2idx=node2idx), node_names=node_names)
     
     def _idx_node_mapping(self, node_names):
+        '''
+        Obtain the node name to index and index to node name mappings.
+        :param node_names: Name of all nodes in the graph.
+        :return: node to index and index to node mappings.
+        '''
         node2idx = {}
         idx2node = {}
         for i, node in enumerate(node_names.get_all()):
