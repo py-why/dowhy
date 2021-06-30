@@ -1,3 +1,4 @@
+import pytest
 import pandas as pd
 import numpy as np
 from dowhy import CausalModel
@@ -22,7 +23,7 @@ class TestIDIdentification(object):
 
         # Calculate causal effect twice: once for unit (t=1, c=0), once for specific increase (t=100, c=50)
         causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
-        identified_estimand = causal_model.identify_effect(method_name="id")
+        identified_estimand = causal_model.identify_effect(method_name="id-algorithm")
 
         # Only P(Y|T) should be present for test to succeed.
         identified_str = identified_estimand.__str__()
@@ -53,10 +54,8 @@ class TestIDIdentification(object):
         causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
 
         # Since undirected graph, identify effect must throw an error.
-        try:
-            identified_estimand = causal_model.identify_effect(method_name="id")
-        except:
-            assert True
+        with pytest.raises(Exception):
+            identified_estimand = causal_model.identify_effect(method_name="id-algorithm")
     
     def test_3(self):
         # Random data
@@ -80,7 +79,7 @@ class TestIDIdentification(object):
 
         # Calculate causal effect twice: once for unit (t=1, c=0), once for specific increase (t=100, c=50)
         causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
-        identified_estimand = causal_model.identify_effect(method_name="id")
+        identified_estimand = causal_model.identify_effect(method_name="id-algorithm")
 
         # Compare with ground truth
         identified_str = identified_estimand.__str__()
@@ -110,7 +109,7 @@ class TestIDIdentification(object):
 
         # Calculate causal effect twice: once for unit (t=1, c=0), once for specific increase (t=100, c=50)
         causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
-        identified_estimand = causal_model.identify_effect(method_name="id")
+        identified_estimand = causal_model.identify_effect(method_name="id-algorithm")
 
         # Compare with ground truth
         identified_str = identified_estimand.__str__()
@@ -138,7 +137,7 @@ class TestIDIdentification(object):
 
         # Calculate causal effect twice: once for unit (t=1, c=0), once for specific increase (t=100, c=50)
         causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
-        identified_estimand = causal_model.identify_effect(method_name="id")
+        identified_estimand = causal_model.identify_effect(method_name="id-algorithm")
 
         # Compare with ground truth
         identified_str = identified_estimand.__str__()
@@ -167,7 +166,7 @@ class TestIDIdentification(object):
 
         # Calculate causal effect twice: once for unit (t=1, c=0), once for specific increase (t=100, c=50)
         causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
-        identified_estimand = causal_model.identify_effect(method_name="id")
+        identified_estimand = causal_model.identify_effect(method_name="id-algorithm")
 
         # Compare with ground truth
         identified_str = identified_estimand.__str__()
