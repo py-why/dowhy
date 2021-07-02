@@ -3,39 +3,35 @@ class OrderedSet:
     Python class for ordered set.
     Code taken from https://github.com/buyalsky/ordered-hash-set/tree/5198b23e01faeac3f5398ab2c08cb013d14b3702.
     '''
-    def __init__(self, items=None):
+    def __init__(self, elements=None):
         self._set = {}
         self._start = None
         self._end = None
-        if items is not None:
-            for item in items:
-                self.add(item)
+        if elements is not None:
+            for element in elements:
+                self.add(element)
+    
+    def add(self, element):
+        """
+        Function to add an element to do set if it does not exit.
+        :param element: element to be added.
+        """
+        if self._start is None:
+            self._start = element
         
-    def add(self, item):
-        """
-        Function to add an item to do set if it does not exit.
-        Raises TypeError if the item is not hashable.
-        :param item: item to be added.
-        :return: Index of the added (or existing item) in the set.
-        """
-        if not self._start:
-            self._start = item
-        if item not in self._set.keys():
-            self._set[item] = item, [self._end, None]
-            if len(self._set) != 1:
-                self._set[self._end][1][1] = item
-            self._end = item
-            return self.__len__() - 1
-        else:
-            return self.get_all().index(item)
-
+        if element not in self._set.keys():
+            self._set[element] = None
+            if len(self._set) > 1:
+                self._set[self._end] = element
+            self._end = element
+        
     def get_all(self):
         """
-        Function to return list of all items in the set.
+        Function to return list of all elements in the set.
         :return: List of all items in the set.
         """
         return list(self)
-
+    
     def is_empty(self):
         """
         Function to determine if the set is empty or not.
@@ -43,92 +39,72 @@ class OrderedSet:
         """
         return self.__len__() == 0
 
-    def intersection(self, *other):
+    def union(self, other_set):
         """
-        Function to compute the intersection of the set and others.        
-        :param *other: The sets to obtain intersection with. Can be a list, set or OrderedSet.
-        :return: New OrderedSet representing the set with elements common to the OrderedSet object and all others.
+        Function to compute the union of self._set and other_set.        
+        :param other_set: The set to obtain union with. Can be a list, set or OrderedSet.
+        :return: New OrderedSet representing the set with elements from the OrderedSet object and other_set.
         """
-        new_ordered_set = OrderedSet()
-
-        for element in self:
-            for obj in other:
-                if element not in obj:
-                    break
-            else:
-                new_ordered_set.add(element)
-
-        return new_ordered_set
-
-    def difference(self, *other):
+        new_set = OrderedSet()
+        for element in self._set:
+            new_set.add(element)
+        for element in other_set:
+            new_set.add(element)
+        return new_set
+    
+    def intersection(self, other_set):
         """
-        Function to remove elements in the set which are also present in others.
-        :param *other: The sets to obtain difference with. Can be a list, set or OrderedSet.
-        :return: New OrderedSet representing the difference of elements in the set and others.
+        Function to compute the intersection of self._set and other_set.        
+        :param other_set: The set to obtain intersection with. Can be a list, set or OrderedSet.
+        :return: New OrderedSet representing the set with elements common to the OrderedSet object and other_set.
         """
-        new_ordered_set = OrderedSet()
-
-        for element in self:
-            for obj in other:
-                if element in obj:
-                    break
-            else:
-                new_ordered_set.add(element)
-
-        return new_ordered_set
-
-    def union(self, *other):
+        new_set = OrderedSet()
+        for element in self._set:
+            if element in other_set:
+                new_set.add(element)
+        return new_set
+    
+    def difference(self, other_set):
         """
-        Function to compute the union of set and others.        
-        :param *other: The sets to obtain union with. Can be a list, set or OrderedSet.
-        :return: New OrderedSet representing the set with elements from the OrderedSet object and all others.
+        Function to remove elements in self._set which are also present in other_set.
+        :param other_set: The set to obtain difference with. Can be a list, set or OrderedSet.
+        :return: New OrderedSet representing the difference of elements in the self._set and other_set.
         """
-        
-        new_ordered_set = OrderedSet()
-
-        for element in self:
-            new_ordered_set.add(element)
-
-        for obj in other:
-            for element in obj:
-                new_ordered_set.add(element)
-
-        return new_ordered_set
-
+        new_set = OrderedSet()
+        for element in self._set:
+            if element not in other_set:
+                new_set.add(element)
+        return new_set
+    
     def __getitem__(self, index):
-        if index < 0:
-            return tuple(i for i in self)[index]
-
-        if self.__len__() >= index:
-            IndexError("Index is out of range")
-
-        item = self._start
-
-        for i in range(index):
-            item = self._set[self._set[item][1][1]][0]
-
-        return item
+        if index >= self.__len__():
+            raise IndexError("Index is out of range")
+        return list(self)[index]
 
     def __iter__(self):
-        self._next = self._start
+        self._iter = self._start
         return self
-
+    
     def __next__(self):
-        item = self._next
-        if not item:
+        element = self._iter
+        if not element:
             raise StopIteration
-        self._next = self._set[self._next][1][1]
-        return item
+        self._iter = self._set[element]
+        return element
 
     def __len__(self):
         return len(self._set)
 
     def __str__(self):
-        items = tuple(i for i in self)
-        return "OrderedSet("+', '.join(['{}']*(len(items))).format(*items) + ")"
-
+        elements = [i for i in self]
+        string = "OrderedSet("
+        for element in elements:
+            string += str(element) + ","
+        string = string[:-1] + ")" 
+        return string
+    
     def __eq__(self, other):
-        if not isinstance(self, other.__class__):
+        if not isinstance(other, self.__class__):
             return False
-
+        
         return self._set == other._set
