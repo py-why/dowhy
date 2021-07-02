@@ -2,10 +2,7 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 from dowhy.utils.ordered_set import OrderedSet
-
-
 from dowhy.utils.graph_operations import find_c_components, induced_graph, find_ancestor
-
 from dowhy.causal_identifier import CausalIdentifier
 from dowhy.utils.api import parse_state
 
@@ -21,6 +18,7 @@ class IDExpression:
     def add_product(self, element):
         '''
         Add an estimator to the list of product.
+
         :param element: Estimator to append to the product list.
         '''
         self._product.append(element)
@@ -28,6 +26,7 @@ class IDExpression:
     def add_sum(self, element):
         '''
         Add variables to the list.
+
         :param element: Set of variables to append to the list self._sum.
         '''
         for el in element:
@@ -36,6 +35,7 @@ class IDExpression:
     def get_val(self, return_type):
         """
         Get either the list of estimators (for product) or list of variables (for the marginalization).
+
         :param return_type: "prod" to return the list of estimators or "sum" to return the list of variables.
         """
         if return_type=="prod":
@@ -56,12 +56,8 @@ class IDExpression:
         if isinstance(estimator, IDExpression):
             s = True if len(estimator.get_val(return_type="sum"))>0 else False
             if s:
-                sum_vars = "{"
-                for i, var in enumerate(list(estimator.get_val(return_type="sum"))):
-                    sum_vars += var
-                    if i < len(list(estimator.get_val(return_type="sum")))-1:
-                        sum_vars += ","
-                string += prefix + "Sum over " + sum_vars + "}:\n"
+                sum_vars = "{" + ",".join(estimator.get_val(return_type="sum")) + "}"
+                string += prefix + "Sum over " + sum_vars + ":\n"
                 prefix += "\t"
             for expression in estimator.get_val(return_type='prod'):
                 add_string = self._print_estimator(prefix, expression)
@@ -70,19 +66,11 @@ class IDExpression:
                 else:
                     string += add_string
         else:
-            string += prefix + "Predictor: P("
             outcome_vars = list(estimator['outcome_vars'])
-            for i, var in enumerate(outcome_vars):
-                string += var
-                if i<len(outcome_vars)-1:
-                    string += ","
             condition_vars = list(estimator['condition_vars'])
+            string += prefix + "Predictor: P(" + ",".join(outcome_vars)
             if len(condition_vars)>0:
-                string += "|"
-                for i, var in enumerate(condition_vars):
-                    string += var
-                    if i<len(condition_vars)-1:
-                        string += ","
+                string += "|" + ",".join(condition_vars)
             string += ")\n"
         if start:
             string = string[:-1]
@@ -129,6 +117,13 @@ class IDIdentifier(CausalIdentifier):
         Implementation of the ID algorithm.
         Link - https://ftp.cs.ucla.edu/pub/stat_ser/shpitser-thesis.pdf
         The pseudo code has been provided on Pg 40.
+
+        :param self: instance of the IDIdentifier class.
+        :param treatment_names: OrderedSet comprising names of treatment variables.
+        :param outcome_names:OrderedSet comprising names of outcome variables.
+        :param adjacency_matrix: Graph adjacency matrix.
+        :param node_names: OrderedSet comprising names of all nodes in the graph.
+        :returns:  target estimand, an instance of the IDExpression class.
         '''
         if adjacency_matrix is None:
             adjacency_matrix = self._adjacency_matrix
@@ -228,6 +223,7 @@ class IDIdentifier(CausalIdentifier):
     def _idx_node_mapping(self, node_names):
         '''
         Obtain the node name to index and index to node name mappings.
+        
         :param node_names: Name of all nodes in the graph.
         :return: node to index and index to node mappings.
         '''

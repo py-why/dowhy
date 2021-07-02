@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from dowhy import CausalModel
 
-class TestIDIdentification(object):
+class TestIDIdentifier(object):
     
     def test_1(self):
         # Random data

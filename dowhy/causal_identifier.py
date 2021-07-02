@@ -48,7 +48,7 @@ class CausalIdentifier:
 
         If estimand_type is non-parametric ATE, then  uses backdoor, instrumental variable and frontdoor identification methods,  to check if an identified estimand exists, based on the causal graph.
 
-        :param self: instance of the CausalEstimator class (or its subclass)
+        :param self: instance of the CausalIdentifier class (or its subclass)
         :returns:  target estimand, an instance of the IdentifiedEstimand class
         """
         if self.estimand_type == CausalIdentifier.NONPARAMETRIC_ATE:
@@ -236,9 +236,6 @@ class CausalIdentifier:
             default_backdoor_id = None
         )
         return estimand
-
-
-
 
     def identify_backdoor(self, treatment_name, outcome_name, include_unobserved=True):
         backdoor_sets = []
