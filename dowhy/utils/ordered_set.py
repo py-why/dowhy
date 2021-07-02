@@ -14,6 +14,7 @@ class OrderedSet:
     def add(self, element):
         """
         Function to add an element to do set if it does not exit.
+        
         :param element: element to be added.
         """
         if self._start is None:
@@ -28,22 +29,25 @@ class OrderedSet:
     def get_all(self):
         """
         Function to return list of all elements in the set.
-        :return: List of all items in the set.
+        
+        :returns: List of all items in the set.
         """
         return list(self)
     
     def is_empty(self):
         """
         Function to determine if the set is empty or not.
-        :return: ``True`` if the set is empty, ``False`` otherwise.
+        
+        :returns: ``True`` if the set is empty, ``False`` otherwise.
         """
         return self.__len__() == 0
 
     def union(self, other_set):
         """
         Function to compute the union of self._set and other_set.        
+        
         :param other_set: The set to obtain union with. Can be a list, set or OrderedSet.
-        :return: New OrderedSet representing the set with elements from the OrderedSet object and other_set.
+        :returns: New OrderedSet representing the set with elements from the OrderedSet object and other_set.
         """
         new_set = OrderedSet()
         for element in self._set:
@@ -55,8 +59,9 @@ class OrderedSet:
     def intersection(self, other_set):
         """
         Function to compute the intersection of self._set and other_set.        
+
         :param other_set: The set to obtain intersection with. Can be a list, set or OrderedSet.
-        :return: New OrderedSet representing the set with elements common to the OrderedSet object and other_set.
+        :returns: New OrderedSet representing the set with elements common to the OrderedSet object and other_set.
         """
         new_set = OrderedSet()
         for element in self._set:
@@ -67,8 +72,9 @@ class OrderedSet:
     def difference(self, other_set):
         """
         Function to remove elements in self._set which are also present in other_set.
+
         :param other_set: The set to obtain difference with. Can be a list, set or OrderedSet.
-        :return: New OrderedSet representing the difference of elements in the self._set and other_set.
+        :returns: New OrderedSet representing the difference of elements in the self._set and other_set.
         """
         new_set = OrderedSet()
         for element in self._set:
@@ -96,11 +102,8 @@ class OrderedSet:
         return len(self._set)
 
     def __str__(self):
-        elements = [i for i in self]
-        string = "OrderedSet("
-        for element in elements:
-            string += str(element) + ","
-        string = string[:-1] + ")" 
+        elements = [str(i) for i in self]
+        string = "OrderedSet(" + ",".join(elements) + ")"
         return string
     
     def __eq__(self, other):
