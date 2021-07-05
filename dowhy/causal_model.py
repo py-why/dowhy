@@ -12,6 +12,7 @@ import dowhy.utils.cli_helpers as cli
 from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_graph import CausalGraph
 from dowhy.causal_identifier import CausalIdentifier
+from dowhy.causal_identifiers.id_identifier import IDIdentifier
 from dowhy.utils.api import parse_state
 
 init_printing()  # To display symbolic math symbols
@@ -169,6 +170,7 @@ class CausalModel:
             method_name="default", proceed_when_unidentifiable=None):
         """Identify the causal effect to be estimated, using properties of the causal graph.
 
+        :param method_name: Method name for identification algorithm. ("id-algorithm" or "default")
         :param proceed_when_unidentifiable: Binary flag indicating whether identification should proceed in the presence of (potential) unobserved confounders.
         :returns: a probability expression (estimand) for the causal effect if identified, else NULL
 
@@ -177,13 +179,19 @@ class CausalModel:
             proceed_when_unidentifiable = self._proceed_when_unidentifiable
         if estimand_type is None:
             estimand_type = self._estimand_type
-
-        self.identifier = CausalIdentifier(self._graph,
+        
+        if method_name == "id-algorithm":
+            self.identifier = IDIdentifier(self._graph,
                                            estimand_type,
                                            method_name,
                                            proceed_when_unidentifiable=proceed_when_unidentifiable)
+        else:
+            self.identifier = CausalIdentifier(self._graph,
+                                               estimand_type,
+                                               method_name,
+                                               proceed_when_unidentifiable=proceed_when_unidentifiable)
         identified_estimand = self.identifier.identify_effect()
-
+        
         return identified_estimand
 
     def estimate_effect(self, identified_estimand, method_name=None,
