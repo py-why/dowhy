@@ -48,7 +48,7 @@ class CausalIdentifier:
 
         If estimand_type is non-parametric ATE, then  uses backdoor, instrumental variable and frontdoor identification methods,  to check if an identified estimand exists, based on the causal graph.
 
-        :param self: instance of the CausalEstimator class (or its subclass)
+        :param self: instance of the CausalIdentifier class (or its subclass)
         :returns:  target estimand, an instance of the IdentifiedEstimand class
         """
         if self.estimand_type == CausalIdentifier.NONPARAMETRIC_ATE:
@@ -79,7 +79,7 @@ class CausalIdentifier:
         default_backdoor_id = self.get_default_backdoor_set_id(backdoor_variables_dict)
         estimands_dict["backdoor"] = estimands_dict.get(str(default_backdoor_id), None)
         backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
-
+        
         ### 2. INSTRUMENTAL VARIABLE IDENTIFICATION
         # Now checking if there is also a valid iv estimand
         instrument_names = self._graph.get_instruments(self.treatment_name,
@@ -97,7 +97,7 @@ class CausalIdentifier:
             estimands_dict["iv"] = iv_estimand_expr
         else:
             estimands_dict["iv"] = None
-
+        
         ### 3. FRONTDOOR IDENTIFICATION
         # Now checking if there is a valid frontdoor variable
         frontdoor_variables_names = self.identify_frontdoor()
@@ -116,7 +116,7 @@ class CausalIdentifier:
             mediation_second_stage_confounders = self.identify_mediation_second_stage_confounders(frontdoor_variables_names, self.outcome_name)
         else:
             estimands_dict["frontdoor"] = None
-
+        
         # Finally returning the estimand object
         estimand = IdentifiedEstimand(
             self,
@@ -237,13 +237,11 @@ class CausalIdentifier:
         )
         return estimand
 
-
-
-
     def identify_backdoor(self, treatment_name, outcome_name, include_unobserved=True):
         backdoor_sets = []
         backdoor_paths = self._graph.get_backdoor_paths(treatment_name, outcome_name)
         method_name = self.method_name if self.method_name != CausalIdentifier.BACKDOOR_DEFAULT else CausalIdentifier.DEFAULT_BACKDOOR_METHOD
+        
         # First, checking if empty set is a valid backdoor set
         empty_set = set()
         check = self._graph.check_valid_backdoor_set(treatment_name, outcome_name, empty_set,
