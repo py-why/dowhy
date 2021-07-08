@@ -10,9 +10,24 @@ class NodePair:
 
 class Path:
     def __init__(self):
-        self.path_var = list() # To store variables in the path
-        self.is_blocked = None # To store if path is blocked
-        self.condition_vars = set() # To store variables needed to block the path
+        self._path = list() # To store variables in the path
+        self._is_blocked = None # To store if path is blocked
+        self._condition_vars = set() # To store variables needed to block the path
+    
+    def update_path(self, path, is_blocked):
+        self._path = path
+        self._is_blocked = is_blocked
+        if not is_blocked:
+            self._condition_vars = self._condition_vars.union(set(path[1:-1]))
+    
+    def get_path(self):
+        return self._path
+    
+    def __str__(self):
+        print("Path:", self._path)
+        print("Blocked:", self._is_blocked)
+        if not self._is_blocked:
+            print("To block path, condition on:", self._condition_vars)
 
 class Backdoor:
 
@@ -38,21 +53,22 @@ class Backdoor:
                 backdoor_paths = [
                     pth
                     for pth in paths
-                    if self._graph.has_edge(pth[1], pth[0])]
+                    if self._graph.has_edge(pth.get_path()[1], pth.get_path()[0])]
                 filtered_backdoor_paths = [
                     pth
                     for pth in backdoor_paths
-                    if len(nodes12.intersection(set(pth[1:-1])))==0]
-                
+                    if len(nodes12.intersection(set(pth.get_path()[1:-1])))==0]
                 path_dict[(node1, node2)] = filtered_backdoor_paths
             
         return path_dict
 
-    def _path_search_util(self, graph, node1, node2, vis, path, paths):
+    def _path_search_util(self, graph, node1, node2, vis, path, paths, is_blocked=False):
         path.append(node1)
         vis.add(node1)
         if node1 == node2:
-            paths.append(path.copy())
+            path_var = Path()
+            path_var.update_path(path.copy(), is_blocked)
+            paths.append(path_var)
         else:
             for neighbour in graph[node1]:
                 if neighbour not in vis:
