@@ -24,11 +24,13 @@ class Path:
         return self._path
     
     def __str__(self):
-        print("Path:", self._path)
-        print("Blocked:", self._is_blocked)
+        string = ""
+        string += "Path: " + ",".join(self._path) + "\n"
+        string += "Blocked: " + str(self._is_blocked) + "\n"
         if not self._is_blocked:
-            print("To block path, condition on:", self._condition_vars)
-
+            string += "To block path, condition on: " + ",".join(self._condition_vars) + "\n"
+        return string
+        
 class Backdoor:
 
     def __init__(self, graph, nodes1, nodes2):
@@ -62,7 +64,10 @@ class Backdoor:
             
         return path_dict
 
-    def _path_search_util(self, graph, node1, node2, vis, path, paths, is_blocked=False):
+    def _path_search_util(self, graph, node1, node2, vis, path, paths, is_blocked=False, prev_arrow=None):
+        '''
+        :param prev_arrow: True if arrow incoming, False if arrow outgoing
+        '''
         path.append(node1)
         vis.add(node1)
         if node1 == node2:
@@ -72,7 +77,11 @@ class Backdoor:
         else:
             for neighbour in graph[node1]:
                 if neighbour not in vis:
-                    self._path_search_util(graph, neighbour, node2, vis, path, paths)
+                    # True if arrow incoming, False if arrow outgoing
+                    next_arrow = False if self._graph.has_edge(node1, neighbour) else True 
+                    if next_arrow == True and prev_arrow == True:
+                        is_blocked = True
+                    self._path_search_util(graph, neighbour, node2, vis, path, paths, is_blocked, not next_arrow) # Since incoming for current node is outgoing for the next
         path.pop()
         vis.remove(node1)
         return paths
@@ -82,5 +91,5 @@ class Backdoor:
         Path search using DFS.
         '''
         vis = set()
-        paths = self._path_search_util(graph, node1, node2, vis, [], [])
+        paths = self._path_search_util(graph, node1, node2, vis, [], [], False)
         return paths
