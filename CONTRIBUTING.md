@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-7-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Contributors ✨
@@ -19,6 +19,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/vojavocni"><img src="https://avatars.githubusercontent.com/u/40206443?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Aleksandar Jovanovic</b></sub></a><br /><a href="https://github.com/microsoft/dowhy/commits?author=vojavocni" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/n8sty"><img src="https://avatars.githubusercontent.com/u/2964996?v=4?s=100" width="100px;" alt=""/><br /><sub><b>nate giraldi</b></sub></a><br /><a href="https://github.com/microsoft/dowhy/commits?author=n8sty" title="Documentation">📖</a> <a href="https://github.com/microsoft/dowhy/commits?author=n8sty" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/yaakx"><img src="https://avatars.githubusercontent.com/u/54352800?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Julen Corral</b></sub></a><br /><a href="https://github.com/microsoft/dowhy/commits?author=yaakx" title="Code">💻</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="http://toppare.github.io/"><img src="https://avatars.githubusercontent.com/u/6221127?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Baran Toppare</b></sub></a><br /><a href="https://github.com/microsoft/dowhy/commits?author=toppare" title="Documentation">📖</a></td>
   </tr>
 </table>
 
