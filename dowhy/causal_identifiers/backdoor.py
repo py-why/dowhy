@@ -150,3 +150,61 @@ class Backdoor:
         '''
         vis = set()
         self._path_search_util(graph, node1, node2, vis, [], path_dict, is_blocked=False)
+
+class HittingSetAlgorithm:
+
+    def __init__(self, list_of_sets):
+        self._list_of_sets = list_of_sets
+        return self._find_set()
+    
+    def _find_set(self):
+        var_set = set()
+        all_set_indices = set([i for i in range(len(self._list_of_sets))])
+        while not self._is_covered(var_set):
+            set_index = all_set_indices - var_set
+            var_dict = self._count_vars(set_index=set_index)
+            max_el = self._max_occurence_var(var_dict=var_dict)
+            var_set.insert(max_el)
+        return var_set
+
+    def _count_vars(self, set_index = None):
+        '''
+        set_index is a set.
+        '''
+        var_dict = {}
+
+        if set_index = None:
+            set_index = set([i for i in range(len(self._list_of_sets))])
+
+        for idx in set_index:
+            s = self._list_of_sets[idx]
+
+            for el in s:
+                if s not in var_dict:
+                    var_dict[s] = 0
+                var_dict[s] += 1
+        
+        return var_dict
+    
+    def _max_occurence_var(self, var_dict):
+        max_el = None
+        max_count = 0
+        for key, val in var_dict.items():
+            if val>max_count:
+                max_count = val
+                max_el = key
+        return max_el
+
+    def _is_covered(self, var_set):
+        ''' List of sets is covered by the variable set.'''
+        if len(var_set) == 0:
+            return False
+        for el in var_set:
+            is_present = False
+            for s in self._list_of_sets:
+                if el in s:
+                    is_present = True
+                    break
+            if not is_present:
+                return False
+        return True
