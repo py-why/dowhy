@@ -92,13 +92,17 @@ class Backdoor:
         # Get adjacency list
         adjlist = adjacency_matrix_to_adjacency_list(nx.to_numpy_matrix(undirected_graph), labels=list(undirected_graph.nodes))
         path_dict = {}
+        solution_node_pairs = {}
 
         for node1 in self._nodes1:
             for node2 in self._nodes2:
                 if (node1, node2) in path_dict:
                     continue
                 self._path_search(adjlist, node1, node2, path_dict)
-        return path_dict
+                obj = HittingSetAlgorithm(path_dict[(node1, node2)].get_condition_vars())
+                solution_node_pairs[(node1, node2)] = obj.find_set()
+        return solution_node_pairs
+        # return path_dict[solution_node_pairs]
 
     def is_backdoor(self, path):
         return True if self._graph.has_edge(path[1], path[0]) else False
@@ -155,16 +159,18 @@ class HittingSetAlgorithm:
 
     def __init__(self, list_of_sets):
         self._list_of_sets = list_of_sets
-        return self._find_set()
+        # return self._find_set()
     
-    def _find_set(self):
+    def find_set(self):
         var_set = set()
+        indices_covered = set()
         all_set_indices = set([i for i in range(len(self._list_of_sets))])
         while not self._is_covered(var_set):
-            set_index = all_set_indices - var_set
+            set_index = all_set_indices - indices_covered
             var_dict = self._count_vars(set_index=set_index)
             max_el = self._max_occurence_var(var_dict=var_dict)
-            var_set.insert(max_el)
+            var_set.add(max_el)
+            indices_covered = indices_covered.union(self._indices_covered(el=max_el, set_index=set_index))
         return var_set
 
     def _count_vars(self, set_index = None):
@@ -173,16 +179,16 @@ class HittingSetAlgorithm:
         '''
         var_dict = {}
 
-        if set_index = None:
+        if set_index == None:
             set_index = set([i for i in range(len(self._list_of_sets))])
 
         for idx in set_index:
             s = self._list_of_sets[idx]
 
             for el in s:
-                if s not in var_dict:
-                    var_dict[s] = 0
-                var_dict[s] += 1
+                if el not in var_dict:
+                    var_dict[el] = 0
+                var_dict[el] += 1
         
         return var_dict
     
@@ -195,16 +201,37 @@ class HittingSetAlgorithm:
                 max_el = key
         return max_el
 
+    def _indices_covered(self, el, set_index=None):
+        covered = set()
+        if set_index == None:
+            set_index = set([i for i in range(len(self._list_of_sets))])
+
+        for idx in set_index:
+            if el in self._list_of_sets[idx]:
+                covered.add(idx)
+        return covered
+        
+
     def _is_covered(self, var_set):
         ''' List of sets is covered by the variable set.'''
         if len(var_set) == 0:
             return False
+        covered = [False for i in range(len(self._list_of_sets))]
         for el in var_set:
-            is_present = False
-            for s in self._list_of_sets:
+            for i, s in enumerate(self._list_of_sets):
                 if el in s:
-                    is_present = True
+                    covered[i] = True
                     break
-            if not is_present:
-                return False
-        return True
+        return all(covered)
+
+        # if len(var_set) == 0:
+        #     return False
+        # for el in var_set:
+        #     is_present = False
+        #     for s in self._list_of_sets:
+        #         if el in s:
+        #             is_present = True
+        #             break
+        #     if not is_present:
+        #         return False
+        # return True
