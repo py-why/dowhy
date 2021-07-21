@@ -23,7 +23,13 @@ class NodePair:
         else:
             '''path is a list'''
             # self._condition_vars = self._condition_vars.union([*path[1:], *condition_vars])
-            self._condition_vars.append(set([*path[1:], *condition_vars]))
+            # print(path)
+            # print(condition_vars)
+            # print(list(condition_vars))
+            # print([*path[1:], *list(condition_vars)])
+            # TODO : Apply hitting set to condition vars to obtain single set/list
+            obj = HittingSetAlgorithm(condition_vars)
+            self._condition_vars.append(set([*path[1:], *list(condition_vars)]))
             # self._condition_vars.append(set([*path, *condition_vars]))
 
     # def update(self, paths):
@@ -86,13 +92,14 @@ class Backdoor:
         self._nodes2 = nodes2
         self._nodes12 = set(self._nodes1).union(self._nodes2)
         
-    def get_backdoor_paths(self):
+    def get_backdoor_vars(self):
         undirected_graph = self._graph.to_undirected()
         
         # Get adjacency list
         adjlist = adjacency_matrix_to_adjacency_list(nx.to_numpy_matrix(undirected_graph), labels=list(undirected_graph.nodes))
         path_dict = {}
-        solution_node_pairs = {}
+        # solution_node_pairs = {}
+        backdoor_sets = [] # Put in backdoor sets format
 
         for node1 in self._nodes1:
             for node2 in self._nodes2:
@@ -100,11 +107,18 @@ class Backdoor:
                     continue
                 self._path_search(adjlist, node1, node2, path_dict)
                 obj = HittingSetAlgorithm(path_dict[(node1, node2)].get_condition_vars())
-                solution_node_pairs[(node1, node2)] = obj.find_set()
-        return solution_node_pairs
+                # solution_node_pairs[(node1, node2)] = obj.find_set()
+                backdoor_set = {}
+                backdoor_set['backdoor_set'] = tuple(obj.find_set())
+                backdoor_set['num_paths_blocked_by_observed_nodes'] = obj.num_sets()
+                backdoor_sets.append(backdoor_set)
+
+        return backdoor_sets
+        # return solution_node_pairs
         # return path_dict[solution_node_pairs]
 
     def is_backdoor(self, path):
+        # print(path)
         return True if self._graph.has_edge(path[1], path[0]) else False
 
     def _path_search_util(self, graph, node1, node2, vis, path, path_dict, is_blocked=False, prev_arrow=None):
@@ -115,7 +129,7 @@ class Backdoor:
             return
 
         # If node pair has been fully explored
-        if ((node1, node2) in path_dict) and (path_dict[(node1, node2).is_complete()]):
+        if ((node1, node2) in path_dict) and (path_dict[(node1, node2)].is_complete()):
             for i in range(len(path)):
                 if (path[i], node2) not in path_dict:
                     path_dict[(path[i], node2)] = NodePair(path[i], node2)
@@ -159,18 +173,26 @@ class HittingSetAlgorithm:
 
     def __init__(self, list_of_sets):
         self._list_of_sets = list_of_sets
-        # return self._find_set()
-    
+        self._var_count = self._count_vars()
+
+    def num_sets(self):
+        return len(self._list_of_sets)
+        
     def find_set(self):
         var_set = set()
         indices_covered = set()
         all_set_indices = set([i for i in range(len(self._list_of_sets))])
         while not self._is_covered(var_set):
             set_index = all_set_indices - indices_covered
-            var_dict = self._count_vars(set_index=set_index)
-            max_el = self._max_occurence_var(var_dict=var_dict)
+            # var_dict = self._count_vars(set_index=set_index)
+            max_el = self._max_occurence_var(var_dict=self._var_count)
             var_set.add(max_el)
-            indices_covered = indices_covered.union(self._indices_covered(el=max_el, set_index=set_index))
+
+            # Modify variable count and indices covered
+            covered_present = self._indices_covered(el=max_el, set_index=set_index)
+            self._modify_count(covered_present)
+            indices_covered = indices_covered.union(covered_present)
+
         return var_set
 
     def _count_vars(self, set_index = None):
@@ -191,6 +213,11 @@ class HittingSetAlgorithm:
                 var_dict[el] += 1
         
         return var_dict
+    
+    def _modify_count(self, indices_covered):
+        for idx in indices_covered:
+            for el in self._list_of_sets[idx]:
+                self._var_count[el] -= 1
     
     def _max_occurence_var(self, var_dict):
         max_el = None
@@ -223,15 +250,3 @@ class HittingSetAlgorithm:
                     covered[i] = True
                     break
         return all(covered)
-
-        # if len(var_set) == 0:
-        #     return False
-        # for el in var_set:
-        #     is_present = False
-        #     for s in self._list_of_sets:
-        #         if el in s:
-        #             is_present = True
-        #             break
-        #     if not is_present:
-        #         return False
-        # return True
