@@ -93,12 +93,13 @@ class Backdoor:
                 if (node1, node2) in path_dict:
                     continue
                 self._path_search(adjlist, node1, node2, path_dict)
-                obj = HittingSetAlgorithm(path_dict[(node1, node2)].get_condition_vars())
-        
-                backdoor_set = {}
-                backdoor_set['backdoor_set'] = tuple(obj.find_set())
-                backdoor_set['num_paths_blocked_by_observed_nodes'] = obj.num_sets()
-                backdoor_sets.append(backdoor_set)
+                if len(path_dict) != 0:
+                    obj = HittingSetAlgorithm(path_dict[(node1, node2)].get_condition_vars())
+                
+                    backdoor_set = {}
+                    backdoor_set['backdoor_set'] = tuple(obj.find_set())
+                    backdoor_set['num_paths_blocked_by_observed_nodes'] = obj.num_sets()
+                    backdoor_sets.append(backdoor_set)
         
         return backdoor_sets
         
@@ -167,9 +168,11 @@ class HittingSetAlgorithm:
         
     def find_set(self):
         var_set = set()
+        num_indices = len(self._list_of_sets)
         indices_covered = set()
-        all_set_indices = set([i for i in range(len(self._list_of_sets))])
-        while not self._is_covered(var_set):
+        all_set_indices = set([i for i in range(num_indices)])
+        # while not self._is_covered(var_set):
+        while not self._is_covered(indices_covered, num_indices):
             set_index = all_set_indices - indices_covered
             max_el = self._max_occurence_var(var_dict=self._var_count)
             var_set.add(max_el)
@@ -178,7 +181,6 @@ class HittingSetAlgorithm:
             covered_present = self._indices_covered(el=max_el, set_index=set_index)
             self._modify_count(covered_present)
             indices_covered = indices_covered.union(covered_present)
-
         return var_set
 
     def _count_vars(self, set_index = None):
@@ -224,15 +226,10 @@ class HittingSetAlgorithm:
                 covered.add(idx)
         return covered
         
-
-    def _is_covered(self, var_set):
+    def _is_covered(self, indices_covered, num_indices):
         ''' List of sets is covered by the variable set.'''
-        if len(var_set) == 0:
-            return False
-        covered = [False for i in range(len(self._list_of_sets))]
-        for el in var_set:
-            for i, s in enumerate(self._list_of_sets):
-                if el in s:
-                    covered[i] = True
-                    break
+
+        covered = [False for i in range(num_indices)]
+        for idx in indices_covered:
+            covered[idx] = True
         return all(covered)
