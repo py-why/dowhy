@@ -2,6 +2,9 @@ import networkx as nx
 from dowhy.utils.graph_operations import adjacency_matrix_to_adjacency_list
 
 class NodePair:
+    '''
+    Data structure to store backdoor variables between 2 nodes.
+    '''
     def __init__(self, node1, node2):
         self._node1 = node1
         self._node2 = node2
@@ -44,6 +47,9 @@ class NodePair:
     
 
 class Path:
+    '''
+    Data structure to store a particular path between 2 nodes.
+    '''
     def __init__(self):
         self._is_blocked = None # To store if path is blocked
         self._condition_vars = set() # To store variables needed to block the path
@@ -70,14 +76,21 @@ class Path:
         return string
 
 class Backdoor:
-
+    '''
+    Class for optimized implementation of Backdoor variable search between the source nodes and the target nodes.
+    '''
     def __init__(self, graph, nodes1, nodes2):
         self._graph = graph
         self._nodes1 = nodes1
         self._nodes2 = nodes2
-        self._nodes12 = set(self._nodes1).union(self._nodes2)
+        self._nodes12 = set(self._nodes1).union(self._nodes2) # Total set of nodes
         
     def get_backdoor_vars(self):
+        '''
+        Obtains sets of backdoor variable to condition on for each node pair.
+
+        :returns:  List of sets with each set containing backdoor variable corresponding to a given node pair.
+        '''
         undirected_graph = self._graph.to_undirected()
         
         # Get adjacency list
@@ -101,13 +114,25 @@ class Backdoor:
         return backdoor_sets
         
     def is_backdoor(self, path):
+        '''
+        Check if path is a backdoor path.
+
+        :param path: List of nodes comprising the path.
+        '''
         if len(path)<2:
             return False
         return True if self._graph.has_edge(path[1], path[0]) else False
 
     def _path_search_util(self, graph, node1, node2, vis, path, path_dict, is_blocked=False, prev_arrow=None):
         '''
-        :param prev_arrow: True if arrow incoming, False if arrow outgoing
+        :param graph: Adjacency list of the graph under consideration.
+        :param node1: Current node being considered.
+        :param node2: Target node.
+        :param vis: Set of already visited nodes.
+        :param path: List of nodes comprising the path upto node1.
+        :path path_dict: Dictionary of node pairs.
+        :param is_blocked: True is path is blocked by a collider, else False.
+        :param prev_arrow: Described state of previous arrow. True if arrow incoming, False if arrow outgoing.
         '''
         if is_blocked:
             return
@@ -150,20 +175,39 @@ class Backdoor:
     def _path_search(self, graph, node1, node2, path_dict):
         '''
         Path search using DFS.
+        
+        :param graph: Adjacency list of the graph under consideration.
+        :param node1: Current node being considered.
+        :param node2: Target node.
+        :path path_dict: Dictionary of node pairs.
         '''
         vis = set()
         self._path_search_util(graph, node1, node2, vis, [], path_dict, is_blocked=False)
 
 class HittingSetAlgorithm:
-
+    '''
+    Class for the Hitting Set Algorithm to obtain a approximate minimal set of backdoor variables 
+    to condition on for each node pair.
+    '''
     def __init__(self, list_of_sets):
+        '''
+        :param list_of_sets: List of sets such that each set comprises nodes representing a single backdoor path between a source node and a target node.
+        '''
         self._list_of_sets = list_of_sets
         self._var_count = self._count_vars()
 
     def num_sets(self):
+        '''
+        Obtain number of backdoor paths between a node pair.
+        '''
         return len(self._list_of_sets)
         
     def find_set(self):
+        '''
+        Find approximate minimal set of nodes such that there is atleast one node from each set in list_of_sets.
+
+        :returns: Approximate minimal set of nodes.
+        '''
         var_set = set()
         num_indices = len(self._list_of_sets)
         indices_covered = set()
@@ -184,7 +228,9 @@ class HittingSetAlgorithm:
 
     def _count_vars(self, set_index = None):
         '''
-        set_index is a set.
+        Obtain count of number of sets each particular node belongs to.
+
+        :param set_index: Set of indices to consider for calculating the number of sets "hit" by a variable..
         '''
         var_dict = {}
 
@@ -202,11 +248,17 @@ class HittingSetAlgorithm:
         return var_dict
     
     def _modify_count(self, indices_covered):
+        '''
+        Modify count of number of sets each particular node belongs to based on nodes already covered in the previous iteration of the algorithm.
+        '''
         for idx in indices_covered:
             for el in self._list_of_sets[idx]:
                 self._var_count[el] -= 1
     
     def _max_occurence_var(self, var_dict):
+        '''
+        Find the node contained in most number of sets.
+        '''
         max_el = None
         max_count = 0
         for key, val in var_dict.items():
@@ -216,6 +268,9 @@ class HittingSetAlgorithm:
         return max_el
 
     def _indices_covered(self, el, set_index=None):
+        '''
+        Obtain indices covered in a particular iteration of the algorithm.
+        '''
         covered = set()
         if set_index == None:
             set_index = set([i for i in range(len(self._list_of_sets))])
@@ -226,7 +281,9 @@ class HittingSetAlgorithm:
         return covered
         
     def _is_covered(self, indices_covered, num_indices):
-        ''' List of sets is covered by the variable set.'''
+        '''
+        List of sets is covered by the variable set.
+        '''
 
         covered = [False for i in range(num_indices)]
         for idx in indices_covered:
