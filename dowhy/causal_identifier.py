@@ -43,7 +43,7 @@ class CausalIdentifier:
         self._proceed_when_unidentifiable = proceed_when_unidentifiable
         self.logger = logging.getLogger(__name__)
 
-    def identify_effect(self, fast_backdoor=False):
+    def identify_effect(self, optimize_backdoor=False):
         """Main method that returns an identified estimand (if one exists).
 
         If estimand_type is non-parametric ATE, then  uses backdoor, instrumental variable and frontdoor identification methods,  to check if an identified estimand exists, based on the causal graph.
@@ -52,7 +52,7 @@ class CausalIdentifier:
         :returns:  target estimand, an instance of the IdentifiedEstimand class
         """
         if self.estimand_type == CausalIdentifier.NONPARAMETRIC_ATE:
-            return self.identify_ate_effect(fast_backdoor=fast_backdoor)
+            return self.identify_ate_effect(optimize_backdoor=optimize_backdoor)
         elif self.estimand_type == CausalIdentifier.NONPARAMETRIC_NDE:
             return self.identify_nde_effect()
         elif self.estimand_type == CausalIdentifier.NONPARAMETRIC_NIE:
@@ -63,13 +63,13 @@ class CausalIdentifier:
                 CausalIdentifier.NONPARAMETRIC_NDE,
                 CausalIdentifier.NONPARAMETRIC_NIE))
 
-    def identify_ate_effect(self, fast_backdoor):
+    def identify_ate_effect(self, optimize_backdoor):
         estimands_dict = {}
         mediation_first_stage_confounders = None
         mediation_second_stage_confounders = None
         ### 1. BACKDOOR IDENTIFICATION
         # First, checking if there are any valid backdoor adjustment sets
-        if fast_backdoor == False:
+        if optimize_backdoor == False:
             backdoor_sets = self.identify_backdoor(self.treatment_name, self.outcome_name)
         else:
             from dowhy.causal_identifiers.backdoor import Backdoor

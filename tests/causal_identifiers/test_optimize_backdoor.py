@@ -4,7 +4,7 @@ from dowhy.causal_identifier import CausalIdentifier
 from dowhy.utils.api import parse_state
 from dowhy.causal_identifiers.backdoor import Backdoor
 
-class TestFastBackdoorIdentifier(object):
+class TestOptimizeBackdoorIdentifier(object):
 
     def test_1(self):
         treatment = "T"

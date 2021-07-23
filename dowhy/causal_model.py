@@ -167,7 +167,7 @@ class CausalModel:
         return self._graph
         
     def identify_effect(self, estimand_type=None,
-            method_name="default", proceed_when_unidentifiable=None, fast_backdoor=False):
+            method_name="default", proceed_when_unidentifiable=None, optimize_backdoor=False):
         """Identify the causal effect to be estimated, using properties of the causal graph.
 
         :param method_name: Method name for identification algorithm. ("id-algorithm" or "default")
@@ -191,7 +191,7 @@ class CausalModel:
                                                estimand_type,
                                                method_name,
                                                proceed_when_unidentifiable=proceed_when_unidentifiable)
-            identified_estimand = self.identifier.identify_effect(fast_backdoor=fast_backdoor)
+            identified_estimand = self.identifier.identify_effect(optimize_backdoor=optimize_backdoor)
         
         return identified_estimand
 
