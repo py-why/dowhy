@@ -22,22 +22,11 @@ class NodePair:
 
         else:
             '''path is a list'''
-            # self._condition_vars = self._condition_vars.union([*path[1:], *condition_vars])
-            # print(path)
-            # print(condition_vars)
-            # print(list(condition_vars))
-            # print([*path[1:], *list(condition_vars)])
+            condition_vars = list(condition_vars)
             # TODO : Apply hitting set to condition vars to obtain single set/list
             obj = HittingSetAlgorithm(condition_vars)
-            self._condition_vars.append(set([*path[1:], *list(condition_vars)]))
-            # self._condition_vars.append(set([*path, *condition_vars]))
-
-    # def update(self, paths):
-    #     self._is_blocked = all([path.is_blocked() for path in paths])
-    #     if not self._is_blocked:
-    #         for path in paths:
-    #             self._condition_vars = self._condition_vars.union(path.get_condition_vars())
-    
+            self._condition_vars.append(set([*path[1:], *condition_vars]))
+            
     def get_condition_vars(self):
         return self._condition_vars
 
@@ -61,8 +50,7 @@ class Path:
     def __init__(self):
         self._is_blocked = None # To store if path is blocked
         self._condition_vars = set() # To store variables needed to block the path
-        # self._colliders = set() # Used to store colliders
-    
+        
     def update(self, path, is_blocked):
         '''
         path is a list
@@ -98,7 +86,6 @@ class Backdoor:
         # Get adjacency list
         adjlist = adjacency_matrix_to_adjacency_list(nx.to_numpy_matrix(undirected_graph), labels=list(undirected_graph.nodes))
         path_dict = {}
-        # solution_node_pairs = {}
         backdoor_sets = [] # Put in backdoor sets format
 
         for node1 in self._nodes1:
@@ -107,18 +94,17 @@ class Backdoor:
                     continue
                 self._path_search(adjlist, node1, node2, path_dict)
                 obj = HittingSetAlgorithm(path_dict[(node1, node2)].get_condition_vars())
-                # solution_node_pairs[(node1, node2)] = obj.find_set()
+        
                 backdoor_set = {}
                 backdoor_set['backdoor_set'] = tuple(obj.find_set())
                 backdoor_set['num_paths_blocked_by_observed_nodes'] = obj.num_sets()
                 backdoor_sets.append(backdoor_set)
-
+        
         return backdoor_sets
-        # return solution_node_pairs
-        # return path_dict[solution_node_pairs]
-
+        
     def is_backdoor(self, path):
-        # print(path)
+        if len(path)<2:
+            return False
         return True if self._graph.has_edge(path[1], path[0]) else False
 
     def _path_search_util(self, graph, node1, node2, vis, path, path_dict, is_blocked=False, prev_arrow=None):
@@ -129,11 +115,12 @@ class Backdoor:
             return
 
         # If node pair has been fully explored
-        if ((node1, node2) in path_dict) and (path_dict[(node1, node2)].is_complete()):
+        if False:#((node1, node2) in path_dict) and (path_dict[(node1, node2)].is_complete()):
             for i in range(len(path)):
                 if (path[i], node2) not in path_dict:
                     path_dict[(path[i], node2)] = NodePair(path[i], node2)
-                path_dict[(path[i], node2)].update(path[i:], path_dict[(node1, node2)].get_condition_vars())
+                obj = HittingSetAlgorithm(path_dict[(node1, node2)].get_condition_vars())
+                path_dict[(path[i], node2)].update(path[i:], obj.find_set())
 
         else:
             path.append(node1)
@@ -184,7 +171,6 @@ class HittingSetAlgorithm:
         all_set_indices = set([i for i in range(len(self._list_of_sets))])
         while not self._is_covered(var_set):
             set_index = all_set_indices - indices_covered
-            # var_dict = self._count_vars(set_index=set_index)
             max_el = self._max_occurence_var(var_dict=self._var_count)
             var_set.add(max_el)
 

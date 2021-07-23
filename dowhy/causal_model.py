@@ -167,7 +167,7 @@ class CausalModel:
         return self._graph
         
     def identify_effect(self, estimand_type=None,
-            method_name="default", proceed_when_unidentifiable=None):
+            method_name="default", proceed_when_unidentifiable=None, fast_backdoor=False):
         """Identify the causal effect to be estimated, using properties of the causal graph.
 
         :param method_name: Method name for identification algorithm. ("id-algorithm" or "default")
@@ -185,12 +185,13 @@ class CausalModel:
                                            estimand_type,
                                            method_name,
                                            proceed_when_unidentifiable=proceed_when_unidentifiable)
+            identified_estimand = self.identifier.identify_effect()
         else:
             self.identifier = CausalIdentifier(self._graph,
                                                estimand_type,
                                                method_name,
                                                proceed_when_unidentifiable=proceed_when_unidentifiable)
-        identified_estimand = self.identifier.identify_effect()
+            identified_estimand = self.identifier.identify_effect(fast_backdoor=fast_backdoor)
         
         return identified_estimand
 
@@ -319,7 +320,6 @@ class CausalModel:
             pass
         else:
             str_arr = method_name.split(".", maxsplit=1)
-            print(str_arr)
             identifier_name = str_arr[0]
             estimator_name = str_arr[1]
             identified_estimand.set_identifier_method(identifier_name)
