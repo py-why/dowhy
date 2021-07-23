@@ -17,7 +17,6 @@ class NodePair:
             else:
                 self._is_blocked = self._is_blocked and path.is_blocked()
             if not path.is_blocked():
-                # self._condition_vars = self._condition_vars.union(path.get_condition_vars())
                 self._condition_vars.append(path.get_condition_vars())
 
         else:
@@ -116,7 +115,7 @@ class Backdoor:
             return
 
         # If node pair has been fully explored
-        if False:#((node1, node2) in path_dict) and (path_dict[(node1, node2)].is_complete()):
+        if ((node1, node2) in path_dict) and (path_dict[(node1, node2)].is_complete()):
             for i in range(len(path)):
                 if (path[i], node2) not in path_dict:
                     path_dict[(path[i], node2)] = NodePair(path[i], node2)
@@ -171,10 +170,12 @@ class HittingSetAlgorithm:
         num_indices = len(self._list_of_sets)
         indices_covered = set()
         all_set_indices = set([i for i in range(num_indices)])
-        # while not self._is_covered(var_set):
+        
         while not self._is_covered(indices_covered, num_indices):
             set_index = all_set_indices - indices_covered
             max_el = self._max_occurence_var(var_dict=self._var_count)
+            if max_el is None:
+                break
             var_set.add(max_el)
 
             # Modify variable count and indices covered
