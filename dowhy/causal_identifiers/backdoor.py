@@ -22,7 +22,6 @@ class NodePair:
         else:
             '''path is a list'''
             condition_vars = list(condition_vars)
-            # TODO : Apply hitting set to condition vars to obtain single set/list
             obj = HittingSetAlgorithm(condition_vars)
             self._condition_vars.append(set([*path[1:], *condition_vars]))
             
@@ -41,7 +40,6 @@ class NodePair:
         if not self._is_blocked:
             condition_vars = [str(s) for s in self._condition_vars]
             string += "To block path, condition on: " + ",".join(condition_vars) + "\n"
-            # string += "To block path, condition on: " + ",".join(self._condition_vars) + "\n"
         return string
     
 
