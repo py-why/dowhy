@@ -9,7 +9,7 @@ class NodePair:
         self._node1 = node1
         self._node2 = node2
         self._is_blocked = None # To store if all paths between node1 and node2 are blocked
-        self._condition_vars = [] #set() # To store variable to be conditioned on to block all paths between node1 and node2
+        self._condition_vars = [] # To store variable to be conditioned on to block all paths between node1 and node2
         self._complete = False # To store to paths between node pair have been completely explored.
     
     def update(self, path, condition_vars=None):
@@ -25,12 +25,11 @@ class NodePair:
         else:
             '''path is a list'''
             condition_vars = list(condition_vars)
-            obj = HittingSetAlgorithm(condition_vars)
             self._condition_vars.append(set([*path[1:], *condition_vars]))
             
     def get_condition_vars(self):
         return self._condition_vars
-
+    
     def set_complete(self):
         self._complete = True
     
@@ -84,6 +83,7 @@ class Backdoor:
         self._nodes1 = nodes1
         self._nodes2 = nodes2
         self._nodes12 = set(self._nodes1).union(self._nodes2) # Total set of nodes
+        self._colliders = set()
         
     def get_backdoor_vars(self):
         '''
@@ -104,7 +104,7 @@ class Backdoor:
                     continue
                 self._path_search(adjlist, node1, node2, path_dict)
                 if len(path_dict) != 0:
-                    obj = HittingSetAlgorithm(path_dict[(node1, node2)].get_condition_vars())
+                    obj = HittingSetAlgorithm(path_dict[(node1, node2)].get_condition_vars(), self._colliders)
                 
                     backdoor_set = {}
                     backdoor_set['backdoor_set'] = tuple(obj.find_set())
@@ -142,8 +142,11 @@ class Backdoor:
             for i in range(len(path)):
                 if (path[i], node2) not in path_dict:
                     path_dict[(path[i], node2)] = NodePair(path[i], node2)
-                obj = HittingSetAlgorithm(path_dict[(node1, node2)].get_condition_vars())
-                path_dict[(path[i], node2)].update(path[i:], obj.find_set())
+                obj = HittingSetAlgorithm(path_dict[(node1, node2)].get_condition_vars(), self._colliders)
+                # Add node1 to backdoor set of node_pair
+                s = set([node1])
+                s = s.union(obj.find_set())
+                path_dict[(path[i], node2)].update(path[i:], s)
 
         else:
             path.append(node1)
@@ -164,6 +167,7 @@ class Backdoor:
                         next_arrow = False if self._graph.has_edge(node1, neighbour) else True 
                         if next_arrow == True and prev_arrow == True:
                             is_blocked = True
+                            self._colliders.add(node1)
                         self._path_search_util(graph, neighbour, node2, vis, path, path_dict, is_blocked, not next_arrow) # Since incoming for current node is outgoing for the next
             path.pop()
             vis.remove(node1)
@@ -189,13 +193,14 @@ class HittingSetAlgorithm:
     Class for the Hitting Set Algorithm to obtain a approximate minimal set of backdoor variables 
     to condition on for each node pair.
     '''
-    def __init__(self, list_of_sets):
+    def __init__(self, list_of_sets, colliders=set()):
         '''
         :param list_of_sets: List of sets such that each set comprises nodes representing a single backdoor path between a source node and a target node.
         '''
         self._list_of_sets = list_of_sets
+        self._colliders = colliders
         self._var_count = self._count_vars()
-
+        
     def num_sets(self):
         '''
         Obtain number of backdoor paths between a node pair.
@@ -241,9 +246,10 @@ class HittingSetAlgorithm:
             s = self._list_of_sets[idx]
 
             for el in s:
-                if el not in var_dict:
-                    var_dict[el] = 0
-                var_dict[el] += 1
+                if el not in self._colliders:
+                    if el not in var_dict:
+                        var_dict[el] = 0
+                    var_dict[el] += 1
         
         return var_dict
     
