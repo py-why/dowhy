@@ -259,8 +259,8 @@ class HittingSetAlgorithm:
         '''
         for idx in indices_covered:
             for el in self._list_of_sets[idx]:
-            if el not in self._colliders:
-                self._var_count[el] -= 1
+                if el not in self._colliders:
+                    self._var_count[el] -= 1
     
     def _max_occurence_var(self, var_dict):
         '''
