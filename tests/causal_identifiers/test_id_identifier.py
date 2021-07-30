@@ -87,9 +87,15 @@ class TestIDIdentifier(object):
         identified_estimand = causal_model.identify_effect(method_name="id-algorithm")
 
         # Compare with ground truth
-        identified_str = identified_estimand.__str__()
-        gt_str = "Sum over {X1}:\n\tPredictor: P(Y|X2,X1,T)\n\tPredictor: P(X1)"
-        assert identified_str == gt_str
+        set_a = set(identified_estimand._product[0]._product[0]._product[0]['outcome_vars']._set)
+        set_b = set(identified_estimand._product[0]._product[0]._product[0]['condition_vars']._set)
+        set_c = set(identified_estimand._product[0]._product[1]._product[0]['outcome_vars']._set)
+        set_d = set(identified_estimand._product[0]._product[1]._product[0]['condition_vars']._set)
+        assert identified_estimand._product[0]._sum == ['X1']
+        assert len(set_a.difference({'Y'})) == 0
+        assert len(set_b.difference({'X1', 'X2', 'T'})) == 0
+        assert len(set_c.difference({'X1'})) == 0
+        assert len(set_d) == 0    
 
     def test_6(self):
         treatment = "T"
