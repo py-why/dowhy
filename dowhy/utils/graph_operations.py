@@ -3,6 +3,25 @@ import graphviz
 from queue import LifoQueue
 from dowhy.utils.ordered_set import OrderedSet
 
+def adjacency_matrix_to_adjacency_list(adjacency_matrix, labels=None):
+    '''
+    Convert the adjacency matrix of a graph to an adjacency list.
+
+    :param adjacency_matrix: A numpy array representing the graph adjacency matrix.
+    :param labels: List of labels.
+    :returns: Adjacency list as a dictionary.
+    '''
+
+    adjlist = dict()
+    if labels is None:
+        labels = [str(i+1) for i in range(adjacency_matrix.shape[0])]
+    for i in range(adjacency_matrix.shape[0]):
+        adjlist[labels[i]] = list()
+        for j in range(adjacency_matrix.shape[1]):
+            if adjacency_matrix[i, j] != 0:
+                adjlist[labels[i]].append(labels[j])
+    return adjlist
+
 def adjacency_matrix_to_graph(adjacency_matrix, labels=None):
     '''
     Convert a given graph adjacency matrix to DOT format.

@@ -246,7 +246,7 @@ class CausalGraph:
         return {'is_dseparated': d_separated,
                 'num_paths_blocked_by_observed_nodes': num_paths_blocked}
 
-    def get_backdoor_paths(self, nodes1, nodes2):
+    def get_backdoor_paths(self, nodes1, nodes2):        
         paths = []
         undirected_graph = self._graph.to_undirected()
         nodes12 = set(nodes1).union(nodes2)

@@ -30,6 +30,7 @@ class CausalModel:
                  estimand_type="nonparametric-ate",
                  proceed_when_unidentifiable=False,
                  missing_nodes_as_confounders=False,
+                 identify_vars=False,
                  **kwargs):
         """Initialize data and create a causal graph instance.
 
@@ -53,6 +54,7 @@ class CausalModel:
         :param estimand_type: the type of estimand requested (currently only "nonparametric-ate" is supported). In the future, may support other specific parametric forms of identification.
         :param proceed_when_unidentifiable: does the identification proceed by ignoring potential unobserved confounders. Binary flag.
         :param missing_nodes_as_confounders: Binary flag indicating whether variables in the dataframe that are not included in the causal graph, should be  automatically included as confounder nodes.
+        :param identify_vars: Variable deciding whether to compute common causes, instruments and effect modifiers while initializing the class. identify_vars should be set to False when user is providing common_causes, instruments or effect modifiers on their own(otherwise the identify_vars code can override the user provided values). Also it does not make sense if no graph is given.
         :returns: an instance of CausalModel class
 
         """
@@ -99,12 +101,12 @@ class CausalModel:
                 self._graph = None
 
         else:
-            self.init_graph(graph=graph)
+            self.init_graph(graph=graph, identify_vars=identify_vars)
             
         self._other_variables = kwargs
         self.summary()
 
-    def init_graph(self, graph):
+    def init_graph(self, graph, identify_vars):
         '''
         Initialize self._graph using graph provided by the user.
 
@@ -118,15 +120,29 @@ class CausalModel:
             observed_node_names=self._data.columns.tolist(),
             missing_nodes_as_confounders = self._missing_nodes_as_confounders
         )
+
+        if identify_vars:
+            self._common_causes = self._graph.get_common_causes(self._treatment, self._outcome)
+            self._instruments = self._graph.get_instruments(self._treatment,
+                                                            self._outcome)
+            # Sometimes, effect modifiers from the graph may not match those provided by the user.
+            # (Because some effect modifiers may also be common causes)
+            # In such cases, the user-provided modifiers are used.
+            # If no effect modifiers are provided,  then the ones from the graph are used.
+            if self._effect_modifiers is None or not self._effect_modifiers:
+                self._effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
+
+    def get_common_causes(self):
         self._common_causes = self._graph.get_common_causes(self._treatment, self._outcome)
-        self._instruments = self._graph.get_instruments(self._treatment,
-                                                        self._outcome)
-        # Sometimes, effect modifiers from the graph may not match those provided by the user.
-        # (Because some effect modifiers may also be common causes)
-        # In such cases, the user-provided modifiers are used.
-        # If no effect modifiers are provided,  then the ones from the graph are used.
-        if self._effect_modifiers is None or not self._effect_modifiers:
-            self._effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
+        return self._common_causes
+
+    def get_instruments(self):
+        self._instruments = self._graph.get_instruments(self._treatment, self._outcome)
+        return self._instruments
+
+    def get_effect_modifiers(self):
+        self._effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
+        return self._effect_modifiers
 
     def learn_graph(self, method_name="cdt.causality.graph.LiNGAM", *args, **kwargs):
         '''
@@ -151,7 +167,7 @@ class CausalModel:
         return self._graph
         
     def identify_effect(self, estimand_type=None,
-            method_name="default", proceed_when_unidentifiable=None):
+            method_name="default", proceed_when_unidentifiable=None, optimize_backdoor=False):
         """Identify the causal effect to be estimated, using properties of the causal graph.
 
         :param method_name: Method name for identification algorithm. ("id-algorithm" or "default")
@@ -169,12 +185,13 @@ class CausalModel:
                                            estimand_type,
                                            method_name,
                                            proceed_when_unidentifiable=proceed_when_unidentifiable)
+            identified_estimand = self.identifier.identify_effect()
         else:
             self.identifier = CausalIdentifier(self._graph,
                                                estimand_type,
                                                method_name,
                                                proceed_when_unidentifiable=proceed_when_unidentifiable)
-        identified_estimand = self.identifier.identify_effect()
+            identified_estimand = self.identifier.identify_effect(optimize_backdoor=optimize_backdoor)
         
         return identified_estimand
 
@@ -217,7 +234,10 @@ class CausalModel:
 
         """
         if effect_modifiers is None:
-            effect_modifiers = self._effect_modifiers
+            if self._effect_modifiers is None:
+                effect_modifiers = self.get_effect_modifiers()
+            else:
+                effect_modifiers = self._effect_modifiers
 
         if method_name is None:
             #TODO add propensity score as default backdoor method, iv as default iv method, add an informational message to show which method has been selected.
@@ -300,7 +320,6 @@ class CausalModel:
             pass
         else:
             str_arr = method_name.split(".", maxsplit=1)
-            print(str_arr)
             identifier_name = str_arr[0]
             estimator_name = str_arr[1]
             identified_estimand.set_identifier_method(identifier_name)
