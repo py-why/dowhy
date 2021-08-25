@@ -288,11 +288,11 @@ class CausalModel:
                     confidence_intervals = confidence_intervals,
                     target_units = target_units,
                     effect_modifiers = effect_modifiers,
-                    params=method_params
+                    params=method_params)
             else:
                 # Estimator had been computed in a previous call
                 assert self.causal_estimator is not None
-            )
+
             estimate = self.causal_estimator.estimate_effect()
             # Store parameters inside estimate object for refutation methods
             # TODO: This add_params needs to move to the estimator class
