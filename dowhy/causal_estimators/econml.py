@@ -53,7 +53,7 @@ class Econml(CausalEstimator):
             self._estimating_instruments = pd.get_dummies(self._estimating_instruments, drop_first=True)
         else:
             self._estimating_instruments = None
-
+        self.estimator = None
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
 
