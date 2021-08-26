@@ -162,8 +162,8 @@ class TestEconMLEstimator:
             target_units=lambda df: df["X0"] > 1,
             confidence_intervals=False,
             method_params={
-                "init_params": {'model_T_XZ': GradientBoostingClassifier(),
-                                'model_Y_X': GradientBoostingRegressor(),
+                "init_params": {'model_t_xwz': GradientBoostingClassifier(),
+                                'model_y_xw': GradientBoostingRegressor(),
                                 'flexible_model_effect': GradientBoostingRegressor(),
                                 'featurizer': PolynomialFeatures(degree=1, include_bias=False)
                                 },
