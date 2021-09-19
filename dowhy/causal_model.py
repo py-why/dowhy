@@ -292,6 +292,8 @@ class CausalModel:
             else:
                 # Estimator had been computed in a previous call
                 assert self.causal_estimator is not None
+                self.causal_estimator.update_input(treatment_value, control_value,
+                        target_units)
 
             estimate = self.causal_estimator.estimate_effect()
             # Store parameters inside estimate object for refutation methods

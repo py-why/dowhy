@@ -601,6 +601,11 @@ class CausalEstimator:
         else:
             return None
 
+    def update_input(self, treatment_value, control_value, target_units):
+        self._control_value = control_value
+        self._treatment_value = treatment_value
+        self._target_units = target_units
+
     @staticmethod
     def is_bootstrap_parameter_changed(bootstrap_estimates_params, given_params):
         """ Check whether parameters of the bootstrap have changed.
