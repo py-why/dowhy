@@ -58,7 +58,7 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
             'd_y': ['sum'],
             'dbar_y': ['sum']
         })
-        weighted_outcomes.columns = ["_".join(x) for x in weighted_outcomes.columns.ravel()]
+        weighted_outcomes.columns = ["_".join(x) for x in weighted_outcomes.columns.to_numpy().ravel()]
         treatment_sum_name = self._treatment_name[0] + "_sum"
         control_sum_name = "dbar_sum"
 
