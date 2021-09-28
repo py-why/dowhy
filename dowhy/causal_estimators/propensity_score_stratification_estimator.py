@@ -23,7 +23,7 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         if not hasattr(self, 'clipping_threshold'):
             self.clipping_threshold = clipping_threshold
 
-    def _estimate_effect(self, recalculate_propensity_score=False):
+    def _estimate_effect(self):
         if self.recalculate_propensity_score is True:
             if self.propensity_score_model is None:
                 self.propensity_score_model = linear_model.LogisticRegression()
