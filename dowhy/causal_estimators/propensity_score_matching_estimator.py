@@ -6,9 +6,30 @@ from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_estimators.propensity_score_estimator import PropensityScoreEstimator
 
 class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
+    """ Estimate effect of treatment by finding matching treated and control units based on propensity score.
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    Straightforward application of the back-door criterion.
+
+    Supports additional parameters that can be specified in the estimate_effect() method.
+
+    - 'propensity_score_model': The model used to compute propensity score. Could be any classification model that supports fit() and predict_proba() methods. If None, use LogisticRegression model as the default. Default=None
+    - 'recalculate_propensity_score': If true, force the estimator to calculate the propensity score. To use pre-computed propensity score, set this value to false. Default=True
+    - 'propensity_score_column': column name that stores the propensity score. Default='propensity_score'
+
+    """
+    def __init__(
+        self, 
+        *args, 
+        propensity_score_model=None, 
+        recalculate_propensity_score=True, 
+        propensity_score_column="propensity_score",
+        **kwargs):
+        super().__init__(
+            *args, 
+            propensity_score_model=propensity_score_model,
+            recalculate_propensity_score=recalculate_propensity_score,
+            propensity_score_column=propensity_score_column,
+            **kwargs)
 
         self.logger.info("INFO: Using Propensity Score Matching Estimator")
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
