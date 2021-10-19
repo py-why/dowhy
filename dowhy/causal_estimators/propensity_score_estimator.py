@@ -4,12 +4,24 @@ import pandas as pd
 from dowhy.causal_estimator import CausalEstimator
 
 class PropensityScoreEstimator(CausalEstimator):
-
-    def __init__(self, *args, **kwargs):
+    """ 
+    Base class for estimators that estimate effects based on propensity of treatment assignment.
+    Supports additional parameters that can be specified in the estimate_effect() method.
+    - 'propensity_score_model': The model used to compute propensity score. Could be any classification model that supports fit() and predict_proba() methods. If None, use LogisticRegression model as the default. Default=None
+    - 'recalculate_propensity_score': If true, force the estimator to calculate the propensity score. To use pre-computed propensity score, set this value to false. Default=True
+    - 'propensity_score_column': column name that stores the propensity score. Default='propensity_score'
+    """
+    def __init__(self, *args, propensity_score_model=None, recalculate_propensity_score=True, propensity_score_column="propensity_score", **kwargs):
         super().__init__(*args, **kwargs)
 
-        # We need to initialize the model when we create any propensity score estimator
-        self._propensity_score_model = None
+        # Enable the user to pass params for a custom propensity model
+        if not hasattr(self, "propensity_score_model"):
+            self.propensity_score_model = propensity_score_model
+        if not hasattr(self, "recalculate_propensity_score"):
+            self.recalculate_propensity_score = recalculate_propensity_score
+        if not hasattr(self, "propensity_score_column"):
+            self.propensity_score_column = propensity_score_column
+
         # Check if the treatment is one-dimensional
         if len(self._treatment_name) > 1:
             error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
@@ -45,14 +57,10 @@ class PropensityScoreEstimator(CausalEstimator):
         '''
         raise NotImplementedError
 
-    def _estimate_effect(self, recalculate_propensity_score=False):
+    def _estimate_effect(self):
         '''
             A custom estimator based on the way the propensity score estimates are to be used.
-            
-            Parameters
-            -----------
-            recalculate_propensity_score: bool, default False,
-            This forces the estimator to recalculate the estimate for the propensity score.
+
         '''
         raise NotImplementedError
 
