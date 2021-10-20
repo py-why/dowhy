@@ -1,5 +1,4 @@
 import numpy as np
-import graphviz
 from queue import LifoQueue
 from dowhy.utils.ordered_set import OrderedSet
 
@@ -25,7 +24,7 @@ def adjacency_matrix_to_adjacency_list(adjacency_matrix, labels=None):
 def adjacency_matrix_to_graph(adjacency_matrix, labels=None):
     '''
     Convert a given graph adjacency matrix to DOT format.
-    
+
     :param adjacency_matrix: A numpy array representing the graph adjacency matrix.
     :param labels: List of labels.
     :returns: Graph in DOT format.
@@ -33,6 +32,7 @@ def adjacency_matrix_to_graph(adjacency_matrix, labels=None):
     # Only consider edges have absolute edge weight > 0.01
     idx = np.abs(adjacency_matrix) > 0.01
     dirs = np.where(idx)
+    import graphviz
     d = graphviz.Digraph(engine='dot')
     names = labels if labels else [f'x{i}' for i in range(len(adjacency_matrix))]
     for name in names:
@@ -44,7 +44,7 @@ def adjacency_matrix_to_graph(adjacency_matrix, labels=None):
 def str_to_dot(string):
     '''
     Converts input string from graphviz library to valid DOT graph format.
-    
+
     :param string: Graph in DOT format.
     :returns: DOT string converted to a suitable format for the DoWhy library.
     '''
@@ -55,7 +55,7 @@ def str_to_dot(string):
 def find_ancestor(node_set, node_names, adjacency_matrix, node2idx, idx2node):
     '''
     Finds ancestors of a given set of nodes in a given graph.
-    
+
     :param node_set: Set of nodes whos ancestors must be obtained.
     :param node_names: Name of all nodes in the graph.
     :param adjacency_matrix: Graph adjacency matrix.
@@ -95,7 +95,7 @@ def induced_graph(node_set, adjacency_matrix, node2idx):
     adjacency_matrix_induced = adjacency_matrix.copy()
     adjacency_matrix_induced = adjacency_matrix_induced[node_idx_list]
     adjacency_matrix_induced = adjacency_matrix_induced[:, node_idx_list]
-    return adjacency_matrix_induced        
+    return adjacency_matrix_induced
 
 def find_c_components(adjacency_matrix, node_set, idx2node):
     '''

@@ -237,7 +237,7 @@ class CausalModel:
 
         """
         if effect_modifiers is None:
-            if self._effect_modifiers is None:
+            if self._effect_modifiers is None or len(self._effect_modifiers) == 0:
                 effect_modifiers = self.get_effect_modifiers()
             else:
                 effect_modifiers = self._effect_modifiers
