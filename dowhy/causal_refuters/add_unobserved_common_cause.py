@@ -41,7 +41,7 @@ class AddUnobservedCommonCause(CausalRefuter):
         self.kappa_t = kwargs["effect_strength_on_treatment"] if "effect_strength_on_treatment" in kwargs else None
         self.kappa_y = kwargs["effect_strength_on_outcome"] if "effect_strength_on_outcome" in kwargs else None
         self.simulated_method_name = kwargs["simulated_method_name"] if "simulated_method_name" in kwargs else "linear_based"
-
+        self.plotmethod = kwargs['plotmethod'] if "plotmethod" in kwargs else "colormesh"
         self.logger = logging.getLogger(__name__)
 
     def refute_estimate(self):
@@ -52,7 +52,7 @@ class AddUnobservedCommonCause(CausalRefuter):
 
         :return: CausalRefuter: An object that contains the estimated effect and a new effect and the name of the refutation used.
         """
-        if not isinstance(self.kappa_t, np.ndarray) and not isinstance(self.kappa_y, np.ndarray): # Deal with single value inputs
+        if not isinstance(self.kappa_t, (list, np.ndarray)) and not isinstance(self.kappa_y, (list,np.ndarray)): # Deal with single value inputs
             new_data = copy.deepcopy(self._data)
             new_data = self.include_confounders_effect(new_data, self.kappa_t, self.kappa_y)
             new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
@@ -66,23 +66,24 @@ class AddUnobservedCommonCause(CausalRefuter):
 
         else: # Deal with multiple value inputs
 
-            if isinstance(self.kappa_t, np.ndarray) and isinstance(self.kappa_y, np.ndarray): # Deal with range inputs
+            if isinstance(self.kappa_t, (list, np.ndarray)) and isinstance(self.kappa_y, (list, np.ndarray)): # Deal with range inputs
                 # Get a 2D matrix of values
-                x,y =  np.meshgrid(self.kappa_t, self.kappa_y) # x,y are both MxN
+                #x,y =  np.meshgrid(self.kappa_t, self.kappa_y) # x,y are both MxN
 
-                results_matrix = np.random.rand(len(x),len(y)) # Matrix to hold all the results of NxM
-                print(results_matrix.shape)
+                results_matrix = np.random.rand(len(self.kappa_t),len(self.kappa_y)) # Matrix to hold all the results of NxM
                 orig_data = copy.deepcopy(self._data)
-
-                for i in range(0,len(x[0])):
-                    for j in range(0,len(y)):
-                        new_data = self.include_confounders_effect(orig_data, x[0][i], y[j][0])
+                #for i in range(0,len(x[0])):
+                #    for j in range(0,len(y)):
+                for i in range(len(self.kappa_t)):
+                    for j in range(len(self.kappa_y)):
+                        #new_data = self.include_confounders_effect(orig_data, x[0][i], y[j][0])
+                        new_data = self.include_confounders_effect(orig_data, self.kappa_t[i], self.kappa_y[j])
                         new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
                         new_effect = new_estimator.estimate_effect()
                         refute = CausalRefutation(self._estimate.value, new_effect.value,
                                                 refutation_type="Refute: Add an Unobserved Common Cause")
                         self.logger.debug(refute)
-                        results_matrix[i][j] = refute.estimated_effect # Populate the results
+                        results_matrix[i][j] = refute.new_effect # Populate the results
 
                 import matplotlib
                 import matplotlib.pyplot as plt
@@ -90,11 +91,28 @@ class AddUnobservedCommonCause(CausalRefuter):
                 left, bottom, width, height = 0.1, 0.1, 0.8, 0.8
                 ax = fig.add_axes([left, bottom, width, height])
 
-                cp = plt.contourf(x, y, results_matrix)
-                plt.colorbar(cp)
+                oe = self._estimate.value
+                contour_levels = [oe/4.0, oe/2.0, (3.0/4)*oe, oe]
+                contour_levels.extend([0, np.min(results_matrix), np.max(results_matrix)])
+                if self.plotmethod=="contour":
+                    cp = plt.contourf(self.kappa_y, self.kappa_t, results_matrix,
+                            levels=sorted(contour_levels))
+                    # Adding a label on the contour line for the original estimate
+                    fmt = {}
+                    trueeffect_index = np.where(cp.levels==oe)[0][0]
+                    fmt[cp.levels[trueeffect_index]] = "Estimated Effect"
+                    # Label every other level using strings
+                    plt.clabel(cp,[cp.levels[trueeffect_index]],inline=True, fmt=fmt)
+                    plt.colorbar(cp)
+                elif self.plotmethod=="colormesh":
+                    cp = plt.pcolormesh(self.kappa_y, self.kappa_t, results_matrix,
+                            shading="nearest")
+                    plt.colorbar(cp, ticks=contour_levels)
+                ax.yaxis.set_ticks(self.kappa_t)
+                ax.xaxis.set_ticks(self.kappa_y)
                 ax.set_title('Effect of Unobserved Common Cause')
-                ax.set_xlabel('Value of Linear Constant on Treatment')
-                ax.set_ylabel('Value of Linear Constant on Outcome')
+                ax.set_ylabel('Value of Linear Constant on Treatment')
+                ax.set_xlabel('Value of Linear Constant on Outcome')
                 plt.show()
 
                 refute.new_effect = results_matrix
@@ -102,7 +120,7 @@ class AddUnobservedCommonCause(CausalRefuter):
                 refute.add_refuter(self)
                 return refute
 
-            elif isinstance(self.kappa_t, np.ndarray):
+            elif isinstance(self.kappa_t, (list, np.ndarray)):
                 outcomes = np.random.rand(len(self.kappa_t))
                 orig_data = copy.deepcopy(self._data)
 
@@ -113,7 +131,7 @@ class AddUnobservedCommonCause(CausalRefuter):
                     refute = CausalRefutation(self._estimate.value, new_effect.value,
                                             refutation_type="Refute: Add an Unobserved Common Cause")
                     self.logger.debug(refute)
-                    outcomes[i] = refute.estimated_effect # Populate the results
+                    outcomes[i] = refute.new_effect # Populate the results
 
                 import matplotlib
                 import matplotlib.pyplot as plt
@@ -122,16 +140,17 @@ class AddUnobservedCommonCause(CausalRefuter):
                 ax = fig.add_axes([left, bottom, width, height])
 
                 plt.plot(self.kappa_t, outcomes)
+                plt.axhline(self._estimate.value, linestyle='--',color="gray")
                 ax.set_title('Effect of Unobserved Common Cause')
                 ax.set_xlabel('Value of Linear Constant on Treatment')
-                ax.set_ylabel('New Effect')
+                ax.set_ylabel('Estimated Effect after adding the common cause')
                 plt.show()
 
                 refute.new_effect = outcomes
                 refute.add_refuter(self)
                 return refute
 
-            elif isinstance(self.kappa_y, np.ndarray):
+            elif isinstance(self.kappa_y, (list, np.ndarray)):
                 outcomes = np.random.rand(len(self.kappa_y))
                 orig_data = copy.deepcopy(self._data)
 
@@ -142,7 +161,7 @@ class AddUnobservedCommonCause(CausalRefuter):
                     refute = CausalRefutation(self._estimate.value, new_effect.value,
                                             refutation_type="Refute: Add an Unobserved Common Cause")
                     self.logger.debug(refute)
-                    outcomes[i] = refute.estimated_effect # Populate the results
+                    outcomes[i] = refute.new_effect # Populate the results
 
                 import matplotlib
                 import matplotlib.pyplot as plt
@@ -151,9 +170,10 @@ class AddUnobservedCommonCause(CausalRefuter):
                 ax = fig.add_axes([left, bottom, width, height])
 
                 plt.plot(self.kappa_y, outcomes)
+                plt.axhline(self._estimate.value, linestyle='--',color="gray")
                 ax.set_title('Effect of Unobserved Common Cause')
                 ax.set_xlabel('Value of Linear Constant on Outcome')
-                ax.set_ylabel('New Effect')
+                ax.set_ylabel('Estimated Effect after adding the common cause')
                 plt.show()
 
                 refute.new_effect = outcomes
