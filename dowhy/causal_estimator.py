@@ -9,6 +9,7 @@ from sklearn.utils import resample
 import dowhy.interpreters as interpreters
 from dowhy.utils.api import parse_state
 
+
 class CausalEstimator:
     """Base class for an estimator of causal effect.
 
@@ -40,7 +41,7 @@ class CausalEstimator:
     def __init__(self, data, identified_estimand, treatment, outcome,
                  control_value=0, treatment_value=1,
                  test_significance=False, evaluate_effect_strength=False,
-                 confidence_intervals = False,
+                 confidence_intervals=False,
                  target_units=None, effect_modifiers=None,
                  params=None):
         """Initializes an estimator with data and names of relevant variables.
@@ -72,7 +73,7 @@ class CausalEstimator:
         self._target_estimand = identified_estimand
         # Currently estimation methods only support univariate treatment and outcome
         self._treatment_name = treatment
-        self._outcome_name = outcome[0] # assuming one-dimensional outcome
+        self._outcome_name = outcome[0]  # assuming one-dimensional outcome
         self._control_value = control_value
         self._treatment_value = treatment_value
         self._significance_test = test_significance
@@ -80,8 +81,8 @@ class CausalEstimator:
         self._target_units = target_units
         self._effect_modifier_names = effect_modifiers
         self._confidence_intervals = confidence_intervals
-        self._bootstrap_estimates = None # for confidence intervals and std error
-        self._bootstrap_null_estimates = None # for significance test
+        self._bootstrap_estimates = None  # for confidence intervals and std error
+        self._bootstrap_null_estimates = None  # for significance test
         self._effect_modifiers = None
         self.method_params = params
 
@@ -118,7 +119,7 @@ class CausalEstimator:
             self._effect_modifiers = self._data[self._effect_modifier_names]
             self._effect_modifiers = pd.get_dummies(self._effect_modifiers, drop_first=True)
             self.logger.debug("Effect modifiers: " +
-                          ",".join(self._effect_modifier_names))
+                              ",".join(self._effect_modifier_names))
 
     @staticmethod
     def get_estimator_object(new_data, identified_estimand, estimate):
@@ -138,26 +139,27 @@ class CausalEstimator:
         """
         estimator_class = estimate.params['estimator_class']
         new_estimator = estimator_class(
-                new_data,
-                identified_estimand,
-                identified_estimand.treatment_variable, identified_estimand.outcome_variable, #names of treatment and outcome
-                control_value=estimate.control_value,
-                treatment_value=estimate.treatment_value,
-                test_significance=False,
-                evaluate_effect_strength=False,
-                confidence_intervals = estimate.params["confidence_intervals"],
-                target_units = estimate.params["target_units"],
-                effect_modifiers = estimate.params["effect_modifiers"],
-                params = estimate.params["method_params"]
-                )
+            new_data,
+            identified_estimand,
+            identified_estimand.treatment_variable, identified_estimand.outcome_variable,
+            # names of treatment and outcome
+            control_value=estimate.control_value,
+            treatment_value=estimate.treatment_value,
+            test_significance=False,
+            evaluate_effect_strength=False,
+            confidence_intervals=estimate.params["confidence_intervals"],
+            target_units=estimate.params["target_units"],
+            effect_modifiers=estimate.params["effect_modifiers"],
+            params=estimate.params["method_params"]
+        )
 
         return new_estimator
-
 
     def _estimate_effect(self):
         '''This method is to be overriden by the child classes, so that they can run the estimation technique of their choice
         '''
-        raise NotImplementedError(("Main estimation method is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG).format(self.__class__))
+        raise NotImplementedError(
+            ("Main estimation method is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG).format(self.__class__))
 
     def estimate_effect(self):
         """Base estimation method that calls the estimate_effect method of its calling subclass.
@@ -173,8 +175,8 @@ class CausalEstimator:
         if self._significance_test:
             self.test_significance(est.value, method=self._significance_test)
         if self._confidence_intervals:
-            self.estimate_confidence_intervals(method=self._confidence_intervals,
-                    confidence_level=self.confidence_level)
+            self.estimate_confidence_intervals(est.value, confidence_level=self.confidence_level,
+                                               method=self._confidence_intervals)
         if self._effect_strength_eval:
             effect_strength_dict = self.evaluate_effect_strength(est)
             est.add_effect_strength(effect_strength_dict)
@@ -182,9 +184,9 @@ class CausalEstimator:
         return est
 
     def estimate_effect_naive(self):
-        #TODO Only works for binary treatment
+        # TODO Only works for binary treatment
         df_withtreatment = self._data.loc[self._data[self._treatment_name] == 1]
-        df_notreatment = self._data.loc[self._data[self._treatment_name]== 0]
+        df_notreatment = self._data.loc[self._data[self._treatment_name] == 0]
         est = np.mean(df_withtreatment[self._outcome_name]) - np.mean(df_notreatment[self._outcome_name])
         return CausalEstimate(est, None, None, control_value=0, treatment_value=1)
 
@@ -193,11 +195,13 @@ class CausalEstimator:
 
         The overridden function should take in a dataframe as input and return the estimate for that data.
         """
-        raise NotImplementedError(("Conditional treatment effects are " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG).format(self.__class__))
+        raise NotImplementedError(
+            ("Conditional treatment effects are " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG).format(
+                self.__class__))
 
     def _estimate_conditional_effects(self, estimate_effect_fn,
-            effect_modifier_names=None,
-            num_quantiles=None):
+                                      effect_modifier_names=None,
+                                      num_quantiles=None):
         """Estimate conditional treatment effects. Common method for all estimators that utilizes a specific estimate_effect_fn implemented by each child estimator.
 
         If a numeric effect modifier is provided, it is discretized into quantile bins. If you would like a custom discretization, you can do so yourself: create a new column containing the discretized effect modifier and then include that column's name in the effect_modifier_names argument.
@@ -219,7 +223,8 @@ class CausalEstimator:
         # Making sure that effect_modifier_names is a list
         effect_modifier_names = parse_state(effect_modifier_names)
         if not all(em in self._effect_modifier_names for em in effect_modifier_names):
-            self.logger.warn("At least one of the provided effect modifiers was not included while fitting the estimator. You may get incorrect results. To resolve, fit the estimator again by providing the updated effect modifiers in estimate_effect().")
+            self.logger.warn(
+                "At least one of the provided effect modifiers was not included while fitting the estimator. You may get incorrect results. To resolve, fit the estimator again by providing the updated effect modifiers in estimate_effect().")
         # Making a copy since we are going to be changing effect modifier names
         effect_modifier_names = effect_modifier_names.copy()
         prefix = CausalEstimator.TEMP_CAT_COLUMN_PREFIX
@@ -227,12 +232,12 @@ class CausalEstimator:
         for i in range(len(effect_modifier_names)):
             em = effect_modifier_names[i]
             if pd.api.types.is_numeric_dtype(self._data[em].dtypes):
-                self._data[prefix+str(em)] = pd.qcut(self._data[em],
-                        num_quantiles, duplicates="drop")
+                self._data[prefix + str(em)] = pd.qcut(self._data[em],
+                                                       num_quantiles, duplicates="drop")
                 effect_modifier_names[i] = prefix + str(em)
         # Grouping by effect modifiers and computing effect separately
         by_effect_mods = self._data.groupby(effect_modifier_names)
-        cond_est_fn = lambda x: self._do(self._treatment_value, x) -self._do(self._control_value, x)
+        cond_est_fn = lambda x: self._do(self._treatment_value, x) - self._do(self._control_value, x)
         conditional_estimates = by_effect_mods.apply(estimate_effect_fn)
         # Deleting the temporary categorical columns
         for em in effect_modifier_names:
@@ -240,9 +245,9 @@ class CausalEstimator:
                 self._data.pop(em)
         return conditional_estimates
 
-
     def _do(self, x, data_df=None):
-        raise NotImplementedError(("Do-operator is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG).format(self.__class__))
+        raise NotImplementedError(
+            ("Do-operator is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG).format(self.__class__))
 
     def do(self, x, data_df=None):
         """Method that implements the do-operator.
@@ -262,7 +267,7 @@ class CausalEstimator:
         raise NotImplementedError(("Symbolic estimator string is ").format(self.__class__))
 
     def _generate_bootstrap_estimates(self, num_bootstrap_simulations,
-            sample_size_fraction):
+                                      sample_size_fraction):
         """ Helper function to generate causal estimates over bootstrapped samples.
 
         :param num_bootstrap_simulations: Number of simulations for the bootstrap method.
@@ -273,44 +278,47 @@ class CausalEstimator:
         simulation_results = np.zeros(num_bootstrap_simulations)
 
         # Find the sample size the proportion with the population size
-        sample_size= int( sample_size_fraction * len(self._data) )
+        sample_size = int(sample_size_fraction * len(self._data))
 
         if sample_size > len(self._data):
             self.logger.warning("WARN: The sample size is greater than the data being sampled")
 
-        self.logger.info("INFO: The sample size: {}".format(sample_size) )
-        self.logger.info("INFO: The number of simulations: {}".format(num_bootstrap_simulations) )
+        self.logger.info("INFO: The sample size: {}".format(sample_size))
+        self.logger.info("INFO: The number of simulations: {}".format(num_bootstrap_simulations))
 
         # Perform the set number of simulations
         for index in range(num_bootstrap_simulations):
-            new_data = resample(self._data,n_samples=sample_size)
+            new_data = resample(self._data, n_samples=sample_size)
 
             new_estimator = type(self)(
                 new_data,
                 self._target_estimand,
-                self._target_estimand.treatment_variable, self._target_estimand.outcome_variable, #names of treatment and outcome
+                self._target_estimand.treatment_variable, self._target_estimand.outcome_variable,
+                # names of treatment and outcome
+                treatment_value=self._treatment_value,
+                control_value=self._control_value,
                 test_significance=False,
                 evaluate_effect_strength=False,
-                confidence_intervals = False,
-                target_units = self._target_units,
-                effect_modifiers = self._effect_modifier_names,
-                params = self.method_params
-                )
+                confidence_intervals=False,
+                target_units=self._target_units,
+                effect_modifiers=self._effect_modifier_names,
+                params=self.method_params
+            )
             new_effect = new_estimator.estimate_effect()
             simulation_results[index] = new_effect.value
 
         estimates = CausalEstimator.BootstrapEstimates(simulation_results,
-                {'num_simulations': num_bootstrap_simulations,
-                'sample_size_fraction': sample_size_fraction})
+                                                       {'num_simulations': num_bootstrap_simulations,
+                                                        'sample_size_fraction': sample_size_fraction})
         return estimates
 
-
-    def _estimate_confidence_intervals_with_bootstrap(self,
-            confidence_level=None,
-            num_simulations=None, sample_size_fraction=None):
+    def _estimate_confidence_intervals_with_bootstrap(self, estimate_value,
+                                                      confidence_level=None,
+                                                      num_simulations=None, sample_size_fraction=None):
         '''
             Method to compute confidence interval using bootstrapped sampling.
 
+            :param estimate_value: obtained estimate's value
             :param confidence_level: The level for which to compute CI (e.g., 95% confidence level translates to confidence_level=0.95)
             :param num_simulations: The number of simulations to be performed to get the bootstrap confidence intervals.
             :param sample_size_fraction: The fraction of the dataset to be resampled.
@@ -329,41 +337,46 @@ class CausalEstimator:
         # Checking if bootstrap_estimates are already computed
         if self._bootstrap_estimates is None:
             self._bootstrap_estimates = self._generate_bootstrap_estimates(
-                    num_simulations, sample_size_fraction)
+                num_simulations, sample_size_fraction)
         elif CausalEstimator.is_bootstrap_parameter_changed(self._bootstrap_estimates.params, locals()):
             # Checked if any parameter is changed from the previous std error estimate
             self._bootstrap_estimates = self._generate_bootstrap_estimates(
-                    num_simulations, sample_size_fraction)
+                num_simulations, sample_size_fraction)
         # Now use the data obtained from the simulations to get the value of the confidence estimates
-        # Sort the simulations
-        bootstrap_estimates = np.sort(self._bootstrap_estimates.estimates)
-        # Now we take the (1- p)th and the (p)th values, where p is the chosen confidence level
-        lower_bound_index = int( ( 1 - confidence_level ) * len(bootstrap_estimates) )
-        upper_bound_index = int( confidence_level * len(bootstrap_estimates) )
+        bootstrap_estimates = self._bootstrap_estimates.estimates
+        # Get the variations of each bootstrap estimate and sort
+        bootstrap_variations = [bootstrap_estimate - estimate_value for bootstrap_estimate in bootstrap_estimates]
+        sorted_bootstrap_variations = np.sort(bootstrap_variations)
 
-        # get the values
-        lower_bound = bootstrap_estimates[lower_bound_index]
-        upper_bound = bootstrap_estimates[upper_bound_index]
+        # Now we take the (1- p)th and the (p)th variations, where p is the chosen confidence level
+        upper_bound_index = int((1 - confidence_level) * len(sorted_bootstrap_variations))
+        lower_bound_index = int(confidence_level * len(sorted_bootstrap_variations))
 
-        return (lower_bound, upper_bound)
+        # Get the lower and upper bounds by subtracting the variations from the estimate
+        lower_bound = estimate_value - sorted_bootstrap_variations[lower_bound_index]
+        upper_bound = estimate_value - sorted_bootstrap_variations[upper_bound_index]
+        return lower_bound, upper_bound
 
-    def _estimate_confidence_intervals(self, confidence_level, method=None,
-            **kwargs):
+    def _estimate_confidence_intervals(self, confidence_level=None, method=None,
+                                       **kwargs):
         '''
             This method is to be overriden by the child classes, so that they
             can run a confidence interval estimation method suited to the specific
             causal estimator.
         '''
-        raise NotImplementedError(("This method for estimating confidence intervals is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG + " Meanwhile, you can try the bootstrap method (method='bootstrap') to estimate confidence intervals.").format(self.__class__))
+        raise NotImplementedError((
+                                              "This method for estimating confidence intervals is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG + " Meanwhile, you can try the bootstrap method (method='bootstrap') to estimate confidence intervals.").format(
+            self.__class__))
 
-    def estimate_confidence_intervals(self, confidence_level=None, method=None,
-             **kwargs):
+    def estimate_confidence_intervals(self, estimate_value, confidence_level=None, method=None,
+                                      **kwargs):
         ''' Find the confidence intervals corresponding to any estimator
             By default, this is done with the help of bootstrapped confidence intervals
             but can be overridden if the specific estimator implements other methods of estimating confidence intervals.
 
             If the method provided is not bootstrap, this function calls the implementation of the specific estimator.
 
+            :param estimate_value: obtained estimate's value
             :param method: Method for estimating confidence intervals.
             :param confidence_level: The confidence level of the confidence intervals of the estimate.
             :param kwargs: Other optional args to be passed to the CI method.
@@ -371,30 +384,30 @@ class CausalEstimator:
         '''
         if method is None:
             if self._confidence_intervals:
-                method = self._confidence_intervals # this is either True or methodname
+                method = self._confidence_intervals  # this is either True or methodname
             else:
                 method = "default"
         confidence_intervals = None
         if confidence_level is None:
             confidence_level = self.confidence_level
-        if method == "default" or method is True: # user has not provided any method
+        if method == "default" or method is True:  # user has not provided any method
             try:
                 confidence_intervals = self._estimate_confidence_intervals(
-                        confidence_level, method=method, **kwargs)
+                    confidence_level, method=method, **kwargs)
             except NotImplementedError:
-                confidence_intervals = self._estimate_confidence_intervals_with_bootstrap(
-                         confidence_level, **kwargs)
+                confidence_intervals = self._estimate_confidence_intervals_with_bootstrap(estimate_value,
+                                                                                          confidence_level, **kwargs)
         else:
             if method == "bootstrap":
-                confidence_intervals = self._estimate_confidence_intervals_with_bootstrap(
-                         confidence_level, **kwargs)
+                confidence_intervals = self._estimate_confidence_intervals_with_bootstrap(estimate_value,
+                                                                                          confidence_level, **kwargs)
             else:
                 confidence_intervals = self._estimate_confidence_intervals(
-                        confidence_level, method=method, **kwargs)
+                    confidence_level, method=method, **kwargs)
         return confidence_intervals
 
     def _estimate_std_error_with_bootstrap(self, num_simulations=None,
-            sample_size_fraction=None):
+                                           sample_size_fraction=None):
         """ Compute standard error using the bootstrap method. Standard error
         and confidence intervals use the same parameter num_simulations for
         the number of bootstrap simulations.
@@ -411,11 +424,11 @@ class CausalEstimator:
         # Checking if bootstrap_estimates are already computed
         if self._bootstrap_estimates is None:
             self._bootstrap_estimates = self._generate_bootstrap_estimates(
-                    num_simulations, sample_size_fraction)
+                num_simulations, sample_size_fraction)
         elif CausalEstimator.is_bootstrap_parameter_changed(self._bootstrap_estimates.params, locals()):
             # Check if any parameter is changed from the previous std error estimate
             self._bootstrap_estimates = self._generate_bootstrap_estimates(
-                    num_simulations, sample_size_fraction)
+                num_simulations, sample_size_fraction)
 
         std_error = np.std(self._bootstrap_estimates.estimates)
         return std_error
@@ -426,9 +439,11 @@ class CausalEstimator:
             can run a standard error estimation method suited to the specific
             causal estimator.
         '''
-        raise NotImplementedError(("This method for estimating standard errors is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG + " Meanwhile, you can try the bootstrap method (method='bootstrap') to estimate standard errors.").format(self.__class__))
+        raise NotImplementedError((
+                                              "This method for estimating standard errors is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG + " Meanwhile, you can try the bootstrap method (method='bootstrap') to estimate standard errors.").format(
+            self.__class__))
 
-    def estimate_std_error(self, method=None,  **kwargs):
+    def estimate_std_error(self, method=None, **kwargs):
         """ Compute standard error of an obtained causal estimate.
 
         :param method: Method for computing the standard error.
@@ -441,7 +456,7 @@ class CausalEstimator:
             else:
                 method = "default"
         std_error = None
-        if method == "default" or method is True: # user has not provided any method
+        if method == "default" or method is True:  # user has not provided any method
             try:
                 std_error = self._estimate_std_error(method, **kwargs)
             except NotImplementedError:
@@ -463,13 +478,14 @@ class CausalEstimator:
         # Use existing params, if new user defined params are not present
         if num_null_simulations is None:
             num_null_simulations = self.num_null_simulations
-        do_retest = self._bootstrap_null_estimates is None or CausalEstimator.is_bootstrap_parameter_changed(self._bootstrap_null_estimates.params, locals())
+        do_retest = self._bootstrap_null_estimates is None or CausalEstimator.is_bootstrap_parameter_changed(
+            self._bootstrap_null_estimates.params, locals())
         if do_retest:
             null_estimates = np.zeros(num_null_simulations)
             for i in range(num_null_simulations):
                 new_outcome = np.random.permutation(self._outcome)
                 new_data = self._data.assign(dummy_outcome=new_outcome)
-                #self._outcome = self._data["dummy_outcome"]
+                # self._outcome = self._data["dummy_outcome"]
                 new_estimator = type(self)(
                     new_data,
                     self._target_estimand,
@@ -477,16 +493,16 @@ class CausalEstimator:
                     ("dummy_outcome",),
                     test_significance=False,
                     evaluate_effect_strength=False,
-                    confidence_intervals = False,
-                    target_units = self._target_units,
-                    effect_modifiers = self._effect_modifier_names,
-                    params = self.method_params
-                    )
+                    confidence_intervals=False,
+                    target_units=self._target_units,
+                    effect_modifiers=self._effect_modifier_names,
+                    params=self.method_params
+                )
                 new_effect = new_estimator.estimate_effect()
                 null_estimates[i] = new_effect.value
             self._bootstrap_null_estimates = CausalEstimator.BootstrapEstimates(
-                    null_estimates,
-                    {'num_null_simulations': num_null_simulations, 'sample_size_fraction': 1})
+                null_estimates,
+                {'num_null_simulations': num_null_simulations, 'sample_size_fraction': 1})
 
         # Processing the null hypothesis estimates
         sorted_null_estimates = np.sort(self._bootstrap_null_estimates.estimates)
@@ -503,9 +519,9 @@ class CausalEstimator:
             p_value = (estimate_index / num_null_simulations)
         # If the estimate_index is 0, it depends on the number of simulations
         if p_value == 0:
-            p_value = (0, 1/len(sorted_null_estimates)) # a tuple determining the range.
+            p_value = (0, 1 / len(sorted_null_estimates))  # a tuple determining the range.
         elif p_value == 1:
-            p_value = (1 -1/len(sorted_null_estimates), 1)
+            p_value = (1 - 1 / len(sorted_null_estimates), 1)
         signif_dict = {
             'p_value': p_value
         }
@@ -517,7 +533,9 @@ class CausalEstimator:
             can run a significance test suited to the specific
             causal estimator.
         '''
-        raise NotImplementedError(("This method for testing statistical significance is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG + " Meanwhile, you can try the bootstrap method (method='bootstrap') to test statistical significance.").format(self.__class__))
+        raise NotImplementedError((
+                                              "This method for testing statistical significance is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG + " Meanwhile, you can try the bootstrap method (method='bootstrap') to test statistical significance.").format(
+            self.__class__))
 
     def test_significance(self, estimate_value, method=None, **kwargs):
         """Test statistical significance of obtained estimate.
@@ -536,11 +554,11 @@ class CausalEstimator:
         """
         if method is None:
             if self._significance_test:
-                method = self._significance_test # this is either True or methodname
+                method = self._significance_test  # this is either True or methodname
             else:
                 method = "default"
         signif_dict = None
-        if method == "default" or method is True: # user has not provided any method
+        if method == "default" or method is True:  # user has not provided any method
             try:
                 signif_dict = self._test_significance(estimate_value, method, **kwargs)
             except NotImplementedError:
@@ -555,11 +573,11 @@ class CausalEstimator:
     def evaluate_effect_strength(self, estimate):
         fraction_effect_explained = self._evaluate_effect_strength(estimate, method="fraction-effect")
         # Need to test r-squared before supporting
-        #effect_r_squared = self._evaluate_effect_strength(estimate, method="r-squared")
+        # effect_r_squared = self._evaluate_effect_strength(estimate, method="r-squared")
         strength_dict = {
-                'fraction-effect': fraction_effect_explained
-         #       'r-squared': effect_r_squared
-                }
+            'fraction-effect': fraction_effect_explained
+            #       'r-squared': effect_r_squared
+        }
         return strength_dict
 
     def _evaluate_effect_strength(self, estimate, method="fraction-effect"):
@@ -569,19 +587,24 @@ class CausalEstimator:
         if method == "fraction-effect":
             naive_obs_estimate = self.estimate_effect_naive()
             print(estimate.value, naive_obs_estimate.value)
-            fraction_effect_explained = estimate.value/naive_obs_estimate.value
+            fraction_effect_explained = estimate.value / naive_obs_estimate.value
             return fraction_effect_explained
-        #elif method == "r-squared":
+        # elif method == "r-squared":
         #    outcome_mean = np.mean(self._outcome)
         #    total_variance = np.sum(np.square(self._outcome - outcome_mean))
-            # Assuming a linear model with one variable: the treatment
-            # Currently only works for continuous y
+        # Assuming a linear model with one variable: the treatment
+        # Currently only works for continuous y
         #    causal_model = outcome_mean + estimate.value*self._treatment
         #    squared_residual = np.sum(np.square(self._outcome - causal_model))
         #    r_squared = 1 - (squared_residual/total_variance)
         #    return r_squared
         else:
             return None
+
+    def update_input(self, treatment_value, control_value, target_units):
+        self._control_value = control_value
+        self._treatment_value = treatment_value
+        self._target_units = target_units
 
     @staticmethod
     def is_bootstrap_parameter_changed(bootstrap_estimates_params, given_params):
@@ -618,8 +641,9 @@ class CausalEstimator:
         if type(pval) is tuple:
             s += "[{0}, {1}]".format(pval[0], pval[1])
         else:
-            s+= "{0}".format(pval)
+            s += "{0}".format(pval)
         return s
+
 
 class CausalEstimate:
     """Class for the estimate object that every causal estimator returns
@@ -627,9 +651,9 @@ class CausalEstimate:
     """
 
     def __init__(self, estimate, target_estimand, realized_estimand_expr,
-            control_value,
-            treatment_value,
-            conditional_estimates = None, **kwargs):
+                 control_value,
+                 treatment_value,
+                 conditional_estimates=None, **kwargs):
         self.value = estimate
         self.target_estimand = target_estimand
         self.realized_estimand_expr = realized_estimand_expr
@@ -653,7 +677,7 @@ class CausalEstimate:
         self.params.update(kwargs)
 
     def get_confidence_intervals(self, confidence_level=None,
-            method=None, **kwargs):
+                                 method=None, **kwargs):
         """ Get confidence intervals of the obtained estimate.
 
         By default, this is done with the help of bootstrapped confidence intervals
@@ -667,9 +691,10 @@ class CausalEstimate:
         :returns: The obtained confidence interval.
         """
         confidence_intervals = self.estimator.estimate_confidence_intervals(
-                confidence_level=confidence_level,
-                method=method,
-                **kwargs)
+            estimate_value=self.value,
+            confidence_level=confidence_level,
+            method=method,
+            **kwargs)
         return confidence_intervals
 
     def get_standard_error(self, method=None, **kwargs):
@@ -702,12 +727,12 @@ class CausalEstimate:
         :returns: p-value from the significance test
         """
         signif_results = self.estimator.test_significance(self.value,
-                method=method,
-                **kwargs)
+                                                          method=method,
+                                                          **kwargs)
         return {'p_value': signif_results["p_value"]}
 
     def estimate_conditional_effects(self, effect_modifiers=None,
-            num_quantiles=CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS):
+                                     num_quantiles=CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS):
         """Estimate treatment effect conditioned on given variables.
 
         If a numeric effect modifier is provided, it is discretized into quantile bins. If you would like a custom discretization, you can do so yourself: create a new column containing the discretized effect modifier and then include that column's name in the effect_modifier_names argument.
@@ -718,8 +743,8 @@ class CausalEstimate:
         :returns: A (multi-index) dataframe that provides separate effects for each value of the (discretized) effect modifiers.
         """
         return self.estimator._estimate_conditional_effects(
-                self.estimator._estimate_effect_fn,
-                effect_modifiers, num_quantiles)
+            self.estimator._estimate_effect_fn,
+            effect_modifiers, num_quantiles)
 
     def interpret(self, method_name=None, **kwargs):
         """Interpret the causal estimate.
@@ -751,14 +776,15 @@ class CausalEstimate:
         if self.estimator._significance_test:
             s += "p-value: {0}\n".format(self.estimator.signif_results_tostr(self.test_stat_significance()))
         if self.estimator._confidence_intervals:
-            s += "{0}% confidence interval: {1}\n".format(100 * self.estimator.confidence_level, self.get_confidence_intervals())
+            s += "{0}% confidence interval: {1}\n".format(100 * self.estimator.confidence_level,
+                                                          self.get_confidence_intervals())
         if self.conditional_estimates is not None:
             s += "### Conditional Estimates\n"
             s += str(self.conditional_estimates)
         if self.effect_strength is not None:
             s += "\n## Effect Strength\n"
             s += "Change in outcome attributable to treatment: {}\n".format(self.effect_strength["fraction-effect"])
-            #s += "Variance in outcome explained by treatment: {}\n".format(self.effect_strength["r-squared"])
+            # s += "Variance in outcome explained by treatment: {}\n".format(self.effect_strength["r-squared"])
         return s
 
 
@@ -789,4 +815,3 @@ class RealizedEstimand(object):
             s += "Estimand assumption {0}, {1}: {2}\n".format(j, ass_name, ass_str)
             j += 1
         return s
-

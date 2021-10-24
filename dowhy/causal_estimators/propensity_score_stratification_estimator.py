@@ -10,10 +10,32 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
     identical common causes.
 
     Straightforward application of the back-door criterion.
+
+    Supports additional parameters that can be specified in the estimate_effect() method.
+
+    - 'num_strata': Number of bins by which data will be stratified. Default=50
+    - 'clipping_threshold': Mininum number of treated or control units per strata. Default=10
+    - 'propensity_score_model': The model used to compute propensity score. Could be any classification model that supports fit() and predict_proba() methods. If None, use LogisticRegression model as the default. Default=None
+    - 'recalculate_propensity_score': If true, force the estimator to calculate the propensity score. To use pre-computed propensity score, set this value to false. Default=True
+    - 'propensity_score_column': column name that stores the propensity score. Default='propensity_score'
+
     """
 
-    def __init__(self, *args, num_strata=50, clipping_threshold=10, **kwargs):
-        super().__init__(*args,  **kwargs)
+    def __init__(
+        self, 
+        *args, 
+        num_strata=50, 
+        clipping_threshold=10, 
+        propensity_score_model=None, 
+        recalculate_propensity_score=True, 
+        propensity_score_column="propensity_score",
+        **kwargs):
+        super().__init__(
+            *args, 
+            propensity_score_model=propensity_score_model,
+            recalculate_propensity_score=recalculate_propensity_score,
+            propensity_score_column=propensity_score_column, 
+            **kwargs)
 
         self.logger.info("INFO: Using Propensity Score Stratification Estimator")
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
@@ -23,17 +45,24 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         if not hasattr(self, 'clipping_threshold'):
             self.clipping_threshold = clipping_threshold
 
-    def _estimate_effect(self, recalculate_propensity_score=False):
-        if self._propensity_score_model is None or recalculate_propensity_score is True:
-            self._propensity_score_model = linear_model.LogisticRegression()
-            self._propensity_score_model.fit(self._observed_common_causes, self._treatment)
-            self._data['propensity_score'] = self._propensity_score_model.predict_proba(self._observed_common_causes)[:,1]
+    def _estimate_effect(self):
+        if self.recalculate_propensity_score is True:
+            if self.propensity_score_model is None:
+                self.propensity_score_model = linear_model.LogisticRegression()
+            self.propensity_score_model.fit(self._observed_common_causes, self._treatment)
+            self._data[self.propensity_score_column] = self.propensity_score_model.predict_proba(self._observed_common_causes)[:, 1]
+        else:
+            # check if the user provides the propensity score column
+            if self.propensity_score_column not in self._data.columns:
+                raise ValueError(f"Propensity score column {self.propensity_score_column} does not exist. Please specify the column name that has your pre-computed propensity score.")
+            else:
+                self.logger.info(f"INFO: Using pre-computed propensity score incolumn {self.propensity_score_column}")
 
         # sort the dataframe by propensity score
         # create a column 'strata' for each element that marks what strata it belongs to
         num_rows = self._data[self._outcome_name].shape[0]
         self._data['strata'] = (
-            (self._data['propensity_score'].rank(ascending=True) / num_rows) * self.num_strata
+            (self._data[self.propensity_score_column].rank(ascending=True) / num_rows) * self.num_strata
         ).round(0)
         # for each strata, count how many treated and control units there are
         # throw away strata that have insufficient treatment or control
@@ -58,7 +87,7 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
             'd_y': ['sum'],
             'dbar_y': ['sum']
         })
-        weighted_outcomes.columns = ["_".join(x) for x in weighted_outcomes.columns.ravel()]
+        weighted_outcomes.columns = ["_".join(x) for x in weighted_outcomes.columns.to_numpy().ravel()]
         treatment_sum_name = self._treatment_name[0] + "_sum"
         control_sum_name = "dbar_sum"
 
@@ -86,7 +115,7 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
                                   treatment_value=self._treatment_value,
                                   target_estimand=self._target_estimand,
                                   realized_estimand_expr=self.symbolic_estimator,
-                                  propensity_scores = self._data["propensity_score"])
+                                  propensity_scores = self._data[self.propensity_score_column])
         return estimate
 
     def construct_symbolic_estimator(self, estimand):

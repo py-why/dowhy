@@ -97,7 +97,8 @@ class TestEconMLEstimator:
             treatment=data["treatment_name"],
             outcome=data["outcome_name"],
             effect_modifiers=data["effect_modifier_names"],
-            graph=data["gml_graph"]
+            graph=data["gml_graph"],
+            identify_vars=True
         )
         identified_estimand = model.identify_effect(
             proceed_when_unidentifiable=True)
@@ -161,8 +162,8 @@ class TestEconMLEstimator:
             target_units=lambda df: df["X0"] > 1,
             confidence_intervals=False,
             method_params={
-                "init_params": {'model_T_XZ': GradientBoostingClassifier(),
-                                'model_Y_X': GradientBoostingRegressor(),
+                "init_params": {'model_t_xwz': GradientBoostingClassifier(),
+                                'model_y_xw': GradientBoostingRegressor(),
                                 'flexible_model_effect': GradientBoostingRegressor(),
                                 'featurizer': PolynomialFeatures(degree=1, include_bias=False)
                                 },

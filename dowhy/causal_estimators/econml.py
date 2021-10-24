@@ -53,9 +53,7 @@ class Econml(CausalEstimator):
             self._estimating_instruments = pd.get_dummies(self._estimating_instruments, drop_first=True)
         else:
             self._estimating_instruments = None
-
-        estimator_class = self._get_econml_class_object(self._econml_methodname)
-        self.estimator = estimator_class(**self.method_params["init_params"])
+        self.estimator = None
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
 
@@ -69,7 +67,6 @@ class Econml(CausalEstimator):
         except (AttributeError, AssertionError, ImportError):
             raise ImportError('Error loading {}.{}. Double-check the method name and ensure that all econml dependencies are installed.'.format(module_name, class_name))
         return estimator_class
-
 
     def _estimate_effect(self):
         n_samples = self._treatment.shape[0]
@@ -86,15 +83,20 @@ class Econml(CausalEstimator):
             Z = self._estimating_instruments
         named_data_args = {'Y': Y, 'T': T, 'X': X, 'W': W, 'Z': Z}
 
-        # Calling the econml estimator's fit method
-        estimator_argspec = inspect.getfullargspec(
-            inspect.unwrap(self.estimator.fit))
-        # As of v0.9, econml has some kewyord only arguments
-        estimator_named_args = estimator_argspec.args + estimator_argspec.kwonlyargs
-        estimator_data_args = {
-            arg: named_data_args[arg] for arg in named_data_args.keys() if arg in estimator_named_args
-            }
-        self.estimator.fit(**estimator_data_args, **self.method_params["fit_params"])
+        if self.estimator is None:
+            estimator_class = self._get_econml_class_object(self._econml_methodname)
+            self.estimator = estimator_class(**self.method_params["init_params"])
+            # Calling the econml estimator's fit method
+            estimator_argspec = inspect.getfullargspec(
+                inspect.unwrap(self.estimator.fit))
+            # As of v0.9, econml has some kewyord only arguments
+            estimator_named_args = estimator_argspec.args + estimator_argspec.kwonlyargs
+            estimator_data_args = {
+                arg: named_data_args[arg] for arg in named_data_args.keys() if arg in estimator_named_args
+                }
+            if self.method_params["fit_params"] is not False:
+                self.estimator.fit(**estimator_data_args,
+                                   **self.method_params["fit_params"])
 
         X_test = X
         n_target_units = n_samples

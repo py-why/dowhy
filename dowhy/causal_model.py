@@ -5,12 +5,14 @@ import logging
 
 from sympy import init_printing
 
+import dowhy.graph_learners as graph_learners
 import dowhy.causal_estimators as causal_estimators
 import dowhy.causal_refuters as causal_refuters
 import dowhy.utils.cli_helpers as cli
 from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_graph import CausalGraph
 from dowhy.causal_identifier import CausalIdentifier
+from dowhy.causal_identifiers.id_identifier import IDIdentifier
 from dowhy.utils.api import parse_state
 
 init_printing()  # To display symbolic math symbols
@@ -28,6 +30,7 @@ class CausalModel:
                  estimand_type="nonparametric-ate",
                  proceed_when_unidentifiable=False,
                  missing_nodes_as_confounders=False,
+                 identify_vars=False,
                  **kwargs):
         """Initialize data and create a causal graph instance.
 
@@ -35,7 +38,8 @@ class CausalModel:
         Also checks and finds the common causes and instruments for treatment
         and outcome.
 
-        At least one of graph, common_causes or instruments must be provided.
+        At least one of graph, common_causes or instruments must be provided. If
+        none of these variables are provided, then learn_graph() can be used later.
 
         :param data: a pandas dataframe containing treatment, outcome and other
         variables.
@@ -50,6 +54,7 @@ class CausalModel:
         :param estimand_type: the type of estimand requested (currently only "nonparametric-ate" is supported). In the future, may support other specific parametric forms of identification.
         :param proceed_when_unidentifiable: does the identification proceed by ignoring potential unobserved confounders. Binary flag.
         :param missing_nodes_as_confounders: Binary flag indicating whether variables in the dataframe that are not included in the causal graph, should be  automatically included as confounder nodes.
+        :param identify_vars: Variable deciding whether to compute common causes, instruments and effect modifiers while initializing the class. identify_vars should be set to False when user is providing common_causes, instruments or effect modifiers on their own(otherwise the identify_vars code can override the user provided values). Also it does not make sense if no graph is given.
         :returns: an instance of CausalModel class
 
         """
@@ -92,20 +97,31 @@ class CausalModel:
                     observed_node_names=self._data.columns.tolist()
                 )
             else:
-                cli.query_yes_no(
-                    "WARN: Are you sure that there are no common causes of treatment and outcome?",
-                    default=None
-                )
+                self.logger.warning("Relevant variables to build causal graph not provided. You may want to use the learn_graph() function to construct the causal graph.")
+                self._graph = None
 
         else:
-            self._graph = CausalGraph(
-                self._treatment,
-                self._outcome,
-                graph,
-                effect_modifier_names=self._effect_modifiers,
-                observed_node_names=self._data.columns.tolist(),
-                missing_nodes_as_confounders = self._missing_nodes_as_confounders
-            )
+            self.init_graph(graph=graph, identify_vars=identify_vars)
+
+        self._other_variables = kwargs
+        self.summary()
+
+    def init_graph(self, graph, identify_vars):
+        '''
+        Initialize self._graph using graph provided by the user.
+
+        '''
+        # Create causal graph object
+        self._graph = CausalGraph(
+            self._treatment,
+            self._outcome,
+            graph,
+            effect_modifier_names=self._effect_modifiers,
+            observed_node_names=self._data.columns.tolist(),
+            missing_nodes_as_confounders = self._missing_nodes_as_confounders
+        )
+
+        if identify_vars:
             self._common_causes = self._graph.get_common_causes(self._treatment, self._outcome)
             self._instruments = self._graph.get_instruments(self._treatment,
                                                             self._outcome)
@@ -116,13 +132,45 @@ class CausalModel:
             if self._effect_modifiers is None or not self._effect_modifiers:
                 self._effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
 
-        self._other_variables = kwargs
-        self.summary()
+    def get_common_causes(self):
+        self._common_causes = self._graph.get_common_causes(self._treatment, self._outcome)
+        return self._common_causes
+
+    def get_instruments(self):
+        self._instruments = self._graph.get_instruments(self._treatment, self._outcome)
+        return self._instruments
+
+    def get_effect_modifiers(self):
+        self._effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
+        return self._effect_modifiers
+
+    def learn_graph(self, method_name="cdt.causality.graph.LiNGAM", *args, **kwargs):
+        '''
+        Learn causal graph from the data. This function takes the method name as input and initializes the
+        causal graph object using the learnt graph.
+
+        :param self: instance of the CausalModel class (or its subclass)
+        :param method_name: Exact method name of the object to be imported from the concerned library.
+        :returns: an instance of the CausalGraph class initialized with the learned graph.
+        '''
+        # Import causal discovery class
+        str_arr = method_name.split(".", maxsplit=1)
+        library_name = str_arr[0]
+        causal_discovery_class = graph_learners.get_discovery_class_object(library_name)
+
+        model = causal_discovery_class(self._data, method_name, *args, **kwargs)
+        graph = model.learn_graph()
+
+        # Initialize causal graph object
+        self.init_graph(graph=graph)
+
+        return self._graph
 
     def identify_effect(self, estimand_type=None,
-            method_name="default", proceed_when_unidentifiable=None):
+            method_name="default", proceed_when_unidentifiable=None, optimize_backdoor=False):
         """Identify the causal effect to be estimated, using properties of the causal graph.
 
+        :param method_name: Method name for identification algorithm. ("id-algorithm" or "default")
         :param proceed_when_unidentifiable: Binary flag indicating whether identification should proceed in the presence of (potential) unobserved confounders.
         :returns: a probability expression (estimand) for the causal effect if identified, else NULL
 
@@ -132,20 +180,28 @@ class CausalModel:
         if estimand_type is None:
             estimand_type = self._estimand_type
 
-        self.identifier = CausalIdentifier(self._graph,
+        if method_name == "id-algorithm":
+            self.identifier = IDIdentifier(self._graph,
                                            estimand_type,
                                            method_name,
                                            proceed_when_unidentifiable=proceed_when_unidentifiable)
-        identified_estimand = self.identifier.identify_effect()
+            identified_estimand = self.identifier.identify_effect()
+        else:
+            self.identifier = CausalIdentifier(self._graph,
+                                               estimand_type,
+                                               method_name,
+                                               proceed_when_unidentifiable=proceed_when_unidentifiable)
+            identified_estimand = self.identifier.identify_effect(optimize_backdoor=optimize_backdoor)
 
         return identified_estimand
 
     def estimate_effect(self, identified_estimand, method_name=None,
-                        control_value = 0,
-                        treatment_value = 1,
+                        control_value=0,
+                        treatment_value=1,
                         test_significance=None, evaluate_effect_strength=False,
                         confidence_intervals=False,
                         target_units="ate", effect_modifiers=None,
+                        fit_estimator=True,
                         method_params=None):
         """Estimate the identified causal effect.
 
@@ -172,6 +228,8 @@ class CausalModel:
         :param confidence_intervals: (Experimental) Binary flag indicating whether confidence intervals should be computed.
         :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be of three types. (1) a string for common specifications of target units (namely, "ate", "att" and "atc"), (2) a lambda function that can be used as an index for the data (pandas DataFrame), or (3) a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
         :param effect_modifiers: Names of effect modifier variables can be (optionally) specified here too, since they do not affect identification. If None, the effect_modifiers from the CausalModel are used.
+        :param fit_estimator: Boolean flag on whether to fit the estimator.
+        Setting it to False is useful to estimate the effect on new data using a previously fitted estimator.
         :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method. See the docs for each estimation method for allowed method-specific params.
 
         :returns: An instance of the CausalEstimate class, containing the causal effect estimate
@@ -179,7 +237,10 @@ class CausalModel:
 
         """
         if effect_modifiers is None:
-            effect_modifiers = self._effect_modifiers
+            if self._effect_modifiers is None or len(self._effect_modifiers) == 0:
+                effect_modifiers = self.get_effect_modifiers()
+            else:
+                effect_modifiers = self._effect_modifiers
 
         if method_name is None:
             #TODO add propensity score as default backdoor method, iv as default iv method, add an informational message to show which method has been selected.
@@ -215,20 +276,26 @@ class CausalModel:
                                   control_value=control_value,
                                   treatment_value=treatment_value)
         else:
-            causal_estimator = causal_estimator_class(
-                self._data,
-                identified_estimand,
-                self._treatment, self._outcome, #names of treatment and outcome
-                control_value = control_value,
-                treatment_value = treatment_value,
-                test_significance=test_significance,
-                evaluate_effect_strength=evaluate_effect_strength,
-                confidence_intervals = confidence_intervals,
-                target_units = target_units,
-                effect_modifiers = effect_modifiers,
-                params=method_params
-            )
-            estimate = causal_estimator.estimate_effect()
+            if fit_estimator:
+                self.causal_estimator = causal_estimator_class(
+                    self._data,
+                    identified_estimand,
+                    self._treatment, self._outcome, #names of treatment and outcome
+                    control_value = control_value,
+                    treatment_value = treatment_value,
+                    test_significance=test_significance,
+                    evaluate_effect_strength=evaluate_effect_strength,
+                    confidence_intervals = confidence_intervals,
+                    target_units = target_units,
+                    effect_modifiers = effect_modifiers,
+                    params=method_params)
+            else:
+                # Estimator had been computed in a previous call
+                assert self.causal_estimator is not None
+                self.causal_estimator.update_input(treatment_value, control_value,
+                        target_units)
+
+            estimate = self.causal_estimator.estimate_effect()
             # Store parameters inside estimate object for refutation methods
             # TODO: This add_params needs to move to the estimator class
             # inside estimate_effect and estimate_conditional_effect
@@ -244,14 +311,17 @@ class CausalModel:
             )
         return estimate
 
-    def do(self, x, identified_estimand, method_name=None,  method_params=None):
+    def do(self, x, identified_estimand, method_name=None,
+           fit_estimator=True, method_params=None):
         """Do operator for estimating values of the outcome after intervening on treatment.
 
-
+        :param x: interventional value of the treatment variable
         :param identified_estimand: a probability expression
             that represents the effect to be estimated. Output of
             CausalModel.identify_effect method
         :param method_name: any of the estimation method to be used. See docs for estimate_effect method for a list of supported estimation methods.
+        :param fit_estimator: Boolean flag on whether to fit the estimator.
+        Setting it to False is useful to compute the do-operation on new data using a previously fitted estimator.
         :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method.
 
         :returns: an instance of the CausalEstimate class, containing the causal effect estimate
@@ -262,7 +332,6 @@ class CausalModel:
             pass
         else:
             str_arr = method_name.split(".", maxsplit=1)
-            print(str_arr)
             identifier_name = str_arr[0]
             estimator_name = str_arr[1]
             identified_estimand.set_identifier_method(identifier_name)
@@ -273,15 +342,25 @@ class CausalModel:
             self.logger.warning("No valid identified estimand for using instrumental variables method")
             estimate = CausalEstimate(None, None, None, None, None)
         else:
-            causal_estimator = causal_estimator_class(
-                self._data,
-                identified_estimand,
-                self._treatment, self._outcome,
-                test_significance=False,
-                params=method_params
-            )
+            if fit_estimator:
+                # Note that while the name of the variable is the same,
+                # "self.causal_estimator", this estimator takes in less
+                # parameters than the same from the
+                # estimate_effect code. It is not advisable to use the
+                # estimator from this function to call estimate_effect
+                # with fit_estimator=False.
+                self.causal_estimator = causal_estimator_class(
+                    self._data,
+                    identified_estimand,
+                    self._treatment, self._outcome,
+                    test_significance=False,
+                    params=method_params
+                )
+            else:
+                # Estimator had been computed in a previous call
+                assert self.causal_estimator is not None
             try:
-                estimate = causal_estimator.do(x)
+                estimate = self.causal_estimator.do(x)
             except NotImplementedError:
                 self.logger.error('Do Operation not implemented or not supported for this estimator.')
                 raise NotImplementedError
@@ -318,15 +397,17 @@ class CausalModel:
         res = refuter.refute_estimate()
         return res
 
-    def view_model(self, layout="dot"):
+    def view_model(self, layout="dot", size=(8, 6), file_name="causal_model"):
         """View the causal DAG.
 
         :param layout: string specifying the layout of the graph.
+        :param size: tuple (x, y) specifying the width and height of the figure in inches.
+        :param file_name: string specifying the file name for the saved causal graph png.
 
         :returns: a visualization of the graph
 
         """
-        self._graph.view_graph(layout)
+        self._graph.view_graph(layout, size, file_name)
 
     def interpret(self, method_name=None, **kwargs):
         """Interpret the causal model.
