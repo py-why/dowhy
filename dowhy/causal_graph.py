@@ -407,8 +407,7 @@ class CausalGraph:
         Currently only supports singleton sets.
         """
         dpaths = self.get_all_directed_paths(nodes1, nodes2)
-        flag = True if len(dpaths)>0 else False
-        return flag
+        return len(dpaths) > 0
 
     def get_adjacency_matrix(self, *args, **kwargs):
         '''
