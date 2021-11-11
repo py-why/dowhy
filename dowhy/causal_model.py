@@ -269,8 +269,15 @@ class CausalModel:
                 # Process the dowhy estimators
                 causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
 
+        if identified_estimand.no_directed_path:
+            self.logger.warning("No directed path from {0} to {1}.".format(
+                self._treatment,
+                self._outcome))
+            estimate = CausalEstimate(0, identified_estimand, None,
+                control_value=control_value,
+                treatment_value=treatment_value)
         # Check if estimator's target estimand is identified
-        if identified_estimand.estimands[identifier_name] is None:
+        elif identified_estimand.estimands[identifier_name] is None:
             self.logger.warning("No valid identified estimand available.")
             estimate = CausalEstimate(None, None, None,
                                   control_value=control_value,

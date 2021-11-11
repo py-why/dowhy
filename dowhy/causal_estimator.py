@@ -767,17 +767,19 @@ class CausalEstimate:
         s = "*** Causal Estimate ***\n"
         s += "\n## Identified estimand\n{0}".format(self.target_estimand.__str__(only_target_estimand=True))
         s += "\n## Realized estimand\n{0}".format(self.realized_estimand_expr)
-        s += "\nTarget units: {0}\n".format(self.estimator.target_units_tostr())
+        if hasattr(self, "estimator"):
+            s += "\nTarget units: {0}\n".format(self.estimator.target_units_tostr())
         s += "\n## Estimate\n"
         s += "Mean value: {0}\n".format(self.value)
         s += ""
         if hasattr(self, "cate_estimates"):
             s += "Effect estimates: {0}\n".format(self.cate_estimates)
-        if self.estimator._significance_test:
-            s += "p-value: {0}\n".format(self.estimator.signif_results_tostr(self.test_stat_significance()))
-        if self.estimator._confidence_intervals:
-            s += "{0}% confidence interval: {1}\n".format(100 * self.estimator.confidence_level,
-                                                          self.get_confidence_intervals())
+        if hasattr(self, "estimator"):
+            if self.estimator._significance_test:
+                s += "p-value: {0}\n".format(self.estimator.signif_results_tostr(self.test_stat_significance()))
+            if self.estimator._confidence_intervals:
+                s += "{0}% confidence interval: {1}\n".format(100 * self.estimator.confidence_level,
+                                                              self.get_confidence_intervals())
         if self.conditional_estimates is not None:
             s += "### Conditional Estimates\n"
             s += str(self.conditional_estimates)

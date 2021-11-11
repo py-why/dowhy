@@ -51,6 +51,13 @@ class CausalIdentifier:
         :param self: instance of the CausalIdentifier class (or its subclass)
         :returns:  target estimand, an instance of the IdentifiedEstimand class
         """
+        # First, check if there is a directed path from action to outcome
+        if not self._graph.has_directed_path(self.treatment_name, self.outcome_name):
+            self.logger.warn("No directed path from treatment to outcome. Causal Effect is zero.")
+            return IdentifiedEstimand(self,
+                    treatment_variable=self.treatment_name,
+                    outcome_variable=self.outcome_name,
+                    no_directed_path=True)
         if self.estimand_type == CausalIdentifier.NONPARAMETRIC_ATE:
             return self.identify_ate_effect(optimize_backdoor=optimize_backdoor)
         elif self.estimand_type == CausalIdentifier.NONPARAMETRIC_NDE:
@@ -74,7 +81,7 @@ class CausalIdentifier:
         else:
             from dowhy.causal_identifiers.backdoor import Backdoor
             path = Backdoor(self._graph._graph, self.treatment_name, self.outcome_name)
-            backdoor_sets = path.get_backdoor_vars() 
+            backdoor_sets = path.get_backdoor_vars()
         estimands_dict, backdoor_variables_dict = self.build_backdoor_estimands_dict(
                 self.treatment_name,
                 self.outcome_name,
@@ -84,7 +91,7 @@ class CausalIdentifier:
         default_backdoor_id = self.get_default_backdoor_set_id(backdoor_variables_dict)
         estimands_dict["backdoor"] = estimands_dict.get(str(default_backdoor_id), None)
         backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
-        
+
         ### 2. INSTRUMENTAL VARIABLE IDENTIFICATION
         # Now checking if there is also a valid iv estimand
         instrument_names = self._graph.get_instruments(self.treatment_name,
@@ -102,7 +109,7 @@ class CausalIdentifier:
             estimands_dict["iv"] = iv_estimand_expr
         else:
             estimands_dict["iv"] = None
-        
+
         ### 3. FRONTDOOR IDENTIFICATION
         # Now checking if there is a valid frontdoor variable
         frontdoor_variables_names = self.identify_frontdoor()
@@ -121,7 +128,7 @@ class CausalIdentifier:
             mediation_second_stage_confounders = self.identify_mediation_second_stage_confounders(frontdoor_variables_names, self.outcome_name)
         else:
             estimands_dict["frontdoor"] = None
-        
+
         # Finally returning the estimand object
         estimand = IdentifiedEstimand(
             self,
@@ -246,7 +253,7 @@ class CausalIdentifier:
         backdoor_sets = []
         backdoor_paths = self._graph.get_backdoor_paths(treatment_name, outcome_name)
         method_name = self.method_name if self.method_name != CausalIdentifier.BACKDOOR_DEFAULT else CausalIdentifier.DEFAULT_BACKDOOR_METHOD
-        
+
         # First, checking if empty set is a valid backdoor set
         empty_set = set()
         check = self._graph.check_valid_backdoor_set(treatment_name, outcome_name, empty_set,
@@ -264,7 +271,7 @@ class CausalIdentifier:
             - set(treatment_name) \
             - set(outcome_name)
         eligible_variables -= self._graph.get_descendants(treatment_name)
-        
+
         num_iterations = 0
         found_valid_adjustment_set = False
         if method_name in CausalIdentifier.METHOD_NAMES:
@@ -288,15 +295,15 @@ class CausalIdentifier:
                     break
         else:
             raise ValueError(f"Identifier method {method_name} not supported. Try one of the following: {CausalIdentifier.METHOD_NAMES}")
-        
+
         return backdoor_sets
 
     def get_default_backdoor_set_id(self, backdoor_sets_dict):
         # Adding a None estimand if no backdoor set found
         if len(backdoor_sets_dict) == 0:
             return None
-        
-        # Default set contains minimum possible number of instrumental variables, to prevent lowering variance in the treatment variable. 
+
+        # Default set contains minimum possible number of instrumental variables, to prevent lowering variance in the treatment variable.
         instrument_names = set(self._graph.get_instruments(self.treatment_name, self.outcome_name))
         iv_count_dict = {key: len(set(bdoor_set).intersection(instrument_names)) for key, bdoor_set in backdoor_sets_dict.items()}
         min_iv_count = min(iv_count_dict.values())
@@ -590,7 +597,8 @@ class IdentifiedEstimand:
                  mediator_variables=None,
                  mediation_first_stage_confounders=None,
                  mediation_second_stage_confounders=None,
-                 default_backdoor_id=None, identifier_method=None):
+                 default_backdoor_id=None, identifier_method=None,
+                 no_directed_path=False):
         self.identifier = identifier
         self.treatment_variable = parse_state(treatment_variable)
         self.outcome_variable = parse_state(outcome_variable)
@@ -604,6 +612,7 @@ class IdentifiedEstimand:
         self.estimands = estimands
         self.default_backdoor_id = default_backdoor_id
         self.identifier_method = identifier_method
+        self.no_directed_path = no_directed_path
 
     def set_identifier_method(self, identifier_name):
         self.identifier_method = identifier_name
@@ -660,6 +669,12 @@ class IdentifiedEstimand:
             )
 
     def __str__(self, only_target_estimand=False, show_all_backdoor_sets=False):
+        if self.no_directed_path:
+            s = "No directed path from {0} to {1} in the causal graph.".format(
+                    self.treatment_variable,
+                    self.outcome_variable)
+            s += "\nCausal effect is zero."
+            return s
         s = "Estimand type: {0}\n".format(self.estimand_type)
         i = 1
         has_valid_backdoor = sum("backdoor" in key for key in self.estimands.keys())

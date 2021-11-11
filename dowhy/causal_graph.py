@@ -246,7 +246,7 @@ class CausalGraph:
         return {'is_dseparated': d_separated,
                 'num_paths_blocked_by_observed_nodes': num_paths_blocked}
 
-    def get_backdoor_paths(self, nodes1, nodes2):        
+    def get_backdoor_paths(self, nodes1, nodes2):
         paths = []
         undirected_graph = self._graph.to_undirected()
         nodes12 = set(nodes1).union(nodes2)
@@ -350,7 +350,7 @@ class CausalGraph:
         nodes = self._graph.nodes
         if not include_unobserved:
             nodes = set(self.filter_unobserved_variables(nodes))
-        
+
         return nodes
 
     def filter_unobserved_variables(self, node_names):
@@ -401,10 +401,18 @@ class CausalGraph:
         # convert the outputted generator into a list
         return [p for p in nx.all_simple_paths(self._graph, source=node1, target=node2)]
 
+    def has_directed_path(self, nodes1, nodes2):
+        """ Checks if there is any directed path between two sets of nodes.
+
+        Currently only supports singleton sets.
+        """
+        dpaths = self.get_all_directed_paths(nodes1, nodes2)
+        return len(dpaths) > 0
+
     def get_adjacency_matrix(self, *args, **kwargs):
         '''
         Get adjacency matrix from the networkx graph
-        
+
         '''
         return nx.convert_matrix.to_numpy_matrix(self._graph, *args, **kwargs)
 
