@@ -1,7 +1,7 @@
 class GraphLearner:
 	"""Base class for causal discovery methods.
 
-	Subclasses implement different discovery methods. All discovery methods are in the package "dowhy.causal_discoverers"
+	Subclasses implement different discovery methods. All discovery methods are in the package "dowhy.graph_learners"
 
 	"""
 
@@ -11,7 +11,7 @@ class GraphLearner:
 		self._labels = list(self._data.columns)
 		self._adjacency_matrix = None
 		self._graph_dot = None
-		
+
 	def learn_graph(self):
 		'''
 		Discover causal graph and the graph in DOT format.

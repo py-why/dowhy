@@ -39,6 +39,13 @@ class CausalGraph:
                                            instrument_names,
                                            effect_modifier_names,
                                            mediator_names)
+        elif isinstance(graph, nx.Graph):
+            # networkx object is provided
+            if nx.is_directed(graph):
+                self._graph = graph
+            else:
+                self.logger.error("Only directed Networkx graphs are supported.")
+                raise ValueError("Only directed Networkx graphs are supported")
         elif re.match(r".*\.dot", graph):
             # load dot file
             try:
@@ -246,7 +253,7 @@ class CausalGraph:
         return {'is_dseparated': d_separated,
                 'num_paths_blocked_by_observed_nodes': num_paths_blocked}
 
-    def get_backdoor_paths(self, nodes1, nodes2):        
+    def get_backdoor_paths(self, nodes1, nodes2):
         paths = []
         undirected_graph = self._graph.to_undirected()
         nodes12 = set(nodes1).union(nodes2)
@@ -350,7 +357,7 @@ class CausalGraph:
         nodes = self._graph.nodes
         if not include_unobserved:
             nodes = set(self.filter_unobserved_variables(nodes))
-        
+
         return nodes
 
     def filter_unobserved_variables(self, node_names):
@@ -404,7 +411,7 @@ class CausalGraph:
     def get_adjacency_matrix(self, *args, **kwargs):
         '''
         Get adjacency matrix from the networkx graph
-        
+
         '''
         return nx.convert_matrix.to_numpy_matrix(self._graph, *args, **kwargs)
 
