@@ -36,21 +36,33 @@ class LinearRegressionEstimator(RegressionEstimator):
 
     def _estimate_confidence_intervals(self, confidence_level,
             method=None):
-        conf_ints = self.model.conf_int(alpha=1-confidence_level)
-
-        # For a linear regression model, the causal effect of a variable is equal to the coefficient corresponding to the 
-        # variable. Hence, the model by default outputs the confidence interval corresponding to treatment=1 and control=0.
-        # So for custom treatment and control values, we must multiply the confidence interval by the difference of the two.
-        return (self._treatment_value - self._control_value) * conf_ints.to_numpy()[1:(len(self._treatment_name)+1),:]
+        if self._effect_modifier_names:
+            # The average treatment effect is a combination of different
+            # regression coefficients. Complicated to compute the confidence
+            # interval analytically. For example, if y=a + b1.t + b2.tx, then
+            # the average treatment effect is b1+b2.mean(x).
+            # Refer Gelman, Hill. ARM Book. Chapter 9
+            # http://www.stat.columbia.edu/~gelman/arm/chap9.pdf
+            # TODO: Looking for contributions
+            raise NotImplementedError
+        else:
+            conf_ints = self.model.conf_int(alpha=1-confidence_level)
+            # For a linear regression model, the causal effect of a variable is equal to the coefficient corresponding to the
+            # variable. Hence, the model by default outputs the confidence interval corresponding to treatment=1 and control=0.
+            # So for custom treatment and control values, we must multiply the confidence interval by the difference of the two.
+            return (self._treatment_value - self._control_value) * conf_ints.to_numpy()[1:(len(self._treatment_name)+1),:]
 
     def _estimate_std_error(self, method=None):
-        std_error = self.model.bse[1:(len(self._treatment_name)+1)]
-        
-        # For a linear regression model, the causal effect of a variable is equal to the coefficient corresponding to the 
-        # variable. Hence, the model by default outputs the standard error corresponding to treatment=1 and control=0.
-        # So for custom treatment and control values, we must multiply the standard error by the difference of the two.
-        return (self._treatment_value - self._control_value) * std_error.to_numpy()
+        if self._effect_modifier_names:
+            raise NotImplementedError
+        else:
+            std_error = self.model.bse[1:(len(self._treatment_name)+1)]
+
+            # For a linear regression model, the causal effect of a variable is equal to the coefficient corresponding to the
+            # variable. Hence, the model by default outputs the standard error corresponding to treatment=1 and control=0.
+            # So for custom treatment and control values, we must multiply the standard error by the difference of the two.
+            return (self._treatment_value - self._control_value) * std_error.to_numpy()
 
     def _test_significance(self, estimate_value, method=None):
         pvalue = self.model.pvalues[1:(len(self._treatment_name)+1)]
-        return {'p_value': pvalue.to_numpy()} 
+        return {'p_value': pvalue.to_numpy()}
