@@ -5,6 +5,7 @@ import pandas as pd
 
 import math
 import statsmodels.api as sm
+from sklearn.preprocessing import StandardScaler
 
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
@@ -40,13 +41,93 @@ class AddUnobservedCommonCause(CausalRefuter):
         self.effect_on_y = kwargs["confounders_effect_on_outcome"] if "confounders_effect_on_outcome" in kwargs else "linear"
         self.kappa_t = kwargs["effect_strength_on_treatment"] if "effect_strength_on_treatment" in kwargs else None
         self.kappa_y = kwargs["effect_strength_on_outcome"] if "effect_strength_on_outcome" in kwargs else None
+        self.frac_strength_treatment = kwargs["effect_fraction_on_treatment"] if "effect_fraction_on_treatment" in kwargs else 1
+        self.frac_strength_outcome = kwargs["effect_fraction_on_outcome"] if "effect_fraction_on_outcome" in kwargs else 1
         self.simulated_method_name = kwargs["simulated_method_name"] if "simulated_method_name" in kwargs else "linear_based"
         self.plotmethod = kwargs['plotmethod'] if "plotmethod" in kwargs else "colormesh"
         self.logger = logging.getLogger(__name__)
 
+        if self.kappa_t is None:
+            self.kappa_t = self.infer_default_kappa_t()
+        if self.kappa_y is None:
+            self.kappa_y = self.infer_default_kappa_y()
+
+    def infer_default_kappa_t(self, len_kappa_t = 10):
+        if self.effect_on_t != "linear":
+            raise NotImplementedError("Automatic default for kappa_t supported" +
+                    " only for linear effect_on_t")
+        observed_common_causes_names = self._target_estimand.get_backdoor_variables()
+        if len(observed_common_causes_names)>0:
+            observed_common_causes = self._data[observed_common_causes_names]
+            observed_common_causes = pd.get_dummies(observed_common_causes, drop_first=True)
+        else:
+            raise ValueError("There needs to be at least one common cause to" +
+                    "automatically compute the default value of kappa_t."+
+                    " Provide a value for kappa_t")
+        t = self._data[self._treatment_name]
+        # Standardizing the data
+        observed_common_causes = StandardScaler().fit_transform(observed_common_causes)
+        # Estimating the regression coefficient from standardized features to t
+        corrcoef_var_t = np.corrcoef(observed_common_causes, t, rowvar=False)[-1, :-1]
+        std_dev_t = np.std(t)[0]
+        max_coeff = max(corrcoef_var_t) * std_dev_t
+        min_coeff = min(corrcoef_var_t) * std_dev_t
+        print(min_coeff, max_coeff, corrcoef_var_t)
+        min_coeff, max_coeff = self.compute_min_max_coeff(min_coeff, max_coeff,
+                self.frac_strength_treatment)
+        print(min_coeff, max_coeff)
+        # By default, return a plot with 10 points
+        # consider 10 values of the effect of the unobserved confounder
+        step = (max_coeff - min_coeff)/len_kappa_t
+        self.logger.info("(Min, Max) kappa_t for observed common causes, ({0}, {1})".format(
+            min_coeff, max_coeff))
+        if np.equal(max_coeff, min_coeff):
+            return max_coeff
+        else:
+            return np.arange(min_coeff, max_coeff, step)
+
+    def compute_min_max_coeff(self,
+            min_coeff, max_coeff, effect_strength_fraction):
+        max_coeff = effect_strength_fraction * max_coeff
+        min_coeff = effect_strength_fraction * min_coeff
+        return min_coeff, max_coeff
+
+    def infer_default_kappa_y(self, len_kappa_y = 10):
+        if self.effect_on_y != "linear":
+            raise NotImplementedError("Automatic default for kappa_y supported" +
+                    "only for linear effect_on_y")
+        observed_common_causes_names = self._target_estimand.get_backdoor_variables()
+        if len(observed_common_causes_names)>0:
+            observed_common_causes = self._data[observed_common_causes_names]
+            observed_common_causes = pd.get_dummies(observed_common_causes, drop_first=True)
+        else:
+            raise ValueError("There needs to be at least one common cause to" +
+                    "automatically compute the default value of kappa_y."+
+                    " Need to provide a value for kappa_y")
+        y = self._data[self._outcome_name]
+        # Standardizing the data
+        observed_common_causes = StandardScaler().fit_transform(observed_common_causes)
+        corrcoef_var_y = np.corrcoef(observed_common_causes, y, rowvar=False)[-1, :-1]
+        std_dev_y = np.std(y)[0]
+        max_coeff = max(corrcoef_var_y) * std_dev_y
+        min_coeff = min(corrcoef_var_y) * std_dev_y
+        print(min_coeff, max_coeff)
+        min_coeff, max_coeff = self.compute_min_max_coeff(min_coeff, max_coeff,
+                self.frac_strength_outcome)
+        print(min_coeff, max_coeff)
+        # By default, return a plot with 10 points
+        # consider 10 values of the effect of the unobserved confounder
+        step = (max_coeff - min_coeff)/len_kappa_y
+        self.logger.info("(Min, Max) kappa_y for observed common causes, ({0}, {1})".format(
+            min_coeff, max_coeff))
+        if np.equal(max_coeff, min_coeff):
+            return max_coeff
+        else:
+            return np.arange(min_coeff, max_coeff, step)
+
     def refute_estimate(self):
         """
-        This function attempts to add an unobserved common cause to the outcome and the treatment. At present, we have implemented the behavior for one dimensional behaviors for continueous
+        This function attempts to add an unobserved common cause to the outcome and the treatment. At present, we have implemented the behavior for one dimensional behaviors for continuous
         and binary variables. This function can either take single valued inputs or a range of inputs. The function then looks at the data type of the input and then decides on the course of
         action.
 
@@ -60,7 +141,8 @@ class AddUnobservedCommonCause(CausalRefuter):
             refute = CausalRefutation(self._estimate.value, new_effect.value,
                                     refutation_type="Refute: Add an Unobserved Common Cause")
 
-            refute.new_effect = np.array(new_effect.value)
+            refute.new_effect_array = np.array(new_effect.value)
+            refute.new_effect = new_effect.value
             refute.add_refuter(self)
             return refute
 
@@ -72,17 +154,13 @@ class AddUnobservedCommonCause(CausalRefuter):
 
                 results_matrix = np.random.rand(len(self.kappa_t),len(self.kappa_y)) # Matrix to hold all the results of NxM
                 orig_data = copy.deepcopy(self._data)
-                #for i in range(0,len(x[0])):
-                #    for j in range(0,len(y)):
                 for i in range(len(self.kappa_t)):
                     for j in range(len(self.kappa_y)):
-                        #new_data = self.include_confounders_effect(orig_data, x[0][i], y[j][0])
                         new_data = self.include_confounders_effect(orig_data, self.kappa_t[i], self.kappa_y[j])
                         new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
                         new_effect = new_estimator.estimate_effect()
                         refute = CausalRefutation(self._estimate.value, new_effect.value,
                                                 refutation_type="Refute: Add an Unobserved Common Cause")
-                        self.logger.debug(refute)
                         results_matrix[i][j] = refute.new_effect # Populate the results
 
                 import matplotlib
@@ -110,12 +188,14 @@ class AddUnobservedCommonCause(CausalRefuter):
                     plt.colorbar(cp, ticks=contour_levels)
                 ax.yaxis.set_ticks(self.kappa_t)
                 ax.xaxis.set_ticks(self.kappa_y)
+                plt.xticks(rotation=45)
                 ax.set_title('Effect of Unobserved Common Cause')
                 ax.set_ylabel('Value of Linear Constant on Treatment')
                 ax.set_xlabel('Value of Linear Constant on Outcome')
                 plt.show()
 
-                refute.new_effect = results_matrix
+                refute.new_effect_array = results_matrix
+                refute.new_effect = (np.min(results_matrix), np.max(results_matrix))
                 # Store the values into the refute object
                 refute.add_refuter(self)
                 return refute
@@ -146,7 +226,8 @@ class AddUnobservedCommonCause(CausalRefuter):
                 ax.set_ylabel('Estimated Effect after adding the common cause')
                 plt.show()
 
-                refute.new_effect = outcomes
+                refute.new_effect_array = outcomes
+                refute.new_effect = (np.min(outcomes), np.max(outcomes))
                 refute.add_refuter(self)
                 return refute
 
@@ -176,7 +257,8 @@ class AddUnobservedCommonCause(CausalRefuter):
                 ax.set_ylabel('Estimated Effect after adding the common cause')
                 plt.show()
 
-                refute.new_effect = outcomes
+                refute.new_effect_array = outcomes
+                refute.new_effect = (np.min(outcomes), np.max(outcomes))
                 refute.add_refuter(self)
                 return refute
 
@@ -204,7 +286,7 @@ class AddUnobservedCommonCause(CausalRefuter):
             new_data.pop('temp_rand_no')
         elif self.effect_on_t == "linear":
             confounder_t_effect = kappa_t * w_random
-            new_data[self._treatment_name] = new_data[self._treatment_name].values - np.ndarray(shape=(num_rows,1), buffer=confounder_t_effect)
+            new_data[self._treatment_name] = new_data[self._treatment_name].values + np.ndarray(shape=(num_rows,1), buffer=confounder_t_effect)
         else:
             raise NotImplementedError("'" + self.effect_on_t + "' method not supported for confounders' effect on treatment")
 
@@ -214,7 +296,7 @@ class AddUnobservedCommonCause(CausalRefuter):
             new_data.pop('temp_rand_no')
         elif self.effect_on_y == "linear":
             confounder_y_effect = kappa_y * w_random
-            new_data[self._outcome_name] = new_data[self._outcome_name].values - np.ndarray(shape=(num_rows,1), buffer=confounder_y_effect)
+            new_data[self._outcome_name] = new_data[self._outcome_name].values + np.ndarray(shape=(num_rows,1), buffer=confounder_y_effect)
         else:
             raise NotImplementedError("'" + self.effect_on_y+ "' method not supported for confounders' effect on outcome")
         return new_data
