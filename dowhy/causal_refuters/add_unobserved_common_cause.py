@@ -48,10 +48,6 @@ class AddUnobservedCommonCause(CausalRefuter):
         self.plotmethod = kwargs['plotmethod'] if "plotmethod" in kwargs else "colormesh"
         self.logger = logging.getLogger(__name__)
 
-        if self.kappa_t is None:
-            self.kappa_t = self.infer_default_kappa_t()
-        if self.kappa_y is None:
-            self.kappa_y = self.infer_default_kappa_y()
 
     def infer_default_kappa_t(self, len_kappa_t = 10):
         observed_common_causes_names = self._target_estimand.get_backdoor_variables()
@@ -143,6 +139,10 @@ class AddUnobservedCommonCause(CausalRefuter):
 
         :return: CausalRefuter: An object that contains the estimated effect and a new effect and the name of the refutation used.
         """
+        if self.kappa_t is None:
+            self.kappa_t = self.infer_default_kappa_t()
+        if self.kappa_y is None:
+            self.kappa_y = self.infer_default_kappa_y()
         if not isinstance(self.kappa_t, (list, np.ndarray)) and not isinstance(self.kappa_y, (list,np.ndarray)): # Deal with single value inputs
             new_data = copy.deepcopy(self._data)
             new_data = self.include_confounders_effect(new_data, self.kappa_t, self.kappa_y)
@@ -282,7 +282,7 @@ class AddUnobservedCommonCause(CausalRefuter):
         :param kappa_t: numpy.float64: The value of the threshold for binary_flip or the value of the regression coefficient for linear effect.
         :param kappa_y: numpy.float64: The value of the threshold for binary_flip or the value of the regression coefficient for linear effect.
 
-        :return: pandas.DataFrame: The DataFrame that ible folding with spacebarncludes the effects of the unobserved confounder.
+        :return: pandas.DataFrame: The DataFrame that includes the effects of the unobserved confounder.
         """
         num_rows = self._data.shape[0]
         stdnorm = scipy.stats.norm()
