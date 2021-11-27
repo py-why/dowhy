@@ -67,8 +67,8 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
     num_cont_instruments = num_instruments -num_discrete_instruments
     num_cont_effect_modifiers = num_effect_modifiers - num_discrete_effect_modifiers
     if num_common_causes > 0:
-        range_c1 = max(beta)*0.5
-        range_c2 = max(beta)*0.5
+        range_c1 = 0.5 + max(abs(beta))*0.5
+        range_c2 = 0.5 + max(abs(beta))*0.5
         means = np.random.uniform(-1, 1, num_common_causes)
         cov_mat = np.diag(np.ones(num_common_causes))
         W = np.random.multivariate_normal(means, cov_mat, num_samples)
@@ -78,7 +78,7 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         c2 = np.random.uniform(0, range_c2, W_with_dummy.shape[1])
 
     if num_instruments > 0:
-        range_cz = beta
+        range_cz = 1 + max(abs(beta))
         p = np.random.uniform(0, 1, num_instruments)
         Z = np.zeros((num_samples, num_instruments))
         for i in range(num_instruments):
@@ -90,7 +90,7 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         cz = np.random.uniform(range_cz - (range_cz * 0.05),
                 range_cz + (range_cz * 0.05), (num_instruments, num_treatments))
     if num_effect_modifiers >0:
-        range_ce = beta*0.5
+        range_ce = 0.5 + max(abs(beta))*0.5
         means = np.random.uniform(-1, 1, num_effect_modifiers)
         cov_mat = np.diag(np.ones(num_effect_modifiers))
         X = np.random.multivariate_normal(means, cov_mat, num_samples)
@@ -111,8 +111,8 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
 
     # Generating frontdoor variables if asked for
     if num_frontdoor_variables > 0:
-        range_cfd1 = max(beta)*0.5
-        range_cfd2 = max(beta)*0.5
+        range_cfd1 = max(abs(beta))*0.5
+        range_cfd2 = max(abs(beta))*0.5
         cfd1 = np.random.uniform(0, range_cfd1, (num_treatments, num_frontdoor_variables))
         cfd2 = np.random.uniform(0, range_cfd2, num_frontdoor_variables)
         FD_noise = np.random.normal(0, 1, (num_samples, num_frontdoor_variables))
@@ -220,7 +220,7 @@ def simple_iv_dataset(beta, num_samples,
 
     c1 = np.random.uniform(0,1, (num_common_causes, num_treatments))
     c2 = np.random.uniform(0,1, num_common_causes)
-    range_cz = beta # cz is much higher than c1 and c2
+    range_cz = 1 + max(abs(beta)) # cz is much higher than c1 and c2
     cz = np.random.uniform(range_cz - (range_cz * 0.05),
                 range_cz + (range_cz * 0.05), (num_instruments, num_treatments))
     W = np.random.uniform(0, 1, (num_samples, num_common_causes))

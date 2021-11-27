@@ -2,10 +2,12 @@ import copy
 import logging
 import numpy as np
 import pandas as pd
+import scipy.stats
 
 import math
 import statsmodels.api as sm
-
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
 from dowhy.causal_estimator import CausalEstimator
@@ -21,18 +23,24 @@ class AddUnobservedCommonCause(CausalRefuter):
     - 'effect_strength_on_treatment': parameter for the strength of the effect of simulated confounder on treatment. For linear effect, it is the regression coeffient. For binary_flip, it is the probability that simulated confounder's effect flips the value of treatment from 0 to 1 (or vice-versa).
     - 'effect_strength_on_outcome': parameter for the strength of the effect of simulated confounder on outcome. For linear effect, it is the regression coeffient. For binary_flip, it is the probability that simulated confounder's effect flips the value of outcome from 0 to 1 (or vice-versa).
 
-    TODO: Needs scaled version of the parameters and an interpretation module
-    (e.g., in comparison to biggest effect of known confounder)
+    TODO: Needs an interpretation module
     """
 
     def __init__(self, *args, **kwargs):
         """
-        Initialize the parameters required for the refuter
+        Initialize the parameters required for the refuter.
 
-        :param effect_on_t: str : This is used to represent the type of effect on the treatment due to the unobserved confounder.
-        :param effect_on_y: str : This is used to represent the type of effect on the outcome due to the unobserved confounder.
-        :param kappa_t: float, numpy.ndarray: This refers to the strength of the confounder on treatment. For a linear effect, it behaves like the regression coeffecient. For a binary flip it is the probability with which it can invert the value of the treatment.
-        :param kappa_y: floar, numpy.ndarray: This refers to the strength of the confounder on outcome. For a linear effect, it behaves like the regression coefficient. For a binary flip, it is the probability with which it can invert the value of the outcome.
+        If effect_strength_on_treatment or effect_strength_on_outcome is not
+        given, it is calculated automatically as a range between the
+        minimum and maximum effect strength of observed confounders on treatment
+        and outcome respectively.
+
+        :param confounders_effect_on_treatment: str : The type of effect on the treatment due to the unobserved confounder. Possible values are ['binary_flip', 'linear']
+        :param confounders_effect_on_outcome: str : The type of effect on the outcome due to the unobserved confounder. Possible values are ['binary_flip', 'linear']
+        :param effect_strength_on_treatment: float, numpy.ndarray: This refers to the strength of the confounder on treatment. For a linear effect, it behaves like the regression coeffecient. For a binary flip it is the probability with which it can invert the value of the treatment.
+        :param effect_strength_on_outcome: float, numpy.ndarray: This refers to the strength of the confounder on outcome. For a linear effect, it behaves like the regression coefficient. For a binary flip, it is the probability with which it can invert the value of the outcome.
+        :param effect_fraction_on_treatment: float: If effect_strength_on_treatment is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on treatment. Defaults to 1.
+        :param effect_fraction_on_outcome: float: If effect_strength_on_outcome is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on outcome. Defaults to 1.
         """
         super().__init__(*args, **kwargs)
 
@@ -40,18 +48,131 @@ class AddUnobservedCommonCause(CausalRefuter):
         self.effect_on_y = kwargs["confounders_effect_on_outcome"] if "confounders_effect_on_outcome" in kwargs else "linear"
         self.kappa_t = kwargs["effect_strength_on_treatment"] if "effect_strength_on_treatment" in kwargs else None
         self.kappa_y = kwargs["effect_strength_on_outcome"] if "effect_strength_on_outcome" in kwargs else None
+        self.frac_strength_treatment = kwargs["effect_fraction_on_treatment"] if "effect_fraction_on_treatment" in kwargs else 1
+        self.frac_strength_outcome = kwargs["effect_fraction_on_outcome"] if "effect_fraction_on_outcome" in kwargs else 1
         self.simulated_method_name = kwargs["simulated_method_name"] if "simulated_method_name" in kwargs else "linear_based"
         self.plotmethod = kwargs['plotmethod'] if "plotmethod" in kwargs else "colormesh"
         self.logger = logging.getLogger(__name__)
 
+
+    def infer_default_kappa_t(self, len_kappa_t = 10):
+        """ Infer default effect strength of simulated confounder on treatment.
+
+        """
+        observed_common_causes_names = self._target_estimand.get_backdoor_variables()
+        if len(observed_common_causes_names)>0:
+            observed_common_causes = self._data[observed_common_causes_names]
+            observed_common_causes = pd.get_dummies(observed_common_causes, drop_first=True)
+        else:
+            raise ValueError("There needs to be at least one common cause to" +
+                    "automatically compute the default value of kappa_t."+
+                " Provide a value for kappa_t")
+        t = self._data[self._treatment_name]
+        # Standardizing the data
+        observed_common_causes = StandardScaler().fit_transform(observed_common_causes)
+        if self.effect_on_t == "binary_flip":
+            # Fit a model containing all confounders and compare predictions
+            # using all features compared to all features except a given
+            # confounder.
+            tmodel = LogisticRegression().fit(observed_common_causes, t)
+            tpred = tmodel.predict(observed_common_causes).astype(int)
+            flips = []
+            for i in  range(observed_common_causes.shape[1]):
+                oldval = np.copy(observed_common_causes[:, i])
+                observed_common_causes[:,i] = 0
+                tcap = tmodel.predict(observed_common_causes).astype(int)
+                observed_common_causes[:,i] = oldval
+                flips.append(np.sum(abs(tcap-tpred))/tpred.shape[0])
+            min_coeff, max_coeff = min(flips), max(flips)
+        elif self.effect_on_t == "linear":
+            # Estimating the regression coefficient from standardized features to t
+            corrcoef_var_t = np.corrcoef(observed_common_causes, t, rowvar=False)[-1, :-1]
+            std_dev_t = np.std(t)[0]
+            max_coeff = max(corrcoef_var_t) * std_dev_t
+            min_coeff = min(corrcoef_var_t) * std_dev_t
+        else:
+            raise NotImplementedError("'" + self.effect_on_t +
+                    "' method not supported for confounders' effect on treatment")
+
+        min_coeff, max_coeff = self._compute_min_max_coeff(min_coeff, max_coeff,
+                self.frac_strength_treatment)
+        # By default, return a plot with 10 points
+        # consider 10 values of the effect of the unobserved confounder
+        step = (max_coeff - min_coeff)/len_kappa_t
+        self.logger.info("(Min, Max) kappa_t for observed common causes, ({0}, {1})".format(
+            min_coeff, max_coeff))
+        if np.equal(max_coeff, min_coeff):
+            return max_coeff
+        else:
+            return np.arange(min_coeff, max_coeff, step)
+
+    def _compute_min_max_coeff(self,
+            min_coeff, max_coeff, effect_strength_fraction):
+        max_coeff = effect_strength_fraction * max_coeff
+        min_coeff = effect_strength_fraction * min_coeff
+        return min_coeff, max_coeff
+
+    def infer_default_kappa_y(self, len_kappa_y = 10):
+        """ Infer default effect strength of simulated confounder on treatment.
+
+        """
+        observed_common_causes_names = self._target_estimand.get_backdoor_variables()
+        if len(observed_common_causes_names)>0:
+            observed_common_causes = self._data[observed_common_causes_names]
+            observed_common_causes = pd.get_dummies(observed_common_causes, drop_first=True)
+        else:
+            raise ValueError("There needs to be at least one common cause to" +
+                    "automatically compute the default value of kappa_y."+
+                " Provide a value for kappa_y")
+        y = self._data[self._outcome_name]
+        # Standardizing the data
+        observed_common_causes = StandardScaler().fit_transform(observed_common_causes)
+        if self.effect_on_y == "binary_flip":
+            # Fit a model containing all confounders and compare predictions
+            # using all features compared to all features except a given
+            # confounder.
+            ymodel = LogisticRegression().fit(observed_common_causes, y)
+            ypred = ymodel.predict(observed_common_causes).astype(int)
+            flips = []
+            for i in  range(observed_common_causes.shape[1]):
+                oldval = np.copy(observed_common_causes[:, i])
+                observed_common_causes[:,i] = 0
+                ycap = ymodel.predict(observed_common_causes).astype(int)
+                observed_common_causes[:,i] = oldval
+                flips.append(np.sum(abs(ycap-ypred))/ypred.shape[0])
+            min_coeff, max_coeff = min(flips), max(flips)
+        elif self.effect_on_y == "linear":
+            corrcoef_var_y = np.corrcoef(observed_common_causes, y, rowvar=False)[-1, :-1]
+            std_dev_y = np.std(y)[0]
+            max_coeff = max(corrcoef_var_y) * std_dev_y
+            min_coeff = min(corrcoef_var_y) * std_dev_y
+        else:
+            raise NotImplementedError("'" + self.effect_on_y +
+                    "' method not supported for confounders' effect on outcome")
+        min_coeff, max_coeff = self._compute_min_max_coeff(min_coeff, max_coeff,
+                self.frac_strength_outcome)
+        # By default, return a plot with 10 points
+        # consider 10 values of the effect of the unobserved confounder
+        step = (max_coeff - min_coeff)/len_kappa_y
+        self.logger.info("(Min, Max) kappa_y for observed common causes, ({0}, {1})".format(
+            min_coeff, max_coeff))
+        if np.equal(max_coeff, min_coeff):
+            return max_coeff
+        else:
+            return np.arange(min_coeff, max_coeff, step)
+
     def refute_estimate(self):
         """
-        This function attempts to add an unobserved common cause to the outcome and the treatment. At present, we have implemented the behavior for one dimensional behaviors for continueous
+        This function attempts to add an unobserved common cause to the outcome and the treatment. At present, we have implemented the behavior for one dimensional behaviors for continuous
         and binary variables. This function can either take single valued inputs or a range of inputs. The function then looks at the data type of the input and then decides on the course of
         action.
 
         :return: CausalRefuter: An object that contains the estimated effect and a new effect and the name of the refutation used.
         """
+        if self.kappa_t is None:
+            self.kappa_t = self.infer_default_kappa_t()
+        if self.kappa_y is None:
+            self.kappa_y = self.infer_default_kappa_y()
         if not isinstance(self.kappa_t, (list, np.ndarray)) and not isinstance(self.kappa_y, (list,np.ndarray)): # Deal with single value inputs
             new_data = copy.deepcopy(self._data)
             new_data = self.include_confounders_effect(new_data, self.kappa_t, self.kappa_y)
@@ -60,7 +181,8 @@ class AddUnobservedCommonCause(CausalRefuter):
             refute = CausalRefutation(self._estimate.value, new_effect.value,
                                     refutation_type="Refute: Add an Unobserved Common Cause")
 
-            refute.new_effect = np.array(new_effect.value)
+            refute.new_effect_array = np.array(new_effect.value)
+            refute.new_effect = new_effect.value
             refute.add_refuter(self)
             return refute
 
@@ -72,17 +194,13 @@ class AddUnobservedCommonCause(CausalRefuter):
 
                 results_matrix = np.random.rand(len(self.kappa_t),len(self.kappa_y)) # Matrix to hold all the results of NxM
                 orig_data = copy.deepcopy(self._data)
-                #for i in range(0,len(x[0])):
-                #    for j in range(0,len(y)):
                 for i in range(len(self.kappa_t)):
                     for j in range(len(self.kappa_y)):
-                        #new_data = self.include_confounders_effect(orig_data, x[0][i], y[j][0])
                         new_data = self.include_confounders_effect(orig_data, self.kappa_t[i], self.kappa_y[j])
                         new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
                         new_effect = new_estimator.estimate_effect()
                         refute = CausalRefutation(self._estimate.value, new_effect.value,
                                                 refutation_type="Refute: Add an Unobserved Common Cause")
-                        self.logger.debug(refute)
                         results_matrix[i][j] = refute.new_effect # Populate the results
 
                 import matplotlib
@@ -110,12 +228,14 @@ class AddUnobservedCommonCause(CausalRefuter):
                     plt.colorbar(cp, ticks=contour_levels)
                 ax.yaxis.set_ticks(self.kappa_t)
                 ax.xaxis.set_ticks(self.kappa_y)
+                plt.xticks(rotation=45)
                 ax.set_title('Effect of Unobserved Common Cause')
                 ax.set_ylabel('Value of Linear Constant on Treatment')
                 ax.set_xlabel('Value of Linear Constant on Outcome')
                 plt.show()
 
-                refute.new_effect = results_matrix
+                refute.new_effect_array = results_matrix
+                refute.new_effect = (np.min(results_matrix), np.max(results_matrix))
                 # Store the values into the refute object
                 refute.add_refuter(self)
                 return refute
@@ -146,7 +266,8 @@ class AddUnobservedCommonCause(CausalRefuter):
                 ax.set_ylabel('Estimated Effect after adding the common cause')
                 plt.show()
 
-                refute.new_effect = outcomes
+                refute.new_effect_array = outcomes
+                refute.new_effect = (np.min(outcomes), np.max(outcomes))
                 refute.add_refuter(self)
                 return refute
 
@@ -176,7 +297,8 @@ class AddUnobservedCommonCause(CausalRefuter):
                 ax.set_ylabel('Estimated Effect after adding the common cause')
                 plt.show()
 
-                refute.new_effect = outcomes
+                refute.new_effect_array = outcomes
+                refute.new_effect = (np.min(outcomes), np.max(outcomes))
                 refute.add_refuter(self)
                 return refute
 
@@ -193,28 +315,42 @@ class AddUnobservedCommonCause(CausalRefuter):
         :return: pandas.DataFrame: The DataFrame that includes the effects of the unobserved confounder.
         """
         num_rows = self._data.shape[0]
-        w_random=np.random.randn(num_rows)
+        stdnorm = scipy.stats.norm()
+        w_random = stdnorm.rvs(num_rows)
 
         if self.effect_on_t == "binary_flip":
-            new_data['temp_rand_no'] = np.random.random(num_rows)
-            new_data.loc[new_data['temp_rand_no'] <= kappa_t, self._treatment_name ]  = 1- new_data.loc[new_data['temp_rand_no'] <= kappa_t, self._treatment_name]
+            alpha = 2*kappa_t-1 if kappa_t >=0.5 else 1-2*kappa_t
+            interval = stdnorm.interval(alpha)
+            rel_interval = interval[0] if kappa_t >=0.5 else interval[1]
+            new_data.loc[rel_interval <= w_random, self._treatment_name ]  = 1- new_data.loc[rel_interval <= w_random, self._treatment_name]
             for tname in self._treatment_name:
                 if pd.api.types.is_bool_dtype(self._data[tname]):
                     new_data = new_data.astype({tname: 'bool'}, copy=False)
-            new_data.pop('temp_rand_no')
         elif self.effect_on_t == "linear":
             confounder_t_effect = kappa_t * w_random
-            new_data[self._treatment_name] = new_data[self._treatment_name].values - np.ndarray(shape=(num_rows,1), buffer=confounder_t_effect)
+            # By default, we add the effect of simulated confounder for treatment.
+            # But subtract it from outcome to create a negative correlation
+            # assuming that the original confounder's effect was positive on both.
+            # This is to remove the effect of the original confounder.
+            new_data[self._treatment_name] = new_data[self._treatment_name].values + np.ndarray(shape=(num_rows,1), buffer=confounder_t_effect)
         else:
             raise NotImplementedError("'" + self.effect_on_t + "' method not supported for confounders' effect on treatment")
 
         if self.effect_on_y == "binary_flip":
-            new_data['temp_rand_no'] = np.random.random(num_rows)
-            new_data.loc[new_data['temp_rand_no'] <= kappa_y, self._outcome_name ]  = 1- new_data[self._outcome_name]
-            new_data.pop('temp_rand_no')
+            alpha = 2*kappa_y-1 if kappa_y >=0.5 else 1-2*kappa_y
+            interval = stdnorm.interval(alpha)
+            rel_interval = interval[0] if kappa_y >=0.5 else interval[1]
+            new_data.loc[rel_interval <= w_random, self._outcome_name ]  = 1- new_data.loc[rel_interval <= w_random, self._outcome_name]
+            for yname in self._outcome_name:
+                if pd.api.types.is_bool_dtype(self._data[yname]):
+                    new_data = new_data.astype({yname: 'bool'}, copy=False)
         elif self.effect_on_y == "linear":
-            confounder_y_effect = kappa_y * w_random
-            new_data[self._outcome_name] = new_data[self._outcome_name].values - np.ndarray(shape=(num_rows,1), buffer=confounder_y_effect)
+            confounder_y_effect = (-1) * kappa_y * w_random
+            # By default, we add the effect of simulated confounder for treatment.
+            # But subtract it from outcome to create a negative correlation
+            # assuming that the original confounder's effect was positive on both.
+            # This is to remove the effect of the original confounder.
+            new_data[self._outcome_name] = new_data[self._outcome_name].values + np.ndarray(shape=(num_rows,1), buffer=confounder_y_effect)
         else:
             raise NotImplementedError("'" + self.effect_on_y+ "' method not supported for confounders' effect on outcome")
         return new_data
