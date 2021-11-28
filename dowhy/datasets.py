@@ -100,7 +100,7 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         ce = np.random.uniform(0, range_ce, X_with_categorical.shape[1])
     # TODO - test all our methods with random noise added to covariates (instead of the stochastic treatment assignment)
 
-    t = np.random.normal(0, 1, (num_samples, num_treatments))
+    t = np.random.normal(0, 10, (num_samples, num_treatments))
     if num_common_causes > 0:
         t += W_with_dummy @ c1  # + np.random.normal(0, 0.01)
     if num_instruments > 0:
