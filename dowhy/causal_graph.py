@@ -236,14 +236,36 @@ class CausalGraph:
             causes = causes.union(self.get_ancestors(v, new_graph=new_graph))
         return causes
 
-    def check_valid_backdoor_set(self, nodes1, nodes2, nodes3, backdoor_paths=None):
+    def check_dseparation(self, nodes1, nodes2, nodes3, new_graph=None,
+            dseparation_algo="default"):
+        if dseparation_algo == "default":
+            if new_graph is None:
+                new_graph = self._graph
+            dseparated = nx.algorithms.d_separated(new_graph,
+                    set(nodes1), set(nodes2), set(nodes3))
+        else:
+            raise ValueError(f"{dseparation_algo} method for d-separation not supported.")
+        return dseparated
+
+    def check_valid_backdoor_set(self, nodes1, nodes2, nodes3,
+            backdoor_paths=None, new_graph=None, dseparation_algo="default"):
         # also return the number of backdoor paths blocked by observed nodes
-        if backdoor_paths is None:
-            backdoor_paths = self.get_backdoor_paths(nodes1, nodes2)
-        d_separated = all([self.is_blocked(path, nodes3) for path in backdoor_paths])
-        observed_nodes3 = self.filter_unobserved_variables(nodes3)
-        num_paths_blocked = sum([self.is_blocked(path, observed_nodes3) for path in backdoor_paths])
-        return {'is_dseparated': d_separated,
+        if dseparation_algo == "default":
+            if new_graph is None:
+                new_graph = self._graph
+            dseparated = nx.algorithms.d_separated(new_graph,
+                    set(nodes1), set(nodes2), set(nodes3))
+            num_paths_blocked = 1
+        elif dseparation_algo == "naive":
+            # ignores new_graph parameter, always uses self._graph
+            if backdoor_paths is None:
+                backdoor_paths = self.get_backdoor_paths(nodes1, nodes2)
+            dseparated = all([self.is_blocked(path, nodes3) for path in backdoor_paths])
+            observed_nodes3 = self.filter_unobserved_variables(nodes3)
+            num_paths_blocked = sum([self.is_blocked(path, observed_nodes3) for path in backdoor_paths])
+        else:
+            raise ValueError(f"{dseparation_algo} method for d-separation not supported.")
+        return {'is_dseparated': dseparated,
                 'num_paths_blocked_by_observed_nodes': num_paths_blocked}
 
     def get_backdoor_paths(self, nodes1, nodes2):
@@ -406,8 +428,9 @@ class CausalGraph:
 
         Currently only supports singleton sets.
         """
-        dpaths = self.get_all_directed_paths(nodes1, nodes2)
-        return len(dpaths) > 0
+        #dpaths = self.get_all_directed_paths(nodes1, nodes2)
+        #return len(dpaths) > 0
+        return nx.has_path(self._graph, nodes1[0], nodes2[0])
 
     def get_adjacency_matrix(self, *args, **kwargs):
         '''
@@ -416,14 +439,25 @@ class CausalGraph:
         '''
         return nx.convert_matrix.to_numpy_matrix(self._graph, *args, **kwargs)
 
-    def check_valid_frontdoor_set(self, nodes1, nodes2, candidate_nodes, frontdoor_paths=None):
+    def check_valid_frontdoor_set(self, nodes1, nodes2, candidate_nodes,
+            frontdoor_paths=None, new_graph = None,
+            dseparation_algo="default"):
         """Check if valid the frontdoor variables for set of treatments, nodes1 to set of outcomes, nodes2.
         """
-        if frontdoor_paths is None:
-            frontdoor_paths = self.get_all_directed_paths(nodes1, nodes2)
+        # Condition 1: node 1 ---> node 2 is intercepted by candidate_nodes
+        if dseparation_algo == "default":
+            if new_graph is None:
+                new_graph = self._graph
+            dseparated = nx.algorithms.d_separated(new_graph,
+                    set(nodes1), set(nodes2), set(candidate_nodes))
+        elif dseparation_algo == "naive":
+            if frontdoor_paths is None:
+                frontdoor_paths = self.get_all_directed_paths(nodes1, nodes2)
 
-        d_separated = all([self.is_blocked(path, candidate_nodes) for path in frontdoor_paths])
-        return d_separated
+            dseparated = all([self.is_blocked(path, candidate_nodes) for path in frontdoor_paths])
+        else:
+            raise ValueError(f"{dseparation_algo} method for d-separation not supported.")
+        return dseparated
 
     def check_valid_mediation_set(self, nodes1, nodes2, candidate_nodes, mediation_paths=None):
         """Check if candidate nodes are valid mediators for set of treatments, nodes1 to set of outcomes, nodes2.

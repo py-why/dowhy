@@ -30,7 +30,7 @@ class CausalIdentifier:
     BACKDOOR_MIN="minimal-adjustment"
     BACKDOOR_MAX="maximal-adjustment"
     METHOD_NAMES = {BACKDOOR_DEFAULT, BACKDOOR_EXHAUSTIVE, BACKDOOR_MIN, BACKDOOR_MAX}
-    DEFAULT_BACKDOOR_METHOD = BACKDOOR_MAX
+    DEFAULT_BACKDOOR_METHOD = BACKDOOR_DEFAULT
 
     def __init__(self, graph, estimand_type,
             method_name = "default",
@@ -249,15 +249,26 @@ class CausalIdentifier:
         )
         return estimand
 
-    def identify_backdoor(self, treatment_name, outcome_name, include_unobserved=True):
+    def identify_backdoor(self, treatment_name, outcome_name,
+            include_unobserved=True, dseparation_algo="default"):
         backdoor_sets = []
-        backdoor_paths = self._graph.get_backdoor_paths(treatment_name, outcome_name)
+        backdoor_paths = None
+        bdoor_graph = None
+        if dseparation_algo == "naive":
+            backdoor_paths = self._graph.get_backdoor_paths(treatment_name, outcome_name)
+        elif dseparation_algo == "default":
+            bdoor_graph = self._graph.do_surgery(treatment_name,
+                    remove_outgoing_edges=True)
+        else:
+            raise ValueError(f"d-separation algorithm {dseparation_algo} is not supported")
         method_name = self.method_name if self.method_name != CausalIdentifier.BACKDOOR_DEFAULT else CausalIdentifier.DEFAULT_BACKDOOR_METHOD
 
         # First, checking if empty set is a valid backdoor set
         empty_set = set()
-        check = self._graph.check_valid_backdoor_set(treatment_name, outcome_name, empty_set,
-                backdoor_paths=backdoor_paths)
+        check = self._graph.check_valid_backdoor_set(treatment_name,
+                outcome_name, empty_set,
+                backdoor_paths=backdoor_paths, new_graph=bdoor_graph,
+                dseparation_algo=dseparation_algo)
         if check["is_dseparated"]:
             backdoor_sets.append({
                 'backdoor_set':empty_set,
@@ -271,32 +282,78 @@ class CausalIdentifier:
             - set(treatment_name) \
             - set(outcome_name)
         eligible_variables -= self._graph.get_descendants(treatment_name)
-
-        num_iterations = 0
-        found_valid_adjustment_set = False
+        # If var is d-separated from either treatment or outcome, it cannot
+        # be a part of the backdoor set
+        filt_eligible_variables = set()
+        for var in eligible_variables:
+            dsep_treat_var = self._graph.check_dseparation(
+                    treatment_name, parse_state(var),
+                    set())
+            if dsep_treat_var:
+                continue
+            dsep_outcome_var = self._graph.check_dseparation(
+                    outcome_name, parse_state(var), set())
+            if not dsep_outcome_var and not dsep_treat_var:
+                filt_eligible_variables.add(var)
+        print(eligible_variables, filt_eligible_variables)
         if method_name in CausalIdentifier.METHOD_NAMES:
-            # If `minimal-adjustment` method is specified, start the search from the set with minimum size. Otherwise, start from the largest.
-            set_sizes = range(1, len(eligible_variables) + 1, 1) if method_name == CausalIdentifier.BACKDOOR_MIN else range(len(eligible_variables), 0, -1)
-            for size_candidate_set in set_sizes:
-                for candidate_set in itertools.combinations(eligible_variables, size_candidate_set):
-                    check = self._graph.check_valid_backdoor_set(treatment_name,
-                            outcome_name, candidate_set, backdoor_paths=backdoor_paths)
-                    self.logger.debug("Candidate backdoor set: {0}, is_dseparated: {1}, No. of paths blocked by observed_nodes: {2}".format(candidate_set, check["is_dseparated"], check["num_paths_blocked_by_observed_nodes"]))
-                    if check["is_dseparated"]:
-                        backdoor_sets.append({
-                            'backdoor_set': candidate_set,
-                            'num_paths_blocked_by_observed_nodes': check["num_paths_blocked_by_observed_nodes"]})
-                        found_valid_adjustment_set = True
-                    num_iterations += 1
-                    if method_name == CausalIdentifier.BACKDOOR_EXHAUSTIVE and num_iterations > CausalIdentifier.MAX_BACKDOOR_ITERATIONS:
-                        break
-                # If the backdoor method is `maximal-adjustment` or `minimal-adjustment`, return the first found adjustment set.
-                if method_name in {CausalIdentifier.BACKDOOR_MAX, CausalIdentifier.BACKDOOR_MIN} and found_valid_adjustment_set:
-                    break
+            backdoor_sets, found_valid_adjustment_set = self.find_valid_adjustment_sets(
+                    treatment_name, outcome_name,
+                    backdoor_paths, bdoor_graph,
+                    dseparation_algo,
+                    backdoor_sets, filt_eligible_variables,
+                    method_name=method_name,
+                    max_iterations= CausalIdentifier.MAX_BACKDOOR_ITERATIONS)
+            if method_name == CausalIdentifier.BACKDOOR_DEFAULT and found_valid_adjustment_set:
+                # repeat the above search with BACKDOOR_MIN
+                backdoor_sets, _ = self.find_valid_adjustment_sets(
+                        treatment_name, outcome_name,
+                        backdoor_paths, bdoor_graph,
+                        dseparation_algo,
+                        backdoor_sets, filt_eligible_variables,
+                        method_name=CausalIdentifier.BACKDOOR_MIN,
+                        max_iterations= CausalIdentifier.MAX_BACKDOOR_ITERATIONS)
         else:
             raise ValueError(f"Identifier method {method_name} not supported. Try one of the following: {CausalIdentifier.METHOD_NAMES}")
 
         return backdoor_sets
+
+    def find_valid_adjustment_sets(self, treatment_name, outcome_name,
+            backdoor_paths, bdoor_graph, dseparation_algo,
+            backdoor_sets, filt_eligible_variables,
+            method_name, max_iterations):
+        num_iterations = 0
+        found_valid_adjustment_set = False
+        # If `minimal-adjustment` method is specified, start the search from the set with minimum size. Otherwise, start from the largest.
+        set_sizes = range(1, len(filt_eligible_variables) + 1, 1) if method_name == CausalIdentifier.BACKDOOR_MIN else range(len(filt_eligible_variables), 0, -1)
+        for size_candidate_set in set_sizes:
+            for candidate_set in itertools.combinations(filt_eligible_variables, size_candidate_set):
+                check = self._graph.check_valid_backdoor_set(treatment_name,
+                        outcome_name, candidate_set,
+                        backdoor_paths=backdoor_paths,
+                        new_graph = bdoor_graph,
+                        dseparation_algo = dseparation_algo)
+                self.logger.debug("Candidate backdoor set: {0}, is_dseparated: {1}, No. of paths blocked by observed_nodes: {2}".format(candidate_set, check["is_dseparated"], check["num_paths_blocked_by_observed_nodes"]))
+                print(candidate_set, check["is_dseparated"])
+                if check["is_dseparated"]:
+                    backdoor_sets.append({
+                        'backdoor_set': candidate_set,
+                        'num_paths_blocked_by_observed_nodes': check["num_paths_blocked_by_observed_nodes"]})
+                    found_valid_adjustment_set = True
+                num_iterations += 1
+                if method_name == CausalIdentifier.BACKDOOR_EXHAUSTIVE and num_iterations > max_iterations:
+                    break
+            # If the backdoor method is `maximal-adjustment` or `minimal-adjustment`, return the first found adjustment set.
+            if method_name in {CausalIdentifier.BACKDOOR_DEFAULT, CausalIdentifier.BACKDOOR_MAX, CausalIdentifier.BACKDOOR_MIN} and found_valid_adjustment_set:
+                break
+            # If all variables are observed, and the biggest eligible set
+            # does not satisfy backdoor, then none of its subsets will.
+            if method_name in {CausalIdentifier.BACKDOOR_DEFAULT, CausalIdentifier.BACKDOOR_MAX} and self._graph.all_observed(filt_eligible_variables):
+                break
+            if num_iterations > max_iterations:
+                break
+        return backdoor_sets, found_valid_adjustment_set
+
 
     def get_default_backdoor_set_id(self, backdoor_sets_dict):
         # Adding a None estimand if no backdoor set found
@@ -310,12 +367,12 @@ class CausalIdentifier:
         min_iv_keys = {key for key, iv_count in iv_count_dict.items() if iv_count == min_iv_count}
         min_iv_backdoor_sets_dict = {key: backdoor_sets_dict[key] for key in min_iv_keys}
 
-        # Default set is the one with the most number of adjustment variables (optimizing for minimum (unknown) bias not for efficiency)
-        max_set_length = -1
+        # Default set is the one with the least number of adjustment variables (optimizing for efficiency)
+        min_set_length = 1000000
         default_key = None
         for key, bdoor_set in min_iv_backdoor_sets_dict.items():
-            if len(bdoor_set) > max_set_length:
-                max_set_length = len(bdoor_set)
+            if len(bdoor_set) < min_set_length:
+                min_set_length = len(bdoor_set)
                 default_key = key
         return default_key
 
@@ -364,20 +421,59 @@ class CausalIdentifier:
             backdoor_variables_dict["backdoor"+str(i+1)] = backdoor_sets_arr[i]
         return estimands_dict, backdoor_variables_dict
 
-    def identify_frontdoor(self):
+    def identify_frontdoor(self, dseparation_algo="default"):
         """ Find a valid frontdoor variable if it exists.
 
         Currently only supports a single variable frontdoor set.
         """
         frontdoor_var = None
-        frontdoor_paths = self._graph.get_all_directed_paths(self.treatment_name, self.outcome_name)
+        frontdoor_paths = None
+        fdoor_graph = None
+        if dseparation_algo == "default":
+            fdoor_graph = self._graph.do_surgery(self.treatment_name,
+                    remove_incoming_edges=True)
+        elif dseparation_algo == "naive":
+            frontdoor_paths = self._graph.get_all_directed_paths(self.treatment_name, self.outcome_name)
+        else:
+            raise ValueError(f"d-separation algorithm {dseparation_algo} is not supported")
+
+
         eligible_variables = self._graph.get_descendants(self.treatment_name) \
-            - set(self.outcome_name)
+            - set(self.outcome_name) \
+            - set(self._graph.get_descendants(self.outcome_name))
         # For simplicity, assuming a one-variable frontdoor set
         for candidate_var in eligible_variables:
-            is_valid_frontdoor = self._graph.check_valid_frontdoor_set(self.treatment_name,
-                    self.outcome_name, parse_state(candidate_var), frontdoor_paths=frontdoor_paths)
-            self.logger.debug("Candidate frontdoor set: {0}, is_dseparated: {1}".format(candidate_var, is_valid_frontdoor))
+            # Cond 2: All directed paths intercepted by candidate_var
+            cond1 = self._graph.check_valid_frontdoor_set(
+                self.treatment_name, self.outcome_name,
+                parse_state(candidate_var),
+                frontdoor_paths=frontdoor_paths,
+                new_graph=fdoor_graph,
+                dseparation_algo=dseparation_algo)
+            self.logger.debug("Candidate frontdoor set: {0}, is_dseparated: {1}".format(candidate_var, cond1))
+            if not cond1:
+                continue
+            # Cond 2: No confounding between treatment and candidate var
+            bdoor_graph1 = self._graph.do_surgery(self.treatment_name,
+                    remove_outgoing_edges=True)
+            cond2 = self._graph.check_valid_backdoor_set(
+                self.treatment_name, parse_state(candidate_var),
+                set(),
+                backdoor_paths=None,
+                new_graph= bdoor_graph1,
+                dseparation_algo=dseparation_algo)
+            if not cond2:
+                continue
+            # Cond 3: treatment blocks all confounding between candidate_var and outcome
+            bdoor_graph2 = self._graph.do_surgery(candidate_var,
+                    remove_outgoing_edges=True)
+            cond3 = self._graph.check_valid_backdoor_set(
+                parse_state(candidate_var), self.outcome_name,
+                self.treatment_name,
+                backdoor_paths=None,
+                new_graph= bdoor_graph2,
+                dseparation_algo=dseparation_algo)
+            is_valid_frontdoor = cond1 and cond2 and cond3
             if is_valid_frontdoor:
                 frontdoor_var = candidate_var
                 break
