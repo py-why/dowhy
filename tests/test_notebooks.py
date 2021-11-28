@@ -20,6 +20,8 @@ advanced_notebooks = [
                       "dowhy-conditional-treatment-effects.ipynb",
                       "dowhy_refuter_notebook.ipynb",
                       "DoWhy-The Causal Story Behind Hotel Booking Cancellations.ipynb",  # needs xgboost too
+                      # will be removed
+                      "dowhy_optimize_backdoor_example.ipynb"
                       ]
 
 # Adding the dowhy root folder to the python path so that jupyter notebooks
