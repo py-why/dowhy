@@ -255,18 +255,15 @@ class CausalGraph:
                 new_graph = self._graph
             dseparated = nx.algorithms.d_separated(new_graph,
                     set(nodes1), set(nodes2), set(nodes3))
-            num_paths_blocked = 1
         elif dseparation_algo == "naive":
             # ignores new_graph parameter, always uses self._graph
             if backdoor_paths is None:
                 backdoor_paths = self.get_backdoor_paths(nodes1, nodes2)
             dseparated = all([self.is_blocked(path, nodes3) for path in backdoor_paths])
-            observed_nodes3 = self.filter_unobserved_variables(nodes3)
-            num_paths_blocked = sum([self.is_blocked(path, observed_nodes3) for path in backdoor_paths])
         else:
             raise ValueError(f"{dseparation_algo} method for d-separation not supported.")
-        return {'is_dseparated': dseparated,
-                'num_paths_blocked_by_observed_nodes': num_paths_blocked}
+        return {'is_dseparated': dseparated}
+
 
     def get_backdoor_paths(self, nodes1, nodes2):
         paths = []

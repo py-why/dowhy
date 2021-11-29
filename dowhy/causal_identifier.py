@@ -270,9 +270,7 @@ class CausalIdentifier:
                 backdoor_paths=backdoor_paths, new_graph=bdoor_graph,
                 dseparation_algo=dseparation_algo)
         if check["is_dseparated"]:
-            backdoor_sets.append({
-                'backdoor_set':empty_set,
-                'num_paths_blocked_by_observed_nodes': check["num_paths_blocked_by_observed_nodes"]})
+            backdoor_sets.append({'backdoor_set':empty_set})
             # If the method is `minimal-adjustment`, return the empty set right away.
             if method_name == CausalIdentifier.BACKDOOR_MIN:
                 return backdoor_sets
@@ -295,7 +293,6 @@ class CausalIdentifier:
                     outcome_name, parse_state(var), set())
             if not dsep_outcome_var and not dsep_treat_var:
                 filt_eligible_variables.add(var)
-        print(eligible_variables, filt_eligible_variables)
         if method_name in CausalIdentifier.METHOD_NAMES:
             backdoor_sets, found_valid_adjustment_set = self.find_valid_adjustment_sets(
                     treatment_name, outcome_name,
@@ -333,15 +330,13 @@ class CausalIdentifier:
                         backdoor_paths=backdoor_paths,
                         new_graph = bdoor_graph,
                         dseparation_algo = dseparation_algo)
-                self.logger.debug("Candidate backdoor set: {0}, is_dseparated: {1}, No. of paths blocked by observed_nodes: {2}".format(candidate_set, check["is_dseparated"], check["num_paths_blocked_by_observed_nodes"]))
-                print(candidate_set, check["is_dseparated"])
+                self.logger.debug("Candidate backdoor set: {0}, is_dseparated: {1}".format(candidate_set, check["is_dseparated"]))
                 if check["is_dseparated"]:
-                    backdoor_sets.append({
-                        'backdoor_set': candidate_set,
-                        'num_paths_blocked_by_observed_nodes': check["num_paths_blocked_by_observed_nodes"]})
+                    backdoor_sets.append({'backdoor_set': candidate_set})
                     found_valid_adjustment_set = True
                 num_iterations += 1
                 if method_name == CausalIdentifier.BACKDOOR_EXHAUSTIVE and num_iterations > max_iterations:
+                    self.logger.warning(f"Max number of iterations {max_iterations} reached. Could not find a valid backdoor set.")
                     break
             # If the backdoor method is `maximal-adjustment` or `minimal-adjustment`, return the first found adjustment set.
             if method_name in {CausalIdentifier.BACKDOOR_DEFAULT, CausalIdentifier.BACKDOOR_MAX, CausalIdentifier.BACKDOOR_MIN} and found_valid_adjustment_set:
@@ -351,6 +346,7 @@ class CausalIdentifier:
             if method_name in {CausalIdentifier.BACKDOOR_DEFAULT, CausalIdentifier.BACKDOOR_MAX} and self._graph.all_observed(filt_eligible_variables):
                 break
             if num_iterations > max_iterations:
+                self.logger.warning(f"Max number of iterations {max_iterations} reached. Could not find a valid backdoor set.")
                 break
         return backdoor_sets, found_valid_adjustment_set
 
@@ -385,11 +381,12 @@ class CausalIdentifier:
             proceed_when_unidentifiable = self._proceed_when_unidentifiable
         is_identified = [ self._graph.all_observed(bset["backdoor_set"]) for bset in backdoor_sets ]
 
-        if all(is_identified):
-            self.logger.info("All common causes are observed. Causal effect can be identified.")
+        if any(is_identified):
+            self.logger.info("Causal effect can be identified.")
             backdoor_sets_arr = [list(
                 bset["backdoor_set"])
-                for bset in backdoor_sets]
+                for bset in backdoor_sets
+                if self._graph.all_observed(bset["backdoor_set"]) ]
         else: # there is unobserved confounding
             self.logger.warning("If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.")
             response = False # user response
@@ -406,11 +403,16 @@ class CausalIdentifier:
                     self.logger.warn("Identification failed due to unobserved variables.")
                     backdoor_sets_arr = []
             if proceed_when_unidentifiable or response is True:
-                max_paths_blocked = max( bset['num_paths_blocked_by_observed_nodes'] for bset in backdoor_sets)
-                backdoor_sets_arr = [list(
-                    self._graph.filter_unobserved_variables(bset["backdoor_set"]))
-                    for bset in backdoor_sets
-                    if bset["num_paths_blocked_by_observed_nodes"]==max_paths_blocked]
+                # Just pick the backdoor set with the highest number of nodes
+                # Assumption: more nodes will help control for the effect of U
+                max_set_size = max(
+                    len(self._graph.filter_unobserved_variables(bset["backdoor_set"]))
+                    for bset in backdoor_sets)
+                backdoor_sets_arr = []
+                for bset in backdoor_sets:
+                    curr_set = list(self._graph.filter_unobserved_variables(bset["backdoor_set"]))
+                    if len(curr_set) == max_set_size:
+                        backdoor_sets_arr.append(curr_set)
 
         for i in range(len(backdoor_sets_arr)):
             backdoor_estimand_expr = self.construct_backdoor_estimand(
