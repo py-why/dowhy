@@ -37,7 +37,7 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
             propensity_score_column=propensity_score_column,
             **kwargs)
 
-        self.logger.info("INFO: Using Propensity Score Stratification Estimator")
+        self.logger.info("Using Propensity Score Stratification Estimator")
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
         if not hasattr(self, 'num_strata'):
