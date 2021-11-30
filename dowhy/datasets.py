@@ -56,6 +56,7 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
                    num_discrete_common_causes=0,
                    num_discrete_instruments=0,
                    num_discrete_effect_modifiers=0,
+                   stddev_treatment_noise = 1,
                    one_hot_encode = False):
     W, X, Z, FD, c1, c2, ce, cz, cfd1, cfd2 = [None]*10
     W_with_dummy, X_with_categorical  = (None, None)
@@ -100,7 +101,7 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         ce = np.random.uniform(0, range_ce, X_with_categorical.shape[1])
     # TODO - test all our methods with random noise added to covariates (instead of the stochastic treatment assignment)
 
-    t = np.random.normal(0, 1, (num_samples, num_treatments))
+    t = np.random.normal(0, stddev_treatment_noise, (num_samples, num_treatments))
     if num_common_causes > 0:
         t += W_with_dummy @ c1  # + np.random.normal(0, 0.01)
     if num_instruments > 0:
