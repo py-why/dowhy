@@ -41,6 +41,7 @@ class AddUnobservedCommonCause(CausalRefuter):
         :param effect_strength_on_outcome: float, numpy.ndarray: This refers to the strength of the confounder on outcome. For a linear effect, it behaves like the regression coefficient. For a binary flip, it is the probability with which it can invert the value of the outcome.
         :param effect_fraction_on_treatment: float: If effect_strength_on_treatment is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on treatment. Defaults to 1.
         :param effect_fraction_on_outcome: float: If effect_strength_on_outcome is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on outcome. Defaults to 1.
+        :param plotmethod: string: Type of plot to be shown. If None, no plot is generated. This parameter is used only only when more than one treatment confounder effect values or outcome confounder effect values are provided. Default is "colormesh". Supported values are "contour", "colormesh" when more than one value is provided for both confounder effect value parameters; "line" when provided for only one of them.
         """
         super().__init__(*args, **kwargs)
 
@@ -203,6 +204,13 @@ class AddUnobservedCommonCause(CausalRefuter):
                                                 refutation_type="Refute: Add an Unobserved Common Cause")
                         results_matrix[i][j] = refute.new_effect # Populate the results
 
+                refute.new_effect_array = results_matrix
+                refute.new_effect = (np.min(results_matrix), np.max(results_matrix))
+                # Store the values into the refute object
+                refute.add_refuter(self)
+                if self.plotmethod is None:
+                    return refute
+
                 import matplotlib
                 import matplotlib.pyplot as plt
                 fig = plt.figure(figsize=(6,5))
@@ -234,10 +242,6 @@ class AddUnobservedCommonCause(CausalRefuter):
                 ax.set_xlabel('Value of Linear Constant on Outcome')
                 plt.show()
 
-                refute.new_effect_array = results_matrix
-                refute.new_effect = (np.min(results_matrix), np.max(results_matrix))
-                # Store the values into the refute object
-                refute.add_refuter(self)
                 return refute
 
             elif isinstance(self.kappa_t, (list, np.ndarray)):
@@ -253,6 +257,12 @@ class AddUnobservedCommonCause(CausalRefuter):
                     self.logger.debug(refute)
                     outcomes[i] = refute.new_effect # Populate the results
 
+                refute.new_effect_array = outcomes
+                refute.new_effect = (np.min(outcomes), np.max(outcomes))
+                refute.add_refuter(self)
+                if self.plotmethod is None:
+                    return refute
+
                 import matplotlib
                 import matplotlib.pyplot as plt
                 fig = plt.figure(figsize=(6,5))
@@ -266,9 +276,6 @@ class AddUnobservedCommonCause(CausalRefuter):
                 ax.set_ylabel('Estimated Effect after adding the common cause')
                 plt.show()
 
-                refute.new_effect_array = outcomes
-                refute.new_effect = (np.min(outcomes), np.max(outcomes))
-                refute.add_refuter(self)
                 return refute
 
             elif isinstance(self.kappa_y, (list, np.ndarray)):
@@ -284,6 +291,12 @@ class AddUnobservedCommonCause(CausalRefuter):
                     self.logger.debug(refute)
                     outcomes[i] = refute.new_effect # Populate the results
 
+                refute.new_effect_array = outcomes
+                refute.new_effect = (np.min(outcomes), np.max(outcomes))
+                refute.add_refuter(self)
+                if self.plotmethod is None:
+                    return refute
+
                 import matplotlib
                 import matplotlib.pyplot as plt
                 fig = plt.figure(figsize=(6,5))
@@ -297,9 +310,6 @@ class AddUnobservedCommonCause(CausalRefuter):
                 ax.set_ylabel('Estimated Effect after adding the common cause')
                 plt.show()
 
-                refute.new_effect_array = outcomes
-                refute.new_effect = (np.min(outcomes), np.max(outcomes))
-                refute.add_refuter(self)
                 return refute
 
     def include_confounders_effect(self, new_data, kappa_t, kappa_y):
