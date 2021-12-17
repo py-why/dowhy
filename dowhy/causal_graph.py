@@ -159,8 +159,11 @@ class CausalGraph:
                 if node_name not in common_cause_names:
                     for outcome in self.outcome_name:
                         self._graph.add_node(node_name, observed="yes")
-                        self._graph.add_edge(node_name, outcome, style = "dotted", headport="s", tailport="n")
-                        self._graph.add_edge(outcome, node_name, style = "dotted", headport="n", tailport="s") # TODO make the ports more general so that they apply not just to top-bottom node configurations
+                        # Assuming the simple form of effect modifier
+                        # that directly causes the outcome.
+                        self._graph.add_edge(node_name, outcome)
+                        #self._graph.add_edge(node_name, outcome, style = "dotted", headport="s", tailport="n")
+                        #self._graph.add_edge(outcome, node_name, style = "dotted", headport="n", tailport="s") # TODO make the ports more general so that they apply not just to top-bottom node configurations
         if mediator_names is not None:
             for node_name in mediator_names:
                 for treatment, outcome in itertools.product(self.treatment_name, self.outcome_name):
@@ -249,10 +252,15 @@ class CausalGraph:
 
     def check_valid_backdoor_set(self, nodes1, nodes2, nodes3,
             backdoor_paths=None, new_graph=None, dseparation_algo="default"):
+        """ Assume that the first parameter (nodes1) is the treatment,
+        the second is the outcome, and the third is the candidate backdoor set
+        """
         # also return the number of backdoor paths blocked by observed nodes
         if dseparation_algo == "default":
             if new_graph is None:
-                new_graph = self._graph
+                # Assume that nodes1 is the treatment
+                new_graph = self.do_surgery(nodes1,
+                    remove_outgoing_edges=True)
             dseparated = nx.algorithms.d_separated(new_graph,
                     set(nodes1), set(nodes2), set(nodes3))
         elif dseparation_algo == "naive":
