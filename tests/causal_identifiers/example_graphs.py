@@ -6,7 +6,7 @@ Each example graph is contained of the following values:
     * graph_str - The graph string in GML format.
     * observed_variables - A list of observed variables in the graph. This will be used to test no unobserved variables are offered in the solution.
     * biased_sets - The sets that we shouldn't get in the output as they incur biased estimates of the causal effect.
-    * minimal_adjustment_sets - Sets of observed variables that should be returned when 'minimal-adjustment' is specified as the backdoor method. 
+    * minimal_adjustment_sets - Sets of observed variables that should be returned when 'minimal-adjustment' is specified as the backdoor method.
         If no adjustment is necessary given the graph, minimal adjustment set should be the empty set.
     * maximal_adjustment_sets - Sets of observed variables that should be returned when 'maximal-adjustment' is specified as the backdoor method.
 """
@@ -14,14 +14,14 @@ Each example graph is contained of the following values:
 TEST_GRAPH_SOLUTIONS = {
     # Example is selected from Pearl J. "Causality" 2nd Edition, from chapter 3.3.1 on backoor criterion.
     "pearl_backdoor_example_graph": dict(
-        graph_str = """graph[directed 1 node[id "Z1" label "Z1"]  
+        graph_str = """graph[directed 1 node[id "Z1" label "Z1"]
                         node[id "Z2" label "Z2"]
                         node[id "Z3" label "Z3"]
                         node[id "Z4" label "Z4"]
                         node[id "Z5" label "Z5"]
                         node[id "Z6" label "Z6"]
                         node[id "X" label "X"]
-                        node[id "Y" label "Y"]      
+                        node[id "Y" label "Y"]
                         edge[source "Z1" target "Z3"]
                         edge[source "Z1" target "Z4"]
                         edge[source "Z2" target "Z4"]
@@ -31,7 +31,7 @@ TEST_GRAPH_SOLUTIONS = {
                         edge[source "Z4" target "Y"]
                         edge[source "Z5" target "Y"]
                         edge[source "Z6" target "Y"]
-                        edge[source "X" target "Z6"]]    
+                        edge[source "X" target "Z6"]]
                     """,
         observed_variables = ["Z1", "Z2", "Z3", "Z4", "Z5", "Z6", "X", "Y"],
         biased_sets = [{"Z4"}, {"Z6"}, {"Z5"}, {"Z2"}, {"Z1"}, {"Z3"}, {"Z1", "Z3"}, {"Z2", "Z5"}, {"Z1", "Z2"}],
@@ -39,22 +39,22 @@ TEST_GRAPH_SOLUTIONS = {
         maximal_adjustment_sets = [{"Z1", "Z2", "Z3", "Z4", "Z5"}]
     ),
     "simple_selection_bias_graph": dict(
-        graph_str = """graph[directed 1 node[id "Z1" label "Z1"]  
+        graph_str = """graph[directed 1 node[id "Z1" label "Z1"]
                     node[id "X" label "X"]
-                    node[id "Y" label "Y"]      
+                    node[id "Y" label "Y"]
                     edge[source "X" target "Y"]
                     edge[source "X" target "Z1"]
                     edge[source "Y" target "Z1"]]
                     """,
         observed_variables = ["Z1", "X", "Y"],
-        biased_sets = [{"Z1",}], 
+        biased_sets = [{"Z1",}],
         minimal_adjustment_sets = [{}],
         maximal_adjustment_sets = [{}]
     ),
     "simple_no_confounder_graph": dict(
-        graph_str = """graph[directed 1 node[id "Z1" label "Z1"]  
+        graph_str = """graph[directed 1 node[id "Z1" label "Z1"]
                 node[id "X" label "X"]
-                node[id "Y" label "Y"]      
+                node[id "Y" label "Y"]
                 edge[source "X" target "Y"]
                 edge[source "Z1" target "X"]]
                 """,
@@ -65,11 +65,11 @@ TEST_GRAPH_SOLUTIONS = {
     ),
     # The following simpsons paradox examples are taken from Pearl, J {2013}. "Understanding Simpson’s Paradox" - http://ftp.cs.ucla.edu/pub/stat_ser/r414.pdf
     "pearl_simpsons_paradox_1c": dict(
-        graph_str = """graph[directed 1 node[id "Z" label "Z"]  
+        graph_str = """graph[directed 1 node[id "Z" label "Z"]
                 node[id "X" label "X"]
                 node[id "Y" label "Y"]
                 node[id "L1" label "L1"]
-                node[id "L2" label "L2"]      
+                node[id "L2" label "L2"]
                 edge[source "X" target "Y"]
                 edge[source "L1" target "X"]
                 edge[source "L1" target "Z"]
@@ -82,7 +82,7 @@ TEST_GRAPH_SOLUTIONS = {
         maximal_adjustment_sets = [{}]
     ),
     "pearl_simpsons_paradox_1d": dict(
-        graph_str = """graph[directed 1 node[id "Z" label "Z"]  
+        graph_str = """graph[directed 1 node[id "Z" label "Z"]
                 node[id "X" label "X"]
                 node[id "Y" label "Y"]
                 node[id "L1" label "L1"]
@@ -97,10 +97,10 @@ TEST_GRAPH_SOLUTIONS = {
         maximal_adjustment_sets = [{"Z",}]
     ),
     "pearl_simpsons_paradox_2a": dict(
-        graph_str = """graph[directed 1 node[id "Z" label "Z"]  
+        graph_str = """graph[directed 1 node[id "Z" label "Z"]
                 node[id "X" label "X"]
                 node[id "Y" label "Y"]
-                node[id "L" label "L"]      
+                node[id "L" label "L"]
                 edge[source "X" target "Y"]
                 edge[source "X" target "Z"]
                 edge[source "L" target "Z"]
@@ -112,30 +112,30 @@ TEST_GRAPH_SOLUTIONS = {
         maximal_adjustment_sets = [{}]
     ),
     "pearl_simpsons_paradox_2b": dict(
-        graph_str = """graph[directed 1 node[id "Z" label "Z"]  
+        graph_str = """graph[directed 1 node[id "Z" label "Z"]
                 node[id "X" label "X"]
                 node[id "Y" label "Y"]
-                node[id "L" label "L"]      
+                node[id "L" label "L"]
                 edge[source "X" target "Y"]
                 edge[source "Z" target "X"]
                 edge[source "L" target "X"]
                 edge[source "L" target "Y"]]""",
         observed_variables = ["Z", "X", "Y"],
-        biased_sets = [], 
+        biased_sets = [],
         minimal_adjustment_sets = [],
         maximal_adjustment_sets = [] # Should this be {"Z"}?
     ),
     "pearl_simpsons_paradox_2b_L_observed": dict(
-        graph_str = """graph[directed 1 node[id "Z" label "Z"]  
+        graph_str = """graph[directed 1 node[id "Z" label "Z"]
                 node[id "X" label "X"]
                 node[id "Y" label "Y"]
-                node[id "L" label "L"]      
+                node[id "L" label "L"]
                 edge[source "X" target "Y"]
                 edge[source "Z" target "X"]
                 edge[source "L" target "X"]
                 edge[source "L" target "Y"]]""",
         observed_variables = ["Z", "X", "Y", "L"],
-        biased_sets = [], 
+        biased_sets = [],
         minimal_adjustment_sets = [{"L"}],
         maximal_adjustment_sets = [{"L", "Z"}]
     ),
@@ -143,7 +143,7 @@ TEST_GRAPH_SOLUTIONS = {
         graph_str = """graph[directed 1 node[id "Z1" label "Z1"]
                 node[id "Z2" label "Z2"]
                 node[id "Z3" label "Z3"]
-                node[id "L" label "L"]  
+                node[id "L" label "L"]
                 node[id "X" label "X"]
                 node[id "Y" label "Y"]
                 edge[source "X" target "Y"]
@@ -163,7 +163,7 @@ TEST_GRAPH_SOLUTIONS = {
         graph_str = """graph[directed 1 node[id "A" label "A"]
                 node[id "B" label "B"]
                 node[id "C" label "C"]
-                node[id "D" label "D"]  
+                node[id "D" label "D"]
                 node[id "E" label "E"]
                 node[id "X" label "X"]
                 node[id "Y" label "Y"]
@@ -220,7 +220,7 @@ TEST_GRAPH_SOLUTIONS = {
         graph_str = """graph[directed 1 node[id "X" label "X"]
                 node[id "Y" label "Y"]
                 node[id "Z1" label "Z1"]
-                node[id "Z2" label "Z2"]      
+                node[id "Z2" label "Z2"]
                 edge[source "X" target "Y"]
                 edge[source "X" target "Z1"]
                 edge[source "Z1" target "Y"]

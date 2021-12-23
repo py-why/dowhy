@@ -280,18 +280,16 @@ class CausalIdentifier:
             - set(treatment_name) \
             - set(outcome_name)
         eligible_variables -= self._graph.get_descendants(treatment_name)
-        # If var is d-separated from either treatment or outcome, it cannot
+        # If var is d-separated from both treatment or outcome, it cannot
         # be a part of the backdoor set
         filt_eligible_variables = set()
         for var in eligible_variables:
             dsep_treat_var = self._graph.check_dseparation(
                     treatment_name, parse_state(var),
                     set())
-            if dsep_treat_var:
-                continue
             dsep_outcome_var = self._graph.check_dseparation(
                     outcome_name, parse_state(var), set())
-            if not dsep_outcome_var and not dsep_treat_var:
+            if not dsep_outcome_var or not dsep_treat_var:
                 filt_eligible_variables.add(var)
         if method_name in CausalIdentifier.METHOD_NAMES:
             backdoor_sets, found_valid_adjustment_set = self.find_valid_adjustment_sets(
