@@ -212,6 +212,7 @@ class CausalGraph:
 
     def do_surgery(self, node_names, remove_outgoing_edges=False,
                    remove_incoming_edges=False):
+        node_names = parse_state(node_names)
         new_graph = self._graph.copy()
         for node_name in node_names:
             if remove_outgoing_edges:

@@ -334,7 +334,7 @@ class CausalIdentifier:
                     found_valid_adjustment_set = True
                 num_iterations += 1
                 if method_name == CausalIdentifier.BACKDOOR_EXHAUSTIVE and num_iterations > max_iterations:
-                    self.logger.warning(f"Max number of iterations {max_iterations} reached. Could not find a valid backdoor set.")
+                    self.logger.warning(f"Max number of iterations {max_iterations} reached.")
                     break
             # If the backdoor method is `maximal-adjustment` or `minimal-adjustment`, return the first found adjustment set.
             if method_name in {CausalIdentifier.BACKDOOR_DEFAULT, CausalIdentifier.BACKDOOR_MAX, CausalIdentifier.BACKDOOR_MIN} and found_valid_adjustment_set:
@@ -401,16 +401,11 @@ class CausalIdentifier:
                     self.logger.warn("Identification failed due to unobserved variables.")
                     backdoor_sets_arr = []
             if proceed_when_unidentifiable or response is True:
-                # Just pick the backdoor set with the highest number of nodes
-                # Assumption: more nodes will help control for the effect of U
-                max_set_size = max(
-                    len(self._graph.filter_unobserved_variables(bset["backdoor_set"]))
-                    for bset in backdoor_sets)
+                # Just removing the unobserved variable
                 backdoor_sets_arr = []
                 for bset in backdoor_sets:
                     curr_set = list(self._graph.filter_unobserved_variables(bset["backdoor_set"]))
-                    if len(curr_set) == max_set_size:
-                        backdoor_sets_arr.append(curr_set)
+                    backdoor_sets_arr.append(curr_set)
 
         for i in range(len(backdoor_sets_arr)):
             backdoor_estimand_expr = self.construct_backdoor_estimand(
@@ -430,8 +425,10 @@ class CausalIdentifier:
         frontdoor_paths = None
         fdoor_graph = None
         if dseparation_algo == "default":
-            fdoor_graph = self._graph.do_surgery(self.treatment_name,
+            cond1_graph = self._graph.do_surgery(self.treatment_name,
                     remove_incoming_edges=True)
+            bdoor_graph1 = self._graph.do_surgery(self.treatment_name,
+                    remove_outgoing_edges=True)
         elif dseparation_algo == "naive":
             frontdoor_paths = self._graph.get_all_directed_paths(self.treatment_name, self.outcome_name)
         else:
@@ -443,19 +440,17 @@ class CausalIdentifier:
             - set(self._graph.get_descendants(self.outcome_name))
         # For simplicity, assuming a one-variable frontdoor set
         for candidate_var in eligible_variables:
-            # Cond 2: All directed paths intercepted by candidate_var
+            # Cond 1: All directed paths intercepted by candidate_var
             cond1 = self._graph.check_valid_frontdoor_set(
                 self.treatment_name, self.outcome_name,
                 parse_state(candidate_var),
                 frontdoor_paths=frontdoor_paths,
-                new_graph=fdoor_graph,
+                new_graph=cond1_graph,
                 dseparation_algo=dseparation_algo)
             self.logger.debug("Candidate frontdoor set: {0}, is_dseparated: {1}".format(candidate_var, cond1))
             if not cond1:
                 continue
             # Cond 2: No confounding between treatment and candidate var
-            bdoor_graph1 = self._graph.do_surgery(self.treatment_name,
-                    remove_outgoing_edges=True)
             cond2 = self._graph.check_valid_backdoor_set(
                 self.treatment_name, parse_state(candidate_var),
                 set(),
