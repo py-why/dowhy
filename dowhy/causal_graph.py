@@ -79,13 +79,14 @@ class CausalGraph:
         # Adding node attributes
         self._graph = self.add_node_attributes(observed_node_names)
 
-    def view_graph(self, layout="dot", size=(8, 6), file_name="causal_model"):
-        out_filename = "{}.png".format(file_name)
+    def view_graph(self, layout="dot", size=(8, 6), file_name=None):
+        if file_name is None:
+            file_name = tempfile.mkstemp(suffix='.png', prefix='causal_graph_')
         try:
             import pygraphviz as pgv
             agraph = nx.drawing.nx_agraph.to_agraph(self._graph)
             agraph.graph_attr.update(size="{},{}!".format(size[0], size[0]))
-            agraph.draw(out_filename, format="png", prog=layout)
+            agraph.draw(file_name, format="png", prog=layout)
         except:
             self.logger.warning("Warning: Pygraphviz cannot be loaded. Check that graphviz and pygraphviz are installed.")
             self.logger.info("Using Matplotlib for plotting")
@@ -114,8 +115,9 @@ class CausalGraph:
             labels = nx.draw_networkx_labels(self._graph, pos)
 
             plt.axis('off')
-            plt.savefig(out_filename)
+            plt.savefig(file_name)
             plt.draw()
+        return file_name
 
     def build_graph(self, common_cause_names, instrument_names,
             effect_modifier_names, mediator_names):
