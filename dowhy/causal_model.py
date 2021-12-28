@@ -2,6 +2,7 @@
 
 """
 import logging
+import tempfile
 
 from sympy import init_printing
 
@@ -404,17 +405,22 @@ class CausalModel:
         res = refuter.refute_estimate()
         return res
 
-    def view_model(self, layout="dot", size=(8, 6), file_name="causal_model"):
+    def view_model(self, layout="dot", size=(8, 6), file_name=None):
         """View the causal DAG.
 
         :param layout: string specifying the layout of the graph.
         :param size: tuple (x, y) specifying the width and height of the figure in inches.
-        :param file_name: string specifying the file name for the saved causal graph png.
+        :param file_name: string file name to save the causal graph as a PNG image. If `None`,
+        a temporary file is created.
 
-        :returns: a visualization of the graph
+        :returns: The name of the file with the image of graph.
 
         """
+        if file_name is None:
+            file_name = tempfile.mkstemp(suffix='.png', prefix='causal_graph_',
+                                         dir=None, text=False)[1]
         self._graph.view_graph(layout, size, file_name)
+        return file_name
 
     def interpret(self, method_name=None, **kwargs):
         """Interpret the causal model.
