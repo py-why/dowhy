@@ -33,6 +33,9 @@ class CausalGraph:
         mediator_names = parse_state(mediator_names)
         self.logger = logging.getLogger(__name__)
 
+        if graph is not None:
+            graph=graph.replace("\n", " ")
+
         if graph is None:
             self._graph = nx.DiGraph()
             self._graph = self.build_graph(common_cause_names,
