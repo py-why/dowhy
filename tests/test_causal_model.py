@@ -1,7 +1,6 @@
 import pytest
 
-import os, sys
-sys.path.append(os.path.abspath("../"))
+
 import dowhy
 import dowhy.datasets
 from dowhy import CausalModel
@@ -132,7 +131,7 @@ class TestCausalModel(object):
         source "Z0" 
         target "{0}"
         ]]""".format(data["treatment_name"][0], data["outcome_name"])
-        print(type(gml_str))
+        print(gml_str)
         model = CausalModel(
             data=data['df'],
             treatment=data["treatment_name"],
