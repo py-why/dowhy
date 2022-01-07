@@ -11,7 +11,6 @@ from numpy.random import choice
 def sigmoid(x):
     return 1 / (1 + math.exp(-x))
 
-
 def stochastically_convert_to_binary(x):
     p = sigmoid(x)
     return choice([0, 1], 1, p=[1-p, p])
@@ -55,14 +54,15 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
                    num_effect_modifiers=0,
                    num_treatments = 1,
                    num_frontdoor_variables=0,
-                   treatment_dtype="bool",
+                   treatment_is_binary=True,
+                   treatment_is_category=False,
                    outcome_is_binary=False,
                    num_discrete_common_causes=0,
                    num_discrete_instruments=0,
                    num_discrete_effect_modifiers=0,
                    stddev_treatment_noise = 1,
                    one_hot_encode = False):
-    assert treatment_dtype in ["bool", "category", "float"]
+    assert not (treatment_is_binary and treatment_is_category)
     W, X, Z, FD, c1, c2, ce, cz, cfd1, cfd2 = [None]*10
     W_with_dummy, X_with_categorical  = (None, None)
     beta = float(beta)
@@ -112,9 +112,9 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
     if num_instruments > 0:
         t += Z @ cz
     # Converting treatment to binary if required
-    if treatment_dtype == "bool":
+    if treatment_is_binary:
         t = np.vectorize(stochastically_convert_to_binary)(t)
-    elif treatment_dtype == "category":
+    elif treatment_is_category:
         t = np.vectorize(stochastically_convert_to_three_level_categorical)(t)
 
     # Generating frontdoor variables if asked for
@@ -183,8 +183,10 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
     col_names = frontdoor_variables + effect_modifiers + instruments + common_causes + treatments + [outcome]
     data = pd.DataFrame(data, columns=col_names)
     # Specifying the correct dtypes
-    if treatment_dtype in ["bool", "category"]:
-        data = data.astype({tname: treatment_dtype for tname in treatments}, copy=False)
+    if treatment_is_binary:
+        data = data.astype({tname: "bool" for tname in treatments}, copy=False)
+    elif treatment_is_category:
+        data = data.astype({tname: "category" for tname in treatments}, copy=False)
     if outcome_is_binary:
         data = data.astype({outcome: 'bool'}, copy=False)
     if num_discrete_common_causes >0 and not one_hot_encode:
