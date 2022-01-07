@@ -101,7 +101,8 @@ class CausalModel:
                 self._graph = None
 
         else:
-            graph=graph.replace("\n", " ")
+            if isinstance(graph, str):
+                graph=graph.replace("\n", " ")
             self.init_graph(graph=graph, identify_vars=identify_vars)
 
         self._other_variables = kwargs
