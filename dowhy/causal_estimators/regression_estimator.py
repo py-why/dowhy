@@ -1,8 +1,6 @@
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-from sklearn import linear_model
-import itertools
 
 from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_estimator import CausalEstimator
@@ -37,7 +35,7 @@ class RegressionEstimator(CausalEstimator):
         # Checking if the model is already trained
         if not self.model:
             # The model is always built on the entire data
-            features, self.model = self._build_model()
+            _, self.model = self._build_model()
             coefficients = self.model.params[1:] # first coefficient is the intercept
             self.logger.debug("Coefficients of the fitted model: " +
                           ",".join(map(str, coefficients)))
@@ -68,11 +66,11 @@ class RegressionEstimator(CausalEstimator):
         # Using all data by default
         if data_df is None:
             data_df = self._data
-            treatment_vals = self._treatment
+            treatment_vals = pd.get_dummies(self._treatment, drop_first=True)
             observed_common_causes_vals = self._observed_common_causes
             effect_modifiers_vals = self._effect_modifiers
         else:
-            treatment_vals = data_df[self._treatment_name]
+            treatment_vals = pd.get_dummies(data_df[self._treatment_name], drop_first=True)
             if len(self._observed_common_causes_names)>0:
                 observed_common_causes_vals = data_df[self._observed_common_causes_names]
                 observed_common_causes_vals = pd.get_dummies(observed_common_causes_vals, drop_first=True)
@@ -88,9 +86,10 @@ class RegressionEstimator(CausalEstimator):
         if treatment_vals.shape[0] != data_df.shape[0]:
             raise ValueError("Provided treatment values and dataframe should have the same length.")
         # Bulding the feature matrix
+        n_treatment_cols = 1 if len(treatment_vals.shape) == 1 else treatment_vals.shape[1]
         n_samples = treatment_vals.shape[0]
-        treatment_2d = treatment_vals.reshape((n_samples,len(self._treatment_name)))
-        if len(self._observed_common_causes_names)>0:
+        treatment_2d = treatment_vals.reshape((n_samples, n_treatment_cols))
+        if len(self._observed_common_causes_names) > 0:
             features = np.concatenate((treatment_2d, observed_common_causes_vals),
                                   axis=1)
         else:
@@ -111,7 +110,12 @@ class RegressionEstimator(CausalEstimator):
             # The model is always built on the entire data
             _, self.model = self._build_model()
         # Replacing treatment values by given x
-        interventional_treatment_2d = np.full((data_df.shape[0], len(self._treatment_name)), treatment_val)
+        # Use this aproach to ensure that the dummies are assigned correctly for a categorical treatment
+        interventional_treatment_2d = pd.concat([self._treatment.copy(), self._treatment.copy()], axis=0)
+        interventional_treatment_2d[self._treatment.shape[0]:] = treatment_val
+        interventional_treatment_2d = pd.get_dummies(interventional_treatment_2d, drop_first=True)
+        interventional_treatment_2d = interventional_treatment_2d[self._treatment.shape[0]:]
+
         new_features = self._build_features(treatment_values=interventional_treatment_2d,
                 data_df=data_df)
         interventional_outcomes = self.model.predict(new_features)

@@ -9,7 +9,7 @@ class TestGeneralizedLinearModelEstimator(object):
     @pytest.mark.parametrize(["error_tolerance", "Estimator",
         "num_common_causes", "num_instruments",
         "num_effect_modifiers", "num_treatments",
-        "treatment_is_binary", "outcome_is_binary",
+        "treatment_dtype", "outcome_is_binary",
         "identifier_method"],
                              [(0.1, GeneralizedLinearModelEstimator, [0,], [0,], [0,], [1, ], [False,], [True,],"backdoor")])
     def test_average_treatment_effect(self, error_tolerance, Estimator,
