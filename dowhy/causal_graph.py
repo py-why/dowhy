@@ -161,8 +161,11 @@ class CausalGraph:
                 if node_name not in common_cause_names:
                     for outcome in self.outcome_name:
                         self._graph.add_node(node_name, observed="yes")
-                        self._graph.add_edge(node_name, outcome, style = "dotted", headport="s", tailport="n")
-                        self._graph.add_edge(outcome, node_name, style = "dotted", headport="n", tailport="s") # TODO make the ports more general so that they apply not just to top-bottom node configurations
+                        # Assuming the simple form of effect modifier
+                        # that directly causes the outcome.
+                        self._graph.add_edge(node_name, outcome)
+                        #self._graph.add_edge(node_name, outcome, style = "dotted", headport="s", tailport="n")
+                        #self._graph.add_edge(outcome, node_name, style = "dotted", headport="n", tailport="s") # TODO make the ports more general so that they apply not just to top-bottom node configurations
         if mediator_names is not None:
             for node_name in mediator_names:
                 for treatment, outcome in itertools.product(self.treatment_name, self.outcome_name):
@@ -211,6 +214,7 @@ class CausalGraph:
 
     def do_surgery(self, node_names, remove_outgoing_edges=False,
                    remove_incoming_edges=False):
+        node_names = parse_state(node_names)
         new_graph = self._graph.copy()
         for node_name in node_names:
             if remove_outgoing_edges:
@@ -238,15 +242,39 @@ class CausalGraph:
             causes = causes.union(self.get_ancestors(v, new_graph=new_graph))
         return causes
 
-    def check_valid_backdoor_set(self, nodes1, nodes2, nodes3, backdoor_paths=None):
+    def check_dseparation(self, nodes1, nodes2, nodes3, new_graph=None,
+            dseparation_algo="default"):
+        if dseparation_algo == "default":
+            if new_graph is None:
+                new_graph = self._graph
+            dseparated = nx.algorithms.d_separated(new_graph,
+                    set(nodes1), set(nodes2), set(nodes3))
+        else:
+            raise ValueError(f"{dseparation_algo} method for d-separation not supported.")
+        return dseparated
+
+    def check_valid_backdoor_set(self, nodes1, nodes2, nodes3,
+            backdoor_paths=None, new_graph=None, dseparation_algo="default"):
+        """ Assume that the first parameter (nodes1) is the treatment,
+        the second is the outcome, and the third is the candidate backdoor set
+        """
         # also return the number of backdoor paths blocked by observed nodes
-        if backdoor_paths is None:
-            backdoor_paths = self.get_backdoor_paths(nodes1, nodes2)
-        d_separated = all([self.is_blocked(path, nodes3) for path in backdoor_paths])
-        observed_nodes3 = self.filter_unobserved_variables(nodes3)
-        num_paths_blocked = sum([self.is_blocked(path, observed_nodes3) for path in backdoor_paths])
-        return {'is_dseparated': d_separated,
-                'num_paths_blocked_by_observed_nodes': num_paths_blocked}
+        if dseparation_algo == "default":
+            if new_graph is None:
+                # Assume that nodes1 is the treatment
+                new_graph = self.do_surgery(nodes1,
+                    remove_outgoing_edges=True)
+            dseparated = nx.algorithms.d_separated(new_graph,
+                    set(nodes1), set(nodes2), set(nodes3))
+        elif dseparation_algo == "naive":
+            # ignores new_graph parameter, always uses self._graph
+            if backdoor_paths is None:
+                backdoor_paths = self.get_backdoor_paths(nodes1, nodes2)
+            dseparated = all([self.is_blocked(path, nodes3) for path in backdoor_paths])
+        else:
+            raise ValueError(f"{dseparation_algo} method for d-separation not supported.")
+        return {'is_dseparated': dseparated}
+
 
     def get_backdoor_paths(self, nodes1, nodes2):
         paths = []
@@ -408,8 +436,9 @@ class CausalGraph:
 
         Currently only supports singleton sets.
         """
-        dpaths = self.get_all_directed_paths(nodes1, nodes2)
-        return len(dpaths) > 0
+        #dpaths = self.get_all_directed_paths(nodes1, nodes2)
+        #return len(dpaths) > 0
+        return nx.has_path(self._graph, nodes1[0], nodes2[0])
 
     def get_adjacency_matrix(self, *args, **kwargs):
         '''
@@ -418,14 +447,25 @@ class CausalGraph:
         '''
         return nx.convert_matrix.to_numpy_matrix(self._graph, *args, **kwargs)
 
-    def check_valid_frontdoor_set(self, nodes1, nodes2, candidate_nodes, frontdoor_paths=None):
+    def check_valid_frontdoor_set(self, nodes1, nodes2, candidate_nodes,
+            frontdoor_paths=None, new_graph = None,
+            dseparation_algo="default"):
         """Check if valid the frontdoor variables for set of treatments, nodes1 to set of outcomes, nodes2.
         """
-        if frontdoor_paths is None:
-            frontdoor_paths = self.get_all_directed_paths(nodes1, nodes2)
+        # Condition 1: node 1 ---> node 2 is intercepted by candidate_nodes
+        if dseparation_algo == "default":
+            if new_graph is None:
+                new_graph = self._graph
+            dseparated = nx.algorithms.d_separated(new_graph,
+                    set(nodes1), set(nodes2), set(candidate_nodes))
+        elif dseparation_algo == "naive":
+            if frontdoor_paths is None:
+                frontdoor_paths = self.get_all_directed_paths(nodes1, nodes2)
 
-        d_separated = all([self.is_blocked(path, candidate_nodes) for path in frontdoor_paths])
-        return d_separated
+            dseparated = all([self.is_blocked(path, candidate_nodes) for path in frontdoor_paths])
+        else:
+            raise ValueError(f"{dseparation_algo} method for d-separation not supported.")
+        return dseparated
 
     def check_valid_mediation_set(self, nodes1, nodes2, candidate_nodes, mediation_paths=None):
         """Check if candidate nodes are valid mediators for set of treatments, nodes1 to set of outcomes, nodes2.
