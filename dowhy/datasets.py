@@ -271,14 +271,10 @@ def simple_iv_dataset(beta, num_samples,
 
 def create_dot_graph(treatments, outcome, common_causes,
         instruments, effect_modifiers=[], frontdoor_variables=[]):
-    dot_graph = ('digraph {{'
-                 ' U[label="Unobserved Confounders"];'
-                 ' U->{0};'
-                 ).format(outcome)
+    dot_graph = 'digraph {'
     for currt in treatments:
         if len(frontdoor_variables) == 0:
             dot_graph += '{0}->{1};'.format(currt, outcome)
-        dot_graph +=  'U->{0};'.format(currt)
         dot_graph +=  " ".join([v + "-> " + currt + ";" for v in common_causes])
         dot_graph += " ".join([v + "-> " + currt + ";" for v in instruments])
         dot_graph += " ".join([currt + "-> " + v + ";" for v in frontdoor_variables])
@@ -296,17 +292,14 @@ def create_gml_graph(treatments, outcome, common_causes,
         instruments, effect_modifiers=[], frontdoor_variables=[]):
     gml_graph = ('graph[directed 1'
                  'node[ id "{0}" label "{0}"]'
-                 'node[ id "{1}" label "{1}"]'
-                 'edge[source "{1}" target "{0}"]'
-                 ).format(outcome, "Unobserved Confounders")
+                 ).format(outcome)
 
     gml_graph +=  " ".join(['node[ id "{0}" label "{0}"]'.format(v) for v in common_causes])
     gml_graph += " ".join(['node[ id "{0}" label "{0}"]'.format(v) for v in instruments])
     gml_graph += " ".join(['node[ id "{0}" label "{0}"]'.format(v) for v in frontdoor_variables])
     for currt in treatments:
         gml_graph += ('node[ id "{0}" label "{0}"]'
-                     'edge[source "{1}" target "{0}"]'
-                     ).format(currt, "Unobserved Confounders")
+                     ).format(currt)
         if len(frontdoor_variables) == 0:
             gml_graph += 'edge[source "{0}" target "{1}"]'.format(currt, outcome)
         gml_graph +=  " ".join(['edge[ source "{0}" target "{1}"]'.format(v, currt) for v in common_causes])

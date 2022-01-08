@@ -95,6 +95,25 @@ class CausalEstimator:
 
         self.logger = logging.getLogger(__name__)
 
+        # Setting treatment and outcome values
+        if self._data is not None:
+            self._treatment = self._data[self._treatment_name]
+            self._outcome = self._data[self._outcome_name]
+
+        # Now saving the effect modifiers
+        if self._effect_modifier_names:
+            # only add the observed nodes
+            self._effect_modifier_names = [cname
+                    for cname in self._effect_modifier_names
+                    if cname in self._data.columns]
+            if len(self._effect_modifier_names) > 0:
+                self._effect_modifiers = self._data[self._effect_modifier_names]
+                self._effect_modifiers = pd.get_dummies(self._effect_modifiers, drop_first=True)
+                self.logger.debug("Effect modifiers: " +
+                                  ",".join(self._effect_modifier_names))
+            else:
+                self._effect_modifier_names = None
+
         # Checking if some parameters were set, otherwise setting to default values
         if not hasattr(self, 'num_null_simulations'):
             self.num_null_simulations = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST
@@ -109,17 +128,6 @@ class CausalEstimator:
         # Estimate conditional estimates by default
         if not hasattr(self, 'need_conditional_estimates'):
             self.need_conditional_estimates = bool(self._effect_modifier_names)
-        # Setting more values
-        if self._data is not None:
-            self._treatment = self._data[self._treatment_name]
-            self._outcome = self._data[self._outcome_name]
-
-        # Now saving the effect modifiers
-        if self._effect_modifier_names:
-            self._effect_modifiers = self._data[self._effect_modifier_names]
-            self._effect_modifiers = pd.get_dummies(self._effect_modifiers, drop_first=True)
-            self.logger.debug("Effect modifiers: " +
-                              ",".join(self._effect_modifier_names))
 
     @staticmethod
     def get_estimator_object(new_data, identified_estimand, estimate):

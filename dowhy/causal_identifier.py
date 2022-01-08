@@ -91,7 +91,6 @@ class CausalIdentifier:
         default_backdoor_id = self.get_default_backdoor_set_id(backdoor_variables_dict)
         estimands_dict["backdoor"] = estimands_dict.get(str(default_backdoor_id), None)
         backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
-
         ### 2. INSTRUMENTAL VARIABLE IDENTIFICATION
         # Now checking if there is also a valid iv estimand
         instrument_names = self._graph.get_instruments(self.treatment_name,
@@ -310,7 +309,6 @@ class CausalIdentifier:
                         max_iterations= CausalIdentifier.MAX_BACKDOOR_ITERATIONS)
         else:
             raise ValueError(f"Identifier method {method_name} not supported. Try one of the following: {CausalIdentifier.METHOD_NAMES}")
-
         return backdoor_sets
 
     def find_valid_adjustment_sets(self, treatment_name, outcome_name,
@@ -701,7 +699,7 @@ class IdentifiedEstimand:
         if key is None:
             if self.identifier_method and self.identifier_method.startswith("backdoor"):
                 return self.backdoor_variables[self.identifier_method]
-            elif self.backdoor_variables is not None:
+            elif self.backdoor_variables is not None and len(self.backdoor_variables) > 0:
                 return self.backdoor_variables[self.default_backdoor_id]
             else:
                 return []
