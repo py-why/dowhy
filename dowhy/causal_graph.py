@@ -1,6 +1,7 @@
 import itertools
 import logging
 import re
+import tempfile
 
 import networkx as nx
 
