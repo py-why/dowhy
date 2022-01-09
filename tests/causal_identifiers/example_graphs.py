@@ -264,9 +264,43 @@ TEST_GRAPH_SOLUTIONS = {
         biased_sets = [],
         minimal_adjustment_sets = [{"Z"}],
         maximal_adjustment_sets = [{"Z"}]
+    ),
+
+    "mbias_with_unobserved": dict(
+        graph_str = """graph[directed 1 node[id "X" label "X"]
+                node[id "Y" label "Y"]
+                node[id "U1" label "U1"]
+                node[id "U2" label "U2"]
+                node[id "Z" label "Z"]
+                node[id "M" label "M"]
+                edge[source "X" target "Y"]
+                edge[source "U1" target "X"]
+                edge[source "U1" target "M"]
+                edge[source "U2" target "M"]
+                edge[source "U2" target "Y"]
+                edge[source "Z" target "X"]]
+                """,
+        observed_variables = ["X", "Y", "Z", "M"],
+        biased_sets = [{"Z", "M"}, {"M"}],
+        minimal_adjustment_sets = [{}],
+        maximal_adjustment_sets = [{"Z"}]
+    ),
+
+    "iv": dict(
+        graph_str = """graph[directed 1 node[id "X" label "X"]
+                node[id "Y" label "Y"]
+                node[id "U" label "U"]
+                node[id "Z" label "Z"]
+                edge[source "X" target "Y"]
+                edge[source "U" target "X"]
+                edge[source "U" target "Y"]
+                edge[source "Z" target "X"]]
+                """,
+        observed_variables = ["X", "Y", "Z"],
+        biased_sets = [{"Z"}],
+        minimal_adjustment_sets = [],
+        maximal_adjustment_sets = []
     )
-
-
 }
 
 
