@@ -773,6 +773,9 @@ class CausalEstimate:
 
     def __str__(self):
         s = "*** Causal Estimate ***\n"
+        # No estimand was identified (identification failed)
+        if self.target_estimand is None:
+            return "Estimation failed! No relevant identified estimand available for this estimation method."
         s += "\n## Identified estimand\n{0}".format(self.target_estimand.__str__(only_target_estimand=True))
         s += "\n## Realized estimand\n{0}".format(self.realized_estimand_expr)
         if hasattr(self, "estimator"):

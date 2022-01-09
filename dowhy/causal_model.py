@@ -268,7 +268,6 @@ class CausalModel:
             else: # For older dowhy methods
                 # Process the dowhy estimators
                 causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
-
         if identified_estimand.no_directed_path:
             self.logger.warning("No directed path from {0} to {1}.".format(
                 self._treatment,
@@ -278,7 +277,7 @@ class CausalModel:
                 treatment_value=treatment_value)
         # Check if estimator's target estimand is identified
         elif identified_estimand.estimands[identifier_name] is None:
-            self.logger.warning("No valid identified estimand available.")
+            self.logger.error("No valid identified estimand available.")
             estimate = CausalEstimate(None, None, None,
                                   control_value=control_value,
                                   treatment_value=treatment_value)
@@ -390,6 +389,9 @@ class CausalModel:
         :returns: an instance of the RefuteResult class
 
         """
+        if estimate is None or estimate.value is None:
+            self.logger.error("Aborting refutation! No estimate is provided.")
+            raise ValueError("Aborting refutation! No valid estimate is provided.")
         if method_name is None:
             pass
         else:
