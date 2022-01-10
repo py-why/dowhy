@@ -28,6 +28,22 @@ dowhy.utils.dgp module
    :undoc-members:
    :show-inheritance:
 
+dowhy.utils.graph\_operations module
+------------------------------------
+
+.. automodule:: dowhy.utils.graph_operations
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.utils.ordered\_set module
+-------------------------------
+
+.. automodule:: dowhy.utils.ordered_set
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.utils.propensity\_score module
 ------------------------------------
 
