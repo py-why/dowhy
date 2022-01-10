@@ -110,9 +110,12 @@ class RegressionEstimator(CausalEstimator):
             # The model is always built on the entire data
             _, self.model = self._build_model()
         # Replacing treatment values by given x
-        # Use this aproach to ensure that the dummies are assigned correctly for a categorical treatment
-        interventional_treatment_2d = pd.concat([self._treatment.copy(), self._treatment.copy()], axis=0)
-        interventional_treatment_2d[self._treatment.shape[0]:] = treatment_val
+        # First, create interventional tensor in original space
+        interventional_treatment_values = np.full((data_df.shape[0], len(self._treatment_name)), treatment_val)
+        # Then, use pandas to ensure that the dummies are assigned correctly for a categorical treatment
+        interventional_treatment_2d = pd.concat([
+            self._treatment.copy(), pd.DataFrame(data=interventional_treatment_values, columns=self._treatment.columns)
+        ], axis=0).astype(self._treatment.dtypes, copy=False)
         interventional_treatment_2d = pd.get_dummies(interventional_treatment_2d, drop_first=True)
         interventional_treatment_2d = interventional_treatment_2d[self._treatment.shape[0]:]
 
