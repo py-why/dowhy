@@ -9,9 +9,11 @@ Subpackages
 
    dowhy.api
    dowhy.causal_estimators
+   dowhy.causal_identifiers
    dowhy.causal_refuters
    dowhy.data_transformers
    dowhy.do_samplers
+   dowhy.graph_learners
    dowhy.interpreters
    dowhy.utils
 
@@ -78,6 +80,14 @@ dowhy.do\_sampler module
 ------------------------
 
 .. automodule:: dowhy.do_sampler
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.graph\_learner module
+---------------------------
+
+.. automodule:: dowhy.graph_learner
    :members:
    :undoc-members:
    :show-inheritance:
