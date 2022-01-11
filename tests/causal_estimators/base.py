@@ -18,6 +18,7 @@ class TestEstimator(object):
             num_frontdoor_variables = 0,
             num_samples=100000,
             treatment_is_binary=True,
+            treatment_is_category=False,
             outcome_is_binary=False,
             confidence_intervals=False,
             test_significance=False,
@@ -26,11 +27,12 @@ class TestEstimator(object):
             data = dowhy.datasets.linear_dataset(beta=beta,
                                              num_common_causes=num_common_causes,
                                              num_instruments=num_instruments,
-                                             num_effect_modifiers = num_effect_modifiers,
-                                             num_treatments = num_treatments,
+                                             num_effect_modifiers=num_effect_modifiers,
+                                             num_treatments=num_treatments,
                                              num_frontdoor_variables=num_frontdoor_variables,
                                              num_samples=num_samples,
                                              treatment_is_binary=treatment_is_binary,
+                                             treatment_is_category=treatment_is_category,
                                              outcome_is_binary = outcome_is_binary)
         elif dataset == "simple-iv":
             data = dowhy.datasets.simple_iv_dataset(beta=beta,
@@ -90,6 +92,7 @@ class TestEstimator(object):
             num_effect_modifiers=[0,], num_treatments=[1,],
             num_frontdoor_variables=[0,],
             treatment_is_binary=[True,],
+            treatment_is_category=[False,],
             outcome_is_binary=[False,],
             confidence_intervals=[False,],
             test_significance=[False,],
@@ -102,6 +105,7 @@ class TestEstimator(object):
                 'num_treatments': num_treatments,
                 'num_frontdoor_variables': num_frontdoor_variables,
                 'treatment_is_binary': treatment_is_binary,
+                'treatment_is_category': treatment_is_category,
                 'outcome_is_binary': outcome_is_binary,
                 'confidence_intervals': confidence_intervals,
                 'test_significance': test_significance

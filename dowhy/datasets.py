@@ -11,10 +11,13 @@ from numpy.random import choice
 def sigmoid(x):
     return 1 / (1 + math.exp(-x))
 
-
 def stochastically_convert_to_binary(x):
     p = sigmoid(x)
     return choice([0, 1], 1, p=[1-p, p])
+
+def stochastically_convert_to_three_level_categorical(x):
+    p = sigmoid(x)
+    return choice([0, 1, 2], 1, p=[0.8*(1-p), 0.8*p, 0.2])
 
 def convert_to_categorical(arr, num_vars, num_discrete_vars,
         quantiles = [0.25, 0.5, 0.75], one_hot_encode=False):
@@ -52,12 +55,14 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
                    num_treatments = 1,
                    num_frontdoor_variables=0,
                    treatment_is_binary=True,
+                   treatment_is_category=False,
                    outcome_is_binary=False,
                    num_discrete_common_causes=0,
                    num_discrete_instruments=0,
                    num_discrete_effect_modifiers=0,
                    stddev_treatment_noise = 1,
                    one_hot_encode = False):
+    assert not (treatment_is_binary and treatment_is_category)
     W, X, Z, FD, c1, c2, ce, cz, cfd1, cfd2 = [None]*10
     W_with_dummy, X_with_categorical  = (None, None)
     beta = float(beta)
@@ -109,6 +114,8 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
     # Converting treatment to binary if required
     if treatment_is_binary:
         t = np.vectorize(stochastically_convert_to_binary)(t)
+    elif treatment_is_category:
+        t = np.vectorize(stochastically_convert_to_three_level_categorical)(t)
 
     # Generating frontdoor variables if asked for
     if num_frontdoor_variables > 0:
@@ -130,6 +137,11 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         if num_frontdoor_variables > 0:
             y += FD @ cfd2
         else:
+            # NOTE: We are assuming a linear relationship *even when t is categorical* and integer coded.
+            # For categorical t, this example dataset has the effect size for category 2 being exactly
+            # double the effect for category 1
+            # This could be changed at this stage by one-hot encoding t and using a custom beta that
+            # sets a different effect for each category {0, 1, 2}
             y += t @ beta
         if num_common_causes > 0:
             y += W @ c2
@@ -177,7 +189,9 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
     data = pd.DataFrame(data, columns=col_names)
     # Specifying the correct dtypes
     if treatment_is_binary:
-        data = data.astype({tname:'bool' for tname in treatments}, copy=False)
+        data = data.astype({tname: "bool" for tname in treatments}, copy=False)
+    elif treatment_is_category:
+        data = data.astype({tname: "category" for tname in treatments}, copy=False)
     if outcome_is_binary:
         data = data.astype({outcome: 'bool'}, copy=False)
     if num_discrete_common_causes >0 and not one_hot_encode:
