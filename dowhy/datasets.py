@@ -137,6 +137,11 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         if num_frontdoor_variables > 0:
             y += FD @ cfd2
         else:
+            # NOTE: We are assuming a linear relationship *even when t is categorical* and integer coded.
+            # For categorical t, this example dataset has the effect size for category 2 being exactly
+            # double the effect for category 1
+            # This could be changed at this stage by one-hot encoding t and using a custom beta that
+            # sets a different effect for each category {0, 1, 2}
             y += t @ beta
         if num_common_causes > 0:
             y += W @ c2
