@@ -1,10 +1,9 @@
 import itertools
 import logging
 import re
-
 import networkx as nx
-
 from dowhy.utils.api import parse_state
+from dowhy.utils.graph_operations import daggity_to_dot
 
 
 class CausalGraph:
@@ -32,6 +31,14 @@ class CausalGraph:
         effect_modifier_names = parse_state(effect_modifier_names)
         mediator_names = parse_state(mediator_names)
         self.logger = logging.getLogger(__name__)
+
+        if re.match(r".*\.txt" , graph):
+            text_file = open(graph , "r")
+            graph = text_file.read()
+            text_file.close()
+    
+        if re.match(r"^dag", graph):   #Convert daggity output to dot format 
+            graph = daggity_to_dot(graph)
 
         if isinstance(graph, str):
             graph=graph.replace("\n", " ")
