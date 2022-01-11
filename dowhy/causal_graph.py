@@ -32,7 +32,7 @@ class CausalGraph:
         mediator_names = parse_state(mediator_names)
         self.logger = logging.getLogger(__name__)
 
-        if re.match(r".*\.txt" , graph):
+        if isinstance(graph, str) and re.match(r".*\.txt" , str(graph)):
             text_file = open(graph , "r")
             graph = text_file.read()
             text_file.close()
