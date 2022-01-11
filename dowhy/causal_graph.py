@@ -37,7 +37,7 @@ class CausalGraph:
             graph = text_file.read()
             text_file.close()
     
-        if re.match(r"^dag", graph):   #Convert daggity output to dot format 
+        if isinstance(graph, str) and re.match(r"^dag", graph):   #Convert daggity output to dot format 
             graph = daggity_to_dot(graph)
 
         if isinstance(graph, str):
