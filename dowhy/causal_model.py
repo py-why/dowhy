@@ -260,7 +260,7 @@ class CausalModel:
                     causal_estimator_class = causal_estimators.get_class_object(estimator_method + "_estimator")
                 else:
                     third_party_estimator_package = estimator_package
-                    causal_estimator_class = causal_estimators.get_class_object(third_party_estimator_package)
+                    causal_estimator_class = causal_estimators.get_class_object(third_party_estimator_package, estimator_name)
                     if method_params is None:
                         method_params = {}
                     # Define the third-party estimation method to be used
