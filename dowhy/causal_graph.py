@@ -32,11 +32,13 @@ class CausalGraph:
         mediator_names = parse_state(mediator_names)
         self.logger = logging.getLogger(__name__)
 
-        if isinstance(graph, str) and re.match(r".*\.txt" , str(graph)):
+        #re.sub only takes string parameter so the first if is to avoid error
+        #if the input is a text file, convert the contained data into string
+        if isinstance(graph, str) and re.match(r".*\.txt" , str(graph)): 
             text_file = open(graph , "r")
             graph = text_file.read()
             text_file.close()
-    
+ 
         if isinstance(graph, str) and re.match(r"^dag", graph):   #Convert daggity output to dot format 
             graph = daggity_to_dot(graph)
 

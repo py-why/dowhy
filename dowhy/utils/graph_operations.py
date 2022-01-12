@@ -151,6 +151,10 @@ def daggity_to_dot(daggity_string):
     graph = re.sub(r'^dag ', 'digraph ', graph)
     graph = re.sub('{;' , '{' , graph)
     graph = re.sub('};' , '}' , graph)
-    graph = re.sub('[a-zA-Z]*,' , '' , graph)
+    graph = re.sub('outcome,*,' , '' , graph)
+    graph = re.sub('adjusted,*', '' , graph)
+    graph = re.sub('exposure,*', '' , graph)
+    graph = re.sub('latent,*' , 'observed="no",', graph)
+    graph = re.sub(',]' , ']' , graph)
     return graph
 
