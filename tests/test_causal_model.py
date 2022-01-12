@@ -215,7 +215,7 @@ class TestCausalModel(object):
             test_significance=None
         )
         # removing two common causes 
-        gml_str = "sample_dag.txt"
+        gml_str = "tests/sample_dag.txt"
         print(gml_str)
         model = CausalModel(
             data=data['df'],
