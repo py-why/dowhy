@@ -283,6 +283,10 @@ class CausalModel:
                                   treatment_value=treatment_value)
         else:
             if fit_estimator:
+                if method_params is not None and num_components <= 2:
+                    extra_args = method_params.get("init_params", {})
+                else:
+                    extra_args = {}
                 self.causal_estimator = causal_estimator_class(
                     self._data,
                     identified_estimand,
@@ -294,7 +298,8 @@ class CausalModel:
                     confidence_intervals = confidence_intervals,
                     target_units = target_units,
                     effect_modifiers = effect_modifiers,
-                    params=method_params)
+                    params=method_params,
+                    **extra_args)
             else:
                 # Estimator had been computed in a previous call
                 assert self.causal_estimator is not None
