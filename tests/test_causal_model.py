@@ -194,6 +194,8 @@ class TestCausalModel(object):
         assert all(node_name in common_causes for node_name in ["X1", "X2"])
         all_nodes = model._graph.get_all_nodes(include_unobserved=True)
         assert all(node_name in all_nodes for node_name in ["Unobserved Confounders", "X0", "X1", "X2", "Z0", "v0", "y"])
+        all_nodes = model._graph.get_all_nodes(include_unobserved=False)
+        assert "Unobserved Confounders" not in all_nodes
     
     @pytest.mark.parametrize(["beta", "num_instruments", "num_samples", "num_treatments"],
                              [(10, 1, 100, 1),])
@@ -230,7 +232,8 @@ class TestCausalModel(object):
         assert all(node_name in common_causes for node_name in ["X1", "X2"])
         all_nodes = model._graph.get_all_nodes(include_unobserved=True)
         assert all(node_name in all_nodes for node_name in ["Unobserved Confounders", "X0", "X1", "X2", "Z0", "v0", "y"])
-        
+        all_nodes = model._graph.get_all_nodes(include_unobserved=False)
+        assert "Unobserved Confounders" not in all_nodes
 
 if __name__ == "__main__":
     pytest.main([__file__])
