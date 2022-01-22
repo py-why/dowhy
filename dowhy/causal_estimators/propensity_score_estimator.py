@@ -27,7 +27,8 @@ class PropensityScoreEstimator(CausalEstimator):
             error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
             raise Exception(error_msg)
         # Checking if the treatment is binary
-        if not pd.api.types.is_bool_dtype(self._data[self._treatment_name[0]]):
+        treatment_values = self._data[self._treatment_name[0]].astype(int).unique()
+        if any([v not in [0,1] for v in treatment_values]):
             error_msg = "Propensity score methods are applicable only for binary treatments"
             self.logger.error(error_msg)
             raise Exception(error_msg)
