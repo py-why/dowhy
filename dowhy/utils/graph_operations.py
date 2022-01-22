@@ -1,6 +1,7 @@
 import numpy as np
 from queue import LifoQueue
 from dowhy.utils.ordered_set import OrderedSet
+import re
 
 def adjacency_matrix_to_adjacency_list(adjacency_matrix, labels=None):
     '''
@@ -138,3 +139,22 @@ def find_c_components(adjacency_matrix, node_set, idx2node):
             c_components.append(component)
 
     return c_components
+
+def daggity_to_dot(daggity_string):
+    '''
+    Converts the input daggity_string to valid DOT graph format.
+
+    :param daggity_string: Output graph from Daggity site
+    :returns: DOT string  
+    '''
+    graph = re.sub(r'\n' , '; ' , daggity_string)
+    graph = re.sub(r'^dag ', 'digraph ', graph)
+    graph = re.sub('{;' , '{' , graph)
+    graph = re.sub('};' , '}' , graph)
+    graph = re.sub('outcome,*,' , '' , graph)
+    graph = re.sub('adjusted,*', '' , graph)
+    graph = re.sub('exposure,*', '' , graph)
+    graph = re.sub('latent,*' , 'observed="no",', graph)
+    graph = re.sub(',]' , ']' , graph)
+    return graph
+

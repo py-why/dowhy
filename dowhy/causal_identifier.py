@@ -89,9 +89,11 @@ class CausalIdentifier:
                 estimands_dict)
         # Setting default "backdoor" identification adjustment set
         default_backdoor_id = self.get_default_backdoor_set_id(backdoor_variables_dict)
-        estimands_dict["backdoor"] = estimands_dict.get(str(default_backdoor_id), None)
-        backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
-
+        if len(backdoor_variables_dict) > 0:
+            estimands_dict["backdoor"] = estimands_dict.get(str(default_backdoor_id), None)
+            backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
+        else:
+            estimands_dict["backdoor"] = None
         ### 2. INSTRUMENTAL VARIABLE IDENTIFICATION
         # Now checking if there is also a valid iv estimand
         instrument_names = self._graph.get_instruments(self.treatment_name,
@@ -250,7 +252,7 @@ class CausalIdentifier:
         return estimand
 
     def identify_backdoor(self, treatment_name, outcome_name,
-            include_unobserved=True, dseparation_algo="default"):
+            include_unobserved=False, dseparation_algo="default"):
         backdoor_sets = []
         backdoor_paths = None
         bdoor_graph = None
@@ -310,7 +312,6 @@ class CausalIdentifier:
                         max_iterations= CausalIdentifier.MAX_BACKDOOR_ITERATIONS)
         else:
             raise ValueError(f"Identifier method {method_name} not supported. Try one of the following: {CausalIdentifier.METHOD_NAMES}")
-
         return backdoor_sets
 
     def find_valid_adjustment_sets(self, treatment_name, outcome_name,
@@ -319,6 +320,7 @@ class CausalIdentifier:
             method_name, max_iterations):
         num_iterations = 0
         found_valid_adjustment_set = False
+        all_nodes_observed = self._graph.all_observed(self._graph.get_all_nodes())
         # If `minimal-adjustment` method is specified, start the search from the set with minimum size. Otherwise, start from the largest.
         set_sizes = range(1, len(filt_eligible_variables) + 1, 1) if method_name == CausalIdentifier.BACKDOOR_MIN else range(len(filt_eligible_variables), 0, -1)
         for size_candidate_set in set_sizes:
@@ -341,7 +343,7 @@ class CausalIdentifier:
                 break
             # If all variables are observed, and the biggest eligible set
             # does not satisfy backdoor, then none of its subsets will.
-            if method_name in {CausalIdentifier.BACKDOOR_DEFAULT, CausalIdentifier.BACKDOOR_MAX} and self._graph.all_observed(filt_eligible_variables):
+            if method_name in {CausalIdentifier.BACKDOOR_DEFAULT, CausalIdentifier.BACKDOOR_MAX} and all_nodes_observed:
                 break
             if num_iterations > max_iterations:
                 self.logger.warning(f"Max number of iterations {max_iterations} reached. Could not find a valid backdoor set.")
@@ -386,26 +388,8 @@ class CausalIdentifier:
                 for bset in backdoor_sets
                 if self._graph.all_observed(bset["backdoor_set"]) ]
         else: # there is unobserved confounding
-            self.logger.warning("If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.")
-            response = False # user response
-            if proceed_when_unidentifiable:
-                self.logger.info(
-                    "Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True."
-                )
-            else:
-                response= cli.query_yes_no(
-                    "WARN: Do you want to continue by ignoring any unobserved confounders? (use proceed_when_unidentifiable=True to disable this prompt)",
-                    default=None
-                )
-                if response is False:
-                    self.logger.warn("Identification failed due to unobserved variables.")
-                    backdoor_sets_arr = []
-            if proceed_when_unidentifiable or response is True:
-                # Just removing the unobserved variable
-                backdoor_sets_arr = []
-                for bset in backdoor_sets:
-                    curr_set = list(self._graph.filter_unobserved_variables(bset["backdoor_set"]))
-                    backdoor_sets_arr.append(curr_set)
+            self.logger.warning("Backdoor identification failed.")
+            backdoor_sets_arr = []
 
         for i in range(len(backdoor_sets_arr)):
             backdoor_estimand_expr = self.construct_backdoor_estimand(
@@ -718,7 +702,7 @@ class IdentifiedEstimand:
         if key is None:
             if self.identifier_method and self.identifier_method.startswith("backdoor"):
                 return self.backdoor_variables[self.identifier_method]
-            elif self.backdoor_variables is not None:
+            elif self.backdoor_variables is not None and len(self.backdoor_variables) > 0:
                 return self.backdoor_variables[self.default_backdoor_id]
             else:
                 return []
@@ -786,7 +770,7 @@ class IdentifiedEstimand:
                 s += " (Default)"
             s += "\n"
             if v is None:
-                s += "No such variable found!\n"
+                s += "No such variable(s) found!\n"
             else:
                 sp_expr_str = sp.pretty(v["estimand"], use_unicode=True)
                 s += "Estimand expression:\n{0}\n".format(sp_expr_str)

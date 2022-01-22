@@ -39,7 +39,7 @@ setup(
     license='MIT',
     long_description=long_description,
     url='https://github.com/microsoft/dowhy',  # Optional
-    download_url='https://github.com/microsoft/dowhy/archive/v0.6.tar.gz',
+    download_url='https://github.com/microsoft/dowhy/archive/v0.7.tar.gz',
     author='Amit Sharma, Emre Kiciman',
     classifiers=[  # Optional
         'Development Status :: 4 - Beta',
@@ -47,11 +47,12 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
 
     keywords='causality machine-learning causal-inference statistics graphical-model',
     packages=find_packages(exclude=['docs', 'tests']),
-    python_requires='>=3.5',
+    python_requires='>=3.6',
     install_requires=install_requires,
     extras_require=extras_require,
     include_package_data=True,

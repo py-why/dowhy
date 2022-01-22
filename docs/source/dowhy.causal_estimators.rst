@@ -12,6 +12,14 @@ dowhy.causal\_estimators.causalml module
    :undoc-members:
    :show-inheritance:
 
+dowhy.causal\_estimators.distance\_matching\_estimator module
+-------------------------------------------------------------
+
+.. automodule:: dowhy.causal_estimators.distance_matching_estimator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.causal\_estimators.econml module
 --------------------------------------
 
