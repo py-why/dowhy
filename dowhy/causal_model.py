@@ -283,7 +283,7 @@ class CausalModel:
                                   treatment_value=treatment_value)
         else:
             if fit_estimator:
-                if method_params is not None and num_components <= 2:
+                if method_params is not None and (num_components <= 2 or estimator_package == 'dowhy'):
                     extra_args = method_params.get("init_params", {})
                 else:
                     extra_args = {}
