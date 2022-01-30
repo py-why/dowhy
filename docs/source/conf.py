@@ -46,7 +46,7 @@ extensions = [
     'sphinx_rtd_theme'
 ]
 
-autodoc_mock_imports = ['matplotlib', 'causalml', 'pymc3']
+autodoc_mock_imports = ['matplotlib', 'causalml', 'pymc3', 'econml']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
