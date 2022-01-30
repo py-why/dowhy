@@ -98,8 +98,12 @@ class CausalModel:
                 )
             else:
                 self.logger.warning("Relevant variables to build causal graph not provided. You may want to use the learn_graph() function to construct the causal graph.")
-                self._graph = None
-
+                self._graph = CausalGraph(
+                    self._treatment,
+                    self._outcome,
+                    effect_modifier_names = self._effect_modifiers,
+                    observed_node_names=self._data.columns.tolist()
+                )
         else:
             self.init_graph(graph=graph, identify_vars=identify_vars)
 
