@@ -69,26 +69,21 @@ class CausalModel:
 
         if graph is None:
             self.logger.warning("Causal Graph not provided. DoWhy will construct a graph based on data inputs.")
+            
             self._common_causes = parse_state(common_causes) or None
             self._instruments = parse_state(instruments) or None
-
-            if self._common_causes or self._instruments:
-                self._graph = CausalGraph(
-                    self._treatment,
-                    self._outcome,
-                    common_cause_names=self._common_causes,
-                    instrument_names=self._instruments,
-                    effect_modifier_names=self._effect_modifiers,
-                    observed_node_names=self._data.columns.tolist()
-                )
-            else:
+            if not (self._common_causes or self._instruments):
                 self.logger.warning("Relevant variables to build causal graph not provided. You may want to use the learn_graph() function to construct the causal graph.")
-                self._graph = CausalGraph(
-                    self._treatment,
-                    self._outcome,
-                    effect_modifier_names = self._effect_modifiers,
-                    observed_node_names=self._data.columns.tolist()
-                )
+            
+            self._graph = CausalGraph(
+                self._treatment,
+                self._outcome,
+                common_cause_names=self._common_causes,
+                instrument_names=self._instruments,
+                effect_modifier_names=self._effect_modifiers,
+                observed_node_names=self._data.columns.tolist()
+            )
+        
         else:
             self.init_graph(graph=graph, identify_vars=identify_vars)
 
