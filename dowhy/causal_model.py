@@ -69,9 +69,10 @@ class CausalModel:
 
         if graph is None:
             self.logger.warning("Causal Graph not provided. DoWhy will construct a graph based on data inputs.")
-            self._common_causes = parse_state(common_causes)
-            self._instruments = parse_state(instruments)
-            if common_causes is not None and instruments is not None:
+            self._common_causes = parse_state(common_causes) or None
+            self._instruments = parse_state(instruments) or None
+
+            if self._common_causes or self._instruments:
                 self._graph = CausalGraph(
                     self._treatment,
                     self._outcome,
@@ -80,26 +81,10 @@ class CausalModel:
                     effect_modifier_names=self._effect_modifiers,
                     observed_node_names=self._data.columns.tolist()
                 )
-            elif common_causes is not None:
-                self._graph = CausalGraph(
-                    self._treatment,
-                    self._outcome,
-                    common_cause_names=self._common_causes,
-                    effect_modifier_names = self._effect_modifiers,
-                    observed_node_names=self._data.columns.tolist()
-                )
-            elif instruments is not None:
-                self._graph = CausalGraph(
-                    self._treatment,
-                    self._outcome,
-                    instrument_names=self._instruments,
-                    effect_modifier_names = self._effect_modifiers,
-                    observed_node_names=self._data.columns.tolist()
-                )
             else:
                 self.logger.warning("Relevant variables to build causal graph not provided. You may want to use the learn_graph() function to construct the causal graph.")
                 self._graph = None
-
+        
         else:
             self.init_graph(graph=graph, identify_vars=identify_vars)
 
@@ -107,10 +92,8 @@ class CausalModel:
         self.summary()
 
     def init_graph(self, graph, identify_vars):
-        '''
-        Initialize self._graph using graph provided by the user.
+        '''Initialize self._graph using graph provided by the user.'''
 
-        '''
         # Create causal graph object
         self._graph = CausalGraph(
             self._treatment,
@@ -205,7 +188,7 @@ class CausalModel:
                         method_params=None):
         """Estimate the identified causal effect.
 
-        Currently requires an explicit method name to be specified. Method names follow the convention of identification method followed by the specific estimation method: "[backdoor/iv].estimation_method_name". Following methods are supported.
+        Method names follow the convention of identification method followed by the specific estimation method: "[backdoor/iv].estimation_method_name". Following methods are supported.
             * Propensity Score Matching: "backdoor.propensity_score_matching"
             * Propensity Score Stratification: "backdoor.propensity_score_stratification"
             * Propensity Score-based Inverse Weighting: "backdoor.propensity_score_weighting"
@@ -213,13 +196,13 @@ class CausalModel:
             * Generalized Linear Models (e.g., logistic regression): "backdoor.generalized_linear_model"
             * Instrumental Variables: "iv.instrumental_variable"
             * Regression Discontinuity: "iv.regression_discontinuity"
+        
+        If method_name is not specified, will use propensity score matching if there is an available backdoor set and instrumental variables if there is an available instrumental variable set.
 
         In addition, you can directly call any of the EconML estimation methods. The convention is "backdoor.econml.path-to-estimator-class". For example, for the double machine learning estimator ("DML" class) that is located inside "dml" module of EconML, you can use the method name, "backdoor.econml.dml.DML". CausalML estimators can also be called. See `this demo notebook <https://microsoft.github.io/dowhy/example_notebooks/dowhy-conditional-treatment-effects.html>`_.
 
 
-        :param identified_estimand: a probability expression
-            that represents the effect to be estimated. Output of
-            CausalModel.identify_effect method
+        :param identified_estimand: an instance of `IdentifiedEstimand`. Output of CausalModel.identify_effect method
         :param method_name: name of the estimation method to be used.
         :param control_value: Value of the treatment in the control group, for effect estimation.  If treatment is multi-variate, this can be a list.
         :param treatment_value: Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.
@@ -236,38 +219,46 @@ class CausalModel:
             and other method-dependent information
 
         """
+        # determine effect modifiers
         if effect_modifiers is None:
             if self._effect_modifiers is None or len(self._effect_modifiers) == 0:
                 effect_modifiers = self.get_effect_modifiers()
             else:
                 effect_modifiers = self._effect_modifiers
-
+        
+        # determine estimator
         if method_name is None:
-            #TODO add propensity score as default backdoor method, iv as default iv method, add an informational message to show which method has been selected.
-            pass
-        else:
-            # TODO add dowhy as a prefix to all dowhy estimators
-            num_components = len(method_name.split("."))
-            str_arr = method_name.split(".", maxsplit=1)
-            identifier_name = str_arr[0]
-            estimator_name = str_arr[1]
-            identified_estimand.set_identifier_method(identifier_name)
-            # This is done as all dowhy estimators have two parts and external ones have two or more parts
-            if num_components > 2:
-                estimator_package =  estimator_name.split(".")[0]
-                if estimator_package == 'dowhy': # For updated dowhy methods
-                    estimator_method = estimator_name.split(".",maxsplit=1)[1] # discard dowhy from the full package name
-                    causal_estimator_class = causal_estimators.get_class_object(estimator_method + "_estimator")
-                else:
-                    third_party_estimator_package = estimator_package
-                    causal_estimator_class = causal_estimators.get_class_object(third_party_estimator_package)
-                    if method_params is None:
-                        method_params = {}
-                    # Define the third-party estimation method to be used
-                    method_params["_" + third_party_estimator_package + "_methodname"] = estimator_name
-            else: # For older dowhy methods
-                # Process the dowhy estimators
-                causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
+            if identified_estimand.get_backdoor_variables():
+                method_name = "backdoor.propensity_score_matching"
+            elif identified_estimand.get_instrumental_variables():
+                method_name = "iv.instrumental_variable"
+            else:
+                raise ValueError("could not infer a method_name, please specify one explicitly")
+            self.logger.info(f"no method_name specified: defaulting to {method_name}")
+
+        # TODO add dowhy as a prefix to all dowhy estimators
+        num_components = len(method_name.split("."))
+        str_arr = method_name.split(".", maxsplit=1)
+        identifier_name = str_arr[0]
+        estimator_name = str_arr[1]
+        identified_estimand.set_identifier_method(identifier_name)
+        # This is done as all dowhy estimators have two parts and external ones have two or more parts
+        if num_components > 2:
+            estimator_package =  estimator_name.split(".")[0]
+            if estimator_package == 'dowhy': # For updated dowhy methods
+                estimator_method = estimator_name.split(".",maxsplit=1)[1] # discard dowhy from the full package name
+                causal_estimator_class = causal_estimators.get_class_object(estimator_method + "_estimator")
+            else:
+                third_party_estimator_package = estimator_package
+                causal_estimator_class = causal_estimators.get_class_object(third_party_estimator_package)
+                if method_params is None:
+                    method_params = {}
+                # Define the third-party estimation method to be used
+                method_params["_" + third_party_estimator_package + "_methodname"] = estimator_name
+        else: # For older dowhy methods
+            # Process the dowhy estimators
+            causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
+        
         if identified_estimand.no_directed_path:
             self.logger.warning("No directed path from {0} to {1}.".format(
                 self._treatment,
@@ -313,7 +304,8 @@ class CausalModel:
                 confidence_intervals=confidence_intervals,
                 target_units=target_units,
                 effect_modifiers=effect_modifiers,
-                method_params=method_params
+                method_params=method_params,
+                method_name=method_name,
             )
         return estimate
 
@@ -450,5 +442,3 @@ class CausalModel:
         if print_to_stdout:
             print(summary_text)
         return summary_text
-
-

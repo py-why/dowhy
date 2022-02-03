@@ -1,7 +1,10 @@
+from charset_normalizer import logging
 import pytest
 import dowhy
 import dowhy.datasets
 from dowhy import CausalModel
+from dowhy.causal_identifier import IdentifiedEstimand
+from tests.list_handler import ListHandler
 
 
 class TestCausalModel(object):
@@ -234,6 +237,60 @@ class TestCausalModel(object):
         assert all(node_name in all_nodes for node_name in ["Unobserved Confounders", "X0", "X1", "X2", "Z0", "v0", "y"])
         all_nodes = model._graph.get_all_nodes(include_unobserved=False)
         assert "Unobserved Confounders" not in all_nodes
+    
+    def test_estimate_effect_default_method_name(self):
+        data = dowhy.datasets.linear_dataset(beta=10, num_common_causes=5, num_samples=100)
+        model = CausalModel(
+            data=data['df'],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            proceed_when_unidentifiable=True,
+            test_significance=None
+        )
+        effect = model.estimate_effect(model.identify_effect())
+        assert effect.params["method_name"] == "backdoor.propensity_score_matching"
+
+        data = dowhy.datasets.linear_dataset(beta=10, num_common_causes=0, num_instruments=1, num_samples=100)
+        model = CausalModel(
+            data=data['df'],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            proceed_when_unidentifiable=True,
+            test_significance=None
+        )
+        effect = model.estimate_effect(model.identify_effect())
+        assert effect.params["method_name"] == "iv.instrumental_variable"
+
+        data = dowhy.datasets.linear_dataset(beta=10, num_common_causes=5, num_samples=100)
+        model = CausalModel(
+            data=data['df'],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            proceed_when_unidentifiable=True,
+            test_significance=None
+        )
+        estimand = IdentifiedEstimand(None, None, None)
+        with pytest.raises(ValueError):
+            model.estimate_effect(estimand)
+
+
+class TestWarnings(object):
+    def test_warn_no_graph(self):
+        # add a handler which will capture warnings in the CausalModel module
+        handler = ListHandler()
+        handler.add_to_object_module(CausalModel)
+
+        # create a model without a graph
+        model = CausalModel(None, None, None)
+
+        # check that the warning was logged
+        messages = {record.getMessage() for record in handler.records}
+        err_message = "Relevant variables to build causal graph not provided. You may want to use the learn_graph() function to construct the causal graph."
+        assert err_message in messages
+
 
 if __name__ == "__main__":
     pytest.main([__file__])
