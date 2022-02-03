@@ -83,8 +83,12 @@ class CausalModel:
                 )
             else:
                 self.logger.warning("Relevant variables to build causal graph not provided. You may want to use the learn_graph() function to construct the causal graph.")
-                self._graph = None
-        
+                self._graph = CausalGraph(
+                    self._treatment,
+                    self._outcome,
+                    effect_modifier_names = self._effect_modifiers,
+                    observed_node_names=self._data.columns.tolist()
+                )
         else:
             self.init_graph(graph=graph, identify_vars=identify_vars)
 
@@ -212,9 +216,8 @@ class CausalModel:
         :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be of three types. (1) a string for common specifications of target units (namely, "ate", "att" and "atc"), (2) a lambda function that can be used as an index for the data (pandas DataFrame), or (3) a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
         :param effect_modifiers: Names of effect modifier variables can be (optionally) specified here too, since they do not affect identification. If None, the effect_modifiers from the CausalModel are used.
         :param fit_estimator: Boolean flag on whether to fit the estimator.
-        Setting it to False is useful to estimate the effect on new data using a previously fitted estimator.
+            Setting it to False is useful to estimate the effect on new data using a previously fitted estimator.
         :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method. See the docs for each estimation method for allowed method-specific params.
-
         :returns: An instance of the CausalEstimate class, containing the causal effect estimate
             and other method-dependent information
 
@@ -250,7 +253,7 @@ class CausalModel:
                 causal_estimator_class = causal_estimators.get_class_object(estimator_method + "_estimator")
             else:
                 third_party_estimator_package = estimator_package
-                causal_estimator_class = causal_estimators.get_class_object(third_party_estimator_package)
+                causal_estimator_class = causal_estimators.get_class_object(third_party_estimator_package, estimator_name)
                 if method_params is None:
                     method_params = {}
                 # Define the third-party estimation method to be used
@@ -274,6 +277,10 @@ class CausalModel:
                                   treatment_value=treatment_value)
         else:
             if fit_estimator:
+                if method_params is not None and (num_components <= 2 or estimator_package == 'dowhy'):
+                    extra_args = method_params.get("init_params", {})
+                else:
+                    extra_args = {}
                 self.causal_estimator = causal_estimator_class(
                     self._data,
                     identified_estimand,
@@ -285,7 +292,8 @@ class CausalModel:
                     confidence_intervals = confidence_intervals,
                     target_units = target_units,
                     effect_modifiers = effect_modifiers,
-                    params=method_params)
+                    params=method_params,
+                    **extra_args)
             else:
                 # Estimator had been computed in a previous call
                 assert self.causal_estimator is not None
@@ -319,7 +327,7 @@ class CausalModel:
             CausalModel.identify_effect method
         :param method_name: any of the estimation method to be used. See docs for estimate_effect method for a list of supported estimation methods.
         :param fit_estimator: Boolean flag on whether to fit the estimator.
-        Setting it to False is useful to compute the do-operation on new data using a previously fitted estimator.
+            Setting it to False is useful to compute the do-operation on new data using a previously fitted estimator.
         :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method.
 
         :returns: an instance of the CausalEstimate class, containing the causal effect estimate

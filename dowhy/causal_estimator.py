@@ -136,12 +136,12 @@ class CausalEstimator:
         Creates a new object with new_data and the identified_estimand
 
         :param new_data: np.ndarray, pd.Series, pd.DataFrame
-        The newly assigned data on which the estimator should run
+            The newly assigned data on which the estimator should run
         :param identified_estimand: IdentifiedEstimand
-        An instance of the identified estimand class that provides the information with
-        respect to which causal pathways are employed when the treatment effects the outcome
+            An instance of the identified estimand class that provides the information with
+            respect to which causal pathways are employed when the treatment effects the outcome
         :param estimate: CausalEstimate
-        It is an already existing estimate whose properties we wish to replicate
+            It is an already existing estimate whose properties we wish to replicate
 
         :returns: An instance of the same estimator class that had generated the given estimate.
         """

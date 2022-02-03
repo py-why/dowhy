@@ -1,13 +1,52 @@
 from charset_normalizer import logging
 import pytest
+
+from sklearn import linear_model
+
 import dowhy
 import dowhy.datasets
 from dowhy import CausalModel
 from dowhy.causal_identifier import IdentifiedEstimand
-from tests.list_handler import ListHandler
 
 
 class TestCausalModel(object):
+    @pytest.mark.parametrize(["beta", "num_samples", "num_treatments"],
+        [(10, 100, 1),])
+    def test_external_estimator(self, beta, num_samples, num_treatments):
+        num_common_causes = 5
+        data = dowhy.datasets.linear_dataset(
+            beta=beta,
+            num_common_causes=num_common_causes,
+            num_samples=num_samples,
+            num_treatments=num_treatments,
+            treatment_is_binary=True,
+        )
+
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            proceed_when_unidentifiable=True,
+            test_significance=None,
+        )
+
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+
+        estimate = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.tests.causal_estimators.mock_external_estimator.PropensityScoreWeightingEstimator",
+            control_value=0,
+            treatment_value=1,
+            target_units="ate",  # condition used for CATE
+            confidence_intervals=True,
+            method_params={
+                "propensity_score_model": linear_model.LogisticRegression(max_iter=1000)
+            },
+        )
+
+        assert estimate.estimator.propensity_score_model.max_iter == 1000
+        
     @pytest.mark.parametrize(["beta", "num_instruments", "num_samples", "num_treatments"],
                              [(10, 1, 100, 1),])
     def test_graph_input(self, beta, num_instruments, num_samples, num_treatments):
@@ -275,22 +314,3 @@ class TestCausalModel(object):
         estimand = IdentifiedEstimand(None, None, None)
         with pytest.raises(ValueError):
             model.estimate_effect(estimand)
-
-
-class TestWarnings(object):
-    def test_warn_no_graph(self):
-        # add a handler which will capture warnings in the CausalModel module
-        handler = ListHandler()
-        handler.add_to_object_module(CausalModel)
-
-        # create a model without a graph
-        model = CausalModel(None, None, None)
-
-        # check that the warning was logged
-        messages = {record.getMessage() for record in handler.records}
-        err_message = "Relevant variables to build causal graph not provided. You may want to use the learn_graph() function to construct the causal graph."
-        assert err_message in messages
-
-
-if __name__ == "__main__":
-    pytest.main([__file__])

@@ -59,19 +59,20 @@ class CausalAccessor(object):
 
         :param x: str, list, dict: The causal state on which to intervene, and (optional) its interventional value(s).
         :param method: The inference method to use with the sampler. Currently, `'mcmc'`, `'weighting'`, and
-        `'kernel_density'` are supported. The `mcmc` sampler requires `pymc3>=3.7`.
+            `'kernel_density'` are supported. The `mcmc` sampler requires `pymc3>=3.7`.
         :param num_cores: int: if the inference method only supports sampling a point at a time, this will parallelize
-        sampling.
+            sampling.
         :param variable_types: dict: The dictionary containing the variable types. Must contain the union of the causal
-        state, control variables, and the outcome.
+            state, control variables, and the outcome.
         :param outcome: str: The outcome variable.
         :param params: dict: extra parameters to set as attributes on the sampler object
         :param dot_graph: str: A string specifying the causal graph.
         :param common_causes: list: A list of strings containing the variable names to control for.
         :param estimand_type: str: 'nonparametric-ate' is the only one currently supported. Others may be added later, to allow for specific, parametric estimands.
         :param proceed_when_unidentifiable: bool: A flag to over-ride user prompts to proceed when effects aren't
-        identifiable with the assumptions provided.
+            identifiable with the assumptions provided.
         :param stateful: bool: Whether to retain state. By default, the do operation is stateless.
+
         :return: pandas.DataFrame: A DataFrame containing the sampled outcome
         """
         x, keep_original_treatment = self.parse_x(x)
@@ -88,20 +89,20 @@ class CausalAccessor(object):
                                              estimand_type=estimand_type,
                                              proceed_when_unidentifiable=proceed_when_unidentifiable)
         #self._identified_estimand = self._causal_model.identify_effect()
-        
+
         if not bool(variable_types): #check if the variables dictionary is empty
             variable_types = dict(self._obj.dtypes) #Convert the series containing data types to a dictionary
             for key in variable_types.keys():
-                variable_types[key] = self.convert_to_custom_type(variable_types[key].name) #Obtain the custom type corrosponding to each data type 
-        
+                variable_types[key] = self.convert_to_custom_type(variable_types[key].name) #Obtain the custom type corrosponding to each data type
+
         elif len(self._obj.columns) > len(variable_types):
-            all_variables = dict(self._obj.dtypes) 
+            all_variables = dict(self._obj.dtypes)
             for key in all_variables.keys():
                 if key not in variable_types:
                     variable_types[key] = self.convert_to_custom_type(all_variables[key].name)
 
         elif len(self._obj.columns) < len(variable_types):
-            raise Exception('Number of variables in the DataFrame is lesser than the variable_types dict') 
+            raise Exception('Number of variables in the DataFrame is lesser than the variable_types dict')
 
         if not self._sampler:
             self._method = method

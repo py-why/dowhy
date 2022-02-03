@@ -9,6 +9,7 @@
    dowhy_estimation_methods
    dowhy-simple-iv-example 
    load_graph_example
+   dowhy_interpreter.ipynb
    dowhy_causal_api
    do_sampler_demo
 

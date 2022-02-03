@@ -41,7 +41,7 @@ class DummyOutcomeRefuter(CausalRefuter):
     outcome y. Note that since f(W) simply defines a new DGP for the simulated
     outcome, it need not be the correct structural equation from W to y.
     2. We obtain the value of dummy outcome as:
-       ``y_dummy = h(t) + f(W)``
+    ``y_dummy = h(t) + f(W)``
 
     To prevent overfitting, we fit f(W) for one value of T and then use it to
     generate data for other values of t. Future support for identification
@@ -71,26 +71,26 @@ class DummyOutcomeRefuter(CausalRefuter):
             t --->y
               h(t)
 
+
     Supports additional parameters that can be specified in the refute_estimate() method.
 
     :param num_simulations: The number of simulations to be run, which defaults to ``CausalRefuter.DEFAULT_NUM_SIMULATIONS``
     :type num_simulations: int, optional
-
     :param transformation_list: It is a list of actions to be performed to obtain the outcome, which defaults to ``DummyOutcomeRefuter.DEFAULT_TRANSFORMATION``.
       The default transformation is as follows:
 
       ``[("zero",""),("noise", {'std_dev':1} )]``
-    :type transformation_list: list, optional
 
+    :type transformation_list: list, optional
     Each of the actions within a transformation is one of the following types:
 
-    * function argument: function ``pd.Dataframe -> np.ndarray``
+        * function argument: function ``pd.Dataframe -> np.ndarray``
 
         It takes in a function that takes the input data frame as the input and outputs the outcome
         variable. This allows us to create an output varable that only depends on the covariates and does not depend
         on the treatment variable.
 
-    * string argument
+        * string argument
 
         * Currently it supports some common estimators like
 
@@ -130,14 +130,14 @@ class DummyOutcomeRefuter(CausalRefuter):
       dummy data.
     :type true_causal_effect: function
 
-    The equation for the dummy outcome is given by
-    ``y_hat = h(t) + f(W)``
+        The equation for the dummy outcome is given by
+        ``y_hat = h(t) + f(W)``
 
-    where
+        where
 
-    * ``y_hat`` is the dummy outcome
-    * ``h(t)`` is the function that gives the true causal effect
-    * ``f(W)`` is the best estimate of ``y`` obtained keeping ``t`` constant. This ensures that the variation in output of function ``f(w)`` is not caused by ``t``.
+        * ``y_hat`` is the dummy outcome
+        * ``h(t)`` is the function that gives the true causal effect
+        * ``f(W)`` is the best estimate of ``y`` obtained keeping ``t`` constant. This ensures that the variation in output of function ``f(w)`` is not caused by ``t``.
 
     .. note:: The true causal effect should take an input of the same shape as the treatment and the output should match the shape of the outcome
 
@@ -145,8 +145,8 @@ class DummyOutcomeRefuter(CausalRefuter):
       This is ``True`` by default, which in turn selects all variables leaving the treatment and the outcome
     :type required_variables: int, list, bool, optional
 
-    1. An integer argument refers to how many variables will be used for estimating the value of the outcome
-    2. A list explicitly refers to which variables will be used to estimate the outcome
+        1. An integer argument refers to how many variables will be used for estimating the value of the outcome
+        2. A list explicitly refers to which variables will be used to estimate the outcome
        Furthermore, it gives the ability to explictly select or deselect the covariates present in the estimation of the
        outcome. This is done by either adding or explicitly removing variables from the list as shown below:
 
@@ -154,7 +154,7 @@ class DummyOutcomeRefuter(CausalRefuter):
             * We need to pass required_variables = ``[W0,W1]`` if we want ``W0`` and ``W1``.
             * We need to pass required_variables = ``[-W0,-W1]`` if we want all variables excluding ``W0`` and ``W1``.
 
-    3. If the value is True, we wish to include all variables to estimate the value of the outcome.
+        3. If the value is True, we wish to include all variables to estimate the value of the outcome.
 
     .. warning:: A ``False`` value is ``INVALID`` and will result in an ``error``.
 
@@ -513,14 +513,14 @@ class DummyOutcomeRefuter(CausalRefuter):
         """
         A function that takes in any sklearn estimator and returns a trained estimator
 
-        - 'action': str
-        The sklearn estimator to be used.
-        - 'X_train': np.ndarray
-        The variable used to estimate the value of outcome.
-        - 'outcome': np.ndarray
-        The variable which we wish to estimate.
-        - 'func_args': variable length keyworded argument
-        The parameters passed to the estimator.
+        :param 'action': str
+            The sklearn estimator to be used.
+        :param 'X_train': np.ndarray
+            The variable used to estimate the value of outcome.
+        :param 'outcome': np.ndarray
+            The variable which we wish to estimate.
+        :param 'func_args': variable length keyworded argument
+            The parameters passed to the estimator.
         """
         estimator = self._get_regressor_object(action, **func_args)
         X = X_train
@@ -534,10 +534,10 @@ class DummyOutcomeRefuter(CausalRefuter):
         """
         Return a sklearn estimator object based on the estimator and corresponding parameters
 
-        - 'action': str
-        The sklearn estimator used.
-        - 'func_args': variable length keyworded argument
-        The parameters passed to the sklearn estimator.
+        :param 'action': str
+            The sklearn estimator used.
+        :param 'func_args': variable length keyworded argument
+            The parameters passed to the sklearn estimator.
         """
         if  action == "linear_regression":
             return LinearRegression(**func_args)
@@ -558,10 +558,10 @@ class DummyOutcomeRefuter(CausalRefuter):
         Otherwise we make use of the Fisher Yates shuffle.
         Refer to https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle for more details.
 
-        'outcome': np.ndarray
-        The outcome variable to be permuted.
-        'permute_fraction': float [0, 1]
-        The fraction of rows permuted.
+        :param 'outcome': np.ndarray
+            The outcome variable to be permuted.
+        :param 'permute_fraction': float [0, 1]
+            The fraction of rows permuted.
         '''
         if permute_fraction == 1:
             outcome = pd.DataFrame(outcome)
@@ -585,9 +585,11 @@ class DummyOutcomeRefuter(CausalRefuter):
         """
         Add white noise with mean 0 and standard deviation = std_dev
 
-        - 'outcome': np.ndarray
-        The outcome variable, to which the white noise is added.
-        - 'std_dev': float
-        The standard deviation of the white noise.
+        :param 'outcome': np.ndarray
+            The outcome variable, to which the white noise is added.
+        :param 'std_dev': float
+            The standard deviation of the white noise.
+
+        :returns: outcome with added noise
         """
         return outcome + np.random.normal(scale=std_dev,size=outcome.shape[0])
