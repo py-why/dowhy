@@ -98,7 +98,7 @@ class CausalRefuter:
         """ Tests the statistical significance of the estimate obtained to the simulations produced by a refuter.
 
         The basis behind using the sample statistics of the refuter when we are in fact testing the estimate,
-        is due to the fact that, we would ideally expect them to follow the same distribition
+        is due to the fact that, we would ideally expect them to follow the same distribition.
 
         For refutation tests (e.g., placebo refuters), consider the null distribution as a distribution of effect
         estimates over multiple simulations with placebo treatment, and compute how likely the true estimate (e.g.,
@@ -108,22 +108,22 @@ class CausalRefuter:
         For sensitivity analysis tests (e.g., bootstrap, subset or common cause refuters), the null distribution captures
         the distribution of effect estimates under the "true" dataset (e.g., with an additional confounder or different
         sampling), and we compute the probability of the obtained estimate under this distribution. If the probability is
-        lower than the p-value, then the estimator method fails the test
+        lower than the p-value, then the estimator method fails the test.
 
-        Null Hypothesis: The estimate is a part of the distribution
-        Alternative Hypothesis: The estimate does not fall in the distribution.
+        Null Hypothesis- The estimate is a part of the distribution
+        Alternative Hypothesis- The estimate does not fall in the distribution.
 
         :param 'estimate': CausalEstimate
-        The estimate obtained from the estimator for the original data.
+            The estimate obtained from the estimator for the original data.
         :param 'simulations': np.array
-        An array containing the result of the refuter for the simulations
+            An array containing the result of the refuter for the simulations
         :param 'test_type': string, default 'auto'
-        The type of test the user wishes to perform.
+            The type of test the user wishes to perform.
         :param 'significance_level': float, default 0.05
-        The significance level for the statistical test
+            The significance level for the statistical test
 
         :returns: significance_dict: Dict
-        A Dict containing the p_value and a boolean that indicates if the result is statistically significant
+            A Dict containing the p_value and a boolean that indicates if the result is statistically significant
         """
         # Initializing the p_value
         p_value = 0

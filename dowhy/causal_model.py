@@ -233,9 +233,8 @@ class CausalModel:
         :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be of three types. (1) a string for common specifications of target units (namely, "ate", "att" and "atc"), (2) a lambda function that can be used as an index for the data (pandas DataFrame), or (3) a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
         :param effect_modifiers: Names of effect modifier variables can be (optionally) specified here too, since they do not affect identification. If None, the effect_modifiers from the CausalModel are used.
         :param fit_estimator: Boolean flag on whether to fit the estimator.
-        Setting it to False is useful to estimate the effect on new data using a previously fitted estimator.
+            Setting it to False is useful to estimate the effect on new data using a previously fitted estimator.
         :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method. See the docs for each estimation method for allowed method-specific params.
-
         :returns: An instance of the CausalEstimate class, containing the causal effect estimate
             and other method-dependent information
 
@@ -336,7 +335,7 @@ class CausalModel:
             CausalModel.identify_effect method
         :param method_name: any of the estimation method to be used. See docs for estimate_effect method for a list of supported estimation methods.
         :param fit_estimator: Boolean flag on whether to fit the estimator.
-        Setting it to False is useful to compute the do-operation on new data using a previously fitted estimator.
+            Setting it to False is useful to compute the do-operation on new data using a previously fitted estimator.
         :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method.
 
         :returns: an instance of the CausalEstimate class, containing the causal effect estimate

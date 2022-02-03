@@ -370,32 +370,33 @@ class AddUnobservedCommonCause(CausalRefuter):
     def include_simulated_confounder(self, convergence_threshold = 0.1, c_star_max = 1000):
         '''
         This function simulates an unobserved confounder based on the data using the following steps:
-            1. It calculates the "residuals"  from the treatment and outcome model
-                i.) The outcome model has outcome as the dependent variable and all the observed variables including treatment as independent variables
-                ii.) The treatment model has treatment as the dependent variable and all the observed variables as independent variables.
+        1. It calculates the "residuals"  from the treatment and outcome model
+        i.) The outcome model has outcome as the dependent variable and all the observed variables including treatment as independent variables
+        ii.) The treatment model has treatment as the dependent variable and all the observed variables as independent variables.
 
-            2. U is an intermediate random variable drawn from the normal distribution with the weighted average of residuals as mean and a unit variance
-               U ~ N(c1*d_y + c2*d_t, 1)
-               where
-                *d_y and d_t are residuals from the treatment and outcome model
-                *c1 and c2 are coefficients to the residuals
+        2. U is an intermediate random variable drawn from the normal distribution with the weighted average of residuals as mean and a unit variance
+        U ~ N(c1*d_y + c2*d_t, 1)
+        where
+        *d_y and d_t are residuals from the treatment and outcome model
+        *c1 and c2 are coefficients to the residuals
 
-            3. The final U, which is the simulated unobserved confounder is obtained by debiasing the intermediate variable U by residualising it with X
+        3. The final U, which is the simulated unobserved confounder is obtained by debiasing the intermediate variable U by residualising it with X
 
 
         Choosing the coefficients c1 and c2:
         The coefficients are chosen based on these basic assumptions:
-            1. There is a hyperbolic relationship satisfying c1*c2 = c_star
-            2. c_star is chosen from a range of possible values based on the correlation of the obtained simulated variable with outcome and treatment.
-            3. The product of correlations with treatment and outcome should be at a minimum distance to the maximum correlations with treatment and outcome in any of the observed confounders
-            4. The ratio of the weights should be such that they maintain the ratio of the maximum possible observed coefficients within some confidence interval
+        1. There is a hyperbolic relationship satisfying c1*c2 = c_star
+        2. c_star is chosen from a range of possible values based on the correlation of the obtained simulated variable with outcome and treatment.
+        3. The product of correlations with treatment and outcome should be at a minimum distance to the maximum correlations with treatment and outcome in any of the observed confounders
+        4. The ratio of the weights should be such that they maintain the ratio of the maximum possible observed coefficients within some confidence interval
 
         :param c_star_max: The maximum possible value for the hyperbolic curve on which the coefficients to the residuals lie. It defaults to 1000 in the code if not specified by the user.
-        :type int
+            :type int
         :param convergence_threshold: The threshold to check the plateauing of the correlation while selecting a c_star. It defaults to 0.1 in the code if not specified by the user
-        :type float
-        :returns final_U: The simulated values of the unobserved confounder based on the data
-        :type pandas.core.series.Series
+            :type float
+
+        :returns: The simulated values of the unobserved confounder based on the data
+            :type pandas.core.series.Series
 
         '''
 
@@ -548,7 +549,7 @@ class AddUnobservedCommonCause(CausalRefuter):
     def generate_confounder_from_residuals(self, c1, c2, d_y, d_t, X):
         '''
         This function takes the residuals from the treatment and outcome model and their coefficients and simulates the intermediate random variable U by taking
-        the row wise normal distribution corresponding to each residual value and then debiasing the intermediate variable to get the final variable
+        the row wise normal distribution corresponding to each residual value and then debiasing the intermediate variable to get the final variable.
 
         :param c1: coefficient to the residual from the outcome model
         :type float
@@ -559,7 +560,7 @@ class AddUnobservedCommonCause(CausalRefuter):
         :param d_t: residuals from the treatment model
         :type list
 
-        :returns final_U: The simulated values of the unobserved confounder based on the data
+        :returns: The simulated values of the unobserved confounder based on the data
         :type pandas.core.series.Series
 
         '''
