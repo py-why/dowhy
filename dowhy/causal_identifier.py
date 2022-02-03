@@ -10,15 +10,6 @@ from dowhy.utils.api import parse_state
 
 
 class CausalIdentifier:
-
-    """Class that implements different identification methods.
-
-    Currently supports backdoor and instrumental variable identification methods. The identification is based on the causal graph provided.
-
-    Other specific ways of identification, such as the ID* algorithm, minimal adjustment criteria, etc. will be added in the future.
-    If you'd like to contribute, please raise an issue or a pull request on Github.
-
-    """
     NONPARAMETRIC_ATE="nonparametric-ate"
     NONPARAMETRIC_NDE="nonparametric-nde"
     NONPARAMETRIC_NIE="nonparametric-nie"
@@ -32,9 +23,18 @@ class CausalIdentifier:
     METHOD_NAMES = {BACKDOOR_DEFAULT, BACKDOOR_EXHAUSTIVE, BACKDOOR_MIN, BACKDOOR_MAX}
     DEFAULT_BACKDOOR_METHOD = BACKDOOR_DEFAULT
 
-    def __init__(self, graph, estimand_type,
-            method_name = "default",
-            proceed_when_unidentifiable=False):
+    def __init__(self, graph, estimand_type, method_name = "default", proceed_when_unidentifiable=False):
+        """Class that implements different identification methods.
+
+        Currently supports backdoor and instrumental variable identification methods. Identification is based on the causal graph provided.
+        Other specific ways of identification, such as the ID* algorithm, minimal adjustment criteria, etc. will be added in the future.
+        If you'd like to contribute, please raise an issue or a pull request on Github.
+
+        :param graph: an instance of CausalGraph
+        :param estimand_type: one of 'nonparametric-ate', 'nonparametric-nde', 'nonparametric-nie'
+        :param method_name: the backdoor method to use; one of 'default', 'exhaustive-search', 'minimal-adjustment', 'maximal-adjustment'
+        :param proceed_when_unidentifiable:
+        """
         self._graph = graph
         self.estimand_type = estimand_type
         self.treatment_name = graph.treatment_name
@@ -46,9 +46,13 @@ class CausalIdentifier:
     def identify_effect(self, optimize_backdoor=False):
         """Main method that returns an identified estimand (if one exists).
 
-        If estimand_type is non-parametric ATE, then  uses backdoor, instrumental variable and frontdoor identification methods,  to check if an identified estimand exists, based on the causal graph.
+        If `estimand_type` is `"nonparametric-ate"`, then uses backdoor, instrumental variable and frontdoor identification methods to 
+        check if an identified estimand exists based on the causal graph.
 
         :param self: instance of the CausalIdentifier class (or its subclass)
+        :param optimize_backdoor: if True, an approximate (but fast) hitting set algorithm is used to learn the backdoor set when 
+            inferring the ATE.
+        :type optimize_backdoor: bool, optional
         :returns:  target estimand, an instance of the IdentifiedEstimand class
         """
         # First, check if there is a directed path from action to outcome
@@ -58,6 +62,8 @@ class CausalIdentifier:
                     treatment_variable=self.treatment_name,
                     outcome_variable=self.outcome_name,
                     no_directed_path=True)
+        
+        # dispatch on estimand type
         if self.estimand_type == CausalIdentifier.NONPARAMETRIC_ATE:
             return self.identify_ate_effect(optimize_backdoor=optimize_backdoor)
         elif self.estimand_type == CausalIdentifier.NONPARAMETRIC_NDE:
@@ -71,9 +77,17 @@ class CausalIdentifier:
                 CausalIdentifier.NONPARAMETRIC_NIE))
 
     def identify_ate_effect(self, optimize_backdoor):
+        """Identifies the nonparametric ATE effect using backdoor, iv, and frontdoor methods.
+        
+        :param optimize_backdoor: if True, an approximate (but fast) hitting set algorithm is used to learn the backdoor set when 
+            inferring the ATE.
+        :type optimize_backdoor: bool
+        :returns: identified estimand, an instance of the IdentifiedEstimand class
+        """
         estimands_dict = {}
         mediation_first_stage_confounders = None
         mediation_second_stage_confounders = None
+
         ### 1. BACKDOOR IDENTIFICATION
         # First, checking if there are any valid backdoor adjustment sets
         if optimize_backdoor == False:
@@ -94,6 +108,7 @@ class CausalIdentifier:
             backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
         else:
             estimands_dict["backdoor"] = None
+        
         ### 2. INSTRUMENTAL VARIABLE IDENTIFICATION
         # Now checking if there is also a valid iv estimand
         instrument_names = self._graph.get_instruments(self.treatment_name,
@@ -148,6 +163,10 @@ class CausalIdentifier:
         return estimand
 
     def identify_nie_effect(self):
+        """Identifies the nonparametric NIE effect using backdoor and mediator methods.
+        
+        :returns: identified estimand, an instance of the IdentifiedEstimand class
+        """
         estimands_dict = {}
         ### 1. FIRST DOING BACKDOOR IDENTIFICATION
         # First, checking if there are any valid backdoor adjustment sets
@@ -182,6 +201,7 @@ class CausalIdentifier:
             mediation_second_stage_confounders = self.identify_mediation_second_stage_confounders(mediators_names, self.outcome_name)
         else:
             estimands_dict["mediation"] = None
+        
         # Finally returning the estimand object
         estimand = IdentifiedEstimand(
             self,
@@ -200,6 +220,10 @@ class CausalIdentifier:
         return estimand
 
     def identify_nde_effect(self):
+        """Identifies the nonparametric NDE effect using backdoor and mediator methods.
+        
+        :returns: identified estimand, an instance of the IdentifiedEstimand class
+        """
         estimands_dict = {}
         ### 1. FIRST DOING BACKDOOR IDENTIFICATION
         # First, checking if there are any valid backdoor adjustment sets
@@ -234,6 +258,7 @@ class CausalIdentifier:
             mediation_second_stage_confounders = self.identify_mediation_second_stage_confounders(mediators_names, self.outcome_name)
         else:
             estimands_dict["mediation"] = None
+        
         # Finally returning the estimand object
         estimand = IdentifiedEstimand(
             self,
@@ -251,8 +276,21 @@ class CausalIdentifier:
         )
         return estimand
 
-    def identify_backdoor(self, treatment_name, outcome_name,
-            include_unobserved=False, dseparation_algo="default"):
+    def identify_backdoor(self, treatment_name, outcome_name, include_unobserved=False, dseparation_algo="default"):
+        """Finds all valid backdoor adjustment sets by exhaustive search.
+
+        Uses `self.method_name` to determine whether to perform minimal, maximal, exhaustive or default search. Returns 
+        a list of dictionaries, each mapping from a single key `"backdoor_set"` to a tuple of variable names.
+
+        :param treatment_name: names of treatment variables
+        :type treatment_name: list
+        :param outcome_name: names of outcome variables
+        :type outcome_name: list
+        :param include_unobserved: whether to search among unobserved variables, defaults to False
+        :type include_unobserved: bool, optional
+        :param dseparation_algo: algorithm to check d-separation (either "default" or "naive"), defaults to "default"
+        :type dseparation_algo: str, optional
+        """
         backdoor_sets = []
         backdoor_paths = None
         bdoor_graph = None
@@ -293,6 +331,7 @@ class CausalIdentifier:
                     outcome_name, parse_state(var), set())
             if not dsep_outcome_var or not dsep_treat_var:
                 filt_eligible_variables.add(var)
+        
         if method_name in CausalIdentifier.METHOD_NAMES:
             backdoor_sets, found_valid_adjustment_set = self.find_valid_adjustment_sets(
                     treatment_name, outcome_name,
@@ -318,6 +357,31 @@ class CausalIdentifier:
             backdoor_paths, bdoor_graph, dseparation_algo,
             backdoor_sets, filt_eligible_variables,
             method_name, max_iterations):
+        """Performs exhaustive search for backdoor adjustment sets over a filtered set of variables. For internal use.
+
+        Returns a tuple of `(backdoor_sets, found_valid_adjustment_set)`. `backdoor_sets` is a list of dictionaries, each mapping from a 
+        single key "backdoor_set" to a tuple of variable names. `found_valid_adjustment_set` is a boolean indicating whether a 
+        valid backdoor set was found.
+
+        :param treatment_name: names of treatment variables
+        :type treatment_name: list
+        :param outcome_name: names of outcome variables
+        :type outcome_name: list
+        :param backdoor_paths: list of backdoor paths used to check candidate backdoor variable sets when `dseparation_algo="naive"`
+        :type backdoor_paths: list, optional
+        :param bdoor_graph: graph used to check candidate backdoor variable sets when `dseparation_algo="default"`
+        :type bdoor_graph: CausalGraph, optional
+        :param dseparation_algo: algorithm used to check candidate backdoor sets, either `"naive"` or `"default"`
+        :type dseparation_algo: str
+        :param backdoor_sets: first element of return tuple (see description), modified in-place and returned
+        :type backdoor_sets: list
+        :param filt_eligible_variables: filtered list of variables names, assumed not d-separated from both treatment and outcome
+        :type filt_eligible_variables: list
+        :param method_name: type of search, one of "default", "minimal-adjustment", "maximal-adjustment", "exhaustive-search"
+        :type method_name: str
+        :param max_iterations: maximum number of candidate backdoor sets to examine
+        :type max_iterations: int
+        """
         num_iterations = 0
         found_valid_adjustment_set = False
         all_nodes_observed = self._graph.all_observed(self._graph.get_all_nodes())
@@ -352,6 +416,16 @@ class CausalIdentifier:
 
 
     def get_default_backdoor_set_id(self, backdoor_sets_dict):
+        """Finds the 'best' backdoor adjustment set. For internal use.
+
+        Looks for the backdoor set which contains the smallest number of instrument variables (to prevent lowering variance in 
+        treatment). In the case of a tie, returns the set with the lowest total number of variables to improve efficiency.
+
+        :param backdoor_sets_dict: dict mapping from name to list of variable names, result of call to `build_backdoor_estimands_dict`
+        :type backdoor_sets_dict: dict
+        :return: key in `backdoor_sets_dict` which maps to the best adjustment set
+        :rtype: str
+        """        
         # Adding a None estimand if no backdoor set found
         if len(backdoor_sets_dict) == 0:
             return None
@@ -372,10 +446,27 @@ class CausalIdentifier:
                 default_key = key
         return default_key
 
-    def build_backdoor_estimands_dict(self, treatment_name, outcome_name,
-            backdoor_sets, estimands_dict, proceed_when_unidentifiable=None):
-        """Build the final dict for backdoor sets by filtering unobserved variables if needed.
+    def build_backdoor_estimands_dict(self, treatment_name, outcome_name, backdoor_sets,
+        estimands_dict, proceed_when_unidentifiable=None):
+        """Builds the final dict for backdoor sets by filtering unobserved variables if needed. For internal use.
+
+        Assigns a `str` name to each backdoor set. Returns a 2-tuple of `(estimands_dict, backdoor_variables_dict)`.
+        The `estimands_dict` maps from the name of each backdoor set to a list of estimand descriptions (as returned by 
+        `self.construct_backdoor_estimand`). The `backdoor_variables_dict` maps from the name of each backdoor set 
+        to a list of variables in that set.
+
+        :param treatment_name: treatment variable names
+        :type treatment_name: list
+        :param outcome_name: outcome variable names, only the first is used
+        :type outcome_name: list
+        :param backdoor_sets: backdoor variable sets to examine, a list of lists of strings
+        :type backdoor_sets: list
+        :param estimands_dict: modified in place and returned as first element of return tuple, see note on return values
+        :type estimands_dict: dict
+        :param proceed_when_unidentifiable: overrides class-level setting
+        :type proceed_when_unidentifiable: bool, optional
         """
+        
         backdoor_variables_dict = {}
         if proceed_when_unidentifiable is None:
             proceed_when_unidentifiable = self._proceed_when_unidentifiable
@@ -401,9 +492,13 @@ class CausalIdentifier:
         return estimands_dict, backdoor_variables_dict
 
     def identify_frontdoor(self, dseparation_algo="default"):
-        """ Find a valid frontdoor variable if it exists.
+        """Finds a valid frontdoor variable if one exists.
 
-        Currently only supports a single variable frontdoor set.
+        Currently only supports a single variable frontdoor set. Returns a list containing a single string if there is a 
+        one-variable frontdoor set. Otherwise, returns an empty list.
+
+        :param dseparation_algo: The dseparation algorithm to use; one of 'default', 'naive'. Defaults to 'default'.
+        :type dseparation_algo: str, optional
         """
         frontdoor_var = None
         frontdoor_paths = None
@@ -422,8 +517,10 @@ class CausalIdentifier:
         eligible_variables = self._graph.get_descendants(self.treatment_name) \
             - set(self.outcome_name) \
             - set(self._graph.get_descendants(self.outcome_name))
+        
         # For simplicity, assuming a one-variable frontdoor set
         for candidate_var in eligible_variables:
+
             # Cond 1: All directed paths intercepted by candidate_var
             cond1 = self._graph.check_valid_frontdoor_set(
                 self.treatment_name, self.outcome_name,
@@ -434,6 +531,7 @@ class CausalIdentifier:
             self.logger.debug("Candidate frontdoor set: {0}, is_dseparated: {1}".format(candidate_var, cond1))
             if not cond1:
                 continue
+
             # Cond 2: No confounding between treatment and candidate var
             cond2 = self._graph.check_valid_backdoor_set(
                 self.treatment_name, parse_state(candidate_var),
@@ -443,6 +541,7 @@ class CausalIdentifier:
                 dseparation_algo=dseparation_algo)
             if not cond2:
                 continue
+
             # Cond 3: treatment blocks all confounding between candidate_var and outcome
             bdoor_graph2 = self._graph.do_surgery(candidate_var,
                     remove_outgoing_edges=True)
@@ -456,17 +555,18 @@ class CausalIdentifier:
             if is_valid_frontdoor:
                 frontdoor_var = candidate_var
                 break
+        
         return parse_state(frontdoor_var)
 
     def identify_mediation(self):
-        """ Find a valid mediator if it exists.
+        """Finds a valid mediator if it exists
 
-        Currently only supports a single variable mediator set.
+        Currently only supports a single variable mediator set. Returns a list containing a single string if there is a 
+        one-variable mediator set. Otherwise, returns an empty list.
         """
         mediation_var = None
         mediation_paths = self._graph.get_all_directed_paths(self.treatment_name, self.outcome_name)
-        eligible_variables = self._graph.get_descendants(self.treatment_name) \
-            - set(self.outcome_name)
+        eligible_variables = self._graph.get_descendants(self.treatment_name) - set(self.outcome_name)
         # For simplicity, assuming a one-variable mediation set
         for candidate_var in eligible_variables:
             is_valid_mediation = self._graph.check_valid_mediation_set(self.treatment_name,
@@ -477,10 +577,16 @@ class CausalIdentifier:
                 break
         return parse_state(mediation_var)
 
-
-        return None
-
     def identify_mediation_first_stage_confounders(self, treatment_name, mediators_names):
+        """Identifies backdoor sets to control confounding between treatment and mediator variables
+
+        :param treatment_name: names of treatment variables
+        :type treatment_name: list
+        :param mediators_names: names of mediator variables
+        :type mediators_names: list
+        :return: dictionary mapping from names to valid backdoor sets
+        :rtype: dict
+        """
         # Create estimands dict as per the API for backdoor, but do not return it
         estimands_dict = {}
         backdoor_sets = self.identify_backdoor(treatment_name, mediators_names)
@@ -497,6 +603,15 @@ class CausalIdentifier:
         return backdoor_variables_dict
 
     def identify_mediation_second_stage_confounders(self, mediators_names, outcome_name):
+        """Identifies backdoor sets to control confounding between mediator and outcome variables
+
+        :param treatment_name: names of treatment variables
+        :type treatment_name: list
+        :param mediators_names: names of mediator variables
+        :type mediators_names: list
+        :return: dictionary mapping from names to valid backdoor sets
+        :rtype: dict
+        """
         # Create estimands dict as per the API for backdoor, but do not return it
         estimands_dict = {}
         backdoor_sets = self.identify_backdoor(mediators_names, outcome_name)
@@ -512,18 +627,28 @@ class CausalIdentifier:
         backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
         return backdoor_variables_dict
 
-    def construct_backdoor_estimand(self, estimand_type, treatment_name,
-                                    outcome_name, common_causes):
-        # TODO: outputs string for now, but ideally should do symbolic
-        # expressions Mon 19 Feb 2018 04:54:17 PM DST
-        # TODO Better support for multivariate treatments
+    def construct_backdoor_estimand(self, estimand_type, treatment_name, outcome_name, common_causes):
+        """Builds the back door estimand
 
-        expr = None
+        The output is a dict with two keys: 'estimand' and 'assumptions'. The 'estimand'
+        key contains a sympy expression with the estimand. The 'assumptions' key contains a dict of mapping from the (str) name of
+        the assumption to a (str) description.
+
+        TODO: outputs string for now, but ideally should do symbolic expressions Mon 19 Feb 2018 04:54:17 PM DST
+        TODO: Better support for multivariate treatments
+
+        :param estimand_type: (ignored)
+        :param treatment_name: names of treatment variables
+        :type treatment_name: list
+        :param outcome_name: names of outcome variables, currently only the first is used
+        :type outcome_name: list
+        :param common_causes: names of common causes
+        :type common_causes: list
+        """
         outcome_name = outcome_name[0]
         num_expr_str = outcome_name
-        if len(common_causes)>0:
+        if len(common_causes) > 0:
             num_expr_str += "|" + ",".join(common_causes)
-        expr = "d(" + num_expr_str + ")/d" + ",".join(treatment_name)
         sym_mu = sp.Symbol("mu")
         sym_sigma = sp.Symbol("sigma", positive=True)
         sym_outcome = spstats.Normal(num_expr_str, sym_mu, sym_sigma)
@@ -545,10 +670,23 @@ class CausalIdentifier:
         }
         return estimand
 
-    def construct_iv_estimand(self, estimand_type, treatment_name,
-                              outcome_name, instrument_names):
-        # TODO: support multivariate treatments better.
-        expr = None
+    def construct_iv_estimand(self, estimand_type, treatment_name, outcome_name, instrument_names):
+        """Builds the iv estimand.
+
+        The output is a dict with two keys: 'estimand' and 'assumptions'. The 'estimand'
+        key contains a sympy expression with the estimand. The 'assumptions' key contains a dict of mapping from the (str) name of
+        the assumption to a (str) description.
+
+        TODO: Better support for multivariate treatments
+
+        :param estimand_type: (ignored)
+        :param treatment_name: names of treatment variables
+        :type treatment_name: list
+        :param outcome_name: names of outcome variables, currently only the first is used
+        :type outcome_name: list
+        :param common_causes: names of common causes
+        :type common_causes: list
+        """
         outcome_name = outcome_name[0]
         sym_outcome = spstats.Normal(outcome_name, 0, 1)
         sym_treatment_symbols = [spstats.Normal(t, 0, 1) for t in treatment_name]
@@ -576,10 +714,23 @@ class CausalIdentifier:
         }
         return estimand
 
-    def construct_frontdoor_estimand(self, estimand_type, treatment_name,
-                              outcome_name, frontdoor_variables_names):
-        # TODO: support multivariate treatments better.
-        expr = None
+    def construct_frontdoor_estimand(self, estimand_type, treatment_name, outcome_name, frontdoor_variables_names):
+        """Builds the frontdoor estimand.
+
+        The output is a dict with two keys: 'estimand' and 'assumptions'. The 'estimand'
+        key contains a sympy expression with the estimand. The 'assumptions' key contains a dict of mapping from the (str) name of
+        the assumption to a (str) description.
+
+        TODO: Better support for multivariate treatments
+
+        :param estimand_type: (ignored)
+        :param treatment_name: names of treatment variables
+        :type treatment_name: list
+        :param outcome_name: names of outcome variables, currently only the first is used
+        :type outcome_name: list
+        :param common_causes: names of common causes
+        :type common_causes: list
+        """
         outcome_name = outcome_name[0]
         sym_outcome = spstats.Normal(outcome_name, 0, 1)
         sym_treatment_symbols = [spstats.Normal(t, 0, 1) for t in treatment_name]
@@ -609,10 +760,23 @@ class CausalIdentifier:
         }
         return estimand
 
-    def construct_mediation_estimand(self, estimand_type, treatment_name,
-                              outcome_name, mediators_names):
-        # TODO: support multivariate treatments better.
-        expr = None
+    def construct_mediation_estimand(self, estimand_type, treatment_name, outcome_name, mediators_names):
+        """Builds the mediation estimand.
+
+        The output is a dict with two keys: 'estimand' and 'assumptions'. The 'estimand'
+        key contains a sympy expression describing the estimand. The 'assumptions' key contains a dict of mapping from the (str) name of
+        the assumption to a (str) description.
+
+        TODO: Better support for multivariate treatments
+
+        :param estimand_type: one of 'nonparametric-nde', 'nonparametric-nie'
+        :param treatment_name: names of treatment variables
+        :type treatment_name: list
+        :param outcome_name: names of outcome variables, currently only the first is used
+        :type outcome_name: list
+        :param common_causes: names of common causes
+        :type common_causes: list
+        """
         if estimand_type in (CausalIdentifier.NONPARAMETRIC_NDE, CausalIdentifier.NONPARAMETRIC_NIE):
             outcome_name = outcome_name[0]
             sym_outcome = spstats.Normal(outcome_name, 0, 1)
@@ -660,11 +824,6 @@ class CausalIdentifier:
 
 
 class IdentifiedEstimand:
-
-    """Class for storing a causal estimand, typically as a result of the identification step.
-
-    """
-
     def __init__(self, identifier, treatment_variable, outcome_variable,
                  estimand_type=None, estimands=None,
                  backdoor_variables=None, instrumental_variables=None,
@@ -674,6 +833,37 @@ class IdentifiedEstimand:
                  mediation_second_stage_confounders=None,
                  default_backdoor_id=None, identifier_method=None,
                  no_directed_path=False):
+        """Class for storing a causal estimand, typically as a result of the identification step.
+
+        The interesting info is stored in the estimands parameters. This is a dict mapping from names (str) of estimands to 
+        descriptions. Each description is a dict with two keys: 'estimand' and 'assumptions'. The 'estimand' key contains a 
+        sympy expression with the estimand. The 'assumptions' key contains a dict of mapping from the (str) name of the assumption
+        to a (str) description.
+
+        :param identifier: [description]
+        :param treatment_variable: name of the treatment variable
+        :param outcome_variable: name of the outcome variable
+        :param estimand_type: one of 'nonparametric-ate', 'nonparametric-nde', 'nonparametric-nie'; defaults to None
+        :param estimands: the estimands (see description)
+        :type estimands: dict, optional
+        :param backdoor_variables: dict mapping from name of backdoor set to iterable of variable names, defaults to None
+        :type backdoor_variables: dict, optional
+        :param instrumental_variables: dict mapping from name of iv set to iterable of variable names, defaults to None
+        :type instrumental_variables: dict, optional
+        :param frontdoor_variables: dict mapping from name of frontdoor set to iterable of variable names, defaults to None
+        :type frontdoor_variables: dict, optional
+        :param mediator_variables: list of mediator variable names, defaults to None
+        :type mediator_variables: [list], optional
+        :param mediation_first_stage_confounders: backdoor sets to control confounding between treatment and mediators
+        :type mediation_first_stage_confounders: [dict], optional
+        :param mediation_second_stage_confounders: backdoor sets to control confounding between mediators and outcome
+        :type mediation_second_stage_confounders: [dict], optional
+        :param default_backdoor_id: name of default backdoor set (a key to the self.estimands dict), defaults to None
+        :type default_backdoor_id: str, optional
+        :param identifier_method: not used, defaults to None
+        :param no_directed_path: whether there is no directed path from the treatment to the outcome, defaults to False
+        :type no_directed_path: bool, optional
+        """        
         self.identifier = identifier
         self.treatment_variable = parse_state(treatment_variable)
         self.outcome_variable = parse_state(outcome_variable)
@@ -693,11 +883,11 @@ class IdentifiedEstimand:
         self.identifier_method = identifier_name
 
     def get_backdoor_variables(self, key=None):
-        """ Return a list containing the backdoor variables.
+        """Return a list containing the backdoor variables.
 
-            If the calling estimator method is a backdoor method, return the
-            backdoor variables corresponding to its target estimand.
-            Otherwise, return the backdoor variables for the default backdoor estimand.
+        If the calling estimator method is a backdoor method, return the
+        backdoor variables corresponding to its target estimand.
+        Otherwise, return the backdoor variables for the default backdoor estimand.
         """
         if key is None:
             if self.identifier_method and self.identifier_method.startswith("backdoor"):
@@ -723,6 +913,7 @@ class IdentifiedEstimand:
         """Return a list containing the mediator variables (if present)
         """
         return self.mediator_variables
+    
     def get_instrumental_variables(self):
         """Return a list containing the instrumental variables (if present)
         """
