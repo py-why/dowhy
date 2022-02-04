@@ -61,11 +61,10 @@ def partial_corr(data=None, x=None, y=None, z=None, method="pearson"):
         V = data.rank(na_option='keep').cov()
     else:
         V = data.astype(float).cov()
-    Vi = np.linalg.pinv(V, hermitian=True) 
+    Vi = np.linalg.pinv(V, hermitian=True)  
     Vi_diag = Vi.diagonal()
     D = np.diag(np.sqrt(1 / Vi_diag))
-    pcor = -1 * (D @ Vi @ D)
-
+    pcor = -1 * (D @ Vi @ D)  
     if z is not None:
         r = pcor[0, 1]
     else:
@@ -73,10 +72,8 @@ def partial_corr(data=None, x=None, y=None, z=None, method="pearson"):
             spcor = pcor / \
                 np.sqrt(np.diag(V))[..., None] / \
                 np.sqrt(np.abs(Vi_diag - Vi ** 2 / Vi_diag[..., None])).T
-        if y_covar is not None:
-            r = spcor[0, 1]  
-        else:
-            r = spcor[1, 0] 
+        r = spcor[1, 0] 
+            
 
     if np.isnan(r):
         return {'n': n, 'r': np.nan, 'CI95%': np.nan, 'p-val': np.nan}
@@ -86,7 +83,7 @@ def partial_corr(data=None, x=None, y=None, z=None, method="pearson"):
     tval = r * np.sqrt(dof / (1 - r**2))
     pval = 2 * t.sf(np.abs(tval), dof)
 
-    ci = compute_ci(stat=r, nx=(n - k), ny=(n - k))
+    ci = compute_ci(stat=r, nx=(n - k), ny=(n - k), decimals=6)
     ci=np.round(ci, 3)
     stats = {
         'n': n,
