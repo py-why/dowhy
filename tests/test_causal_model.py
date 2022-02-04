@@ -331,7 +331,7 @@ class TestCausalModel(object):
             missing_nodes_as_confounders=True
         )
         true_implications, false_implications = model.refute_graph(1,method_name = "partial_correlation")
-        assert len(false_implications) is 0
+        assert len(false_implications) == 0
         assert len(true_implications) > 0
 
     @pytest.mark.parametrize(["beta", "num_instruments", "num_samples"],
