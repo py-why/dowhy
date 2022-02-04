@@ -83,7 +83,7 @@ def partial_corr(data=None, x=None, y=None, z=None, method="pearson"):
     tval = r * np.sqrt(dof / (1 - r**2))
     pval = 2 * t.sf(np.abs(tval), dof)
 
-    ci = compute_ci(stat=r, nx=(n - k), ny=(n - k), decimals=6)
+    ci = compute_ci(stat=r, nx=(n - k), ny=(n - k))
     ci=np.round(ci, 3)
     stats = {
         'n': n,
