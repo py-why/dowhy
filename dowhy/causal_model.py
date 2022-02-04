@@ -4,7 +4,7 @@
 import logging
 
 from sympy import init_printing
-
+from itertools import combinations
 import dowhy.graph_learners as graph_learners
 import dowhy.causal_estimators as causal_estimators
 import dowhy.causal_refuters as causal_refuters
@@ -14,6 +14,7 @@ from dowhy.causal_graph import CausalGraph
 from dowhy.causal_identifier import CausalIdentifier
 from dowhy.causal_identifiers.id_identifier import IDIdentifier
 from dowhy.utils.api import parse_state
+from dowhy.utils.cit import partial_corr
 
 init_printing()  # To display symbolic math symbols
 
@@ -458,5 +459,56 @@ class CausalModel:
         if print_to_stdout:
             print(summary_text)
         return summary_text
+
+    def refute_graph(self, k= 1, method_name =None ):
+        """
+        Check if the dependencies in input graph matches with the dataset
+        :param k: number of covariates in set Z while testing conditional independence ( X ⫫ Y ) | Z 
+        :param method_name: name of method name to test conditional independece in data
+        
+        : returns: python lists true_implications and false_implications which contain the implications which were 
+                   were true for the dataset and not true respectively.
+        """
+        all_nodes=list(self._graph.get_all_nodes(include_unobserved=False))
+        all_possible_combinations = list(combinations(all_nodes, 2))
+        conditional_independences=[]
+        print("For the input graph following are the conditional independences: ")
+        for combination in all_possible_combinations:
+            a=combination[0]
+            b=combination[1]
+            all_nodes.remove(a) 
+            all_nodes.remove(b)
+            k_sized_lists=list(combinations(all_nodes,k)) 
+            for k_list in k_sized_lists:
+                if self._graph.check_dseparation([str(a)], [str(b)], k_list) == True :
+                    print(a , " and ",  b , " are CI given ", k_list)
+                    conditional_independences.append([a, b, k_list])
+            all_nodes.append(a)
+            all_nodes.append(b)
+
+        if method_name is None or method_name is "partial_correlation" :
+            true_implications = []
+            false_implications = []
+            for a, b, c in conditional_independences:
+                stats = partial_corr(data=self._data, x= a, y=b, z=list(c))
+                p_value = stats['p-val']
+                if(p_value < 0.05):
+                    #Reject H0
+                    false_implications.append([a,b,c])
+                    #print(a, " and " , b , " are not Conditionally Independent of " , c )
+                else:
+                    true_implications.append([a, b, c])
+                    #print(a, " and " , b , " are Conditionally Independent of " , c )
+
+        if (len(false_implications) > 0):
+            print("The following implications did not satisfy with the dataset ")
+            for a, b, c in false_implications :
+                print(a, " and " , b , " given " , c )
+        elif (len(false_implications) == 0):
+            print("All the implications from the graph were met")
+
+        return true_implications, false_implications
+
+
 
 

@@ -1,10 +1,10 @@
 import pytest
 
 from sklearn import linear_model
-
 import dowhy
 import dowhy.datasets
 from dowhy import CausalModel
+import pandas as pd
 
 
 class TestCausalModel(object):
@@ -274,6 +274,121 @@ class TestCausalModel(object):
         assert all(node_name in all_nodes for node_name in ["Unobserved Confounders", "X0", "X1", "X2", "Z0", "v0", "y"])
         all_nodes = model._graph.get_all_nodes(include_unobserved=False)
         assert "Unobserved Confounders" not in all_nodes
+
+    @pytest.mark.parametrize(["beta", "num_instruments", "num_samples"],
+                             [(10, 2, 5000),])
+    def test_graph_refutation(self, beta, num_instruments, num_samples):
+        data = dowhy.datasets.linear_dataset(beta=beta,
+        num_common_causes=5,
+        num_instruments = num_instruments,
+        num_effect_modifiers=1,
+        num_samples=num_samples, 
+        treatment_is_binary=True,
+        stddev_treatment_noise=10,
+        num_discrete_common_causes=1)
+        df = pd.read_csv('tests/test_data.csv')
+        model = CausalModel(
+            data=df,
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            proceed_when_unidentifiable=True,
+            test_significance=None
+        )
+        gml_str = """dag {
+        W0 [pos="-2.200,-1.520"]
+        W1 [pos="-1.457,-1.533"]
+        W2 [pos="-0.763,-1.547"]
+        W3 [pos="1.041,-1.587"]
+        W4 [pos="1.510,-1.560"]
+        X0 [pos="1.222,-0.625"]
+        Z0 [pos="0.390,-1.601"]
+        Z1 [pos="-0.176,-1.540"]
+        v0 [pos="-0.219,-0.881"]
+        y [pos="-0.144,-0.296"]
+        W0 -> v0
+        W0 -> y
+        W1 -> v0
+        W1 -> y
+        W2 -> v0
+        W2 -> y
+        W3 -> v0
+        W3 -> y
+        W4 -> v0
+        W4 -> y
+        X0 -> y
+        Z0 -> v0
+        Z1 -> v0
+        v0 -> y
+        }"""
+        model = CausalModel(
+            data=df,
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=gml_str,
+            proceed_when_unidentifiable=True,
+            test_significance=None,
+            missing_nodes_as_confounders=True
+        )
+        true_implications, false_implications = model.refute_graph(1,method_name = "partial_correlation")
+        assert len(false_implications) is 0
+        assert len(true_implications) > 0
+
+    @pytest.mark.parametrize(["beta", "num_instruments", "num_samples"],
+                             [(10, 2, 5000),])
+    def test_graph_refutation2(self, beta, num_instruments, num_samples):
+        data = dowhy.datasets.linear_dataset(beta=beta,
+        num_common_causes=5,
+        num_instruments = num_instruments,
+        num_effect_modifiers=1,
+        num_samples=num_samples, 
+        treatment_is_binary=True,
+        stddev_treatment_noise=10,
+        num_discrete_common_causes=1)
+        df = pd.read_csv('tests/test_data.csv')
+        model = CausalModel(
+            data=df,
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            proceed_when_unidentifiable=True,
+            test_significance=None
+        )
+        gml_str = """dag {
+        W0 [pos="-2.200,-1.520"]
+        W1 [pos="-1.457,-1.533"]
+        W2 [pos="-0.763,-1.547"]
+        W3 [pos="1.041,-1.587"]
+        W4 [pos="1.510,-1.560"]
+        X0 [pos="1.222,-0.625"]
+        Z0 [pos="0.390,-1.601"]
+        Z1 [pos="-0.176,-1.540"]
+        v0 [pos="-0.219,-0.881"]
+        y [pos="-0.144,-0.296"]
+        W0 -> v0
+        W0 -> y
+        W1 -> v0
+        W1 -> y
+        W2 -> v0
+        W2 -> y
+        W3 -> v0
+        W3 -> y
+        W4 -> v0
+        X0 -> Z0
+        Z0 -> Z1
+        }"""
+        model = CausalModel(
+            data=df,
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=gml_str,
+            proceed_when_unidentifiable=True,
+            test_significance=None,
+            missing_nodes_as_confounders=True
+        )
+        true_implications, false_implications = model.refute_graph(1,method_name = "partial_correlation")
+        assert len(false_implications) > 0
+        assert len(true_implications) > 0
 
 if __name__ == "__main__":
     pytest.main([__file__])
