@@ -486,7 +486,7 @@ class CausalModel:
             all_nodes.append(a)
             all_nodes.append(b)
 
-        if method_name is None or method_name is "partial_correlation" :
+        if method_name is None or method_name == "partial_correlation" :
             true_implications = []
             false_implications = []
             for a, b, c in conditional_independences:
