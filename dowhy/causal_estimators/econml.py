@@ -155,7 +155,7 @@ class Econml(CausalEstimator):
             expr += " | " + ",".join(self._effect_modifier_names)
         return expr
     
-    def shap_values(self, df: pd.DataFrame, *args, **kwargs) -> "Explanation":
+    def shap_values(self, df: pd.DataFrame, *args, **kwargs):
         return self.estimator.shap_values(
             df[self._effect_modifier_names].values, *args, **kwargs
         )
