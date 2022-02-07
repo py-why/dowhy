@@ -154,3 +154,18 @@ class Econml(CausalEstimator):
             expr += "+".join(var_list)
             expr += " | " + ",".join(self._effect_modifier_names)
         return expr
+    
+    def shap_values(self, df: pd.DataFrame, *args, **kwargs):
+        return self.estimator.shap_values(
+            df[self._effect_modifier_names].values, *args, **kwargs
+        )
+
+    def effect(self, df: pd.DataFrame, *args, **kwargs) -> np.ndarray:
+        return self.estimator.effect(
+            df[self._effect_modifier_names].values, *args, **kwargs
+        )
+
+    def effect_inference(self, df: pd.DataFrame, *args, **kwargs) -> np.ndarray:
+        return self.estimator.effect_inference(
+            df[self._effect_modifier_names].values, *args, **kwargs
+        )
