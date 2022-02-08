@@ -14,7 +14,7 @@ from dowhy.causal_graph import CausalGraph
 from dowhy.causal_identifier import CausalIdentifier
 from dowhy.causal_identifiers.id_identifier import IDIdentifier
 from dowhy.utils.api import parse_state
-from dowhy.utils.cit import partial_corr
+from dowhy.causal_refuter import GraphRefutation
 
 init_printing()  # To display symbolic math symbols
 
@@ -460,54 +460,47 @@ class CausalModel:
             print(summary_text)
         return summary_text
 
-    def refute_graph(self, k= 1, method_name =None ):
+    def refute_graph(self, k= 1, method_name =None, test_set = None ):
         """
         Check if the dependencies in input graph matches with the dataset
         :param k: number of covariates in set Z while testing conditional independence ( X ⫫ Y ) | Z 
-        :param method_name: name of method name to test conditional independece in data
-        
-        : returns: python lists true_implications and false_implications which contain the implications which were 
-                   were true for the dataset and not true respectively.
+        :param method_name: name of method to test conditional independece in data
+        :param test_set: list of implications to be test input by the user in the format 
+        [(x,y,(z1,z2)),
+        (x,y, (z3,))
+        ]
+        : returns: an instance of GraphRefutation class
         """
-        all_nodes=list(self._graph.get_all_nodes(include_unobserved=False))
-        all_possible_combinations = list(combinations(all_nodes, 2))
-        conditional_independences=[]
-        print("For the input graph following are the conditional independences: ")
-        for combination in all_possible_combinations:
-            a=combination[0]
-            b=combination[1]
-            all_nodes.remove(a) 
-            all_nodes.remove(b)
-            k_sized_lists=list(combinations(all_nodes,k)) 
-            for k_list in k_sized_lists:
-                if self._graph.check_dseparation([str(a)], [str(b)], k_list) == True :
-                    print(a , " and ",  b , " are CI given ", k_list)
-                    conditional_independences.append([a, b, k_list])
-            all_nodes.append(a)
-            all_nodes.append(b)
 
-        if method_name is None or method_name == "partial_correlation" :
-            true_implications = []
-            false_implications = []
-            for a, b, c in conditional_independences:
-                stats = partial_corr(data=self._data, x= a, y=b, z=list(c))
-                p_value = stats['p-val']
-                if(p_value < 0.05):
-                    #Reject H0
-                    false_implications.append([a,b,c])
-                    #print(a, " and " , b , " are not Conditionally Independent of " , c )
-                else:
-                    true_implications.append([a, b, c])
-                    #print(a, " and " , b , " are Conditionally Independent of " , c )
+        refuter = GraphRefutation(data = self._data, method_name= method_name)
 
-        if (len(false_implications) > 0):
-            print("The following implications did not satisfy with the dataset ")
-            for a, b, c in false_implications :
-                print(a, " and " , b , " given " , c )
-        elif (len(false_implications) == 0):
-            print("All the implications from the graph were met")
+        if test_set is None:
+            all_nodes=list(self._graph.get_all_nodes(include_unobserved=False))
+            all_possible_combinations = list(combinations(all_nodes, 2))  #Generating sets of size 2 for different x and y
+            conditional_independences=[]
+            self.logger.info("The followed conditional independences are true for the input graph")
+            for combination in all_possible_combinations:  #Iterate over the unique 2-sized sets [x,y]
+                a=combination[0]
+                b=combination[1]
+                all_nodes.remove(a) #Remove x from list of all nodes, in order to skip it from set Z
+                all_nodes.remove(b) #Remove y from list of all nodes, in order to skip it from set Z
+                k_sized_lists=list(combinations(all_nodes,k)) #Create k-sized unique Z set from remaining list of all nodes
+                for k_list in k_sized_lists:
+                    if self._graph.check_dseparation([str(a)], [str(b)], k_list) == True :
+                        self.logger.info(" %s and %s are CI given %s ", a, b, k_list)
+                        conditional_independences.append([a, b, k_list])
+                all_nodes.append(a) #Add x back to list of all nodes
+                all_nodes.append(b) #Add y back to list of all nodes
 
-        return true_implications, false_implications
+            refuter.perform_conditional_independence_test(test_set = conditional_independences)
+
+        else:
+            refuter.perform_conditional_independence_test(test_set = test_set)
+        
+        self.logger.info(refuter._refutation_passed)
+        
+        return refuter
+
 
 
 

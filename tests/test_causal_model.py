@@ -330,9 +330,9 @@ class TestCausalModel(object):
             test_significance=None,
             missing_nodes_as_confounders=True
         )
-        true_implications, false_implications = model.refute_graph(1,method_name = "partial_correlation")
-        assert len(false_implications) == 0
-        assert len(true_implications) > 0
+        graph_refuter_object = model.refute_graph(1,method_name = "partial_correlation")
+        assert graph_refuter_object._refutation_passed == True
+        assert len(graph_refuter_object._true_implications) > 0
 
     @pytest.mark.parametrize(["beta", "num_instruments", "num_samples"],
                              [(10, 2, 5000),])
@@ -386,9 +386,9 @@ class TestCausalModel(object):
             test_significance=None,
             missing_nodes_as_confounders=True
         )
-        true_implications, false_implications = model.refute_graph(1,method_name = "partial_correlation")
-        assert len(false_implications) > 0
-        assert len(true_implications) > 0
+        graph_refuter_object = model.refute_graph(1,method_name = "partial_correlation")
+        assert len(graph_refuter_object._false_implications) > 0
+        assert len(graph_refuter_object._true_implications) > 0
 
 if __name__ == "__main__":
     pytest.main([__file__])
