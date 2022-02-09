@@ -3,8 +3,23 @@ import pandas as pd
 import numpy as np
 
 
-def compute_ci(stat=None, nx=None, ny=None, confidence=.95):
-    """Parametric confidence intervals around correlation coefficient.
+def compute_ci(r=None, nx=None, ny=None, confidence=.95):
+    """Compute Parametric confidence intervals around correlation coefficient.
+    See : https://online.stat.psu.edu/stat505/lesson/6/6.3
+
+    This is done by applying Fisher's r to z transform
+    z = .5[ln((1+r)/(1-r))] = arctanh(r)
+
+    The Standard error is 1/sqrt(N-3) where N is sample size
+
+    The critical value for normal distribution for a corresponding confidence
+    level is calculated from stats.norm.ppf((1 - alpha)/2) for two tailed test
+
+    The lower and upper condidence intervals in z space are calculated with the formula
+    z ± critical value*error
+
+    The confidence interval is then converted back to r space
+    
     :param stat : correlation coefficient
     :param nx : length of vector x
     :param ny :length of vector y
@@ -13,21 +28,27 @@ def compute_ci(stat=None, nx=None, ny=None, confidence=.95):
     :returns : array containing confidence interval
     """
 
-    assert stat is not None and nx is not None
+    assert r is not None and nx is not None
     assert isinstance(confidence, float)
     assert 0 < confidence < 1
 
+    z = np.arctanh(r) # Fisher Transform  from r to z
+    se = 1 / np.sqrt(nx - 3) # Standard error = 1/sqrt(N-3) where N is sample size
+    crit = np.abs(norm.ppf((1 - confidence) / 2)) # Z-critical value 
+    ci_z = np.array([z - crit * se, z + crit * se]) # CI = point estimator ± critical value*error
+    ci = np.tanh(ci_z)  # Back Transform to r-space
 
-    z = np.arctanh(stat) 
-    se = 1 / np.sqrt(nx - 3)
-    
-    crit = np.abs(norm.ppf((1 - confidence) / 2))
-    ci_z = np.array([z - crit * se, z + crit * se])
-    ci = np.tanh(ci_z)  
-    return np.round(ci, 5)
+    return ci
 
 def partial_corr(data=None, x=None, y=None, z=None, method="pearson"):
-    """ Calculate Partial correlation.
+    """ Calculate Partial correlation which is the degree of association between 
+    x and y after removing effect of z. This is done by calculating correlation
+    coefficient between the residuals of two linear regressions :
+    x\sim z, y\sim z
+    See : 1 https://en.wikipedia.org/wiki/Partial_correlation
+          2 https://onlinelibrary.wiley.com/doi/pdf/10.1111/j.1467-842X.2004.00360.x?casa_token=p_D3joHC8C0AAAAA:qigIZHVfcVi8vsz1j2t7uQYOorrYaF3Tm4lpQOUzqG_J9gJgtFerOyliKBnQPVG187nJxbA-wcbXU3QcOw
+          3 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4681537/
+          4 http://parker.ad.siu.edu/Olive/slch6.pdf
     :param data : pandas dataframe 
     :param x : Column name in data
     :param y : Column name in data
@@ -41,49 +62,41 @@ def partial_corr(data=None, x=None, y=None, z=None, method="pearson"):
         p-val: p-value
     """
 
-    assert data.shape[0] > 2
-    assert x != z
-    assert y != z
-    assert x != y
+    assert data.shape[0] > 2 # Check for atleast 3 samples
+    assert x != z # x and z should be distinct
+    assert y != z # y and z should be distinct
+    assert x != y # x and y should be distinct
     if isinstance(z, list):
-        assert x not in z
-        assert y not in z
+        assert x not in z # x and z should be distinct
+        assert y not in z # y and z should be distinct
 
-    combined_variables = [x,y]
+    combined_variables = [x,y] # Combine all variables - x, y and z
     for var in z:
-        combined_variables.append(var)
-    data = data[combined_variables].dropna()
-    n = data.shape[0] 
-    k = data.shape[1] - 2  
+        combined_variables.append(var) 
+    data = data[combined_variables].dropna() #Drop missing values
+    n = data.shape[0] # Number of samples after dropping missing values
+    k = data.shape[1] - 2 # Number of covariates
     assert n > 2
 
     if method == "spearman":
-        V = data.rank(na_option='keep').cov()
+        V = data.rank(na_option='keep').cov() # Change data to rank for spearman correlation
     else:
-        V = data.astype(float).cov()
-    Vi = np.linalg.pinv(V, hermitian=True)  
-    Vi_diag = Vi.diagonal()
-    D = np.diag(np.sqrt(1 / Vi_diag))
+        V = data.astype(float).cov() # Computing Covariance Matrix
+    Vi = np.linalg.pinv(V, hermitian=True)   # Computing Inverse Covariance Matrix
+    Vi_diag = Vi.diagonal()  # Storing variance
+    D = np.diag(np.sqrt(1 / Vi_diag)) # Storing Standard Deviations from diagonal of inverse covariance matrix
     pcor = -1 * (D @ Vi @ D)  
-    if z is not None:
-        r = pcor[0, 1]
-    else:
-        with np.errstate(divide='ignore'):
-            spcor = pcor / \
-                np.sqrt(np.diag(V))[..., None] / \
-                np.sqrt(np.abs(Vi_diag - Vi ** 2 / Vi_diag[..., None])).T
-        r = spcor[1, 0] 
-            
-
+    r = pcor[0,1]
+    
     if np.isnan(r):
         return {'n': n, 'r': np.nan, 'CI95%': np.nan, 'p-val': np.nan}
 
- 
-    dof = n - k - 2
-    tval = r * np.sqrt(dof / (1 - r**2))
-    pval = 2 * t.sf(np.abs(tval), dof)
+    # Finding p-value using student T test
+    dof = n - k - 2  # Degree of freedom for multivariate analysis
+    tval = r * np.sqrt(dof / (1 - r**2)) # Test statistic
+    pval = 2 * t.sf(np.abs(tval), dof) # Calculate p-value corresponding to the test statistic and degree of freedom
 
-    ci = compute_ci(stat=r, nx=(n - k), ny=(n - k))
+    ci = compute_ci(r=r, nx=(n - k), ny=(n - k)) #Finding Confidence Interval
     ci=np.round(ci, 3)
     stats = {
         'n': n,

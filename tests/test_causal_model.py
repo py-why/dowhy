@@ -278,6 +278,8 @@ class TestCausalModel(object):
     @pytest.mark.parametrize(["beta", "num_instruments", "num_samples"],
                              [(10, 2, 5000),])
     def test_graph_refutation(self, beta, num_instruments, num_samples):
+        import numpy.random
+        numpy.random.seed(102)
         data = dowhy.datasets.linear_dataset(beta=beta,
         num_common_causes=5,
         num_instruments = num_instruments,
@@ -286,7 +288,7 @@ class TestCausalModel(object):
         treatment_is_binary=True,
         stddev_treatment_noise=10,
         num_discrete_common_causes=1)
-        df = pd.read_csv('tests/test_data.csv')
+        df = data["df"]
         model = CausalModel(
             data=df,
             treatment=data["treatment_name"],
@@ -345,7 +347,7 @@ class TestCausalModel(object):
         treatment_is_binary=True,
         stddev_treatment_noise=10,
         num_discrete_common_causes=1)
-        df = pd.read_csv('tests/test_data.csv')
+        df = data["df"]
         model = CausalModel(
             data=df,
             treatment=data["treatment_name"],

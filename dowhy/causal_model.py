@@ -14,7 +14,7 @@ from dowhy.causal_graph import CausalGraph
 from dowhy.causal_identifier import CausalIdentifier
 from dowhy.causal_identifiers.id_identifier import IDIdentifier
 from dowhy.utils.api import parse_state
-from dowhy.causal_refuter import GraphRefutation
+from dowhy.causal_refuters.graph_refuter import GraphRefuter
 
 init_printing()  # To display symbolic math symbols
 
@@ -460,42 +460,49 @@ class CausalModel:
             print(summary_text)
         return summary_text
 
-    def refute_graph(self, k= 1, method_name =None, test_set = None ):
+    def refute_graph(self, k= 1, method_name =None, independence_constraints = None ):
         """
-        Check if the dependencies in input graph matches with the dataset
-        :param k: number of covariates in set Z while testing conditional independence ( X ⫫ Y ) | Z 
+        Check if the dependencies in input graph matches with the dataset - 
+        ( X ⫫ Y ) | Z 
+        where X and Y are considered as singleton sets currently
+        Z can have multiple variables
+        :param k: number of covariates in set Z 
         :param method_name: name of method to test conditional independece in data
-        :param test_set: list of implications to be test input by the user in the format 
+        :param independence_constraints: list of implications to be test input by the user in the format 
         [(x,y,(z1,z2)),
         (x,y, (z3,))
         ]
-        : returns: an instance of GraphRefutation class
+        : returns: an instance of GraphRefuter class
         """
+        
+        refuter = GraphRefuter(data = self._data, method_name= method_name)
 
-        refuter = GraphRefutation(data = self._data, method_name= method_name)
-
-        if test_set is None:
+        if independence_constraints is None:
             all_nodes=list(self._graph.get_all_nodes(include_unobserved=False))
-            all_possible_combinations = list(combinations(all_nodes, 2))  #Generating sets of size 2 for different x and y
+            num_nodes = len(all_nodes)
+            array_indices = list(range(0,num_nodes))
+            all_possible_combinations = list(combinations(array_indices, 2))  #Generating sets of indices of size 2 for different x and y
             conditional_independences=[]
             self.logger.info("The followed conditional independences are true for the input graph")
             for combination in all_possible_combinations:  #Iterate over the unique 2-sized sets [x,y]
-                a=combination[0]
-                b=combination[1]
-                all_nodes.remove(a) #Remove x from list of all nodes, in order to skip it from set Z
-                all_nodes.remove(b) #Remove y from list of all nodes, in order to skip it from set Z
-                k_sized_lists=list(combinations(all_nodes,k)) #Create k-sized unique Z set from remaining list of all nodes
+                i=combination[0]
+                j=combination[1]
+                a=all_nodes[i]
+                b=all_nodes[j]
+                if(i < j ):
+                    temp_arr = all_nodes[:i] + all_nodes[i+1:j]+ all_nodes[j+1:]
+                else:
+                    temp_arr = all_nodes[:j] + all_nodes[j+1:i]+ all_nodes[i+1:]
+                k_sized_lists=list(combinations(temp_arr,k))
                 for k_list in k_sized_lists:
                     if self._graph.check_dseparation([str(a)], [str(b)], k_list) == True :
                         self.logger.info(" %s and %s are CI given %s ", a, b, k_list)
                         conditional_independences.append([a, b, k_list])
-                all_nodes.append(a) #Add x back to list of all nodes
-                all_nodes.append(b) #Add y back to list of all nodes
-
-            refuter.perform_conditional_independence_test(test_set = conditional_independences)
+    
+            refuter.perform_conditional_independence_test(independence_constraints = conditional_independences)
 
         else:
-            refuter.perform_conditional_independence_test(test_set = test_set)
+            refuter.perform_conditional_independence_test(independence_constraints = independence_constraints)
         
         self.logger.info(refuter._refutation_passed)
         
