@@ -1,5 +1,5 @@
 import logging
-from dowhy.causal_refuter import CausalRefuter
+from dowhy.causal_refuter import CausalRefuter, CausalRefutation
 from dowhy.utils.cit import partial_corr
 
 class GraphRefuter(CausalRefuter):
@@ -31,15 +31,15 @@ class GraphRefuter(CausalRefuter):
             self._refutation_passed = True
         else:
             self._refutation_passed = False
-    
-    def perform_conditional_independence_test(self,independence_constraints):
+      
+    def refute_model(self,independence_constraints):
         """
         Method to test conditional independence using the graph refutation object on the given testing set
 
         :param independence_constraints: List of implications to test the conditional independence on
         """
-
         if self._method_name is None or self._method_name == "partial_correlation" :
+            refute = GraphRefutation(method_name=self._method_name)
             for a,b,c in independence_constraints:
                 stats = partial_corr(data=self._data, x= a, y=b, z=list(c))
                 p_value = stats['p-val']
@@ -52,5 +52,31 @@ class GraphRefuter(CausalRefuter):
                     self._true_implications.append([a, b, c])
                     self._results[key]= [p_value, True]
             self.set_refutation_result() #Set refutation result accordingly
+            refute.add_conditional_independence_test_result(number_of_constraints_model = len(independence_constraints), number_of_constraints_satisfied = len(self._true_implications), refutation_result = self._refutation_passed)
         else:
             self.logger.error("Invalid conditional independence test")
+        return refute
+
+
+class GraphRefutation(CausalRefutation):
+    """Class for storing the result of a refutation method.
+    """
+
+    def __init__(self, method_name):
+        self.method_name = method_name
+        self.number_of_constraints_model = None
+        self.number_of_constraints_satisfied = None
+        self.refutation_result = None
+    
+    def add_conditional_independence_test_result(self, number_of_constraints_model, number_of_constraints_satisfied, refutation_result):
+        self.number_of_constraints_model = number_of_constraints_model
+        self.number_of_constraints_satisfied = number_of_constraints_satisfied
+        self.refutation_result = refutation_result
+    
+    def __str__(self):
+        if self.refutation_result is None:
+            return "Method name:{0}\n".format(self.method_name)
+        else:
+            return "Method name:{0}\nNumber of conditional independencies entailed by model:{1}\nNumber of independences satisfied by data:{2}\nTest passed:{3}\n".format(
+                self.method_name, self.number_of_constraints_model, self.number_of_constraints_satisfied, self.refutation_result
+            )

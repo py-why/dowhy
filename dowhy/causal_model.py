@@ -499,14 +499,14 @@ class CausalModel:
                         self.logger.info(" %s and %s are CI given %s ", a, b, k_list)
                         conditional_independences.append([a, b, k_list])
     
-            refuter.perform_conditional_independence_test(independence_constraints = conditional_independences)
+            res = refuter.refute_model(independence_constraints = conditional_independences)
 
         else:
-            refuter.perform_conditional_independence_test(independence_constraints = independence_constraints)
+            res = refuter.refute_model(independence_constraints = independence_constraints)
         
         self.logger.info(refuter._refutation_passed)
         
-        return refuter
+        return res
 
 
 
