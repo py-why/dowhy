@@ -4,7 +4,7 @@
 import logging
 
 from sympy import init_printing
-
+from itertools import combinations
 import dowhy.graph_learners as graph_learners
 import dowhy.causal_estimators as causal_estimators
 import dowhy.causal_refuters as causal_refuters
@@ -14,6 +14,7 @@ from dowhy.causal_graph import CausalGraph
 from dowhy.causal_identifier import CausalIdentifier
 from dowhy.causal_identifiers.id_identifier import IDIdentifier
 from dowhy.utils.api import parse_state
+from dowhy.causal_refuters.graph_refuter import GraphRefuter
 
 init_printing()  # To display symbolic math symbols
 
@@ -458,5 +459,56 @@ class CausalModel:
         if print_to_stdout:
             print(summary_text)
         return summary_text
+
+    def refute_graph(self, k= 1, method_name =None, independence_constraints = None ):
+        """
+        Check if the dependencies in input graph matches with the dataset - 
+        ( X ⫫ Y ) | Z 
+        where X and Y are considered as singleton sets currently
+        Z can have multiple variables
+        :param k: number of covariates in set Z 
+        :param method_name: name of method to test conditional independece in data
+        :param independence_constraints: list of implications to be test input by the user in the format 
+        [(x,y,(z1,z2)),
+        (x,y, (z3,))
+        ]
+        : returns: an instance of GraphRefuter class
+        """
+        
+        refuter = GraphRefuter(data = self._data, method_name= method_name)
+
+        if independence_constraints is None:
+            all_nodes=list(self._graph.get_all_nodes(include_unobserved=False))
+            num_nodes = len(all_nodes)
+            array_indices = list(range(0,num_nodes))
+            all_possible_combinations = list(combinations(array_indices, 2))  #Generating sets of indices of size 2 for different x and y
+            conditional_independences=[]
+            self.logger.info("The followed conditional independences are true for the input graph")
+            for combination in all_possible_combinations:  #Iterate over the unique 2-sized sets [x,y]
+                i=combination[0]
+                j=combination[1]
+                a=all_nodes[i]
+                b=all_nodes[j]
+                if(i < j ):
+                    temp_arr = all_nodes[:i] + all_nodes[i+1:j]+ all_nodes[j+1:]
+                else:
+                    temp_arr = all_nodes[:j] + all_nodes[j+1:i]+ all_nodes[i+1:]
+                k_sized_lists=list(combinations(temp_arr,k))
+                for k_list in k_sized_lists:
+                    if self._graph.check_dseparation([str(a)], [str(b)], k_list) == True :
+                        self.logger.info(" %s and %s are CI given %s ", a, b, k_list)
+                        conditional_independences.append([a, b, k_list])
+    
+            res = refuter.refute_model(independence_constraints = conditional_independences)
+
+        else:
+            res = refuter.refute_model(independence_constraints = independence_constraints)
+        
+        self.logger.info(refuter._refutation_passed)
+        
+        return res
+
+
+
 
 
