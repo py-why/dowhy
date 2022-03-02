@@ -1,0 +1,316 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Identifying Effect using ID Algorithm\n",
+    "\n",
+    "This is a tutorial notebook for using the ID Algorithm in the causal identification step of causal inference.\n",
+    "\n",
+    "Link to paper: https://ftp.cs.ucla.edu/pub/stat_ser/shpitser-thesis.pdf\n",
+    "The pseudo code has been provided on Pg 40.\n",
+    "        "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from dowhy import CausalModel\n",
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "from IPython.display import Image, display\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Examples\n",
+    "\n",
+    "The following sections show the working of the ID Algorithm on multiple test cases. In the graphs, **T** denotes the treatment variable, **Y** denotes the outcome variable and the **Xs** are additional variables."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Case 1\n",
+    "\n",
+    "This example exhibits the performance of the algorithm on the simplest possible graph."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Random data\n",
+    "treatment = \"T\"\n",
+    "outcome = \"Y\"\n",
+    "causal_graph = \"digraph{T->Y;}\"\n",
+    "columns = list(treatment) + list(outcome)\n",
+    "df = pd.DataFrame(columns=columns)\n",
+    "\n",
+    "# Causal Model Initialization\n",
+    "causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)\n",
+    "\n",
+    "# View graph\n",
+    "causal_model.view_model()\n",
+    "from IPython.display import Image, display\n",
+    "print(\"Graph:\")\n",
+    "display(Image(filename=\"causal_model.png\"))\n",
+    "\n",
+    "# Causal Identification using the ID Algorithm\n",
+    "identified_estimand = causal_model.identify_effect(method_name=\"id-algorithm\")\n",
+    "print(\"\\nResult for identification using ID Algorithm:\")\n",
+    "print(identified_estimand)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Case 2\n",
+    "\n",
+    "This example exhibits the performance of the algorithm on a cyclic graph. This example demonstrates that a directed acyclic graph (DAG) is needed for the ID algorithm."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Random data\n",
+    "treatment = \"T\"\n",
+    "outcome = \"Y\"\n",
+    "causal_graph = \"digraph{T->Y; Y->T;}\"\n",
+    "columns = list(treatment) + list(outcome)\n",
+    "df = pd.DataFrame(columns=columns)\n",
+    "\n",
+    "# Causal Model Initialization\n",
+    "causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)\n",
+    "\n",
+    "# View graph\n",
+    "causal_model.view_model()\n",
+    "from IPython.display import Image, display\n",
+    "print(\"Graph:\")\n",
+    "display(Image(filename=\"causal_model.png\"))\n",
+    "\n",
+    "try:\n",
+    "    # Causal Identification using the ID Algorithm\n",
+    "    identified_estimand = causal_model.identify_effect(method_name=\"id-algorithm\")\n",
+    "    print(\"\\nResult for identification using ID Algorithm:\")\n",
+    "    print(identified_estimand)\n",
+    "except:\n",
+    "    print(\"Identification Failed: The graph must be a directed acyclic graph (DAG).\")\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Case 3\n",
+    "\n",
+    "This example exhibits the performance of the algorithm in the presence of a mediator variable(**X1**)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Random data\n",
+    "treatment = \"T\"\n",
+    "outcome = \"Y\"\n",
+    "variables = [\"X1\"]\n",
+    "causal_graph = \"digraph{T->X1;X1->Y;}\"\n",
+    "columns = list(treatment) + list(outcome) + list(variables)\n",
+    "df = pd.DataFrame(columns=columns)\n",
+    "\n",
+    "# Causal Model Initialization\n",
+    "causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)\n",
+    "\n",
+    "# View graph\n",
+    "causal_model.view_model()\n",
+    "from IPython.display import Image, display\n",
+    "print(\"Graph:\")\n",
+    "display(Image(filename=\"causal_model.png\"))\n",
+    "\n",
+    "# Causal Identification using the ID Algorithm\n",
+    "identified_estimand = causal_model.identify_effect(method_name=\"id-algorithm\")\n",
+    "print(\"\\nResult for identification using ID Algorithm:\")\n",
+    "print(identified_estimand)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Case 4\n",
+    "\n",
+    "The example exhibits the performance of the algorithm in the presence of a direct and indirect path(through **X1**) from **T** to **Y**."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Random data\n",
+    "treatment = \"T\"\n",
+    "outcome = \"Y\"\n",
+    "variables = [\"X1\"]\n",
+    "causal_graph = \"digraph{T->Y;T->X1;X1->Y;}\"\n",
+    "columns = list(treatment) + list(outcome) + list(variables)\n",
+    "df = pd.DataFrame(columns=columns)\n",
+    "\n",
+    "# Causal Model Initialization\n",
+    "causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)\n",
+    "\n",
+    "# View graph\n",
+    "causal_model.view_model()\n",
+    "from IPython.display import Image, display\n",
+    "print(\"Graph:\")\n",
+    "display(Image(filename=\"causal_model.png\"))\n",
+    "\n",
+    "# Causal Identification using the ID Algorithm\n",
+    "identified_estimand = causal_model.identify_effect(method_name=\"id-algorithm\")\n",
+    "print(\"\\nResult for identification using ID Algorithm:\")\n",
+    "print(identified_estimand)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Case 5\n",
+    "\n",
+    "This example exhibits the performance of the algorithm in the presence of a confounding variable(**X1**) and an instrumental variable(**X2**)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Random data\n",
+    "treatment = \"T\"\n",
+    "outcome = \"Y\"\n",
+    "variables = [\"X1\", \"X2\"]\n",
+    "causal_graph = \"digraph{T->Y;X1->T;X1->Y;X2->T;}\"\n",
+    "columns = list(treatment) + list(outcome) + list(variables)\n",
+    "df = pd.DataFrame(columns=columns)\n",
+    "\n",
+    "# Causal Model Initialization\n",
+    "causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)\n",
+    "\n",
+    "# View graph\n",
+    "causal_model.view_model()\n",
+    "from IPython.display import Image, display\n",
+    "print(\"Graph:\")\n",
+    "display(Image(filename=\"causal_model.png\"))\n",
+    "\n",
+    "# Causal Identification using the ID Algorithm\n",
+    "identified_estimand = causal_model.identify_effect(method_name=\"id-algorithm\")\n",
+    "print(\"\\nResult for identification using ID Algorithm:\")\n",
+    "print(identified_estimand)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Case 6\n",
+    "\n",
+    "This example exhibits the performance of the algorithm in case of a disjoint graph."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Random data\n",
+    "treatment = \"T\"\n",
+    "outcome = \"Y\"\n",
+    "variables = [\"X1\"]\n",
+    "causal_graph = \"digraph{T;X1->Y;}\"\n",
+    "columns = list(treatment) + list(outcome) + list(variables)\n",
+    "df = pd.DataFrame(columns=columns)\n",
+    "\n",
+    "# Causal Model Initialization\n",
+    "causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)\n",
+    "\n",
+    "# View graph\n",
+    "causal_model.view_model()\n",
+    "from IPython.display import Image, display\n",
+    "print(\"Graph:\")\n",
+    "display(Image(filename=\"causal_model.png\"))\n",
+    "\n",
+    "# Causal Identification using the ID Algorithm\n",
+    "identified_estimand = causal_model.identify_effect(method_name=\"id-algorithm\")\n",
+    "print(\"\\nResult for identification using ID Algorithm:\")\n",
+    "print(identified_estimand)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "interpreter": {
+   "hash": "31f2aee4e71d21fbe5cf8b01ff0e069b9275f58929596ceb00d14d90e3e16cd6"
+  },
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.12"
+  },
+  "metadata": {
+   "interpreter": {
+    "hash": "31f2aee4e71d21fbe5cf8b01ff0e069b9275f58929596ceb00d14d90e3e16cd6"
+   }
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": false,
+   "sideBar": true,
+   "skip_h1_title": true,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

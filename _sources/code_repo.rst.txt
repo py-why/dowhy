@@ -6,6 +6,37 @@ DoWhy is hosted on GitHub.
 You can browse the code in a html-friendly format `here
 <https://github.com/Microsoft/dowhy>`_.
 
+
+v0.7: Better Refuters for unobserved confounders and placebo treatment
+----------------------------------------------------------------------
+* **[Major]** Faster backdoor identification with support for minimal adjustment, maximal adjustment
+  or exhaustive search. More test coverage for identification.
+
+* **[Major]** Added new functionality of causal discovery [Experimental].
+  DoWhy now supports discovery algorithms from external libraries like CDT.
+  `[Example notebook] <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_causal_discovery_example.ipynb>`_
+
+* **[Major]** Implemented ID algorithm for causal identification. [Experimental] 
+
+* Added friendly text-based interpretation for DoWhy's effect estimate. 
+
+* Added a new estimation method, distance matching that relies on a distance
+  metrics between inputs.
+  
+* Heuristics to infer default parameters for refuters. 
+
+* Inferring default strata automatically for propensity score stratification.
+ 
+* Added support for custom propensity models in propensity-based estimation
+  methods. 
+
+* Bug fixes for confidence intervals for linear regression. Better version of
+  bootstrap method.
+
+* Allow effect estimation without need to refit the model for econml estimators
+
+Big thanks to @AndrewC19, @ha2trinh, @siddhanthaldar, and @vojavocni 
+
 v0.6: Better Refuters for unobserved confounders and placebo treatment
 ----------------------------------------------------------------------
 

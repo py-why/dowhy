@@ -4,7 +4,7 @@
  *
  * Sphinx JavaScript utilities for all documentation.
  *
- * :copyright: Copyright 2007-2020 by the Sphinx team, see AUTHORS.
+ * :copyright: Copyright 2007-2022 by the Sphinx team, see AUTHORS.
  * :license: BSD, see LICENSE for details.
  *
  */
@@ -29,9 +29,14 @@ if (!window.console || !console.firebug) {
 
 /**
  * small helper function to urldecode strings
+ *
+ * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent#Decoding_query_parameters_from_a_URL
  */
 jQuery.urldecode = function(x) {
-  return decodeURIComponent(x).replace(/\+/g, ' ');
+  if (!x) {
+    return x
+  }
+  return decodeURIComponent(x.replace(/\+/g, ' '));
 };
 
 /**
@@ -259,6 +264,9 @@ var Documentation = {
   hideSearchWords : function() {
     $('#searchbox .highlight-link').fadeOut(300);
     $('span.highlighted').removeClass('highlighted');
+    var url = new URL(window.location);
+    url.searchParams.delete('highlight');
+    window.history.replaceState({}, '', url);
   },
 
   /**
@@ -296,12 +304,14 @@ var Documentation = {
               window.location.href = prevHref;
               return false;
             }
+            break;
           case 39: // right
             var nextHref = $('link[rel="next"]').prop('href');
             if (nextHref) {
               window.location.href = nextHref;
               return false;
             }
+            break;
         }
       }
     });

@@ -36,6 +36,14 @@ dowhy.causal\_refuters.dummy\_outcome\_refuter module
    :undoc-members:
    :show-inheritance:
 
+dowhy.causal\_refuters.graph\_refuter module
+--------------------------------------------
+
+.. automodule:: dowhy.causal_refuters.graph_refuter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.causal\_refuters.placebo\_treatment\_refuter module
 ---------------------------------------------------------
 
