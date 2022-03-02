@@ -29,6 +29,9 @@ class LinearRegressionEstimator(RegressionEstimator):
             expr += "+" + "+".join(interaction_terms)
         return expr
 
+    def predict_fn(self, model, features):
+        return model.predict(features)
+
     def _build_model(self):
         features = self._build_features()
         model = sm.OLS(self._outcome, features).fit()
