@@ -30,7 +30,8 @@ class TestGeneralizedLinearModelEstimator(object):
                 method_params={
                     'num_ci_simulations': 10,
                     'num_null_simulations': 10,
-                    'glm_family': sm.families.Binomial()
+                    'glm_family': sm.families.Binomial(),
+                    'predict_score': True
                     }
                 )
 
