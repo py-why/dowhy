@@ -121,6 +121,6 @@ class RegressionEstimator(CausalEstimator):
 
         new_features = self._build_features(treatment_values=interventional_treatment_2d,
                 data_df=data_df)
-        interventional_outcomes = self.model.predict(new_features)
+        interventional_outcomes = self.predict_fn(self.model, new_features)
         return interventional_outcomes.mean()
 

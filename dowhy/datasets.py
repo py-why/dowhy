@@ -11,9 +11,12 @@ from numpy.random import choice
 def sigmoid(x):
     return 1 / (1 + math.exp(-x))
 
-def stochastically_convert_to_binary(x):
+def convert_to_binary(x, stochastic=True):
     p = sigmoid(x)
-    return choice([0, 1], 1, p=[1-p, p])
+    if stochastic:
+        return choice([0, 1], 1, p=[1-p, p])
+    else:
+        return int(p > 0.5)
 
 def stochastically_convert_to_three_level_categorical(x):
     p = sigmoid(x)
@@ -57,6 +60,7 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
                    treatment_is_binary=True,
                    treatment_is_category=False,
                    outcome_is_binary=False,
+                   stochastic_discretization=True,
                    num_discrete_common_causes=0,
                    num_discrete_instruments=0,
                    num_discrete_effect_modifiers=0,
@@ -113,7 +117,7 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         t += Z @ cz
     # Converting treatment to binary if required
     if treatment_is_binary:
-        t = np.vectorize(stochastically_convert_to_binary)(t)
+        t = np.vectorize(convert_to_binary)(t)
     elif treatment_is_category:
         t = np.vectorize(stochastically_convert_to_three_level_categorical)(t)
 
@@ -148,7 +152,7 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         if num_effect_modifiers > 0:
             y += (X @ ce) * np.prod(t, axis=1)
         if outcome_is_binary:
-            y = np.vectorize(stochastically_convert_to_binary)(y)
+            y = np.vectorize(convert_to_binary)(y,stochastic_discretization)
         return y
 
     y = _compute_y(t, W_with_dummy, X_with_categorical, FD, beta, c2, ce, cfd2)
@@ -242,7 +246,7 @@ def simple_iv_dataset(beta, num_samples,
     Z = np.random.normal(0, 1, (num_samples, num_instruments))
     t = np.random.normal(0, 1, (num_samples, num_treatments)) + Z @ cz + W @ c1
     if treatment_is_binary:
-        t = np.vectorize(stochastically_convert_to_binary)(t)
+        t = np.vectorize(convert_to_binary)(t)
 
     def _compute_y(t, W, beta, c2):
         y = t @ beta + W @ c2
