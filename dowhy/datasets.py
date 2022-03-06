@@ -246,7 +246,7 @@ def simple_iv_dataset(beta, num_samples,
     Z = np.random.normal(0, 1, (num_samples, num_instruments))
     t = np.random.normal(0, 1, (num_samples, num_treatments)) + Z @ cz + W @ c1
     if treatment_is_binary:
-        t = np.vectorize(stochastically_convert_to_binary)(t)
+        t = np.vectorize(convert_to_binary)(t)
 
     def _compute_y(t, W, beta, c2):
         y = t @ beta + W @ c2
