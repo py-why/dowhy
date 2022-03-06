@@ -13,16 +13,24 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
 
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, glm_family=None, predict_score=True, **kwargs):
+        """For a list of args and kwargs, see documentation for
+        :class:`~dowhy.causal_estimator.CausalEstimator`.
+
+        :param glm_family: statsmodels family for the generalized linear model.
+            For example, use statsmodels.api.families.Binomial() for logistic
+            regression or statsmodels.api.families.Poisson() for count data.
+        :param predict_score: For models that have a binary output, whether
+            to output the model's score or the binary output based on the score.
+
+        """
         super().__init__(*args, **kwargs)
         self.logger.info("INFO: Using Generalized Linear Model Estimator")
-        if self.method_params is not None and 'glm_family' in self.method_params:
-                self.family = self.method_params['glm_family']
+        if glm_family is not None:
+            self.family = glm_family
         else:
             raise ValueError("Need to specify the family for the generalized linear model. Provide a 'glm_family' parameter in method_params, such as statsmodels.api.families.Binomial() for logistic regression.")
-        self.predict_score = True
-        if self.method_params is not None and 'predict_score' in self.method_params:
-                self.predict_score = self.method_params['predict_score']
+        self.predict_score = predict_score
         # Checking if Y is binary
         outcome_values = self._data[self._outcome_name].astype(int).unique()
         self.outcome_is_binary = all([v in [0,1] for v in outcome_values])

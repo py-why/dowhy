@@ -5,11 +5,28 @@ import numpy as np
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 
 class DistanceMatchingEstimator(CausalEstimator):
-    """ Simple matching estimator for binary treatments based on a distance metric.
-    """
+    """Simple matching estimator for binary treatments based on a distance
+    metric.
 
+    For a list of standard args and kwargs, see documentation for
+    :class:`~dowhy.causal_estimator.CausalEstimator`.
+
+    Supports additional parameters as listed below.
+
+    """
+    # allowed types of distance metric
     Valid_Dist_Metric_Params = ['p', 'V', 'VI', 'w']
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, num_matches_per_unit=1,
+            distance_metric="minkowski", exact_match_cols=None, **kwargs):
+        """
+        :param num_matches_per_unit: The number of matches per data point.
+            Default=1.
+        :param distance_metric: Distance metric to use. Default="minkowski"
+            that corresponds to Euclidean distance metric with p=2.
+        :param exact_match_cols: List of column names whose values should be
+        exactly matched. Typically used for columns with discrete values.
+
+        """
         super().__init__(*args, **kwargs)
         # Check if the treatment is one-dimensional
         if len(self._treatment_name) > 1:
@@ -21,15 +38,9 @@ class DistanceMatchingEstimator(CausalEstimator):
             self.logger.error(error_msg)
             raise Exception(error_msg)
 
-        # Setting the number of matches per data point
-        if getattr(self, 'num_matches_per_unit', None) is None:
-            self.num_matches_per_unit = 1
-        # Default distance metric if not provided by the user
-        if getattr(self, 'distance_metric', None) is None:
-            self.distance_metric = 'minkowski' # corresponds to euclidean metric with p=2
-
-        if getattr(self, 'exact_match_cols', None) is None:
-            self.exact_match_cols = None
+        self.num_matches_per_unit = num_matches_per_unit
+        self.distance_metric = distance_metric
+        self.exact_match_cols = exact_match_cols
 
         self.logger.debug("Back-door variables used:" +
                         ",".join(self._target_estimand.get_backdoor_variables()))

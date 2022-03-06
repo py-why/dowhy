@@ -6,26 +6,37 @@ from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_estimators.propensity_score_estimator import PropensityScoreEstimator
 
 class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
-    """ Estimate effect of treatment by finding matching treated and control units based on propensity score.
+    """ Estimate effect of treatment by finding matching treated and control
+    units based on propensity score.
 
     Straightforward application of the back-door criterion.
 
-    Supports additional parameters that can be specified in the estimate_effect() method.
+    For a list of standard args and kwargs, see documentation for
+    :class:`~dowhy.causal_estimator.CausalEstimator`.
 
-    - 'propensity_score_model': The model used to compute propensity score. Could be any classification model that supports fit() and predict_proba() methods. If None, use LogisticRegression model as the default. Default=None
-    - 'recalculate_propensity_score': If true, force the estimator to calculate the propensity score. To use pre-computed propensity score, set this value to false. Default=True
-    - 'propensity_score_column': column name that stores the propensity score. Default='propensity_score'
+    Supports additional parameters as listed below.
 
     """
     def __init__(
-        self, 
-        *args, 
-        propensity_score_model=None, 
-        recalculate_propensity_score=True, 
+        self,
+        *args,
+        propensity_score_model=None,
+        recalculate_propensity_score=True,
         propensity_score_column="propensity_score",
         **kwargs):
+        """
+        :param propensity_score_model: Model used to compute propensity score.
+            Can be any classification model that supports fit() and
+            predict_proba() methods. If None, LogisticRegression is used.
+        :param recalculate_propensity_score: Whether the propensity score
+            should be estimated. To use pre-computed propensity scores,
+            set this value to False. Default=True.
+        :param propensity_score_column: Column name that stores the
+            propensity score. Default='propensity_score'
+
+        """
         super().__init__(
-            *args, 
+            *args,
             propensity_score_model=propensity_score_model,
             recalculate_propensity_score=recalculate_propensity_score,
             propensity_score_column=propensity_score_column,

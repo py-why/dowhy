@@ -14,19 +14,23 @@ class InstrumentalVariableEstimator(CausalEstimator):
 
     This is also a superclass that can be inherited by other specific methods.
 
+    For a list of standard args and kwargs, see documentation for
+    :class:`~dowhy.causal_estimator.CausalEstimator`.
 
-    Supports additional parameters that can be specified in the estimate_effect() method.
-
-    - 'iv_instrument_name': Name of the specific instrumental variable to be used. Needs to be one of the IVs identified in the identification step. Default is to use all the IV variables from the identification step.
+    Supports additional parameters as listed below.
 
     """
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, iv_instrument_name=None,  **kwargs):
+        """
+        :param iv_instrument_name: Name of the specific instrumental variable
+            to be used. Needs to be one of the IVs identified in the
+            identification step. Default is to use all the IV variables
+            from the identification step.
+        """
         super().__init__(*args, **kwargs)
         # choosing the instrumental variable to use
-        if getattr(self, 'iv_instrument_name', None) is None:
-            self.estimating_instrument_names = self._target_estimand.instrumental_variables
-        else:
+        self.estimating_instrument_names = self._target_estimand.instrumental_variables
+        if iv_instrument_name is not None:
             self.estimating_instrument_names = parse_state(self.iv_instrument_name)
         self.logger.debug("Instrumental Variables used:" +
                           ",".join(self.estimating_instrument_names))

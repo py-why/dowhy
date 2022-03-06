@@ -12,29 +12,43 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
 
     Straightforward application of the back-door criterion.
 
-    Supports additional parameters that can be specified in the estimate_effect() method.
+    For a list of standard args and kwargs, see documentation for
+    :class:`~dowhy.causal_estimator.CausalEstimator`.
 
-    - 'min_ps_score': Lower bound used to clip the propensity score. Default=0.05
-    - 'max_ps_score': Upper bound used to clip the propensity score. Default=0.95
-    - 'weighting_scheme': This is the name of weighting method to use. Can be inverse propensity score ("ips_weight", default), stabilized IPS score ("ips_stabilized_weight"), or normalized IPS score ("ips_normalized_weight")
-    - 'propensity_score_model': The model used to compute propensity score. Could be any classification model that supports fit() and predict_proba() methods. If None, use LogisticRegression model as the default. Default=None
-    - 'recalculate_propensity_score': If true, force the estimator to calculate the propensity score. To use pre-computed propensity score, set this value to false. Default=True
-    - 'propensity_score_column': column name that stores the propensity score. Default='propensity_score'
+    Supports additional parameters as listed below.
 
     """
-
     def __init__(
-        self, 
-        *args, 
-        min_ps_score=0.05, 
-        max_ps_score=0.95, 
-        weighting_scheme='ips_weight', 
-        propensity_score_model=None, 
-        recalculate_propensity_score=True, 
+        self,
+        *args,
+        min_ps_score=0.05,
+        max_ps_score=0.95,
+        weighting_scheme='ips_weight',
+        propensity_score_model=None,
+        recalculate_propensity_score=True,
         propensity_score_column="propensity_score",
         **kwargs):
+        """
+        :param min_ps_score: Lower bound used to clip the propensity score.
+            Default=0.05
+        :param max_ps_score: Upper bound used to clip the propensity score.
+            Default=0.95
+        :param weighting_scheme: Weighting method to use. Can be inverse
+            propensity score ("ips_weight", default), stabilized IPS score
+            ("ips_stabilized_weight"), or normalized IPS score
+            ("ips_normalized_weight").
+        :param propensity_score_model: The model used to compute propensity
+            score. Can be any classification model that supports fit() and
+            predict_proba() methods. If None, use LogisticRegression model as
+            the default. Default=None
+        :param recalculate_propensity_score: If true, force the estimator to
+            estimate the propensity score. To use pre-computed propensity
+            scores, set this value to false. Default=True
+        :param propensity_score_column: Column name that stores the
+            propensity score. Default='propensity_score'
+        """
         super().__init__(
-            *args, 
+            *args,
             propensity_score_model=propensity_score_model,
             recalculate_propensity_score=recalculate_propensity_score,
             propensity_score_column=propensity_score_column,

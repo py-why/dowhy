@@ -302,7 +302,7 @@ class CausalModel:
                     confidence_intervals = confidence_intervals,
                     target_units = target_units,
                     effect_modifiers = effect_modifiers,
-                    params=method_params,
+                    **method_params,
                     **extra_args)
             else:
                 # Estimator had been computed in a previous call
@@ -334,9 +334,11 @@ class CausalModel:
         :param identified_estimand: a probability expression
             that represents the effect to be estimated. Output of
             CausalModel.identify_effect method
-        :param method_name: any of the estimation method to be used. See docs for estimate_effect method for a list of supported estimation methods.
+        :param method_name: any of the estimation method to be used. See docs
+            for estimate_effect method for a list of supported estimation methods.
         :param fit_estimator: Boolean flag on whether to fit the estimator.
-            Setting it to False is useful to compute the do-operation on new data using a previously fitted estimator.
+            Setting it to False is useful to compute the do-operation on new
+            data using a previously fitted estimator.
         :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method.
 
         :returns: an instance of the CausalEstimate class, containing the causal effect estimate
@@ -369,7 +371,7 @@ class CausalModel:
                     identified_estimand,
                     self._treatment, self._outcome,
                     test_significance=False,
-                    params=method_params
+                    **method_params
                 )
             else:
                 # Estimator had been computed in a previous call
@@ -462,19 +464,19 @@ class CausalModel:
 
     def refute_graph(self, k= 1, method_name =None, independence_constraints = None ):
         """
-        Check if the dependencies in input graph matches with the dataset - 
-        ( X ⫫ Y ) | Z 
+        Check if the dependencies in input graph matches with the dataset -
+        ( X ⫫ Y ) | Z
         where X and Y are considered as singleton sets currently
         Z can have multiple variables
-        :param k: number of covariates in set Z 
+        :param k: number of covariates in set Z
         :param method_name: name of method to test conditional independece in data
-        :param independence_constraints: list of implications to be test input by the user in the format 
+        :param independence_constraints: list of implications to be test input by the user in the format
         [(x,y,(z1,z2)),
         (x,y, (z3,))
         ]
         : returns: an instance of GraphRefuter class
         """
-        
+
         refuter = GraphRefuter(data = self._data, method_name= method_name)
 
         if independence_constraints is None:
@@ -498,14 +500,14 @@ class CausalModel:
                     if self._graph.check_dseparation([str(a)], [str(b)], k_list) == True :
                         self.logger.info(" %s and %s are CI given %s ", a, b, k_list)
                         conditional_independences.append([a, b, k_list])
-    
+
             res = refuter.refute_model(independence_constraints = conditional_independences)
 
         else:
             res = refuter.refute_model(independence_constraints = independence_constraints)
-        
+
         self.logger.info(refuter._refutation_passed)
-        
+
         return res
 
 

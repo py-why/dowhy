@@ -7,7 +7,10 @@ from importlib import import_module
 import causalml
 
 class Causalml(CausalEstimator):
+    """ Wrapper class for estimators from the causalml library.
 
+        For documentation on the estimation methods, refer to causalml docs.
+    """
     def __init__(self, *args, **kwargs):
 
         super().__init__(*args, **kwargs)

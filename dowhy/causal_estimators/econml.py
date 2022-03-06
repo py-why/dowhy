@@ -11,7 +11,11 @@ import econml
 
 
 class Econml(CausalEstimator):
+    """Wrapper class for estimators from the EconML library.
 
+    For parameters of each method, refer to the EconML docs.
+
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.logger.info("INFO: Using EconML Estimator")
@@ -154,7 +158,7 @@ class Econml(CausalEstimator):
             expr += "+".join(var_list)
             expr += " | " + ",".join(self._effect_modifier_names)
         return expr
-    
+
     def shap_values(self, df: pd.DataFrame, *args, **kwargs):
         return self.estimator.shap_values(
             df[self._effect_modifier_names].values, *args, **kwargs

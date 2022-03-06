@@ -43,7 +43,7 @@ class CausalEstimator:
                  test_significance=False, evaluate_effect_strength=False,
                  confidence_intervals=False,
                  target_units=None, effect_modifiers=None,
-                 params=None):
+                 **kwargs):
         """Initializes an estimator with data and names of relevant variables.
 
         This method is called from the constructors of its child classes.
@@ -60,7 +60,7 @@ class CausalEstimator:
         :param confidence_intervals: Binary flag or a string indicating whether the confidence intervals should be computed and which method should be used. All methods support estimation of confidence intervals using the bootstrap method by using the parameter confidence_intervals="bootstrap". The bootstrap method takes in two arguments (num_simulations and sample_size_fraction) that can be optionally specified in the params dictionary. Estimators may also override this to implement their own confidence interval method. If this parameter is False, no confidence intervals are computed. If True, confidence intervals are computed by the estimator's specific method if available, otherwise through bootstrap.
         :param target_units: The units for which the treatment effect should be estimated. This can be a string for common specifications of target units (namely, "ate", "att" and "atc"). It can also be a lambda function that can be used as an index for the data (pandas DataFrame). Alternatively, it can be a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
         :param effect_modifiers: Variables on which to compute separate effects, or return a heterogeneous effect function. Not all methods support this currently.
-        :param params: (optional) Additional method parameters
+        :param kwargs: (optional) Additional method parameters
             num_null_simulations: The number of simulations for testing the statistical significance of the estimator
             num_simulations: The number of simulations for finding the confidence interval (and/or standard error) for a estimate
             sample_size_fraction: The size of the sample for the bootstrap estimator
@@ -84,14 +84,13 @@ class CausalEstimator:
         self._bootstrap_estimates = None  # for confidence intervals and std error
         self._bootstrap_null_estimates = None  # for significance test
         self._effect_modifiers = None
-        self.method_params = params
-
+        self.method_params = kwargs
         # Setting the default interpret method
         self.interpret_method = CausalEstimator.DEFAULT_INTERPRET_METHOD
         # Unpacking the keyword arguments
-        if params is not None:
-            for key, value in params.items():
-                setattr(self, key, value)
+        #if params is not None:
+        #    for key, value in params.items():
+        #        setattr(self, key, value)
 
         self.logger = logging.getLogger(__name__)
 
@@ -310,7 +309,7 @@ class CausalEstimator:
                 confidence_intervals=False,
                 target_units=self._target_units,
                 effect_modifiers=self._effect_modifier_names,
-                params=self.method_params
+                **self.method_params
             )
             new_effect = new_estimator.estimate_effect()
             simulation_results[index] = new_effect.value

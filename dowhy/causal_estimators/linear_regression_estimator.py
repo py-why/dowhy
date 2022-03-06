@@ -16,6 +16,10 @@ class LinearRegressionEstimator(RegressionEstimator):
     """
 
     def __init__(self, *args, **kwargs):
+        """For a list of args and kwargs, see documentation for
+        :class:`~dowhy.causal_estimator.CausalEstimator`.
+
+        """
         super().__init__(*args, **kwargs)
         self.logger.info("INFO: Using Linear Regression Estimator")
         self._linear_model = self.model
