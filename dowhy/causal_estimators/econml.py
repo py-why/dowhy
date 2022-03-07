@@ -13,11 +13,20 @@ import econml
 class Econml(CausalEstimator):
     """Wrapper class for estimators from the EconML library.
 
-    For parameters of each method, refer to the EconML docs.
+    For a list of standard args and kwargs, see documentation for
+    :class:`~dowhy.causal_estimator.CausalEstimator`.
+
+    Supports additional parameters as listed below. For init and fit
+    parameters of each estimator, refer to the EconML docs.
 
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, econml_methodname,  **kwargs):
+        """
+        :param econml_methodname: Fully qualified name of econml estimator
+            class. For example, 'econml.dml.DML'
+        """
         super().__init__(*args, **kwargs)
+        self._econml_methodname = econml_methodname
         self.logger.info("INFO: Using EconML Estimator")
         self.identifier_method = self._target_estimand.identifier_method
         self._observed_common_causes_names = self._target_estimand.get_backdoor_variables().copy()

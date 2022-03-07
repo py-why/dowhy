@@ -268,7 +268,7 @@ class CausalModel:
                     if method_params is None:
                         method_params = {}
                     # Define the third-party estimation method to be used
-                    method_params["_" + third_party_estimator_package + "_methodname"] = estimator_name
+                    method_params[third_party_estimator_package + "_methodname"] = estimator_name
             else: # For older dowhy methods
                 # Process the dowhy estimators
                 causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
@@ -291,6 +291,8 @@ class CausalModel:
                     extra_args = method_params.get("init_params", {})
                 else:
                     extra_args = {}
+                if method_params is None:
+                    method_params = {}
                 self.causal_estimator = causal_estimator_class(
                     self._data,
                     identified_estimand,

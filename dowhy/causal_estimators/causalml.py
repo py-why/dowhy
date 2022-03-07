@@ -9,10 +9,18 @@ import causalml
 class Causalml(CausalEstimator):
     """ Wrapper class for estimators from the causalml library.
 
-        For documentation on the estimation methods, refer to causalml docs.
-    """
-    def __init__(self, *args, **kwargs):
+    For a list of standard args and kwargs, see documentation for
+    :class:`~dowhy.causal_estimator.CausalEstimator`.
 
+    Supports additional parameters as listed below. For specific
+    parameters of each estimator, refer to the CausalML docs.
+
+    """
+    def __init__(self, *args, causalml_methodname, **kwargs):
+        """
+        :param causalml_methodname: Fully qualified name of causalml estimator
+            class.
+        """
         super().__init__(*args, **kwargs)
 
         # Add the identification method used in the estimator
