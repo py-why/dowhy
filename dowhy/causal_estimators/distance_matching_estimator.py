@@ -27,7 +27,11 @@ class DistanceMatchingEstimator(CausalEstimator):
         exactly matched. Typically used for columns with discrete values.
 
         """
-        super().__init__(*args, **kwargs)
+        # Required to ensure that self.method_params contains all the
+        # parameters to create an object of this class
+        args_dict = {k:v for k,v in locals().items() if k not in ('self','args','kwargs')}
+        args_dict.update(kwargs)
+        super().__init__(*args, **args_dict)
         # Check if the treatment is one-dimensional
         if len(self._treatment_name) > 1:
             error_msg = str(self.__class__) + "cannot handle more than one treatment variable"

@@ -85,12 +85,9 @@ class CausalEstimator:
         self._bootstrap_null_estimates = None  # for significance test
         self._effect_modifiers = None
         self.method_params = kwargs
+        print("Initial", self.method_params)
         # Setting the default interpret method
         self.interpret_method = CausalEstimator.DEFAULT_INTERPRET_METHOD
-        # Unpacking the keyword arguments
-        #if params is not None:
-        #    for key, value in params.items():
-        #        setattr(self, key, value)
 
         self.logger = logging.getLogger(__name__)
 
@@ -157,7 +154,7 @@ class CausalEstimator:
             confidence_intervals=estimate.params["confidence_intervals"],
             target_units=estimate.params["target_units"],
             effect_modifiers=estimate.params["effect_modifiers"],
-            params=estimate.params["method_params"]
+            **estimate.params["method_params"]
         )
 
         return new_estimator
@@ -493,6 +490,7 @@ class CausalEstimator:
                 new_outcome = np.random.permutation(self._outcome)
                 new_data = self._data.assign(dummy_outcome=new_outcome)
                 # self._outcome = self._data["dummy_outcome"]
+                print("test1", self.method_params)
                 new_estimator = type(self)(
                     new_data,
                     self._target_estimand,
@@ -503,7 +501,7 @@ class CausalEstimator:
                     confidence_intervals=False,
                     target_units=self._target_units,
                     effect_modifiers=self._effect_modifier_names,
-                    params=self.method_params
+                    **self.method_params
                 )
                 new_effect = new_estimator.estimate_effect()
                 null_estimates[i] = new_effect.value

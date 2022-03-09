@@ -43,12 +43,19 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         score. Default='propensity_score'
 
         """
+        # Required to ensure that self.method_params contains all the information
+        # to create an object of this class
+        args_dict = kwargs
+        args_dict.update({
+            'num_strata': num_strata,
+            'clipping_threshold': clipping_threshold
+            })
         super().__init__(
             *args,
             propensity_score_model=propensity_score_model,
             recalculate_propensity_score=recalculate_propensity_score,
             propensity_score_column=propensity_score_column,
-            **kwargs)
+            **args_dict)
 
         self.logger.info("Using Propensity Score Stratification Estimator")
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)

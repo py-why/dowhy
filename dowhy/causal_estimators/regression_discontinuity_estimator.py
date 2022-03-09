@@ -29,7 +29,11 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
             control. Considered band is (threshold +- bandwidth)
 
         """
-        super().__init__(*args, **kwargs)
+        # Required to ensure that self.method_params contains all the information
+        # to create an object of this class
+        args_dict = {k:v for k,v in locals().items() if k not in ('self','args','kwargs')}
+        args_dict.update(kwargs)
+        super().__init__(*args, **args_dict)
         self.logger.info("Using Regression Discontinuity Estimator")
         self.rd_variable_name = rd_variable_name
         self.rd_threshold_value = rd_threshold_value
@@ -58,7 +62,7 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
             ['local_treatment'],
             ['local_outcome'],
             test_significance=self._significance_test,
-            iv_instrument_name=local_rd_variable
+            iv_instrument_name='local_rd_variable'
         )
         est = iv_estimator.estimate_effect()
         return est

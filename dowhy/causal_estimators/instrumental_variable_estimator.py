@@ -27,11 +27,15 @@ class InstrumentalVariableEstimator(CausalEstimator):
             identification step. Default is to use all the IV variables
             from the identification step.
         """
-        super().__init__(*args, **kwargs)
+        # Required to ensure that self.method_params contains all the information
+        # to create an object of this class
+        args_dict = {k:v for k,v in locals().items() if k not in ('self','args','kwargs')}
+        args_dict.update(kwargs)
+        super().__init__(*args, **args_dict)
         # choosing the instrumental variable to use
         self.estimating_instrument_names = self._target_estimand.instrumental_variables
         if iv_instrument_name is not None:
-            self.estimating_instrument_names = parse_state(self.iv_instrument_name)
+            self.estimating_instrument_names = parse_state(iv_instrument_name)
         self.logger.debug("Instrumental Variables used:" +
                           ",".join(self.estimating_instrument_names))
         if not self.estimating_instrument_names:

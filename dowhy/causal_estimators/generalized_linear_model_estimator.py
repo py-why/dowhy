@@ -24,7 +24,11 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
             to output the model's score or the binary output based on the score.
 
         """
-        super().__init__(*args, **kwargs)
+        # Required to ensure that self.method_params contains all the
+        # parameters needed to create an object of this class
+        args_dict = {k:v for k,v in locals().items() if k not in ('self','args','kwargs')}
+        args_dict.update(kwargs)
+        super().__init__(*args, **args_dict)
         self.logger.info("INFO: Using Generalized Linear Model Estimator")
         if glm_family is not None:
             self.family = glm_family

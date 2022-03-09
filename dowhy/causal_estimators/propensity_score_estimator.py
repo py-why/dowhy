@@ -27,8 +27,11 @@ class PropensityScoreEstimator(CausalEstimator):
         :param propensity_score_column: Column name that stores the
             propensity score. Default='propensity_score'
         """
-
-        super().__init__(*args, **kwargs)
+        # Required to ensure that self.method_params contains all the
+        # parameters to create an object of this class
+        args_dict = {k:v for k,v in locals().items() if k not in ('self','args','kwargs')}
+        args_dict.update(kwargs)
+        super().__init__(*args, **args_dict)
 
         # Enable the user to pass params for a custom propensity model
         self.propensity_score_model = propensity_score_model

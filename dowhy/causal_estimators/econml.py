@@ -25,7 +25,11 @@ class Econml(CausalEstimator):
         :param econml_methodname: Fully qualified name of econml estimator
             class. For example, 'econml.dml.DML'
         """
-        super().__init__(*args, **kwargs)
+        # Required to ensure that self.method_params contains all the
+        # parameters to create an object of this class
+        args_dict = {k:v for k,v in locals().items() if k not in ('self','args','kwargs')}
+        args_dict.update(kwargs)
+        super().__init__(*args, **args_dict)
         self._econml_methodname = econml_methodname
         self.logger.info("INFO: Using EconML Estimator")
         self.identifier_method = self._target_estimand.identifier_method

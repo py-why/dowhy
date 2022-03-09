@@ -47,12 +47,20 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
         :param propensity_score_column: Column name that stores the
             propensity score. Default='propensity_score'
         """
+        # Required to ensure that self.method_params contains all the information
+        # to create an object of this class
+        args_dict = kwargs
+        args_dict.update({
+            'min_ps_score': min_ps_score,
+            'max_ps_score': max_ps_score,
+            'weighting_scheme': weighting_scheme
+            })
         super().__init__(
             *args,
             propensity_score_model=propensity_score_model,
             recalculate_propensity_score=recalculate_propensity_score,
             propensity_score_column=propensity_score_column,
-            **kwargs)
+            **args_dict)
 
         self.logger.info("INFO: Using Propensity Score Weighting Estimator")
         self.symbolic_estimator = self.construct_symbolic_estimator(

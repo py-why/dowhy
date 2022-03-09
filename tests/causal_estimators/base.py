@@ -65,7 +65,7 @@ class TestEstimator(object):
             confidence_intervals = confidence_intervals,
             target_units = "ate",
             effect_modifiers = data["effect_modifier_names"],
-            params=method_params
+            **method_params
         )
         true_ate = data["ate"]
         ate_estimate = estimator_ate.estimate_effect()
