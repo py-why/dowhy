@@ -275,119 +275,130 @@ class TestCausalModel(object):
         all_nodes = model._graph.get_all_nodes(include_unobserved=False)
         assert "Unobserved Confounders" not in all_nodes
 
-    @pytest.mark.parametrize(["beta", "num_instruments", "num_samples"],
-                             [(10, 2, 5000),])
-    def test_graph_refutation(self, beta, num_instruments, num_samples):
-        import numpy.random
-        numpy.random.seed(102)
-        data = dowhy.datasets.linear_dataset(beta=beta,
-        num_common_causes=5,
-        num_instruments = num_instruments,
-        num_effect_modifiers=1,
-        num_samples=num_samples, 
-        treatment_is_binary=True,
-        stddev_treatment_noise=10,
-        num_discrete_common_causes=1)
+    @pytest.mark.parametrize(["num_variables", "num_samples"],
+                             [(10,5000),])
+    def test_graph_refutation(self, num_variables,num_samples):
+        data = dowhy.datasets.dataset_from_random_graph(num_vars = num_variables, num_samples= num_samples)
         df = data["df"]
         model = CausalModel(
             data=df,
             treatment=data["treatment_name"],
             outcome=data["outcome_name"],
             graph=data["gml_graph"],
-            proceed_when_unidentifiable=True,
-            test_significance=None
         )
-        gml_str = """dag {
-        W0 [pos="-2.200,-1.520"]
-        W1 [pos="-1.457,-1.533"]
-        W2 [pos="-0.763,-1.547"]
-        W3 [pos="1.041,-1.587"]
-        W4 [pos="1.510,-1.560"]
-        X0 [pos="1.222,-0.625"]
-        Z0 [pos="0.390,-1.601"]
-        Z1 [pos="-0.176,-1.540"]
-        v0 [pos="-0.219,-0.881"]
-        y [pos="-0.144,-0.296"]
-        W0 -> v0
-        W0 -> y
-        W1 -> v0
-        W1 -> y
-        W2 -> v0
-        W2 -> y
-        W3 -> v0
-        W3 -> y
-        W4 -> v0
-        W4 -> y
-        X0 -> y
-        Z0 -> v0
-        Z1 -> v0
-        v0 -> y
-        }"""
-        model = CausalModel(
-            data=df,
-            treatment=data["treatment_name"],
-            outcome=data["outcome_name"],
-            graph=gml_str,
-            proceed_when_unidentifiable=True,
-            test_significance=None,
-            missing_nodes_as_confounders=True
-        )
-        graph_refutation_object = model.refute_graph(1,method_name = "partial_correlation")
-        assert graph_refutation_object.refutation_result == True
+        graph_refutation_object = model.refute_graph(k = 1, independence_test = 
+        {'test_for_continuous': 'partial_correlation', 
+        'test_for_discrete' : 'conditional_mutual_information'})
+        assert graph_refutation_object.number_of_constraints_satisfied >= 0.80 * graph_refutation_object.number_of_constraints_model
 
-    @pytest.mark.parametrize(["beta", "num_instruments", "num_samples"],
-                             [(10, 2, 5000),])
-    def test_graph_refutation2(self, beta, num_instruments, num_samples):
-        data = dowhy.datasets.linear_dataset(beta=beta,
-        num_common_causes=5,
-        num_instruments = num_instruments,
-        num_effect_modifiers=1,
-        num_samples=num_samples, 
-        treatment_is_binary=True,
-        stddev_treatment_noise=10,
-        num_discrete_common_causes=1)
+    @pytest.mark.parametrize(["num_variables", "num_samples"],
+                             [(10,5000),])
+    def test_graph_refutation2(self, num_variables,num_samples):
+        data = dowhy.datasets.dataset_from_random_graph(num_vars = num_variables, num_samples= num_samples)
         df = data["df"]
-        model = CausalModel(
-            data=df,
-            treatment=data["treatment_name"],
-            outcome=data["outcome_name"],
-            graph=data["gml_graph"],
-            proceed_when_unidentifiable=True,
-            test_significance=None
-        )
-        gml_str = """dag {
-        W0 [pos="-2.200,-1.520"]
-        W1 [pos="-1.457,-1.533"]
-        W2 [pos="-0.763,-1.547"]
-        W3 [pos="1.041,-1.587"]
-        W4 [pos="1.510,-1.560"]
-        X0 [pos="1.222,-0.625"]
-        Z0 [pos="0.390,-1.601"]
-        Z1 [pos="-0.176,-1.540"]
-        v0 [pos="-0.219,-0.881"]
-        y [pos="-0.144,-0.296"]
-        W0 -> v0
-        W0 -> y
-        W1 -> v0
-        W1 -> y
-        W2 -> v0
-        W2 -> y
-        W3 -> v0
-        W3 -> y
-        W4 -> v0
-        X0 -> Z0
-        Z0 -> Z1
-        }"""
+        gml_str = """
+        graph [
+        directed 1
+        node [
+            id 0
+            label "a"
+        ]
+        node [
+            id 1
+            label "b"
+        ]
+        node [
+            id 2
+            label "c"
+        ]
+        node [
+            id 3
+            label "d"
+        ]
+        node [
+            id 4
+            label "e"
+        ]
+        node [
+            id 5
+            label "f"
+        ]
+        node [
+            id 6
+            label "g"
+        ]
+        node [
+            id 7
+            label "h"
+        ]
+        node [
+            id 8
+            label "i"
+        ]
+        node [
+            id 9
+            label "j"
+        ]
+        edge [
+            source 0
+            target 1
+        ]
+        edge [
+            source 0
+            target 2
+        ]
+        edge [
+            source 0
+            target 3
+        ]
+        edge [
+            source 1
+            target 4
+        ]
+        edge [
+            source 1
+            target 5
+        ]
+        edge [
+            source 2
+            target 3
+        ]
+        edge [
+            source 4
+            target 2
+        ]
+        edge [
+            source 4
+            target 5
+        ]
+        edge [
+            source 4
+            target 6
+        ]
+        edge [
+            source 4
+            target 7
+        ]
+        edge [
+            source 8
+            target 6
+        ]
+        edge
+        [
+        source 9
+        target 0
+        ]
+        ]
+        """
         model = CausalModel(
             data=df,
             treatment=data["treatment_name"],
             outcome=data["outcome_name"],
             graph=gml_str,
-            proceed_when_unidentifiable=True,
-            test_significance=None,
-            missing_nodes_as_confounders=True
         )
-        graph_refutation_object = model.refute_graph(1,method_name = "partial_correlation")
+        graph_refutation_object = model.refute_graph(k = 2, independence_test = 
+        {'test_for_continuous': 'partial_correlation', 
+        'test_for_discrete' : 'conditional_mutual_information'})
         assert graph_refutation_object.refutation_result == False
 
 if __name__ == "__main__":

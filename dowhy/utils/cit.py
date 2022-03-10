@@ -1,6 +1,8 @@
 from scipy.stats import t, norm
 import pandas as pd
 import numpy as np
+from collections import defaultdict
+from math import log, exp
 
 
 def compute_ci(r=None, nx=None, ny=None, confidence=.95):
@@ -105,3 +107,41 @@ def partial_corr(data=None, x=None, y=None, z=None, method="pearson"):
         'p-val': pval.round(5),
     }
     return stats
+
+def entropy(x):
+    """"
+    Returns entropy for a random variable x
+    H(x) = - Σ p(x)log(p(x))
+    """
+    d=defaultdict(lambda:0)
+    s = 0.0
+    entr = 0.0
+    for i in x:
+        d[i]+=1  # Calculating frequency of an event
+        s+=1
+    for i in d:
+        p = d[i]/s # Calculating probability for an event
+        entr-=p*log(p,2) # H(x) = - Σ p(x)log(p(x))
+    return entr
+
+
+def conditional_MI(data=None,x=None,y=None,z=None):
+    """
+    Method to return conditional mutual information between X and Y given Z
+    I(X, Y | Z) = H(X|Z) - H(X|Y,Z)
+                = H(X,Z) - H(Z) - H(X,Y,Z) + H(Y,Z)
+                = H(X,Z) + H(Y,Z) - H(X,Y,Z) - H(Z)
+    :param data : dataset 
+    :param x,y,z : column names from dataset
+    """
+    X = data[x].astype(int)
+    Y = data[y].astype(int)
+    t = list(z)
+    Z = data[t].astype(int)
+    Z = Z.values.tolist()
+    Z = list(data[t].itertuples(index=False, name=None)) 
+    Hxz = entropy(map(lambda x:'%s/%s'%x,zip(X,Z)))       # Finding Joint entropy of X and Z
+    Hyz = entropy(map(lambda x:'%s/%s'%x,zip(Y,Z)))       # Finding Joint entropy of Y and Z
+    Hz = entropy(Z)                                       # Finding Entropy of Z
+    Hxyz = entropy(map(lambda x:'%s/%s/%s'%x,zip(X,Y,Z))) # Finding Joint Entropy of X, Y and Z
+    return Hxz + Hyz - Hxyz - Hz

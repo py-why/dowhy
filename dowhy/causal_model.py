@@ -460,14 +460,14 @@ class CausalModel:
             print(summary_text)
         return summary_text
 
-    def refute_graph(self, k= 1, method_name =None, independence_constraints = None ):
+    def refute_graph(self, k= 1, independence_test = None ,  independence_constraints = None ):
         """
         Check if the dependencies in input graph matches with the dataset - 
         ( X ⫫ Y ) | Z 
         where X and Y are considered as singleton sets currently
         Z can have multiple variables
         :param k: number of covariates in set Z 
-        :param method_name: name of method to test conditional independece in data
+        :param independence_test: dictionary containing methods to test conditional independece in data
         :param independence_constraints: list of implications to be test input by the user in the format 
         [(x,y,(z1,z2)),
         (x,y, (z3,))
@@ -475,7 +475,13 @@ class CausalModel:
         : returns: an instance of GraphRefuter class
         """
         
-        refuter = GraphRefuter(data = self._data, method_name= method_name)
+        if independence_test is not None:
+            test_for_continuous = independence_test['test_for_continuous']
+            test_for_discrete = independence_test['test_for_discrete']
+            refuter = GraphRefuter(data = self._data, method_name_continuous= test_for_continuous, method_name_discrete = test_for_discrete)
+        
+        else:
+            refuter = GraphRefuter(data = self._data) 
 
         if independence_constraints is None:
             all_nodes=list(self._graph.get_all_nodes(include_unobserved=False))
@@ -499,10 +505,9 @@ class CausalModel:
                         self.logger.info(" %s and %s are CI given %s ", a, b, k_list)
                         conditional_independences.append([a, b, k_list])
     
-            res = refuter.refute_model(independence_constraints = conditional_independences)
+            independence_constraints = conditional_independences
 
-        else:
-            res = refuter.refute_model(independence_constraints = independence_constraints)
+        res = refuter.refute_model(independence_constraints = independence_constraints)
         
         self.logger.info(refuter._refutation_passed)
         
