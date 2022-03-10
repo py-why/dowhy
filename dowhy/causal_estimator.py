@@ -43,12 +43,12 @@ class CausalEstimator:
                  test_significance=False, evaluate_effect_strength=False,
                  confidence_intervals=False,
                  target_units=None, effect_modifiers=None,
-                 num_null_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
-                 num_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI,
-                 sample_size_fraction=CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION,
-                 confidence_level=CausalEstimator.DEFAULT_CONFIDENCE_LEVEL,
+                 num_null_simulations=DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
+                 num_simulations=DEFAULT_NUMBER_OF_SIMULATIONS_CI,
+                 sample_size_fraction=DEFAULT_SAMPLE_SIZE_FRACTION,
+                 confidence_level=DEFAULT_CONFIDENCE_LEVEL,
                  need_conditional_estimates='auto',
-                 num_quantiles_to_discretize_cont_cols=CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
+                 num_quantiles_to_discretize_cont_cols=NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
                  **kwargs):
         """Initializes an estimator with data and names of relevant variables.
 
@@ -136,6 +136,7 @@ class CausalEstimator:
         self.need_conditional_estimates = need_conditional_estimates \
             if need_conditional_estimates != 'auto' \
             else bool(self._effect_modifier_names)
+        print(self.sample_size_fraction)
 
     @staticmethod
     def get_estimator_object(new_data, identified_estimand, estimate):
