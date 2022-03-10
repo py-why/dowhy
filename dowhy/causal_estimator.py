@@ -85,7 +85,6 @@ class CausalEstimator:
         self._bootstrap_null_estimates = None  # for significance test
         self._effect_modifiers = None
         self.method_params = kwargs
-        print("Initial", self.method_params)
         # Setting the default interpret method
         self.interpret_method = CausalEstimator.DEFAULT_INTERPRET_METHOD
 
@@ -490,7 +489,6 @@ class CausalEstimator:
                 new_outcome = np.random.permutation(self._outcome)
                 new_data = self._data.assign(dummy_outcome=new_outcome)
                 # self._outcome = self._data["dummy_outcome"]
-                print("test1", self.method_params)
                 new_estimator = type(self)(
                     new_data,
                     self._target_estimand,
