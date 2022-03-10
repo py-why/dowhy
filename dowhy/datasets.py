@@ -504,19 +504,18 @@ def dataset_from_random_graph(num_vars, num_samples=1000, prob_edge=0.3, random_
             outcome = node #Node which has no successors is outcome
             break
 
-    treatment = None
+    treatments = list()
     for node in all_nodes:
         if DAG.in_degree(node) > 0:
             children = list(DAG.successors(node))
             if outcome in children:
-                treatment = node #Node which causes outcome is treatment
-                break
+                treatments.append(node) #Node which causes outcome is treatment
    
     gml_str = ("\n".join(nx.generate_gml(DAG)))
     ret_dict = {
         "df": df,
         "outcome_name": outcome,
-        "treatment_name": treatment,
+        "treatment_name": treatments,
         "gml_graph": gml_str,
         "discrete_columns": discrete_cols,
         "continuous_columns": continuous_cols,
