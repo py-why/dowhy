@@ -60,10 +60,9 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         self.logger.info("Using Propensity Score Stratification Estimator")
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
-        if not hasattr(self, 'num_strata'):
-            self.num_strata = num_strata
-        if not hasattr(self, 'clipping_threshold'):
-            self.clipping_threshold = clipping_threshold
+        # setting method-specific parameters
+        self.num_strata = num_strata
+        self.clipping_threshold = clipping_threshold
 
 
     def _estimate_effect(self):

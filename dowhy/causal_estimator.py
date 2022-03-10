@@ -43,10 +43,12 @@ class CausalEstimator:
                  test_significance=False, evaluate_effect_strength=False,
                  confidence_intervals=False,
                  target_units=None, effect_modifiers=None,
-                 num_null_simulations=None, num_simulations=None,
-                 sample_size_fraction=None, confidence_level=None,
+                 num_null_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
+                 num_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI,
+                 sample_size_fraction=CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION,
+                 confidence_level=CausalEstimator.DEFAULT_CONFIDENCE_LEVEL,
                  need_conditional_estimates='auto',
-                 num_quantiles_to_discretize_cont_cols=None,
+                 num_quantiles_to_discretize_cont_cols=CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
                  **kwargs):
         """Initializes an estimator with data and names of relevant variables.
 
@@ -123,23 +125,13 @@ class CausalEstimator:
             else:
                 self._effect_modifier_names = None
 
-        # Checking if some parameters were set, otherwise setting to default values
-        self.num_null_simulations = num_null_simulations \
-            if num_null_simulations is not None \
-            else CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST
-        self.num_simulations = num_simulations \
-            if num_simulations is not None \
-            else CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI
-        self.sample_size_fraction = sample_size_fraction \
-            if sample_size_fraction is not None \
-            else CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION
-        self.confidence_level = confidence_level \
-            if confidence_level is not None \
-            else CausalEstimator.DEFAULT_CONFIDENCE_LEVEL
+        # Check if some parameters were set, otherwise set to default values
+        self.num_null_simulations = num_null_simulations
+        self.num_simulations = num_simulations
+        self.sample_size_fraction = sample_size_fraction
+        self.confidence_level = confidence_level
         self.num_quantiles_to_discretize_cont_cols = \
-            num_quantiles_to_discretize_cont_cols \
-            if num_quantiles_to_discretize_cont_cols is not None \
-            else CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS
+            num_quantiles_to_discretize_cont_cols
         # Estimate conditional estimates by default
         self.need_conditional_estimates = need_conditional_estimates \
             if need_conditional_estimates != 'auto' \

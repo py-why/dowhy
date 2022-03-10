@@ -66,13 +66,10 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
         self.symbolic_estimator = self.construct_symbolic_estimator(
             self._target_estimand)
         self.logger.info(self.symbolic_estimator)
-        if not hasattr(self, "weighting_scheme"):
-            # 'ips_weight', 'ips_normalized_weight', 'ips_stabilized_weight'
-            self.weighting_scheme = weighting_scheme
-        if not hasattr(self, "min_ps_score"):
-            self.min_ps_score = min_ps_score
-        if not hasattr(self, "max_ps_score"):
-            self.max_ps_score = max_ps_score
+        # Setting method specific parameters
+        self.weighting_scheme = weighting_scheme
+        self.min_ps_score = min_ps_score
+        self.max_ps_score = max_ps_score
 
     def _estimate_effect(self):
         if self.recalculate_propensity_score is True:
