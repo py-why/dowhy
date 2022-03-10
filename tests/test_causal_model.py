@@ -289,7 +289,7 @@ class TestCausalModel(object):
         graph_refutation_object = model.refute_graph(k = 1, independence_test = 
         {'test_for_continuous': 'partial_correlation', 
         'test_for_discrete' : 'conditional_mutual_information'})
-        assert graph_refutation_object.number_of_constraints_satisfied >= 0.80 * graph_refutation_object.number_of_constraints_model
+        assert graph_refutation_object.refutation_result == True
 
     @pytest.mark.parametrize(["num_variables", "num_samples"],
                              [(10,5000),])

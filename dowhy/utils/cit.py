@@ -112,6 +112,8 @@ def entropy(x):
     """"
     Returns entropy for a random variable x
     H(x) = - Σ p(x)log(p(x))
+    :param x : random variable to calculate entropy for
+    :returns : entropy of random variable
     """
     d=defaultdict(lambda:0)
     s = 0.0
@@ -133,6 +135,7 @@ def conditional_MI(data=None,x=None,y=None,z=None):
                 = H(X,Z) + H(Y,Z) - H(X,Y,Z) - H(Z)
     :param data : dataset 
     :param x,y,z : column names from dataset
+    :returns : conditional mutual information between X and Y given Z
     """
     X = data[x].astype(int)
     Y = data[y].astype(int)

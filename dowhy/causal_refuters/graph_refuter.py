@@ -2,6 +2,7 @@ import logging
 from dowhy.causal_refuter import CausalRefuter, CausalRefutation
 from dowhy.utils.cit import partial_corr, conditional_MI
 import numpy as np
+import warnings
 
 class GraphRefuter(CausalRefuter):
     """
@@ -16,7 +17,7 @@ class GraphRefuter(CausalRefuter):
         :param method_name_continuous: name of method for testing conditional independece in continuous data
         :returns : instance of GraphRefutation class
         """
-        self._refutation_passed = "Undecided"  
+        self._refutation_passed = None  
         self._data = data
         self._method_name_discrete = method_name_discrete
         self._method_name_continuous = method_name_continuous
@@ -31,10 +32,11 @@ class GraphRefuter(CausalRefuter):
         """
         if (len(self._true_implications)) == number_of_constraints_model:
             self._refutation_passed = True
+        elif len(self._false_implications) == 0:
+            self._refutation_passed = True
+            warnings.warn("Some tests could not be run : config not supported")
         elif len(self._false_implications) > 0:
             self._refutation_passed = False
-        else:
-            self._refutation_passed = "Undecided"
     
     def partial_correlation(self, x = None, y = None, z =None):
         stats = partial_corr(data=self._data, x=x, y=y, z=list(z))
@@ -63,6 +65,7 @@ class GraphRefuter(CausalRefuter):
         Method to test conditional independence using the graph refutation object on the given testing set
 
         :param independence_constraints: List of implications to test the conditional independence on
+        :returns : GraphRefutation object
         """
         
         refute = GraphRefutation(method_name_continuous= self._method_name_continuous ,method_name_discrete = self._method_name_discrete)
@@ -71,13 +74,17 @@ class GraphRefuter(CausalRefuter):
         discrete_columns = []
         continuous_columns = []
         binary_columns = []
+        variable_type = dict()
         for node in all_nodes:
             if self._data[node].dtype == np.int64 or self._data[node].dtype == np.int32:
                 discrete_columns.append(node)
+                variable_type[node] = "discrete"
                 if self._data[node].isin([0,1]).all():
                     binary_columns.append(node)
+                    variable_type[node] = "binary"
             else:
                 continuous_columns.append(node)
+                variable_type[node] = "continuous"
         for a, b, c in independence_constraints:
             if a in continuous_columns and b in continuous_columns and all(node in continuous_columns for node in c):
                 # a, b and c are all continuous variables
@@ -93,28 +100,28 @@ class GraphRefuter(CausalRefuter):
                 else:
                     self.logger.error("Invalid conditional independence test for discrete data. Supported tests - conditional_mutual_information")
 
-            elif all(node in discrete_columns for node in c): 
-                # c is discrete and either a or b is continuous and the other is discrete
-                self.conditional_mutual_information(x = a, y= b, z = c)
-            elif all(node in continuous_columns for node in c) and ((a in continuous_columns and b in binary_columns) or (a in binary_columns and b in continuous_columns) or (a in binary_columns and b in binary_columns) ): 
-                # c is continuous and 
+            elif (a in continuous_columns or a in binary_columns) and (b in continuous_columns or b in binary_columns) and all(node in continuous_columns  or node in binary_columns for node in c):
+                # c is set of continuous and binary variables and 
                 #   1. either a and b is continuous and the other is binary
-                #   2. both and b are binary
-                self.partial_correlation(x = a, y= b, z = c)
-            elif all(node in continuous_columns for node in c) and ((a in continuous_columns and b not in binary_columns) or (b in continuous_columns and a not in binary_columns)):
-                # c is continuous and either of a and b is continuous and the other is discrete-non binary
-                print("The following setting not supported")
-            elif a in continuous_columns and b in continuous_columns and all(node in continuous_columns  or node in binary_columns for node in c):
-                # a and b are continuous and c has set of continuous and binary variables
+                #   2. both a and b are binary
                 self.partial_correlation(x = a, y= b, z = c) 
-            elif ((a in continuous_columns and b in binary_columns) or (a in binary_columns and b in continuous_columns)) and all(node in continuous_columns  or node in binary_columns for node in c):
-                # Either of a and b is continuous and other one is binary and c has continuous and binary variables
-                self.partial_correlation(x = a, y= b, z = c) 
+            
+            elif all(node in discrete_columns for node in c) and (a in discrete_columns or b in discrete_columns): 
+                # c is discrete and
+                # either a or b is continuous and the other is discrete
+                self.conditional_mutual_information(x = a, y= b, z = c)
+
             elif a in discrete_columns and b in discrete_columns:
                 # a and b are discrete and c is a mixture of discrete and continuous variables. We discretize c and calculate conditional mutual information
                 self.conditional_mutual_information(x = a, y= b, z = c)
+
             else:
-                print("The following setting not supported")
+                key = ((a,b)+(c,))
+                self._results[key]= [None, "NotImplemented"]
+                variable_types_c = []
+                for var in c:
+                    variable_types_c.append(variable_type[var])
+                print("The following setting with {0} as {1}, {2} as {3}, {4} as {5} not supported".format(a, variable_type[a], b, variable_type[b], c, variable_types_c))
                 
         self.set_refutation_result(number_of_constraints_model = len(independence_constraints))
         refute.add_conditional_independence_test_result(number_of_constraints_model = len(independence_constraints), number_of_constraints_satisfied = len(self._true_implications), refutation_result = self._refutation_passed)

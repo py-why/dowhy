@@ -416,7 +416,7 @@ def convert_continuous_to_discrete(arr):
     return arr.astype(int)
 
 
-def dataset_from_random_graph(num_vars, num_samples=1000, prob_edge=0.3, random_seed=100):
+def dataset_from_random_graph(num_vars, num_samples=1000, prob_edge=0.3, random_seed=100, prob_type_of_data = (0.333, 0.333, 0.334)):
     """
     This function generates a dataset with discrete and continuous kinds of variables.
     It creates a random graph and models the variables linearly according to the relations in the graph.
@@ -425,8 +425,11 @@ def dataset_from_random_graph(num_vars, num_samples=1000, prob_edge=0.3, random_
     :param num_samples: Number of samples in the dataset
     :param prob_edge : Probability of an edge between two random nodes in a graph
     :param random_seed: Seed for generating random graph
-    """    
-    np.random.seed(109) 
+    :param prob_type_of_data : 3-element tuple containing the probability of data being discrete, binary and continuous respectively.
+    :returns ret_dict : dictionary with information like dataframe, outcome, treatment, graph string and continuous, discrete and binary columns
+    """
+    assert (sum(list(prob_type_of_data)) == 1.0) 
+    np.random.seed(102) 
     G = nx.fast_gnp_random_graph(n = num_vars, p = prob_edge, seed= random_seed, directed=True) #Generating a random graph 
     DAG = nx.DiGraph([(u,v) for (u,v) in G.edges() if u<v]) #Condition to maintain acyclicity
     mapping = dict(zip(DAG, string.ascii_lowercase))
@@ -437,6 +440,7 @@ def dataset_from_random_graph(num_vars, num_samples=1000, prob_edge=0.3, random_
     changed = dict()
     discrete_cols = []
     continuous_cols = []
+    binary_cols = []
     random_numbers_array = np.random.rand(num_nodes) #Random numbers between 0 to 1 to decide if that particular node will be discrete or continuous
 
     for node in all_nodes:
@@ -450,16 +454,17 @@ def dataset_from_random_graph(num_vars, num_samples=1000, prob_edge=0.3, random_
         if DAG.in_degree(node) == 0:
             x = random_numbers_array[counter]  
             counter+=1
-            if x<=0.333:
+            if x<=prob_type_of_data[0]:
                 df[node] = create_discrete_column(num_samples) #Generating discrete data
                 discrete_cols.append(node)
-            elif x<=0.667:
+            elif x<=prob_type_of_data[0]+prob_type_of_data[1]:
                 df[node] = np.random.normal(0,1,num_samples) #Generating continuous data
                 continuous_cols.append(node)
             else:
                 nums = np.random.normal(0,1,num_samples)
                 df[node] = np.vectorize(convert_to_binary)(nums) #Generating binary data
                 discrete_cols.append(node)
+                binary_cols.append(node)
             successors = list(DAG.successors(node)) #Storing immediate successors for next level data generation
             successors.sort()
             currset.extend(successors)
@@ -490,6 +495,7 @@ def dataset_from_random_graph(num_vars, num_samples=1000, prob_edge=0.3, random_
                     nums = np.random.normal(0,1,num_samples)
                     df[node] = np.vectorize(convert_to_binary)(nums)
                     discrete_cols.append(node)
+                    binary_cols.append(node)
         currset = cs 
 
     outcome  = None  
@@ -513,6 +519,7 @@ def dataset_from_random_graph(num_vars, num_samples=1000, prob_edge=0.3, random_
         "treatment_name": treatment,
         "gml_graph": gml_str,
         "discrete_columns": discrete_cols,
-        "continuous_columns": continuous_cols
+        "continuous_columns": continuous_cols,
+        "binary_columns": binary_cols
     }
     return ret_dict
