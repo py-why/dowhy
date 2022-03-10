@@ -43,6 +43,10 @@ class CausalEstimator:
                  test_significance=False, evaluate_effect_strength=False,
                  confidence_intervals=False,
                  target_units=None, effect_modifiers=None,
+                 num_null_simulations=None, num_simulations=None,
+                 sample_size_fraction=None, confidence_level=None,
+                 need_conditional_estimates='auto',
+                 num_quantiles_to_discretize_cont_cols=None,
                  **kwargs):
         """Initializes an estimator with data and names of relevant variables.
 
@@ -55,19 +59,29 @@ class CausalEstimator:
         :param outcome: name of the outcome variable
         :param control_value: Value of the treatment in the control group, for effect estimation.  If treatment is multi-variate, this can be a list.
         :param treatment_value: Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.
-        :param test_significance: Binary flag or a string indicating whether to test significance and by which method. All estimators support test_significance="bootstrap" that estimates a p-value for the obtained estimate using the bootstrap method. Individual estimators can override this to support custom testing methods. The bootstrap method supports an optional parameter, num_null_simulations that can be specified through the params dictionary. If False, no testing is done. If True, significance of the estimate is tested using the custom method if available, otherwise by bootstrap.
+        :param test_significance: Binary flag or a string indicating whether to test significance and by which method. All estimators support test_significance="bootstrap" that estimates a p-value for the obtained estimate using the bootstrap method. Individual estimators can override this to support custom testing methods. The bootstrap method supports an optional parameter, num_null_simulations. If False, no testing is done. If True, significance of the estimate is tested using the custom method if available, otherwise by bootstrap.
         :param evaluate_effect_strength: (Experimental) whether to evaluate the strength of effect
         :param confidence_intervals: Binary flag or a string indicating whether the confidence intervals should be computed and which method should be used. All methods support estimation of confidence intervals using the bootstrap method by using the parameter confidence_intervals="bootstrap". The bootstrap method takes in two arguments (num_simulations and sample_size_fraction) that can be optionally specified in the params dictionary. Estimators may also override this to implement their own confidence interval method. If this parameter is False, no confidence intervals are computed. If True, confidence intervals are computed by the estimator's specific method if available, otherwise through bootstrap.
         :param target_units: The units for which the treatment effect should be estimated. This can be a string for common specifications of target units (namely, "ate", "att" and "atc"). It can also be a lambda function that can be used as an index for the data (pandas DataFrame). Alternatively, it can be a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
-        :param effect_modifiers: Variables on which to compute separate effects, or return a heterogeneous effect function. Not all methods support this currently.
-        :param kwargs: (optional) Additional method parameters
-            num_null_simulations: The number of simulations for testing the statistical significance of the estimator
-            num_simulations: The number of simulations for finding the confidence interval (and/or standard error) for a estimate
-            sample_size_fraction: The size of the sample for the bootstrap estimator
-            confidence_level: The confidence level of the confidence interval estimate
-            num_quantiles_to_discretize_cont_cols: The number of quantiles into which a numeric effect modifier is split, to enable estimation of conditional treatment effect over it.
+        :param effect_modifiers: Variables on which to compute separate
+            effects, or return a heterogeneous effect function. Not all
+            methods support this currently.
+        :param num_null_simulations: The number of simulations for testing the
+            statistical significance of the estimator
+        :param num_simulations: The number of simulations for finding the
+            confidence interval (and/or standard error) for a estimate
+        :param sample_size_fraction: The size of the sample for the bootstrap
+            estimator
+        :param confidence_level: The confidence level of the confidence
+            interval estimate
+        :param need_conditional_estimates: Boolean flag indicating whether
+            conditional estimates should be computed. Defaults to True if
+            there are effect modifiers in the graph
+        :param num_quantiles_to_discretize_cont_cols: The number of quantiles
+            into which a numeric effect modifier is split, to enable
+            estimation of conditional treatment effect over it.
+        :param kwargs: (optional) Additional estimator-specific parameters
         :returns: an instance of the estimator class.
-
         """
         self._data = data
         self._target_estimand = identified_estimand
@@ -110,19 +124,26 @@ class CausalEstimator:
                 self._effect_modifier_names = None
 
         # Checking if some parameters were set, otherwise setting to default values
-        if not hasattr(self, 'num_null_simulations'):
-            self.num_null_simulations = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST
-        if not hasattr(self, 'num_simulations'):
-            self.num_simulations = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI
-        if not hasattr(self, 'sample_size_fraction'):
-            self.sample_size_fraction = CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION
-        if not hasattr(self, 'confidence_level'):
-            self.confidence_level = CausalEstimator.DEFAULT_CONFIDENCE_LEVEL
-        if not hasattr(self, 'num_quantiles_to_discretize_cont_cols'):
-            self.num_quantiles_to_discretize_cont_cols = CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS
+        self.num_null_simulations = num_null_simulations \
+            if num_null_simulations is not None \
+            else CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST
+        self.num_simulations = num_simulations \
+            if num_simulations is not None \
+            else CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI
+        self.sample_size_fraction = sample_size_fraction \
+            if sample_size_fraction is not None \
+            else CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION
+        self.confidence_level = confidence_level \
+            if confidence_level is not None \
+            else CausalEstimator.DEFAULT_CONFIDENCE_LEVEL
+        self.num_quantiles_to_discretize_cont_cols = \
+            num_quantiles_to_discretize_cont_cols \
+            if num_quantiles_to_discretize_cont_cols is not None \
+            else CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS
         # Estimate conditional estimates by default
-        if not hasattr(self, 'need_conditional_estimates'):
-            self.need_conditional_estimates = bool(self._effect_modifier_names)
+        self.need_conditional_estimates = need_conditional_estimates \
+            if need_conditional_estimates != 'auto' \
+            else bool(self._effect_modifier_names)
 
     @staticmethod
     def get_estimator_object(new_data, identified_estimand, estimate):
