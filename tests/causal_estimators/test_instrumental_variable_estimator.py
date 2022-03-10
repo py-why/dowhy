@@ -32,7 +32,7 @@ class TestInstrumentalVariableEstimator(object):
         configs = [dict(zip(keys, v)) for v in itertools.product(*values)]
         for cfg in configs:
             print("\nConfig:", cfg)
-            cfg['method_params']= None
+            cfg['method_params']= {}
             if cfg["num_instruments"] >= cfg["num_treatments"]:
                 estimator_tester.average_treatment_effect_test(**cfg)
             else:
