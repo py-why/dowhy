@@ -11,10 +11,13 @@ class RandomCommonCause(CausalRefuter):
     """Refute an estimate by introducing a randomly generated confounder
     (that may have been unobserved).
 
-    :param num_simulations: The number of simulations to be run, which is ``CausalRefuter.DEFAULT_NUM_SIMULATIONS`` by default
+    :param num_simulations: The number of simulations to be run, which is
+        ``CausalRefuter.DEFAULT_NUM_SIMULATIONS`` by default
     :type num_simulations: int, optional
 
-    :param random_state: The seed value to be added if we wish to repeat the same random behavior. If we with to repeat the same behavior we push the same seed in the psuedo-random generator
+    :param random_state: The seed value to be added if we wish to repeat the
+        same random behavior. If we with to repeat the same behavior we push
+        the same seed in the psuedo-random generator
     :type random_state: int, RandomState, optional
     """
     def __init__(self, *args, **kwargs):
