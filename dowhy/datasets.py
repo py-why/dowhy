@@ -485,10 +485,10 @@ def dataset_from_random_graph(num_vars, num_samples=1000, prob_edge=0.3, random_
                 changed[node] = True
                 x = random_numbers_array[counter]
                 counter+=1
-                if x<=0.333:
+                if x<=prob_type_of_data[0]:
                     df[node] = convert_continuous_to_discrete(t)
                     discrete_cols.append(node)
-                elif x<=0.667:
+                elif x<=prob_type_of_data[0]+prob_type_of_data[1]:
                     df[node] = t
                     continuous_cols.append(node)
                 else:
