@@ -2,7 +2,6 @@ import logging
 from dowhy.causal_refuter import CausalRefuter, CausalRefutation
 from dowhy.utils.cit import partial_corr, conditional_MI
 import numpy as np
-import warnings
 
 class GraphRefuter(CausalRefuter):
     """
@@ -34,7 +33,7 @@ class GraphRefuter(CausalRefuter):
             self._refutation_passed = True
         elif len(self._false_implications) == 0:
             self._refutation_passed = True
-            warnings.warn("Some tests could not be run : config not supported")
+            self.logger.warn("Some tests could not be run : config not supported")
         elif len(self._false_implications) > 0:
             self._refutation_passed = False
     
