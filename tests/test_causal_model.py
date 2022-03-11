@@ -289,6 +289,7 @@ class TestCausalModel(object):
         graph_refutation_object = model.refute_graph(k = 1, independence_test = 
         {'test_for_continuous': 'partial_correlation', 
         'test_for_discrete' : 'conditional_mutual_information'})
+        print(df, data["gml_graph"])
         assert graph_refutation_object.refutation_result == True
 
     @pytest.mark.parametrize(["num_variables", "num_samples"],
