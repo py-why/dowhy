@@ -10,6 +10,8 @@ from numpy.random import choice, random
 import networkx as nx
 import scipy.stats as ss
 import string
+from collections import deque
+
 
 def sigmoid(x):
     return 1 / (1 + math.exp(-x))
@@ -415,6 +417,395 @@ def create_discrete_column(num_samples,std_dev=1):
 def convert_continuous_to_discrete(arr):
     return arr.astype(int)
 
+def get_simple_ordered_tree(n):
+    """
+    Generates a simple-ordered tree. The tree is just a
+    directed acyclic graph of n nodes with the structure
+    0 --> 1 --> .... --> n.
+    """
+    g = nx.DiGraph()
+
+    for i in range(n):
+        g.add_node(i)
+
+    for i in range(n - 1):
+        g.add_edges_from([(i, i+1, {})])
+    return g
+
+def topological_generations(G):
+    """Stratifies a DAG into generations.
+    A topological generation is node collection in which ancestors of a node in each
+    generation are guaranteed to be in a previous generation, and any descendants of
+    a node are guaranteed to be in a following generation. Nodes are guaranteed to
+    be in the earliest possible generation that they can belong to.
+    Parameters
+    ----------
+    G : NetworkX digraph
+        A directed acyclic graph (DAG)
+    Yields
+    ------
+    sets of nodes
+        Yields sets of nodes representing each generation.
+    Raises
+    ------
+    NetworkXError
+        Generations are defined for directed graphs only. If the graph
+        `G` is undirected, a :exc:`NetworkXError` is raised.
+    NetworkXUnfeasible
+        If `G` is not a directed acyclic graph (DAG) no topological generations
+        exist and a :exc:`NetworkXUnfeasible` exception is raised.  This can also
+        be raised if `G` is changed while the returned iterator is being processed
+    RuntimeError
+        If `G` is changed while the returned iterator is being processed.
+    Examples
+    --------
+    >>> DG = nx.DiGraph([(2, 1), (3, 1)])
+    >>> [sorted(generation) for generation in nx.topological_generations(DG)]
+    [[2, 3], [1]]
+    Notes
+    -----
+    The generation in which a node resides can also be determined by taking the
+    max-path-distance from the node to the farthest leaf node. That value can
+    be obtained with this function using `enumerate(topological_generations(G))`.
+    See also
+    --------
+    topological_sort
+    """
+    if not G.is_directed():
+        raise nx.NetworkXError("Topological sort not defined on undirected graphs.")
+
+    multigraph = G.is_multigraph()
+    indegree_map = {v: d for v, d in G.in_degree() if d > 0}
+    zero_indegree = [v for v, d in G.in_degree() if d == 0]
+
+    while zero_indegree:
+        this_generation = zero_indegree
+        zero_indegree = []
+        for node in this_generation:
+            if node not in G:
+                raise RuntimeError("Graph changed during iteration")
+            for child in G.neighbors(node):
+                try:
+                    indegree_map[child] -= len(G[node][child]) if multigraph else 1
+                except KeyError as err:
+                    raise RuntimeError("Graph changed during iteration") from err
+                if indegree_map[child] == 0:
+                    zero_indegree.append(child)
+                    del indegree_map[child]
+        yield this_generation
+
+    if indegree_map:
+        raise nx.NetworkXUnfeasible(
+            "Graph contains a cycle or graph changed during iteration"
+        )
+
+
+def topological_sort(G):
+    """Returns a generator of nodes in topologically sorted order.
+    A topological sort is a nonunique permutation of the nodes of a
+    directed graph such that an edge from u to v implies that u
+    appears before v in the topological sort order. This ordering is
+    valid only if the graph has no directed cycles.
+    Parameters
+    ----------
+    G : NetworkX digraph
+        A directed acyclic graph (DAG)
+    Yields
+    ------
+    nodes
+        Yields the nodes in topological sorted order.
+    Raises
+    ------
+    NetworkXError
+        Topological sort is defined for directed graphs only. If the graph `G`
+        is undirected, a :exc:`NetworkXError` is raised.
+    NetworkXUnfeasible
+        If `G` is not a directed acyclic graph (DAG) no topological sort exists
+        and a :exc:`NetworkXUnfeasible` exception is raised.  This can also be
+        raised if `G` is changed while the returned iterator is being processed
+    RuntimeError
+        If `G` is changed while the returned iterator is being processed.
+    Examples
+    --------
+    To get the reverse order of the topological sort:
+    >>> DG = nx.DiGraph([(1, 2), (2, 3)])
+    >>> list(reversed(list(nx.topological_sort(DG))))
+    [3, 2, 1]
+    If your DiGraph naturally has the edges representing tasks/inputs
+    and nodes representing people/processes that initiate tasks, then
+    topological_sort is not quite what you need. You will have to change
+    the tasks to nodes with dependence reflected by edges. The result is
+    a kind of topological sort of the edges. This can be done
+    with :func:`networkx.line_graph` as follows:
+    >>> list(nx.topological_sort(nx.line_graph(DG)))
+    [(1, 2), (2, 3)]
+    Notes
+    -----
+    This algorithm is based on a description and proof in
+    "Introduction to Algorithms: A Creative Approach" [1]_ .
+    See also
+    --------
+    is_directed_acyclic_graph, lexicographical_topological_sort
+    References
+    ----------
+    .. [1] Manber, U. (1989).
+       *Introduction to Algorithms - A Creative Approach.* Addison-Wesley.
+    """
+    for generation in topological_generations(G):
+        yield from generation
+
+def is_directed_acyclic_graph(G):
+    """Returns True if the graph `G` is a directed acyclic graph (DAG) or
+    False if not.
+    Parameters
+    ----------
+    G : NetworkX graph
+    Returns
+    -------
+    bool
+        True if `G` is a DAG, False otherwise
+    Examples
+    --------
+    Undirected graph::
+        >>> G = nx.Graph([(1, 2), (2, 3)])
+        >>> nx.is_directed_acyclic_graph(G)
+        False
+    Directed graph with cycle::
+        >>> G = nx.DiGraph([(1, 2), (2, 3), (3, 1)])
+        >>> nx.is_directed_acyclic_graph(G)
+        False
+    Directed acyclic graph::
+        >>> G = nx.DiGraph([(1, 2), (2, 3)])
+        >>> nx.is_directed_acyclic_graph(G)
+        True
+    See also
+    --------
+    topological_sort
+    """
+    return G.is_directed() and not has_cycle(G)
+
+
+def shortest_path(G, source=None, target=None, weight=None, method="dijkstra"):
+    """Compute shortest paths in the graph.
+    Parameters
+    ----------
+    G : NetworkX graph
+    source : node, optional
+        Starting node for path. If not specified, compute shortest
+        paths for each possible starting node.
+    target : node, optional
+        Ending node for path. If not specified, compute shortest
+        paths to all possible nodes.
+    weight : None, string or function, optional (default = None)
+        If None, every edge has weight/distance/cost 1.
+        If a string, use this edge attribute as the edge weight.
+        Any edge attribute not present defaults to 1.
+        If this is a function, the weight of an edge is the value
+        returned by the function. The function must accept exactly
+        three positional arguments: the two endpoints of an edge and
+        the dictionary of edge attributes for that edge.
+        The function must return a number.
+    method : string, optional (default = 'dijkstra')
+        The algorithm to use to compute the path.
+        Supported options: 'dijkstra', 'bellman-ford'.
+        Other inputs produce a ValueError.
+        If `weight` is None, unweighted graph methods are used, and this
+        suggestion is ignored.
+    Returns
+    -------
+    path: list or dictionary
+        All returned paths include both the source and target in the path.
+        If the source and target are both specified, return a single list
+        of nodes in a shortest path from the source to the target.
+        If only the source is specified, return a dictionary keyed by
+        targets with a list of nodes in a shortest path from the source
+        to one of the targets.
+        If only the target is specified, return a dictionary keyed by
+        sources with a list of nodes in a shortest path from one of the
+        sources to the target.
+        If neither the source nor target are specified return a dictionary
+        of dictionaries with path[source][target]=[list of nodes in path].
+    Raises
+    ------
+    NodeNotFound
+        If `source` is not in `G`.
+    ValueError
+        If `method` is not among the supported options.
+    Examples
+    --------
+    >>> G = nx.path_graph(5)
+    >>> print(nx.shortest_path(G, source=0, target=4))
+    [0, 1, 2, 3, 4]
+    >>> p = nx.shortest_path(G, source=0)  # target not specified
+    >>> p[4]
+    [0, 1, 2, 3, 4]
+    >>> p = nx.shortest_path(G, target=4)  # source not specified
+    >>> p[0]
+    [0, 1, 2, 3, 4]
+    >>> p = nx.shortest_path(G)  # source, target not specified
+    >>> p[0][4]
+    [0, 1, 2, 3, 4]
+    Notes
+    -----
+    There may be more than one shortest path between a source and target.
+    This returns only one of them.
+    See Also
+    --------
+    all_pairs_shortest_path
+    all_pairs_dijkstra_path
+    all_pairs_bellman_ford_path
+    single_source_shortest_path
+    single_source_dijkstra_path
+    single_source_bellman_ford_path
+    """
+    if method not in ("dijkstra", "bellman-ford"):
+        # so we don't need to check in each branch later
+        raise ValueError(f"method not supported: {method}")
+    method = "unweighted" if weight is None else method
+    if source is None:
+        if target is None:
+            # Find paths between all pairs.
+            if method == "unweighted":
+                paths = dict(nx.all_pairs_shortest_path(G))
+            elif method == "dijkstra":
+                paths = dict(nx.all_pairs_dijkstra_path(G, weight=weight))
+            else:  # method == 'bellman-ford':
+                paths = dict(nx.all_pairs_bellman_ford_path(G, weight=weight))
+        else:
+            # Find paths from all nodes co-accessible to the target.
+            if G.is_directed():
+                G = G.reverse(copy=False)
+            if method == "unweighted":
+                paths = nx.single_source_shortest_path(G, target)
+            elif method == "dijkstra":
+                paths = nx.single_source_dijkstra_path(G, target, weight=weight)
+            else:  # method == 'bellman-ford':
+                paths = nx.single_source_bellman_ford_path(G, target, weight=weight)
+            # Now flip the paths so they go from a source to the target.
+            for target in paths:
+                paths[target] = list(reversed(paths[target]))
+    else:
+        if target is None:
+            # Find paths to all nodes accessible from the source.
+            if method == "unweighted":
+                paths = nx.single_source_shortest_path(G, source)
+            elif method == "dijkstra":
+                paths = nx.single_source_dijkstra_path(G, source, weight=weight)
+            else:  # method == 'bellman-ford':
+                paths = nx.single_source_bellman_ford_path(G, source, weight=weight)
+        else:
+            # Find shortest source-target path.
+            if method == "unweighted":
+                paths = nx.bidirectional_shortest_path(G, source, target)
+            elif method == "dijkstra":
+                _, paths = nx.bidirectional_dijkstra(G, source, target, weight)
+            else:  # method == 'bellman-ford':
+                paths = nx.bellman_ford_path(G, source, target, weight)
+    return paths
+
+def is_connected(g):
+    """
+    Checks if a the directed acyclic graph is connected.
+    """
+    u = convert_to_undirected_graph(g)
+    return nx.is_connected(u)
+
+
+def convert_to_undirected_graph(g):
+    """
+    Converts a directed acyclic graph (DAG) to an undirected graph.
+    We need to convert a DAG to an undirected one to use
+    some API calls to operate over the undirected graph. For example,
+    in checking for connectedness of a graph, the API has a method
+    to check for connectedness of an undirected graph, but not a
+    DAG.
+    """
+    u = nx.Graph()
+    for n in g.nodes:
+        u.add_node(n)
+    for e in g.edges:
+        u.add_edges_from([(e[0], e[1], {})])
+    return u
+
+
+def get_random_node_pair(n):
+    """
+    Randomly generates a pair of nodes.
+    """
+    i = np.random.randint(0, n)
+    j = i
+    while j == i:
+        j = np.random.randint(0, n)
+    return i, j
+
+
+
+def find_predecessor(i, j, g):
+    """
+    Finds a predecessor, k, in the path between two nodes, i and j,
+    in the graph, g. We assume g is connected, and there is a
+    path between i and j (ignoring the direction of the edges).
+    We want to find a k, that is a parent of j, that is in
+    the path between i and j. In some cases, we may not find
+    such a k.
+    """
+    parents = list(g.predecessors(j))
+    u = convert_to_undirected_graph(g)
+    for pa in parents:
+        try:
+            path = shortest_path(u, pa, i)
+            return pa
+        except:
+            pass
+    return None
+
+def has_cycle(G):
+    """Decides whether the directed graph has a cycle."""
+    try:
+        # Feed the entire iterator into a zero-length deque.
+        deque(topological_sort(G), maxlen=0)
+    except nx.NetworkXUnfeasible:
+        return True
+    else:
+        return False
+
+
+def del_edge(i, j, g):
+    """
+    Deletes the edge i --> j in the graph, g. The edge is only
+    deleted if this removal does NOT cause the graph to be
+    disconnected.
+    """
+    if g.has_edge(i, j) is True:
+        g.remove_edge(i, j)
+
+        if is_connected(g) is False:
+            g.add_edges_from([(i, j, {})])
+
+def add_edge(i, j, g):
+    """
+    Adds an edge i --> j to the graph, g. The edge is only
+    added if this addition does NOT cause the graph to have
+    cycles.
+    """
+    g.add_edges_from([(i, j, {})])
+    if is_directed_acyclic_graph(g) is False:
+        g.remove_edge(i, j)
+
+
+
+def generate_random_graph(n, max_iter = 10):
+    g = get_simple_ordered_tree(n)
+    for it in range(max_iter):
+        i, j = get_random_node_pair(n)
+        if g.has_edge(i, j) is True:
+            del_edge(i, j, g)
+        else:
+            add_edge(i, j, g)
+    
+    return g
+
+
 
 def dataset_from_random_graph(num_vars, num_samples=1000, prob_edge=0.3, random_seed=100, prob_type_of_data = (0.333, 0.333, 0.334)):
     """
@@ -429,10 +820,11 @@ def dataset_from_random_graph(num_vars, num_samples=1000, prob_edge=0.3, random_
     :returns ret_dict : dictionary with information like dataframe, outcome, treatment, graph string and continuous, discrete and binary columns
     """
     assert (sum(list(prob_type_of_data)) == 1.0) 
-    np.random.seed(102) 
+    np.random.seed(100) 
     print(num_vars)
     G = nx.fast_gnp_random_graph(n = num_vars, p = prob_edge, seed= random_seed, directed=True) #Generating a random graph 
     DAG = nx.DiGraph([(u,v) for (u,v) in G.edges() if u<v]) #Condition to maintain acyclicity
+    DAG = generate_random_graph(n = num_vars)
     print(G.nodes, DAG.nodes)
     mapping = dict(zip(DAG, string.ascii_lowercase))
     DAG = nx.relabel_nodes(DAG, mapping)
@@ -515,6 +907,7 @@ def dataset_from_random_graph(num_vars, num_samples=1000, prob_edge=0.3, random_
                 treatments.append(node) #Node which causes outcome is treatment
    
     gml_str = ("\n".join(nx.generate_gml(DAG)))
+    print(gml_str)
     ret_dict = {
         "df": df,
         "outcome_name": outcome,
