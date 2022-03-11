@@ -430,11 +430,14 @@ def dataset_from_random_graph(num_vars, num_samples=1000, prob_edge=0.3, random_
     """
     assert (sum(list(prob_type_of_data)) == 1.0) 
     np.random.seed(102) 
+    print(num_vars)
     G = nx.fast_gnp_random_graph(n = num_vars, p = prob_edge, seed= random_seed, directed=True) #Generating a random graph 
     DAG = nx.DiGraph([(u,v) for (u,v) in G.edges() if u<v]) #Condition to maintain acyclicity
+    print(G.nodes)
     mapping = dict(zip(DAG, string.ascii_lowercase))
     DAG = nx.relabel_nodes(DAG, mapping)
     all_nodes = list(DAG.nodes)
+    print(all_nodes)
     all_nodes.sort()
     num_nodes = len(all_nodes)
     changed = dict()
