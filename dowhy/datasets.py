@@ -433,7 +433,7 @@ def dataset_from_random_graph(num_vars, num_samples=1000, prob_edge=0.3, random_
     print(num_vars)
     G = nx.fast_gnp_random_graph(n = num_vars, p = prob_edge, seed= random_seed, directed=True) #Generating a random graph 
     DAG = nx.DiGraph([(u,v) for (u,v) in G.edges() if u<v]) #Condition to maintain acyclicity
-    print(G.nodes)
+    print(G.nodes, DAG.nodes)
     mapping = dict(zip(DAG, string.ascii_lowercase))
     DAG = nx.relabel_nodes(DAG, mapping)
     all_nodes = list(DAG.nodes)
