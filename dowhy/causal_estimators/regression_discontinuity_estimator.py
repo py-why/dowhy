@@ -31,7 +31,8 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
         """
         # Required to ensure that self.method_params contains all the information
         # to create an object of this class
-        args_dict = {k:v for k,v in locals().items() if k not in ('self','args','kwargs')}
+        args_dict = {k: v for k, v in locals().items()
+                     if k not in type(self)._STD_INIT_ARGS}
         args_dict.update(kwargs)
         super().__init__(*args, **args_dict)
         self.logger.info("Using Regression Discontinuity Estimator")

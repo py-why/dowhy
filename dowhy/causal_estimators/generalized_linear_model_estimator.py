@@ -1,9 +1,8 @@
-import numpy as np
-import pandas as pd
 import statsmodels.api as sm
 import itertools
 
 from dowhy.causal_estimators.regression_estimator import RegressionEstimator
+
 
 class GeneralizedLinearModelEstimator(RegressionEstimator):
     """Compute effect of treatment using a generalized linear model such as logistic regression.
@@ -26,7 +25,8 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
         """
         # Required to ensure that self.method_params contains all the
         # parameters needed to create an object of this class
-        args_dict = {k:v for k,v in locals().items() if k not in ('self','args','kwargs')}
+        args_dict = {k: v for k, v in locals().items()
+                     if k not in type(self)._STD_INIT_ARGS}
         args_dict.update(kwargs)
         super().__init__(*args, **args_dict)
         self.logger.info("INFO: Using Generalized Linear Model Estimator")

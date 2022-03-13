@@ -38,6 +38,9 @@ class CausalEstimator:
 
     DEFAULT_INTERPRET_METHOD = ["textual_effect_interpreter"]
 
+    # std args to be removed from locals() before being passed to args_dict
+    _STD_INIT_ARGS = ('self', '__class__', 'args', 'kwargs')
+
     def __init__(self, data, identified_estimand, treatment, outcome,
                  control_value=0, treatment_value=1,
                  test_significance=False, evaluate_effect_strength=False,
@@ -136,7 +139,6 @@ class CausalEstimator:
         self.need_conditional_estimates = need_conditional_estimates \
             if need_conditional_estimates != 'auto' \
             else bool(self._effect_modifier_names)
-        print(self.sample_size_fraction)
 
     @staticmethod
     def get_estimator_object(new_data, identified_estimand, estimate):

@@ -3,6 +3,7 @@ import pandas as pd
 
 from dowhy.causal_estimator import CausalEstimator
 
+
 class PropensityScoreEstimator(CausalEstimator):
     """
     Base class for estimators that estimate effects based on propensity of
@@ -15,8 +16,8 @@ class PropensityScoreEstimator(CausalEstimator):
 
     """
     def __init__(self, *args, propensity_score_model=None,
-            recalculate_propensity_score=True,
-            propensity_score_column="propensity_score", **kwargs):
+                 recalculate_propensity_score=True,
+                 propensity_score_column="propensity_score", **kwargs):
         """
         :param propensity_score_model: Model used to compute propensity score.
             Can be any classification model that supports fit() and
@@ -29,8 +30,10 @@ class PropensityScoreEstimator(CausalEstimator):
         """
         # Required to ensure that self.method_params contains all the
         # parameters to create an object of this class
-        args_dict = {k:v for k,v in locals().items() if k not in ('self','args','kwargs')}
+        args_dict = {k: v for k, v in locals().items()
+                     if k not in type(self)._STD_INIT_ARGS}
         args_dict.update(kwargs)
+        print(args_dict)
         super().__init__(*args, **args_dict)
 
         # Enable the user to pass params for a custom propensity model

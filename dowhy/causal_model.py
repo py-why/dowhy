@@ -270,6 +270,7 @@ class CausalModel:
                     # Define the third-party estimation method to be used
                     method_params[third_party_estimator_package + "_methodname"] = estimator_name
             else: # For older dowhy methods
+                print(estimator_name)
                 # Process the dowhy estimators
                 causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
         if identified_estimand.no_directed_path:

@@ -16,8 +16,9 @@ class DistanceMatchingEstimator(CausalEstimator):
     """
     # allowed types of distance metric
     Valid_Dist_Metric_Params = ['p', 'V', 'VI', 'w']
+
     def __init__(self, *args, num_matches_per_unit=1,
-            distance_metric="minkowski", exact_match_cols=None, **kwargs):
+                 distance_metric="minkowski", exact_match_cols=None, **kwargs):
         """
         :param num_matches_per_unit: The number of matches per data point.
             Default=1.
@@ -29,7 +30,8 @@ class DistanceMatchingEstimator(CausalEstimator):
         """
         # Required to ensure that self.method_params contains all the
         # parameters to create an object of this class
-        args_dict = {k:v for k,v in locals().items() if k not in ('self','args','kwargs')}
+        args_dict = {k: v for k, v in locals().items()
+                     if k not in type(self)._STD_INIT_ARGS}
         args_dict.update(kwargs)
         super().__init__(*args, **args_dict)
         # Check if the treatment is one-dimensional

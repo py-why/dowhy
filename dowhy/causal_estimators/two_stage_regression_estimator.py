@@ -8,6 +8,7 @@ from dowhy.causal_identifier import CausalIdentifier
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 from dowhy.utils.api import parse_state
 
+
 class TwoStageRegressionEstimator(CausalEstimator):
     """Compute treatment effect whenever the effect is fully mediated by
     another variable (front-door) or when there is an instrument available.
@@ -26,7 +27,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
     DEFAULT_SECOND_STAGE_MODEL = LinearRegressionEstimator
 
     def __init__(self, *args, first_stage_model=None,
-            second_stage_model=None, **kwargs):
+                 second_stage_model=None, **kwargs):
         """
         :param first_stage_model: First stage estimator to be used. Default is
             linear regression.
@@ -36,7 +37,8 @@ class TwoStageRegressionEstimator(CausalEstimator):
         """
         # Required to ensure that self.method_params contains all the
         # parameters needed to create an object of this class
-        args_dict = {k:v for k,v in locals().items() if k not in ('self','args','kwargs')}
+        args_dict = {k: v for k, v in locals().items()
+                     if k not in type(self)._STD_INIT_ARGS}
         args_dict.update(kwargs)
         super().__init__(*args, **args_dict)
         self.logger.info("INFO: Using Two Stage Regression Estimator")
