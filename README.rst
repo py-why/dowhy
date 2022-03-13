@@ -37,10 +37,28 @@ For a quick introduction to causal inference, check out `amit-sharma/causal-infe
 
 Documentation for DoWhy is available at `microsoft.github.io/dowhy <https://microsoft.github.io/dowhy/>`_.
 
+.. raw:: html
+
+   <details>
+   <summary><a><strong><em>Table of Contents</em></strong></summary>
+   
 .. i here comment toctree::
 .. i here comment   :maxdepth: 4
 .. i here comment   :caption: Contents:
-.. contents:: **Contents**
+.. contents::
+
+.. raw:: html
+
+   </details>
+ 
+News
+-----
+**2022.03.13**: **Call for Content**. 
+Hello everyone, Microsoft will be hosting a workshop to explore current and future applications for DoWhy and EconML on Tuesday, May 3, 2022. With DoWhy, our goal has been to make answering ‘what if’ questions a whole lot easier by providing a state-of-the-art, end-to-end framework for causal inference, including automated causal identification and robustness procedures. We’re charting the course for future development of DoWhy and need your help.
+
+What more would you like to see in the library? New kinds of tasks, better functionality for the core tasks? Let us know!
+We are also looking for stories of problems you have solved using DoWhy+EconML to highlight in the workshop. If you have one,
+please reach out to caburact@microsoft.com or respond on the discussions page (https://github.com/microsoft/dowhy/discussions/392).
 
 The need for causal inference
 ----------------------------------
