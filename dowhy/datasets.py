@@ -11,6 +11,8 @@ import networkx as nx
 import scipy.stats as ss
 import string
 from collections import deque
+from networkx.algorithms.dag import is_directed_acyclic_graph
+from networkx.algorithms.shortest_paths.generic import shortest_path
 
 
 def sigmoid(x):
@@ -432,156 +434,6 @@ def get_simple_ordered_tree(n):
         g.add_edges_from([(i, i+1, {})])
     return g
 
-def topological_generations(G):
-    """Stratifies a DAG into generations.
-    :returns: sets of nodes
-    """
-    if not G.is_directed():
-        raise nx.NetworkXError("Topological sort not defined on undirected graphs.")
-
-    multigraph = G.is_multigraph()
-    indegree_map = {v: d for v, d in G.in_degree() if d > 0}
-    zero_indegree = [v for v, d in G.in_degree() if d == 0]
-
-    while zero_indegree:
-        this_generation = zero_indegree
-        zero_indegree = []
-        for node in this_generation:
-            if node not in G:
-                raise RuntimeError("Graph changed during iteration")
-            for child in G.neighbors(node):
-                try:
-                    indegree_map[child] -= len(G[node][child]) if multigraph else 1
-                except KeyError as err:
-                    raise RuntimeError("Graph changed during iteration") from err
-                if indegree_map[child] == 0:
-                    zero_indegree.append(child)
-                    del indegree_map[child]
-        yield this_generation
-
-    if indegree_map:
-        raise nx.NetworkXUnfeasible(
-            "Graph contains a cycle or graph changed during iteration"
-        )
-
-
-def topological_sort(G):
-    """Returns a generator of nodes in topologically sorted order.
-    A topological sort is a nonunique permutation of the nodes of a
-    directed graph such that an edge from u to v implies that u
-    appears before v in the topological sort order. This ordering is
-    valid only if the graph has no directed cycles.
-    Parameters
-    ----------
-    G : NetworkX digraph
-        A directed acyclic graph (DAG)
-    Yields
-    ------
-    nodes
-        Yields the nodes in topological sorted order.
-    """
-    for generation in topological_generations(G):
-        yield from generation
-
-def is_directed_acyclic_graph(G):
-    """Returns True if the graph `G` is a directed acyclic graph (DAG) or
-    False if not.
-    Parameters
-    ----------
-    G : NetworkX graph
-    Returns
-    -------
-    bool
-        True if `G` is a DAG, False otherwise
-    """
-    return G.is_directed() and not has_cycle(G)
-
-
-def shortest_path(G, source=None, target=None, weight=None, method="dijkstra"):
-    """Compute shortest paths in the graph.
-    Parameters
-    ----------
-    G : NetworkX graph
-    source : node, optional
-        Starting node for path. If not specified, compute shortest
-        paths for each possible starting node.
-    target : node, optional
-        Ending node for path. If not specified, compute shortest
-        paths to all possible nodes.
-    weight : None, string or function, optional (default = None)
-        If None, every edge has weight/distance/cost 1.
-        If a string, use this edge attribute as the edge weight.
-        Any edge attribute not present defaults to 1.
-        If this is a function, the weight of an edge is the value
-        returned by the function. The function must accept exactly
-        three positional arguments: the two endpoints of an edge and
-        the dictionary of edge attributes for that edge.
-        The function must return a number.
-    method : string, optional (default = 'dijkstra')
-        The algorithm to use to compute the path.
-        Supported options: 'dijkstra', 'bellman-ford'.
-        Other inputs produce a ValueError.
-        If `weight` is None, unweighted graph methods are used, and this
-        suggestion is ignored.
-    Returns
-    -------
-    path: list or dictionary
-        All returned paths include both the source and target in the path.
-        If the source and target are both specified, return a single list
-        of nodes in a shortest path from the source to the target.
-        If only the source is specified, return a dictionary keyed by
-        targets with a list of nodes in a shortest path from the source
-        to one of the targets.
-        If only the target is specified, return a dictionary keyed by
-        sources with a list of nodes in a shortest path from one of the
-        sources to the target.
-        If neither the source nor target are specified return a dictionary
-        of dictionaries with path[source][target]=[list of nodes in path].
-    """
-    if method not in ("dijkstra", "bellman-ford"):
-        # so we don't need to check in each branch later
-        raise ValueError(f"method not supported: {method}")
-    method = "unweighted" if weight is None else method
-    if source is None:
-        if target is None:
-            # Find paths between all pairs.
-            if method == "unweighted":
-                paths = dict(nx.all_pairs_shortest_path(G))
-            elif method == "dijkstra":
-                paths = dict(nx.all_pairs_dijkstra_path(G, weight=weight))
-            else:  # method == 'bellman-ford':
-                paths = dict(nx.all_pairs_bellman_ford_path(G, weight=weight))
-        else:
-            # Find paths from all nodes co-accessible to the target.
-            if G.is_directed():
-                G = G.reverse(copy=False)
-            if method == "unweighted":
-                paths = nx.single_source_shortest_path(G, target)
-            elif method == "dijkstra":
-                paths = nx.single_source_dijkstra_path(G, target, weight=weight)
-            else:  # method == 'bellman-ford':
-                paths = nx.single_source_bellman_ford_path(G, target, weight=weight)
-            # Now flip the paths so they go from a source to the target.
-            for target in paths:
-                paths[target] = list(reversed(paths[target]))
-    else:
-        if target is None:
-            # Find paths to all nodes accessible from the source.
-            if method == "unweighted":
-                paths = nx.single_source_shortest_path(G, source)
-            elif method == "dijkstra":
-                paths = nx.single_source_dijkstra_path(G, source, weight=weight)
-            else:  # method == 'bellman-ford':
-                paths = nx.single_source_bellman_ford_path(G, source, weight=weight)
-        else:
-            # Find shortest source-target path.
-            if method == "unweighted":
-                paths = nx.bidirectional_shortest_path(G, source, target)
-            elif method == "dijkstra":
-                _, paths = nx.bidirectional_dijkstra(G, source, target, weight)
-            else:  # method == 'bellman-ford':
-                paths = nx.bellman_ford_path(G, source, target, weight)
-    return paths
 
 def is_connected(g):
     """
@@ -627,15 +479,6 @@ def find_predecessor(i, j, g):
             pass
     return None
 
-def has_cycle(G):
-    """Decides whether the directed graph has a cycle."""
-    try:
-        # Feed the entire iterator into a zero-length deque.
-        deque(topological_sort(G), maxlen=0)
-    except nx.NetworkXUnfeasible:
-        return True
-    else:
-        return False
 
 
 def del_edge(i, j, g):
