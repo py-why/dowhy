@@ -6,7 +6,12 @@ import math
 
 import numpy as np
 import pandas as pd
-from numpy.random import choice
+from numpy.random import choice, random
+import networkx as nx
+import scipy.stats as ss
+import string
+from dowhy.utils.graph_operations import is_connected,convert_to_undirected_graph, get_random_node_pair, find_predecessor, del_edge, add_edge, get_simple_ordered_tree
+
 
 def sigmoid(x):
     return 1 / (1 + math.exp(-x))
@@ -397,5 +402,144 @@ def xy_dataset(num_samples, effect=True,
         "dot_graph": None,
         "gml_graph": None,
         "ate": None,
+    }
+    return ret_dict
+
+def create_discrete_column(num_samples,std_dev=1):
+    #Generating a random normal distribution of integers
+    x = np.arange(-5,6)
+    xU, xL = x + 0.5, x - 0.5 
+    prob = ss.norm.cdf(xU, scale = std_dev) - ss.norm.cdf(xL, scale = std_dev)  #probability of selecting a number x is p(x-0.5 < x < x+0.5) where x is a normal random variable with mean 0 and standard deviation std_dev
+    prob = prob / prob.sum() # normalize the probabilities so their sum is 1
+    nums = choice(a = x, size = num_samples, p = prob) #pick up an element 
+    return nums
+
+def convert_continuous_to_discrete(arr):
+    return arr.astype(int)
+
+
+def generate_random_graph(n, max_iter = 10):
+    """
+    Function to generate random Directed Acyclic Graph
+    :param n: number of nodes in the graph
+    :param max_iter: number of iterations to create graph
+
+    :returns: Directed Acyclic Graph
+    See: https://datascience.oneoffcoder.com/generate-random-bbn.html 
+    """
+    g = get_simple_ordered_tree(n)
+    for it in range(max_iter):
+        i, j = get_random_node_pair(n)
+        if g.has_edge(i, j) is True:
+            del_edge(i, j, g)
+        else:
+            add_edge(i, j, g)
+    return g
+
+
+
+def dataset_from_random_graph(num_vars, num_samples=1000, prob_edge=0.3, random_seed=100, prob_type_of_data = (0.333, 0.333, 0.334)):
+    """
+    This function generates a dataset with discrete and continuous kinds of variables.
+    It creates a random graph and models the variables linearly according to the relations in the graph.
+
+    :param num_vars: Number of variables in the dataset
+    :param num_samples: Number of samples in the dataset
+    :param prob_edge : Probability of an edge between two random nodes in a graph
+    :param random_seed: Seed for generating random graph
+    :param prob_type_of_data : 3-element tuple containing the probability of data being discrete, binary and continuous respectively.
+    :returns ret_dict : dictionary with information like dataframe, outcome, treatment, graph string and continuous, discrete and binary columns
+    """
+    assert (sum(list(prob_type_of_data)) == 1.0) 
+    np.random.seed(100) 
+    DAG = generate_random_graph(n = num_vars)
+    mapping = dict(zip(DAG, string.ascii_lowercase))
+    DAG = nx.relabel_nodes(DAG, mapping)
+    all_nodes = list(DAG.nodes)
+    all_nodes.sort()
+    num_nodes = len(all_nodes)
+    changed = dict()
+    discrete_cols = []
+    continuous_cols = []
+    binary_cols = []
+    random_numbers_array = np.random.rand(num_nodes) #Random numbers between 0 to 1 to decide if that particular node will be discrete or continuous
+
+    for node in all_nodes:
+        changed[node] = False
+    df = pd.DataFrame()
+    currset = list()
+    counter = 0
+
+    #Generating data for nodes which have no incoming edges
+    for node in all_nodes:
+        if DAG.in_degree(node) == 0:
+            x = random_numbers_array[counter]  
+            counter+=1
+            if x<=prob_type_of_data[0]:
+                df[node] = create_discrete_column(num_samples) #Generating discrete data
+                discrete_cols.append(node)
+            elif x<=prob_type_of_data[0]+prob_type_of_data[1]:
+                df[node] = np.random.normal(0,1,num_samples) #Generating continuous data
+                continuous_cols.append(node)
+            else:
+                nums = np.random.normal(0,1,num_samples)
+                df[node] = np.vectorize(convert_to_binary)(nums) #Generating binary data
+                discrete_cols.append(node)
+                binary_cols.append(node)
+            successors = list(DAG.successors(node)) #Storing immediate successors for next level data generation
+            successors.sort()
+            currset.extend(successors)
+            changed[node] = True 
+
+    #"currset" variable currently has all the successors of the nodes which had no incoming edges
+    while len(currset) > 0:
+        cs = list() #Variable to store immediate children of nodes present in "currset"
+        for node in currset: 
+            predecessors = list(DAG.predecessors(node))  #Getting all the parent nodes on which current "node" depends on
+            if changed[node] == False and all(changed[x] == True for x in predecessors): #Check if current "node" has not been processed yet and if all the parent nodes have been processed
+                successors = list(DAG.successors(node))
+                successors.sort()
+                cs.extend(successors) #Storing immediate children for next level data generation
+                X = df[predecessors].to_numpy() #Using parent nodes data 
+                c = np.random.uniform(0,1,len(predecessors)) 
+                t = np.random.normal(0,1, num_samples)+ X@c #Using Linear Regression to generate data
+                changed[node] = True
+                x = random_numbers_array[counter]
+                counter+=1
+                if x<=prob_type_of_data[0]:
+                    df[node] = convert_continuous_to_discrete(t)
+                    discrete_cols.append(node)
+                elif x<=prob_type_of_data[0]+prob_type_of_data[1]:
+                    df[node] = t
+                    continuous_cols.append(node)
+                else:
+                    nums = np.random.normal(0,1,num_samples)
+                    df[node] = np.vectorize(convert_to_binary)(nums)
+                    discrete_cols.append(node)
+                    binary_cols.append(node)
+        currset = cs 
+
+    outcome  = None  
+    for node in all_nodes:
+        if DAG.out_degree(node) == 0:
+            outcome = node #Node which has no successors is outcome
+            break
+
+    treatments = list()
+    for node in all_nodes:
+        if DAG.in_degree(node) > 0:
+            children = list(DAG.successors(node))
+            if outcome in children:
+                treatments.append(node) #Node which causes outcome is treatment
+   
+    gml_str = ("\n".join(nx.generate_gml(DAG)))
+    ret_dict = {
+        "df": df,
+        "outcome_name": outcome,
+        "treatment_name": treatments,
+        "gml_graph": gml_str,
+        "discrete_columns": discrete_cols,
+        "continuous_columns": continuous_cols,
+        "binary_columns": binary_cols
     }
     return ret_dict
