@@ -67,6 +67,7 @@ class TestEstimator(object):
             effect_modifiers = data["effect_modifier_names"],
             **method_params
         )
+
         true_ate = data["ate"]
         ate_estimate = estimator_ate.estimate_effect()
         str(ate_estimate) # checking if str output is correctly created

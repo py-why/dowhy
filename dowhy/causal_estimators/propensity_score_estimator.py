@@ -33,7 +33,6 @@ class PropensityScoreEstimator(CausalEstimator):
         args_dict = {k: v for k, v in locals().items()
                      if k not in type(self)._STD_INIT_ARGS}
         args_dict.update(kwargs)
-        print(args_dict)
         super().__init__(*args, **args_dict)
 
         # Enable the user to pass params for a custom propensity model

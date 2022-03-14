@@ -308,7 +308,6 @@ class CausalEstimator:
         # Perform the set number of simulations
         for index in range(num_bootstrap_simulations):
             new_data = resample(self._data, n_samples=sample_size)
-
             new_estimator = type(self)(
                 new_data,
                 self._target_estimand,
