@@ -268,8 +268,9 @@ class CausalModel:
                     if method_params is None:
                         method_params = {}
                     # Define the third-party estimation method to be used
-                    method_params["_" + third_party_estimator_package + "_methodname"] = estimator_name
+                    method_params[third_party_estimator_package + "_methodname"] = estimator_name
             else: # For older dowhy methods
+                print(estimator_name)
                 # Process the dowhy estimators
                 causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
         if identified_estimand.no_directed_path:
@@ -291,6 +292,8 @@ class CausalModel:
                     extra_args = method_params.get("init_params", {})
                 else:
                     extra_args = {}
+                if method_params is None:
+                    method_params = {}
                 self.causal_estimator = causal_estimator_class(
                     self._data,
                     identified_estimand,
@@ -302,7 +305,7 @@ class CausalModel:
                     confidence_intervals = confidence_intervals,
                     target_units = target_units,
                     effect_modifiers = effect_modifiers,
-                    params=method_params,
+                    **method_params,
                     **extra_args)
             else:
                 # Estimator had been computed in a previous call
@@ -334,9 +337,11 @@ class CausalModel:
         :param identified_estimand: a probability expression
             that represents the effect to be estimated. Output of
             CausalModel.identify_effect method
-        :param method_name: any of the estimation method to be used. See docs for estimate_effect method for a list of supported estimation methods.
+        :param method_name: any of the estimation method to be used. See docs
+            for estimate_effect method for a list of supported estimation methods.
         :param fit_estimator: Boolean flag on whether to fit the estimator.
-            Setting it to False is useful to compute the do-operation on new data using a previously fitted estimator.
+            Setting it to False is useful to compute the do-operation on new
+            data using a previously fitted estimator.
         :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method.
 
         :returns: an instance of the CausalEstimate class, containing the causal effect estimate
@@ -369,7 +374,7 @@ class CausalModel:
                     identified_estimand,
                     self._treatment, self._outcome,
                     test_significance=False,
-                    params=method_params
+                    **method_params
                 )
             else:
                 # Estimator had been computed in a previous call
@@ -462,26 +467,25 @@ class CausalModel:
 
     def refute_graph(self, k= 1, independence_test = None ,  independence_constraints = None ):
         """
-        Check if the dependencies in input graph matches with the dataset - 
-        ( X ⫫ Y ) | Z 
+        Check if the dependencies in input graph matches with the dataset -
+        ( X ⫫ Y ) | Z
         where X and Y are considered as singleton sets currently
         Z can have multiple variables
         :param k: number of covariates in set Z 
         :param independence_test: dictionary containing methods to test conditional independece in data
         :param independence_constraints: list of implications to be test input by the user in the format 
-        [(x,y,(z1,z2)),
-        (x,y, (z3,))
-        ]
+            [(x,y,(z1,z2)),
+            (x,y, (z3,))
+            ]
         : returns: an instance of GraphRefuter class
         """
-        
         if independence_test is not None:
             test_for_continuous = independence_test['test_for_continuous']
             test_for_discrete = independence_test['test_for_discrete']
             refuter = GraphRefuter(data = self._data, method_name_continuous= test_for_continuous, method_name_discrete = test_for_discrete)
         
         else:
-            refuter = GraphRefuter(data = self._data) 
+            refuter = GraphRefuter(data = self._data)
 
         if independence_constraints is None:
             all_nodes=list(self._graph.get_all_nodes(include_unobserved=False))
@@ -510,7 +514,7 @@ class CausalModel:
         res = refuter.refute_model(independence_constraints = independence_constraints)
         
         self.logger.info(refuter._refutation_passed)
-        
+
         return res
 
 

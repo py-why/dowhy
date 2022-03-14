@@ -11,13 +11,10 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
 
     Straightforward application of the back-door criterion.
 
-    Supports additional parameters that can be specified in the estimate_effect() method.
+    For a list of standard args and kwargs, see documentation for
+    :class:`~dowhy.causal_estimator.CausalEstimator`.
 
-    - 'num_strata': Number of bins by which data will be stratified. Default=50
-    - 'clipping_threshold': Mininum number of treated or control units per strata. Default=10
-    - 'propensity_score_model': The model used to compute propensity score. Could be any classification model that supports fit() and predict_proba() methods. If None, use LogisticRegression model as the default. Default=None
-    - 'recalculate_propensity_score': If true, force the estimator to calculate the propensity score. To use pre-computed propensity score, set this value to false. Default=True
-    - 'propensity_score_column': column name that stores the propensity score. Default='propensity_score'
+    Supports additional parameters as listed below.
 
     """
 
@@ -30,20 +27,42 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         recalculate_propensity_score=True,
         propensity_score_column="propensity_score",
         **kwargs):
+        """
+        :param num_strata: Number of bins by which data will be stratified.
+            Default is automatically determined.
+        :param clipping_threshold: Mininum number of treated or control units
+            per strata. Default=10
+        :param propensity_score_model: The model used to compute propensity
+            score. Can be any classification model that supports fit() and
+            predict_proba() methods. If None, use
+            LogisticRegression model as the default.
+        :param recalculate_propensity_score: If true, force the estimator to
+            estimate the propensity score. To use pre-computed propensity
+            scores, set this value to False. Default=True
+        :param propensity_score_column: Column name that stores the propensity
+        score. Default='propensity_score'
+
+        """
+        # Required to ensure that self.method_params contains all the information
+        # to create an object of this class
+        args_dict = kwargs
+        args_dict.update({
+            'num_strata': num_strata,
+            'clipping_threshold': clipping_threshold
+            })
         super().__init__(
             *args,
             propensity_score_model=propensity_score_model,
             recalculate_propensity_score=recalculate_propensity_score,
             propensity_score_column=propensity_score_column,
-            **kwargs)
+            **args_dict)
 
         self.logger.info("Using Propensity Score Stratification Estimator")
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
-        if not hasattr(self, 'num_strata'):
-            self.num_strata = num_strata
-        if not hasattr(self, 'clipping_threshold'):
-            self.clipping_threshold = clipping_threshold
+        # setting method-specific parameters
+        self.num_strata = num_strata
+        self.clipping_threshold = clipping_threshold
 
 
     def _estimate_effect(self):

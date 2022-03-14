@@ -11,9 +11,27 @@ import econml
 
 
 class Econml(CausalEstimator):
+    """Wrapper class for estimators from the EconML library.
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    For a list of standard args and kwargs, see documentation for
+    :class:`~dowhy.causal_estimator.CausalEstimator`.
+
+    Supports additional parameters as listed below. For init and fit
+    parameters of each estimator, refer to the EconML docs.
+
+    """
+    def __init__(self, *args, econml_methodname,  **kwargs):
+        """
+        :param econml_methodname: Fully qualified name of econml estimator
+            class. For example, 'econml.dml.DML'
+        """
+        # Required to ensure that self.method_params contains all the
+        # parameters to create an object of this class
+        args_dict = {k: v for k, v in locals().items()
+                     if k not in type(self)._STD_INIT_ARGS}
+        args_dict.update(kwargs)
+        super().__init__(*args, **args_dict)
+        self._econml_methodname = econml_methodname
         self.logger.info("INFO: Using EconML Estimator")
         self.identifier_method = self._target_estimand.identifier_method
         self._observed_common_causes_names = self._target_estimand.get_backdoor_variables().copy()
@@ -154,7 +172,7 @@ class Econml(CausalEstimator):
             expr += "+".join(var_list)
             expr += " | " + ",".join(self._effect_modifier_names)
         return expr
-    
+
     def shap_values(self, df: pd.DataFrame, *args, **kwargs):
         return self.estimator.shap_values(
             df[self._effect_modifier_names].values, *args, **kwargs

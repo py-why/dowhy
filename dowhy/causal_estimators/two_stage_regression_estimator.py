@@ -8,16 +8,39 @@ from dowhy.causal_identifier import CausalIdentifier
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 from dowhy.utils.api import parse_state
 
+
 class TwoStageRegressionEstimator(CausalEstimator):
-    """Compute treatment effect whenever the effect is fully mediated by another variable (front-door) or when there is an instrument available.
+    """Compute treatment effect whenever the effect is fully mediated by
+    another variable (front-door) or when there is an instrument available.
 
     Currently only supports a linear model for the effects.
+
+    For a list of standard args and kwargs, see documentation for
+    :class:`~dowhy.causal_estimator.CausalEstimator`.
+
+    Supports additional parameters as listed below.
+
     """
+    # First stage statistical model
     DEFAULT_FIRST_STAGE_MODEL = LinearRegressionEstimator
+    # Second stage statistical model
     DEFAULT_SECOND_STAGE_MODEL = LinearRegressionEstimator
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args, first_stage_model=None,
+                 second_stage_model=None, **kwargs):
+        """
+        :param first_stage_model: First stage estimator to be used. Default is
+            linear regression.
+        :param second_stage_model: Second stage estimator to be used. Default
+            is linear regression.
+
+        """
+        # Required to ensure that self.method_params contains all the
+        # parameters needed to create an object of this class
+        args_dict = {k: v for k, v in locals().items()
+                     if k not in type(self)._STD_INIT_ARGS}
+        args_dict.update(kwargs)
+        super().__init__(*args, **args_dict)
         self.logger.info("INFO: Using Two Stage Regression Estimator")
         # Check if the treatment is one-dimensional
         if len(self._treatment_name) > 1:
@@ -58,29 +81,18 @@ class TwoStageRegressionEstimator(CausalEstimator):
                 error_msg = "No instrumental variable present. Two stage regression is not applicable"
                 self.logger.error(error_msg)
 
-        if 'first_stage_model' in self.method_params:
-            self.first_stage_model = self.method_params['first_stage_model']
+        if first_stage_model is not None:
+            self.first_stage_model = first_stage_model
         else:
             self.first_stage_model = self.__class__.DEFAULT_FIRST_STAGE_MODEL
             self.logger.warning("First stage model not provided. Defaulting to sklearn.linear_model.LinearRegression.")
-        if 'second_stage_model' in self.method_params:
-            self.second_stage_model = self.method_params['second_stage_model']
+        if second_stage_model is not None:
+            self.second_stage_model = second_stage_model
         else:
             self.second_stage_model = self.__class__.DEFAULT_SECOND_STAGE_MODEL
             self.logger.warning("Second stage model not provided. Defaulting to backdoor.linear_regression.")
 
     def _estimate_effect(self):
-        #first_stage_features = self.build_first_stage_features()
-        #fs_model = self.first_stage_model()
-        #if self._target_estimand.identifier_method=="frontdoor":
-        #    first_stage_outcome = self._frontdoor_variables
-        #elif self._target_estimand.identifier_method=="mediation":
-        #    first_stage_outcome = self._mediators
-        #fs_model.fit(first_stage_features, self._frontdoor_variables)
-        #self.logger.debug("Coefficients of the fitted model: " +
-        #                  ",".join(map(str, fs_model.coef_)))
-        #residuals = self._frontdoor_variables - fs_model.predict(first_stage_features)
-        #self._data["residual"] = residuals
         estimate_value = None
         # First stage
         modified_target_estimand = copy.deepcopy(self._target_estimand)
@@ -102,7 +114,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
                  confidence_intervals = self._confidence_intervals,
                  target_units=self._target_units,
                  effect_modifiers=self._effect_modifier_names,
-                 params=self.method_params)._estimate_effect()
+                 **self.method_params)._estimate_effect()
 
         # Second Stage
         modified_target_estimand = copy.deepcopy(self._target_estimand)
@@ -124,7 +136,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
                  confidence_intervals = self._confidence_intervals,
                  target_units=self._target_units,
                  effect_modifiers=self._effect_modifier_names,
-                 params=self.method_params)._estimate_effect()
+                 **self.method_params)._estimate_effect()
         # Combining the two estimates
         natural_indirect_effect = first_stage_estimate.value * second_stage_estimate.value
         # This same estimate is valid for frontdoor as well as mediation (NIE)
@@ -149,7 +161,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
                      confidence_intervals = self._confidence_intervals,
                      target_units=self._target_units,
                      effect_modifiers=self._effect_modifier_names,
-                     params=self.method_params)._estimate_effect()
+                     **self.method_params)._estimate_effect()
             natural_direct_effect = total_effect_estimate.value - natural_indirect_effect
             estimate_value = natural_direct_effect
             self.symbolic_estimator = self.construct_symbolic_estimator(

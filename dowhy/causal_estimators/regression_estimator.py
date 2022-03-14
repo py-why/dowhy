@@ -8,11 +8,20 @@ from dowhy.causal_estimator import CausalEstimator
 class RegressionEstimator(CausalEstimator):
     """Compute effect of treatment using some regression function.
 
-    Fits a regression model for estimating the outcome using treatment(s) and confounders.
+    Fits a regression model for estimating the outcome using treatment(s) and
+    confounders.
+
+    Base class for all regression models, inherited by
+    LinearRegressionEstimator and GeneralizedLinearModelEstimator.
 
     """
 
     def __init__(self, *args, **kwargs):
+        """For a list of standard args and kwargs, see documentation for
+        :class:`~dowhy.causal_estimator.CausalEstimator`.
+
+        """
+
         super().__init__(*args, **kwargs)
         self.logger.debug("Back-door variables used:" +
                           ",".join(self._target_estimand.get_backdoor_variables()))

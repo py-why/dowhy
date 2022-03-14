@@ -12,6 +12,14 @@ dowhy.utils.api module
    :undoc-members:
    :show-inheritance:
 
+dowhy.utils.cit module
+----------------------
+
+.. automodule:: dowhy.utils.cit
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.utils.cli\_helpers module
 -------------------------------
 

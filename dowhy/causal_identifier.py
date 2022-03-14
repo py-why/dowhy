@@ -10,13 +10,9 @@ from dowhy.utils.api import parse_state
 
 
 class CausalIdentifier:
-
     """Class that implements different identification methods.
 
     Currently supports backdoor and instrumental variable identification methods. The identification is based on the causal graph provided.
-
-    Other specific ways of identification, such as the ID* algorithm, minimal adjustment criteria, etc. will be added in the future.
-    If you'd like to contribute, please raise an issue or a pull request on Github.
 
     """
     NONPARAMETRIC_ATE="nonparametric-ate"

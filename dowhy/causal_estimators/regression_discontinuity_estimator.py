@@ -11,17 +11,34 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
     Estimates effect by transforming the problem to an instrumental variables
     problem.
 
-    Supports additional parameters that can be specified in the estimate_effect() method.
+    For a list of standard args and kwargs, see documentation for
+    :class:`~dowhy.causal_estimator.CausalEstimator`.
 
-    * 'rd_variable_name': name of the variable on which the discontinuity occurs. This is the instrument.
-    * 'rd_threshold_value': Threshold at which the discontinuity occurs.
-    * 'rd_bandwidth': Distance from the threshold within which confounders can be considered the same between treatment and control. Considered band is (threshold +- bandwidth)
+    Supports additional parameters as listed below.
 
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args, rd_variable_name=None,
+            rd_threshold_value=None, rd_bandwidth=None, **kwargs):
+        """
+        :param rd_variable_name: Name of the variable on which the
+            discontinuity occurs. This is the instrument.
+        :param rd_threshold_value: Threshold at which the discontinuity occurs.
+        :param rd_bandwidth: Distance from the threshold within which
+            confounders can be considered the same between treatment and
+            control. Considered band is (threshold +- bandwidth)
+
+        """
+        # Required to ensure that self.method_params contains all the information
+        # to create an object of this class
+        args_dict = {k: v for k, v in locals().items()
+                     if k not in type(self)._STD_INIT_ARGS}
+        args_dict.update(kwargs)
+        super().__init__(*args, **args_dict)
         self.logger.info("Using Regression Discontinuity Estimator")
+        self.rd_variable_name = rd_variable_name
+        self.rd_threshold_value = rd_threshold_value
+        self.rd_bandwidth = rd_bandwidth
         self.rd_variable = self._data[self.rd_variable_name]
 
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
@@ -46,7 +63,7 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
             ['local_treatment'],
             ['local_outcome'],
             test_significance=self._significance_test,
-            params={'iv_instrument_name': 'local_rd_variable'}
+            iv_instrument_name='local_rd_variable'
         )
         est = iv_estimator.estimate_effect()
         return est
