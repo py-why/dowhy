@@ -2,6 +2,9 @@ import numpy as np
 from queue import LifoQueue
 from dowhy.utils.ordered_set import OrderedSet
 import re
+import networkx as nx
+from networkx.algorithms.dag import is_directed_acyclic_graph
+from networkx.algorithms.shortest_paths.generic import shortest_path
 
 def adjacency_matrix_to_adjacency_list(adjacency_matrix, labels=None):
     '''
@@ -158,3 +161,86 @@ def daggity_to_dot(daggity_string):
     graph = re.sub(',]' , ']' , graph)
     return graph
 
+def get_simple_ordered_tree(n):
+    """
+    Generates a simple-ordered tree. The tree is just a
+    directed acyclic graph of n nodes with the structure
+    0 --> 1 --> .... --> n.
+    """
+    g = nx.DiGraph()
+
+    for i in range(n):
+        g.add_node(i)
+
+    for i in range(n - 1):
+        g.add_edges_from([(i, i+1, {})])
+    return g
+
+
+def is_connected(g):
+    """
+    Checks if a the directed acyclic graph is connected.
+    """
+    u = convert_to_undirected_graph(g)
+    return nx.is_connected(u)
+
+
+def convert_to_undirected_graph(g):
+    u = nx.Graph()
+    for n in g.nodes:
+        u.add_node(n)
+    for e in g.edges:
+        u.add_edges_from([(e[0], e[1], {})])
+    return u
+
+
+def get_random_node_pair(n):
+    """
+    Randomly generates a pair of nodes.
+    """
+    i = np.random.randint(0, n)
+    j = i
+    while j == i:
+        j = np.random.randint(0, n)
+    return i, j
+
+
+
+def find_predecessor(i, j, g):
+    """
+    Finds a predecessor, k, in the path between two nodes, i and j,
+    in the graph, g. 
+    """
+    parents = list(g.predecessors(j))
+    u = convert_to_undirected_graph(g)
+    for pa in parents:
+        try:
+            path = shortest_path(u, pa, i)
+            return pa
+        except:
+            pass
+    return None
+
+
+
+def del_edge(i, j, g):
+    """
+    Deletes the edge i --> j in the graph, g. The edge is only
+    deleted if this removal does NOT cause the graph to be
+    disconnected.
+    """
+    if g.has_edge(i, j) is True:
+        g.remove_edge(i, j)
+
+        if is_connected(g) is False:
+            g.add_edges_from([(i, j, {})])
+
+def add_edge(i, j, g):
+    """
+    Adds an edge i --> j to the graph, g. The edge is only
+    added if this addition does NOT cause the graph to have
+    cycles.
+    """
+    g.add_edges_from([(i, j, {})])
+    if is_directed_acyclic_graph(g) is False:
+        g.remove_edge(i, j)
