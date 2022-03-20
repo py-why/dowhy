@@ -21,7 +21,9 @@ advanced_notebooks = [
                       "dowhy_refuter_notebook.ipynb",
                       "DoWhy-The Causal Story Behind Hotel Booking Cancellations.ipynb",  # needs xgboost too
                       # will be removed
-                      "dowhy_optimize_backdoor_example.ipynb"
+                      "dowhy_optimize_backdoor_example.ipynb",
+                      # applied notebook, not necessary to test each time
+                      "dowhy_ranking_methods.ipynb"
                       ]
 
 # Adding the dowhy root folder to the python path so that jupyter notebooks
@@ -62,14 +64,16 @@ def test_confounder_notebook():
     nb, errors = _notebook_run(NOTEBOOKS_PATH+"dowhy_confounder_example.ipynb")
     assert errors = []
 """
-parameter_list=[]
+parameter_list = []
 for nb in notebooks_list:
     if nb in advanced_notebooks:
         param = pytest.param(nb,
-                marks=[pytest.mark.skip, pytest.mark.advanced],
-                id=nb)
+                        marks=[pytest.mark.advanced, pytest.mark.notebook],
+                        id=nb)
     else:
-        param = pytest.param(nb, id=nb)
+        param = pytest.param(nb,
+                        marks=[pytest.mark.notebook],
+                        id=nb)
     parameter_list.append(param)
 
 @pytest.mark.parametrize("notebook_filename", parameter_list)

@@ -37,20 +37,11 @@ For a quick introduction to causal inference, check out `amit-sharma/causal-infe
 
 Documentation for DoWhy is available at `microsoft.github.io/dowhy <https://microsoft.github.io/dowhy/>`_.
 
-.. raw:: html
-
-   <details>
-   <summary><a><strong><em>Table of Contents</em></strong></summary>
-   
 .. i here comment toctree::
 .. i here comment   :maxdepth: 4
 .. i here comment   :caption: Contents:
-.. contents::
+.. contents:: **Contents**
 
-.. raw:: html
-
-   </details>
- 
 News
 -----
 **2022.03.13**: **Call for Content**. 
