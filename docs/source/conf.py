@@ -24,7 +24,7 @@ copyright = '2020, Microsoft'
 author = 'Amit Sharma, Emre Kiciman'
 
 # The short X.Y version
-version = '0.7'
+version = '0.7.1'
 # The full version, including alpha/beta/rc tags
 release = ''
 
