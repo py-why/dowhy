@@ -28,7 +28,7 @@
             <a href="../../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
           </a>
               <div class="version">
-                0.7
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -131,9 +131,27 @@
 
 
 <div class="viewcode-block" id="Econml"><a class="viewcode-back" href="../../../dowhy.causal_estimators.html#dowhy.causal_estimators.econml.Econml">[docs]</a><span class="k">class</span> <span class="nc">Econml</span><span class="p">(</span><span class="n">CausalEstimator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Wrapper class for estimators from the EconML library.</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="sd">    For a list of standard args and kwargs, see documentation for</span>
+<span class="sd">    :class:`~dowhy.causal_estimator.CausalEstimator`.</span>
+
+<span class="sd">    Supports additional parameters as listed below. For init and fit</span>
+<span class="sd">    parameters of each estimator, refer to the EconML docs.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">econml_methodname</span><span class="p">,</span>  <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param econml_methodname: Fully qualified name of econml estimator</span>
+<span class="sd">            class. For example, &#39;econml.dml.DML&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Required to ensure that self.method_params contains all the</span>
+        <span class="c1"># parameters to create an object of this class</span>
+        <span class="n">args_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                     <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_STD_INIT_ARGS</span><span class="p">}</span>
+        <span class="n">args_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">args_dict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_econml_methodname</span> <span class="o">=</span> <span class="n">econml_methodname</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;INFO: Using EconML Estimator&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">identifier_method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">identifier_method</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">get_backdoor_variables</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -274,7 +292,7 @@
             <span class="n">expr</span> <span class="o">+=</span> <span class="s2">&quot;+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">var_list</span><span class="p">)</span>
             <span class="n">expr</span> <span class="o">+=</span> <span class="s2">&quot; | &quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">expr</span></div>
-    
+
 <div class="viewcode-block" id="Econml.shap_values"><a class="viewcode-back" href="../../../dowhy.causal_estimators.html#dowhy.causal_estimators.econml.Econml.shap_values">[docs]</a>    <span class="k">def</span> <span class="nf">shap_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">shap_values</span><span class="p">(</span>
             <span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>

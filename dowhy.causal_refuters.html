@@ -31,7 +31,7 @@
             <a href="index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
           </a>
               <div class="version">
-                0.7
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -202,6 +202,24 @@
 <li><p>‘effect_strength_on_outcome’: parameter for the strength of the effect of simulated confounder on outcome. For linear effect, it is the regression coeffient. For binary_flip, it is the probability that simulated confounder’s effect flips the value of outcome from 0 to 1 (or vice-versa).</p></li>
 </ul>
 <p>TODO: Needs an interpretation module</p>
+<p>Initialize the parameters required for the refuter.</p>
+<p>If effect_strength_on_treatment or effect_strength_on_outcome is not
+given, it is calculated automatically as a range between the
+minimum and maximum effect strength of observed confounders on treatment
+and outcome respectively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>confounders_effect_on_treatment</strong> – str : The type of effect on the treatment due to the unobserved confounder. Possible values are [‘binary_flip’, ‘linear’]</p></li>
+<li><p><strong>confounders_effect_on_outcome</strong> – str : The type of effect on the outcome due to the unobserved confounder. Possible values are [‘binary_flip’, ‘linear’]</p></li>
+<li><p><strong>effect_strength_on_treatment</strong> – float, numpy.ndarray: This refers to the strength of the confounder on treatment. For a linear effect, it behaves like the regression coeffecient. For a binary flip it is the probability with which it can invert the value of the treatment.</p></li>
+<li><p><strong>effect_strength_on_outcome</strong> – float, numpy.ndarray: This refers to the strength of the confounder on outcome. For a linear effect, it behaves like the regression coefficient. For a binary flip, it is the probability with which it can invert the value of the outcome.</p></li>
+<li><p><strong>effect_fraction_on_treatment</strong> – float: If effect_strength_on_treatment is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on treatment. Defaults to 1.</p></li>
+<li><p><strong>effect_fraction_on_outcome</strong> – float: If effect_strength_on_outcome is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on outcome. Defaults to 1.</p></li>
+<li><p><strong>plotmethod</strong> – string: Type of plot to be shown. If None, no plot is generated. This parameter is used only only when more than one treatment confounder effect values or outcome confounder effect values are provided. Default is “colormesh”. Supported values are “contour”, “colormesh” when more than one value is provided for both confounder effect value parameters; “line” when provided for only one of them.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.causal_refuters.add_unobserved_common_cause.AddUnobservedCommonCause.generate_confounder_from_residuals">
 <span class="sig-name descname"><span class="pre">generate_confounder_from_residuals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/add_unobserved_common_cause.html#AddUnobservedCommonCause.generate_confounder_from_residuals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_refuters.add_unobserved_common_cause.AddUnobservedCommonCause.generate_confounder_from_residuals" title="Permalink to this definition"></a></dt>
@@ -708,6 +726,7 @@ We then apply the estimators on <code class="docutils literal notranslate"><span
 <dt class="sig sig-object py" id="dowhy.causal_refuters.dummy_outcome_refuter.TestFraction">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_refuters.dummy_outcome_refuter.</span></span><span class="sig-name descname"><span class="pre">TestFraction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dowhy.causal_refuters.dummy_outcome_refuter.TestFraction" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
+<p>Create new instance of TestFraction(base, other)</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dowhy.causal_refuters.dummy_outcome_refuter.TestFraction.base">
 <span class="sig-name descname"><span class="pre">base</span></span><a class="headerlink" href="#dowhy.causal_refuters.dummy_outcome_refuter.TestFraction.base" title="Permalink to this definition"></a></dt>
@@ -727,7 +746,7 @@ We then apply the estimators on <code class="docutils literal notranslate"><span
 <span id="dowhy-causal-refuters-graph-refuter-module"></span><h2>dowhy.causal_refuters.graph_refuter module<a class="headerlink" href="#module-dowhy.causal_refuters.graph_refuter" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="dowhy.causal_refuters.graph_refuter.GraphRefutation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_refuters.graph_refuter.</span></span><span class="sig-name descname"><span class="pre">GraphRefutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/graph_refuter.html#GraphRefutation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_refuters.graph_refuter.GraphRefutation" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_refuters.graph_refuter.</span></span><span class="sig-name descname"><span class="pre">GraphRefutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method_name_discrete</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method_name_continuous</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/graph_refuter.html#GraphRefutation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_refuters.graph_refuter.GraphRefutation" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="dowhy.html#dowhy.causal_refuter.CausalRefutation" title="dowhy.causal_refuter.CausalRefutation"><code class="xref py py-class docutils literal notranslate"><span class="pre">dowhy.causal_refuter.CausalRefutation</span></code></a></p>
 <p>Class for storing the result of a refutation method.</p>
 <dl class="py method">
@@ -739,9 +758,24 @@ We then apply the estimators on <code class="docutils literal notranslate"><span
 
 <dl class="py class">
 <dt class="sig sig-object py" id="dowhy.causal_refuters.graph_refuter.GraphRefuter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_refuters.graph_refuter.</span></span><span class="sig-name descname"><span class="pre">GraphRefuter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/graph_refuter.html#GraphRefuter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_refuters.graph_refuter.GraphRefuter" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_refuters.graph_refuter.</span></span><span class="sig-name descname"><span class="pre">GraphRefuter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method_name_discrete</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'conditional_mutual_information'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method_name_continuous</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'partial_correlation'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/graph_refuter.html#GraphRefuter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_refuters.graph_refuter.GraphRefuter" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="dowhy.html#dowhy.causal_refuter.CausalRefuter" title="dowhy.causal_refuter.CausalRefuter"><code class="xref py py-class docutils literal notranslate"><span class="pre">dowhy.causal_refuter.CausalRefuter</span></code></a></p>
 <p>Class for performing refutations on graph and storing the results</p>
+<p>Initialize data for graph refutation</p>
+<p>:param <a class="reference external" href="data:input">data:input</a> dataset
+:param method_name_discrete: name of method for testing conditional independence in discrete data
+:param method_name_continuous: name of method for testing conditional independece in continuous data
+:returns : instance of GraphRefutation class</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_refuters.graph_refuter.GraphRefuter.conditional_mutual_information">
+<span class="sig-name descname"><span class="pre">conditional_mutual_information</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/graph_refuter.html#GraphRefuter.conditional_mutual_information"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_refuters.graph_refuter.GraphRefuter.conditional_mutual_information" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_refuters.graph_refuter.GraphRefuter.partial_correlation">
+<span class="sig-name descname"><span class="pre">partial_correlation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/graph_refuter.html#GraphRefuter.partial_correlation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_refuters.graph_refuter.GraphRefuter.partial_correlation" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.causal_refuters.graph_refuter.GraphRefuter.refute_model">
 <span class="sig-name descname"><span class="pre">refute_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">independence_constraints</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/graph_refuter.html#GraphRefuter.refute_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_refuters.graph_refuter.GraphRefuter.refute_model" title="Permalink to this definition"></a></dt>
@@ -751,11 +785,12 @@ We then apply the estimators on <code class="docutils literal notranslate"><span
 <dd class="field-odd"><p><strong>independence_constraints</strong> – List of implications to test the conditional independence on</p>
 </dd>
 </dl>
+<p>:returns : GraphRefutation object</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.causal_refuters.graph_refuter.GraphRefuter.set_refutation_result">
-<span class="sig-name descname"><span class="pre">set_refutation_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/graph_refuter.html#GraphRefuter.set_refutation_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_refuters.graph_refuter.GraphRefuter.set_refutation_result" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_refutation_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_constraints_model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/graph_refuter.html#GraphRefuter.set_refutation_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_refuters.graph_refuter.GraphRefuter.set_refutation_result" title="Permalink to this definition"></a></dt>
 <dd><p>Method to set the result for graph refutation. Set true if there are no false implications else false</p>
 </dd></dl>
 

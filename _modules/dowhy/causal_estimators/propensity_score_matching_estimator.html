@@ -28,7 +28,7 @@
             <a href="../../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
           </a>
               <div class="version">
-                0.7
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -85,7 +85,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_discovery_example.html#Experiments-on-the-Sachs-dataset">Experiments on the Sachs dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_discovery_example.html#id2">Causal Discovery with Causal Discovery Tool (CDT)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/identifying_effects_using_id_algorithm.html#Case-5">Case 5</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package</span></p>
 <ul>
@@ -127,26 +126,37 @@
 <span class="kn">from</span> <span class="nn">dowhy.causal_estimators.propensity_score_estimator</span> <span class="kn">import</span> <span class="n">PropensityScoreEstimator</span>
 
 <div class="viewcode-block" id="PropensityScoreMatchingEstimator"><a class="viewcode-back" href="../../../dowhy.causal_estimators.html#dowhy.causal_estimators.propensity_score_matching_estimator.PropensityScoreMatchingEstimator">[docs]</a><span class="k">class</span> <span class="nc">PropensityScoreMatchingEstimator</span><span class="p">(</span><span class="n">PropensityScoreEstimator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Estimate effect of treatment by finding matching treated and control units based on propensity score.</span>
+    <span class="sd">&quot;&quot;&quot; Estimate effect of treatment by finding matching treated and control</span>
+<span class="sd">    units based on propensity score.</span>
 
 <span class="sd">    Straightforward application of the back-door criterion.</span>
 
-<span class="sd">    Supports additional parameters that can be specified in the estimate_effect() method.</span>
+<span class="sd">    For a list of standard args and kwargs, see documentation for</span>
+<span class="sd">    :class:`~dowhy.causal_estimator.CausalEstimator`.</span>
 
-<span class="sd">    - &#39;propensity_score_model&#39;: The model used to compute propensity score. Could be any classification model that supports fit() and predict_proba() methods. If None, use LogisticRegression model as the default. Default=None</span>
-<span class="sd">    - &#39;recalculate_propensity_score&#39;: If true, force the estimator to calculate the propensity score. To use pre-computed propensity score, set this value to false. Default=True</span>
-<span class="sd">    - &#39;propensity_score_column&#39;: column name that stores the propensity score. Default=&#39;propensity_score&#39;</span>
+<span class="sd">    Supports additional parameters as listed below.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> 
-        <span class="o">*</span><span class="n">args</span><span class="p">,</span> 
-        <span class="n">propensity_score_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-        <span class="n">recalculate_propensity_score</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">propensity_score_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">recalculate_propensity_score</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">propensity_score_column</span><span class="o">=</span><span class="s2">&quot;propensity_score&quot;</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param propensity_score_model: Model used to compute propensity score.</span>
+<span class="sd">            Can be any classification model that supports fit() and</span>
+<span class="sd">            predict_proba() methods. If None, LogisticRegression is used.</span>
+<span class="sd">        :param recalculate_propensity_score: Whether the propensity score</span>
+<span class="sd">            should be estimated. To use pre-computed propensity scores,</span>
+<span class="sd">            set this value to False. Default=True.</span>
+<span class="sd">        :param propensity_score_column: Column name that stores the</span>
+<span class="sd">            propensity score. Default=&#39;propensity_score&#39;</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="o">*</span><span class="n">args</span><span class="p">,</span> 
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
             <span class="n">propensity_score_model</span><span class="o">=</span><span class="n">propensity_score_model</span><span class="p">,</span>
             <span class="n">recalculate_propensity_score</span><span class="o">=</span><span class="n">recalculate_propensity_score</span><span class="p">,</span>
             <span class="n">propensity_score_column</span><span class="o">=</span><span class="n">propensity_score_column</span><span class="p">,</span>

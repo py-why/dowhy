@@ -28,7 +28,7 @@
             <a href="../../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
           </a>
               <div class="version">
-                0.7
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -127,11 +127,27 @@
 <span class="kn">import</span> <span class="nn">causalml</span>
 
 <div class="viewcode-block" id="Causalml"><a class="viewcode-back" href="../../../dowhy.causal_estimators.html#dowhy.causal_estimators.causalml.Causalml">[docs]</a><span class="k">class</span> <span class="nc">Causalml</span><span class="p">(</span><span class="n">CausalEstimator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Wrapper class for estimators from the causalml library.</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="sd">    For a list of standard args and kwargs, see documentation for</span>
+<span class="sd">    :class:`~dowhy.causal_estimator.CausalEstimator`.</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="sd">    Supports additional parameters as listed below. For specific</span>
+<span class="sd">    parameters of each estimator, refer to the CausalML docs.</span>
 
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">causalml_methodname</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param causalml_methodname: Fully qualified name of causalml estimator</span>
+<span class="sd">            class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Required to ensure that self.method_params contains all the information</span>
+        <span class="c1"># to create an object of this class</span>
+        <span class="n">args_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                     <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_STD_INIT_ARGS</span><span class="p">}</span>
+        <span class="n">args_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">args_dict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_causalml_methodname</span> <span class="o">=</span> <span class="n">causalml_methodname</span>
         <span class="c1"># Add the identification method used in the estimator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">identifier_method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">identifier_method</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;The identifier method used </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier_method</span><span class="p">))</span>

@@ -28,7 +28,7 @@
             <a href="../../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
           </a>
               <div class="version">
-                0.7
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -85,7 +85,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_discovery_example.html#Experiments-on-the-Sachs-dataset">Experiments on the Sachs dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_discovery_example.html#id2">Causal Discovery with Causal Discovery Tool (CDT)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/identifying_effects_using_id_algorithm.html#Case-5">Case 5</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package</span></p>
 <ul>
@@ -135,20 +134,29 @@
 
 <span class="sd">    This is also a superclass that can be inherited by other specific methods.</span>
 
+<span class="sd">    For a list of standard args and kwargs, see documentation for</span>
+<span class="sd">    :class:`~dowhy.causal_estimator.CausalEstimator`.</span>
 
-<span class="sd">    Supports additional parameters that can be specified in the estimate_effect() method.</span>
-
-<span class="sd">    - &#39;iv_instrument_name&#39;: Name of the specific instrumental variable to be used. Needs to be one of the IVs identified in the identification step. Default is to use all the IV variables from the identification step.</span>
+<span class="sd">    Supports additional parameters as listed below.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">iv_instrument_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param iv_instrument_name: Name of the specific instrumental variable</span>
+<span class="sd">            to be used. Needs to be one of the IVs identified in the</span>
+<span class="sd">            identification step. Default is to use all the IV variables</span>
+<span class="sd">            from the identification step.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Required to ensure that self.method_params contains all the information</span>
+        <span class="c1"># to create an object of this class</span>
+        <span class="n">args_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                     <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_STD_INIT_ARGS</span><span class="p">}</span>
+        <span class="n">args_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">args_dict</span><span class="p">)</span>
         <span class="c1"># choosing the instrumental variable to use</span>
-        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;iv_instrument_name&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">estimating_instrument_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">instrumental_variables</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">estimating_instrument_names</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iv_instrument_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimating_instrument_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">instrumental_variables</span>
+        <span class="k">if</span> <span class="n">iv_instrument_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">estimating_instrument_names</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="n">iv_instrument_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Instrumental Variables used:&quot;</span> <span class="o">+</span>
                           <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimating_instrument_names</span><span class="p">))</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimating_instrument_names</span><span class="p">:</span>

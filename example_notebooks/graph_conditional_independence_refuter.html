@@ -31,7 +31,7 @@
             <a href="../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
           </a>
               <div class="version">
-                0.7
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -391,7 +391,7 @@ div.rendered_html tbody tr:hover {
 </style>
 <section id="Testing-Assumptions-in-model-with-DoWhy:-A-simple-example">
 <h1>Testing Assumptions in model with DoWhy: A simple example<a class="headerlink" href="#Testing-Assumptions-in-model-with-DoWhy:-A-simple-example" title="Permalink to this headline"></a></h1>
-<p>This is a quick introduction to how we can test if our assumed graph is correct and the assumptions match with the dataset. We do so by checking the conditional independences in the graph and see if they hold true for the data as well. Currently we are using partial correlation to do that.</p>
+<p>This is a quick introduction to how we can test if our assumed graph is correct and the assumptions match with the dataset. We do so by checking the conditional independences in the graph and see if they hold true for the data as well. Currently we are using partial correlation to test continuous data and conditional mutual information to test discrete data.</p>
 <p>First, let us load all required packages.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -418,128 +418,36 @@ div.rendered_html tbody tr:hover {
 </div>
 <section id="Step-1:-Load-dataset">
 <h2>Step 1: Load dataset<a class="headerlink" href="#Step-1:-Load-dataset" title="Permalink to this headline"></a></h2>
+<p>The function <code class="docutils literal notranslate"><span class="pre">dataset_from_random_graph(num_vars,</span> <span class="pre">num_samples,</span> <span class="pre">prob_edge,</span> <span class="pre">random_seed,</span> <span class="pre">prob_type_data)</span></code> can be used to create a dataset from a randomly generated directed graph. The data can be mixture of discrete, binary and continuous variables. The parameters have the following significance - - num_vars : Number of variables in the dataset - num_samples: Number of samples in the dataset - prob_edge : Probability of an edge between two random nodes in a graph - random_seed: Seed for
+generating random graph - prob_type_of_data : 3-element tuple containing the probability of data being discrete, binary and continuous respectively.(Should add up to 1)</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">linear_dataset</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-        <span class="n">num_common_causes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-        <span class="n">num_instruments</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">num_effect_modifiers</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">num_samples</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span>
-        <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">stddev_treatment_noise</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-        <span class="n">num_discrete_common_causes</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">dataset_from_random_graph</span><span class="p">(</span><span class="n">num_vars</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                                                <span class="n">num_samples</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
+                                                <span class="n">prob_edge</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+                                                <span class="n">random_seed</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+                                                <span class="n">prob_type_of_data</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.333</span><span class="p">,</span> <span class="mf">0.333</span><span class="p">,</span> <span class="mf">0.334</span><span class="p">))</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">]</span> <span class="c1">#Insert dataset here</span>
-<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;discrete_columns&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;continuous_columns&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;binary_columns&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
-</pre></div>
+<div class="prompt empty docutils container">
 </div>
-<div class="output_area rendered_html docutils container">
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>X0</th>
-      <th>Z0</th>
-      <th>Z1</th>
-      <th>W0</th>
-      <th>W1</th>
-      <th>W2</th>
-      <th>W3</th>
-      <th>W4</th>
-      <th>v0</th>
-      <th>y</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>-1.614714</td>
-      <td>0.0</td>
-      <td>0.670102</td>
-      <td>-0.285415</td>
-      <td>2.353672</td>
-      <td>0.839046</td>
-      <td>1.321677</td>
-      <td>0</td>
-      <td>True</td>
-      <td>26.645992</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>-1.107990</td>
-      <td>0.0</td>
-      <td>0.451512</td>
-      <td>-1.283712</td>
-      <td>-0.808634</td>
-      <td>1.920393</td>
-      <td>0.812835</td>
-      <td>3</td>
-      <td>True</td>
-      <td>18.622764</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>0.478802</td>
-      <td>0.0</td>
-      <td>0.180037</td>
-      <td>-1.428622</td>
-      <td>0.540832</td>
-      <td>1.754006</td>
-      <td>1.967819</td>
-      <td>0</td>
-      <td>True</td>
-      <td>26.051047</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>-1.690426</td>
-      <td>0.0</td>
-      <td>0.081600</td>
-      <td>-0.819202</td>
-      <td>-0.646040</td>
-      <td>-0.332039</td>
-      <td>0.760431</td>
-      <td>3</td>
-      <td>False</td>
-      <td>2.358555</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>-0.720739</td>
-      <td>0.0</td>
-      <td>0.448382</td>
-      <td>0.381812</td>
-      <td>0.541719</td>
-      <td>0.856264</td>
-      <td>-0.991769</td>
-      <td>2</td>
-      <td>True</td>
-      <td>14.905391</td>
-    </tr>
-  </tbody>
-</table>
-</div></div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;f&#39;, &#39;h&#39;] [&#39;b&#39;, &#39;d&#39;, &#39;g&#39;, &#39;i&#39;, &#39;j&#39;] [&#39;c&#39;, &#39;e&#39;]
+   a         b  c         d  e  f         g  h         i         j
+0 -1 -1.170054  1  0.996507  1  0 -0.218214 -1 -1.107993  0.699933
+1  0  0.527130  1  0.894435  1  1  1.485562  0 -1.450727 -1.055649
+2  0  0.436049  0 -0.151908  0  0  0.195296  0  2.280391  1.162284
+3  0  0.005213  1  0.347139  1  0 -0.727156 -1 -1.140999 -2.165819
+4  0  1.212397  0 -1.230150  0  1  0.582913  0 -1.377051 -2.359753
+</pre></div></div>
 </div>
 <p>Note that we are using a pandas dataframe to load the data. At present, DoWhy only supports pandas dataframe as input.</p>
 </section>
@@ -550,32 +458,99 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">graph_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;dag {</span>
-<span class="s2">        W0 [pos=&quot;-2.200,-1.520&quot;]</span>
-<span class="s2">        W1 [pos=&quot;-1.457,-1.533&quot;]</span>
-<span class="s2">        W2 [pos=&quot;-0.763,-1.547&quot;]</span>
-<span class="s2">        W3 [pos=&quot;1.041,-1.587&quot;]</span>
-<span class="s2">        W4 [pos=&quot;1.510,-1.560&quot;]</span>
-<span class="s2">        X0 [pos=&quot;1.222,-0.625&quot;]</span>
-<span class="s2">        Z0 [pos=&quot;0.390,-1.601&quot;]</span>
-<span class="s2">        Z1 [pos=&quot;-0.176,-1.540&quot;]</span>
-<span class="s2">        v0 [pos=&quot;-0.219,-0.881&quot;]</span>
-<span class="s2">        y [pos=&quot;-0.144,-0.296&quot;]</span>
-<span class="s2">        W0 -&gt; v0</span>
-<span class="s2">        W0 -&gt; y</span>
-<span class="s2">        W1 -&gt; v0</span>
-<span class="s2">        W1 -&gt; y</span>
-<span class="s2">        W2 -&gt; v0</span>
-<span class="s2">        W2 -&gt; y</span>
-<span class="s2">        W3 -&gt; v0</span>
-<span class="s2">        W3 -&gt; y</span>
-<span class="s2">        W4 -&gt; v0</span>
-<span class="s2">        W4 -&gt; y</span>
-<span class="s2">        X0 -&gt; y</span>
-<span class="s2">        Z0 -&gt; v0</span>
-<span class="s2">        Z1 -&gt; v0</span>
-<span class="s2">        v0 -&gt; y</span>
-<span class="s2">        }&quot;&quot;&quot;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">graph_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;graph [</span>
+<span class="s2">  directed 1</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 0</span>
+<span class="s2">    label &quot;a&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 1</span>
+<span class="s2">    label &quot;b&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 2</span>
+<span class="s2">    label &quot;c&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 3</span>
+<span class="s2">    label &quot;d&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 4</span>
+<span class="s2">    label &quot;e&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 5</span>
+<span class="s2">    label &quot;f&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 6</span>
+<span class="s2">    label &quot;g&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 7</span>
+<span class="s2">    label &quot;h&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 8</span>
+<span class="s2">    label &quot;i&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 9</span>
+<span class="s2">    label &quot;j&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 0</span>
+<span class="s2">    target 1</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 0</span>
+<span class="s2">    target 8</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 1</span>
+<span class="s2">    target 2</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 1</span>
+<span class="s2">    target 5</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 2</span>
+<span class="s2">    target 3</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 2</span>
+<span class="s2">    target 4</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 3</span>
+<span class="s2">    target 4</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 4</span>
+<span class="s2">    target 5</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 5</span>
+<span class="s2">    target 6</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 6</span>
+<span class="s2">    target 7</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 7</span>
+<span class="s2">    target 8</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 8</span>
+<span class="s2">    target 9</span>
+<span class="s2">  ]</span>
+<span class="s2">]</span>
+
+<span class="s2">&quot;&quot;&quot;</span>
 </pre></div>
 </div>
 </div>
@@ -622,14 +597,31 @@ div.rendered_html tbody tr:hover {
 </section>
 <section id="Step-4:-Testing-for-Conditional-Independence">
 <h2>Step 4: Testing for Conditional Independence<a class="headerlink" href="#Step-4:-Testing-for-Conditional-Independence" title="Permalink to this headline"></a></h2>
-<p>We can check if the assumptions of the graph hold true for the data using model.refute_graph(k, method_name,independence_constraints) We are testing X ⫫ Y | Z where X and Y are singular sets and Z can have k number of variables. Currently we are using “partial_correlation” method by default and k value is 1 by default unless input.</p>
-<div class="nbinput nblast docutils container">
+<p>We can check if the assumptions of the graph hold true for the data using <code class="docutils literal notranslate"><span class="pre">model.refute_graph(k,</span> <span class="pre">independence_test</span> <span class="pre">=</span> <span class="pre">{'test_for_continuous':</span> <span class="pre">'partial_correlation',</span> <span class="pre">'test_for_discrete'</span> <span class="pre">:</span> <span class="pre">'conditional_mutual_information'})</span></code> We are testing X ⫫ Y | Z where X and Y are singular sets and Z can have k number of variables. k value is 1 by default unless input. Currently we are using following settings - - “partial_correlation” for continuous data - “conditional_mutual_information” for discrete
+data - “conditional_mutua_information” when Z is discrete and either of X and Y is continuous - “partial_correlation” when Z is continuous/binary and X and Y are either continuous/binary - “conditional_mutual_information” when X and Y are discrete and Z has mixed data - other settings are currently not supported</p>
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refuter_object</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_graph</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">method_name</span> <span class="o">=</span> <span class="s2">&quot;partial_correlation&quot;</span><span class="p">)</span>  <span class="c1">#Change k parameter to test conditional independence given different number of variables</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refuter_object</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_graph</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">independence_test</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;test_for_continuous&#39;</span><span class="p">:</span> <span class="s1">&#39;partial_correlation&#39;</span><span class="p">,</span> <span class="s1">&#39;test_for_discrete&#39;</span> <span class="p">:</span> <span class="s1">&#39;conditional_mutual_information&#39;</span><span class="p">})</span> <span class="c1">#Change k parameter to test conditional independence given different number of variables</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The following setting with f as discrete, j as continuous, (&#39;i&#39;,) as [&#39;continuous&#39;] not supported
+The following setting with d as continuous, g as continuous, (&#39;f&#39;,) as [&#39;discrete&#39;] not supported
+The following setting with d as continuous, a as discrete, (&#39;b&#39;,) as [&#39;continuous&#39;] not supported
+The following setting with d as continuous, h as discrete, (&#39;g&#39;,) as [&#39;continuous&#39;] not supported
+The following setting with g as continuous, b as continuous, (&#39;f&#39;,) as [&#39;discrete&#39;] not supported
+The following setting with g as continuous, a as discrete, (&#39;b&#39;,) as [&#39;continuous&#39;] not supported
+The following setting with b as continuous, h as discrete, (&#39;g&#39;,) as [&#39;continuous&#39;] not supported
+The following setting with j as continuous, a as discrete, (&#39;i&#39;,) as [&#39;continuous&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;i&#39;,) as [&#39;continuous&#39;] not supported
+</pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
@@ -644,120 +636,35 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Method name:partial_correlation
-Number of conditional independencies entailed by model:483
-Number of independences satisfied by data:396
-Test passed:False
+Method name for discrete data:conditional_mutual_information
+Method name for continuous data:partial_correlation
+Number of conditional independencies entailed by model:34
+Number of independences satisfied by data:25
+Test passed:True
 
 </pre></div></div>
 </div>
 <section id="Testing-for-a-set-of-edges">
 <h3>Testing for a set of edges<a class="headerlink" href="#Testing-for-a-set-of-edges" title="Permalink to this headline"></a></h3>
-<p>We can also test a set of conditional independences whether they are true or not The input has to be in the form - [( x1, y1, (z1, z2)), ( x2, y2, (z3, z4)), ( x3, y3, (z5,)), ( x4, y4, ()) ]</p>
-<div class="nbinput docutils container">
+<p>We can also test a set of conditional independences whether they are true or not The input has to be in the form - [( x1, y1, (z1, z2)), ( x2, y2, (z3, z4)), ( x3, y3, (z5,)), ( x4, y4, ()) ] ##### The testing data can be a mix of discrete and continuous types as well (Here binary implies discrete only) -</p>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">refute_graph</span><span class="p">(</span><span class="n">method_name</span> <span class="o">=</span> <span class="s2">&quot;partial_correlation&quot;</span><span class="p">,</span><span class="n">independence_constraints</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;W3&#39;</span><span class="p">,</span> <span class="s1">&#39;Z0&#39;</span><span class="p">,</span> <span class="p">()),</span> <span class="p">(</span><span class="s1">&#39;W0&#39;</span><span class="p">,</span> <span class="s1">&#39;Z0&#39;</span><span class="p">,</span> <span class="p">()),(</span><span class="s1">&#39;W3&#39;</span><span class="p">,</span> <span class="s1">&#39;Z0&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;W1&#39;</span><span class="p">,</span><span class="s1">&#39;W2&#39;</span><span class="p">,))]))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refuter_object</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_graph</span><span class="p">(</span><span class="n">independence_constraints</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;g&#39;</span><span class="p">,)),</span> <span class="c1"># c and e - binary, g - continuous</span>
+                                                                <span class="p">(</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;h&#39;</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,)),</span> <span class="c1"># f and h - discrete, b - continuous</span>
+                                                                <span class="p">(</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;h&#39;</span><span class="p">,)),</span> <span class="c1"># e - binary, g - continuous, h - discrete</span>
+                                                                <span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,)),</span> <span class="c1"># c and a - discrete, b - continuous</span>
+                                                                <span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,)),</span> <span class="c1"># d and i - continuous, c - binary</span>
+                                                                <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span> <span class="p">,</span> <span class="p">())</span>      <span class="c1"># a - discrete, j - continuous</span>
+                                                               <span class="p">],</span>
+                         <span class="n">independence_test</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;test_for_continuous&#39;</span><span class="p">:</span> <span class="s1">&#39;partial_correlation&#39;</span><span class="p">,</span> <span class="s1">&#39;test_for_discrete&#39;</span> <span class="p">:</span> <span class="s1">&#39;conditional_mutual_information&#39;</span><span class="p">}</span>
+                        <span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Method name:partial_correlation
-Number of conditional independencies entailed by model:3
-Number of independences satisfied by data:3
-Test passed:True
-
-</pre></div></div>
-</div>
-</section>
-</section>
-<section id="Testing-with-a-wrong-graph-input">
-<h2>Testing with a wrong graph input<a class="headerlink" href="#Testing-with-a-wrong-graph-input" title="Permalink to this headline"></a></h2>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">graph_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;dag {</span>
-<span class="s2">        W0 [pos=&quot;-2.200,-1.520&quot;]</span>
-<span class="s2">        W1 [pos=&quot;-1.457,-1.533&quot;]</span>
-<span class="s2">        W2 [pos=&quot;-0.763,-1.547&quot;]</span>
-<span class="s2">        W3 [pos=&quot;1.041,-1.587&quot;]</span>
-<span class="s2">        W4 [pos=&quot;1.510,-1.560&quot;]</span>
-<span class="s2">        X0 [pos=&quot;1.222,-0.625&quot;]</span>
-<span class="s2">        Z0 [pos=&quot;0.390,-1.601&quot;]</span>
-<span class="s2">        Z1 [pos=&quot;-0.176,-1.540&quot;]</span>
-<span class="s2">        v0 [pos=&quot;-0.219,-0.881&quot;]</span>
-<span class="s2">        y [pos=&quot;-0.144,-0.296&quot;]</span>
-<span class="s2">        W0 -&gt; v0</span>
-<span class="s2">        W0 -&gt; y</span>
-<span class="s2">        W1 -&gt; v0</span>
-<span class="s2">        W1 -&gt; y</span>
-<span class="s2">        W2 -&gt; v0</span>
-<span class="s2">        W2 -&gt; y</span>
-<span class="s2">        W3 -&gt; v0</span>
-<span class="s2">        W3 -&gt; y</span>
-<span class="s2">        W4 -&gt; v0</span>
-<span class="s2">        X0 -&gt; Z0</span>
-<span class="s2">        Z0 -&gt; Z1</span>
-<span class="s2">        }&quot;&quot;&quot;</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
-            <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
-            <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
-            <span class="n">graph</span><span class="o">=</span><span class="n">graph_string</span><span class="p">,</span>
-            <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">test_significance</span><span class="o">=</span><span class="kc">None</span>
-        <span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
-<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/example_notebooks_graph_conditional_independence_refuter_22_0.png" src="../_images/example_notebooks_graph_conditional_independence_refuter_22_0.png" />
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refuter_object</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_graph</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">method_name</span> <span class="o">=</span> <span class="s2">&quot;partial_correlation&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<p>We can see that since we input the wrong graph, many conditional independences were not met</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">refuter_object</span><span class="p">)</span>
@@ -769,9 +676,388 @@ Test passed:True
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Method name:partial_correlation
-Number of conditional independencies entailed by model:240
-Number of independences satisfied by data:152
+Method name for discrete data:conditional_mutual_information
+Method name for continuous data:partial_correlation
+Number of conditional independencies entailed by model:6
+Number of independences satisfied by data:6
+Test passed:True
+
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="Testing-with-a-wrong-graph-input">
+<h2>Testing with a wrong graph input<a class="headerlink" href="#Testing-with-a-wrong-graph-input" title="Permalink to this headline"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">graph_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;graph [</span>
+<span class="s2">        directed 1</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 0</span>
+<span class="s2">            label &quot;a&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 1</span>
+<span class="s2">            label &quot;b&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 2</span>
+<span class="s2">            label &quot;c&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 3</span>
+<span class="s2">            label &quot;d&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 4</span>
+<span class="s2">            label &quot;e&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 5</span>
+<span class="s2">            label &quot;f&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 6</span>
+<span class="s2">            label &quot;g&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 7</span>
+<span class="s2">            label &quot;h&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 8</span>
+<span class="s2">            label &quot;i&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 9</span>
+<span class="s2">            label &quot;j&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 0</span>
+<span class="s2">            target 1</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 0</span>
+<span class="s2">            target 2</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 0</span>
+<span class="s2">            target 3</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 1</span>
+<span class="s2">            target 4</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 1</span>
+<span class="s2">            target 5</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 2</span>
+<span class="s2">            target 3</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 4</span>
+<span class="s2">            target 2</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 4</span>
+<span class="s2">            target 5</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 4</span>
+<span class="s2">            target 6</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 4</span>
+<span class="s2">            target 7</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 8</span>
+<span class="s2">            target 6</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge</span>
+<span class="s2">        [</span>
+<span class="s2">        source 9</span>
+<span class="s2">        target 0</span>
+<span class="s2">        ]</span>
+<span class="s2">        ]&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+            <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
+            <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
+            <span class="n">graph</span><span class="o">=</span><span class="n">graph_string</span><span class="p">,</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_graph_conditional_independence_refuter_23_0.png" src="../_images/example_notebooks_graph_conditional_independence_refuter_23_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refuter_object</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_graph</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The following setting with f as discrete, d as continuous, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, g as continuous, (&#39;d&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with f as discrete, g as continuous, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, g as continuous, (&#39;e&#39;, &#39;j&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, g as continuous, (&#39;e&#39;, &#39;i&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, j as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with f as discrete, j as continuous, (&#39;g&#39;, &#39;b&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, j as continuous, (&#39;g&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with f as discrete, j as continuous, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, j as continuous, (&#39;b&#39;, &#39;i&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, j as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with f as discrete, j as continuous, (&#39;b&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with f as discrete, j as continuous, (&#39;i&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;c&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;c&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;c&#39;, &#39;j&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;d&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;d&#39;, &#39;b&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;d&#39;, &#39;j&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;d&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;g&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;e&#39;, &#39;j&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;b&#39;, &#39;j&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;b&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;j&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;j&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with c as binary, j as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with c as binary, j as continuous, (&#39;g&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with c as binary, j as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with c as binary, j as continuous, (&#39;i&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with c as binary, i as continuous, (&#39;f&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with c as binary, i as continuous, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with c as binary, i as continuous, (&#39;f&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with c as binary, i as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with c as binary, i as continuous, (&#39;d&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with c as binary, i as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with c as binary, i as continuous, (&#39;b&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with c as binary, i as continuous, (&#39;j&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with c as binary, i as continuous, (&#39;j&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, g as continuous, (&#39;f&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with d as continuous, g as continuous, (&#39;c&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, g as continuous, (&#39;e&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, g as continuous, (&#39;e&#39;, &#39;h&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, b as continuous, (&#39;c&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, b as continuous, (&#39;e&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, j as continuous, (&#39;f&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, j as continuous, (&#39;c&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, j as continuous, (&#39;g&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, j as continuous, (&#39;e&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, j as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, j as continuous, (&#39;i&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, j as continuous, (&#39;a&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, i as continuous, (&#39;f&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with d as continuous, i as continuous, (&#39;f&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with d as continuous, i as continuous, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with d as continuous, i as continuous, (&#39;f&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with d as continuous, i as continuous, (&#39;f&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, i as continuous, (&#39;f&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, i as continuous, (&#39;c&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, i as continuous, (&#39;c&#39;, &#39;h&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, i as continuous, (&#39;e&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, i as continuous, (&#39;e&#39;, &#39;h&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, i as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, i as continuous, (&#39;b&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, i as continuous, (&#39;j&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, i as continuous, (&#39;j&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, i as continuous, (&#39;a&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with d as continuous, h as discrete, (&#39;g&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with d as continuous, h as discrete, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with d as continuous, h as discrete, (&#39;e&#39;, &#39;j&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with d as continuous, h as discrete, (&#39;e&#39;, &#39;i&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with g as continuous, b as continuous, (&#39;f&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with g as continuous, b as continuous, (&#39;e&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with g as continuous, b as continuous, (&#39;e&#39;, &#39;h&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with g as continuous, j as continuous, (&#39;f&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with g as continuous, j as continuous, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with g as continuous, j as continuous, (&#39;f&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with g as continuous, j as continuous, (&#39;c&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with g as continuous, j as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with g as continuous, j as continuous, (&#39;e&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with g as continuous, j as continuous, (&#39;e&#39;, &#39;h&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with g as continuous, j as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with g as continuous, j as continuous, (&#39;b&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with g as continuous, j as continuous, (&#39;i&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with g as continuous, j as continuous, (&#39;a&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with g as continuous, a as discrete, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with g as continuous, a as discrete, (&#39;d&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with g as continuous, a as discrete, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with g as continuous, a as discrete, (&#39;e&#39;, &#39;j&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with g as continuous, a as discrete, (&#39;e&#39;, &#39;i&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with g as continuous, a as discrete, (&#39;b&#39;, &#39;j&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with g as continuous, a as discrete, (&#39;b&#39;, &#39;i&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with g as continuous, a as discrete, (&#39;b&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with g as continuous, h as discrete, (&#39;d&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with g as continuous, h as discrete, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with g as continuous, h as discrete, (&#39;e&#39;, &#39;j&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with g as continuous, h as discrete, (&#39;e&#39;, &#39;i&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with e as binary, j as continuous, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with e as binary, j as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with e as binary, j as continuous, (&#39;g&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with e as binary, j as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with e as binary, j as continuous, (&#39;b&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with e as binary, j as continuous, (&#39;i&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with e as binary, i as continuous, (&#39;f&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with e as binary, i as continuous, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with e as binary, i as continuous, (&#39;f&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with e as binary, i as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with e as binary, i as continuous, (&#39;d&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with e as binary, i as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with e as binary, i as continuous, (&#39;b&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with e as binary, i as continuous, (&#39;j&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with e as binary, i as continuous, (&#39;j&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with b as continuous, j as continuous, (&#39;f&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with b as continuous, j as continuous, (&#39;c&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with b as continuous, j as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with b as continuous, j as continuous, (&#39;g&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with b as continuous, j as continuous, (&#39;e&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with b as continuous, j as continuous, (&#39;i&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with b as continuous, j as continuous, (&#39;a&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with b as continuous, i as continuous, (&#39;f&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with b as continuous, i as continuous, (&#39;f&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with b as continuous, i as continuous, (&#39;f&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with b as continuous, i as continuous, (&#39;f&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with b as continuous, i as continuous, (&#39;f&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with b as continuous, i as continuous, (&#39;f&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with b as continuous, i as continuous, (&#39;c&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with b as continuous, i as continuous, (&#39;c&#39;, &#39;h&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with b as continuous, i as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with b as continuous, i as continuous, (&#39;d&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with b as continuous, i as continuous, (&#39;e&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with b as continuous, i as continuous, (&#39;e&#39;, &#39;h&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with b as continuous, i as continuous, (&#39;j&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with b as continuous, i as continuous, (&#39;j&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with b as continuous, i as continuous, (&#39;a&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with b as continuous, h as discrete, (&#39;d&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with b as continuous, h as discrete, (&#39;g&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with b as continuous, h as discrete, (&#39;e&#39;, &#39;j&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with b as continuous, h as discrete, (&#39;e&#39;, &#39;i&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, i as continuous, (&#39;f&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with j as continuous, i as continuous, (&#39;f&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, i as continuous, (&#39;f&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with j as continuous, i as continuous, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, i as continuous, (&#39;f&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, i as continuous, (&#39;f&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, i as continuous, (&#39;c&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, i as continuous, (&#39;c&#39;, &#39;h&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, i as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, i as continuous, (&#39;d&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, i as continuous, (&#39;g&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, i as continuous, (&#39;e&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, i as continuous, (&#39;e&#39;, &#39;h&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, i as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, i as continuous, (&#39;b&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, i as continuous, (&#39;a&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;d&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;g&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;g&#39;, &#39;b&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;g&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;e&#39;, &#39;i&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;b&#39;, &#39;i&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;i&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;f&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;f&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;c&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;c&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;c&#39;, &#39;j&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;d&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;d&#39;, &#39;b&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;d&#39;, &#39;j&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;d&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;g&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;g&#39;, &#39;b&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;e&#39;, &#39;j&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;b&#39;, &#39;j&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;b&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;j&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;f&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;f&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;c&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;c&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;c&#39;, &#39;j&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;d&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;d&#39;, &#39;b&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;d&#39;, &#39;j&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;g&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;e&#39;, &#39;j&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;b&#39;, &#39;j&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;j&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+</pre></div></div>
+</div>
+<p>We can see that since we input the wrong graph, many conditional independences were not met</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">refuter_object</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Method name for discrete data:conditional_mutual_information
+Method name for continuous data:partial_correlation
+Number of conditional independencies entailed by model:359
+Number of independences satisfied by data:144
 Test passed:False
 
 </pre></div></div>

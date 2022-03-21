@@ -28,7 +28,7 @@
             <a href="../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
           </a>
               <div class="version">
-                0.7
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -125,14 +125,22 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">choice</span>
+<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">choice</span><span class="p">,</span> <span class="n">random</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">ss</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">from</span> <span class="nn">dowhy.utils.graph_operations</span> <span class="kn">import</span> <span class="n">is_connected</span><span class="p">,</span><span class="n">convert_to_undirected_graph</span><span class="p">,</span> <span class="n">get_random_node_pair</span><span class="p">,</span> <span class="n">find_predecessor</span><span class="p">,</span> <span class="n">del_edge</span><span class="p">,</span> <span class="n">add_edge</span><span class="p">,</span> <span class="n">get_simple_ordered_tree</span>
+
 
 <div class="viewcode-block" id="sigmoid"><a class="viewcode-back" href="../../dowhy.html#dowhy.datasets.sigmoid">[docs]</a><span class="k">def</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="stochastically_convert_to_binary"><a class="viewcode-back" href="../../dowhy.html#dowhy.datasets.stochastically_convert_to_binary">[docs]</a><span class="k">def</span> <span class="nf">stochastically_convert_to_binary</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<div class="viewcode-block" id="convert_to_binary"><a class="viewcode-back" href="../../dowhy.html#dowhy.datasets.convert_to_binary">[docs]</a><span class="k">def</span> <span class="nf">convert_to_binary</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">stochastic</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">choice</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="o">-</span><span class="n">p</span><span class="p">,</span> <span class="n">p</span><span class="p">])</span></div>
+    <span class="k">if</span> <span class="n">stochastic</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">choice</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="o">-</span><span class="n">p</span><span class="p">,</span> <span class="n">p</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="stochastically_convert_to_three_level_categorical"><a class="viewcode-back" href="../../dowhy.html#dowhy.datasets.stochastically_convert_to_three_level_categorical">[docs]</a><span class="k">def</span> <span class="nf">stochastically_convert_to_three_level_categorical</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -176,6 +184,7 @@
                    <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                    <span class="n">treatment_is_category</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                    <span class="n">outcome_is_binary</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                   <span class="n">stochastic_discretization</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                    <span class="n">num_discrete_common_causes</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                    <span class="n">num_discrete_instruments</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                    <span class="n">num_discrete_effect_modifiers</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
@@ -232,7 +241,7 @@
         <span class="n">t</span> <span class="o">+=</span> <span class="n">Z</span> <span class="o">@</span> <span class="n">cz</span>
     <span class="c1"># Converting treatment to binary if required</span>
     <span class="k">if</span> <span class="n">treatment_is_binary</span><span class="p">:</span>
-        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">stochastically_convert_to_binary</span><span class="p">)(</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">convert_to_binary</span><span class="p">)(</span><span class="n">t</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">treatment_is_category</span><span class="p">:</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">stochastically_convert_to_three_level_categorical</span><span class="p">)(</span><span class="n">t</span><span class="p">)</span>
 
@@ -267,7 +276,7 @@
         <span class="k">if</span> <span class="n">num_effect_modifiers</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">y</span> <span class="o">+=</span> <span class="p">(</span><span class="n">X</span> <span class="o">@</span> <span class="n">ce</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">outcome_is_binary</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">stochastically_convert_to_binary</span><span class="p">)(</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">convert_to_binary</span><span class="p">)(</span><span class="n">y</span><span class="p">,</span><span class="n">stochastic_discretization</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">y</span>
 
     <span class="n">y</span> <span class="o">=</span> <span class="n">_compute_y</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">W_with_dummy</span><span class="p">,</span> <span class="n">X_with_categorical</span><span class="p">,</span> <span class="n">FD</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">ce</span><span class="p">,</span> <span class="n">cfd2</span><span class="p">)</span>
@@ -361,7 +370,7 @@
     <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">num_instruments</span><span class="p">))</span>
     <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">num_treatments</span><span class="p">))</span> <span class="o">+</span> <span class="n">Z</span> <span class="o">@</span> <span class="n">cz</span> <span class="o">+</span> <span class="n">W</span> <span class="o">@</span> <span class="n">c1</span>
     <span class="k">if</span> <span class="n">treatment_is_binary</span><span class="p">:</span>
-        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">stochastically_convert_to_binary</span><span class="p">)(</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">convert_to_binary</span><span class="p">)(</span><span class="n">t</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_compute_y</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">c2</span><span class="p">):</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">t</span> <span class="o">@</span> <span class="n">beta</span> <span class="o">+</span> <span class="n">W</span> <span class="o">@</span> <span class="n">c2</span>
@@ -512,6 +521,145 @@
         <span class="s2">&quot;dot_graph&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="s2">&quot;gml_graph&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="s2">&quot;ate&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">ret_dict</span></div>
+
+<div class="viewcode-block" id="create_discrete_column"><a class="viewcode-back" href="../../dowhy.html#dowhy.datasets.create_discrete_column">[docs]</a><span class="k">def</span> <span class="nf">create_discrete_column</span><span class="p">(</span><span class="n">num_samples</span><span class="p">,</span><span class="n">std_dev</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="c1">#Generating a random normal distribution of integers</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span>
+    <span class="n">xU</span><span class="p">,</span> <span class="n">xL</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="mf">0.5</span> 
+    <span class="n">prob</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">xU</span><span class="p">,</span> <span class="n">scale</span> <span class="o">=</span> <span class="n">std_dev</span><span class="p">)</span> <span class="o">-</span> <span class="n">ss</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">xL</span><span class="p">,</span> <span class="n">scale</span> <span class="o">=</span> <span class="n">std_dev</span><span class="p">)</span>  <span class="c1">#probability of selecting a number x is p(x-0.5 &lt; x &lt; x+0.5) where x is a normal random variable with mean 0 and standard deviation std_dev</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="n">prob</span> <span class="o">/</span> <span class="n">prob</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="c1"># normalize the probabilities so their sum is 1</span>
+    <span class="n">nums</span> <span class="o">=</span> <span class="n">choice</span><span class="p">(</span><span class="n">a</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="n">num_samples</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">prob</span><span class="p">)</span> <span class="c1">#pick up an element </span>
+    <span class="k">return</span> <span class="n">nums</span></div>
+
+<div class="viewcode-block" id="convert_continuous_to_discrete"><a class="viewcode-back" href="../../dowhy.html#dowhy.datasets.convert_continuous_to_discrete">[docs]</a><span class="k">def</span> <span class="nf">convert_continuous_to_discrete</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">arr</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="generate_random_graph"><a class="viewcode-back" href="../../dowhy.html#dowhy.datasets.generate_random_graph">[docs]</a><span class="k">def</span> <span class="nf">generate_random_graph</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">max_iter</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to generate random Directed Acyclic Graph</span>
+<span class="sd">    :param n: number of nodes in the graph</span>
+<span class="sd">    :param max_iter: number of iterations to create graph</span>
+
+<span class="sd">    :returns: Directed Acyclic Graph</span>
+<span class="sd">    See: https://datascience.oneoffcoder.com/generate-random-bbn.html </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">get_simple_ordered_tree</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_iter</span><span class="p">):</span>
+        <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">get_random_node_pair</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">has_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">del_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">add_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">g</span></div>
+
+
+
+<div class="viewcode-block" id="dataset_from_random_graph"><a class="viewcode-back" href="../../dowhy.html#dowhy.datasets.dataset_from_random_graph">[docs]</a><span class="k">def</span> <span class="nf">dataset_from_random_graph</span><span class="p">(</span><span class="n">num_vars</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">prob_edge</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">prob_type_of_data</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.333</span><span class="p">,</span> <span class="mf">0.333</span><span class="p">,</span> <span class="mf">0.334</span><span class="p">)):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function generates a dataset with discrete and continuous kinds of variables.</span>
+<span class="sd">    It creates a random graph and models the variables linearly according to the relations in the graph.</span>
+
+<span class="sd">    :param num_vars: Number of variables in the dataset</span>
+<span class="sd">    :param num_samples: Number of samples in the dataset</span>
+<span class="sd">    :param prob_edge : Probability of an edge between two random nodes in a graph</span>
+<span class="sd">    :param random_seed: Seed for generating random graph</span>
+<span class="sd">    :param prob_type_of_data : 3-element tuple containing the probability of data being discrete, binary and continuous respectively.</span>
+<span class="sd">    :returns ret_dict : dictionary with information like dataframe, outcome, treatment, graph string and continuous, discrete and binary columns</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">prob_type_of_data</span><span class="p">))</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">)</span> 
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> 
+    <span class="n">DAG</span> <span class="o">=</span> <span class="n">generate_random_graph</span><span class="p">(</span><span class="n">n</span> <span class="o">=</span> <span class="n">num_vars</span><span class="p">)</span>
+    <span class="n">mapping</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">DAG</span><span class="p">,</span> <span class="n">string</span><span class="o">.</span><span class="n">ascii_lowercase</span><span class="p">))</span>
+    <span class="n">DAG</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">relabel_nodes</span><span class="p">(</span><span class="n">DAG</span><span class="p">,</span> <span class="n">mapping</span><span class="p">)</span>
+    <span class="n">all_nodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">DAG</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+    <span class="n">all_nodes</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="n">num_nodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_nodes</span><span class="p">)</span>
+    <span class="n">changed</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">discrete_cols</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">continuous_cols</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">binary_cols</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">random_numbers_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">)</span> <span class="c1">#Random numbers between 0 to 1 to decide if that particular node will be discrete or continuous</span>
+
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">all_nodes</span><span class="p">:</span>
+        <span class="n">changed</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+    <span class="n">currset</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1">#Generating data for nodes which have no incoming edges</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">all_nodes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">DAG</span><span class="o">.</span><span class="n">in_degree</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">random_numbers_array</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span>  
+            <span class="n">counter</span><span class="o">+=</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="n">x</span><span class="o">&lt;=</span><span class="n">prob_type_of_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">df</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_discrete_column</span><span class="p">(</span><span class="n">num_samples</span><span class="p">)</span> <span class="c1">#Generating discrete data</span>
+                <span class="n">discrete_cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">x</span><span class="o">&lt;=</span><span class="n">prob_type_of_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">prob_type_of_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">df</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">num_samples</span><span class="p">)</span> <span class="c1">#Generating continuous data</span>
+                <span class="n">continuous_cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nums</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">num_samples</span><span class="p">)</span>
+                <span class="n">df</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">convert_to_binary</span><span class="p">)(</span><span class="n">nums</span><span class="p">)</span> <span class="c1">#Generating binary data</span>
+                <span class="n">discrete_cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                <span class="n">binary_cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="n">successors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">DAG</span><span class="o">.</span><span class="n">successors</span><span class="p">(</span><span class="n">node</span><span class="p">))</span> <span class="c1">#Storing immediate successors for next level data generation</span>
+            <span class="n">successors</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">currset</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">successors</span><span class="p">)</span>
+            <span class="n">changed</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span> 
+
+    <span class="c1">#&quot;currset&quot; variable currently has all the successors of the nodes which had no incoming edges</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">currset</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">cs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span> <span class="c1">#Variable to store immediate children of nodes present in &quot;currset&quot;</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">currset</span><span class="p">:</span> 
+            <span class="n">predecessors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">DAG</span><span class="o">.</span><span class="n">predecessors</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>  <span class="c1">#Getting all the parent nodes on which current &quot;node&quot; depends on</span>
+            <span class="k">if</span> <span class="n">changed</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">changed</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">==</span> <span class="kc">True</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">predecessors</span><span class="p">):</span> <span class="c1">#Check if current &quot;node&quot; has not been processed yet and if all the parent nodes have been processed</span>
+                <span class="n">successors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">DAG</span><span class="o">.</span><span class="n">successors</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+                <span class="n">successors</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+                <span class="n">cs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">successors</span><span class="p">)</span> <span class="c1">#Storing immediate children for next level data generation</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">predecessors</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span> <span class="c1">#Using parent nodes data </span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">predecessors</span><span class="p">))</span> 
+                <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">)</span><span class="o">+</span> <span class="n">X</span><span class="nd">@c</span> <span class="c1">#Using Linear Regression to generate data</span>
+                <span class="n">changed</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">random_numbers_array</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span>
+                <span class="n">counter</span><span class="o">+=</span><span class="mi">1</span>
+                <span class="k">if</span> <span class="n">x</span><span class="o">&lt;=</span><span class="n">prob_type_of_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">df</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">convert_continuous_to_discrete</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+                    <span class="n">discrete_cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">x</span><span class="o">&lt;=</span><span class="n">prob_type_of_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">prob_type_of_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">df</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span>
+                    <span class="n">continuous_cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">nums</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">num_samples</span><span class="p">)</span>
+                    <span class="n">df</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">convert_to_binary</span><span class="p">)(</span><span class="n">nums</span><span class="p">)</span>
+                    <span class="n">discrete_cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                    <span class="n">binary_cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="n">currset</span> <span class="o">=</span> <span class="n">cs</span> 
+
+    <span class="n">outcome</span>  <span class="o">=</span> <span class="kc">None</span>  
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">all_nodes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">DAG</span><span class="o">.</span><span class="n">out_degree</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">outcome</span> <span class="o">=</span> <span class="n">node</span> <span class="c1">#Node which has no successors is outcome</span>
+            <span class="k">break</span>
+
+    <span class="n">treatments</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">all_nodes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">DAG</span><span class="o">.</span><span class="n">in_degree</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">children</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">DAG</span><span class="o">.</span><span class="n">successors</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">outcome</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+                <span class="n">treatments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="c1">#Node which causes outcome is treatment</span>
+   
+    <span class="n">gml_str</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">generate_gml</span><span class="p">(</span><span class="n">DAG</span><span class="p">)))</span>
+    <span class="n">ret_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;df&quot;</span><span class="p">:</span> <span class="n">df</span><span class="p">,</span>
+        <span class="s2">&quot;outcome_name&quot;</span><span class="p">:</span> <span class="n">outcome</span><span class="p">,</span>
+        <span class="s2">&quot;treatment_name&quot;</span><span class="p">:</span> <span class="n">treatments</span><span class="p">,</span>
+        <span class="s2">&quot;gml_graph&quot;</span><span class="p">:</span> <span class="n">gml_str</span><span class="p">,</span>
+        <span class="s2">&quot;discrete_columns&quot;</span><span class="p">:</span> <span class="n">discrete_cols</span><span class="p">,</span>
+        <span class="s2">&quot;continuous_columns&quot;</span><span class="p">:</span> <span class="n">continuous_cols</span><span class="p">,</span>
+        <span class="s2">&quot;binary_columns&quot;</span><span class="p">:</span> <span class="n">binary_cols</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="n">ret_dict</span></div>
 </pre></div>

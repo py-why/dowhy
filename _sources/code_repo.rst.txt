@@ -6,6 +6,22 @@ DoWhy is hosted on GitHub.
 You can browse the code in a html-friendly format `here
 <https://github.com/Microsoft/dowhy>`_.
 
+v0.7.1: Added Graph refuter. Support for dagitty graphs and external estimators
+--------------------------------------------------------------------------------------
+
+* Graph refuter with conditional independence tests to check whether data conforms to the assumed causal graph
+
+* Better docs for estimators by adding the method-specific parameters directly in its own init method
+
+* Support use of custom external estimators 
+
+* Consistent structure for init_params for dowhy and econml estimators
+
+* Add support for Dagitty graphs
+
+* Bug fixes for GLM model, causal model with no confounders, and hotel case-study notebook
+
+Thank you @EgorKraevTransferwise, @ae-foster, @anusha0409 for your contributions! 
 
 v0.7: Better Refuters for unobserved confounders and placebo treatment
 ----------------------------------------------------------------------

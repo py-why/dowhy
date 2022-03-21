@@ -28,7 +28,7 @@
             <a href="../../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
           </a>
               <div class="version">
-                0.7
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -120,6 +120,8 @@
 <span></span><span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">t</span><span class="p">,</span> <span class="n">norm</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log</span><span class="p">,</span> <span class="n">exp</span>
 
 
 <div class="viewcode-block" id="compute_ci"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.cit.compute_ci">[docs]</a><span class="k">def</span> <span class="nf">compute_ci</span><span class="p">(</span><span class="n">r</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">confidence</span><span class="o">=</span><span class="mf">.95</span><span class="p">):</span>
@@ -224,6 +226,47 @@
         <span class="s1">&#39;p-val&#39;</span><span class="p">:</span> <span class="n">pval</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="n">stats</span></div>
+
+<div class="viewcode-block" id="entropy"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.cit.entropy">[docs]</a><span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;&quot;</span>
+<span class="sd">    Returns entropy for a random variable x</span>
+<span class="sd">    H(x) = - Σ p(x)log(p(x))</span>
+<span class="sd">    :param x : random variable to calculate entropy for</span>
+<span class="sd">    :returns : entropy of random variable</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">d</span><span class="o">=</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">entr</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
+        <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>  <span class="c1"># Calculating frequency of an event</span>
+        <span class="n">s</span><span class="o">+=</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="n">s</span> <span class="c1"># Calculating probability for an event</span>
+        <span class="n">entr</span><span class="o">-=</span><span class="n">p</span><span class="o">*</span><span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="c1"># H(x) = - Σ p(x)log(p(x))</span>
+    <span class="k">return</span> <span class="n">entr</span></div>
+
+
+<div class="viewcode-block" id="conditional_MI"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.cit.conditional_MI">[docs]</a><span class="k">def</span> <span class="nf">conditional_MI</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Method to return conditional mutual information between X and Y given Z</span>
+<span class="sd">    I(X, Y | Z) = H(X|Z) - H(X|Y,Z)</span>
+<span class="sd">                = H(X,Z) - H(Z) - H(X,Y,Z) + H(Y,Z)</span>
+<span class="sd">                = H(X,Z) + H(Y,Z) - H(X,Y,Z) - H(Z)</span>
+<span class="sd">    :param data : dataset </span>
+<span class="sd">    :param x,y,z : column names from dataset</span>
+<span class="sd">    :returns : conditional mutual information between X and Y given Z</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">y</span><span class="p">)]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">t</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">Z</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">t</span><span class="p">]</span><span class="o">.</span><span class="n">itertuples</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">))</span> 
+    <span class="n">Hxz</span> <span class="o">=</span> <span class="n">entropy</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">x</span><span class="p">,</span><span class="nb">zip</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Z</span><span class="p">)))</span>       <span class="c1"># Finding Joint entropy of X and Z</span>
+    <span class="n">Hyz</span> <span class="o">=</span> <span class="n">entropy</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">x</span><span class="p">,</span><span class="nb">zip</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">)))</span>       <span class="c1"># Finding Joint entropy of Y and Z</span>
+    <span class="n">Hz</span> <span class="o">=</span> <span class="n">entropy</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>                                       <span class="c1"># Finding Entropy of Z</span>
+    <span class="n">Hxyz</span> <span class="o">=</span> <span class="n">entropy</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">x</span><span class="p">,</span><span class="nb">zip</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">)))</span> <span class="c1"># Finding Joint Entropy of X, Y and Z</span>
+    <span class="k">return</span> <span class="n">Hxz</span> <span class="o">+</span> <span class="n">Hyz</span> <span class="o">-</span> <span class="n">Hxyz</span> <span class="o">-</span> <span class="n">Hz</span></div>
 </pre></div>
 
            </div>

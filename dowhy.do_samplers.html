@@ -31,7 +31,7 @@
             <a href="index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
           </a>
               <div class="version">
-                0.7
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -88,7 +88,6 @@
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_causal_discovery_example.html#Experiments-on-the-Sachs-dataset">Experiments on the Sachs dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_causal_discovery_example.html#id2">Causal Discovery with Causal Discovery Tool (CDT)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_notebooks/identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_notebooks/identifying_effects_using_id_algorithm.html#Case-5">Case 5</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package</span></p>
 <ul class="current">
@@ -191,6 +190,40 @@
 <dt class="sig sig-object py" id="dowhy.do_samplers.kernel_density_sampler.KernelDensitySampler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.do_samplers.kernel_density_sampler.</span></span><span class="sig-name descname"><span class="pre">KernelDensitySampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_samplers/kernel_density_sampler.html#KernelDensitySampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.do_samplers.kernel_density_sampler.KernelDensitySampler" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="dowhy.html#dowhy.do_sampler.DoSampler" title="dowhy.do_sampler.DoSampler"><code class="xref py py-class docutils literal notranslate"><span class="pre">dowhy.do_sampler.DoSampler</span></code></a></p>
+<p>Initializes a do sampler with data and names of relevant variables.</p>
+<p>Do sampling implements the do() operation from Pearl (2000). This is an operation is defined on a causal
+bayesian network, an explicit implementation of which is the basis for the MCMC sampling method.</p>
+<p>We abstract the idea behind the three-step process to allow other methods, as well. The <cite>disrupt_causes</cite>
+method is the means to make treatment assignment ignorable. In the Pearlian framework, this is where we cut the
+edges pointing into the causal state. With other methods, this will typically be by using some approach which
+assumes conditional ignorability (e.g. weighting, or explicit conditioning with Robins G-formula.)</p>
+<p>Next, the <cite>make_treatment_effective</cite> method reflects the assumption that the intervention we impose is
+“effective”. Most simply, we fix the causal state to some specific value. We skip this step there is no value
+specified for the causal state, and the original values are used instead.</p>
+<p>Finally, we sample from the resulting distribution. This can be either from a <cite>point_sample</cite> method, in the case
+that the inference method doesn’t support batch sampling, or the <cite>sample</cite> method in the case that it does. For
+convenience, the <cite>point_sample</cite> method parallelizes with <cite>multiprocessing</cite> using the <cite>num_cores</cite> kwargs to set
+the number of cores to use for parallelization.</p>
+<p>While different methods will have their own class attributes, the <cite>_df</cite> method should be common to all methods.
+This is them temporary dataset which starts as a copy of the original data, and is modified to reflect the steps
+of the do operation. Read through the existing methods (weighting is likely the most minimal) to get an idea of
+how this works to implement one yourself.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – pandas.DataFrame containing the data</p></li>
+<li><p><strong>identified_estimand</strong> – dowhy.causal_identifier.IdentifiedEstimand: and estimand using a backdoor method</p></li>
+</ul>
+</dd>
+</dl>
+<p>for effect identification.
+:param treatments: list or str:  names of the treatment variables
+:param outcomes: list or str: names of the outcome variables
+:param variable_types: dict: A dictionary containing the variable’s names and types. ‘c’ for continuous, ‘o’
+for ordered, ‘d’ for discrete, and ‘u’ for unordered discrete.
+:param keep_original_treatment: bool: Whether to use <cite>make_treatment_effective</cite>, or to keep the original
+treatment assignments.
+:param params: (optional) additional method parameters</p>
 </dd></dl>
 
 <dl class="py class">
@@ -211,6 +244,7 @@
 <dt class="sig sig-object py" id="dowhy.do_samplers.mcmc_sampler.McmcSampler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.do_samplers.mcmc_sampler.</span></span><span class="sig-name descname"><span class="pre">McmcSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_original_treatment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">causal_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_samplers/mcmc_sampler.html#McmcSampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.do_samplers.mcmc_sampler.McmcSampler" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="dowhy.html#dowhy.do_sampler.DoSampler" title="dowhy.do_sampler.DoSampler"><code class="xref py py-class docutils literal notranslate"><span class="pre">dowhy.do_sampler.DoSampler</span></code></a></p>
+<p>g, df, data_types</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.do_samplers.mcmc_sampler.McmcSampler.apply_data_types">
 <span class="sig-name descname"><span class="pre">apply_data_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_samplers/mcmc_sampler.html#McmcSampler.apply_data_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.do_samplers.mcmc_sampler.McmcSampler.apply_data_types" title="Permalink to this definition"></a></dt>
@@ -265,6 +299,7 @@
 <dt class="sig sig-object py" id="dowhy.do_samplers.multivariate_weighting_sampler.MultivariateWeightingSampler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.do_samplers.multivariate_weighting_sampler.</span></span><span class="sig-name descname"><span class="pre">MultivariateWeightingSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_original_treatment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">causal_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_samplers/multivariate_weighting_sampler.html#MultivariateWeightingSampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.do_samplers.multivariate_weighting_sampler.MultivariateWeightingSampler" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="dowhy.html#dowhy.do_sampler.DoSampler" title="dowhy.do_sampler.DoSampler"><code class="xref py py-class docutils literal notranslate"><span class="pre">dowhy.do_sampler.DoSampler</span></code></a></p>
+<p>g, df, data_types</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.do_samplers.multivariate_weighting_sampler.MultivariateWeightingSampler.compute_weights">
 <span class="sig-name descname"><span class="pre">compute_weights</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_samplers/multivariate_weighting_sampler.html#MultivariateWeightingSampler.compute_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.do_samplers.multivariate_weighting_sampler.MultivariateWeightingSampler.compute_weights" title="Permalink to this definition"></a></dt>
@@ -303,6 +338,7 @@ Override this method if you want to use a different approach to sampling.
 <dt class="sig sig-object py" id="dowhy.do_samplers.weighting_sampler.WeightingSampler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.do_samplers.weighting_sampler.</span></span><span class="sig-name descname"><span class="pre">WeightingSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_original_treatment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">causal_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_samplers/weighting_sampler.html#WeightingSampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.do_samplers.weighting_sampler.WeightingSampler" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="dowhy.html#dowhy.do_sampler.DoSampler" title="dowhy.do_sampler.DoSampler"><code class="xref py py-class docutils literal notranslate"><span class="pre">dowhy.do_sampler.DoSampler</span></code></a></p>
+<p>g, df, data_types</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.do_samplers.weighting_sampler.WeightingSampler.compute_weights">
 <span class="sig-name descname"><span class="pre">compute_weights</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_samplers/weighting_sampler.html#WeightingSampler.compute_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.do_samplers.weighting_sampler.WeightingSampler.compute_weights" title="Permalink to this definition"></a></dt>

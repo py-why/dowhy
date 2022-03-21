@@ -28,7 +28,7 @@
             <a href="../../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
           </a>
               <div class="version">
-                0.7
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -85,7 +85,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_discovery_example.html#Experiments-on-the-Sachs-dataset">Experiments on the Sachs dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_discovery_example.html#id2">Causal Discovery with Causal Discovery Tool (CDT)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/identifying_effects_using_id_algorithm.html#Case-5">Case 5</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package</span></p>
 <ul>
@@ -133,45 +132,64 @@
 
 <span class="sd">    Straightforward application of the back-door criterion.</span>
 
-<span class="sd">    Supports additional parameters that can be specified in the estimate_effect() method.</span>
+<span class="sd">    For a list of standard args and kwargs, see documentation for</span>
+<span class="sd">    :class:`~dowhy.causal_estimator.CausalEstimator`.</span>
 
-<span class="sd">    - &#39;min_ps_score&#39;: Lower bound used to clip the propensity score. Default=0.05</span>
-<span class="sd">    - &#39;max_ps_score&#39;: Upper bound used to clip the propensity score. Default=0.95</span>
-<span class="sd">    - &#39;weighting_scheme&#39;: This is the name of weighting method to use. Can be inverse propensity score (&quot;ips_weight&quot;, default), stabilized IPS score (&quot;ips_stabilized_weight&quot;), or normalized IPS score (&quot;ips_normalized_weight&quot;)</span>
-<span class="sd">    - &#39;propensity_score_model&#39;: The model used to compute propensity score. Could be any classification model that supports fit() and predict_proba() methods. If None, use LogisticRegression model as the default. Default=None</span>
-<span class="sd">    - &#39;recalculate_propensity_score&#39;: If true, force the estimator to calculate the propensity score. To use pre-computed propensity score, set this value to false. Default=True</span>
-<span class="sd">    - &#39;propensity_score_column&#39;: column name that stores the propensity score. Default=&#39;propensity_score&#39;</span>
+<span class="sd">    Supports additional parameters as listed below.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> 
-        <span class="o">*</span><span class="n">args</span><span class="p">,</span> 
-        <span class="n">min_ps_score</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> 
-        <span class="n">max_ps_score</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> 
-        <span class="n">weighting_scheme</span><span class="o">=</span><span class="s1">&#39;ips_weight&#39;</span><span class="p">,</span> 
-        <span class="n">propensity_score_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-        <span class="n">recalculate_propensity_score</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">min_ps_score</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+        <span class="n">max_ps_score</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
+        <span class="n">weighting_scheme</span><span class="o">=</span><span class="s1">&#39;ips_weight&#39;</span><span class="p">,</span>
+        <span class="n">propensity_score_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">recalculate_propensity_score</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">propensity_score_column</span><span class="o">=</span><span class="s2">&quot;propensity_score&quot;</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param min_ps_score: Lower bound used to clip the propensity score.</span>
+<span class="sd">            Default=0.05</span>
+<span class="sd">        :param max_ps_score: Upper bound used to clip the propensity score.</span>
+<span class="sd">            Default=0.95</span>
+<span class="sd">        :param weighting_scheme: Weighting method to use. Can be inverse</span>
+<span class="sd">            propensity score (&quot;ips_weight&quot;, default), stabilized IPS score</span>
+<span class="sd">            (&quot;ips_stabilized_weight&quot;), or normalized IPS score</span>
+<span class="sd">            (&quot;ips_normalized_weight&quot;).</span>
+<span class="sd">        :param propensity_score_model: The model used to compute propensity</span>
+<span class="sd">            score. Can be any classification model that supports fit() and</span>
+<span class="sd">            predict_proba() methods. If None, use LogisticRegression model as</span>
+<span class="sd">            the default. Default=None</span>
+<span class="sd">        :param recalculate_propensity_score: If true, force the estimator to</span>
+<span class="sd">            estimate the propensity score. To use pre-computed propensity</span>
+<span class="sd">            scores, set this value to false. Default=True</span>
+<span class="sd">        :param propensity_score_column: Column name that stores the</span>
+<span class="sd">            propensity score. Default=&#39;propensity_score&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Required to ensure that self.method_params contains all the information</span>
+        <span class="c1"># to create an object of this class</span>
+        <span class="n">args_dict</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="n">args_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="s1">&#39;min_ps_score&#39;</span><span class="p">:</span> <span class="n">min_ps_score</span><span class="p">,</span>
+            <span class="s1">&#39;max_ps_score&#39;</span><span class="p">:</span> <span class="n">max_ps_score</span><span class="p">,</span>
+            <span class="s1">&#39;weighting_scheme&#39;</span><span class="p">:</span> <span class="n">weighting_scheme</span>
+            <span class="p">})</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="o">*</span><span class="n">args</span><span class="p">,</span> 
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
             <span class="n">propensity_score_model</span><span class="o">=</span><span class="n">propensity_score_model</span><span class="p">,</span>
             <span class="n">recalculate_propensity_score</span><span class="o">=</span><span class="n">recalculate_propensity_score</span><span class="p">,</span>
             <span class="n">propensity_score_column</span><span class="o">=</span><span class="n">propensity_score_column</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="o">**</span><span class="n">args_dict</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;INFO: Using Propensity Score Weighting Estimator&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">construct_symbolic_estimator</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolic_estimator</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;weighting_scheme&quot;</span><span class="p">):</span>
-            <span class="c1"># &#39;ips_weight&#39;, &#39;ips_normalized_weight&#39;, &#39;ips_stabilized_weight&#39;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">weighting_scheme</span> <span class="o">=</span> <span class="n">weighting_scheme</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;min_ps_score&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">min_ps_score</span> <span class="o">=</span> <span class="n">min_ps_score</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;max_ps_score&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">max_ps_score</span> <span class="o">=</span> <span class="n">max_ps_score</span>
+        <span class="c1"># Setting method specific parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weighting_scheme</span> <span class="o">=</span> <span class="n">weighting_scheme</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_ps_score</span> <span class="o">=</span> <span class="n">min_ps_score</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_ps_score</span> <span class="o">=</span> <span class="n">max_ps_score</span>
 
     <span class="k">def</span> <span class="nf">_estimate_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">recalculate_propensity_score</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>

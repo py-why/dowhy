@@ -28,7 +28,7 @@
             <a href="../../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
           </a>
               <div class="version">
-                0.7
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -118,13 +118,11 @@
            <div itemprop="articleBody">
              
   <h1>Source code for dowhy.causal_estimators.linear_regression_estimator</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
-<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">linear_model</span>
+<span></span><span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
 
 <span class="kn">from</span> <span class="nn">dowhy.causal_estimators.regression_estimator</span> <span class="kn">import</span> <span class="n">RegressionEstimator</span>
+
 
 <div class="viewcode-block" id="LinearRegressionEstimator"><a class="viewcode-back" href="../../../dowhy.causal_estimators.html#dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator">[docs]</a><span class="k">class</span> <span class="nc">LinearRegressionEstimator</span><span class="p">(</span><span class="n">RegressionEstimator</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Compute effect of treatment using linear regression.</span>
@@ -136,7 +134,17 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;For a list of args and kwargs, see documentation for</span>
+<span class="sd">        :class:`~dowhy.causal_estimator.CausalEstimator`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Required to ensure that self.method_params contains all the</span>
+        <span class="c1"># parameters to create an object of this class</span>
+        <span class="n">args_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                     <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_STD_INIT_ARGS</span><span class="p">}</span>
+        <span class="n">args_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">args_dict</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">args_dict</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;INFO: Using Linear Regression Estimator&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_linear_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
 
@@ -148,6 +156,9 @@
             <span class="n">interaction_terms</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">*</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">estimand</span><span class="o">.</span><span class="n">treatment_variable</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">)]</span>
             <span class="n">expr</span> <span class="o">+=</span> <span class="s2">&quot;+&quot;</span> <span class="o">+</span> <span class="s2">&quot;+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">interaction_terms</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">expr</span></div>
+
+<div class="viewcode-block" id="LinearRegressionEstimator.predict_fn"><a class="viewcode-back" href="../../../dowhy.causal_estimators.html#dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator.predict_fn">[docs]</a>    <span class="k">def</span> <span class="nf">predict_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">features</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">features</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_build_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_features</span><span class="p">()</span>

@@ -28,7 +28,7 @@
             <a href="../../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
           </a>
               <div class="version">
-                0.7
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -85,7 +85,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_discovery_example.html#Experiments-on-the-Sachs-dataset">Experiments on the Sachs dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_discovery_example.html#id2">Causal Discovery with Causal Discovery Tool (CDT)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/identifying_effects_using_id_algorithm.html#Case-5">Case 5</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package</span></p>
 <ul>
@@ -122,6 +121,10 @@
 <span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">LifoQueue</span>
 <span class="kn">from</span> <span class="nn">dowhy.utils.ordered_set</span> <span class="kn">import</span> <span class="n">OrderedSet</span>
 <span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
+<span class="kn">from</span> <span class="nn">networkx.algorithms.dag</span> <span class="kn">import</span> <span class="n">is_directed_acyclic_graph</span>
+<span class="kn">from</span> <span class="nn">networkx.algorithms.shortest_paths.generic</span> <span class="kn">import</span> <span class="n">shortest_path</span>
 
 <div class="viewcode-block" id="adjacency_matrix_to_adjacency_list"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.graph_operations.adjacency_matrix_to_adjacency_list">[docs]</a><span class="k">def</span> <span class="nf">adjacency_matrix_to_adjacency_list</span><span class="p">(</span><span class="n">adjacency_matrix</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
@@ -278,6 +281,89 @@
     <span class="n">graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;,]&#39;</span> <span class="p">,</span> <span class="s1">&#39;]&#39;</span> <span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">graph</span></div>
 
+<div class="viewcode-block" id="get_simple_ordered_tree"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.graph_operations.get_simple_ordered_tree">[docs]</a><span class="k">def</span> <span class="nf">get_simple_ordered_tree</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a simple-ordered tree. The tree is just a</span>
+<span class="sd">    directed acyclic graph of n nodes with the structure</span>
+<span class="sd">    0 --&gt; 1 --&gt; .... --&gt; n.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">([(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="p">{})])</span>
+    <span class="k">return</span> <span class="n">g</span></div>
+
+
+<div class="viewcode-block" id="is_connected"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.graph_operations.is_connected">[docs]</a><span class="k">def</span> <span class="nf">is_connected</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks if a the directed acyclic graph is connected.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">convert_to_undirected_graph</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">is_connected</span><span class="p">(</span><span class="n">u</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="convert_to_undirected_graph"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.graph_operations.convert_to_undirected_graph">[docs]</a><span class="k">def</span> <span class="nf">convert_to_undirected_graph</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+        <span class="n">u</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">edges</span><span class="p">:</span>
+        <span class="n">u</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">([(</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">{})])</span>
+    <span class="k">return</span> <span class="n">u</span></div>
+
+
+<div class="viewcode-block" id="get_random_node_pair"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.graph_operations.get_random_node_pair">[docs]</a><span class="k">def</span> <span class="nf">get_random_node_pair</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Randomly generates a pair of nodes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="n">i</span>
+    <span class="k">while</span> <span class="n">j</span> <span class="o">==</span> <span class="n">i</span><span class="p">:</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span></div>
+
+
+
+<div class="viewcode-block" id="find_predecessor"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.graph_operations.find_predecessor">[docs]</a><span class="k">def</span> <span class="nf">find_predecessor</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds a predecessor, k, in the path between two nodes, i and j,</span>
+<span class="sd">    in the graph, g. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">parents</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">predecessors</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">convert_to_undirected_graph</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">pa</span> <span class="ow">in</span> <span class="n">parents</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">shortest_path</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">pa</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">pa</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="del_edge"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.graph_operations.del_edge">[docs]</a><span class="k">def</span> <span class="nf">del_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Deletes the edge i --&gt; j in the graph, g. The edge is only</span>
+<span class="sd">    deleted if this removal does NOT cause the graph to be</span>
+<span class="sd">    disconnected.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">has_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">is_connected</span><span class="p">(</span><span class="n">g</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">([(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">{})])</span></div>
+
+<div class="viewcode-block" id="add_edge"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.graph_operations.add_edge">[docs]</a><span class="k">def</span> <span class="nf">add_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds an edge i --&gt; j to the graph, g. The edge is only</span>
+<span class="sd">    added if this addition does NOT cause the graph to have</span>
+<span class="sd">    cycles.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">([(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">{})])</span>
+    <span class="k">if</span> <span class="n">is_directed_acyclic_graph</span><span class="p">(</span><span class="n">g</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

@@ -28,7 +28,7 @@
             <a href="../../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
           </a>
               <div class="version">
-                0.7
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -85,7 +85,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_discovery_example.html#Experiments-on-the-Sachs-dataset">Experiments on the Sachs dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_discovery_example.html#id2">Causal Discovery with Causal Discovery Tool (CDT)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/identifying_effects_using_id_algorithm.html#Case-5">Case 5</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package</span></p>
 <ul>
@@ -129,16 +128,39 @@
 <span class="kn">from</span> <span class="nn">dowhy.causal_estimators.linear_regression_estimator</span> <span class="kn">import</span> <span class="n">LinearRegressionEstimator</span>
 <span class="kn">from</span> <span class="nn">dowhy.utils.api</span> <span class="kn">import</span> <span class="n">parse_state</span>
 
+
 <div class="viewcode-block" id="TwoStageRegressionEstimator"><a class="viewcode-back" href="../../../dowhy.causal_estimators.html#dowhy.causal_estimators.two_stage_regression_estimator.TwoStageRegressionEstimator">[docs]</a><span class="k">class</span> <span class="nc">TwoStageRegressionEstimator</span><span class="p">(</span><span class="n">CausalEstimator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Compute treatment effect whenever the effect is fully mediated by another variable (front-door) or when there is an instrument available.</span>
+    <span class="sd">&quot;&quot;&quot;Compute treatment effect whenever the effect is fully mediated by</span>
+<span class="sd">    another variable (front-door) or when there is an instrument available.</span>
 
 <span class="sd">    Currently only supports a linear model for the effects.</span>
+
+<span class="sd">    For a list of standard args and kwargs, see documentation for</span>
+<span class="sd">    :class:`~dowhy.causal_estimator.CausalEstimator`.</span>
+
+<span class="sd">    Supports additional parameters as listed below.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># First stage statistical model</span>
     <span class="n">DEFAULT_FIRST_STAGE_MODEL</span> <span class="o">=</span> <span class="n">LinearRegressionEstimator</span>
+    <span class="c1"># Second stage statistical model</span>
     <span class="n">DEFAULT_SECOND_STAGE_MODEL</span> <span class="o">=</span> <span class="n">LinearRegressionEstimator</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">first_stage_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">second_stage_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param first_stage_model: First stage estimator to be used. Default is</span>
+<span class="sd">            linear regression.</span>
+<span class="sd">        :param second_stage_model: Second stage estimator to be used. Default</span>
+<span class="sd">            is linear regression.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Required to ensure that self.method_params contains all the</span>
+        <span class="c1"># parameters needed to create an object of this class</span>
+        <span class="n">args_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                     <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_STD_INIT_ARGS</span><span class="p">}</span>
+        <span class="n">args_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">args_dict</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;INFO: Using Two Stage Regression Estimator&quot;</span><span class="p">)</span>
         <span class="c1"># Check if the treatment is one-dimensional</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -179,29 +201,18 @@
                 <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;No instrumental variable present. Two stage regression is not applicable&quot;</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="s1">&#39;first_stage_model&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">method_params</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">first_stage_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">method_params</span><span class="p">[</span><span class="s1">&#39;first_stage_model&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">first_stage_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">first_stage_model</span> <span class="o">=</span> <span class="n">first_stage_model</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">first_stage_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">DEFAULT_FIRST_STAGE_MODEL</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;First stage model not provided. Defaulting to sklearn.linear_model.LinearRegression.&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="s1">&#39;second_stage_model&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">method_params</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">second_stage_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">method_params</span><span class="p">[</span><span class="s1">&#39;second_stage_model&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">second_stage_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">second_stage_model</span> <span class="o">=</span> <span class="n">second_stage_model</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">second_stage_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">DEFAULT_SECOND_STAGE_MODEL</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Second stage model not provided. Defaulting to backdoor.linear_regression.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_estimate_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1">#first_stage_features = self.build_first_stage_features()</span>
-        <span class="c1">#fs_model = self.first_stage_model()</span>
-        <span class="c1">#if self._target_estimand.identifier_method==&quot;frontdoor&quot;:</span>
-        <span class="c1">#    first_stage_outcome = self._frontdoor_variables</span>
-        <span class="c1">#elif self._target_estimand.identifier_method==&quot;mediation&quot;:</span>
-        <span class="c1">#    first_stage_outcome = self._mediators</span>
-        <span class="c1">#fs_model.fit(first_stage_features, self._frontdoor_variables)</span>
-        <span class="c1">#self.logger.debug(&quot;Coefficients of the fitted model: &quot; +</span>
-        <span class="c1">#                  &quot;,&quot;.join(map(str, fs_model.coef_)))</span>
-        <span class="c1">#residuals = self._frontdoor_variables - fs_model.predict(first_stage_features)</span>
-        <span class="c1">#self._data[&quot;residual&quot;] = residuals</span>
         <span class="n">estimate_value</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># First stage</span>
         <span class="n">modified_target_estimand</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="p">)</span>
@@ -223,7 +234,7 @@
                  <span class="n">confidence_intervals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_confidence_intervals</span><span class="p">,</span>
                  <span class="n">target_units</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_units</span><span class="p">,</span>
                  <span class="n">effect_modifiers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">,</span>
-                 <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">method_params</span><span class="p">)</span><span class="o">.</span><span class="n">_estimate_effect</span><span class="p">()</span>
+                 <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">method_params</span><span class="p">)</span><span class="o">.</span><span class="n">_estimate_effect</span><span class="p">()</span>
 
         <span class="c1"># Second Stage</span>
         <span class="n">modified_target_estimand</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="p">)</span>
@@ -245,7 +256,7 @@
                  <span class="n">confidence_intervals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_confidence_intervals</span><span class="p">,</span>
                  <span class="n">target_units</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_units</span><span class="p">,</span>
                  <span class="n">effect_modifiers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">,</span>
-                 <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">method_params</span><span class="p">)</span><span class="o">.</span><span class="n">_estimate_effect</span><span class="p">()</span>
+                 <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">method_params</span><span class="p">)</span><span class="o">.</span><span class="n">_estimate_effect</span><span class="p">()</span>
         <span class="c1"># Combining the two estimates</span>
         <span class="n">natural_indirect_effect</span> <span class="o">=</span> <span class="n">first_stage_estimate</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">second_stage_estimate</span><span class="o">.</span><span class="n">value</span>
         <span class="c1"># This same estimate is valid for frontdoor as well as mediation (NIE)</span>
@@ -270,7 +281,7 @@
                      <span class="n">confidence_intervals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_confidence_intervals</span><span class="p">,</span>
                      <span class="n">target_units</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_units</span><span class="p">,</span>
                      <span class="n">effect_modifiers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">,</span>
-                     <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">method_params</span><span class="p">)</span><span class="o">.</span><span class="n">_estimate_effect</span><span class="p">()</span>
+                     <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">method_params</span><span class="p">)</span><span class="o">.</span><span class="n">_estimate_effect</span><span class="p">()</span>
             <span class="n">natural_direct_effect</span> <span class="o">=</span> <span class="n">total_effect_estimate</span><span class="o">.</span><span class="n">value</span> <span class="o">-</span> <span class="n">natural_indirect_effect</span>
             <span class="n">estimate_value</span> <span class="o">=</span> <span class="n">natural_direct_effect</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">construct_symbolic_estimator</span><span class="p">(</span>
