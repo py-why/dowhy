@@ -11,6 +11,7 @@ from sklearn.linear_model import LogisticRegression
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
 from dowhy.causal_estimator import CausalEstimator
+from dowhy.causal_refuters.sensitivity_analysis import Sensitivity_analysis
 
 class AddUnobservedCommonCause(CausalRefuter):
 
@@ -53,6 +54,13 @@ class AddUnobservedCommonCause(CausalRefuter):
         self.frac_strength_outcome = kwargs["effect_fraction_on_outcome"] if "effect_fraction_on_outcome" in kwargs else 1
         self.simulated_method_name = kwargs["simulated_method_name"] if "simulated_method_name" in kwargs else "linear_based"
         self.plotmethod = kwargs['plotmethod'] if "plotmethod" in kwargs else "colormesh"
+        self.q = kwargs["q"] if 'q' in kwargs else 1.0
+        self.formula = kwargs["formula"] if "formula" in kwargs else None
+        self.confidence = kwargs["confidence"] if "confidence" in kwargs else 0.05
+        self.increase = kwargs["increase"] if "increase" in kwargs else False
+        self.benchmark_covariates = kwargs["benchmark_covariates"]
+        self.kd = kwargs["kd"] if "kd" in kwargs else None
+        self.ky = kwargs["ky"] if "ky" in kwargs else None
         self.logger = logging.getLogger(__name__)
 
 
@@ -170,6 +178,11 @@ class AddUnobservedCommonCause(CausalRefuter):
 
         :return: CausalRefuter: An object that contains the estimated effect and a new effect and the name of the refutation used.
         """
+        if self.simulated_method_name == "Carlos":
+            analyzer = Sensitivity_analysis(formula = self.formula , data = self._data, treatment_name = self._treatment_name, q = self.q, confidence = self.confidence, benchmark_covariates= self.benchmark_covariates, kd = self.kd, ky = self.ky)
+            analyzer.perform_analysis()
+            return analyzer
+        
         if self.kappa_t is None:
             self.kappa_t = self.infer_default_kappa_t()
         if self.kappa_y is None:
