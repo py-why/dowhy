@@ -58,7 +58,7 @@ class AddUnobservedCommonCause(CausalRefuter):
         self.formula = kwargs["formula"] if "formula" in kwargs else None
         self.confidence = kwargs["confidence"] if "confidence" in kwargs else 0.05
         self.increase = kwargs["increase"] if "increase" in kwargs else False
-        self.benchmark_covariates = kwargs["benchmark_covariates"]
+        self.benchmark_covariates = kwargs["benchmark_covariates"] if "benchmark_covariates" in kwargs else None
         self.kd = kwargs["kd"] if "kd" in kwargs else None
         self.ky = kwargs["ky"] if "ky" in kwargs else None
         self.logger = logging.getLogger(__name__)
