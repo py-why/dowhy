@@ -121,7 +121,7 @@ class Sensitivity_analysis:
         v = model.cov.params().loc[treatment, :][treatment]
         l = len(estimate)
         f_stats = np.matmul(np.matmul(estimate.values.T, np.linalg.inv(v.values)), estimate.values) / l
-        return f_stats * l / (f_stats * p + degree_of_freedom)
+        return f_stats * l / (f_stats * l + degree_of_freedom)
 
 
     def get_all_covariates(self, treatment):
