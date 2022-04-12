@@ -11,7 +11,8 @@ from sklearn.linear_model import LogisticRegression
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
 from dowhy.causal_estimator import CausalEstimator
-from dowhy.causal_refuters.sensitivity_analysis import Sensitivity_analysis
+from dowhy.causal_refuters.sensitivity_analysis import LinearSensitivityAnalysis
+from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 
 class AddUnobservedCommonCause(CausalRefuter):
 
@@ -178,8 +179,13 @@ class AddUnobservedCommonCause(CausalRefuter):
 
         :return: CausalRefuter: An object that contains the estimated effect and a new effect and the name of the refutation used.
         """
-        if self.simulated_method_name == "Carlos":
-            analyzer = Sensitivity_analysis(formula = self.formula , data = self._data, treatment_name = self._treatment_name, q = self.q, confidence = self.confidence, benchmark_covariates= self.benchmark_covariates, kd = self.kd, ky = self.ky)
+        if self.simulated_method_name == "PartialR2":
+            if not(isinstance(self._estimate.estimator, LinearRegressionEstimator)):
+                raise NotImplementedError("Currently only LinearRegressionEstimator is supported for Sensitivity Analysis")
+            analyzer = LinearSensitivityAnalysis( OLSmodel = self._estimate.estimator.model, 
+            data = self._data, treatment_name = self._treatment_name, 
+            q = self.q, confidence = self.confidence, benchmark_covariates= self.benchmark_covariates, 
+            kd = self.kd, ky = self.ky, common_causes_order = self._estimate.estimator._observed_common_causes.columns)
             analyzer.perform_analysis()
             return analyzer
         if self.kappa_t is None:

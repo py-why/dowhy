@@ -5,65 +5,77 @@ import pandas as pd
 import statsmodels.api as sma
 import logging
 import matplotlib.pyplot as plt
+from dowhy.utils.api import parse_state
 
 
-class Sensitivity_analysis:
+class LinearSensitivityAnalysis:
     """
     Class to perform sensitivity analysis
-    :param formula: The formula specifying the model
+    See: https://carloscinelli.com/files/Cinelli%20and%20Hazlett%20(2020)%20-%20Making%20Sense%20of%20Sensitivity.pdf 
+
+    :param model: OLS results derived from linear estimator of the causal model
     :param data: Pandas dataframe
     :param treatment_name: name of treatment
     :param q: percentage reduction for robustness value
-    :param standard_error: standard error in regression
-    :param estimate: estimate of regression
-    :param degree_of_freedom: degree of freedom of error in regression
     :param h0: hypothesis
     :param stats: dictionary for sensitivity statistics
     :param benchmark_covariates: names of variables for benchmark bounding
     :param kd: strength of association between benchmark and treatment variable to test with benchmark bounding
     :param ky: strength of association between benchmark and outcome variable to test with benchmark bounding
-    :param r2dz_x: partial R^2  of putative unobserved confounder "z" with treatment "d", observed covariates "x" partialed out
-    :param r2yz_dx: partial R^2  of putative unobserved confounder "z" with outcome "y", observed covariates "x" and treatment "d" partialed out
-    :param r2dxj_x: partial R^2 of covariate Xj with treatment "d", covariates "x" excluding Xj are partialed out
-    :param r2yxj_dx:  partial R^2 of covariate Xj with outcome "y", covariates "x" excluding Xj and treatment "d" are partialed out
-    :param bounds_results: dataframe containing information about bounds and bias adjusted terms
-    :param stats: dictionary containing information like robustness value, partial R^2, estimate, standard error , degree of freedom, partial f^2, t-statistic
+    :param common_causes_order: The order of column names in OLS regression data
     """
-    formula = None
-    data = None
     treatment_name = None
+    # estimate: estimate of regression
     estimate = None
+    # degree_of_freedom: degree of freedom of error in regression
     degree_of_freedom = None
+    # standard_error: standard error in regression
     standard_error = None
-    q = None
-    confidence = None
-    h0 = 0
     increase = False
     benchmark_covariates = None
     kd = None
     ky = None
+    # common_causes_map : maps the original variable names to variable names in OLS regression
+    common_causes_map = {}
+    # r2dz_x: partial R^2  of putative unobserved confounder "z" with treatment "d", observed covariates "x" partialed out
     r2dz_x = None
+    # r2yz_dx: partial R^2  of putative unobserved confounder "z" with outcome "y", observed covariates "x" and treatment "d" partialed out
     r2yz_dx = None
+    # r2dxj_x: partial R^2 of covariate Xj with treatment "d", covariates "x" excluding Xj are partialed out
     r2dxj_x = None
+    # r2yxj_dx:  partial R^2 of covariate Xj with outcome "y", covariates "x" excluding Xj and treatment "d" are partialed out
     r2yxj_dx = None
     bias_adjusted_estimate = None
     bias_adjusted_se = None
     bias_adjusted_t = None
     bias_adjusted_lower_CI = None
     bias_adjusted_upper_CI = None
+    # bounds_results: dataframe containing information about bounds and bias adjusted terms
     bounds_result = None
+    # stats: dictionary containing information like robustness value, partial R^2, estimate, standard error , degree of freedom, partial f^2, t-statistic
     stats = None
     
 
-    def __init__(self, formula = None, data = None, treatment_name = None, q = 1.0, confidence = 0.05, increase = False, benchmark_covariates = None, kd = None, ky = None):
-        self.formula = formula
+    def __init__(self, OLSmodel = None, data = None, treatment_name = None, q = 1.0, confidence = 0.05, increase = False, benchmark_covariates = None, kd = None, ky = None, common_causes_order = None):
         self.data = data
-        self.treatment_name = treatment_name
+        self.treatment_name = []
+        # original_treatment_name: : stores original variable names for labelling
+        self.original_treatment_name = treatment_name
+        for i in range(len(treatment_name)):
+            self.treatment_name.append("x"+str(i+1))
         self.q = q
         self.confidence = confidence
         self.increase = increase
-        self.benchmark_covariates = benchmark_covariates
+        self.OLSmodel = OLSmodel
         self.h0 = 0
+        for i in range(len(common_causes_order)):
+            self.common_causes_map[common_causes_order[i]] = "x"+str(len(self.treatment_name)+i+1)
+        # benchmark_covariates: stores variable names in terms of regression model variables
+        self.benchmark_covariates = []
+        # original_benchmark_covariates: stores original variable names for labelling
+        self.original_benchmark_covariates = benchmark_covariates
+        for i in range(len(benchmark_covariates)):
+            self.benchmark_covariates.append(self.common_causes_map[benchmark_covariates[i]])
         if type(kd) is list:
             self.kd = np.array(kd)
         if type(ky) is list:
@@ -118,23 +130,10 @@ class Sensitivity_analysis:
         if np.isscalar(estimate):
             return self.partial_r2_func(model, treatment)
         degree_of_freedom = model_details['degree_of_freedom']
-        v = model.cov.params().loc[treatment, :][treatment]
+        v = model.cov_params().loc[treatment, :][treatment]
         l = len(estimate)
         f_stats = np.matmul(np.matmul(estimate.values.T, np.linalg.inv(v.values)), estimate.values) / l
         return f_stats * l / (f_stats * l + degree_of_freedom)
-
-
-    def get_all_covariates(self, treatment):
-        """
-        Converts a single treatment variable to an array
-
-        :param treatment: name(s) of the treatment
-        :returns : python array
-        """
-        if type(treatment) is str:
-            treatment = [treatment]
-        return treatment
-
 
         
     def perform_analysis(self):
@@ -142,28 +141,24 @@ class Sensitivity_analysis:
         Function to perform sensitivity analysis
 
         """
-        regression_model = smfa.ols(formula = self.formula, data = self.data)
-        results = regression_model.fit()
-        if int(results.df_resid) == 0:
-            raise ValueError("Zero residual degrees of freedom")
 
         if self.treatment_name is not None:
-            covariates = self.get_all_covariates(self.treatment_name)
+            self.treatment_name = parse_state(state = self.treatment_name)
         else:
-            covariates = results.model.exog_names
+            self.treatment_name = self.OLSmodel.model.exog_names
 
-        self.standard_error = list(results.bse[covariates])[0]
-        self.degree_of_freedom = int(results.df_resid)
-        self.estimate = list(results.params[covariates])[0]
+        self.standard_error = list(self.OLSmodel.bse[1:(len(self.treatment_name)+1)])[0]
+        self.degree_of_freedom = int(self.OLSmodel.df_resid)
+        self.estimate = list(self.OLSmodel.params[1:(len(self.treatment_name)+1)])[0]
 
         if self.increase:
             self.h0 = self.estimate * (1 + self.q)
         else:
             self.h0 = self.estimate * (1 - self.q)
         t_value = self.estimate / self.standard_error
-        partial_r2 = self.partial_r2_func(results, covariates)
-        rv_q = self.robustness_value(model = results, t_statistic = t_value)
-        rv_q_alpha = self.robustness_value(model = results,t_statistic = t_value, alpha = self.confidence)
+        partial_r2 = self.partial_r2_func(self.OLSmodel, self.treatment_name)
+        rv_q = self.robustness_value(model = self.OLSmodel, t_statistic = t_value)
+        rv_q_alpha = self.robustness_value(model = self.OLSmodel,t_statistic = t_value, alpha = self.confidence)
         partial_f2 = t_value ** 2 / self.degree_of_freedom
         t_statistic = (self.estimate - self.h0)/ self.standard_error
         self.stats = {'estimate' : self.estimate,
@@ -176,21 +171,23 @@ class Sensitivity_analysis:
         'robustness_value_alpha ' : rv_q_alpha
         }
 
-        m = pd.DataFrame(results.model.exog, columns = results.model.exog_names)
-        d = np.array(m[self.treatment_name])
-        nd = m.drop(columns = self.treatment_name)
+        # build a new regression model by considering treatment variables as outcome 
+        # r2dxj_x is partial R^2 of covariate xj with treatment 
+        m = pd.DataFrame(self.OLSmodel.model.exog, columns = self.OLSmodel.model.exog_names)
+        d = np.array(m[self.treatment_name])  #Treatment 
+        nd = m.drop(columns = self.treatment_name) #Non treatment
         nd.insert(0,0,1)
         model = sma.OLS(d, nd)
         treatment_results = model.fit()
         if type(self.benchmark_covariates) is str:
-            self.r2yxj_dx = self.partial_r2_func(results, self.benchmark_covariates)
-            self.r2dxj_x = self.partial_r2_func(treatment_results, self.benchmark_covariates)
+            self.r2yxj_dx = self.partial_r2_func(self.OLSmodel, self.benchmark_covariates) # partial R^2 of covariate Xj with outcome "y", covariates "x" excluding Xj and treatment "d" are partialed out
+            self.r2dxj_x = self.partial_r2_func(treatment_results, self.benchmark_covariates) # partial R^2 of covariate Xj with treatment "d", covariates "x" excluding Xj are partialed out
         else:
             self.r2dxj_x = []
             self.r2yxj_dx = []
             for covariate in self.benchmark_covariates:
-                self.r2yxj_dx.append(self.group_partial_r2_func(results, covariate))
-                self.r2dxj_x.append(self.group_partial_r2_func(treatment_results, covariate))
+                self.r2yxj_dx.append(self.group_partial_r2_func(self.OLSmodel, covariate)) # partial R^2 of covariate Xj with outcome "y", covariates "x" excluding Xj and treatment "d" are partialed out
+                self.r2dxj_x.append(self.group_partial_r2_func(treatment_results, covariate)) # partial R^2 of covariate Xj with treatment "d", covariates "x" excluding Xj are partialed out
         bounds = pd.DataFrame()
         for i in range(len(self.benchmark_covariates)):
             r2dxj_x = self.r2dxj_x[i]
@@ -208,22 +205,11 @@ class Sensitivity_analysis:
 
         #Calculate bias adjusted terms
         self.compute_bias_adjusted()
-        if np.isscalar(self.r2dz_x):
-            self.bounds_result = pd.DataFrame(data = {
+        
+        self.bounds_result = pd.DataFrame(data = {
                 'r2dz_x': self.r2dz_x,
                 'r2yz_dx': self.r2yz_dx,
-                'treatment': self.treatment_name * len(self.kd),
-                'adjusted_estimate': self.bias_adjusted_estimate,
-                'adjusted_se': self.bias_adjusted_se,
-                'adjusted_t': self.bias_adjusted_t,
-                'adjusted_lower_CI': self.bias_adjusted_lower_CI,
-                'adjusted_upper_CI': self.bias_adjusted_upper_CI
-            }, index = [0])
-        else:
-            self.bounds_result = pd.DataFrame(data = {
-                'r2dz_x': self.r2dz_x,
-                'r2yz_dx': self.r2yz_dx,
-                'treatment': self.treatment_name * len(self.kd),
+                'treatment': self.original_treatment_name * len(self.kd),
                 'adjusted_estimate': self.bias_adjusted_estimate,
                 'adjusted_se': self.bias_adjusted_se,
                 'adjusted_t': self.bias_adjusted_t,
@@ -442,8 +428,13 @@ class Sensitivity_analysis:
         plt.xlim(-(x_limit / 15.0), x_limit)
         plt.ylim(-(y_limit / 15.0), y_limit)
 
-        label_names = self.generate_label(self.benchmark_covariates)
+        label_names = self.generate_label(self.original_benchmark_covariates)
         
         if self.r2dz_x is not None:
             self.add_bound(bound_value, sensitivity_variable, label_names, x_limit, y_limit)
+        
+        margin_x = 0.05 * x_limit
+        margin_y = 0.05 * y_limit
+        x0, x1, y0, y1 = plt.axis()
+        plt.axis((x0, x1 + margin_x, y0, y1 + margin_y))
         plt.tight_layout()
