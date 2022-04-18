@@ -138,8 +138,8 @@ class LinearSensitivityAnalysis:
         
     def perform_analysis(self):
         """
-        Function to perform sensitivity analysis
-
+        Function to perform sensitivity analysis. 
+        By default it generates a plot of point estimate and the variations with respect to benchmarking and unobserved confounding.
         """
 
         if self.treatment_name is not None:
@@ -373,7 +373,7 @@ class LinearSensitivityAnalysis:
         return label_names
 
 
-    def contour_plot(self,sensitivity_variable, kd = 1,  estimate_threshold = 0, t_threshold = 2, contour_color = "black", threshold_color = "red", x_limit = 0.4, y_limit = 0.4):
+    def contour_plot(self,sensitivity_variable, kd = 1,  estimate_threshold = 0, t_threshold = 2, contour_color = "black", threshold_color = "red", x_limit = 0.8, y_limit = 0.8):
         """
         The horizontal axis shows hypothetical values of the patial R2 of unobserved confounder(s) with the treatment
         The vertical axis shows hypothetical values of the patial R2 of unobserved confounder(s) with the outcome.

@@ -4,16 +4,15 @@ from datetime import datetime
 SMALL_SIZE = 8
 MEDIUM_SIZE = 26
 BIGGER_SIZE = 30
-plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
-plt.rc('axes', titlesize=BIGGER_SIZE)    # fontsize of the axes title
-plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
-plt.rc('xtick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
-plt.rc('ytick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
-plt.rc('legend', fontsize=MEDIUM_SIZE)   # legend fontsize
-plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
-
 
 def plot_treatment_outcome(treatment, outcome, time_var):
+    plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+    plt.rc('axes', titlesize=BIGGER_SIZE)    # fontsize of the axes title
+    plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+    plt.rc('xtick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
+    plt.rc('ytick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
+    plt.rc('legend', fontsize=MEDIUM_SIZE)   # legend fontsize
+    plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
     fig, ax = plt.subplots()
     tline = ax.plot(time_var, treatment, 'o', label="Treatment")
     oline = ax.plot(time_var, outcome, 'r^', label="Outcome")
@@ -26,6 +25,13 @@ def plot_treatment_outcome(treatment, outcome, time_var):
 
 
 def plot_causal_effect(estimate, treatment, outcome):
+    plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+    plt.rc('axes', titlesize=BIGGER_SIZE)    # fontsize of the axes title
+    plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+    plt.rc('xtick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
+    plt.rc('ytick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
+    plt.rc('legend', fontsize=MEDIUM_SIZE)   # legend fontsize
+    plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
     fig, ax = plt.subplots()
     x_min = 0
     x_max = max(treatment)
