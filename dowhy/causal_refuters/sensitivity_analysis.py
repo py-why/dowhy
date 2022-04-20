@@ -165,10 +165,10 @@ class LinearSensitivityAnalysis:
         'standard error' : self.standard_error,
         'degree of freedom' : self.degree_of_freedom,
         't_statistic' : t_statistic,
-        'r2yd_x' : partial_r2,
+        'r2yd_x' : list(partial_r2)[0],
         'partial_f2' : partial_f2,
         'robustness_value' : rv_q,
-        'robustness_value_alpha ' : rv_q_alpha
+        'robustness_value_alpha' : rv_q_alpha
         }
 
         # build a new regression model by considering treatment variables as outcome 
@@ -224,7 +224,10 @@ class LinearSensitivityAnalysis:
     def robustness_value(self, model = None, covariates = None, t_statistic = None, alpha = 1.0):
         """
         Function to calculate the robustness value. 
-        It is the minimum strength of association that omitted variables must have with treatment and outcome to change the estimated coefficient by certain amount
+        It is the minimum strength of association that omitted variables must have with treatment and outcome to change the estimated coefficient by certain amount.
+        RVq describes how strong the association must be in order to reduce the estimated effect by (100 * q)%.
+        RVq close to 1 means the treatment effect can handle strong confounders explaining  almost all residual variation of the treatment and the outcome.
+        RVq close to 0 means that even very weak confounders could eliminate the results.
 
         :param model: OLS regression model
         :param covariates: names of covariates
@@ -438,3 +441,19 @@ class LinearSensitivityAnalysis:
         x0, x1, y0, y1 = plt.axis()
         plt.axis((x0, x1 + margin_x, y0, y1 + margin_y))
         plt.tight_layout()
+    
+    def __str__(self):
+        s = "Sensitivity Analysis to Unobserved Confounding\n\n"
+        s += "Unadjusted Estimates of {0} :\n".format(self.original_treatment_name)
+        s += "Coefficient Estimate : {0}\n".format(self.estimate)
+        s += "Standard Error : {0}\n".format(self.standard_error)
+        s += "t-value : {0}\n\n".format(self.stats['t_statistic'])
+        s += "Sensitivity Statistics : \n"
+        s += "Partial R2 of treatment with outcome : {0}\n".format(self.stats['r2yd_x'])
+        s += "Robustness Value : {0}\n\n".format(self.stats['robustness_value'])
+        s += "Verbal Interpretation of results :\n"
+        s += "Any confounder explaining less than {0}% percent of the residual variance of both the treatment and the outcome would not be strong enough to bring down the estimated effect to 0\n\n".format(round(self.stats['robustness_value'] * 100, 2))
+        s += "For a significance level of {0}%, any confounder explaining more than {1}% percent of the residual variance of both the treatment and the outcome would be strong enough to make the estimated effect not 'statistically significant'\n\n".format(self.confidence*100,round(self.stats['robustness_value_alpha'] * 100, 2))
+        s += "If confounders explained 100% of the residual variance of the outcome, they would need to explain at least {0}% of the residual variance of the treatment to bring down the estimated effect to 0\n\n".format(round(self.stats['r2yd_x'] * 100, 2))
+        return s
+        
