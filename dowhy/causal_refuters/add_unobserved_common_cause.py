@@ -55,13 +55,10 @@ class AddUnobservedCommonCause(CausalRefuter):
         self.frac_strength_outcome = kwargs["effect_fraction_on_outcome"] if "effect_fraction_on_outcome" in kwargs else 1
         self.simulated_method_name = kwargs["simulated_method_name"] if "simulated_method_name" in kwargs else "linear_based"
         self.plotmethod = kwargs['plotmethod'] if "plotmethod" in kwargs else "colormesh"
-        self.q = kwargs["q"] if 'q' in kwargs else 1.0
-        self.formula = kwargs["formula"] if "formula" in kwargs else None
-        self.confidence = kwargs["confidence"] if "confidence" in kwargs else 0.05
+        self.percent_change_rvalue = kwargs["percent_change_rvalue"] if 'percent_change_rvalue' in kwargs else 1.0
+        self.significance_level = kwargs["significance_level"] if "significance_level" in kwargs else 0.05
         self.increase = kwargs["increase"] if "increase" in kwargs else False
         self.benchmark_covariates = kwargs["benchmark_covariates"] if "benchmark_covariates" in kwargs else None
-        self.kd = kwargs["kd"] if "kd" in kwargs else None
-        self.ky = kwargs["ky"] if "ky" in kwargs else None
         self.logger = logging.getLogger(__name__)
 
 
@@ -182,10 +179,12 @@ class AddUnobservedCommonCause(CausalRefuter):
         if self.simulated_method_name == "PartialR2":
             if not(isinstance(self._estimate.estimator, LinearRegressionEstimator)):
                 raise NotImplementedError("Currently only LinearRegressionEstimator is supported for Sensitivity Analysis")
+            if(self.frac_strength_outcome == 1):
+                self.frac_strength_outcome = self.frac_strength_treatment
             analyzer = LinearSensitivityAnalysis( OLSmodel = self._estimate.estimator.model, 
             data = self._data, treatment_name = self._treatment_name, 
-            q = self.q, confidence = self.confidence, benchmark_covariates= self.benchmark_covariates, 
-            kd = self.kd, ky = self.ky, common_causes_order = self._estimate.estimator._observed_common_causes.columns)
+            percent_change_rvalue = self.percent_change_rvalue, significance_level = self.significance_level, benchmark_covariates= self.benchmark_covariates, 
+            frac_strength_treatment = self.frac_strength_treatment, frac_strength_outcome = self.frac_strength_outcome, common_causes_order = self._estimate.estimator._observed_common_causes.columns)
             analyzer.perform_analysis()
             return analyzer
         if self.kappa_t is None:
