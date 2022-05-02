@@ -154,3 +154,7 @@ def has_categorical(X: np.ndarray) -> bool:
             break
 
     return status
+
+
+def mean_deviation(randomized_predictions: np.ndarray, baseline_values: np.ndarray) -> np.ndarray:
+    return np.mean(randomized_predictions).squeeze() - np.mean(baseline_values).squeeze()
