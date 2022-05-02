@@ -6,7 +6,7 @@ from flaky import flaky
 from pytest import approx
 
 from dowhy.gcm import ClassifierFCM, AdditiveNoiseModel, EmpiricalDistribution, fit, interventional_samples, \
-    ProbabilisticCausalModel
+    ProbabilisticCausalModel, counterfactual_samples, InvertibleStructuralCausalModel
 from dowhy.gcm.ml import create_linear_regressor, create_logistic_regression_classifier
 
 
@@ -18,7 +18,7 @@ def __create_and_fit_simple_probabilistic_causal_model():
 
     original_observations = pd.DataFrame({'X0': X0, 'X1': X1, 'X2': X2, 'X3': X3})
 
-    causal_model = ProbabilisticCausalModel(nx.DiGraph([('X0', 'X1'), ('X0', 'X2'), ('X2', 'X3')]))
+    causal_model = InvertibleStructuralCausalModel(nx.DiGraph([('X0', 'X1'), ('X0', 'X2'), ('X2', 'X3')]))
     causal_model.set_causal_mechanism('X0', EmpiricalDistribution())
     causal_model.set_causal_mechanism('X1', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
     causal_model.set_causal_mechanism('X2', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
@@ -145,3 +145,50 @@ def test_interventional_samples_raise_error_both_parameter_given():
 
     with pytest.raises(ValueError):
         interventional_samples(causal_model, dict(X0=lambda x: 10), observed_data=observed_data, num_samples_to_draw=100)
+
+
+def test_counterfactual_samples_with_observed_samples():
+    causal_model, _ = __create_and_fit_simple_probabilistic_causal_model()
+
+    observed_samples = pd.DataFrame({'X0': [1],
+                                     'X1': [3],
+                                     'X2': [3],
+                                     'X3': [4]})
+
+    sample = counterfactual_samples(causal_model, dict(X2=lambda x: 2), observed_data=observed_samples)
+    assert sample['X0'].to_numpy().squeeze() == 1
+    assert sample['X1'].to_numpy().squeeze() == 3
+    assert sample['X2'].to_numpy().squeeze() == 2
+    assert sample['X3'].to_numpy().squeeze() == approx(3.5, abs=0.05)
+
+
+def test_counterfactual_samples_with_noise_samples():
+    causal_model, _ = __create_and_fit_simple_probabilistic_causal_model()
+
+    noise_samples = pd.DataFrame({'X0': [1],
+                                  'X1': [2],
+                                  'X2': [3],
+                                  'X3': [4]})
+
+    sample = counterfactual_samples(causal_model, dict(X2=lambda x: 2), noise_data=noise_samples)
+    assert sample['X0'].to_numpy().squeeze() == 1
+    assert sample['X1'].to_numpy().squeeze() == approx(4, abs=0.05)
+    assert sample['X2'].to_numpy().squeeze() == 2
+    assert sample['X3'].to_numpy().squeeze() == approx(5, abs=0.05)
+
+
+def test_counterfactual_samples_raises_error_all_parameter_none():
+    causal_model, _ = __create_and_fit_simple_probabilistic_causal_model()
+
+    with pytest.raises(ValueError):
+        counterfactual_samples(causal_model, dict(X0=lambda x: 10))
+
+
+def test_counterfactual_samples_raises_error_both_parameter_given():
+    causal_model, _ = __create_and_fit_simple_probabilistic_causal_model()
+
+    with pytest.raises(ValueError):
+        counterfactual_samples(causal_model,
+                               dict(X0=lambda x: 10),
+                               observed_data=pd.DataFrame({'X0': [1], 'X1': [3], 'X2': [3], 'X3': [4]}),
+                               noise_data=pd.DataFrame({'X0': [1], 'X1': [4], 'X2': [3], 'X3': [4]}))

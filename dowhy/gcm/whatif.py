@@ -4,11 +4,13 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 
-from dowhy.gcm.cms import ProbabilisticCausalModel
+from dowhy.gcm._noise import compute_noise_from_data
+from dowhy.gcm.cms import ProbabilisticCausalModel, InvertibleStructuralCausalModel, StructuralCausalModel
 from dowhy.gcm.fitting_sampling import draw_samples
 from dowhy.gcm.graph import get_ordered_predecessors, is_root_node, DirectedGraph, validate_causal_dag, \
     validate_node_in_graph
-from dowhy.gcm.util.general import convert_numpy_array_to_pandas_column
+from dowhy.gcm.util.general import convert_numpy_array_to_pandas_column, column_stack_selected_numpy_arrays, \
+    convert_to_data_frame
 
 
 def interventional_samples(causal_model: ProbabilisticCausalModel,
@@ -78,6 +80,63 @@ def _get_nodes_affected_by_intervention(causal_graph: DirectedGraph, target_node
                 break
 
     return result
+
+
+def counterfactual_samples(causal_model: Union[StructuralCausalModel, InvertibleStructuralCausalModel],
+                           interventions: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
+                           observed_data: Optional[pd.DataFrame] = None,
+                           noise_data: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    """Estimates counterfactual data for observed data if we were to perform specified interventions.
+
+    :param causal_model: The (invertible) structural causal model we perform this intervention on. If noise_data is
+                         None and observed_data is provided, this must be an invertible structural model, otherwise,
+                         this can be either a structural causal model or an invertible one.
+    :param interventions: Dictionary containing the interventions we want to perform keyed by node name. An
+                          intervention is a function that takes a value as input and returns another value.
+                          For example, `{'X': lambda x: 2}` mimics the atomic intervention *do(X:=2)*.
+    :param observed_data: Factual data that we observe for the nodes in the causal graph.
+    :param noise_data: Data of noise terms corresponding to nodes in the causal graph. If not provided,
+                       these have to be estimated from observed data. Then we require causal models of nodes to be
+                       invertible.
+    :return: Estimated counterfactual data.
+    """
+    for node in interventions:
+        validate_node_in_graph(causal_model.graph, node)
+
+    validate_causal_dag(causal_model.graph)
+
+    if observed_data is None and noise_data is None:
+        raise ValueError("Either observed_data or noise_data need to be given!")
+    if observed_data is not None and noise_data is not None:
+        raise ValueError("Either observed_data or noise_data can be given, not both!")
+
+    if noise_data is None and observed_data is not None:
+        if not isinstance(causal_model, InvertibleStructuralCausalModel):
+            raise ValueError("Since no noise_data is given, this has to be estimated from the given "
+                             "observed_data. This can only be done with InvertibleStructuralCausalModel.")
+        noise_data = compute_noise_from_data(causal_model, observed_data)
+
+    return _estimate_counterfactuals(causal_model, interventions, noise_data)
+
+
+def _estimate_counterfactuals(causal_model: StructuralCausalModel,
+                              interventions: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
+                              noise_data: pd.DataFrame) -> pd.DataFrame:
+    counterfactual_samples = {}
+
+    for node in nx.topological_sort(causal_model.graph):
+        if is_root_node(causal_model.graph, node):
+            node_data = noise_data[node].to_numpy()
+        else:
+            node_data = convert_numpy_array_to_pandas_column(
+                causal_model.causal_mechanism(node).evaluate(
+                    column_stack_selected_numpy_arrays(counterfactual_samples,
+                                                       get_ordered_predecessors(causal_model.graph, node)),
+                    noise_data[node].to_numpy()))
+
+        counterfactual_samples[node] = _evaluate_intervention(node, interventions, node_data)
+
+    return convert_to_data_frame(counterfactual_samples)
 
 
 def _evaluate_intervention(node: Any,
