@@ -1,0 +1,479 @@
+from typing import Callable, List, Union, Optional, Tuple
+
+import numpy as np
+import scipy
+from joblib import Parallel, delayed
+from numpy.linalg import pinv, svd, LinAlgError
+from scipy.stats import gamma
+from sklearn.kernel_approximation import Nystroem
+from sklearn.preprocessing import scale
+
+import dowhy.gcm.config as config
+from dowhy.gcm.independence_test.kernel_operation import auto_create_list_of_kernels
+from dowhy.gcm.stats import quantile_based_fwer
+from dowhy.gcm.util.general import set_random_seed, shape_into_2d, apply_one_hot_encoding, fit_one_hot_encoders
+
+
+def kernel_based(X: np.ndarray,
+                 Y: np.ndarray,
+                 Z: Optional[np.ndarray] = None,
+                 kernels_X: Optional[List[Callable[[np.ndarray], np.ndarray]]] = None,
+                 kernels_Y: Optional[List[Callable[[np.ndarray], np.ndarray]]] = None,
+                 kernels_Z: Optional[List[Callable[[np.ndarray], np.ndarray]]] = None,
+                 use_bootstrap: bool = True,
+                 bootstrap_num_runs: int = 20,
+                 bootstrap_num_samples_per_run: int = 2000,
+                 bootstrap_n_jobs: Optional[int] = None,
+                 p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float] = quantile_based_fwer) \
+        -> float:
+    """Prepares the data and uses kernel (conditional) independence test.
+
+    Depending whether Z is given, a conditional or pairwise independence test is performed.
+    
+    If Z is given: Using KCI as conditional independence test.
+    If Z is not given: Using HSIC as pairwise independence test.
+    
+    :return: The p-value for the null hypothesis that X and Y are independent (given Z).
+    """
+    bootstrap_n_jobs = config.default_n_jobs if bootstrap_n_jobs is None else bootstrap_n_jobs
+
+    if kernels_X is None:
+        kernels_X = auto_create_list_of_kernels(X)
+    if kernels_Y is None:
+        kernels_Y = auto_create_list_of_kernels(Y)
+    if Z is not None and kernels_Z is None:
+        kernels_Z = auto_create_list_of_kernels(Z)
+
+    def evaluate_kernel_test_on_samples(X: np.ndarray,
+                                        Y: np.ndarray,
+                                        Z: np.ndarray,
+                                        parallel_random_seed: int) -> float:
+        set_random_seed(parallel_random_seed)
+
+        try:
+            if Z is None:
+                return _hsic(X, Y,
+                             kernels_X=kernels_X,
+                             kernels_Y=kernels_Y)
+            else:
+                return _kci(X, Y, Z,
+                            kernels_X=kernels_X,
+                            kernels_Y=kernels_Y,
+                            kernels_Z=kernels_Z)
+        except LinAlgError:
+            # TODO: This is a temporary workaround.
+            #       Under some circumstances, the KCI test throws a "numpy.linalg.LinAlgError: SVD did not converge"
+            #       error, depending on the data samples. This is related to the utilized algorithms by numpy for SVD.
+            #       There is actually a robust version for SVD, but it is not included in numpy.
+            #       This can either be addressed by some augmenting the data, using a different SVD implementation or
+            #       wait until numpy updates the used algorithm.
+            return np.nan
+
+    if use_bootstrap and X.shape[0] > bootstrap_num_samples_per_run:
+        random_indices = [np.random.choice(X.shape[0], min(X.shape[0], bootstrap_num_samples_per_run), replace=False)
+                          for run in range(bootstrap_num_runs)]
+
+        random_seeds = np.random.randint(np.iinfo(np.int32).max, size=len(random_indices))
+        p_values = Parallel(n_jobs=bootstrap_n_jobs)(
+            delayed(evaluate_kernel_test_on_samples)(X[indices],
+                                                     Y[indices],
+                                                     Z[indices] if Z is not None else None,
+                                                     random_seed)
+            for indices, random_seed in zip(random_indices, random_seeds))
+
+        return p_value_adjust_func(p_values)
+    else:
+        return evaluate_kernel_test_on_samples(X, Y, Z, np.random.randint(np.iinfo(np.int32).max, size=1)[0])
+
+
+def approx_kernel_based(X: np.ndarray,
+                        Y: np.ndarray,
+                        Z: Optional[np.ndarray] = None,
+                        num_random_features_X: int = 10,
+                        num_random_features_Y: int = 10,
+                        num_random_features_Z: int = 10,
+                        num_permutations: int = 100,
+                        use_bootstrap: bool = True,
+                        bootstrap_num_runs: int = 20,
+                        bootstrap_num_samples: int = 1000,
+                        bootstrap_n_jobs: Optional[int] = None,
+                        p_value_adjust_func:
+                        Callable[[Union[np.ndarray, List[float]]], float] = quantile_based_fwer) -> float:
+    """Implementation of the Randomized Conditional Independence Test.
+    
+    Based on the work:
+        Strobl, Eric V., Kun Zhang, and Shyam Visweswaran.
+        Approximate kernel-based conditional independence tests for fast non-parametric causal discovery.
+        Journal of Causal Inference 7.1 (2019).
+
+    This is an implementation in Python and is inspired by the implementation in R from
+        https://github.com/ericstrobl/RCIT/
+    written by Eric V. Strobl.
+    """
+    bootstrap_n_jobs = config.default_n_jobs if bootstrap_n_jobs is None else bootstrap_n_jobs
+
+    if not use_bootstrap:
+        bootstrap_num_runs = 1
+        bootstrap_num_samples = float('inf')
+        bootstrap_n_jobs = 1
+
+    if Z is None:
+        return _rit(X,
+                    Y,
+                    num_permutations=num_permutations,
+                    num_random_features_X=num_random_features_X,
+                    num_random_features_Y=num_random_features_Y,
+                    num_runs=bootstrap_num_runs,
+                    num_max_samples_per_run=bootstrap_num_samples,
+                    n_jobs=bootstrap_n_jobs,
+                    p_value_adjust_func=p_value_adjust_func)
+    else:
+        return _rcit(X,
+                     Y,
+                     Z,
+                     num_permutations=num_permutations,
+                     num_random_features_X=num_random_features_X,
+                     num_random_features_Y=num_random_features_Y,
+                     num_random_features_Z=num_random_features_Z,
+                     num_runs=bootstrap_num_runs,
+                     num_max_samples_per_run=bootstrap_num_samples,
+                     n_jobs=bootstrap_n_jobs,
+                     p_value_adjust_func=p_value_adjust_func)
+
+
+def _kci(X: np.ndarray,
+         Y: np.ndarray,
+         Z: np.ndarray,
+         kernels_X: List[Callable[[np.ndarray], np.ndarray]],
+         kernels_Y: List[Callable[[np.ndarray], np.ndarray]],
+         kernels_Z: List[Callable[[np.ndarray], np.ndarray]],
+         regularization_param: float = 10 ** -3) -> float:
+    """Tests the null hypothesis that X and Y are independent given Z using the kernel conditional independence test.
+
+    This is a corrected reimplementation of the kci method in the CondIndTests R-package. Authors of the original R
+    package: Christina Heinze-Deml, Jonas Peters, Asbjoern Marco Sinius Munk
+
+    :return: The p-value for the null hypothesis that X and Y are independent given Z.
+    """
+    X, Y, Z = shape_into_2d(X, Y, Z)
+
+    if X.shape[0] != Y.shape[0] != Z.shape[0]:
+        raise RuntimeError('All variables need to have the same number of samples!')
+
+    n = X.shape[0]
+
+    k_x = np.ones((X.shape[0], X.shape[0]))
+    k_y = np.ones((X.shape[0], X.shape[0]))
+    k_z = np.ones((X.shape[0], X.shape[0]))
+
+    for i in range(X.shape[1]):
+        if np.unique(X[:, i]).shape[0] == 1:
+            continue
+        k_x *= kernels_X[i](X[:, i])
+
+    for i in range(Y.shape[1]):
+        if np.unique(Y[:, i]).shape[0] == 1:
+            continue
+        k_y *= kernels_Y[i](Y[:, i])
+
+    for i in range(Z.shape[1]):
+        if np.unique(Z[:, i]).shape[0] == 1:
+            continue
+        k_z *= kernels_Z[i](Z[:, i])
+
+    k_xz = k_x * k_z
+
+    k_xz = _fast_centering(k_xz)
+    k_y = _fast_centering(k_y)
+    k_z = _fast_centering(k_z)
+
+    r_z = np.eye(n) - k_z @ pinv(k_z + regularization_param * np.eye(n))
+
+    k_xz_z = r_z @ k_xz @ r_z.T
+    k_y_z = r_z @ k_y @ r_z.T
+
+    # Not dividing by n, seeing that the expectation and variance are also not divided by n and n**2, respectively.
+    statistic = np.sum(k_xz_z * k_y_z.T)
+
+    # Taking the sum, because due to numerical issues, the matrices might not be symmetric.
+    eigen_vec_k_xz_z, eigen_val_k_xz_z, _ = svd((k_xz_z + k_xz_z.T) / 2)
+    eigen_vec_k_y_z, eigen_val_k_y_z, _ = svd((k_y_z + k_y_z.T) / 2)
+
+    # Filter out eigenvalues that are too small.
+    eigen_val_k_xz_z, eigen_vec_k_xz_z = _filter_out_small_eigen_values_and_vectors(eigen_val_k_xz_z, eigen_vec_k_xz_z)
+    eigen_val_k_y_z, eigen_vec_k_y_z = _filter_out_small_eigen_values_and_vectors(eigen_val_k_y_z, eigen_vec_k_y_z)
+
+    if len(eigen_val_k_xz_z) == 1:
+        empirical_kernel_map_xz_z = eigen_vec_k_xz_z * np.sqrt(eigen_val_k_xz_z)
+    else:
+        empirical_kernel_map_xz_z = eigen_vec_k_xz_z @ (np.eye(len(eigen_val_k_xz_z))
+                                                        * np.sqrt(eigen_val_k_xz_z)).T
+
+    empirical_kernel_map_xz_z = empirical_kernel_map_xz_z.squeeze()
+    empirical_kernel_map_xz_z = empirical_kernel_map_xz_z.reshape(empirical_kernel_map_xz_z.shape[0], -1)
+
+    if len(eigen_val_k_y_z) == 1:
+        empirical_kernel_map_y_z = eigen_vec_k_y_z * np.sqrt(eigen_val_k_y_z)
+    else:
+        empirical_kernel_map_y_z = eigen_vec_k_y_z @ (np.eye(len(eigen_val_k_y_z)) * np.sqrt(eigen_val_k_y_z)).T
+
+    empirical_kernel_map_y_z = empirical_kernel_map_y_z.squeeze()
+    empirical_kernel_map_y_z = empirical_kernel_map_y_z.reshape(empirical_kernel_map_y_z.shape[0], -1)
+
+    num_eigen_vec_xz_z = empirical_kernel_map_xz_z.shape[1]
+    num_eigen_vec_y_z = empirical_kernel_map_y_z.shape[1]
+
+    size_w = num_eigen_vec_xz_z * num_eigen_vec_y_z
+
+    w = np.zeros((n, size_w))
+
+    for i in range(num_eigen_vec_xz_z):
+        for j in range(num_eigen_vec_y_z):
+            w[:, i * num_eigen_vec_y_z + j] = empirical_kernel_map_xz_z[:, i] * empirical_kernel_map_y_z[:, j]
+
+    if size_w > n:
+        ww_prod = w @ w.T
+    else:
+        ww_prod = w.T @ w
+
+    return _estimate_p_value(ww_prod, statistic)
+
+
+def _fast_centering(k: np.ndarray) -> np.ndarray:
+    """Compute centered kernel matrix in time O(n^2).
+
+    The centered kernel matrix is defined as K_c = H @ K @ H, with
+    H = identity - 1/ n * ones(n,n). Computing H @ K @ H via matrix multiplication scales with n^3. The
+    implementation circumvents this and runs in time n^2.
+    :param k: original kernel matrix of size nxn
+    :return: centered kernel matrix of size nxn
+    """
+    n = len(k)
+    k_c = (k - 1 / n * np.outer(np.ones(n), np.sum(k, axis=0))
+           - 1 / n * np.outer(np.sum(k, axis=1), np.ones(n))
+           + 1 / n ** 2 * np.sum(k) * np.ones((n, n)))
+    return k_c
+
+
+def _hsic(X: np.ndarray,
+          Y: np.ndarray,
+          kernels_X: List[Callable[[np.ndarray], np.ndarray]],
+          kernels_Y: List[Callable[[np.ndarray], np.ndarray]],
+          cut_off_value: float = config.EPS) -> float:
+    """Estimates the Hilbert-Schmidt Independence Criterion score for a pairwise independence test between variables X
+    and Y.
+
+    This is a reimplementation from the original Matlab code provided by the authors.
+
+    :return: The p-value for the null hypothesis that X and Y are independent.
+    """
+    X, Y = shape_into_2d(X, Y)
+
+    if X.shape[0] != Y.shape[0]:
+        raise RuntimeError('All variables need to have the same number of samples!')
+
+    if X.shape[0] < 6:
+        raise RuntimeError('At least 6 samples are required for the HSIC independence test. Only %d were given.'
+                           % X.shape[0])
+
+    n = X.shape[0]
+
+    bone = np.ones((n, 1), dtype=float)
+
+    k_mat = np.ones((X.shape[0], X.shape[0]))
+    l_mat = np.ones((X.shape[0], X.shape[0]))
+
+    for i in range(X.shape[1]):
+        if np.unique(X[:, i]).shape[0] == 1:
+            continue
+        k_mat *= kernels_X[i](X[:, i])
+
+    for i in range(Y.shape[1]):
+        if np.unique(Y[:, i]).shape[0] == 1:
+            continue
+        l_mat *= kernels_Y[i](Y[:, i])
+
+    k_c = _fast_centering(k_mat)
+    l_c = _fast_centering(l_mat)
+
+    #  Test statistic is given as np.trace(K @ H @ L @ H) / n. Below computes without matrix products.
+    test_statistic = 1 / n * (np.sum(k_mat * l_mat) - 2 / n * np.sum(k_mat, axis=0) @ np.sum(l_mat, axis=1) +
+                              1 / n ** 2 * np.sum(k_mat) * np.sum(l_mat))
+
+    var_hsic = (k_c * l_c) ** 2
+    var_hsic = (np.sum(var_hsic) - np.trace(var_hsic)) / n / (n - 1)
+    var_hsic = var_hsic * 2 * (n - 4) * (n - 5) / n / (n - 1) / (n - 2) / (n - 3)
+
+    k_mat = k_mat - np.diag(np.diag(k_mat))
+    l_mat = l_mat - np.diag(np.diag(l_mat))
+
+    mu_x = (bone.T @ k_mat @ bone) / n / (n - 1)
+    mu_y = (bone.T @ l_mat @ bone) / n / (n - 1)
+
+    m_hsic = (1 + mu_x * mu_y - mu_x - mu_y) / n
+
+    var_hsic = max(var_hsic.squeeze(), cut_off_value)
+    m_hsic = max(m_hsic.squeeze(), cut_off_value)
+    if test_statistic <= cut_off_value:
+        test_statistic = 0
+
+    al = m_hsic ** 2 / var_hsic
+    bet = var_hsic * n / m_hsic
+
+    p_value = 1 - gamma.cdf(test_statistic, al, scale=bet)
+
+    return p_value
+
+
+def _filter_out_small_eigen_values_and_vectors(eigen_values: np.ndarray,
+                                               eigen_vectors: np.ndarray,
+                                               relative_tolerance: float = (10 ** -5)) \
+        -> Tuple[np.ndarray, np.ndarray]:
+    filtered_indices_xz_z = np.where(eigen_values[eigen_values > max(eigen_values) * relative_tolerance])
+
+    return eigen_values[filtered_indices_xz_z], eigen_vectors[:, filtered_indices_xz_z]
+
+
+def _estimate_p_value(ww_prod: np.ndarray, statistic: np.ndarray) -> float:
+    # Dividing by n not required since we do not divide the test statistical_tools by n.
+    mean_approx = np.trace(ww_prod)
+    variance_approx = 2 * np.trace(ww_prod @ ww_prod)
+
+    alpha_approx = mean_approx ** 2 / variance_approx
+    beta_approx = variance_approx / mean_approx
+
+    return 1 - gamma.cdf(statistic, alpha_approx, scale=beta_approx)
+
+
+def _rit(X: np.ndarray,
+         Y: np.ndarray,
+         num_random_features_X: int,
+         num_random_features_Y: int,
+         num_permutations: int,
+         num_runs: int,
+         num_max_samples_per_run: int = 1000,
+         n_jobs: Optional[int] = None,
+         p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float] = quantile_based_fwer) -> float:
+    """Implementation of the Randomized Independence Test.
+
+    Based on the work:
+        Strobl, Eric V., Kun Zhang, and Shyam Visweswaran.
+        Approximate kernel-based conditional independence tests for fast non-parametric causal discovery.
+        Journal of Causal Inference 7.1 (2019).
+
+    This is an implementation in Python and is inspired by the implementation in R from
+        https://github.com/ericstrobl/RCIT/
+    written by Eric V. Strobl.
+    """
+    n_jobs = config.default_n_jobs if n_jobs is None else n_jobs
+
+    X, Y = shape_into_2d(X, Y)
+    X = scale(apply_one_hot_encoding(X, fit_one_hot_encoders(X)))
+    Y = scale(apply_one_hot_encoding(Y, fit_one_hot_encoders(Y)))
+
+    def evaluate_rit_on_samples(parallel_random_seed: int):
+        set_random_seed(parallel_random_seed)
+
+        if X.shape[0] > num_max_samples_per_run:
+            random_indices = np.random.choice(X.shape[0], num_max_samples_per_run, replace=False)
+            X_samples = X[random_indices]
+            Y_samples = Y[random_indices]
+        else:
+            X_samples = X
+            Y_samples = Y
+
+        random_features_x = Nystroem(n_components=num_random_features_X).fit_transform(X_samples)
+        random_features_y = Nystroem(n_components=num_random_features_Y).fit_transform(Y_samples)
+
+        permutation_results_of_statistic = []
+        for i in range(num_permutations):
+            permutation_results_of_statistic.append(_estimate_rit_statistic(
+                random_features_x[np.random.choice(random_features_x.shape[0],
+                                                   random_features_x.shape[0], replace=False)], random_features_y))
+
+        return 1 - (np.sum(_estimate_rit_statistic(random_features_x, random_features_y)
+                           > permutation_results_of_statistic) / len(permutation_results_of_statistic))
+
+    random_seeds = np.random.randint(np.iinfo(np.int32).max, size=num_runs)
+    p_values = Parallel(n_jobs=n_jobs)(delayed(evaluate_rit_on_samples)(random_seeds[i]) for i in range(num_runs))
+
+    return p_value_adjust_func(p_values)
+
+
+def _rcit(X: np.ndarray, Y: np.ndarray, Z: np.ndarray,
+          num_random_features_X: int,
+          num_random_features_Y: int,
+          num_random_features_Z: int,
+          num_permutations: int,
+          num_runs: int,
+          num_max_samples_per_run: int = 1000,
+          n_jobs: Optional[int] = None,
+          p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float] = quantile_based_fwer) -> float:
+    """Implementation of the Randomized Conditional Independence Test
+
+    Based on the work:
+        Strobl, Eric V., Kun Zhang, and Shyam Visweswaran.
+        Approximate kernel-based conditional independence tests for fast non-parametric causal discovery.
+        Journal of Causal Inference 7.1 (2019).
+
+    This is an implementation in Python and is inspired by the implementation in R from
+        https://github.com/ericstrobl/RCIT/
+    written by Eric V. Strobl.
+    """
+    n_jobs = config.default_n_jobs if n_jobs is None else n_jobs
+
+    X, Y, Z = shape_into_2d(X, Y, Z)
+    X = scale(apply_one_hot_encoding(X, fit_one_hot_encoders(X)))
+    Y = scale(apply_one_hot_encoding(Y, fit_one_hot_encoders(Y)))
+    Z = scale(apply_one_hot_encoding(Z, fit_one_hot_encoders(Z)))
+
+    def parallel_job(parallel_random_seed: int):
+        set_random_seed(parallel_random_seed)
+
+        if X.shape[0] > num_max_samples_per_run:
+            random_indices = np.random.choice(X.shape[0], num_max_samples_per_run, replace=False)
+            X_samples = X[random_indices]
+            Y_samples = Y[random_indices]
+            Z_samples = Z[random_indices]
+        else:
+            X_samples = X
+            Y_samples = Y
+            Z_samples = Z
+
+        random_features_x = Nystroem(n_components=num_random_features_X).fit_transform(X_samples)
+        random_features_y = Nystroem(n_components=num_random_features_Y).fit_transform(Y_samples)
+        random_features_z = Nystroem(n_components=num_random_features_Z).fit_transform(Z_samples)
+
+        cov_zz = _estimate_column_wise_covariances(random_features_z, random_features_z)
+        inverse_cov_zz = scipy.linalg.cho_solve(
+            scipy.linalg.cho_factor(cov_zz + np.eye(cov_zz.shape[0]) * 10 ** -10, lower=True),
+            np.eye(cov_zz.shape[0]))
+        cov_xz = _estimate_column_wise_covariances(random_features_x, random_features_z)
+        cov_zy = _estimate_column_wise_covariances(random_features_z, random_features_y)
+
+        z_inverse_cov_zz = random_features_z @ inverse_cov_zz
+
+        residual_x = random_features_x - z_inverse_cov_zz @ cov_xz.T
+        residual_y = random_features_y - z_inverse_cov_zz @ cov_zy
+
+        permutation_results_of_statistic = []
+        for i in range(num_permutations):
+            permutation_results_of_statistic.append(_estimate_rit_statistic(
+                residual_x[np.random.choice(residual_x.shape[0],
+                                            residual_x.shape[0], replace=False)], residual_y))
+
+        return 1 - (np.sum(_estimate_rit_statistic(residual_x, residual_y) > permutation_results_of_statistic)
+                    / len(permutation_results_of_statistic))
+
+    random_seeds = np.random.randint(np.iinfo(np.int32).max, size=num_runs)
+    p_values = Parallel(n_jobs=n_jobs)(delayed(parallel_job)(random_seeds[i]) for i in range(num_runs))
+
+    return p_value_adjust_func(p_values)
+
+
+def _estimate_rit_statistic(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
+    return X.shape[0] * np.sum(_estimate_column_wise_covariances(X, Y) ** 2)
+
+
+def _estimate_column_wise_covariances(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
+    return np.cov(X, Y, rowvar=False)[:X.shape[1], -Y.shape[1]:]

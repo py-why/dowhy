@@ -3,6 +3,7 @@ from typing import Union, List, Dict, Any
 
 import numpy as np
 import pandas as pd
+from scipy.optimize import minimize
 from sklearn.preprocessing import OneHotEncoder
 
 
@@ -66,7 +67,7 @@ def convert_to_data_frame(dict_with_np_arrays: Dict[Any, np.ndarray]) -> pd.Data
 
 
 def column_stack_selected_numpy_arrays(dict_with_np_arrays: Dict[Any, np.ndarray],
-                                    keys: List[Any]) -> np.ndarray:
+                                       keys: List[Any]) -> np.ndarray:
     return np.column_stack([dict_with_np_arrays[x] for x in keys])
 
 
@@ -158,3 +159,10 @@ def has_categorical(X: np.ndarray) -> bool:
 
 def mean_deviation(randomized_predictions: np.ndarray, baseline_values: np.ndarray) -> np.ndarray:
     return np.mean(randomized_predictions).squeeze() - np.mean(baseline_values).squeeze()
+
+
+def geometric_median(x: np.ndarray) -> np.ndarray:
+    def distance_function(x_input: np.ndarray) -> np.ndarray:
+        return np.sum(np.sqrt(np.sum((x_input - x) ** 2, axis=1)))
+
+    return minimize(distance_function, np.sum(x, axis=0) / x.shape[0]).x
