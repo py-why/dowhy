@@ -3,3 +3,4 @@ from .fcms import PredictionModel, ClassificationModel, AdditiveNoiseModel, Clas
 from .fitting_sampling import fit, draw_samples
 from .graph import StochasticModel, ConditionalStochasticModel, FunctionalCausalModel, DirectedGraph, is_root_node
 from .stochastic_models import EmpiricalDistribution, BayesianGaussianMixtureDistribution, ScipyDistribution
+from .whatif import interventional_samples
