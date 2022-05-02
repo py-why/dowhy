@@ -86,7 +86,8 @@ def counterfactual_samples(causal_model: Union[StructuralCausalModel, Invertible
                            interventions: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
                            observed_data: Optional[pd.DataFrame] = None,
                            noise_data: Optional[pd.DataFrame] = None) -> pd.DataFrame:
-    """Estimates counterfactual data for observed data if we were to perform specified interventions.
+    """Estimates counterfactual data for observed data if we were to perform specified interventions. This function 
+    implements the 3-step process for computing counterfactuals by Pearl (see https://ftp.cs.ucla.edu/pub/stat_ser/r485.pdf).
 
     :param causal_model: The (invertible) structural causal model we perform this intervention on. If noise_data is
                          None and observed_data is provided, this must be an invertible structural model, otherwise,
@@ -114,8 +115,10 @@ def counterfactual_samples(causal_model: Union[StructuralCausalModel, Invertible
         if not isinstance(causal_model, InvertibleStructuralCausalModel):
             raise ValueError("Since no noise_data is given, this has to be estimated from the given "
                              "observed_data. This can only be done with InvertibleStructuralCausalModel.")
+        # Abduction: For invertible SCMs, we recover exact noise values from data.
         noise_data = compute_noise_from_data(causal_model, observed_data)
 
+    # Action + Prediction: Propage the intervention downstream and use recovered noise values.
     return _estimate_counterfactuals(causal_model, interventions, noise_data)
 
 
