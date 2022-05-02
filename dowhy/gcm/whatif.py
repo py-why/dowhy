@@ -118,7 +118,7 @@ def counterfactual_samples(causal_model: Union[StructuralCausalModel, Invertible
         # Abduction: For invertible SCMs, we recover exact noise values from data.
         noise_data = compute_noise_from_data(causal_model, observed_data)
 
-    # Action + Prediction: Propage the intervention downstream and use recovered noise values.
+    # Action + Prediction: Propagate the intervention downstream using recovered noise values.
     return _estimate_counterfactuals(causal_model, interventions, noise_data)
 
 
