@@ -37,6 +37,12 @@
 
 .. toctree::
    :maxdepth: 2
+   :caption: GCM-based inference (Experimental)
+
+   gcm/index
+
+.. toctree::
+   :maxdepth: 2
    :caption: Package
 
    code_repo
