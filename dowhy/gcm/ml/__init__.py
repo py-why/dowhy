@@ -1,5 +1,6 @@
-"""This module defines implementations of :py:class:`PredictionModel
-<dowhy.scm.fcms.PredictionModel>` used by the different Functional Causal Model implementations.
+"""This module defines implementations of :class:`~dowhy.gcm.fcms.PredictionModel` used by the different
+:class:`~dowhy.gcm.graph.FunctionalCausalModel` implementations, such as :class:`~dowhy.gcm.fcms.PostNonlinearModel` or
+:class:`~dowhy.gcm.fcms.AdditiveNoiseModel`.
 """
 
 from .classification import SklearnClassificationModel, \

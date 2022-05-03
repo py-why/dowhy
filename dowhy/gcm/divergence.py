@@ -16,15 +16,15 @@ def auto_estimate_kl_divergence(X: np.ndarray, Y: np.ndarray) -> float:
 
 
 def estimate_kl_divergence_continuous(X: np.ndarray, Y: np.ndarray) -> float:
-    """ Estimates KL-Divergence using k-nearest neighbours (Wang et al., 2009).
+    """Estimates KL-Divergence using k-nearest neighbours (Wang et al., 2009).
 
-        Q. Wang, S. R. Kulkarni, and S. Verdú,
-        "Divergence estimation for multidimensional densities via k-nearest-neighbor distances",
-        IEEE Transactions on Information Theory, vol. 55, no. 5, pp. 2392-2405, May 2009.
+    Q. Wang, S. R. Kulkarni, and S. Verdú,
+    "Divergence estimation for multidimensional densities via k-nearest-neighbor distances",
+    IEEE Transactions on Information Theory, vol. 55, no. 5, pp. 2392-2405, May 2009.
 
-        s1: (N_1,D) Sample drawn from distribution P_X
-        s2: (N_2,D) Sample drawn from distribution P_Y
-        return: Estimated value of D(P_X||P_Y).
+    :param X: (N_1,D) Sample drawn from distribution P_X
+    :param Y: (N_2,D) Sample drawn from distribution P_Y
+    return: Estimated value of D(P_X||P_Y).
     """
     X, Y = shape_into_2d(X, Y)
 

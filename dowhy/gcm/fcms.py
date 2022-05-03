@@ -1,6 +1,6 @@
 
-"""This module defines multiple implementations of the abstract class
-:py:class:`FunctionalCausalModel <causality.graph.interface.FunctionalCausalModel>` (FCM)
+"""This module defines multiple implementations of the abstract class :class:`~dowhy.gcm.graph.FunctionalCausalModel`
+(FCM)
 """
 
 import copy

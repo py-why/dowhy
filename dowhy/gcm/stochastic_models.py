@@ -1,6 +1,6 @@
 
 """This module defines multiple implementations of the abstract class
-:py:class:`StochasticModel <dowhy.scm.graph.StochasticModel>`
+:class:`~dowhy.gcm.graph.StochasticModel`
 """
 
 import warnings

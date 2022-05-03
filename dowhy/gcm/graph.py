@@ -1,4 +1,4 @@
-"""This module defines the fundamental interfaces used in this library."""
+"""This module defines the fundamental interfaces and functions related to causal graphs in graphical causal models."""
 
 from abc import abstractmethod, ABC
 from typing import Any, List
