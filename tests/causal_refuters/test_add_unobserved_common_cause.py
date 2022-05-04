@@ -72,8 +72,6 @@ class TestAddUnobservedCommonCauseRefuter(object):
                 effect_strength_on_y = effect_strength_on_y)
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
-
-
     @pytest.mark.parametrize(["estimator_method", "effect_strength_on_t", "benchmark_covariates", "simulated_method_name"],
                              [("backdoor.linear_regression", [1,2,3], ["W3"], "PartialR2"),])
     @patch("matplotlib.pyplot.figure")
@@ -106,5 +104,4 @@ class TestAddUnobservedCommonCauseRefuter(object):
                                effect_fraction_on_treatment = effect_strength_on_t)
         assert refute.stats['robustness_value'] >= 0 and refute.stats['robustness_value'] <= 1
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
-
 
