@@ -11,7 +11,7 @@ from sklearn.linear_model import LogisticRegression
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
 from dowhy.causal_estimator import CausalEstimator
-from dowhy.causal_refuters.sensitivity_analysis import LinearSensitivityAnalysis
+from dowhy.causal_refuters.linear_sensitivity_analysis import LinearSensitivityAnalysis
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 
 class AddUnobservedCommonCause(CausalRefuter):

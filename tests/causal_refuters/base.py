@@ -8,7 +8,7 @@ class TestRefuter(object):
     def __init__(self, error_tolerance, estimator_method, refuter_method,
             transformations=None, params = None, confounders_effect_on_t=None,
             confounders_effect_on_y=None, effect_strength_on_t=None,
-            effect_strength_on_y=None, **kwargs):
+            effect_strength_on_y=None, simulated_method_name = None, **kwargs):
         self._error_tolerance = error_tolerance
         self.estimator_method = estimator_method
         self.identifier_method = estimator_method.split(".")[0]
@@ -19,6 +19,7 @@ class TestRefuter(object):
         self.confounders_effect_on_y = confounders_effect_on_y
         self.effect_strength_on_t = effect_strength_on_t
         self.effect_strength_on_y = effect_strength_on_y
+        self.simulated_method_name = simulated_method_name
         self.logger = logging.getLogger(__name__)
         self.logger.debug(self._error_tolerance)
 
@@ -56,6 +57,7 @@ class TestRefuter(object):
 
         if self.refuter_method == "add_unobserved_common_cause":
         # To test if there are any exceptions
+
             ref = model.refute_estimate(target_estimand, ate_estimate,
                 method_name=self.refuter_method,
                 confounders_effect_on_treatment = self.confounders_effect_on_t,
