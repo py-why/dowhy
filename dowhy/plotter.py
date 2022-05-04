@@ -5,6 +5,7 @@ SMALL_SIZE = 8
 MEDIUM_SIZE = 26
 BIGGER_SIZE = 30
 
+
 def plot_treatment_outcome(treatment, outcome, time_var):
     plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
     plt.rc('axes', titlesize=BIGGER_SIZE)    # fontsize of the axes title
