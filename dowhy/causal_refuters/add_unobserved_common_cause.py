@@ -179,12 +179,19 @@ class AddUnobservedCommonCause(CausalRefuter):
         if self.simulated_method_name == "PartialR2":
             if not(isinstance(self._estimate.estimator, LinearRegressionEstimator)):
                 raise NotImplementedError("Currently only LinearRegressionEstimator is supported for Sensitivity Analysis")
+
+            if(len(self._estimate.estimator._effect_modifier_names) > 0):
+                raise NotImplementedError("The current implementation does not support effect modifiers")
+                
             if(self.frac_strength_outcome == 1):
                 self.frac_strength_outcome = self.frac_strength_treatment
+
+            
             analyzer = LinearSensitivityAnalysis( OLSmodel = self._estimate.estimator.model, 
             data = self._data, treatment_name = self._treatment_name, 
             percent_change_rvalue = self.percent_change_rvalue, significance_level = self.significance_level, benchmark_covariates= self.benchmark_covariates, 
             frac_strength_treatment = self.frac_strength_treatment, frac_strength_outcome = self.frac_strength_outcome, common_causes_order = self._estimate.estimator._observed_common_causes.columns)
+            
             analyzer.perform_analysis()
             return analyzer
         if self.kappa_t is None:
