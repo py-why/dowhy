@@ -10,6 +10,7 @@ from sklearn.linear_model import LinearRegression
 from tqdm import tqdm
 
 import dowhy.gcm.config as config
+from dowhy.gcm.constant import EPS
 from dowhy.gcm.util.general import set_random_seed
 
 
@@ -310,7 +311,7 @@ def _approximate_shapley_values_via_early_stopping(
                 break
 
             new_shap_proxy = np.array(shapley_values)
-            new_shap_proxy[new_shap_proxy == 0] = config.EPS
+            new_shap_proxy[new_shap_proxy == 0] = EPS
             # The current Shapley values are the average of the estimated values, i.e. we need to divide by the number
             # of generated permutations here.
             new_shap_proxy /= num_generated_permutations

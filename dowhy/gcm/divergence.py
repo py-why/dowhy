@@ -2,7 +2,7 @@ import numpy as np
 from scipy.stats import entropy
 from sklearn.neighbors import NearestNeighbors
 
-from dowhy.gcm.config import EPS
+from dowhy.gcm.constant import EPS
 from dowhy.gcm.util.general import shape_into_2d, is_categorical
 
 

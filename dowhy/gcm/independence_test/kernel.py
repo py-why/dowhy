@@ -9,6 +9,7 @@ from sklearn.kernel_approximation import Nystroem
 from sklearn.preprocessing import scale
 
 import dowhy.gcm.config as config
+from dowhy.gcm.constant import EPS
 from dowhy.gcm.independence_test.kernel_operation import auto_create_list_of_kernels
 from dowhy.gcm.stats import quantile_based_fwer
 from dowhy.gcm.util.general import set_random_seed, shape_into_2d, apply_one_hot_encoding, fit_one_hot_encoders
@@ -309,7 +310,7 @@ def _hsic(X: np.ndarray,
           Y: np.ndarray,
           kernels_X: List[Callable[[np.ndarray], np.ndarray]],
           kernels_Y: List[Callable[[np.ndarray], np.ndarray]],
-          cut_off_value: float = config.EPS) -> float:
+          cut_off_value: float = EPS) -> float:
     """Estimates the Hilbert-Schmidt Independence Criterion score for a pairwise independence test between variables X
     and Y.
 
