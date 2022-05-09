@@ -8,11 +8,16 @@ import numpy as np
 from networkx.algorithms.dag import has_cycle
 from typing_extensions import Protocol
 
+# This constant is used as key when storing/accessing models as causal mechanisms in graph node attributes
 CAUSAL_MECHANISM = 'causal_mechanism'
+
+# This constant is used as key when storing the parents of a node during fitting. It's used for validation purposes
+# afterwards.
 PARENTS_DURING_FIT = 'parents_during_fit'
 
 
 class HasNodes(Protocol):
+    """This protocol defines a trait for classes having nodes."""
     @property
     @abstractmethod
     def nodes(self):
@@ -21,6 +26,7 @@ class HasNodes(Protocol):
 
 
 class HasEdges(Protocol):
+    """This protocol defines a trait for classes having edges."""
     @property
     @abstractmethod
     def edges(self):
@@ -29,18 +35,28 @@ class HasEdges(Protocol):
 
 
 class DirectedGraph(HasNodes, HasEdges, Protocol):
+    """A protocol representing a directed graph as needed by graphical causal models.
+
+    This protocol specifically defines a subset of the networkx.DiGraph class, which make that class automatically
+    compatible with DirectedGraph. While in most cases a networkx.DiGraph is the class of choice when constructing
+    a causal graph, anyone can choose to provide their own implementation of the DirectGraph interface.
+    """
     @abstractmethod
     def predecessors(self, node):
         raise NotImplementedError
 
 
 class StochasticModel(ABC):
-    @abstractmethod
-    def draw_samples(self, num_samples: int) -> np.ndarray:
-        raise NotImplementedError
+    """A stochastic model represents a model used for causal mechanisms for root nodes in a graphical causal model."""
 
     @abstractmethod
     def fit(self, X: np.ndarray) -> None:
+        """Fits the model according to the data."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def draw_samples(self, num_samples: int) -> np.ndarray:
+        """Draws samples for the fitted model."""
         raise NotImplementedError
 
     @abstractmethod
@@ -49,12 +65,17 @@ class StochasticModel(ABC):
 
 
 class ConditionalStochasticModel(ABC):
-    @abstractmethod
-    def draw_samples(self, parent_samples: np.ndarray) -> np.ndarray:
-        raise NotImplementedError
+    """A conditional stochastic model represents a model used for causal mechanisms for non-root nodes in a graphical
+    causal model."""
 
     @abstractmethod
     def fit(self, X: np.ndarray, Y: np.ndarray) -> None:
+        """Fits the model according to the data."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def draw_samples(self, parent_samples: np.ndarray) -> np.ndarray:
+        """Draws samples for the fitted model."""
         raise NotImplementedError
 
     @abstractmethod
@@ -63,7 +84,10 @@ class ConditionalStochasticModel(ABC):
 
 
 class FunctionalCausalModel(ConditionalStochasticModel):
-    """Represents a Functional Causal Model (FCM)"""
+    """Represents a Functional Causal Model (FCM), a specific type of conditional stochastic model, that is defined
+    as:
+        Y := f(X, N), N: Noise
+    """
 
     def draw_samples(self, parent_samples: np.ndarray) -> np.ndarray:
         return self.evaluate(parent_samples, self.draw_noise_samples(parent_samples.shape[0]))
