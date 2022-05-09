@@ -11,7 +11,7 @@ from sklearn.linear_model import LogisticRegression
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
 from dowhy.causal_estimator import CausalEstimator
-from dowhy.causal_refuters.linear_sensitivity_analysis import LinearSensitivityAnalysis
+from dowhy.causal_refuters.linear_sensitivity_analyzer import LinearSensitivityAnalyzer
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 
 class AddUnobservedCommonCause(CausalRefuter):
@@ -44,6 +44,14 @@ class AddUnobservedCommonCause(CausalRefuter):
         :param effect_fraction_on_treatment: float: If effect_strength_on_treatment is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on treatment. Defaults to 1.
         :param effect_fraction_on_outcome: float: If effect_strength_on_outcome is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on outcome. Defaults to 1.
         :param plotmethod: string: Type of plot to be shown. If None, no plot is generated. This parameter is used only only when more than one treatment confounder effect values or outcome confounder effect values are provided. Default is "colormesh". Supported values are "contour", "colormesh" when more than one value is provided for both confounder effect value parameters; "line" when provided for only one of them.
+        :param simulated_methods_name: method type to add unobserved common cause. "linear_based" by default."PartialR2" for linear sensitivity analysis
+        :param percent_change_rvalue: percentage reduction for robustness value
+        :param confounder_increases_estimate: True implies that confounder increases the absolute value of estimate and vice versa. (Default = False)
+        :param benchmark_common_causes: names of variables for bounding strength of confounders
+        :param significance_level: confidence interval for statistical inference(default = 0.05)
+        :param null_hypothesis_effect: assumed effect under the null hypothesis
+        :param plot_estimate: Generate contour plot for estimate while performing sensitivity analysis. (default = True). 
+                              To override the setting, set plot_estimate = False.
         """
         super().__init__(*args, **kwargs)
 
@@ -57,8 +65,10 @@ class AddUnobservedCommonCause(CausalRefuter):
         self.plotmethod = kwargs['plotmethod'] if "plotmethod" in kwargs else "colormesh"
         self.percent_change_rvalue = kwargs["percent_change_rvalue"] if 'percent_change_rvalue' in kwargs else 1.0
         self.significance_level = kwargs["significance_level"] if "significance_level" in kwargs else 0.05
-        self.increase = kwargs["increase"] if "increase" in kwargs else False
-        self.benchmark_covariates = kwargs["benchmark_covariates"] if "benchmark_covariates" in kwargs else None
+        self.confounder_increases_estimate = kwargs["confounder_increases_estimate"] if "confounder_increases_estimate" in kwargs else False
+        self.benchmark_common_causes = kwargs["benchmark_common_causes"] if "benchmark_common_causes" in kwargs else None
+        self.null_hypothesis_effect = kwargs["null_hypothesis_effect"] if "null_hypothesis_effect" in kwargs else 0
+        self.plot_estimate = kwargs["plot_estimate"] if "plot_estimate" in kwargs else True
         self.logger = logging.getLogger(__name__)
 
 
@@ -182,17 +192,16 @@ class AddUnobservedCommonCause(CausalRefuter):
 
             if(len(self._estimate.estimator._effect_modifier_names) > 0):
                 raise NotImplementedError("The current implementation does not support effect modifiers")
-                
+
             if(self.frac_strength_outcome == 1):
                 self.frac_strength_outcome = self.frac_strength_treatment
 
-            
-            analyzer = LinearSensitivityAnalysis( OLSmodel = self._estimate.estimator.model, 
+            analyzer = LinearSensitivityAnalyzer(estimator = self._estimate.estimator,
             data = self._data, treatment_name = self._treatment_name, 
-            percent_change_rvalue = self.percent_change_rvalue, significance_level = self.significance_level, benchmark_covariates= self.benchmark_covariates, 
+            percent_change_rvalue = self.percent_change_rvalue, significance_level = self.significance_level, benchmark_common_causes= self.benchmark_common_causes, null_hypothesis_effect = self.null_hypothesis_effect,
             frac_strength_treatment = self.frac_strength_treatment, frac_strength_outcome = self.frac_strength_outcome, common_causes_order = self._estimate.estimator._observed_common_causes.columns)
             
-            analyzer.perform_analysis()
+            analyzer.check_sensitivity(plot = self.plot_estimate)
             return analyzer
         if self.kappa_t is None:
             self.kappa_t = self.infer_default_kappa_t()

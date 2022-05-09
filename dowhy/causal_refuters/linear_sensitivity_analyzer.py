@@ -1,57 +1,57 @@
-import statsmodels.formula.api as smfa
 import numpy as np
 from scipy.stats import t
 import pandas as pd
-import statsmodels.api as sma
+import statsmodels.api as sm
 import logging
 import matplotlib.pyplot as plt
 from dowhy.utils.api import parse_state
 import sys
 
-class LinearSensitivityAnalysis:
+class LinearSensitivityAnalyzer:
     """
     Class to perform sensitivity analysis
     See: https://carloscinelli.com/files/Cinelli%20and%20Hazlett%20(2020)%20-%20Making%20Sense%20of%20Sensitivity.pdf 
 
-    :param model: OLS results derived from linear estimator of the causal model
+    :param estimator: linear estimator of the causal model
     :param data: Pandas dataframe
     :param treatment_name: name of treatment
     :param percent_change_rvalue: percentage reduction for robustness value
-    :param h0: hypothesis value
-    :param increase: True implies that confounder increases the absolute value of estimate and vice versa. (Default = False)
-    :param benchmark_covariates: names of variables for bounding strength of confounders
+    :param null_hypothesis_effect: assumed effect under the null hypothesis
+    :param confounder_increases_estimate: True implies that confounder increases the absolute value of estimate and vice versa. (Default = True)
+    :param benchmark_common_causes: names of variables for bounding strength of confounders
     :param significance_level: confidence interval for statistical inference(default = 0.05)
     :param frac_strength_treatment: strength of association between unobserved confounder and treatment compared to benchmark covariate
     :param frac_strength_outcome: strength of association between unobserved confounder and outcome compared to benchmark covariate
     :param common_causes_order: The order of column names in OLS regression data
     """
 
-    def __init__(self, OLSmodel = None, data = None, treatment_name = None, percent_change_rvalue = 1.0, significance_level = 0.05, increase = False, benchmark_covariates = None, h0 = 0, frac_strength_treatment = None, frac_strength_outcome = None, common_causes_order = None):
+    def __init__(self, estimator = None, data = None, treatment_name = None, percent_change_rvalue = 1.0, significance_level = 0.05, confounder_increases_estimate = True, benchmark_common_causes = None, null_hypothesis_effect = 0, frac_strength_treatment = None, frac_strength_outcome = None, common_causes_order = None):
         self.data = data
         self.treatment_name = []
         # original_treatment_name: : stores original variable names for labelling
         self.original_treatment_name = treatment_name
-        for i in range(len(treatment_name)):
-            self.treatment_name.append("x"+str(i+1))
+        for t in range(len(treatment_name)):
+            self.treatment_name.append("x"+str(t+1))
         
         self.percent_change_rvalue = percent_change_rvalue
         self.significance_level = significance_level
-        self.increase = increase
-        self.OLSmodel = OLSmodel
-        self.h0 = h0
+        self.confounder_increases_estimate = confounder_increases_estimate
+        self.estimator = estimator
+        self.estimator_model = estimator.model
+        self.null_hypothesis_effect = null_hypothesis_effect
 
         # common_causes_map : maps the original variable names to variable names in OLS regression
         self.common_causes_map = {}
         for i in range(len(common_causes_order)):
             self.common_causes_map[common_causes_order[i]] = "x"+str(len(self.treatment_name)+i+1)
 
-        # benchmark_covariates: stores variable names in terms of regression model variables
-        benchmark_covariates = parse_state(benchmark_covariates)
-        self.benchmark_covariates = []
+        # benchmark_common_causes: stores variable names in terms of regression model variables
+        benchmark_common_causes = parse_state(benchmark_common_causes)
+        self.benchmark_common_causes = []
         # original_benchmark_covariates: stores original variable names for labelling
-        self.original_benchmark_covariates = benchmark_covariates
-        for i in range(len(benchmark_covariates)):
-            self.benchmark_covariates.append(self.common_causes_map[benchmark_covariates[i]])
+        self.original_benchmark_covariates = benchmark_common_causes
+        for i in range(len(benchmark_common_causes)):
+            self.benchmark_common_causes.append(self.common_causes_map[benchmark_common_causes[i]])
 
         if type(frac_strength_treatment) in [int, list, float]:
             self.frac_strength_treatment = np.array(frac_strength_treatment)
@@ -76,12 +76,6 @@ class LinearSensitivityAnalysis:
         self.r2twj_w = None
         # r2ywj_tw:  partial R^2 of observed covariate wj with outcome "y", after controlling for observed covariates "w" (excluding wj) and treatment "t"
         self.r2ywj_tw = None
-        # bias adjusted terms
-        self.bias_adjusted_estimate = None
-        self.bias_adjusted_se = None
-        self.bias_adjusted_t = None
-        self.bias_adjusted_lower_CI = None
-        self.bias_adjusted_upper_CI = None
         # benchmarking_results: dataframe containing information about bounds and bias adjusted terms
         self.benchmarking_results = None
         # stats: dictionary containing information like robustness value, partial R^2, estimate, standard error , degree of freedom, partial f^2, t-statistic
@@ -89,58 +83,55 @@ class LinearSensitivityAnalysis:
         self.logger = logging.getLogger(__name__)
 
     
-    def treatment_regression(self, model = None, treatment = None):
+    def treatment_regression(self):
         """
         Function to perform regression with treatment as outcome
 
-        :param model: original OLS regression model
-        :param treatment: treatment variable names
-
         :returns: new OLS regression model
         """
-        data = pd.DataFrame(model.model.exog, columns = model.model.exog_names)
-        treatment_data = np.array(data[treatment])
-        non_treatment_data = data.drop(columns = treatment)
-        non_treatment_data.insert(0,0,1) #inserting bias
-        new_model = sma.OLS(treatment_data, non_treatment_data)
-        OLSmodel_new = new_model.fit()
+
+        features = self.estimator._observed_common_causes.copy()
+        treatment_df = self.estimator._treatment.copy() 
+        features = sm.tools.add_constant(features)
+        features.rename(columns = self.common_causes_map, inplace = True)
+        model = sm.OLS(treatment_df, features)
+        estimator_model = model.fit()
         
-        return OLSmodel_new
+        return estimator_model
 
     
-    def partial_r2_func(self, model = None, treatment = None):
+    def partial_r2_func(self, estimator_model = None, treatment = None):
         """
         Computes the partial R^2 of regression model 
 
-        :param model: statsmodels OLS regression model
+        :param estimator_model: Linear regression model
         :param treatment: treatment name
 
         :returns: partial R^2 value
         """
 
-        estimate = model.params[treatment]
-        degree_of_freedom = int(model.df_resid)
+        estimate = estimator_model.params[treatment]
+        degree_of_freedom = int(estimator_model.df_resid)
 
         if np.isscalar(estimate): #for single covariate
-            t_stats = model.tvalues[treatment]
+            t_stats = estimator_model.tvalues[treatment]
             return  (t_stats ** 2 / (t_stats ** 2 + degree_of_freedom))
 
         else: #compute for a group of covariates
-            covariance_matrix = model.cov_params().loc[treatment, :][treatment]
+            covariance_matrix = estimator_model.cov_params().loc[treatment, :][treatment]
             n = len(estimate) #number of parameters in model
             f_stat = np.matmul(np.matmul(estimate.values.T, np.linalg.inv(covariance_matrix.values)), estimate.values) / n
             return f_stat * n / (f_stat * n + degree_of_freedom)
 
             
-    def robustness_value_func(self, model = None, alpha = 1.0):
+    def robustness_value_func(self, alpha = 1.0):
         """
         Function to calculate the robustness value. 
         It is the minimum strength of association that confounders must have with treatment and outcome to change conclusions.
-        RVq describes how strong the association must be in order to reduce the estimated effect by (100 * percent_change_rvalue)%.
-        RVq close to 1 means the treatment effect can handle strong confounders explaining  almost all residual variation of the treatment and the outcome.
-        RVq close to 0 means that even very weak confounders can also change the results.
+        Robustness value describes how strong the association must be in order to reduce the estimated effect by (100 * percent_change_rvalue)%.
+        Robustness value close to 1 means the treatment effect can handle strong confounders explaining  almost all residual variation of the treatment and the outcome.
+        Robustness value close to 0 means that even very weak confounders can also change the results.
 
-        :param model: OLS regression model
         :param alpha: confidence interval (default = 1)
 
         :returns: robustness value 
@@ -167,20 +158,23 @@ class LinearSensitivityAnalysis:
         """
         Computes the bias adjusted estimate, standard error, t-value,  partial R2, confidence intervals
 
+        :param r2tu_w: partial r^2 from regressing unobserved confounder u on treatment t after controlling for observed covariates w
+        :param r2yu_tw: partial r^2 from regressing unobserved confounder u on outcome y after controlling for observed covariates w and treatment t
+
         :returns: Python dictionary with information about partial R^2 of confounders with treatment and outcome and bias adjusted variables
         """
 
         bias_factor = np.sqrt((r2yu_tw * r2tu_w) / (1 - r2tu_w))
         bias = bias_factor * (self.standard_error * np.sqrt(self.degree_of_freedom))
 
-        if self.increase:
-            bias_adjusted_estimate = np.sign(self.estimate) * (abs(self.estimate) + bias)
-        else:
+        if self.confounder_increases_estimate:
             bias_adjusted_estimate = np.sign(self.estimate) * (abs(self.estimate) - bias)
+        else:
+            bias_adjusted_estimate = np.sign(self.estimate) * (abs(self.estimate) + bias)
 
         bias_adjusted_se = np.sqrt((1 - r2yu_tw) / (1 - r2tu_w)) * self.standard_error * np.sqrt(self.degree_of_freedom / (self.degree_of_freedom - 1))
 
-        bias_adjusted_t = (bias_adjusted_estimate - self.h0) / bias_adjusted_se
+        bias_adjusted_t = (bias_adjusted_estimate - self.null_hypothesis_effect) / bias_adjusted_se
 
         bias_adjusted_partial_r2 = bias_adjusted_t ** 2 / (bias_adjusted_t ** 2 + (self.degree_of_freedom - 1)) #partial r2 formula used with new t value and dof - 1
 
@@ -201,42 +195,46 @@ class LinearSensitivityAnalysis:
 
         return benchmarking_results
     
-    def perform_analysis(self):
+    def check_sensitivity(self, plot = True):
         """
         Function to perform sensitivity analysis. 
-        By default it generates a plot of point estimate and the variations with respect to benchmarking and unobserved confounding.
+        :param plot: plot = True generates a plot of point estimate and the variations with respect to unobserved confounding.
+                     plot = False overrides the setting
+        
+        :returns: instance of LinearSensitivityAnalyzer class
         """
 
-        self.standard_error = list(self.OLSmodel.bse[1:(len(self.treatment_name)+1)])[0]
-        self.degree_of_freedom = int(self.OLSmodel.df_resid)
-        self.estimate = list(self.OLSmodel.params[1:(len(self.treatment_name)+1)])[0]
-        self.t_stats = list(self.OLSmodel.tvalues[self.treatment_name])[0]
+        self.standard_error = np.array(self.estimator_model.bse[1:(len(self.treatment_name)+1)])[0]
+        self.degree_of_freedom = int(self.estimator_model.df_resid)
+        self.estimate = np.array(self.estimator_model.params[1:(len(self.treatment_name)+1)])[0]
+        self.t_stats = np.array(self.estimator_model.tvalues[self.treatment_name])[0]
 
         # partial R^2 (r2yt_w) is the proportion of variation in outcome uniquely explained by treatment
-        partial_r2 = self.partial_r2_func(self.OLSmodel, self.treatment_name)
-        RVq = self.robustness_value_func(model = self.OLSmodel)
-        RVqa = self.robustness_value_func(model = self.OLSmodel, alpha = self.significance_level)
+        partial_r2 = self.partial_r2_func(self.estimator_model, self.treatment_name)
+        RVq = self.robustness_value_func()
+        RV_qalpha = self.robustness_value_func(alpha = self.significance_level)
 
-        if self.increase:  
-            self.h0 = self.estimate * (1 + self.percent_change_rvalue) 
+        if self.confounder_increases_estimate:  
+            self.null_hypothesis_effect = self.estimate * (1 - self.percent_change_rvalue) 
         else:
-            self.h0 = self.estimate * (1 - self.percent_change_rvalue)
+            self.null_hypothesis_effect = self.estimate * (1 + self.percent_change_rvalue)
 
-        self.t_stats = (self.estimate - self.h0 ) / self.standard_error
+        self.t_stats = (self.estimate - self.null_hypothesis_effect ) / self.standard_error
         self.partial_f2 = self.t_stats ** 2 / self.degree_of_freedom
         
         # build a new regression model by considering treatment variables as outcome 
-        OLS_model_new = self.treatment_regression(model = self.OLSmodel, treatment = self.treatment_name)
+        treatment_linear_model = self.treatment_regression()
 
         # r2twj_w is partial R^2 of covariate wj with treatment "t", after controlling for covariates w(excluding wj)
         # r2ywj_tw is partial R^2 of covariate wj with outcome "y", after controlling for covariates w(excluding wj) and treatment "t"
         self.r2twj_w = []
         self.r2ywj_tw = []
-        for covariate in self.benchmark_covariates:
-            self.r2ywj_tw.append(self.partial_r2_func(self.OLSmodel, covariate)) 
-            self.r2twj_w.append(self.partial_r2_func(OLS_model_new, covariate))
+
+        for covariate in self.benchmark_common_causes:
+            self.r2ywj_tw.append(self.partial_r2_func(self.estimator_model, covariate)) 
+            self.r2twj_w.append(self.partial_r2_func(treatment_linear_model, covariate))
         
-        for i in range(len(self.benchmark_covariates)):
+        for i in range(len(self.benchmark_common_causes)):
             r2twj_w = self.r2twj_w[i]
             r2ywj_tw = self.r2ywj_tw[i]
             
@@ -259,13 +257,9 @@ class LinearSensitivityAnalysis:
             #Compute bias adjusted terms
         
         self.benchmarking_results = self.compute_bias_adjusted(self.r2tu_w, self.r2yu_tw)
-        self.bias_adjusted_estimate = self.benchmarking_results['bias_adjusted_estimate']
-        self.bias_adjusted_se = self.benchmarking_results['bias_adjusted_se']
-        self.bias_adjusted_t = self.benchmarking_results['bias_adjusted_t']
-        self.bias_adjusted_lower_CI = self.benchmarking_results['bias_adjusted_lower_CI']
-        self.bias_adjusted_upper_CI = self.benchmarking_results['bias_adjusted_upper_CI']
-        
-        self.plot()
+
+        if plot == True:
+            self.plot()
 
         self.stats = {
             'estimate' : self.estimate,
@@ -275,7 +269,7 @@ class LinearSensitivityAnalysis:
             'r2yt_w' : partial_r2,
             'partial_f2' : self.partial_f2,
             'robustness_value' : RVq,
-            'robustness_value_alpha' : RVqa 
+            'robustness_value_alpha' : RV_qalpha 
         }
 
         self.benchmarking_results = pd.DataFrame.from_dict(self.benchmarking_results)
@@ -294,7 +288,7 @@ class LinearSensitivityAnalysis:
         estimate_bounds : estimate values for unobserved confounders (bias adjusted estimates)
         """
 
-        critical_estimate = self.h0
+        critical_estimate = self.null_hypothesis_effect
         contour_values = np.zeros((len(r2yu_tw), len(r2tu_w)))
         for i in range(len(r2yu_tw)):
             y = r2tu_w[i]
@@ -304,7 +298,7 @@ class LinearSensitivityAnalysis:
                 estimate = benchmarking_results['bias_adjusted_estimate']
                 contour_values[i][j] = estimate
 
-        estimate_bounds = self.bias_adjusted_estimate
+        estimate_bounds = self.benchmarking_results['bias_adjusted_estimate']
         return contour_values, critical_estimate, estimate_bounds
 
     
@@ -333,29 +327,55 @@ class LinearSensitivityAnalysis:
                 contour.append(t_value)
             contour_values.append(contour)
 
-        t_bounds = self.bias_adjusted_t
+        t_bounds = self.benchmarking_results['bias_adjusted_t']
         return contour_values, critical_t, t_bounds
 
     
-    def plot(self, sensitivity_variable = 'estimate', critical_estimate = 0, critical_t = 2, contour_color = "blue", threshold_color = "red", x_limit = 0.8, y_limit = 0.8 ):
+    def plot(self, plot_type = 'estimate', critical_value = None, x_limit = 0.8, y_limit = 0.8, 
+             num_points_per_contour = 200, plot_size = (7,7), contours_color = "blue", critical_contour_color = "red", 
+             label_fontsize = 9, contour_linewidths = 0.75, contour_linestyles = "solid",
+             contours_label_color = "black", critical_label_color = "red", 
+             unadjusted_estimate_marker = 'D', unadjusted_estimate_color = "black", 
+             adjusted_estimate_marker = '^', adjusted_estimate_color = "red",
+             legend_position = (1.6, 0.6) ):
         """
-        The horizontal axis shows hypothetical values of the partial R2 of unobserved confounder(s) with the treatment
-        The vertical axis shows hypothetical values of the partial R2 of unobserved confounder(s) with the outcome.
-        The contour levels represent adjusted t-values or estimates for unobserved confounders with these hypothetical partialR2 values.
+        Plots and summarizes the sensitivity bounds as a contour plot, as they vary with the partial R^2 of the unobserved confounder(s) with the treatment and the outcome
+        Two types of plots can be generated, based on adjusted estimates or adjusted t-values
+        X-axis: Partial R^2 of treatment and unobserved confounder(s)
+        Y-axis: Partial R^2 of outcome and unobserved confounder(s)
         We also plot bounds on the partial R^2 of the unobserved confounders obtained from observed covariates
 
-        :param sensitivity_variable: "estimate" or "t-value"
-        :param critical_estimate: threshold line to represent the contour corresponding to estimate, (default = 0)
-        :param critical_t: threshold line to represent the contour corresponding to t-value, (default = 2 - usual approx value for 95% CI)
-        :param x_limit: plot's maximum x_axis value
-        :param y_limit: plot's minimum y_axis value
-        :param contour_color: color of contour line(default = blue)
-        :param threshold_color: color of threshold line(default = red)
+        :param plot_type: "estimate" or "t-value"
+        :param critical_value: special reference value of the estimate or t-value that will be highlighted in the plot
+        :param x_limit: plot's maximum x_axis value (default = 0.8)
+        :param y_limit: plot's minimum y_axis value (default = 0.8)
+        :param num_points_per_contour: number of points to calculate and plot each contour line (default = 200)
+        :param plot_size: tuple denoting the size of the plot (default = (7,7))
+        :param contours_color: color of contour line (default = blue)
+                               String or array. If array, lines will be plotted with the specific color in ascending order.
+        :param critical_contour_color: color of threshold line (default = red)
+        :param label_fontsize: fontsize for labelling contours (default = 9)
+        :param contour_linewidths: linewidths for contours (default = 0.75)
+        :param contour_linestyles: linestyles for contours (default = "solid")
+                                   See : https://matplotlib.org/3.5.0/gallery/lines_bars_and_markers/linestyles.html for more examples
+        :param contours_label_color: color of contour line label (default = black)
+        :param critical_label_color: color of threshold line label (default = red)
+        :param unadjusted_estimate_marker: marker type for unadjusted estimate in the plot (default = 'D')
+                                           See: https://matplotlib.org/stable/api/markers_api.html 
+        :parm unadjusted_estimate_color: marker color for unadjusted estimate in the plot (default = "black")
+        :param adjusted_estimate_marker: marker type for bias adjusted estimates in the plot (default = '^')
+        :parm adjusted_estimate_color: marker color for bias adjusted estimates in the plot (default = "red")
+        :param legend_position:tuple denoting the position of the legend (default = (1.6, 0.6))
         """
 
         #Plotting the contour plot
-        fig, ax = plt.subplots(1, 1, figsize = (7,7))
-        ax.set_title("Sensitivity contour plot of %s"  %sensitivity_variable)
+        if plot_type == "estimate":
+            critical_value = 0 #default value of estimate
+        else:
+            critical_value = 2 #default t-value (usual approx for 95% CI)
+
+        fig, ax = plt.subplots(1, 1, figsize = plot_size )
+        ax.set_title("Sensitivity contour plot of %s"  %plot_type)
         ax.set_xlabel("Partial R^2 of confounder with treatment")
         ax.set_ylabel("Partial R^2 of confounder with outcome")
 
@@ -363,33 +383,36 @@ class LinearSensitivityAnalysis:
             x = self.r2tu_w[i]
             y = self.r2yu_tw[i]
             if(x > 0.8 or y > 0.8):
-                x_limit = 0.95
-                y_limit = 0.95
+                x_limit = 0.99
+                y_limit = 0.99
                 break
 
-        r2tu_w = np.arange(0.0, x_limit, x_limit / 200)
-        r2yu_tw = np.arange(0.0, y_limit, y_limit / 200)
+        r2tu_w = np.arange(0.0, x_limit, x_limit / num_points_per_contour)
+        r2yu_tw = np.arange(0.0, y_limit, y_limit / num_points_per_contour)
 
         unadjusted_point_estimate = None
 
-        if sensitivity_variable == "estimate":
-            contour_values, contour_threshold, bound_values  = self.plot_estimate(r2tu_w, r2yu_tw)
+        if plot_type == "estimate":
+            contour_values, critical_value, bound_values  = self.plot_estimate(r2tu_w, r2yu_tw)
             unadjusted_estimate = self.estimate
             unadjusted_point_estimate = unadjusted_estimate
-        else:
-            contour_values, contour_threshold, bound_values = self.plot_t(r2tu_w, r2yu_tw)
+        elif plot_type == "t-value" :
+            contour_values, critical_value, bound_values = self.plot_t(r2tu_w, r2yu_tw)
             unadjusted_t = self.t_stats
             unadjusted_point_estimate = unadjusted_t
+        else:
+            raise ValueError("Current plotting method only supports 'estimate' and 't-value' ")
         
         #Adding contours
-        contour_plot = ax.contour(r2tu_w, r2yu_tw, contour_values, colors = contour_color, linewidths = 0.75, linestyles = "solid")
-        ax.clabel(contour_plot, inline = 1, fontsize = 9, colors = "black")
+        contour_plot = ax.contour(r2tu_w, r2yu_tw, contour_values, colors = contours_color, linewidths = contour_linewidths, linestyles = contour_linestyles)
+        ax.clabel(contour_plot, inline = 1, fontsize = label_fontsize, colors = contours_label_color)
         
         #Adding threshold contour line
-        contour_plot = ax.contour(r2tu_w, r2yu_tw, contour_values, colors = threshold_color, linewidths = 0.75, levels = [contour_threshold])
+        contour_plot = ax.contour(r2tu_w, r2yu_tw, contour_values, colors = critical_contour_color, linewidths = contour_linewidths, levels = [critical_value])
+        ax.clabel(contour_plot,  [critical_value], inline = 1, fontsize = label_fontsize, colors = critical_label_color)
 
         #Adding unadjusted point estimate 
-        ax.scatter([0],[0], marker = 'D', color = "black", label = "Unadjusted({:1.2f})".format(unadjusted_point_estimate))
+        ax.scatter([0],[0], marker = unadjusted_estimate_marker, color = unadjusted_estimate_color, label = "Unadjusted({:1.2f})".format(unadjusted_point_estimate))
 
         #Adding bounds to partial R^2 values for given strength of confounders
         for i in range(len(self.frac_strength_treatment)):
@@ -400,10 +423,10 @@ class LinearSensitivityAnalysis:
             else:
                 signs = str(round(frac_strength_treatment,2)) + '/' + str(round(frac_strength_outcome,2))
             label = str(i+1) + "  "+signs + ' X ' + str(self.original_benchmark_covariates) + " ({:1.2f}) ".format(bound_values[i])
-            ax.scatter(self.r2tu_w[i], self.r2yu_tw[i], color = 'red', marker = '^', label = label)
+            ax.scatter(self.r2tu_w[i], self.r2yu_tw[i], color = adjusted_estimate_color, marker = adjusted_estimate_marker, label = label)
             ax.annotate(str(i+1), (self.r2tu_w[i] + 0.005, self.r2yu_tw[i] + 0.005 ))
 
-        ax.legend(bbox_to_anchor = (1.6 , 0.6))
+        ax.legend(bbox_to_anchor = legend_position)
         plt.show()
 
     def __str__(self):
