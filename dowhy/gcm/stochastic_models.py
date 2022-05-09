@@ -40,41 +40,41 @@ class ScipyDistribution(StochasticModel):
     def __init__(self,
                  scipy_distribution: Optional[Union[rv_continuous, rv_discrete]] = None,
                  **parameters) -> None:
-        self.__distribution = scipy_distribution
-        self.__parameters = parameters
-        self.__fixed_parameters = len(parameters) > 0
+        self._distribution = scipy_distribution
+        self._parameters = parameters
+        self._fixed_parameters = len(parameters) > 0
 
     def draw_samples(self, num_samples: int) -> np.ndarray:
-        if len(self.__parameters) == 0 or self.__distribution is None:
+        if len(self._parameters) == 0 or self._distribution is None:
             raise ValueError('Cannot draw samples. Model has not been fit!')
 
-        return shape_into_2d(self.__distribution.rvs(size=num_samples,
-                                                     **self.parameters))
+        return shape_into_2d(self._distribution.rvs(size=num_samples,
+                                                    **self.parameters))
 
     def fit(self, X: np.ndarray) -> None:
-        if self.__distribution is None:
+        if self._distribution is None:
             # Currently only support continuous distributions for auto selection.
             best_model, best_parameters = self.find_suitable_continuous_distribution(X)
-            self.__distribution = best_model
-            self.__parameters = best_parameters
-        elif not self.__fixed_parameters:
-            self.__parameters \
-                = self.map_scipy_distribution_parameters_to_names(self.__distribution,
-                                                                  self.__distribution.fit(shape_into_2d(X)))
+            self._distribution = best_model
+            self._parameters = best_parameters
+        elif not self._fixed_parameters:
+            self._parameters \
+                = self.map_scipy_distribution_parameters_to_names(self._distribution,
+                                                                  self._distribution.fit(shape_into_2d(X)))
 
     @property
     def parameters(self) -> Dict[str, float]:
-        return self.__parameters
+        return self._parameters
 
     @property
     def scipy_distribution(self) -> Optional[Union[rv_continuous, rv_discrete]]:
-        return self.__distribution
+        return self._distribution
 
     def clone(self):
-        if self.__fixed_parameters:
-            return ScipyDistribution(scipy_distribution=self.__distribution, **self.__parameters)
+        if self._fixed_parameters:
+            return ScipyDistribution(scipy_distribution=self._distribution, **self._parameters)
         else:
-            return ScipyDistribution(scipy_distribution=self.__distribution)
+            return ScipyDistribution(scipy_distribution=self._distribution)
 
     @staticmethod
     def find_suitable_continuous_distribution(distribution_samples: np.ndarray,
@@ -154,14 +154,14 @@ class EmpiricalDistribution(StochasticModel):
     """ A distribution model for uniformly sampling from data samples. """
 
     def __init__(self) -> None:
-        self.__data = None
+        self._data = None
 
     @property
     def data(self) -> np.ndarray:
-        return self.__data
+        return self._data
 
     def fit(self, X: np.ndarray) -> None:
-        self.__data = shape_into_2d(X)
+        self._data = shape_into_2d(X)
 
     def draw_samples(self, num_samples: int) -> np.ndarray:
         if self.data is None:
