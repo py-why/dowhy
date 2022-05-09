@@ -41,6 +41,11 @@ def fit_causal_model_of_target(causal_model: ProbabilisticCausalModel,
             X=training_data[get_ordered_predecessors(causal_model.graph, target_node)].to_numpy(),
             Y=training_data[target_node].to_numpy())
 
+    # To be able to validate that the graph structure did not change between fitting and causal query, we store the
+    # parents of a node during fit. That way, before sampling, we can verify the parents are still the same. While
+    # this would automatically fail when the number of parents is different, there are other more subtle cases,
+    # where the number is still the same, but it's different parents, and therefore different data. That would yield
+    # wrong results, but would not fail.
     causal_model.graph.nodes[target_node][PARENTS_DURING_FIT] = \
         get_ordered_predecessors(causal_model.graph, target_node)
 
