@@ -74,9 +74,9 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
     @pytest.mark.parametrize(["estimator_method", "effect_strength_on_t", "benchmark_common_causes", "simulated_method_name"],
-                             [("backdoor.linear_regression", [1,2,3], ["W3"], "PartialR2"),])
+                             [("backdoor.linear_regression", [1,2,3], ["W3"], "linear-partial-R2"),])
     @patch("matplotlib.pyplot.figure")
-    def test_linear_sensitivity_analysis(self, mock_fig,estimator_method,
+    def test_linear_sensitivity_with_confounders(self, mock_fig,estimator_method,
             effect_strength_on_t, benchmark_common_causes, simulated_method_name):
         np.random.seed(100) 
         data = dowhy.datasets.linear_dataset( beta = 10,
@@ -120,9 +120,9 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
     @pytest.mark.parametrize(["estimator_method", "effect_strength_on_t", "benchmark_common_causes", "simulated_method_name"],
-                             [("backdoor.linear_regression", [1,2,3], ["W3"], "PartialR2"),])
+                             [("backdoor.linear_regression", [1,2,3], ["W3"], "linear-partial-R2"),])
     @patch("matplotlib.pyplot.figure")
-    def test_linear_sensitivity_analysis2(self, mock_fig,estimator_method,
+    def test_linear_sensitivity_given_strength_of_confounding(self, mock_fig,estimator_method,
             effect_strength_on_t, benchmark_common_causes, simulated_method_name):
         np.random.seed(100) 
         data = dowhy.datasets.linear_dataset( beta = 10,
@@ -161,9 +161,9 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
     @pytest.mark.parametrize(["estimator_method", "effect_strength_on_t", "benchmark_common_causes", "simulated_method_name", "rvalue_threshold"],
-                             [("backdoor.linear_regression", [1,2,3], ["W3"], "PartialR2", 0.95),])
+                             [("backdoor.linear_regression", [1,2,3], ["W3"], "linear-partial-R2", 0.95),])
     @patch("matplotlib.pyplot.figure")
-    def test_linear_sensitivity_analysis3(self, mock_fig,estimator_method,
+    def test_linear_sensitivity_dataset_without_confounders(self, mock_fig,estimator_method,
             effect_strength_on_t, benchmark_common_causes, simulated_method_name, rvalue_threshold):
         np.random.seed(100) 
         data = dowhy.datasets.linear_dataset( beta = 10,
@@ -201,9 +201,9 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert all((val >= 0 and val <=1) for val in refute2.benchmarking_results['r2tu_w']) 
         assert all((val >= 0 and val <=1) for val in refute2.benchmarking_results['r2yu_tw'])
         assert  refute2.stats['r2yt_w'] >= 0 and refute2.stats['r2yt_w'] <= 1
-
+        
         print(refute2.stats['robustness_value'])
-        assert refute2.stats['robustness_value'] >= rvalue_threshold and refute2.stats['robustness_value'] <= 1
+        #for a dataset with no confounders, the robustness value should be higher than a given threshold (0.95 in our case)
+        assert refute2.stats['robustness_value'] >= rvalue_threshold and refute2.stats['robustness_value'] <= 1 
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
-
     

@@ -44,8 +44,9 @@ class AddUnobservedCommonCause(CausalRefuter):
         :param effect_fraction_on_treatment: float: If effect_strength_on_treatment is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on treatment. Defaults to 1.
         :param effect_fraction_on_outcome: float: If effect_strength_on_outcome is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on outcome. Defaults to 1.
         :param plotmethod: string: Type of plot to be shown. If None, no plot is generated. This parameter is used only only when more than one treatment confounder effect values or outcome confounder effect values are provided. Default is "colormesh". Supported values are "contour", "colormesh" when more than one value is provided for both confounder effect value parameters; "line" when provided for only one of them.
-        :param simulated_methods_name: method type to add unobserved common cause. "linear_based" by default."PartialR2" for linear sensitivity analysis
-        :param percent_change_rvalue: percentage reduction for robustness value
+        :param simulated_method_name: method type to add unobserved common cause. "linear-partial-R2" for linear sensitivity analysis
+        :param percent_change_estimate: It is the percentage of reduction of treatment estimate that could alter the results (default = 1)
+                                        if percent_change_estimate = 1, the robustness value describes the strength of association of confounders with treatment and outcome in order to reduce the estimate by 100% i.e bring it down to 0.
         :param confounder_increases_estimate: True implies that confounder increases the absolute value of estimate and vice versa. (Default = False)
         :param benchmark_common_causes: names of variables for bounding strength of confounders
         :param significance_level: confidence interval for statistical inference(default = 0.05)
@@ -63,7 +64,7 @@ class AddUnobservedCommonCause(CausalRefuter):
         self.frac_strength_outcome = kwargs["effect_fraction_on_outcome"] if "effect_fraction_on_outcome" in kwargs else 1
         self.simulated_method_name = kwargs["simulated_method_name"] if "simulated_method_name" in kwargs else "linear_based"
         self.plotmethod = kwargs['plotmethod'] if "plotmethod" in kwargs else "colormesh"
-        self.percent_change_rvalue = kwargs["percent_change_rvalue"] if 'percent_change_rvalue' in kwargs else 1.0
+        self.percent_change_estimate = kwargs["percent_change_estimate"] if 'percent_change_estimate' in kwargs else 1.0
         self.significance_level = kwargs["significance_level"] if "significance_level" in kwargs else 0.05
         self.confounder_increases_estimate = kwargs["confounder_increases_estimate"] if "confounder_increases_estimate" in kwargs else False
         self.benchmark_common_causes = kwargs["benchmark_common_causes"] if "benchmark_common_causes" in kwargs else None
@@ -186,7 +187,7 @@ class AddUnobservedCommonCause(CausalRefuter):
 
         :return: CausalRefuter: An object that contains the estimated effect and a new effect and the name of the refutation used.
         """
-        if self.simulated_method_name == "PartialR2":
+        if self.simulated_method_name == "linear-partial-R2":
             if not(isinstance(self._estimate.estimator, LinearRegressionEstimator)):
                 raise NotImplementedError("Currently only LinearRegressionEstimator is supported for Sensitivity Analysis")
 
@@ -198,7 +199,7 @@ class AddUnobservedCommonCause(CausalRefuter):
 
             analyzer = LinearSensitivityAnalyzer(estimator = self._estimate.estimator,
             data = self._data, treatment_name = self._treatment_name, 
-            percent_change_rvalue = self.percent_change_rvalue, significance_level = self.significance_level, benchmark_common_causes= self.benchmark_common_causes, null_hypothesis_effect = self.null_hypothesis_effect,
+            percent_change_estimate = self.percent_change_estimate, significance_level = self.significance_level, benchmark_common_causes= self.benchmark_common_causes, null_hypothesis_effect = self.null_hypothesis_effect,
             frac_strength_treatment = self.frac_strength_treatment, frac_strength_outcome = self.frac_strength_outcome, common_causes_order = self._estimate.estimator._observed_common_causes.columns)
             
             analyzer.check_sensitivity(plot = self.plot_estimate)

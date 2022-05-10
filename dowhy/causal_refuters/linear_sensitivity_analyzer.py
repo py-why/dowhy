@@ -15,7 +15,8 @@ class LinearSensitivityAnalyzer:
     :param estimator: linear estimator of the causal model
     :param data: Pandas dataframe
     :param treatment_name: name of treatment
-    :param percent_change_rvalue: percentage reduction for robustness value
+     :param percent_change_estimate: It is the percentage of reduction of treatment estimate that could alter the results (default = 1)
+                                        if percent_change_estimate = 1, the robustness value describes the strength of association of confounders with treatment and outcome in order to reduce the estimate by 100% i.e bring it down to 0.
     :param null_hypothesis_effect: assumed effect under the null hypothesis
     :param confounder_increases_estimate: True implies that confounder increases the absolute value of estimate and vice versa. (Default = True)
     :param benchmark_common_causes: names of variables for bounding strength of confounders
@@ -25,7 +26,7 @@ class LinearSensitivityAnalyzer:
     :param common_causes_order: The order of column names in OLS regression data
     """
 
-    def __init__(self, estimator = None, data = None, treatment_name = None, percent_change_rvalue = 1.0, significance_level = 0.05, confounder_increases_estimate = True, benchmark_common_causes = None, null_hypothesis_effect = 0, frac_strength_treatment = None, frac_strength_outcome = None, common_causes_order = None):
+    def __init__(self, estimator = None, data = None, treatment_name = None, percent_change_estimate = 1.0, significance_level = 0.05, confounder_increases_estimate = True, benchmark_common_causes = None, null_hypothesis_effect = 0, frac_strength_treatment = None, frac_strength_outcome = None, common_causes_order = None):
         self.data = data
         self.treatment_name = []
         # original_treatment_name: : stores original variable names for labelling
@@ -33,7 +34,7 @@ class LinearSensitivityAnalyzer:
         for t in range(len(treatment_name)):
             self.treatment_name.append("x"+str(t+1))
         
-        self.percent_change_rvalue = percent_change_rvalue
+        self.percent_change_estimate = percent_change_estimate
         self.significance_level = significance_level
         self.confounder_increases_estimate = confounder_increases_estimate
         self.estimator = estimator
@@ -68,13 +69,13 @@ class LinearSensitivityAnalyzer:
         self.t_stats = None
         # partial_f2: value to determine if a regression model and a nested version of it have a statistically significant difference between them
         self.partial_f2 = None
-        # r2tu_w: partial R^2  of unobserved confounder "u" with treatment "t", after controlling for observed covariates "w"
+        # r2tu_w: partial R^2  of unobserved confounder "u" with treatment "t", after conditioning on observed covariates "w"
         self.r2tu_w = None
-        # r2yu_tw: partial R^2  of unobserved confounder "u" with outcome "y", after controlling for observed covariates "w" and treatment "t"
+        # r2yu_tw: partial R^2  of unobserved confounder "u" with outcome "y", after conditioning on observed covariates "w" and treatment "t"
         self.r2yu_tw = None
-        # r2twj_w: partial R^2 of observed covariate wj with treatment "t", after controlling for observed covariates "w" excluding wj
+        # r2twj_w: partial R^2 of observed covariate wj with treatment "t", after conditioning on observed covariates "w" excluding wj
         self.r2twj_w = None
-        # r2ywj_tw:  partial R^2 of observed covariate wj with outcome "y", after controlling for observed covariates "w" (excluding wj) and treatment "t"
+        # r2ywj_tw:  partial R^2 of observed covariate wj with outcome "y", after conditioning on observed covariates "w" (excluding wj) and treatment "t"
         self.r2ywj_tw = None
         # benchmarking_results: dataframe containing information about bounds and bias adjusted terms
         self.benchmarking_results = None
@@ -128,7 +129,7 @@ class LinearSensitivityAnalyzer:
         """
         Function to calculate the robustness value. 
         It is the minimum strength of association that confounders must have with treatment and outcome to change conclusions.
-        Robustness value describes how strong the association must be in order to reduce the estimated effect by (100 * percent_change_rvalue)%.
+        Robustness value describes how strong the association must be in order to reduce the estimated effect by (100 * percent_change_estimate)%.
         Robustness value close to 1 means the treatment effect can handle strong confounders explaining  almost all residual variation of the treatment and the outcome.
         Robustness value close to 0 means that even very weak confounders can also change the results.
 
@@ -138,7 +139,7 @@ class LinearSensitivityAnalyzer:
         """
 
         partial_cohen_f = abs(self.t_stats / np.sqrt(self.degree_of_freedom)) #partial f of treatment t with outcome y. f = t_val/sqrt(dof)
-        f_q = self.percent_change_rvalue * partial_cohen_f
+        f_q = self.percent_change_estimate * partial_cohen_f
         t_alpha_df_1 = t.ppf(alpha / 2 , self.degree_of_freedom - 1) # t-value threshold with alpha significance level and dof-1 degrees of freedom
         f_critical = abs(t_alpha_df_1) / np.sqrt(self.degree_of_freedom - 1)
         f_adjusted = f_q - f_critical
@@ -158,8 +159,8 @@ class LinearSensitivityAnalyzer:
         """
         Computes the bias adjusted estimate, standard error, t-value,  partial R2, confidence intervals
 
-        :param r2tu_w: partial r^2 from regressing unobserved confounder u on treatment t after controlling for observed covariates w
-        :param r2yu_tw: partial r^2 from regressing unobserved confounder u on outcome y after controlling for observed covariates w and treatment t
+        :param r2tu_w: partial r^2 from regressing unobserved confounder u on treatment t after conditioning on observed covariates w
+        :param r2yu_tw: partial r^2 from regressing unobserved confounder u on outcome y after conditioning on observed covariates w and treatment t
 
         :returns: Python dictionary with information about partial R^2 of confounders with treatment and outcome and bias adjusted variables
         """
@@ -215,9 +216,9 @@ class LinearSensitivityAnalyzer:
         RV_qalpha = self.robustness_value_func(alpha = self.significance_level)
 
         if self.confounder_increases_estimate:  
-            self.null_hypothesis_effect = self.estimate * (1 - self.percent_change_rvalue) 
+            self.null_hypothesis_effect = self.estimate * (1 - self.percent_change_estimate) 
         else:
-            self.null_hypothesis_effect = self.estimate * (1 + self.percent_change_rvalue)
+            self.null_hypothesis_effect = self.estimate * (1 + self.percent_change_estimate)
 
         self.t_stats = (self.estimate - self.null_hypothesis_effect ) / self.standard_error
         self.partial_f2 = self.t_stats ** 2 / self.degree_of_freedom
@@ -225,8 +226,8 @@ class LinearSensitivityAnalyzer:
         # build a new regression model by considering treatment variables as outcome 
         treatment_linear_model = self.treatment_regression()
 
-        # r2twj_w is partial R^2 of covariate wj with treatment "t", after controlling for covariates w(excluding wj)
-        # r2ywj_tw is partial R^2 of covariate wj with outcome "y", after controlling for covariates w(excluding wj) and treatment "t"
+        # r2twj_w is partial R^2 of covariate wj with treatment "t", after conditioning on covariates w(excluding wj)
+        # r2ywj_tw is partial R^2 of covariate wj with outcome "y", after conditioning on covariates w(excluding wj) and treatment "t"
         self.r2twj_w = []
         self.r2ywj_tw = []
 
@@ -238,7 +239,7 @@ class LinearSensitivityAnalyzer:
             r2twj_w = self.r2twj_w[i]
             r2ywj_tw = self.r2ywj_tw[i]
             
-            # r2tu_w is the partial r^2 from regressing u on t after controlling for w
+            # r2tu_w is the partial r^2 from regressing u on t after conditioning on w
             self.r2tu_w = self.frac_strength_treatment * (r2twj_w / (1 - r2twj_w))
             if(any(val >= 1 for val in self.r2tu_w)):
                 raise ValueError("r2tu_w can not be >= 1. Try a lower frac_strength_treatment value")
