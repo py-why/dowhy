@@ -66,7 +66,7 @@ def convert_to_data_frame(dict_with_np_arrays: Dict[Any, np.ndarray]) -> pd.Data
         {k: convert_numpy_array_to_pandas_column(v) for (k, v) in dict_with_np_arrays.items()})
 
 
-def column_stack_selected_numpy_arrays(dict_with_np_arrays: Dict[Any, np.ndarray],
+def column_stack_selected_numpy_arrays(dict_with_np_arrays: Union[Dict[Any, np.ndarray], pd.DataFrame],
                                        keys: List[Any]) -> np.ndarray:
     return np.column_stack([dict_with_np_arrays[x] for x in keys])
 

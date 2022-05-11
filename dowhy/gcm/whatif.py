@@ -9,8 +9,7 @@ from dowhy.gcm.cms import ProbabilisticCausalModel, InvertibleStructuralCausalMo
 from dowhy.gcm.fitting_sampling import draw_samples
 from dowhy.gcm.graph import get_ordered_predecessors, is_root_node, DirectedGraph, validate_causal_dag, \
     validate_node_in_graph
-from dowhy.gcm.util.general import convert_numpy_array_to_pandas_column, column_stack_selected_numpy_arrays, \
-    convert_to_data_frame
+from dowhy.gcm.util.general import convert_numpy_array_to_pandas_column as to_column
 
 
 def interventional_samples(causal_model: ProbabilisticCausalModel,
@@ -44,26 +43,23 @@ def interventional_samples(causal_model: ProbabilisticCausalModel,
     return _interventional_samples(causal_model, observed_data, interventions)
 
 
-def _interventional_samples(causal_model: ProbabilisticCausalModel,
+def _interventional_samples(pcm: ProbabilisticCausalModel,
                             observed_data: pd.DataFrame,
                             interventions: Dict[Any, Callable[[np.ndarray], np.ndarray]]) -> pd.DataFrame:
-    interventional_samples = observed_data.copy()
-    affected_nodes = _get_nodes_affected_by_intervention(causal_model.graph, interventions.keys())
+    samples = observed_data.copy()
+    affected_nodes = _get_nodes_affected_by_intervention(pcm.graph, interventions.keys())
 
-    for node in nx.topological_sort(causal_model.graph):
+    for node in nx.topological_sort(pcm.graph):
         if node not in affected_nodes:
             continue
-
-        if is_root_node(causal_model.graph, node):
-            node_data = interventional_samples[node]
+        if is_root_node(pcm.graph, node):
+            node_data = samples[node]
         else:
-            node_data = convert_numpy_array_to_pandas_column(
-                causal_model.causal_mechanism(node).draw_samples(
-                    interventional_samples[get_ordered_predecessors(causal_model.graph, node)].to_numpy()))
+            node_data = to_column(pcm.causal_mechanism(node).draw_samples(_parent_samples_of(node, pcm, samples)))
 
-        interventional_samples[node] = _evaluate_intervention(node, interventions, node_data)
+        samples[node] = _evaluate_intervention(node, interventions, node_data)
 
-    return interventional_samples
+    return samples
 
 
 def _get_nodes_affected_by_intervention(causal_graph: DirectedGraph, target_nodes: Iterable[Any]) -> List[Any]:
@@ -86,7 +82,7 @@ def counterfactual_samples(causal_model: Union[StructuralCausalModel, Invertible
                            interventions: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
                            observed_data: Optional[pd.DataFrame] = None,
                            noise_data: Optional[pd.DataFrame] = None) -> pd.DataFrame:
-    """Estimates counterfactual data for observed data if we were to perform specified interventions. This function 
+    """Estimates counterfactual data for observed data if we were to perform specified interventions. This function
     implements the 3-step process for computing counterfactuals by Pearl (see https://ftp.cs.ucla.edu/pub/stat_ser/r485.pdf).
 
     :param causal_model: The (invertible) structural causal model we perform this intervention on. If noise_data is
@@ -119,27 +115,29 @@ def counterfactual_samples(causal_model: Union[StructuralCausalModel, Invertible
         noise_data = compute_noise_from_data(causal_model, observed_data)
 
     # Action + Prediction: Propagate the intervention downstream using recovered noise values.
-    return _estimate_counterfactuals(causal_model, interventions, noise_data)
+    return _counterfactual_samples(causal_model, interventions, noise_data)
 
 
-def _estimate_counterfactuals(causal_model: StructuralCausalModel,
-                              interventions: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
-                              noise_data: pd.DataFrame) -> pd.DataFrame:
-    counterfactual_samples = {}
+def _counterfactual_samples(scm: StructuralCausalModel,
+                            interventions: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
+                            noise_data: pd.DataFrame) -> pd.DataFrame:
+    topologically_sorted_nodes = list(nx.topological_sort(scm.graph))
+    samples = pd.DataFrame(np.empty((noise_data.shape[0], len(topologically_sorted_nodes))),
+                           columns=topologically_sorted_nodes)
 
-    for node in nx.topological_sort(causal_model.graph):
-        if is_root_node(causal_model.graph, node):
+    for node in topologically_sorted_nodes:
+        if is_root_node(scm.graph, node):
             node_data = noise_data[node].to_numpy()
         else:
-            node_data = convert_numpy_array_to_pandas_column(
-                causal_model.causal_mechanism(node).evaluate(
-                    column_stack_selected_numpy_arrays(counterfactual_samples,
-                                                       get_ordered_predecessors(causal_model.graph, node)),
-                    noise_data[node].to_numpy()))
+            node_data = to_column(scm.causal_mechanism(node).evaluate(_parent_samples_of(node, scm, samples),
+                                                                      noise_data[node].to_numpy()))
+        samples[node] = _evaluate_intervention(node, interventions, node_data)
 
-        counterfactual_samples[node] = _evaluate_intervention(node, interventions, node_data)
+    return samples
 
-    return convert_to_data_frame(counterfactual_samples)
+
+def _parent_samples_of(node, scm, samples):
+    return samples[get_ordered_predecessors(scm.graph, node)].to_numpy()
 
 
 def _evaluate_intervention(node: Any,
