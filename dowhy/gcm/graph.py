@@ -112,6 +112,11 @@ def is_root_node(causal_graph: DirectedGraph, node: Any) -> bool:
 
 
 def get_ordered_predecessors(causal_graph: DirectedGraph, node: Any) -> List[Any]:
+    """This function returns predecessors of a node in a well-defined order.
+
+    This is necessary, because we select subsets of columns in Dataframes by using a node's parents, and these parents
+    might not be returned in a reliable order.
+    """
     return sorted(causal_graph.predecessors(node))
 
 
