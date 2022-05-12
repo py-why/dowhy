@@ -151,7 +151,7 @@ class ScipyDistribution(StochasticModel):
 
 
 class EmpiricalDistribution(StochasticModel):
-    """ A distribution model for uniformly sampling from data samples. """
+    """An implementation of a stochastic model that uniformly samples from data samples."""
 
     def __init__(self) -> None:
         self._data = None
