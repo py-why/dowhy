@@ -18,14 +18,14 @@ class ShapleyApproximationMethods(Enum):
     AUTO: Using EXACT when number of players is below 6 and EARLY_STOPPING otherwise.
     EXACT: Generate all possible subsets and estimate Shapley values with corresponding subset weights.
     EXACT_FAST: Generate all possible subsets and estimate Shapley values via weighed least squares regression. This can
-     be faster, but, depending on the set function, numerically less stable.
+                be faster, but, depending on the set function, numerically less stable.
     SUBSET_SAMPLING: Randomly samples subsets and estimate Shapley values via weighed least squares regression. Here,
-     only a certain number of randomly drawn subsets are used.
+                     only a certain number of randomly drawn subsets are used.
     EARLY_STOPPING: Estimate Shapley values based on a few randomly generated permutations. Stop the estimation process
-     when the the Shapley values do not change much on average anymore between runs.
+                    when the the Shapley values do not change much on average anymore between runs.
     PERMUTATION: Estimates Shapley values based on a fixed number of randomly generated permutations. By fine tuning
-     hyperparameters, this can be potentially faster than the early stopping approach due to a better
-     utilization of the parallelization.
+                 hyperparameters, this can be potentially faster than the early stopping approach due to a better
+                 utilization of the parallelization.
     """
     AUTO = 0,
     EXACT = 1,
@@ -41,6 +41,21 @@ class ShapleyConfig:
                  num_samples: int = 5000,
                  min_percentage_change_threshold: float = 0.01,
                  n_jobs: Optional[int] = None) -> None:
+        """Config for estimating Shapley values.
+
+        :param approximation_method: Type of approximation methods (see :py:class:`ShapleyApproximationMethods <dowhy.gcm.shapley.ShapleyApproximationMethods>`).
+        :param num_samples: Number of samples used for approximating the Shapley values. Depending on the approximation
+                            method, this can either represent the number of drawn subsets (in SUBSET_SAMPLING) or the
+                            number of drawn permutations (in EARLY_STOPPING and PERMUTATION). In case of EARLY_STOPPING,
+                            this also represents a limit on the evaluation runs.
+        :param min_percentage_change_threshold: This parameter is only relevant for EARLY_STOPPING and indicates the
+                                                minimum required change of the Shapley values between two runs
+                                                (i.e. evaluation of permutations) before the estimation stops.
+                                                For instance, if the Shapley value changes less than the given value for
+                                                a certain number of consecutive runs, the algorithm stops and returns
+                                                the current result.
+        :param n_jobs: Number of parallel jobs.
+        """
         self.approximation_method = approximation_method
         self.num_samples = num_samples
         self.min_percentage_change_threshold = min_percentage_change_threshold
@@ -50,6 +65,29 @@ class ShapleyConfig:
 def estimate_shapley_values(set_func: Callable[[np.ndarray], Union[float, np.ndarray]],
                             num_players: int,
                             shapley_config: Optional[ShapleyConfig] = None) -> np.ndarray:
+    """Estimates the Shapley values based on the provided set function. A set function here is defined by taking a
+    (subset) of players and returning a certain utility value. This is in the context of attributing the
+    value of the i-th player to a subset of players S by evaluating v(S u {i}) - v(S), where v is the
+    set function and i is not in S. While we use the term 'player' here, this is often a certain feature/variable.
+
+    The input of the set function is a binary vector indicating which player is part of the set. For instance, given 4
+    players (1,2,3,4) and a subset only contains players 1,2,4, then this is indicated by the vector [1, 1, 0, 1]. The
+    function is expected to return a numeric value based on this input.
+
+    Note: The set function can be arbitrary and can resemble computationally complex operations. Keep in mind
+    that the estimation of Shapley values can become computationally expensive and requires a lot of memory. If the
+    runtime is too slow, consider changing the default config.
+
+    :param set_func: A set function that expects a binary vector as input which specifies which player is part of the
+                     subset.
+    :param num_players: Total number of players.
+    :param shapley_config: A config object for indicating the approximation method and other parameters. If None is
+                           given, a default config is used. For faster runtime or more accurate results, consider
+                           creating a custom config.
+    :return: A numpy array representing the Shapley values for each player, i.e. there are as many Shapley values as
+             num_players. The i-th entry belongs to the i-th player. Here, the set function defines which index belongs
+             to which player and is responsible to keep it consistent.
+    """
     if shapley_config is None:
         shapley_config = ShapleyConfig()
 
@@ -234,24 +272,33 @@ def _approximate_shapley_values_via_early_stopping(
         pbar = tqdm(total=1)
 
     with Parallel(n_jobs=n_jobs) as parallel:
+        # The method stops if either the change between some consecutive runs is below the given threshold or the
+        # maximum number of runs is reached.
         while True:
             run_counter += 1
             subsets_to_evaluate = set()
 
+            # In each run, we create one random permutation of players. For instance, given 4 players, a permutation
+            # could be [3,1,4,2].
             permutations = [np.random.choice(num_players, num_players, replace=False)
                             for _ in range(num_permutations_per_run)]
             for permutation in permutations:
                 num_generated_permutations += 1
+                # Create all subsets belonging to the generated permutation. This is, if we have [3,1,4,2], then the
+                # subsets are [3], [3,1], [3,1,4] [3,1,4,2].
                 subsets_to_evaluate.update([subset_tuple for subset_tuple
                                             in _create_index_order_and_subset_tuples(permutation)
                                             if subset_tuple not in evaluated_subsets])
 
+            # The result for each subset is cached such that if a subset that has already been evaluated appears again,
+            # we can take this result directly.
             evaluated_subsets.update(_evaluate_set_function(set_func,
                                                             subsets_to_evaluate,
                                                             parallel,
                                                             False))
 
             for permutation in permutations:
+                # To improve the runtime, multiple permutations are evaluated in each run.
                 if shapley_values is None:
                     shapley_values = _estimate_shapley_values_of_permutation(permutation, evaluated_subsets,
                                                                              full_subset_result, empty_subset_result)
@@ -264,6 +311,8 @@ def _approximate_shapley_values_via_early_stopping(
 
             new_shap_proxy = np.array(shapley_values)
             new_shap_proxy[new_shap_proxy == 0] = config.EPS
+            # The current Shapley values are the average of the estimated values, i.e. we need to divide by the number
+            # of generated permutations here.
             new_shap_proxy /= num_generated_permutations
 
             if run_counter > 1:
@@ -275,6 +324,8 @@ def _approximate_shapley_values_via_early_stopping(
                                          f'{np.mean(percentage_changes) * 100}%')
 
                 if np.mean(percentage_changes) < min_percentage_change_threshold:
+                    # Here, the change between two runs is below the minimum threshold, but to reduce the likelihood
+                    # that this just happened by chance, we require that this happens at least for two runs in a row.
                     converged_run += 1
                     if converged_run >= 2:
                         break
@@ -291,11 +342,26 @@ def _approximate_shapley_values_via_early_stopping(
 
 
 def _create_subsets_and_weights_exact(num_players: int, high_weight: float) -> Tuple[np.ndarray, np.ndarray]:
+    """Creates all subsets and the exact weights of each subset. See Section 4.1.1. in
+
+    Janzing, D., Minorics, L., & Bloebaum, P. (2020).
+    Feature relevance quantification in explainable AI: A causal problem.
+    In International Conference on Artificial Intelligence and Statistics (pp. 2907-2916). PMLR.
+
+    for more details on this.
+
+    :param num_players: Total number of players.
+    :param high_weight: A 'high' weight for computational purposes. This is used to resemble 'infinity', but needs to be
+                        selected carefully to avoid numerical issues.
+    :return: A tuple, where the first entry is a numpy array with all subsets and the second entry is an array with the
+             corresponding weights to each subset.
+    """
     all_subsets = []
 
     num_iterations = int(np.ceil(num_players / 2))
 
     for i in range(num_iterations):
+        # Create all (unique) subsets)
         all_subsets.extend(np.array([np.bincount(combs, minlength=num_players) for combs in
                                      itertools.combinations(range(num_players), i)]))
 
@@ -311,8 +377,11 @@ def _create_subsets_and_weights_exact(num_players: int, high_weight: float) -> T
     for i, subset in enumerate(all_subsets):
         subset_size = np.sum(subset)
         if subset_size == num_players or subset_size == 0:
+            # Assigning a 'high' weight, since this resembles "infinity".
             weights[i] = high_weight
         else:
+            # The weight for a subset with a specific length (see paper mentioned in the docstring for more
+            # information).
             weights[i] = (num_players - 1) / (
                     scipy.special.binom(num_players, subset_size)
                     * subset_size
@@ -323,6 +392,15 @@ def _create_subsets_and_weights_exact(num_players: int, high_weight: float) -> T
 
 def _create_subsets_and_weights_approximation(num_players: int, high_weight: float,
                                               num_subset_samples: int) -> Tuple[np.ndarray, np.ndarray]:
+    """Randomly samples subsets and weights them based on the number of how often they appear.
+
+    :param num_players: Total number of players.
+    :param high_weight: A 'high' weight for computational purposes. This is used to resemble 'infinity', but needs to be
+                        selected carefully to avoid numerical issues.
+    :param num_subset_samples: Number of subset samples.
+    :return: A tuple, where the first entry is a numpy array with the sampled subsets and the second entry is an array
+             with the corresponding weights to each subset.
+    """
     all_subsets = [np.zeros(num_players), np.ones(num_players)]
     weights = {tuple(all_subsets[0]): high_weight, tuple(all_subsets[1]): high_weight}
 
