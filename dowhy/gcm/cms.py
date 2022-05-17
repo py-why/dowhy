@@ -7,7 +7,9 @@ from dowhy.gcm.graph import DirectedGraph, StochasticModel, ConditionalStochasti
 
 
 class ProbabilisticCausalModel:
-    """Represents a probabilistic graphical causal model."""
+    """Represents a probabilistic graphical causal model, i.e. it combines a graphical representation of causal
+    causal relationships and corresponding causal mechanism for each node describing the data generation process. The
+    causal mechanisms can be any general stochastic models."""
 
     def __init__(self, graph: Optional[DirectedGraph] = None):
         if graph is None:
@@ -39,8 +41,10 @@ class ProbabilisticCausalModel:
 
 
 class StructuralCausalModel(ProbabilisticCausalModel):
-    """Represents a structural graphical causal model, as required e.g. by
-    :func:`~dowhy.gcm.counterfactual_samples`.
+    """Represents a structural causal model (SCM), as required e.g. by
+    :func:`~dowhy.gcm.counterfactual_samples`. As compared to a :py:class:`ProbabilisticCausalModel
+<dowhy.gcm.ProbabilisticCausalModel>`, an SCM describes the data generation process in non-root nodes by functional
+    causal models.
     """
 
     def set_causal_mechanism(self, node: Any, mechanism: Union[StochasticModel, FunctionalCausalModel]) -> None:
@@ -52,7 +56,10 @@ class StructuralCausalModel(ProbabilisticCausalModel):
 
 class InvertibleStructuralCausalModel(StructuralCausalModel):
     """Represents an invertible structural graphical causal model, as required e.g. by
-    :func:`~dowhy.gcm.counterfactual_samples`.
+    :func:`~dowhy.gcm.counterfactual_samples`. This is a subclass of :py:class:`StructuralCausalModel
+<dowhy.gcm.StructuralCausalModel>` and has further restrictions on the class of causal mechanisms. Here, the
+    mechanisms of non-root nodes need to be invertible with respect to the noise, such as :py:class:`PostNonlinearModels
+<dowhy.gcm.PostNonlinearModel>`.
     """
 
     def set_causal_mechanism(self, target_node: Any,

@@ -7,7 +7,7 @@ from flaky import flaky
 from pytest import approx
 
 from dowhy.gcm.shapley import estimate_shapley_values, ShapleyApproximationMethods, ShapleyConfig
-from dowhy.gcm.util.general import mean_deviation
+from dowhy.gcm.util.general import means_difference
 
 
 @pytest.fixture
@@ -207,7 +207,7 @@ def _set_function_for_aggregated_feature_attribution(subset, X, model):
     tmp = _permute_features(X, np.arange(0, X.shape[1])[subset == 0], False)
     tmp[:, subset == 1] = X[0, subset == 1]
 
-    return mean_deviation(model(tmp), X[0])
+    return means_difference(model(tmp), X[0])
 
 
 def _permute_features(feature_samples: np.ndarray,

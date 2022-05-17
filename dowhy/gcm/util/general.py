@@ -8,11 +8,16 @@ from sklearn.preprocessing import OneHotEncoder
 
 
 def shape_into_2d(*args):
-    """
-    If necessary, shapes the input into a 2D matrix.
+    """If necessary, shapes the numpy inputs into 2D matrices.
+
     Example:
         array([1, 2, 3]) -> array([[1], [2], [3]])
         2 -> array([[2]])
+
+    :param args: The function expects numpy arrays as inputs and returns a reshaped (2D) version of them (if necessary).
+    :return: Reshaped versions of the input numpy arrays. For instance, given 1D inputs X, Y and Z, then
+             shape_into_2d(X, Y, Z) reshapes them into 2D and returns them. If an input is already 2D, it will not be
+             modified and returned as it is.
     """
 
     def shaping(X: np.ndarray):
@@ -32,16 +37,20 @@ def shape_into_2d(*args):
 
 
 def convert_numpy_array_to_pandas_column(*args) -> Union[np.ndarray, List[np.ndarray]]:
-    """
-    Prepares given np arrays to be used as column data in a pd data frame. This means, for np arrays with
+    """Prepares given np arrays to be used as column data in a pd data frame. This means, for np arrays with
     one feature, a flatten version is returned for a better performance. For np arrays with multiple columns,
     the entries (row-wise) are returned in a list.
     Example:
        array([[1], [2]]) -> array([1, 2])
        array([[1, 2], [3, 4]]) -> list([[1, 2], [3, 4]])
        array([[1]]) -> array([1])
+
+    :param args: The function expects numpy arrays and returns them as a list. This is equivalent to apply list(array)
+                 to each input separately and converting a scalar array into a list with one element.
+    :return: List versions of the input numpy arrays.
     """
 
+    # TODO: Remove this function and refactor places where it is currently used accordingly.
     def shaping(X):
         X = X.squeeze()
 
@@ -72,11 +81,22 @@ def column_stack_selected_numpy_arrays(dict_with_np_arrays: Union[Dict[Any, np.n
 
 
 def set_random_seed(random_seed: int) -> None:
+    """Sets random seed in numpy and the random module.
+
+    :param random_seed: Random see for the numpy and random module.
+    :return: None
+    """
     np.random.seed(random_seed)
     random.seed(random_seed)
 
 
 def fit_one_hot_encoders(X: np.ndarray) -> Dict[int, OneHotEncoder]:
+    """Fits one-hot encoders to each categorical column in X. A categorical input needs to be a string, i.e. a
+    categorical column consists only of strings.
+
+    :param X: Input data matrix.
+    :return: Dictionary that maps a column index to a scikit OneHotEncoder.
+    """
     X = shape_into_2d(X)
 
     one_hot_encoders = {}
@@ -157,7 +177,7 @@ def has_categorical(X: np.ndarray) -> bool:
     return status
 
 
-def mean_deviation(randomized_predictions: np.ndarray, baseline_values: np.ndarray) -> np.ndarray:
+def means_difference(randomized_predictions: np.ndarray, baseline_values: np.ndarray) -> np.ndarray:
     return np.mean(randomized_predictions).squeeze() - np.mean(baseline_values).squeeze()
 
 

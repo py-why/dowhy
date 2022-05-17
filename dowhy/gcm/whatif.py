@@ -49,6 +49,8 @@ def _interventional_samples(pcm: ProbabilisticCausalModel,
     samples = observed_data.copy()
     affected_nodes = _get_nodes_affected_by_intervention(pcm.graph, interventions.keys())
 
+    # Simulating interventions by propagating the effects through the graph. For this, we iterate over the nodes based
+    # on their topological order.
     for node in nx.topological_sort(pcm.graph):
         if node not in affected_nodes:
             continue
@@ -57,6 +59,9 @@ def _interventional_samples(pcm: ProbabilisticCausalModel,
         else:
             node_data = to_column(pcm.causal_mechanism(node).draw_samples(_parent_samples_of(node, pcm, samples)))
 
+        # After drawing samples of the node based on the data generation process, we apply the corresponding
+        # intervention. The inputs of downstream nodes are therefore based on the outcome of the intervention in this
+        # node.
         samples[node] = _evaluate_intervention(node, interventions, node_data)
 
     return samples
@@ -142,14 +147,18 @@ def _parent_samples_of(node, scm, samples):
 
 def _evaluate_intervention(node: Any,
                            interventions: Dict[Any, Callable[[np.ndarray], np.ndarray]],
-                           node_data: np.ndarray) -> np.ndarray:
+                           pre_intervention_data: np.ndarray) -> np.ndarray:
+    # Check if we need to apply an intervention on the given node.
     if node in interventions:
-        post_intervention_data = np.array(list(map(interventions[node], node_data)))
-        if node_data.shape != post_intervention_data.shape:
+        # Apply intervention function to the data of the node.
+        post_intervention_data = np.array(list(map(interventions[node], pre_intervention_data)))
+
+        # Check if the intervention function changes the shape of the data.
+        if pre_intervention_data.shape != post_intervention_data.shape:
             raise RuntimeError(
                 'Dimension of data corresponding to the node `%s` after intervention is different than before '
                 'intervention.' % node)
 
         return post_intervention_data
     else:
-        return node_data
+        return pre_intervention_data

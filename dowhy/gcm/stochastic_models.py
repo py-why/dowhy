@@ -36,6 +36,7 @@ _DISCRETE_DISTRIBUTIONS = {x.name: x for x in _DISCRETE_DISTRIBUTIONS}
 
 
 class ScipyDistribution(StochasticModel):
+    """Represents any parametric distribution that can be modeled by scipy."""
 
     def __init__(self,
                  scipy_distribution: Optional[Union[rv_continuous, rv_discrete]] = None,
@@ -131,6 +132,15 @@ class ScipyDistribution(StochasticModel):
     @staticmethod
     def map_scipy_distribution_parameters_to_names(scipy_distribution: Union[rv_continuous, rv_discrete],
                                                    parameters: Tuple[float]) -> Dict[str, float]:
+        """Helper function to obtain a mapping from parameter name to parameter value. Depending whether the
+        distribution is discrete or continuous, there are slightly different parameter names. The given parameters are
+        assumed to follow the order as provided by the scipy fit function.
+
+        :param scipy_distribution: The scipy distribution.
+        :param parameters: The values of the corresponding parameters of the distribution. Here, it is expected to
+                           follow the same order as defined by the scipy fit function.
+        :return: A dictionary that maps a parameter name to its value.
+        """
         if scipy_distribution.shapes:
             parameter_list = [name.strip() for name in scipy_distribution.shapes.split(',')]
         else:
