@@ -26,13 +26,40 @@ def kernel_based(X: np.ndarray,
                  bootstrap_n_jobs: Optional[int] = None,
                  p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float] = quantile_based_fwer) \
         -> float:
-    """Prepares the data and uses kernel (conditional) independence test.
+    """Prepares the data and uses kernel (conditional) independence test. The independence test estimates a p-value
+    for the null hypothesis that X and Y are independent (given Z). Depending whether Z is given, a conditional or
+    pairwise independence test is performed.
 
-    Depending whether Z is given, a conditional or pairwise independence test is performed.
-    
     If Z is given: Using KCI as conditional independence test.
     If Z is not given: Using HSIC as pairwise independence test.
-    
+
+    Note:
+    - The data can be multivariate, i.e. the given input matrices can have multiple columns.
+    - Categorical data need to be represented as strings.
+    - It is possible to apply a different kernel to each column in the matrices. For instance, a RBF kernel for the
+      first dimension in X and a delta kernel for the second.
+
+    Based on the work:
+    - Conditional: K. Zhang, J. Peters, D. Janzing, B. Schölkopf. *Kernel-based Conditional Independence Test and Application in Causal Discovery*. UAI'11, Pages 804–813, 2011.
+    - Pairwise: A. Gretton, K. Fukumizu, C.-H. Teo, L. Song, B. Schölkopf, A. Smola. *A Kernel Statistical Test of Independence*. NIPS 21, 2007.
+
+    :param X: Data matrix for observations from X.
+    :param Y: Data matrix for observations from Y.
+    :param Z: Optional data matrix for observations from Z. This is the conditional variable.
+    :param kernels_X: A list of kernels corresponding to each column in X. If None is given, the RBF kernel is used for
+                      continuous data and the delta-kernel for categorical data.
+    :param kernels_Y: A list of kernels corresponding to each column in Y. If None is given, the RBF kernel is used for
+                      continuous data and the delta-kernel for categorical data.
+    :param kernels_Z: A list of kernels corresponding to each column in Z. If None is given, the RBF kernel is used for
+                      continuous data and the delta-kernel for categorical data.
+    :param use_bootstrap: If True, the independence tests are performed on multiple subsets of the data and the final
+                          p-value is constructed based on the provided p_value_adjust_func function.
+    :param bootstrap_num_runs: Number of bootstrap runs (only relevant if use_bootstrap is True).
+    :param bootstrap_num_samples_per_run: Number of samples used in a bootstrap run (only relevant if use_bootstrap is
+                                          True).
+    :param bootstrap_n_jobs: Number of parallel jobs for the boostrap runs.
+    :param p_value_adjust_func: A callable that expects a numpy array of multiple p-values and returns one p-value. This
+                                is typically used a family wise error rate control method.
     :return: The p-value for the null hypothesis that X and Y are independent (given Z).
     """
     bootstrap_n_jobs = config.default_n_jobs if bootstrap_n_jobs is None else bootstrap_n_jobs
@@ -99,16 +126,38 @@ def approx_kernel_based(X: np.ndarray,
                         bootstrap_n_jobs: Optional[int] = None,
                         p_value_adjust_func:
                         Callable[[Union[np.ndarray, List[float]]], float] = quantile_based_fwer) -> float:
-    """Implementation of the Randomized Conditional Independence Test.
+    """Implementation of the Randomized Conditional Independence Test. The independence test estimates a p-value
+    for the null hypothesis that X and Y are independent (given Z). Depending whether Z is given, a conditional or
+    pairwise independence test is performed.
     
+    If Z is given: Using RCIT as conditional independence test.
+    If Z is not given: Using RIT as pairwise independence test.
+
+    Note:
+    - The data can be multivariate, i.e. the given input matrices can have multiple columns.
+    - Categorical data need to be represented as strings.
+    - It is possible to apply a different kernel to each column in the matrices. For instance, a RBF kernel for the
+      first dimension in X and a delta kernel for the second.
+      
     Based on the work:
         Strobl, Eric V., Kun Zhang, and Shyam Visweswaran.
         Approximate kernel-based conditional independence tests for fast non-parametric causal discovery.
         Journal of Causal Inference 7.1 (2019).
-
-    This is an implementation in Python and is inspired by the implementation in R from
-        https://github.com/ericstrobl/RCIT/
-    written by Eric V. Strobl.
+    
+    :param X: Data matrix for observations from X.
+    :param Y: Data matrix for observations from Y.
+    :param Z: Optional data matrix for observations from Z. This is the conditional variable.
+    :param num_random_features_X: Number of features sampled from the approximated kernel map for X. 
+    :param num_random_features_Y: Number of features sampled from the approximated kernel map for Y. 
+    :param num_random_features_Z: Number of features sampled from the approximated kernel map for Z. 
+    :param num_permutations: Number of permutations for estimating the test test statistic.
+    :param use_bootstrap: If True, the independence tests are performed on multiple subsets of the data and the final
+                          p-value is constructed based on the provided p_value_adjust_func function.
+    :param bootstrap_num_runs: Number of bootstrap runs (only relevant if use_bootstrap is True).
+    :param bootstrap_n_jobs: Number of parallel jobs for the boostrap runs.
+    :param p_value_adjust_func: A callable that expects a numpy array of multiple p-values and returns one p-value. This
+                                is typically used a family wise error rate control method.
+    :return: The p-value for the null hypothesis that X and Y are independent (given Z).
     """
     bootstrap_n_jobs = config.default_n_jobs if bootstrap_n_jobs is None else bootstrap_n_jobs
 
@@ -166,6 +215,7 @@ def _kci(X: np.ndarray,
     k_y = np.ones((X.shape[0], X.shape[0]))
     k_z = np.ones((X.shape[0], X.shape[0]))
 
+    # Applying kernels to each dimension. The product of the results is equivalent to the convolution of all kernels.
     for i in range(X.shape[1]):
         if np.unique(X[:, i]).shape[0] == 1:
             continue
@@ -283,6 +333,7 @@ def _hsic(X: np.ndarray,
     k_mat = np.ones((X.shape[0], X.shape[0]))
     l_mat = np.ones((X.shape[0], X.shape[0]))
 
+    # Applying kernels to each dimension. The product of the results is equivalent to the convolution of all kernels.
     for i in range(X.shape[1]):
         if np.unique(X[:, i]).shape[0] == 1:
             continue
@@ -440,6 +491,7 @@ def _rcit(X: np.ndarray, Y: np.ndarray, Z: np.ndarray,
             Y_samples = Y
             Z_samples = Z
 
+        # Apply approximate kernel mapping and create features for each (potentially multivariate) variable.
         random_features_x = Nystroem(n_components=num_random_features_X).fit_transform(X_samples)
         random_features_y = Nystroem(n_components=num_random_features_Y).fit_transform(Y_samples)
         random_features_z = Nystroem(n_components=num_random_features_Z).fit_transform(Z_samples)
@@ -456,6 +508,9 @@ def _rcit(X: np.ndarray, Y: np.ndarray, Z: np.ndarray,
         residual_x = random_features_x - z_inverse_cov_zz @ cov_xz.T
         residual_y = random_features_y - z_inverse_cov_zz @ cov_zy
 
+        # Estimate test statistic multiple times on different permutations of the data. The p-value is then the
+        # probability (i.e. fraction) of obtaining a test statistic that is greater than statistic on the non-permuted
+        # data.
         permutation_results_of_statistic = []
         for i in range(num_permutations):
             permutation_results_of_statistic.append(_estimate_rit_statistic(
