@@ -41,6 +41,19 @@ class ScipyDistribution(StochasticModel):
     def __init__(self,
                  scipy_distribution: Optional[Union[rv_continuous, rv_discrete]] = None,
                  **parameters) -> None:
+        """Initializes a stochastic model that allows to sample from a parametric distribution implemented in Scipy.
+
+        For instance, to use a beta distribution with parameters a=2 and b=0.5:
+            ScipyDistribution(stats.beta, a=2, b=0.5)
+        Or a Gaussian distribution with mean=0 and standard deviation 2:
+            ScipyDistribution(stats.norm, loc=2, scale=0.5)
+
+        Note that the parameter names need to coincide with the parameter names in the corresponding Scipy
+        implementations. See https://docs.scipy.org/doc/scipy/tutorial/stats.html for more information.
+
+        :param scipy_distribution: A continuous or discrete distribution parametric distribution implemented in Scipy.
+        :param parameters: Set of parameters of the parametric distribution.
+        """
         self._distribution = scipy_distribution
         self._parameters = parameters
         self._fixed_parameters = len(parameters) > 0
@@ -81,7 +94,10 @@ class ScipyDistribution(StochasticModel):
     def find_suitable_continuous_distribution(distribution_samples: np.ndarray,
                                               divergence_threshold: float = 10 ** -2) \
             -> Tuple[rv_continuous, Dict[str, float]]:
-        """ Tries to find the best fitting continuous parametric distribution of given samples. """
+        """ Tries to find the best fitting continuous parametric distribution of given samples. This is done by fitting
+        different parametric models and selecting the one with the smallest KL divergence between observed and generated
+        samples.
+        """
         distribution_samples = shape_into_2d(distribution_samples)
 
         currently_best_distribution = norm
@@ -161,7 +177,10 @@ class ScipyDistribution(StochasticModel):
 
 
 class EmpiricalDistribution(StochasticModel):
-    """An implementation of a stochastic model that uniformly samples from data samples."""
+    """An implementation of a stochastic model that uniformly samples from data samples. By randomly returning a sample
+    from the training data set, this model represents a parameter free representation of the marginal distribution of
+    the training data. However, it will not generate unseen data points. For this, consider :py:class:`BayesianGaussianMixtureDistribution <dowhy.gcm.BayesianGaussianMixtureDistribution>`.
+    """
 
     def __init__(self) -> None:
         self._data = None
