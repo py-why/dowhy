@@ -14,8 +14,8 @@ from dowhy.gcm.util.general import column_stack_selected_numpy_arrays, convert_t
 def fit(causal_model: ProbabilisticCausalModel, data: pd.DataFrame):
     """Learns generative causal models of nodes in the causal graph from data.
 
-    :param causal_model: The causal mechanism to be fitted.
-    :param data: Observations of nodes in the DAG.
+    :param causal_model: The causal model containing the mechanisms that will be fitted.
+    :param data: Observations of nodes in the causal model.
     """
     progress_bar = tqdm(causal_model.graph.nodes, desc='Fitting causal models', position=0, leave=True,
                         disable=not config.show_progress_bars)
@@ -32,6 +32,13 @@ def fit(causal_model: ProbabilisticCausalModel, data: pd.DataFrame):
 def fit_causal_model_of_target(causal_model: ProbabilisticCausalModel,
                                target_node: Any,
                                training_data: pd.DataFrame) -> None:
+    """Fits only the causal mechanism of the given target node based on the training data.
+
+    :param causal_model: The causal model containing the target node.
+    :param target_node: Target node for which the mechanism is fitted.
+    :param training_data: Training data for fitting the causal mechanism.
+    :return: None
+    """
     validate_causal_model_assignment(causal_model.graph, target_node)
 
     if is_root_node(causal_model.graph, target_node):
@@ -51,6 +58,13 @@ def fit_causal_model_of_target(causal_model: ProbabilisticCausalModel,
 
 
 def draw_samples(causal_model: ProbabilisticCausalModel, num_samples: int) -> pd.DataFrame:
+    """Draws new joint samples from the given graphical causal model. This is done by first generating random samples
+    from root nodes and then propagating causal downstream effects through the graph.
+
+    :param causal_model: New samples are generated based on the given causal model.
+    :param num_samples: Number of samples to draw.
+    :return: A pandas data frame where columns correspond to the nodes in the graph and rows to the drawn joint samples.
+    """
     validate_causal_dag(causal_model.graph)
 
     drawn_samples = {}

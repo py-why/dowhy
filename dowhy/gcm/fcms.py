@@ -81,6 +81,19 @@ class PostNonlinearModel(InvertibleFunctionalCausalModel):
         self._invertible_function = invertible_function
 
     def fit(self, X: np.ndarray, Y: np.ndarray) -> None:
+        """Fits the post non-linear model of the form Y = g(f(X) + N). Here, this consists of three steps given
+        samples from (X, Y):
+
+            1. Transform Y via the inverse of g: g^-1(Y) = f(X) + N
+            2. Fit the model for f on (X, g^-1(Y))
+            3. Reconstruct N based on the residual N = g^-1(Y) - f(X)
+
+        Note that the noise here can be inferred uniquely if the model assumption holds.
+
+        :param X: Samples from the input X.
+        :param Y: Samples from the target Y.
+        :return: None
+        """
         X, Y = shape_into_2d(X, Y)
 
         self._prediction_model.fit(X=X, Y=self._invertible_function.evaluate_inverse(Y))
@@ -89,15 +102,39 @@ class PostNonlinearModel(InvertibleFunctionalCausalModel):
     def estimate_noise(self,
                        target_samples: np.ndarray,
                        parent_samples: np.ndarray) -> np.ndarray:
+        """Reconstruct the noise given samples from (X, Y). This is done by:
+
+            1. Transform Y via the inverse of g: g^-1(Y) = f(X) + N
+            2. Return the residual g^-1(Y) - f(X)
+
+        :param target_samples: Samples from the input X.
+        :param parent_samples: Samples from the target Y.
+        :return: The reconstructed noise based on the given samples.
+        """
         target_samples, parent_samples = shape_into_2d(target_samples, parent_samples)
 
         return self._invertible_function.evaluate_inverse(target_samples) - self._prediction_model.predict(
             parent_samples)
 
     def draw_noise_samples(self, num_samples: int) -> np.ndarray:
+        """Draws samples from the noise distribution N.
+
+        :param num_samples: Number of noise samples.
+        :return: A numpy array containing num_samples samples from the noise.
+        """
         return self._noise_model.draw_samples(num_samples)
 
     def evaluate(self, parent_samples: np.ndarray, noise_samples: np.ndarray) -> np.ndarray:
+        """Evaluates the post non-linear model given samples (X, N). This is done by:
+
+            1. Evaluate f(X)
+            2. Evaluate f(X) + N
+            3. Return g(f(X) + N)
+
+        :param parent_samples: Samples from the inputs X.
+        :param noise_samples: Samples from the noise N.
+        :return: The Y values based on the given samples.
+        """
         parent_samples, noise_samples = shape_into_2d(parent_samples, noise_samples)
         predictions = shape_into_2d(self._prediction_model.predict(parent_samples))
 
@@ -127,6 +164,15 @@ class PostNonlinearModel(InvertibleFunctionalCausalModel):
 
 
 class AdditiveNoiseModel(PostNonlinearModel):
+    """Represents the continuous functional causal model of the form
+        Y = f(X) + N,
+    where X is the input (typically, direct causal parents of Y) and the noise N is assumed to be independent of X. This
+    is a special instance of a :py:class:`PostNonlinearModel <dowhy.gcm.PostNonlinearModel>` where the function g is the
+    identity function.
+
+    Given joint samples from (X, Y), this model can be fitted by first training a model f (e.g. using least squares
+    regression) and then reconstruct N by N = Y - f(X), i.e. using the residual.
+    """
     def __init__(self,
                  prediction_model: PredictionModel,
                  noise_model: Optional[StochasticModel] = None) -> None:
@@ -151,6 +197,14 @@ class ProbabilityEstimatorModel(ABC):
 
 
 class ClassifierFCM(FunctionalCausalModel, ProbabilityEstimatorModel):
+    """Represents the categorical functional causal model of the form
+        Y = f(X, N),
+    where X is the input (typically, direct causal parents of Y) and the noise N here is uniform on [0, 1]. The model
+    is mostly based on a standard classification model that outputs probabilities. In order to generate a new random
+    sample given an input x, the return value y is uniformly sampled based on the class probabilities p(y | x). Here,
+    the noise is used to make this sampling process deterministic by using the cumulative distribution functions defined
+    by the given inputs.
+    """
     def __init__(self, classifier_model: Optional[ClassificationModel] = None) -> None:
         self._classifier_model = classifier_model
 
@@ -159,9 +213,23 @@ class ClassifierFCM(FunctionalCausalModel, ProbabilityEstimatorModel):
             self._classifier_model = create_hist_gradient_boost_classifier()
 
     def draw_noise_samples(self, num_samples: int) -> np.ndarray:
+        """Returns uniformly sampled values on [0, 1].
+
+        :param num_samples: Number of noise samples.
+        :return: Noise samples on [0, 1].
+        """
         return shape_into_2d(np.random.uniform(0, 1, num_samples))
 
     def evaluate(self, parent_samples: np.ndarray, noise_samples: np.ndarray) -> np.ndarray:
+        """Evaluates the model Y = f(X, N), where X are the parent_samples and N the noise_samples. Here, the
+        cumulative distribution functions are defined by the parent_samples. For instance, lets say we have 2
+        classes, n = 0.7 and an input x with p(y = 0| x) = 0.6 and p(y = 1| x) = 0.4, then we get y = 1 as a return
+        value. This is because p(y = 0| x) < n <= 1.0, i.e. n falls into the bucket that is spanned by p(y = 1| x).
+
+        :param parent_samples: Samples from the inputs X.
+        :param noise_samples: Samples from the noise on [0, 1].
+        :return: Class labels Y based on the inputs and noise.
+        """
         noise_samples = shape_into_2d(noise_samples)
         probabilities = self.estimate_probabilities(parent_samples)
 
@@ -171,9 +239,22 @@ class ClassifierFCM(FunctionalCausalModel, ProbabilityEstimatorModel):
         return shape_into_2d(np.array(self.get_class_names(np.argmin(probabilities, axis=1))))
 
     def estimate_probabilities(self, parent_samples: np.ndarray) -> np.ndarray:
+        """Returns the class probabilities for the given parent_samples.
+
+        :param parent_samples: Samples from inputs X.
+        :return: A nxd numpy matrix with class probabilities for each sample, where n is the number of samples and d
+                 the number of classes. Here, array entry A[i][j] corresponds to the i-th sample indicating the
+                 probability of the j-th class.
+        """
         return self._classifier_model.predict_probabilities(parent_samples)
 
     def fit(self, X: np.ndarray, Y: np.ndarray) -> None:
+        """Fits the underlying classification model.
+
+        :param X: Input samples.
+        :param Y: Target labels.
+        :return: None
+        """
         X, Y = shape_into_2d(X, Y)
 
         if not is_categorical(Y):
