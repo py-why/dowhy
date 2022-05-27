@@ -15,12 +15,9 @@
 DoWhy | An end-to-end library for causal inference
 ===================================================
 
-`Amit Sharma <http://www.amitsharma.in>`_,
-`Emre Kiciman <http://www.kiciman.org>`_
-
   Introducing DoWhy and the 4 steps of causal inference | `Microsoft Research Blog <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Video Tutorial <https://note.microsoft.com/MSR-Webinar-DoWhy-Library-Registration-On-Demand.html>`_ | `Arxiv Paper <https://arxiv.org/abs/2011.04216>`_ | `Slides <https://www2.slideshare.net/AmitSharma315/dowhy-an-endtoend-library-for-causal-inference>`_
 
-  Read the `docs <https://microsoft.github.io/dowhy/>`_ | Try it online! |Binder|_ 
+  Read the `docs <https://py-why.github.io/dowhy/>`_ | Try it online! |Binder|_ 
 
 .. |Binder| image:: https://mybinder.org/badge_logo.svg
 .. _Binder: https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F
@@ -35,7 +32,7 @@ Much like machine learning libraries have done for prediction, **"DoWhy" is a Py
 
 For a quick introduction to causal inference, check out `amit-sharma/causal-inference-tutorial <https://github.com/amit-sharma/causal-inference-tutorial/>`_. We also gave a more comprehensive tutorial at the ACM Knowledge Discovery and Data Mining (`KDD 2018 <http://www.kdd.org/kdd2018/>`_) conference: `causalinference.gitlab.io/kdd-tutorial <http://causalinference.gitlab.io/kdd-tutorial/>`_. For an introduction to the four steps of causal inference and its implications for machine learning, you can access this video tutorial from Microsoft Research: `DoWhy Webinar <https://note.microsoft.com/MSR-Webinar-DoWhy-Library-Registration-On-Demand.html>`_.
 
-Documentation for DoWhy is available at `microsoft.github.io/dowhy <https://microsoft.github.io/dowhy/>`_.
+Documentation for DoWhy is available at `py-why.github.io/dowhy <https://py-why.github.io/dowhy/>`_.
 
 .. i here comment toctree::
 .. i here comment   :maxdepth: 4
@@ -44,12 +41,12 @@ Documentation for DoWhy is available at `microsoft.github.io/dowhy <https://micr
 
 News
 -----
-**2022.03.13**: **Call for Content**. 
-Hello everyone, Microsoft will be hosting a workshop to explore current and future applications for DoWhy and EconML on Tuesday, May 3, 2022. With DoWhy, our goal has been to make answering ‘what if’ questions a whole lot easier by providing a state-of-the-art, end-to-end framework for causal inference, including automated causal identification and robustness procedures. We’re charting the course for future development of DoWhy and need your help.
+**2022.05.27**:
 
-What more would you like to see in the library? New kinds of tasks, better functionality for the core tasks? Let us know!
-We are also looking for stories of problems you have solved using DoWhy+EconML to highlight in the workshop. If you have one,
-please reach out to caburact@microsoft.com or respond on the discussions page (https://github.com/microsoft/dowhy/discussions/392).
+* **DoWhy now part of PyWhy**
+
+  We have moved DoWhy from microsoft/dowhy to py-why/dowhy. While GitHub will automatically
+  redirect your git command for cloning, pulling, etc., we recommend updating git remotes and bookmarks.
 
 The need for causal inference
 ----------------------------------
