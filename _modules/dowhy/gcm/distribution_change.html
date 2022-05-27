@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dowhy.gcm.distribution_change &mdash; DoWhy | An end-to-end library for causal inference  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
+          </a>
+              <div class="version">
+                0.7.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introducing DoWhy</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">DoWhy | An end-to-end library for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html#graphical-models-and-potential-outcomes-best-of-both-worlds">Graphical Models and Potential Outcomes: Best of both worlds</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html#four-steps-of-causal-inference">Four steps of causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html#citing-this-package">Citing this package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html#roadmap">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html#contributing">Contributing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Quick-Start Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/tutorial-causalinference-machinelearning-using-dowhy-econml.html">Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Starter Notebooks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_interpreter.html">DoWhy: Interpreters for Causal Estimators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Case Study Notebooks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">DoWhy-The Causal Story Behind Hotel Booking Cancellations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_example_effect_of_memberrewards_program.html">Estimating the effect of a Member Rewards program</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_twins_example.html">DoWhy example on Twins dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_refutation_testing.html">Applying refutation tests to the Lalonde and IHDP datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Notebooks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_demo_dummy_outcome_refuter.html">A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_multiple_treatments.html">Estimating effect of multiple treatments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_discovery_example.html">Causal Discovery example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_discovery_example.html#Experiments-on-the-Auto-MPG-dataset">Experiments on the Auto-MPG dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_discovery_example.html#Causal-Discovery-with-Causal-Discovery-Tool-(CDT)">Causal Discovery with Causal Discovery Tool (CDT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_discovery_example.html#Experiments-on-the-Sachs-dataset">Experiments on the Sachs dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_discovery_example.html#id2">Causal Discovery with Causal Discovery Tool (CDT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">GCM-based inference (Experimental)</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gcm/user_guide/index.html">GCMs User Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../code_repo.html">Code repository &amp; Versions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dowhy.html">dowhy package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">DoWhy | An end-to-end library for causal inference</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>dowhy.gcm.distribution_change</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for dowhy.gcm.distribution_change</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This module defines functions to attribute distribution changes.</span>
+
+<span class="sd">Functions in this module should be considered experimental, meaning there might be breaking API changes in the future.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">numpy.matlib</span> <span class="kn">import</span> <span class="n">repmat</span>
+<span class="kn">from</span> <span class="nn">statsmodels.stats.multitest</span> <span class="kn">import</span> <span class="n">multipletests</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="kn">from</span> <span class="nn">dowhy.gcm.cms</span> <span class="kn">import</span> <span class="n">ProbabilisticCausalModel</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.divergence</span> <span class="kn">import</span> <span class="n">auto_estimate_kl_divergence</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.fitting_sampling</span> <span class="kn">import</span> <span class="n">fit_causal_model_of_target</span><span class="p">,</span> <span class="n">draw_samples</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.graph</span> <span class="kn">import</span> <span class="n">DirectedGraph</span><span class="p">,</span> <span class="n">ConditionalStochasticModel</span><span class="p">,</span> <span class="n">is_root_node</span><span class="p">,</span> <span class="n">get_ordered_predecessors</span><span class="p">,</span> \
+    <span class="n">node_connected_subgraph_view</span><span class="p">,</span> <span class="n">clone_causal_models</span><span class="p">,</span> <span class="n">validate_causal_dag</span><span class="p">,</span> <span class="n">PARENTS_DURING_FIT</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.independence_test.kernel</span> <span class="kn">import</span> <span class="n">kernel_based</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.shapley</span> <span class="kn">import</span> <span class="n">estimate_shapley_values</span><span class="p">,</span> <span class="n">ShapleyConfig</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.util.general</span> <span class="kn">import</span> <span class="n">shape_into_2d</span>
+
+<span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="mechanism_change_test"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.distribution_change.mechanism_change_test">[docs]</a><span class="k">def</span> <span class="nf">mechanism_change_test</span><span class="p">(</span><span class="n">target_original_data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                          <span class="n">target_new_data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                          <span class="n">parents_original_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">parents_new_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">independence_test</span><span class="p">:</span>
+                          <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
+                                <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="nb">float</span><span class="p">]]</span>
+                          <span class="o">=</span> <span class="n">kernel_based</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Estimates a p-value for the nullhypothesis that the original and new data were generated by the same mechanism. </span>
+<span class="sd">    Here, we check the dependency between binary labels indicating whether a sample is from the original or a new </span>
+<span class="sd">    data set. If the labels do not provide information to determine if a sample is coming from the original/new </span>
+<span class="sd">    distribution, then it is likely that the mechanism has not changed.</span>
+<span class="sd">    </span>
+<span class="sd">    For non-root nodes, samples from parent variables are needed as conditioning variables. This is, testing the</span>
+<span class="sd">    nullhypothesis that the data were generated by the same mechanism given the parent samples. By this, we incorporate</span>
+<span class="sd">    upstream changes that might have impacted the parents, but not the target node itself.</span>
+<span class="sd">    </span>
+<span class="sd">    :param target_original_data: Samples of the node from the original data set.</span>
+<span class="sd">    :param target_new_data: Samples of the node from the new data set.</span>
+<span class="sd">    :param parents_original_data: Samples from parents of the node from the original data set.</span>
+<span class="sd">    :param parents_new_data: Samples from parents of the node from the new data set.</span>
+<span class="sd">    :param independence_test: Pairwise/conditional independence test.</span>
+<span class="sd">    :return: A p-value for the nullhypothesis that the mechanism has not changed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">causal_graph</span><span class="p">:</span> <span class="n">DirectedGraph</span>
+
+    <span class="k">if</span> <span class="n">parents_original_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">parents_new_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Original parents data were given, but no new parents data!&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">parents_original_data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">parents_new_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;New parents data were given, but no original parents data!&quot;</span><span class="p">)</span>
+
+    <span class="n">num_samples_for_testing</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">target_original_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">target_new_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">data_set_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">num_samples_for_testing</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">data_set_indices</span><span class="p">[</span><span class="n">num_samples_for_testing</span><span class="p">:]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">data_set_indices</span> <span class="o">=</span> <span class="n">data_set_indices</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+
+    <span class="n">original_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">target_original_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">num_samples_for_testing</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">new_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">target_new_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">num_samples_for_testing</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">joint_target_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">shape_into_2d</span><span class="p">(</span><span class="n">target_original_data</span><span class="p">[</span><span class="n">original_indices</span><span class="p">]),</span>
+                                      <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">target_new_data</span><span class="p">[</span><span class="n">new_indices</span><span class="p">])])</span>
+
+    <span class="k">if</span> <span class="n">parents_original_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">independence_test</span><span class="p">(</span><span class="n">joint_target_samples</span><span class="p">,</span> <span class="n">data_set_indices</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">parents_new_data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+        <span class="n">joint_parent_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">shape_into_2d</span><span class="p">(</span><span class="n">parents_original_data</span><span class="p">[</span><span class="n">original_indices</span><span class="p">]),</span>
+                                       <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">parents_new_data</span><span class="p">[</span><span class="n">new_indices</span><span class="p">])])</span>
+
+        <span class="k">return</span> <span class="n">independence_test</span><span class="p">(</span><span class="n">joint_target_samples</span><span class="p">,</span> <span class="n">data_set_indices</span><span class="p">,</span> <span class="n">joint_parent_data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="distribution_change"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.distribution_change.distribution_change">[docs]</a><span class="k">def</span> <span class="nf">distribution_change</span><span class="p">(</span><span class="n">causal_model</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span>
+                        <span class="n">old_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                        <span class="n">new_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                        <span class="n">target_node</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+                        <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span>
+                        <span class="n">difference_estimation_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span>
+                        <span class="o">=</span> <span class="n">auto_estimate_kl_divergence</span><span class="p">,</span>
+                        <span class="n">mechanism_change_test_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                                              <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                                              <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                                                              <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="nb">float</span><span class="p">]</span>
+                        <span class="o">=</span> <span class="n">mechanism_change_test</span><span class="p">,</span>
+                        <span class="n">mechanism_change_test_significance_level</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+                        <span class="n">mechanism_change_test_fdr_control_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;fdr_bh&#39;</span><span class="p">,</span>
+                        <span class="n">return_additional_info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="n">shapley_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ShapleyConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="n">graph_factory</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">DirectedGraph</span><span class="p">]</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">)</span> \
+        <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+                 <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">bool</span><span class="p">],</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span> <span class="n">ProbabilisticCausalModel</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;Attributes the change in the marginal distribution of the target_node to nodes upstream in the causal DAG.</span>
+
+<span class="sd">    Note that this method creates two copies of the causal DAG. The causal models of one causal DAG are learned from</span>
+<span class="sd">    old data and those of another DAG are learned from new data.</span>
+
+<span class="sd">    **Research Paper**:</span>
+<span class="sd">    Kailash Budhathoki, Dominik Janzing, Patrick Bloebaum, Hoiyi Ng. *Why did the distribution change?*. Proceedings</span>
+<span class="sd">    of The 24th International Conference on Artificial Intelligence and Statistics, PMLR 130:1666-1674, 2021.</span>
+
+<span class="sd">    :param causal_model: Reference causal model.</span>
+<span class="sd">    :param old_data: Joint samples from the &#39;old&#39; distribution.</span>
+<span class="sd">    :param new_data: Joint samples from the &#39;new&#39; distribution.</span>
+<span class="sd">    :param target_node: Target node of interest for attributing the marginal distribution change.</span>
+<span class="sd">    :param num_samples: Number of samples used for estimating Shapley values. This can have a significant influence</span>
+<span class="sd">                        on runtime and accuracy.</span>
+<span class="sd">    :param difference_estimation_func: Function for quantifying the distribution change. This function should expect</span>
+<span class="sd">                                       two inputs which represent samples from two different distributions,</span>
+<span class="sd">                                       e.g. difference in average values.</span>
+<span class="sd">    :param mechanism_change_test_func: Function for testing whether the causal mechanism of a node has changed. This</span>
+<span class="sd">                                       function should return a p–value for the null hypothesis that the mechanism has</span>
+<span class="sd">                                       not changed.</span>
+<span class="sd">    :param mechanism_change_test_significance_level: A significance level for rejecting the null hypothesis that the</span>
+<span class="sd">                                                     causal mechanism of a node has not changed.</span>
+<span class="sd">    :param mechanism_change_test_fdr_control_method: The false discovery rate control method for mechanism change</span>
+<span class="sd">                                                     tests. For more options, checkout `statsmodels manual</span>
+<span class="sd">                                                     &lt;https://www.statsmodels.org/dev/generated/statsmodels.stats.multitest.multipletests.html&gt;`_.</span>
+<span class="sd">    :param return_additional_info: If set to True, three additional items are returned: a dictionary indicating</span>
+<span class="sd">                                   whether each node&#39;s mechanism changed, the causal DAG whose causal models are</span>
+<span class="sd">                                   learned from old data, and the causal DAG whose causal models are learned from new</span>
+<span class="sd">                                   data.</span>
+<span class="sd">    :param shapley_config: Configuration for the Shapley estimator.</span>
+<span class="sd">    :param graph_factory: Allows customization in case a graph class different than networkx.DiGraph should be used.</span>
+<span class="sd">                          This function *must* copy nodes and edges. Attributes of nodes will be overridden in the copy,</span>
+<span class="sd">                          so the algorithm is independent of the attribute copy behavior of this factory.</span>
+<span class="sd">    :return: By default, if `return_additional_info` is set to False, only the dictionary containing contribution of</span>
+<span class="sd">             each upstream node is returned. If `return_additional_info` is set to True, three additional items are</span>
+<span class="sd">             returned: a dictionary indicating whether each node&#39;s mechanism changed, the causal DAG whose causal models</span>
+<span class="sd">             learned from old data, and the causal DAG whose causal models are learned from new data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">causal_graph_old</span> <span class="o">=</span> <span class="n">graph_factory</span><span class="p">(</span><span class="n">node_connected_subgraph_view</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">target_node</span><span class="p">))</span>
+    <span class="n">clone_causal_models</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">causal_graph_old</span><span class="p">)</span>
+    <span class="n">causal_model_old</span> <span class="o">=</span> <span class="n">ProbabilisticCausalModel</span><span class="p">(</span><span class="n">causal_graph_old</span><span class="p">)</span>
+
+    <span class="n">causal_graph_new</span> <span class="o">=</span> <span class="n">graph_factory</span><span class="p">(</span><span class="n">causal_graph_old</span><span class="p">)</span>
+    <span class="n">clone_causal_models</span><span class="p">(</span><span class="n">causal_graph_old</span><span class="p">,</span> <span class="n">causal_graph_new</span><span class="p">)</span>
+    <span class="n">causal_model_new</span> <span class="o">=</span> <span class="n">ProbabilisticCausalModel</span><span class="p">(</span><span class="n">causal_graph_new</span><span class="p">)</span>
+
+    <span class="n">mechanism_changes</span> <span class="o">=</span> <span class="n">_fit_accounting_for_mechanism_change</span><span class="p">(</span><span class="n">causal_model_old</span><span class="p">,</span>
+                                                             <span class="n">causal_model_new</span><span class="p">,</span>
+                                                             <span class="n">old_data</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">causal_graph_old</span><span class="o">.</span><span class="n">nodes</span><span class="p">)],</span>
+                                                             <span class="n">new_data</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">causal_graph_new</span><span class="o">.</span><span class="n">nodes</span><span class="p">)],</span>
+                                                             <span class="n">mechanism_change_test_func</span><span class="p">,</span>
+                                                             <span class="n">mechanism_change_test_significance_level</span><span class="p">,</span>
+                                                             <span class="n">mechanism_change_test_fdr_control_method</span><span class="p">)</span>
+
+    <span class="n">attributions</span> <span class="o">=</span> <span class="n">distribution_change_of_graphs</span><span class="p">(</span><span class="n">causal_model_old</span><span class="p">,</span>
+                                                 <span class="n">causal_model_new</span><span class="p">,</span>
+                                                 <span class="n">target_node</span><span class="p">,</span>
+                                                 <span class="n">num_samples</span><span class="p">,</span>
+                                                 <span class="n">difference_estimation_func</span><span class="p">,</span>
+                                                 <span class="n">shapley_config</span><span class="p">,</span>
+                                                 <span class="n">graph_factory</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_additional_info</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">attributions</span><span class="p">,</span> <span class="n">mechanism_changes</span><span class="p">,</span> <span class="n">causal_model_old</span><span class="p">,</span> <span class="n">causal_model_new</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">attributions</span></div>
+
+
+<div class="viewcode-block" id="distribution_change_of_graphs"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.distribution_change.distribution_change_of_graphs">[docs]</a><span class="k">def</span> <span class="nf">distribution_change_of_graphs</span><span class="p">(</span><span class="n">causal_model_old</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span>
+                                  <span class="n">causal_model_new</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span>
+                                  <span class="n">target_node</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+                                  <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span>
+                                  <span class="n">difference_estimation_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span>
+                                  <span class="o">=</span> <span class="n">auto_estimate_kl_divergence</span><span class="p">,</span>
+                                  <span class="n">shapley_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ShapleyConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                  <span class="n">graph_factory</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">DirectedGraph</span><span class="p">]</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot; Attributes the change of the marginal distribution of target_node to upstream nodes based on the distributions</span>
+<span class="sd">    generated by the &#39;old&#39; and &#39;new&#39; causal graphs. These graphs are assumed to represent the same causal structure and</span>
+<span class="sd">    to be fitted on the respective data.</span>
+
+<span class="sd">    Note: This method creates a copy of the given causal models, i.e. the original objects will not be modified.</span>
+
+<span class="sd">    Related paper:</span>
+<span class="sd">    Budhathoki, K., Janzing, D., Bloebaum, P., &amp; Ng, H. (2021). Why did the distribution change?</span>
+<span class="sd">    arXiv preprint arXiv:2102.13384.</span>
+
+<span class="sd">    :param causal_model_old: The ProbabilisticCausalModel fitted on the &#39;old&#39; data.</span>
+<span class="sd">    :param causal_model_new: The ProbabilisticCausalModel fitted on the &#39;new&#39; data.</span>
+<span class="sd">    :param target_node: Node of interest for attributing the marginal distribution change.</span>
+<span class="sd">    :param num_samples: Number of samples used for the estimation. This can have a significant influence on the runtime</span>
+<span class="sd">                        and accuracy.</span>
+<span class="sd">    :param difference_estimation_func: Function for quantifying the distribution change. This function should expect</span>
+<span class="sd">                                       two inputs which represent samples from two different distributions. An example</span>
+<span class="sd">                                       could be the KL divergence.</span>
+<span class="sd">    :param shapley_config: Config for the Shapley estimator.</span>
+<span class="sd">    :param graph_factory: Allows customization in case a graph class different than networkx.DiGraph should be used.</span>
+<span class="sd">                          This function *must* copy nodes and edges. Attributes of nodes will be overridden in the copy,</span>
+<span class="sd">                          so the algorithm is independent of the attribute copy behavior of this factory.</span>
+<span class="sd">    :return: A dictionary containing the contributions of upstream nodes to the marginal distribution change in the</span>
+<span class="sd">             target node.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">validate_causal_dag</span><span class="p">(</span><span class="n">causal_model_old</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+    <span class="n">validate_causal_dag</span><span class="p">(</span><span class="n">causal_model_new</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">__estimate_marginal_distribution_change</span><span class="p">(</span>
+        <span class="n">ProbabilisticCausalModel</span><span class="p">(</span><span class="n">node_connected_subgraph_view</span><span class="p">(</span><span class="n">causal_model_old</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">target_node</span><span class="p">)),</span>
+        <span class="n">ProbabilisticCausalModel</span><span class="p">(</span><span class="n">node_connected_subgraph_view</span><span class="p">(</span><span class="n">causal_model_new</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">target_node</span><span class="p">)),</span>
+        <span class="n">target_node</span><span class="p">,</span>
+        <span class="n">num_samples</span><span class="p">,</span>
+        <span class="n">difference_estimation_func</span><span class="p">,</span>
+        <span class="n">shapley_config</span><span class="p">,</span>
+        <span class="n">graph_factory</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_fit_accounting_for_mechanism_change</span><span class="p">(</span><span class="n">causal_model_old</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span>
+                                         <span class="n">causal_model_new</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span>
+                                         <span class="n">old_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                                         <span class="n">new_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                                         <span class="n">mechanism_change_func</span><span class="p">:</span>
+                                         <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                                   <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                                   <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                                                   <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="nb">float</span><span class="p">],</span>
+                                         <span class="n">significance_level</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                         <span class="n">fdr_control_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+    <span class="n">mechanism_changed_for_node</span> <span class="o">=</span> <span class="n">_check_significant_mechanism_change</span><span class="p">(</span><span class="n">causal_model_old</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span>
+                                                                     <span class="n">old_data</span><span class="p">,</span>
+                                                                     <span class="n">new_data</span><span class="p">,</span>
+                                                                     <span class="n">mechanism_change_func</span><span class="p">,</span>
+                                                                     <span class="n">significance_level</span><span class="p">,</span>
+                                                                     <span class="n">fdr_control_method</span><span class="p">)</span>
+
+    <span class="n">joint_data</span> <span class="o">=</span> <span class="n">old_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_data</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">causal_model_new</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">mechanism_changed_for_node</span><span class="p">[</span><span class="n">node</span><span class="p">]:</span>
+            <span class="n">fit_causal_model_of_target</span><span class="p">(</span><span class="n">causal_model_old</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">old_data</span><span class="p">)</span>
+            <span class="n">fit_causal_model_of_target</span><span class="p">(</span><span class="n">causal_model_new</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">new_data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fit_causal_model_of_target</span><span class="p">(</span><span class="n">causal_model_old</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">joint_data</span><span class="p">)</span>
+            <span class="n">fit_causal_model_of_target</span><span class="p">(</span><span class="n">causal_model_new</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">joint_data</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">mechanism_changed_for_node</span>
+
+
+<span class="k">def</span> <span class="nf">__estimate_marginal_distribution_change</span><span class="p">(</span><span class="n">causal_model_old</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span>
+                                            <span class="n">causal_model_new</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span>
+                                            <span class="n">target_node</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+                                            <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                                            <span class="n">difference_estimation_func</span><span class="p">:</span>
+                                            <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
+                                            <span class="n">shapley_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ShapleyConfig</span><span class="p">],</span>
+                                            <span class="n">graph_factory</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">DirectedGraph</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="n">old_causal_models</span> <span class="o">=</span> <span class="p">[</span><span class="n">causal_model_old</span><span class="o">.</span><span class="n">causal_mechanism</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">causal_model_old</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">)]</span>
+    <span class="n">new_causal_models</span> <span class="o">=</span> <span class="p">[</span><span class="n">causal_model_new</span><span class="o">.</span><span class="n">causal_mechanism</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">causal_model_new</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">)]</span>
+
+    <span class="n">target_samples_old</span> <span class="o">=</span> <span class="n">draw_samples</span><span class="p">(</span><span class="n">causal_model_old</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">)[</span><span class="n">target_node</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">attribution_set_function</span><span class="p">(</span><span class="n">subset</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">subset</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="n">causal_model</span> <span class="o">=</span> <span class="n">ProbabilisticCausalModel</span><span class="p">(</span><span class="n">graph_factory</span><span class="p">(</span><span class="n">causal_model_old</span><span class="o">.</span><span class="n">graph</span><span class="p">))</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">old_causal_models</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">subset</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">new_causal_models</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">old_causal_models</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+            <span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="n">PARENTS_DURING_FIT</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_ordered_predecessors</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+
+        <span class="n">target_samples_new</span> <span class="o">=</span> <span class="n">draw_samples</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">)[</span><span class="n">target_node</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">difference_estimation_func</span><span class="p">(</span><span class="n">target_samples_old</span><span class="p">,</span> <span class="n">target_samples_new</span><span class="p">)</span>
+
+    <span class="n">attributions</span> <span class="o">=</span> <span class="n">estimate_shapley_values</span><span class="p">(</span><span class="n">attribution_set_function</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_causal_models</span><span class="p">),</span> <span class="n">shapley_config</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">attributions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">causal_model_old</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">))}</span>
+
+
+<div class="viewcode-block" id="estimate_distribution_change_scores"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.distribution_change.estimate_distribution_change_scores">[docs]</a><span class="k">def</span> <span class="nf">estimate_distribution_change_scores</span><span class="p">(</span><span class="n">causal_model</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span>
+                                        <span class="n">original_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                                        <span class="n">new_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                                        <span class="n">difference_estimation_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                                                                             <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span>
+                                        <span class="o">=</span> <span class="n">auto_estimate_kl_divergence</span><span class="p">,</span>
+                                        <span class="n">max_num_evaluation_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+                                        <span class="n">num_joint_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
+                                        <span class="n">early_stopping_percentage</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+                                        <span class="n">mechanism_change_test_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                                                              <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                                                              <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                                                                              <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="nb">float</span><span class="p">]</span>
+                                        <span class="o">=</span> <span class="n">mechanism_change_test</span><span class="p">,</span>
+                                        <span class="n">mechanism_change_test_significance_level</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+                                        <span class="n">mechanism_change_test_fdr_control_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;fdr_bh&#39;</span><span class="p">)</span> \
+        <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Given newly observed and original samples from the joint distribution of the given causal graphical model, this</span>
+<span class="sd">    method estimates a score for each node that quantifies how much the distribution of the node has changed. For this,</span>
+<span class="sd">    it first checks whether the underlying causal mechanism has changed at all and, if this is the case, it estimates</span>
+<span class="sd">    the difference between the new and original distributions. The score is based on the quantity measured by the</span>
+<span class="sd">    provided difference_estimation_func or 0 if no mechanism change has been detected.</span>
+
+<span class="sd">    Note that for each parent sample, num_joint_samples conditional samples are generated based on the original and new</span>
+<span class="sd">    causal mechanism and evaluated by the given difference_estimation_func function. These results are then averaged</span>
+<span class="sd">    over multiple different parent samples.</span>
+
+<span class="sd">    :param causal_model: The underlying causal model based on the original data.</span>
+<span class="sd">    :param original_data: Samples from the original data.</span>
+<span class="sd">    :param new_data: Samples from the new data.</span>
+<span class="sd">    :param difference_estimation_func: Function for quantifying the distribution change. This function should expect</span>
+<span class="sd">                                       two inputs which represent samples from two different distributions. An example</span>
+<span class="sd">                                       could be the KL divergence.</span>
+<span class="sd">    :param max_num_evaluation_samples: Maximum number of (parent) samples for evaluating the difference in</span>
+<span class="sd">                                       distributions.</span>
+<span class="sd">    :param num_joint_samples: Number of samples generated in a node per parent sample.</span>
+<span class="sd">    :param early_stopping_percentage: If the change in percentage between multiple consecutive runs is below this</span>
+<span class="sd">                                      threshold, the evaluation stops before evaluating all max_num_evaluation_samples.</span>
+<span class="sd">    :param mechanism_change_test_func: Function for testing whether the causal mechanism of a node has changed. This</span>
+<span class="sd">                                       function should return a p–value for the null hypothesis that the mechanism has</span>
+<span class="sd">                                       not changed.</span>
+<span class="sd">    :param mechanism_change_test_significance_level: A significance level for rejecting the null hypothesis that the</span>
+<span class="sd">                                                     causal mechanism of a node has not changed.</span>
+<span class="sd">    :param mechanism_change_test_fdr_control_method: The false discovery rate control method for mechanism change</span>
+<span class="sd">                                                     tests. For more options, checkout `statsmodels manual</span>
+<span class="sd">                                                     &lt;https://www.statsmodels.org/dev/generated/statsmodels.stats.multitest.multipletests.html&gt;`_.</span>
+<span class="sd">    :return: A dictionary assining a score to each node in the causal graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">validate_causal_dag</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+
+    <span class="n">mechanism_changed_for_node</span> <span class="o">=</span> <span class="n">_check_significant_mechanism_change</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span>
+                                                                     <span class="n">original_data</span><span class="p">,</span>
+                                                                     <span class="n">new_data</span><span class="p">,</span>
+                                                                     <span class="n">mechanism_change_test_func</span><span class="p">,</span>
+                                                                     <span class="n">mechanism_change_test_significance_level</span><span class="p">,</span>
+                                                                     <span class="n">mechanism_change_test_fdr_control_method</span><span class="p">)</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Estimating mechanism change anomaly scores&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                     <span class="n">leave</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">mechanism_changed_for_node</span><span class="p">[</span><span class="n">node</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">is_root_node</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">difference_estimation_func</span><span class="p">(</span><span class="n">original_data</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
+                                                           <span class="n">new_data</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">parent_nodes</span> <span class="o">=</span> <span class="n">get_ordered_predecessors</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="n">_estimate_distribution_change_score</span><span class="p">(</span>
+                        <span class="n">original_data</span><span class="p">[</span><span class="n">parent_nodes</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
+                        <span class="n">new_data</span><span class="p">[</span><span class="n">parent_nodes</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
+                        <span class="n">new_data</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
+                        <span class="n">causal_model</span><span class="o">.</span><span class="n">causal_mechanism</span><span class="p">(</span><span class="n">node</span><span class="p">),</span>
+                        <span class="n">difference_estimation_func</span><span class="p">,</span>
+                        <span class="n">max_num_evaluation_samples</span><span class="p">,</span>
+                        <span class="n">num_joint_samples</span><span class="p">,</span>
+                        <span class="n">early_stopping_percentage</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+<span class="k">def</span> <span class="nf">_check_significant_mechanism_change</span><span class="p">(</span><span class="n">graph</span><span class="p">:</span> <span class="n">DirectedGraph</span><span class="p">,</span>
+                                        <span class="n">old_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                                        <span class="n">new_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                                        <span class="n">mechanism_change_func</span><span class="p">:</span>
+                                        <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                                  <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                                  <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                                                  <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="nb">float</span><span class="p">],</span>
+                                        <span class="n">significance_level</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                        <span class="n">fdr_control_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+    <span class="n">all_p_values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_root_node</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+            <span class="n">parents_org_data</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">parents_new_data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parents_org_data</span> <span class="o">=</span> <span class="n">old_data</span><span class="p">[</span><span class="n">get_ordered_predecessors</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">node</span><span class="p">)]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+            <span class="n">parents_new_data</span> <span class="o">=</span> <span class="n">new_data</span><span class="p">[</span><span class="n">get_ordered_predecessors</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">node</span><span class="p">)]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+
+        <span class="n">all_p_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mechanism_change_func</span><span class="p">(</span><span class="n">old_data</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
+                                                  <span class="n">new_data</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
+                                                  <span class="n">parents_org_data</span><span class="p">,</span>
+                                                  <span class="n">parents_new_data</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">fdr_control_method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">successes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">all_p_values</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">significance_level</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">successes</span> <span class="o">=</span> <span class="n">multipletests</span><span class="p">(</span><span class="n">all_p_values</span><span class="p">,</span> <span class="n">significance_level</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">fdr_control_method</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">successes</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">_estimate_distribution_change_score</span><span class="p">(</span><span class="n">parent_original_data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                        <span class="n">parent_new_data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                        <span class="n">target_new_data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                        <span class="n">causal_model_original</span><span class="p">:</span> <span class="n">ConditionalStochasticModel</span><span class="p">,</span>
+                                        <span class="n">difference_estimation_func</span><span class="p">:</span>
+                                        <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+                                        <span class="n">max_num_evaluation_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                                        <span class="n">num_joint_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                                        <span class="n">early_stopping_percentage</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="n">parent_original_data</span><span class="p">,</span> <span class="n">parent_new_data</span><span class="p">,</span> <span class="n">target_new_data</span> \
+        <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">parent_original_data</span><span class="p">,</span> <span class="n">parent_new_data</span><span class="p">,</span> <span class="n">target_new_data</span><span class="p">)</span>
+    <span class="n">causal_model_new</span> <span class="o">=</span> <span class="n">causal_model_original</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+    <span class="n">causal_model_new</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">parent_new_data</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">target_new_data</span><span class="p">)</span>
+
+    <span class="n">joint_parent_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">parent_original_data</span><span class="p">,</span> <span class="n">parent_new_data</span><span class="p">])</span>
+    <span class="n">joint_parent_samples</span> <span class="o">=</span> \
+        <span class="n">joint_parent_samples</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">joint_parent_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                              <span class="nb">min</span><span class="p">(</span><span class="n">joint_parent_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                  <span class="n">max_num_evaluation_samples</span><span class="p">),</span>
+                                              <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)]</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">run</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">joint_parent_sample</span> <span class="ow">in</span> <span class="n">joint_parent_samples</span><span class="p">:</span>
+        <span class="n">old_result</span> <span class="o">=</span> <span class="n">result</span>
+
+        <span class="n">samples</span> <span class="o">=</span> <span class="n">repmat</span><span class="p">(</span><span class="n">joint_parent_sample</span><span class="p">,</span> <span class="n">num_joint_samples</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">+=</span> <span class="n">difference_estimation_func</span><span class="p">(</span><span class="n">causal_model_original</span><span class="o">.</span><span class="n">draw_samples</span><span class="p">(</span><span class="n">samples</span><span class="p">),</span>
+                                             <span class="n">causal_model_new</span><span class="o">.</span><span class="n">draw_samples</span><span class="p">(</span><span class="n">samples</span><span class="p">))</span>
+
+        <span class="n">run</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">old_result</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">result</span> <span class="o">/</span> <span class="n">old_result</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">early_stopping_percentage</span><span class="p">:</span>
+            <span class="c1"># If the relative change of the score is less than the given threshold, we stop the estimation early.</span>
+            <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Early stopping: Result only changed by </span><span class="si">%f</span><span class="s2"> percent and a threshold of </span><span class="si">%f</span><span class="s2"> is set.&quot;</span>
+                         <span class="o">%</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">result</span> <span class="o">/</span> <span class="n">old_result</span><span class="p">,</span> <span class="n">early_stopping_percentage</span><span class="p">))</span>
+            <span class="k">break</span>
+
+    <span class="k">return</span> <span class="n">result</span> <span class="o">/</span> <span class="n">run</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

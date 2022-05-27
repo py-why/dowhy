@@ -86,6 +86,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_causal_discovery_example.html#id2">Causal Discovery with Causal Discovery Tool (CDT)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">GCM-based inference (Experimental)</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../gcm/user_guide/index.html">GCMs User Guide</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Package</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../code_repo.html">Code repository &amp; Versions</a></li>
@@ -338,7 +342,7 @@
 <span class="sd">            * Instrumental Variables: &quot;iv.instrumental_variable&quot;</span>
 <span class="sd">            * Regression Discontinuity: &quot;iv.regression_discontinuity&quot;</span>
 
-<span class="sd">        In addition, you can directly call any of the EconML estimation methods. The convention is &quot;backdoor.econml.path-to-estimator-class&quot;. For example, for the double machine learning estimator (&quot;DML&quot; class) that is located inside &quot;dml&quot; module of EconML, you can use the method name, &quot;backdoor.econml.dml.DML&quot;. CausalML estimators can also be called. See `this demo notebook &lt;https://microsoft.github.io/dowhy/example_notebooks/dowhy-conditional-treatment-effects.html&gt;`_.</span>
+<span class="sd">        In addition, you can directly call any of the EconML estimation methods. The convention is &quot;backdoor.econml.path-to-estimator-class&quot;. For example, for the double machine learning estimator (&quot;DML&quot; class) that is located inside &quot;dml&quot; module of EconML, you can use the method name, &quot;backdoor.econml.dml.DML&quot;. CausalML estimators can also be called. See `this demo notebook &lt;https://py-why.github.io/dowhy/example_notebooks/dowhy-conditional-treatment-effects.html&gt;`_.</span>
 
 
 <span class="sd">        :param identified_estimand: a probability expression</span>
@@ -590,9 +594,9 @@
 <span class="sd">        ( X ⫫ Y ) | Z</span>
 <span class="sd">        where X and Y are considered as singleton sets currently</span>
 <span class="sd">        Z can have multiple variables</span>
-<span class="sd">        :param k: number of covariates in set Z </span>
+<span class="sd">        :param k: number of covariates in set Z</span>
 <span class="sd">        :param independence_test: dictionary containing methods to test conditional independece in data</span>
-<span class="sd">        :param independence_constraints: list of implications to be test input by the user in the format </span>
+<span class="sd">        :param independence_constraints: list of implications to be test input by the user in the format</span>
 <span class="sd">            [(x,y,(z1,z2)),</span>
 <span class="sd">            (x,y, (z3,))</span>
 <span class="sd">            ]</span>
@@ -602,7 +606,7 @@
             <span class="n">test_for_continuous</span> <span class="o">=</span> <span class="n">independence_test</span><span class="p">[</span><span class="s1">&#39;test_for_continuous&#39;</span><span class="p">]</span>
             <span class="n">test_for_discrete</span> <span class="o">=</span> <span class="n">independence_test</span><span class="p">[</span><span class="s1">&#39;test_for_discrete&#39;</span><span class="p">]</span>
             <span class="n">refuter</span> <span class="o">=</span> <span class="n">GraphRefuter</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">method_name_continuous</span><span class="o">=</span> <span class="n">test_for_continuous</span><span class="p">,</span> <span class="n">method_name_discrete</span> <span class="o">=</span> <span class="n">test_for_discrete</span><span class="p">)</span>
-        
+
         <span class="k">else</span><span class="p">:</span>
             <span class="n">refuter</span> <span class="o">=</span> <span class="n">GraphRefuter</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
 
@@ -627,11 +631,11 @@
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">check_dseparation</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)],</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">b</span><span class="p">)],</span> <span class="n">k_list</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span> <span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2"> are CI given </span><span class="si">%s</span><span class="s2"> &quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">k_list</span><span class="p">)</span>
                         <span class="n">conditional_independences</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">k_list</span><span class="p">])</span>
-    
+
             <span class="n">independence_constraints</span> <span class="o">=</span> <span class="n">conditional_independences</span>
 
         <span class="n">res</span> <span class="o">=</span> <span class="n">refuter</span><span class="o">.</span><span class="n">refute_model</span><span class="p">(</span><span class="n">independence_constraints</span> <span class="o">=</span> <span class="n">independence_constraints</span><span class="p">)</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">refuter</span><span class="o">.</span><span class="n">_refutation_passed</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">res</span></div></div>
