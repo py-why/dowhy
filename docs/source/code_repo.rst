@@ -107,7 +107,7 @@ v0.5-beta: Enhanced documentation and support for causal mediation
 
 * A `tutorial  <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/tutorial-causalinference-machinelearning-using-dowhy-econml.ipynb>`_ on causal inference using DoWhy and EconML
 
-* Better organization of docs and notebooks on the `documentation website <https://microsoft.github.io/dowhy/>`_.
+* Better organization of docs and notebooks on the `documentation website <https://py-why.github.io/dowhy/>`_.
 
 **Community**
 

@@ -219,7 +219,7 @@ class CausalModel:
             * Instrumental Variables: "iv.instrumental_variable"
             * Regression Discontinuity: "iv.regression_discontinuity"
 
-        In addition, you can directly call any of the EconML estimation methods. The convention is "backdoor.econml.path-to-estimator-class". For example, for the double machine learning estimator ("DML" class) that is located inside "dml" module of EconML, you can use the method name, "backdoor.econml.dml.DML". CausalML estimators can also be called. See `this demo notebook <https://microsoft.github.io/dowhy/example_notebooks/dowhy-conditional-treatment-effects.html>`_.
+        In addition, you can directly call any of the EconML estimation methods. The convention is "backdoor.econml.path-to-estimator-class". For example, for the double machine learning estimator ("DML" class) that is located inside "dml" module of EconML, you can use the method name, "backdoor.econml.dml.DML". CausalML estimators can also be called. See `this demo notebook <https://py-why.github.io/dowhy/example_notebooks/dowhy-conditional-treatment-effects.html>`_.
 
 
         :param identified_estimand: a probability expression
@@ -471,9 +471,9 @@ class CausalModel:
         ( X ⫫ Y ) | Z
         where X and Y are considered as singleton sets currently
         Z can have multiple variables
-        :param k: number of covariates in set Z 
+        :param k: number of covariates in set Z
         :param independence_test: dictionary containing methods to test conditional independece in data
-        :param independence_constraints: list of implications to be test input by the user in the format 
+        :param independence_constraints: list of implications to be test input by the user in the format
             [(x,y,(z1,z2)),
             (x,y, (z3,))
             ]
@@ -483,7 +483,7 @@ class CausalModel:
             test_for_continuous = independence_test['test_for_continuous']
             test_for_discrete = independence_test['test_for_discrete']
             refuter = GraphRefuter(data = self._data, method_name_continuous= test_for_continuous, method_name_discrete = test_for_discrete)
-        
+
         else:
             refuter = GraphRefuter(data = self._data)
 
@@ -508,11 +508,11 @@ class CausalModel:
                     if self._graph.check_dseparation([str(a)], [str(b)], k_list) == True :
                         self.logger.info(" %s and %s are CI given %s ", a, b, k_list)
                         conditional_independences.append([a, b, k_list])
-    
+
             independence_constraints = conditional_independences
 
         res = refuter.refute_model(independence_constraints = independence_constraints)
-        
+
         self.logger.info(refuter._refutation_passed)
 
         return res
