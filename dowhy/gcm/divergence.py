@@ -1,3 +1,6 @@
+"""Functions in this module should be considered experimental, meaning there might be breaking API changes in the
+future.
+"""
 import numpy as np
 from scipy.stats import entropy
 from sklearn.neighbors import NearestNeighbors

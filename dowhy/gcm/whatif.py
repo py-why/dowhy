@@ -1,3 +1,8 @@
+"""This module provides functionality to answer what-if questions.
+
+Functions in this module should be considered experimental, meaning there might be breaking API changes in the future.
+"""
+
 from typing import Any, Dict, Callable, Iterable, List, Union, Optional
 
 import networkx as nx

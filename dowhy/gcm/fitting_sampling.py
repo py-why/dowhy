@@ -1,3 +1,8 @@
+"""This module provides functionality for fitting probabilistic causal models and drawing samples from them.
+
+Functions in this module should be considered experimental, meaning there might be breaking API changes in the future.
+"""
+
 from typing import Any
 
 import networkx as nx

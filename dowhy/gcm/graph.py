@@ -1,4 +1,8 @@
-"""This module defines the fundamental interfaces and functions related to causal graphs in graphical causal models."""
+"""This module defines the fundamental interfaces and functions related to causal graphs in graphical causal models.
+
+Classes and functions in this module should be considered experimental, meaning there might be breaking API changes in
+the future.
+"""
 
 from abc import abstractmethod, ABC
 from typing import Any, List

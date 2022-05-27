@@ -1,6 +1,7 @@
-
 """This module defines multiple implementations of the abstract class :class:`~dowhy.gcm.graph.FunctionalCausalModel`
 (FCM)
+
+Classes in this module should be considered experimental, meaning there might be breaking API changes in the future.
 """
 
 import copy

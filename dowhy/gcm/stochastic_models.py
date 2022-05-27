@@ -1,6 +1,6 @@
+"""This module defines multiple implementations of the abstract class :class:`~dowhy.gcm.graph.StochasticModel`.
 
-"""This module defines multiple implementations of the abstract class
-:class:`~dowhy.gcm.graph.StochasticModel`
+Classes in this module should be considered experimental, meaning there might be breaking API changes in the future.
 """
 
 import warnings

@@ -1,3 +1,9 @@
+"""This module provides functionality for shapley value estimation.
+
+Classes and functions in this module should be considered experimental, meaning there might be breaking API changes in
+the future.
+"""
+
 import itertools
 from enum import Enum
 from typing import Callable, Union, Tuple, List, Dict, Set, Optional

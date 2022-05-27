@@ -1,3 +1,7 @@
+"""Functions and classes in this module should be considered experimental, meaning there might be breaking API changes
+in the future.
+"""
+
 from typing import List
 
 import numpy as np

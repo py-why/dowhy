@@ -1,3 +1,7 @@
+"""Functions in this module should be considered experimental, meaning there might be breaking API changes in the
+future.
+"""
+
 from typing import Optional, List, Callable
 
 import numpy
