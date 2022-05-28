@@ -46,7 +46,8 @@ News
 * **DoWhy now part of PyWhy**
 
   We have moved DoWhy from microsoft/dowhy to py-why/dowhy. While GitHub will automatically
-  redirect your git command for cloning, pulling, etc., we recommend updating git remotes and bookmarks.
+  redirect your git command for cloning, pulling, etc., we recommend updating git remotes and bookmarks. Please note
+  that the **documentation** has now moved to https://py-why.github.io/dowhy with **no** redirect from the old URL.
 
 * **Experimental support for GCM-based inference**
 
