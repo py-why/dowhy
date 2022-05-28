@@ -48,6 +48,16 @@ News
   We have moved DoWhy from microsoft/dowhy to py-why/dowhy. While GitHub will automatically
   redirect your git command for cloning, pulling, etc., we recommend updating git remotes and bookmarks.
 
+* **Experimental support for GCM-based inference**
+
+  We have started adding support for graphical causal model-based inference (or in short GCM-based). At the moment,
+  this includes support for interventions, counterfactuals, and attributing distribution changes. As part of this,
+  we also added features for Shapley value estimation and independence tests. We're still in the process of fleshing
+  everything out, including `documentation <https://py-why.github.io/dowhy/gcm/>`_. Some of it is already on `master
+  <https://github.com/py-why/dowhy>`_, other parts are on feature branches (prefixed with ``gcm-``) with open
+  pull-requests, other parts will appear as new pull-requests in the next couple of weeks. Be sure to watch this space
+  here as we quickly expand functionality and documentation.
+
 The need for causal inference
 ----------------------------------
 
