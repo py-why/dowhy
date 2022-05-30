@@ -204,7 +204,25 @@ GCM-based inference (experimental)
 ----------------------------------
 
 Graphical causal model-based inference, or GCM-based inference for short, is an experimental addition to DoWhy. For
-details, check out the `documentation for the gcm sub-package <https://py-why.github.io/dowhy/gcm>`_.
+details, check out the `documentation for the gcm sub-package <https://py-why.github.io/dowhy/gcm>`_. The basic
+recipe for this API works as follows:
+
+.. code:: python
+
+    # 1. Modeling cause-effect relationships as a structural causal model
+    #    (causal graph + functional causal models):
+    scm = gcm.StructuralCausalModel(nx.DiGraph([('X', 'Y'), ('Y', 'Z')])) # X -> Y -> Z
+    scm.set_causal_mechanism('X', gcm.EmpiricalDistribution())
+    scm.set_causal_mechanism('Y', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
+    scm.set_causal_mechanism('Z', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
+
+    # 2. Fitting the SCM to the data:
+    gcm.fit(scm, data)
+
+    # 3. Answering a causal query based on the SCM:
+    results = gcm.<causal_query>(scm, ...)
+
+Where <causal_query> can be one of multiple functions explained in `Answering Causal Questions <https://py-why.github.io/dowhy/gcm/user_guide/answering_causal_questions/index.html>`_.
 
 
 A high-level Pandas API
