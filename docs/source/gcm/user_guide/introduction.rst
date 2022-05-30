@@ -3,8 +3,8 @@ Introduction
 
 Graphical causal model-based inference, or GCM-based inference for short, is an experimental addition to DoWhy, that
 currently works separately from DoWhy's main API. Its experimental status also means that its API may
-undergo breaking changes in the future. It will be forming a part of a joint, new API (<link to proposal>). We
-welcome your comments.
+undergo breaking changes in the future. It will be forming a part of a joint,
+`new API <https://github.com/py-why/dowhy/wiki/API-proposal-for-v1>`_. We welcome your comments.
 
 The ``dowhy.gcm`` package provides a variety of ways to answer causal questions and we'll go through them in detail in
 section :doc:`answering_causal_questions/index`. However, before diving into them, let's understand
