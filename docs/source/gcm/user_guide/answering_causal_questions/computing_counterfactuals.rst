@@ -20,7 +20,7 @@ To see how the method works, let's generate some data:
 
 >>> import networkx as nx, numpy as np, pandas as pd
 >>> from dowhy import gcm
->>>
+
 >>> X = np.random.normal(loc=0, scale=1, size=1000)
 >>> Y = 2*X + np.random.normal(loc=0, scale=1, size=1000)
 >>> Z = 3*Y + np.random.normal(loc=0, scale=1, size=1000)
@@ -29,13 +29,15 @@ To see how the method works, let's generate some data:
 Next, we'll model cause-effect relationships as an invertible SCM and fit it to the data:
 
 >>> causal_model = gcm.InvertibleStructuralCausalModel(nx.DiGraph([('X', 'Y'), ('Y', 'Z')])) # X -> Y -> Z
->>> gcm.auto_assign_causal_models(causal_model, training_data, gcm.AutoAssignQuality.GOOD)
->>>
+>>> causal_model.set_causal_mechanism('X', gcm.EmpiricalDistribution())
+>>> causal_model.set_causal_mechanism('Y', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
+>>> causal_model.set_causal_mechanism('Z', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
+
 >>> gcm.fit(causal_model, training_data)
 
 Finally, let's compute the counterfactual when intervening on X:
 
->>> gcm.estimate_counterfactuals(
+>>> gcm.counterfactual_samples(
 >>>     causal_model,
 >>>     {'X': lambda x: 2},
 >>>     observed_data=pd.DataFrame(data=dict(X=[1], Y=[2], Z=[3])))
@@ -53,7 +55,7 @@ estimate the counterfactual value of :math:`Z`, had we set :math:`X := 2`, which
 This shows that the observed data is used to calculate the noise data in the system. We can also
 provide these noise values directly, via:
 
->>> gcm.counterfactual_distribution(
+>>> gcm.counterfactual_samples(
 >>>     causal_model,
 >>>     {'X': lambda x: 2},
 >>>     noise_data=pd.DataFrame(data=dict(X=[0], Y=[-0.007913], Z=[-2.97568])))

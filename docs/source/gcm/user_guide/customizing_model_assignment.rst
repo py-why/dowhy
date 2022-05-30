@@ -1,4 +1,4 @@
 Customizing Model Assignment
 ============================
 
-TODO
+Coming soon.
