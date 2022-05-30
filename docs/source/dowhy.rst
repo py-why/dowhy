@@ -13,6 +13,7 @@ Subpackages
    dowhy.causal_refuters
    dowhy.data_transformers
    dowhy.do_samplers
+   dowhy.gcm
    dowhy.graph_learners
    dowhy.interpreters
    dowhy.utils
