@@ -200,6 +200,13 @@ estimate (if any). Here's a sample output of the linear regression estimator.
 For a full code example, check out the `Getting Started with DoWhy <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_ notebook. You can also use Conditional Average Treatment Effect (CATE) estimation methods from other libraries such as EconML and CausalML, as shown in the `Conditional Treatment Effects <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_ notebook. For more examples of using DoWhy, check out the Jupyter notebooks in `docs/source/example_notebooks <https://github.com/microsoft/dowhy/tree/master/docs/source/example_notebooks/>`_ or try them online at `Binder <https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F>`_. 
 
 
+GCM-based inference (experimental)
+----------------------------------
+
+Graphical causal model-based inference, or GCM-based inference for short, is an experimental addition to DoWhy. For
+details, check out the `documentation for the gcm sub-package <https://py-why.github.io/dowhy/gcm>`_.
+
+
 A high-level Pandas API
 -----------------------
 
