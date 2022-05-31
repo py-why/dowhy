@@ -17,12 +17,12 @@ deployment:
 >>> import networkx as nx, numpy as np, pandas as pd
 >>> from dowhy import gcm
 >>> from scipy.stats import halfnorm
->>>
+
 >>> X = halfnorm.rvs(size=1000, loc=0.5, scale=0.2)
 >>> Y = halfnorm.rvs(size=1000, loc=1.0, scale=0.2)
 >>> Z = np.maximum(X, Y) + np.random.normal(loc=0, scale=1, size=1000)
 >>> data_old = pd.DataFrame(data=dict(X=X, Y=Y, Z=Z))
->>>
+
 >>> X = halfnorm.rvs(size=1000, loc=0.5, scale=0.2)
 >>> Y = halfnorm.rvs(size=1000, loc=1.0, scale=0.2)
 >>> Z = X + Y + np.random.normal(loc=0, scale=1, size=1000)
@@ -34,7 +34,9 @@ parallel vs. waiting for them sequentially).
 Next, we'll model cause-effect relationships as a probabilistic causal model:
 
 >>> causal_model = gcm.ProbabilisticCausalModel(nx.DiGraph([('X', 'Z'), ('Y', 'Z')]))  # X -> Z <- Y
->>> gcm.auto_assign_causal_models(causal_model, based_on=data_old)
+>>> causal_model.set_causal_mechanism('X', gcm.EmpiricalDistribution())
+>>> causal_model.set_causal_mechanism('Y', gcm.EmpiricalDistribution())
+>>> causal_model.set_causal_mechanism('Z', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
 
 Finally, we attribute changes in distributions to changes in causal mechanisms:
 

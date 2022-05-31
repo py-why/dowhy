@@ -6,7 +6,7 @@ DoWhy can answer and explain the concepts behind them and how to interpret the r
 
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 1
 
     simulate_impact_of_interventions
     computing_counterfactuals

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Example to demonstrate optimized backdoor variable search for Causal Identification &mdash; DoWhy | An end-to-end library for causal inference  documentation</title>
+  <title>Basic Example for GCM-Based Inference &mdash; DoWhy | An end-to-end library for causal inference  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -20,7 +20,9 @@
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Code repository &amp; Versions" href="../code_repo.html" />
+    <link rel="prev" title="Customizing Model Assignment" href="../gcm/user_guide/customizing_model_assignment.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -90,9 +92,14 @@
 <li class="toctree-l1"><a class="reference internal" href="identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">GCM-based inference (Experimental)</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../gcm/user_guide/index.html">GCMs User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gcm_basic_example.html">Basic Example for GCM-Based Inference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Basic Example for GCM-Based Inference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Step-1:-Modeling-cause-effect-relationships-as-a-structural-causal-model-(SCM)">Step 1: Modeling cause-effect relationships as a structural causal model (SCM)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Step-2:-Fitting-the-SCM-to-the-data">Step 2: Fitting the SCM to the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Step-3:-Answering-a-causal-query-based-on-the-SCM">Step 3: Answering a causal query based on the SCM</a></li>
+</ul>
+</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package</span></p>
 <ul>
@@ -114,9 +121,10 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Example to demonstrate optimized backdoor variable search for Causal Identification</li>
+          <li><a href="../gcm/index.html">&lt;no title&gt;</a> &raquo;</li>
+      <li>Basic Example for GCM-Based Inference</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/example_notebooks/dowhy_optimize_backdoor_example.ipynb.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/example_notebooks/gcm_basic_example.ipynb.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -394,106 +402,234 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<section id="Example-to-demonstrate-optimized-backdoor-variable-search-for-Causal-Identification">
-<h1>Example to demonstrate optimized backdoor variable search for Causal Identification<a class="headerlink" href="#Example-to-demonstrate-optimized-backdoor-variable-search-for-Causal-Identification" title="Permalink to this headline"></a></h1>
-<p>This notebook compares the performance between causal identification using vanilla backdoor search and the optimized backdoor search and demonstrates the performance gains obtained by using the latter.</p>
+<section id="Basic-Example-for-GCM-Based-Inference">
+<h1>Basic Example for GCM-Based Inference<a class="headerlink" href="#Basic-Example-for-GCM-Based-Inference" title="Permalink to this headline"></a></h1>
+<section id="Step-1:-Modeling-cause-effect-relationships-as-a-structural-causal-model-(SCM)">
+<h2>Step 1: Modeling cause-effect relationships as a structural causal model (SCM)<a class="headerlink" href="#Step-1:-Modeling-cause-effect-relationships-as-a-structural-causal-model-(SCM)" title="Permalink to this headline"></a></h2>
+<p>The first step is to model the cause-effect relationships between variables relevant to our use case. We do that in form of a causal graph. A causal graph is a directed acyclic graph (DAG) where an edge X→Y implies that X causes Y. Statistically, a causal graph encodes the conditional independence relations between variables. Using the <a class="reference external" href="https://networkx.org/">NetworkX</a> library, we can create causal graphs. In the snippet below, we create a chain X→Y→Z:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">import</span> <span class="nn">random</span>
-<span class="kn">from</span> <span class="nn">networkx.linalg.graphmatrix</span> <span class="kn">import</span> <span class="n">adjacency_matrix</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
-
-<span class="kn">import</span> <span class="nn">dowhy</span>
-<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
-<span class="kn">from</span> <span class="nn">dowhy.utils</span> <span class="kn">import</span> <span class="n">graph_operations</span>
-<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
-<br/></pre></div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="n">causal_graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">)])</span>
+</pre></div>
 </div>
 </div>
-<section id="Create-Random-Graph">
-<h2>Create Random Graph<a class="headerlink" href="#Create-Random-Graph" title="Permalink to this headline"></a></h2>
-<p>In this section, we create a random graph with the designated number of nodes (10 in this case).</p>
-<div class="nbinput docutils container">
+<p>To answer causal questions using causal graphs, we also have to know the nature of underlying data-generating process of variables. A causal graph by itself, being a diagram, does not have any information about the data-generating process. To introduce this data-generating process, we use an SCM that’s built on top of our causal graph:</p>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">10</span>
-<span class="n">p</span> <span class="o">=</span> <span class="mf">0.5</span>
-
-<span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">generators</span><span class="o">.</span><span class="n">random_graphs</span><span class="o">.</span><span class="n">fast_gnp_random_graph</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">directed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">()</span> <span class="k">if</span> <span class="n">u</span><span class="o">&lt;</span><span class="n">v</span><span class="p">])</span>
-<span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
-    <span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-<span class="n">adjacency_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">to_numpy_matrix</span><span class="p">(</span><span class="n">graph</span><span class="p">))</span>
-<span class="n">graph_dot</span> <span class="o">=</span> <span class="n">graph_operations</span><span class="o">.</span><span class="n">adjacency_matrix_to_graph</span><span class="p">(</span><span class="n">adjacency_matrix</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
-<span class="n">graph_dot</span> <span class="o">=</span> <span class="n">graph_operations</span><span class="o">.</span><span class="n">str_to_dot</span><span class="p">(</span><span class="n">graph_dot</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Graph Generated.&quot;</span><span class="p">)</span>
-
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">nodes</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Dataframe Generated.&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">gcm</span>
+<span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Graph Generated.
-Dataframe Generated.
-</pre></div></div>
-</div>
-</section>
-<section id="Testing-optimized-backdoor-search">
-<h2>Testing optimized backdoor search<a class="headerlink" href="#Testing-optimized-backdoor-search" title="Permalink to this headline"></a></h2>
-<p>In this section, we compare the runtimes for causal identification using vanilla backdoor search and the optimized backdoor search.</p>
-<div class="nbinput docutils container">
+<p>This causal model allows us now to assign causal mechanisms to each node in the form of functional causal models. For this basic example, we’ll use an empirical distribution for the root node X, and an additive noise model for Y and Z:</p>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">EmpiricalDistribution</span><span class="p">())</span>
+<span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+<span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+</pre></div>
+</div>
+</div>
+<p>At this point we would normally load our dataset. For this introduction, we generate some synthetic data instead. The API takes data in form of Pandas DataFrames:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span><span class="o">,</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<span class="c1"># I. Create a causal model from the data and given graph.</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span><span class="n">treatment</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)),</span><span class="n">outcome</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)),</span><span class="n">graph</span><span class="o">=</span><span class="n">graph_dot</span><span class="p">)</span>
-<span class="n">time1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time taken for initializing model =&quot;</span><span class="p">,</span> <span class="n">time1</span><span class="o">-</span><span class="n">start</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">X</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">Z</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">Y</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">))</span>
+<span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
 
-<span class="c1"># II. Identify causal effect and return target estimands</span>
-<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
-<span class="n">time2</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time taken for vanilla identification =&quot;</span><span class="p">,</span> <span class="n">time2</span><span class="o">-</span><span class="n">time1</span><span class="p">)</span>
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
 
-<span class="c1"># III. Identify causal effect using the optimized backdoor implementation</span>
-<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">optimize_backdoor</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time taken for optimized backdoor identification =&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">-</span><span class="n">time2</span><span class="p">)</span>
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>X</th>
+      <th>Y</th>
+      <th>Z</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1.076338</td>
+      <td>2.763681</td>
+      <td>7.835457</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>-0.172612</td>
+      <td>-0.776535</td>
+      <td>-3.262967</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1.790508</td>
+      <td>4.582391</td>
+      <td>14.032967</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-2.168174</td>
+      <td>-2.712969</td>
+      <td>-9.979541</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-0.212621</td>
+      <td>-1.400585</td>
+      <td>-5.207276</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Note how the columns X, Y, Z correspond to our nodes X, Y, Z in the graph constructed above. We can also see how the values of X influence the values of Y and how the values of Y influence the values of Z in that data set.</p>
+<p>In the real world, this data comes as an opaque stream of values, where we don’t know how one variable influences another. SCM-based inference can basically help us to deconstruct these causal relationships again, even though we didn’t know them before.</p>
+</section>
+<section id="Step-2:-Fitting-the-SCM-to-the-data">
+<h2>Step 2: Fitting the SCM to the data<a class="headerlink" href="#Step-2:-Fitting-the-SCM-to-the-data" title="Permalink to this headline"></a></h2>
+<p>With the data at hand and the graph constructed earlier, we can now train the SCM using <code class="docutils literal notranslate"><span class="pre">fit</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
+<div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Time taken for initializing model = 0.020856618881225586
-Time taken for vanilla identification = 0.0005276203155517578
-Time taken for optimized backdoor identification = 0.00048804283142089844
+Fitting causal mechanism of node Z: 100%|██████████████████████████████████████████████████████| 3/3 [00:00&lt;00:00, 173.42it/s]
 </pre></div></div>
 </div>
-<p>It can be observed that the optimized backdoor search makes causal identification faster as compared to the vanilla implementation.</p>
+<p>Fitting means, we learn the generative models of the variables in the SCM according to the data.</p>
+</section>
+<section id="Step-3:-Answering-a-causal-query-based-on-the-SCM">
+<h2>Step 3: Answering a causal query based on the SCM<a class="headerlink" href="#Step-3:-Answering-a-causal-query-based-on-the-SCM" title="Permalink to this headline"></a></h2>
+<p>The last step, answering a causal question, is our actual goal. E.g. we could ask the question:</p>
+<blockquote>
+<div><p>What will happen to the variable Z if I intervene on Y?</p>
+</div></blockquote>
+<p>This can be done via the <code class="docutils literal notranslate"><span class="pre">interventional_samples</span></code> function. Here’s how:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">samples</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">interventional_samples</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span>
+                                     <span class="p">{</span><span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="mf">2.34</span> <span class="p">},</span>
+                                     <span class="n">num_samples_to_draw</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">samples</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>X</th>
+      <th>Y</th>
+      <th>Z</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>-1.276026</td>
+      <td>2.34</td>
+      <td>7.003431</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>-0.265595</td>
+      <td>2.34</td>
+      <td>6.051983</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>-0.051601</td>
+      <td>2.34</td>
+      <td>7.431603</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-0.887553</td>
+      <td>2.34</td>
+      <td>6.495480</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-2.019357</td>
+      <td>2.34</td>
+      <td>6.720843</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
 </section>
 </section>
 
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../gcm/user_guide/customizing_model_assignment.html" class="btn btn-neutral float-left" title="Customizing Model Assignment" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../code_repo.html" class="btn btn-neutral float-right" title="Code repository &amp; Versions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

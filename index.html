@@ -91,6 +91,7 @@
 <p class="caption" role="heading"><span class="caption-text">GCM-based inference (Experimental)</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="gcm/user_guide/index.html">GCMs User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/gcm_basic_example.html">Basic Example for GCM-Based Inference</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package</span></p>
 <ul>
@@ -365,7 +366,23 @@ estimate (if any). Here’s a sample output of the linear regression estimator.<
 <section id="gcm-based-inference-experimental">
 <h2><a class="toc-backref" href="#id9">GCM-based inference (experimental)</a><a class="headerlink" href="#gcm-based-inference-experimental" title="Permalink to this headline"></a></h2>
 <p>Graphical causal model-based inference, or GCM-based inference for short, is an experimental addition to DoWhy. For
-details, check out the <a class="reference external" href="https://py-why.github.io/dowhy/gcm">documentation for the gcm sub-package</a>.</p>
+details, check out the <a class="reference external" href="https://py-why.github.io/dowhy/gcm">documentation for the gcm sub-package</a>. The basic
+recipe for this API works as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. Modeling cause-effect relationships as a structural causal model</span>
+<span class="c1">#    (causal graph + functional causal models):</span>
+<span class="n">scm</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">)]))</span> <span class="c1"># X -&gt; Y -&gt; Z</span>
+<span class="n">scm</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">EmpiricalDistribution</span><span class="p">())</span>
+<span class="n">scm</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+<span class="n">scm</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+
+<span class="c1"># 2. Fitting the SCM to the data:</span>
+<span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># 3. Answering a causal query based on the SCM:</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.&lt;</span><span class="n">causal_query</span><span class="o">&gt;</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Where &lt;causal_query&gt; can be one of multiple functions explained in <a class="reference external" href="https://py-why.github.io/dowhy/gcm/user_guide/answering_causal_questions/index.html">Answering Causal Questions</a>.</p>
 </section>
 <section id="a-high-level-pandas-api">
 <h2><a class="toc-backref" href="#id10">A high-level Pandas API</a><a class="headerlink" href="#a-high-level-pandas-api" title="Permalink to this headline"></a></h2>
@@ -651,16 +668,7 @@ As a practical example, <a class="reference external" href="https://github.com/m
 </section>
 <section id="contributing">
 <h1><a class="toc-backref" href="#id26">Contributing</a><a class="headerlink" href="#contributing" title="Permalink to this headline"></a></h1>
-<p>This project welcomes contributions and suggestions. For a guide to contributing and a list of all contributors, check out <a class="reference external" href="https://github.com/microsoft/dowhy/blob/master/CONTRIBUTING.md">CONTRIBUTING.md</a>. You can also join the DoWhy development channel on Discord: <a class="reference external" href="https://discord.gg/cSBGb3vsZb"><img alt="discord" src="https://img.shields.io/discord/818456847551168542" /></a></p>
-<p>Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit <a class="reference external" href="https://cla.microsoft.com">https://cla.microsoft.com</a>.</p>
-<p>When you submit a pull request, a CLA-bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.</p>
-<p>This project has adopted the <a class="reference external" href="https://opensource.microsoft.com/codeofconduct/">Microsoft Open Source Code of Conduct</a>.
-For more information see the <a class="reference external" href="https://opensource.microsoft.com/codeofconduct/faq/">Code of Conduct FAQ</a> or
-contact <a class="reference external" href="mailto:opencode&#37;&#52;&#48;microsoft&#46;com">opencode<span>&#64;</span>microsoft<span>&#46;</span>com</a> with any additional questions or comments.</p>
+<p>This project welcomes contributions and suggestions. For a guide to contributing and a list of all contributors, check out <a class="reference external" href="https://github.com/microsoft/dowhy/blob/master/CONTRIBUTING.md">CONTRIBUTING.md</a>. Our contributor code of conduct is available [here](<a class="reference external" href="https://github.com/py-why/governance/blob/main/CODE-OF-CONDUCT.md">https://github.com/py-why/governance/blob/main/CODE-OF-CONDUCT.md</a>). You can also join the DoWhy development channel on Discord: <a class="reference external" href="https://discord.gg/cSBGb3vsZb"><img alt="discord" src="https://img.shields.io/discord/818456847551168542" /></a></p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Introducing DoWhy</span></p>
 <ul>
@@ -920,6 +928,12 @@ contact <a class="reference external" href="mailto:opencode&#37;&#52;&#48;micros
 <li class="toctree-l2"><a class="reference internal" href="gcm/user_guide/customizing_model_assignment.html">Customizing Model Assignment</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/gcm_basic_example.html">Basic Example for GCM-Based Inference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="example_notebooks/gcm_basic_example.html#Step-1:-Modeling-cause-effect-relationships-as-a-structural-causal-model-(SCM)">Step 1: Modeling cause-effect relationships as a structural causal model (SCM)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_notebooks/gcm_basic_example.html#Step-2:-Fitting-the-SCM-to-the-data">Step 2: Fitting the SCM to the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_notebooks/gcm_basic_example.html#Step-3:-Answering-a-causal-query-based-on-the-SCM">Step 3: Answering a causal query based on the SCM</a></li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
@@ -974,7 +988,7 @@ contact <a class="reference external" href="mailto:opencode&#37;&#52;&#48;micros
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Microsoft.</p>
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -105,6 +105,7 @@
 <li class="toctree-l2"><a class="reference internal" href="customizing_model_assignment.html">Customizing Model Assignment</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/gcm_basic_example.html">Basic Example for GCM-Based Inference</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package</span></p>
 <ul>
@@ -200,10 +201,12 @@ nodes. We will dive much deeper into the details of causal mechanisms and their 
 to answer causal questions. With that in mind, the typical steps involved in answering a causal question, are:</p>
 <p>1. <strong>Modeling cause-effect relationships as a GCM (causal graph + causal mechanisms):</strong></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">causal_model</span> <span class="o">=</span> <span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">)]))</span> <span class="c1"># X -&gt; Y -&gt; Z</span>
-<span class="n">auto_assign_causal_models</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">based_on</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+<span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">EmpiricalDistribution</span><span class="p">())</span>
+<span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+<span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
 </pre></div>
 </div>
-<p>1. <strong>Fitting the GCM to the data:</strong></p>
+<p>2. <strong>Fitting the GCM to the data:</strong></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -234,14 +237,19 @@ built on top of our causal graph:</p>
 </pre></div>
 </div>
 <p>This causal model allows us now to assign causal mechanisms to each node in the form of functional causal models.
-Section <a class="reference internal" href="customizing_model_assignment.html"><span class="doc">Customizing Model Assignment</span></a> explains how this can be done explicitly, but for now, we’ll rely on
-our auto-assign feature. The feature automatically determines a good set of default functional causal
-models based on the data we work with.</p>
-<p>Therefore, at this point we would normally load our dataset. For this introduction, we generate
+Section <a class="reference internal" href="customizing_model_assignment.html"><span class="doc">Customizing Model Assignment</span></a> will go into more detail on how this works exactly. For now, we’ll assign
+an empirical distribution to the root node X, and an additive noise model to Y and Z:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">EmpiricalDistribution</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+</pre></div>
+</div>
+<p>At this point we would normally load our dataset. For this introduction, we generate
 some synthetic data instead. The API takes data in form of Pandas DataFrames:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span><span class="o">,</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Y</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">X</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Z</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">Y</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">))</span>
@@ -259,13 +267,6 @@ values of X influence the values of Y and how the values of Y influence the valu
 <p>In the real world, this data comes as an opaque stream of values, where we don’t know how one
 variable influences another. The SCM-based  can basically help us to deconstruct these causal
 relationships again, even though we didn’t know them before.</p>
-<p>Now that we have the data, let’s automatically assign a functional causal model (FCM) to each node in the graph,
-based on the data:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">auto_assign_causal_models</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">based_on</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>While this function provides a good default, section <a class="reference internal" href="customizing_model_assignment.html"><span class="doc">Customizing Model Assignment</span></a> explains
-how we can manually optimize the choice of models according to our problem and improve our results.</p>
 </section>
 <section id="step-2-fitting-the-scm-to-the-data">
 <h3>Step 2: Fitting the SCM to the data<a class="headerlink" href="#step-2-fitting-the-scm-to-the-data" title="Permalink to this headline"></a></h3>
@@ -281,10 +282,10 @@ how we can manually optimize the choice of models according to our problem and i
 <blockquote>
 <div><p>What will happen to the variable Z if I intervene on Y?</p>
 </div></blockquote>
-<p>This can be done via the <code class="docutils literal notranslate"><span class="pre">perform_intervention</span></code> function. Here’s how:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">samples</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">perform_intervention</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>                                   <span class="p">{</span><span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="mf">2.34</span> <span class="p">},</span>
-<span class="gp">&gt;&gt;&gt; </span>                                   <span class="n">num_samples_to_draw</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<p>This can be done via the <code class="docutils literal notranslate"><span class="pre">interventional_samples</span></code> function. Here’s how:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">samples</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">interventional_samples</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                     <span class="p">{</span><span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="mf">2.34</span> <span class="p">},</span>
+<span class="gp">&gt;&gt;&gt; </span>                                     <span class="n">num_samples_to_draw</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">samples</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="go">          X         Y          Z</span>
 <span class="go">0  1.186229  6.918607  20.682375</span>
@@ -314,7 +315,7 @@ value and Z will respond according to its causal model.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Microsoft.</p>
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
