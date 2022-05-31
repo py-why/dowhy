@@ -51,9 +51,11 @@ to answer causal questions. With that in mind, the typical steps involved in ans
 ::
 
    causal_model = StructuralCausalModel(nx.DiGraph([('X', 'Y'), ('Y', 'Z')])) # X -> Y -> Z
-   auto_assign_causal_models(causal_model, based_on=data)
+   causal_model.set_causal_mechanism('X', EmpiricalDistribution())
+   causal_model.set_causal_mechanism('Y', AdditiveNoiseModel(create_linear_regressor()))
+   causal_model.set_causal_mechanism('Z', AdditiveNoiseModel(create_linear_regressor()))
 
-1. **Fitting the GCM to the data:**
+2. **Fitting the GCM to the data:**
 ::
 
    fit(causal_model, data)
@@ -90,15 +92,19 @@ built on top of our causal graph:
 >>> causal_model = gcm.StructuralCausalModel(causal_graph)
 
 This causal model allows us now to assign causal mechanisms to each node in the form of functional causal models.
-Section :doc:`customizing_model_assignment` explains how this can be done explicitly, but for now, we'll rely on
-our auto-assign feature. The feature automatically determines a good set of default functional causal
-models based on the data we work with.
+Section :doc:`customizing_model_assignment` will go into more detail on how this works exactly. For now, we'll assign
+an empirical distribution to the root node X, and an additive noise model to Y and Z:
 
-Therefore, at this point we would normally load our dataset. For this introduction, we generate
+>>> causal_model.set_causal_mechanism('X', gcm.EmpiricalDistribution())
+>>> causal_model.set_causal_mechanism('Y', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
+>>> causal_model.set_causal_mechanism('Z', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
+
+
+At this point we would normally load our dataset. For this introduction, we generate
 some synthetic data instead. The API takes data in form of Pandas DataFrames:
 
 >>> import numpy as np, pandas as pd
->>>
+
 >>> X = np.random.normal(loc=0, scale=1, size=1000)
 >>> Y = 2 * X + np.random.normal(loc=0, scale=1, size=1000)
 >>> Z = 3 * Y + np.random.normal(loc=0, scale=1, size=1000)
@@ -118,14 +124,6 @@ In the real world, this data comes as an opaque stream of values, where we don't
 variable influences another. The SCM-based  can basically help us to deconstruct these causal
 relationships again, even though we didn't know them before.
 
-Now that we have the data, let's automatically assign a functional causal model (FCM) to each node in the graph,
-based on the data:
-
->>> gcm.auto_assign_causal_models(causal_model, based_on=data)
-
-While this function provides a good default, section :doc:`customizing_model_assignment` explains
-how we can manually optimize the choice of models according to our problem and improve our results.
-
 Step 2: Fitting the SCM to the data
 -----------------------------------
 
@@ -142,11 +140,11 @@ The last step, answering a causal question, is our actual goal. E.g. we could as
 
     What will happen to the variable Z if I intervene on Y?
 
-This can be done via the ``perform_intervention`` function. Here's how:
+This can be done via the ``interventional_samples`` function. Here's how:
 
->>> samples = gcm.perform_intervention(causal_model,
->>>                                    {'Y': lambda y: 2.34 },
->>>                                    num_samples_to_draw=1000)
+>>> samples = gcm.interventional_samples(causal_model,
+>>>                                      {'Y': lambda y: 2.34 },
+>>>                                      num_samples_to_draw=1000)
 >>> samples.head()
           X         Y          Z
 0  1.186229  6.918607  20.682375

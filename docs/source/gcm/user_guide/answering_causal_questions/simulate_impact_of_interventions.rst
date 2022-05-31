@@ -11,7 +11,7 @@ How to use it
 To see how the method works, let's generate some data:
 
 >>> import numpy as np, pandas as pd
->>>
+
 >>> X = np.random.normal(loc=0, scale=1, size=1000)
 >>> Y = 2*X + np.random.normal(loc=0, scale=1, size=1000)
 >>> Z = 3*Y + np.random.normal(loc=0, scale=1, size=1000)
@@ -21,14 +21,19 @@ Next, we'll model cause-effect relationships as a probabilistic causal model and
 
 >>> import networkx as nx
 >>> from dowhy import gcm
->>>
+
 >>> causal_model = gcm.ProbabilisticCausalModel(nx.DiGraph([('X', 'Y'), ('Y', 'Z')])) # X -> Y -> Z
->>> gcm.auto_assign_causal_models(causal_model, training_data)
+>>> causal_model.set_causal_mechanism('X', gcm.EmpiricalDistribution())
+>>> causal_model.set_causal_mechanism('Y', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
+>>> causal_model.set_causal_mechanism('Z', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
+
 >>> gcm.fit(causal_model, training_data)
 
-Finally, let's perform an intervention on Y:
+Finally, let's perform an intervention on X:
 
->>> samples = gcm.perform_intervention(causal_model, {'X': lambda x: 1}, num_samples_to_draw=1000)
+>>> samples = gcm.interventional_samples(causal_model,
+>>>                                      {'X': lambda x: 1},
+>>>                                      num_samples_to_draw=1000)
 >>> samples.head()
        X         Y          Z
     0  1  3.481467  12.475105
@@ -40,7 +45,9 @@ Finally, let's perform an intervention on Y:
 As we can see, X is now fixed at a constant value of 1. This is known as an atomic intervention. We can also perform
 shift interventions where we shift the random variable X by some value:
 
->>> samples = gcm.perform_intervention(causal_model, {'X': lambda x: x + 0.5}, num_samples_to_draw=1000)
+>>> samples = gcm.interventional_samples(causal_model,
+>>>                                      {'X': lambda x: x + 0.5},
+>>>                                      num_samples_to_draw=1000)
 >>> samples.head()
               X         Y          Z
     0 -0.542813  0.031771   1.195391
