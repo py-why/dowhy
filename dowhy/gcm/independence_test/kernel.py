@@ -14,7 +14,7 @@ from sklearn.preprocessing import scale
 
 import dowhy.gcm.config as config
 from dowhy.gcm.constant import EPS
-from dowhy.gcm.independence_test.kernel_operation import auto_create_list_of_kernels
+from dowhy.gcm.independence_test.kernel_operation import apply_rbf_kernel
 from dowhy.gcm.stats import quantile_based_fwer
 from dowhy.gcm.util.general import set_random_seed, shape_into_2d, apply_one_hot_encoding, fit_one_hot_encoders
 
@@ -22,9 +22,8 @@ from dowhy.gcm.util.general import set_random_seed, shape_into_2d, apply_one_hot
 def kernel_based(X: np.ndarray,
                  Y: np.ndarray,
                  Z: Optional[np.ndarray] = None,
-                 kernels_X: Optional[List[Callable[[np.ndarray], np.ndarray]]] = None,
-                 kernels_Y: Optional[List[Callable[[np.ndarray], np.ndarray]]] = None,
-                 kernels_Z: Optional[List[Callable[[np.ndarray], np.ndarray]]] = None,
+                 kernel: Callable[[np.ndarray], np.ndarray] = apply_rbf_kernel,
+                 scale_data: bool = False,
                  use_bootstrap: bool = True,
                  bootstrap_num_runs: int = 20,
                  bootstrap_num_samples_per_run: int = 2000,
@@ -51,12 +50,11 @@ def kernel_based(X: np.ndarray,
     :param X: Data matrix for observations from X.
     :param Y: Data matrix for observations from Y.
     :param Z: Optional data matrix for observations from Z. This is the conditional variable.
-    :param kernels_X: A list of kernels corresponding to each column in X. If None is given, the RBF kernel is used for
-                      continuous data and the delta-kernel for categorical data.
-    :param kernels_Y: A list of kernels corresponding to each column in Y. If None is given, the RBF kernel is used for
-                      continuous data and the delta-kernel for categorical data.
-    :param kernels_Z: A list of kernels corresponding to each column in Z. If None is given, the RBF kernel is used for
-                      continuous data and the delta-kernel for categorical data.
+    :param kernel: A kernel for estimating the pairwise similarities between samples. The expected input is a n x d
+                   numpy array and the output is expected to be a n x n numpy array. By default, the RBF kernel is used.
+    :param scale_data: If set to True, the data will be standardized. If set to False, the data is taken as it is.
+                       Standardizing the data helps in identifying weak dependencies. If one is only interested in
+                       stronger ones, consider setting this to False.
     :param use_bootstrap: If True, the independence tests are performed on multiple subsets of the data and the final
                           p-value is constructed based on the provided p_value_adjust_func function.
     :param bootstrap_num_runs: Number of bootstrap runs (only relevant if use_bootstrap is True).
@@ -69,13 +67,6 @@ def kernel_based(X: np.ndarray,
     """
     bootstrap_n_jobs = config.default_n_jobs if bootstrap_n_jobs is None else bootstrap_n_jobs
 
-    if kernels_X is None:
-        kernels_X = auto_create_list_of_kernels(X)
-    if kernels_Y is None:
-        kernels_Y = auto_create_list_of_kernels(Y)
-    if Z is not None and kernels_Z is None:
-        kernels_Z = auto_create_list_of_kernels(Z)
-
     def evaluate_kernel_test_on_samples(X: np.ndarray,
                                         Y: np.ndarray,
                                         Z: np.ndarray,
@@ -84,21 +75,10 @@ def kernel_based(X: np.ndarray,
 
         try:
             if Z is None:
-                return _hsic(X, Y,
-                             kernels_X=kernels_X,
-                             kernels_Y=kernels_Y)
+                return _hsic(X, Y, kernel=kernel, scale_data=scale_data)
             else:
-                return _kci(X, Y, Z,
-                            kernels_X=kernels_X,
-                            kernels_Y=kernels_Y,
-                            kernels_Z=kernels_Z)
-        except LinAlgError:
-            # TODO: This is a temporary workaround.
-            #       Under some circumstances, the KCI test throws a "numpy.linalg.LinAlgError: SVD did not converge"
-            #       error, depending on the data samples. This is related to the utilized algorithms by numpy for SVD.
-            #       There is actually a robust version for SVD, but it is not included in numpy.
-            #       This can either be addressed by some augmenting the data, using a different SVD implementation or
-            #       wait until numpy updates the used algorithm.
+                return _kci(X, Y, Z, kernel=kernel, scale_data=scale_data)
+        except LinAlgError:  # TODO: This is a temporary workaround. See https://issues.amazon.com/issues/causality-497
             return np.nan
 
     if use_bootstrap and X.shape[0] > bootstrap_num_samples_per_run:
@@ -198,43 +178,32 @@ def approx_kernel_based(X: np.ndarray,
 def _kci(X: np.ndarray,
          Y: np.ndarray,
          Z: np.ndarray,
-         kernels_X: List[Callable[[np.ndarray], np.ndarray]],
-         kernels_Y: List[Callable[[np.ndarray], np.ndarray]],
-         kernels_Z: List[Callable[[np.ndarray], np.ndarray]],
+         kernel: Callable[[np.ndarray], np.ndarray],
+         scale_data: bool,
          regularization_param: float = 10 ** -3) -> float:
-    """Tests the null hypothesis that X and Y are independent given Z using the kernel conditional independence test.
+    """
+    Tests the null hypothesis that X and Y are independent given Z using the kernel conditional independence test.
 
-    This is a corrected reimplementation of the kci method in the CondIndTests R-package. Authors of the original R
+    This is a corrected reimplementation of the KCI method in the CondIndTests R-package. Authors of the original R
     package: Christina Heinze-Deml, Jonas Peters, Asbjoern Marco Sinius Munk
 
     :return: The p-value for the null hypothesis that X and Y are independent given Z.
     """
-    X, Y, Z = shape_into_2d(X, Y, Z)
+    X, Y, Z = _convert_to_numeric(*shape_into_2d(X, Y, Z))
 
     if X.shape[0] != Y.shape[0] != Z.shape[0]:
         raise RuntimeError('All variables need to have the same number of samples!')
 
     n = X.shape[0]
 
-    k_x = np.ones((X.shape[0], X.shape[0]))
-    k_y = np.ones((X.shape[0], X.shape[0]))
-    k_z = np.ones((X.shape[0], X.shape[0]))
+    if scale_data:
+        X = scale(X)
+        Y = scale(Y)
+        Z = scale(Z)
 
-    # Applying kernels to each dimension. The product of the results is equivalent to the convolution of all kernels.
-    for i in range(X.shape[1]):
-        if np.unique(X[:, i]).shape[0] == 1:
-            continue
-        k_x *= kernels_X[i](X[:, i])
-
-    for i in range(Y.shape[1]):
-        if np.unique(Y[:, i]).shape[0] == 1:
-            continue
-        k_y *= kernels_Y[i](Y[:, i])
-
-    for i in range(Z.shape[1]):
-        if np.unique(Z[:, i]).shape[0] == 1:
-            continue
-        k_z *= kernels_Z[i](Z[:, i])
+    k_x = kernel(X)
+    k_y = kernel(Y)
+    k_z = kernel(Z)
 
     k_xz = k_x * k_z
 
@@ -280,11 +249,8 @@ def _kci(X: np.ndarray,
 
     size_w = num_eigen_vec_xz_z * num_eigen_vec_y_z
 
-    w = np.zeros((n, size_w))
-
-    for i in range(num_eigen_vec_xz_z):
-        for j in range(num_eigen_vec_y_z):
-            w[:, i * num_eigen_vec_y_z + j] = empirical_kernel_map_xz_z[:, i] * empirical_kernel_map_y_z[:, j]
+    w = (empirical_kernel_map_y_z[:, None]
+         * empirical_kernel_map_xz_z[..., None]).reshape(empirical_kernel_map_y_z.shape[0], -1)
 
     if size_w > n:
         ww_prod = w @ w.T
@@ -312,17 +278,18 @@ def _fast_centering(k: np.ndarray) -> np.ndarray:
 
 def _hsic(X: np.ndarray,
           Y: np.ndarray,
-          kernels_X: List[Callable[[np.ndarray], np.ndarray]],
-          kernels_Y: List[Callable[[np.ndarray], np.ndarray]],
+          kernel: Callable[[np.ndarray], np.ndarray],
+          scale_data: bool,
           cut_off_value: float = EPS) -> float:
-    """Estimates the Hilbert-Schmidt Independence Criterion score for a pairwise independence test between variables X
+    """
+    Estimates the Hilbert-Schmidt Independence Criterion score for a pairwise independence test between variables X
     and Y.
 
     This is a reimplementation from the original Matlab code provided by the authors.
 
     :return: The p-value for the null hypothesis that X and Y are independent.
     """
-    X, Y = shape_into_2d(X, Y)
+    X, Y = _convert_to_numeric(*shape_into_2d(X, Y))
 
     if X.shape[0] != Y.shape[0]:
         raise RuntimeError('All variables need to have the same number of samples!')
@@ -333,21 +300,12 @@ def _hsic(X: np.ndarray,
 
     n = X.shape[0]
 
-    bone = np.ones((n, 1), dtype=float)
+    if scale_data:
+        X = scale(X)
+        Y = scale(Y)
 
-    k_mat = np.ones((X.shape[0], X.shape[0]))
-    l_mat = np.ones((X.shape[0], X.shape[0]))
-
-    # Applying kernels to each dimension. The product of the results is equivalent to the convolution of all kernels.
-    for i in range(X.shape[1]):
-        if np.unique(X[:, i]).shape[0] == 1:
-            continue
-        k_mat *= kernels_X[i](X[:, i])
-
-    for i in range(Y.shape[1]):
-        if np.unique(Y[:, i]).shape[0] == 1:
-            continue
-        l_mat *= kernels_Y[i](Y[:, i])
+    k_mat = kernel(X)
+    l_mat = kernel(Y)
 
     k_c = _fast_centering(k_mat)
     l_c = _fast_centering(l_mat)
@@ -363,6 +321,7 @@ def _hsic(X: np.ndarray,
     k_mat = k_mat - np.diag(np.diag(k_mat))
     l_mat = l_mat - np.diag(np.diag(l_mat))
 
+    bone = np.ones((n, 1), dtype=float)
     mu_x = (bone.T @ k_mat @ bone) / n / (n - 1)
     mu_y = (bone.T @ l_mat @ bone) / n / (n - 1)
 
@@ -537,3 +496,7 @@ def _estimate_rit_statistic(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
 
 def _estimate_column_wise_covariances(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
     return np.cov(X, Y, rowvar=False)[:X.shape[1], -Y.shape[1]:]
+
+
+def _convert_to_numeric(*args) -> List[np.ndarray]:
+    return [apply_one_hot_encoding(X, fit_one_hot_encoders(X)) for X in args]
