@@ -7,7 +7,6 @@ from typing import Optional, List, Callable
 import numpy as np
 from sklearn.kernel_approximation import Nystroem
 from sklearn.metrics import euclidean_distances
-from sklearn.preprocessing import scale
 
 from dowhy.gcm.util.general import shape_into_2d, is_categorical
 
@@ -43,20 +42,16 @@ def apply_delta_kernel(X: np.ndarray) -> np.ndarray:
 
 def approximate_rbf_kernel_features(X: np.ndarray,
                                     num_random_components: int,
-                                    scale_data: bool = False,
                                     precision: Optional[float] = None) -> np.ndarray:
     """Applies the Nystroem method to create a NxD (D << N) approximated RBF kernel map using a subset of the data,
     where N is the number of samples in X and D the number of components.
 
     :param X: Input data.
     :param num_random_components: Number of components D for the approximated kernel map.
-    :param scale_data: Specific precision matrix for the RBF kernel. If None is given, this is inferred from the data.
-    :param precision:
+    :param precision: Specific precision matrix for the RBF kernel. If None is given, this is inferred from the data.
     :return: A NxD approximated RBF kernel map, where N is the number of samples in X and D the number of components.
     """
     X = shape_into_2d(X)
-    if scale_data:
-        X = scale(X)
 
     if precision is None:
         precision = _median_based_precision(X)
@@ -71,8 +66,6 @@ def approximate_delta_kernel_features(X: np.ndarray, num_random_components: int)
 
     :param X: Input data.
     :param num_random_components: Number of components D for the approximated kernel map.
-    :param scale_data: Specific precision matrix for the RBF kernel. If None is given, this is inferred from the data.
-    :param precision:
     :return: A NxD approximated RBF kernel map, where N is the number of samples in X and D the number of components.
     """
     X = shape_into_2d(X)

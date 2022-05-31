@@ -9,12 +9,11 @@ import scipy
 from joblib import Parallel, delayed
 from numpy.linalg import pinv, svd, LinAlgError
 from scipy.stats import gamma
-from sklearn.kernel_approximation import Nystroem
 from sklearn.preprocessing import scale
 
 import dowhy.gcm.config as config
 from dowhy.gcm.constant import EPS
-from dowhy.gcm.independence_test.kernel_operation import apply_rbf_kernel
+from dowhy.gcm.independence_test.kernel_operation import apply_rbf_kernel, approximate_rbf_kernel_features
 from dowhy.gcm.stats import quantile_based_fwer
 from dowhy.gcm.util.general import set_random_seed, shape_into_2d, apply_one_hot_encoding, fit_one_hot_encoders
 
@@ -101,12 +100,14 @@ def kernel_based(X: np.ndarray,
 def approx_kernel_based(X: np.ndarray,
                         Y: np.ndarray,
                         Z: Optional[np.ndarray] = None,
-                        num_random_features_X: int = 10,
-                        num_random_features_Y: int = 10,
-                        num_random_features_Z: int = 10,
+                        num_random_features_X: int = 50,
+                        num_random_features_Y: int = 50,
+                        num_random_features_Z: int = 50,
                         num_permutations: int = 100,
+                        approx_kernel: Callable[[np.ndarray], np.ndarray] = approximate_rbf_kernel_features,
+                        scale_data: bool = False,
                         use_bootstrap: bool = True,
-                        bootstrap_num_runs: int = 20,
+                        bootstrap_num_runs: int = 10,
                         bootstrap_num_samples: int = 1000,
                         bootstrap_n_jobs: Optional[int] = None,
                         p_value_adjust_func:
@@ -136,9 +137,16 @@ def approx_kernel_based(X: np.ndarray,
     :param num_random_features_Y: Number of features sampled from the approximated kernel map for Y. 
     :param num_random_features_Z: Number of features sampled from the approximated kernel map for Z. 
     :param num_permutations: Number of permutations for estimating the test test statistic.
+    :param approx_kernel: The approximated kernel map. The expected input is a n x d numpy array and the output is 
+                          expected to be a n x k numpy array with k << d. By default, the Nystroem method with a RBF
+                          kernel is used.
+    :param scale_data: If set to True, the data will be standardized. If set to False, the data is taken as it is.
+                       Standardizing the data helps in identifying weak dependencies. If one is only interested in
+                       stronger ones, consider setting this to False.
     :param use_bootstrap: If True, the independence tests are performed on multiple subsets of the data and the final
                           p-value is constructed based on the provided p_value_adjust_func function.
     :param bootstrap_num_runs: Number of bootstrap runs (only relevant if use_bootstrap is True).
+    :param bootstrap_num_samples: Maximum number of used samples per bootstrap run. 
     :param bootstrap_n_jobs: Number of parallel jobs for the boostrap runs.
     :param p_value_adjust_func: A callable that expects a numpy array of multiple p-values and returns one p-value. This
                                 is typically used a family wise error rate control method.
@@ -159,6 +167,8 @@ def approx_kernel_based(X: np.ndarray,
                     num_random_features_Y=num_random_features_Y,
                     num_runs=bootstrap_num_runs,
                     num_max_samples_per_run=bootstrap_num_samples,
+                    approx_kernel=approx_kernel,
+                    scale_data=scale_data,
                     n_jobs=bootstrap_n_jobs,
                     p_value_adjust_func=p_value_adjust_func)
     else:
@@ -171,6 +181,8 @@ def approx_kernel_based(X: np.ndarray,
                      num_random_features_Z=num_random_features_Z,
                      num_runs=bootstrap_num_runs,
                      num_max_samples_per_run=bootstrap_num_samples,
+                     approx_kernel=approx_kernel,
+                     scale_data=scale_data,
                      n_jobs=bootstrap_n_jobs,
                      p_value_adjust_func=p_value_adjust_func)
 
@@ -360,31 +372,28 @@ def _estimate_p_value(ww_prod: np.ndarray, statistic: np.ndarray) -> float:
     return 1 - gamma.cdf(statistic, alpha_approx, scale=beta_approx)
 
 
-def _rit(X: np.ndarray,
-         Y: np.ndarray,
+def _rit(X: np.ndarray, Y: np.ndarray,
          num_random_features_X: int,
          num_random_features_Y: int,
          num_permutations: int,
          num_runs: int,
-         num_max_samples_per_run: int = 1000,
-         n_jobs: Optional[int] = None,
-         p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float] = quantile_based_fwer) -> float:
-    """Implementation of the Randomized Independence Test.
-
-    Based on the work:
+         num_max_samples_per_run: int,
+         approx_kernel: Callable[[np.ndarray, int], np.ndarray],
+         scale_data: bool,
+         n_jobs: Optional[int],
+         p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float]) -> float:
+    """Implementation of the Randomized Independence Test based on the work:
         Strobl, Eric V., Kun Zhang, and Shyam Visweswaran.
         Approximate kernel-based conditional independence tests for fast non-parametric causal discovery.
         Journal of Causal Inference 7.1 (2019).
-
-    This is an implementation in Python and is inspired by the implementation in R from
-        https://github.com/ericstrobl/RCIT/
-    written by Eric V. Strobl.
     """
     n_jobs = config.default_n_jobs if n_jobs is None else n_jobs
 
-    X, Y = shape_into_2d(X, Y)
-    X = scale(apply_one_hot_encoding(X, fit_one_hot_encoders(X)))
-    Y = scale(apply_one_hot_encoding(Y, fit_one_hot_encoders(Y)))
+    X, Y = _convert_to_numeric(*shape_into_2d(X, Y))
+
+    if scale_data:
+        X = scale(X)
+        Y = scale(Y)
 
     def evaluate_rit_on_samples(parallel_random_seed: int):
         set_random_seed(parallel_random_seed)
@@ -397,8 +406,8 @@ def _rit(X: np.ndarray,
             X_samples = X
             Y_samples = Y
 
-        random_features_x = Nystroem(n_components=num_random_features_X).fit_transform(X_samples)
-        random_features_y = Nystroem(n_components=num_random_features_Y).fit_transform(Y_samples)
+        random_features_x = scale(approx_kernel(X_samples, num_random_features_X))
+        random_features_y = scale(approx_kernel(Y_samples, num_random_features_Y))
 
         permutation_results_of_statistic = []
         for i in range(num_permutations):
@@ -421,26 +430,25 @@ def _rcit(X: np.ndarray, Y: np.ndarray, Z: np.ndarray,
           num_random_features_Z: int,
           num_permutations: int,
           num_runs: int,
-          num_max_samples_per_run: int = 1000,
-          n_jobs: Optional[int] = None,
-          p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float] = quantile_based_fwer) -> float:
-    """Implementation of the Randomized Conditional Independence Test
-
-    Based on the work:
+          num_max_samples_per_run: int,
+          approx_kernel: Callable[[np.ndarray, int], np.ndarray],
+          scale_data: bool,
+          n_jobs: Optional[int],
+          p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float]) -> float:
+    """
+    Implementation of the Randomized Conditional Independence Test based on the work:
         Strobl, Eric V., Kun Zhang, and Shyam Visweswaran.
         Approximate kernel-based conditional independence tests for fast non-parametric causal discovery.
         Journal of Causal Inference 7.1 (2019).
-
-    This is an implementation in Python and is inspired by the implementation in R from
-        https://github.com/ericstrobl/RCIT/
-    written by Eric V. Strobl.
     """
     n_jobs = config.default_n_jobs if n_jobs is None else n_jobs
 
-    X, Y, Z = shape_into_2d(X, Y, Z)
-    X = scale(apply_one_hot_encoding(X, fit_one_hot_encoders(X)))
-    Y = scale(apply_one_hot_encoding(Y, fit_one_hot_encoders(Y)))
-    Z = scale(apply_one_hot_encoding(Z, fit_one_hot_encoders(Z)))
+    X, Y, Z = _convert_to_numeric(*shape_into_2d(X, Y, Z))
+
+    if scale_data:
+        X = scale(X)
+        Y = scale(Y)
+        Z = scale(Z)
 
     def parallel_job(parallel_random_seed: int):
         set_random_seed(parallel_random_seed)
@@ -455,10 +463,10 @@ def _rcit(X: np.ndarray, Y: np.ndarray, Z: np.ndarray,
             Y_samples = Y
             Z_samples = Z
 
-        # Apply approximate kernel mapping and create features for each (potentially multivariate) variable.
-        random_features_x = Nystroem(n_components=num_random_features_X).fit_transform(X_samples)
-        random_features_y = Nystroem(n_components=num_random_features_Y).fit_transform(Y_samples)
-        random_features_z = Nystroem(n_components=num_random_features_Z).fit_transform(Z_samples)
+        Y_samples = np.column_stack([Y_samples, Z_samples])
+        random_features_x = scale(approx_kernel(X_samples, num_random_features_X))
+        random_features_y = scale(approx_kernel(Y_samples, num_random_features_Y))
+        random_features_z = scale(approx_kernel(Z_samples, num_random_features_Z))
 
         cov_zz = _estimate_column_wise_covariances(random_features_z, random_features_z)
         inverse_cov_zz = scipy.linalg.cho_solve(
