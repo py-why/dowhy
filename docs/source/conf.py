@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath("../../"))
 # -- Project information -----------------------------------------------------
 
 project = 'DoWhy | An end-to-end library for causal inference'
-copyright = '2020, Microsoft'
+copyright = '2022, PyWhy contributors'
 author = 'Amit Sharma, Emre Kiciman'
 
 # The short X.Y version
