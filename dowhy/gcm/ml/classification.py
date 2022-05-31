@@ -6,7 +6,11 @@ from typing import List
 
 import numpy as np
 import sklearn
-from sklearn.experimental import enable_hist_gradient_boosting  # noqa
+from packaging import version
+
+if version.parse(sklearn.__version__) < version.parse("1.0"):
+    from sklearn.experimental import enable_hist_gradient_boosting  # noqa
+
 from sklearn.ensemble import RandomForestClassifier, HistGradientBoostingClassifier
 from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.linear_model import LogisticRegression

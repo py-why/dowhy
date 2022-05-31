@@ -6,7 +6,11 @@ from typing import Any
 
 import numpy as np
 import sklearn
-from sklearn.experimental import enable_hist_gradient_boosting  # noqa
+from packaging import version
+
+if version.parse(sklearn.__version__) < version.parse("1.0"):
+    from sklearn.experimental import enable_hist_gradient_boosting  # noqa
+
 from sklearn.ensemble import RandomForestRegressor, HistGradientBoostingRegressor
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.linear_model import LinearRegression, RidgeCV, LassoCV, LassoLarsIC, ElasticNetCV
