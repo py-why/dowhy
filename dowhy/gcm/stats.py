@@ -6,7 +6,10 @@ from typing import Union, List, Optional, Callable
 
 import numpy as np
 from numpy.matlib import repmat
+from scipy import stats
+from sklearn.linear_model import LinearRegression
 
+from dowhy.gcm.constant import EPS
 from dowhy.gcm.util.general import shape_into_2d
 
 
@@ -163,3 +166,66 @@ def permute_features(feature_samples: np.ndarray,
             np.random.shuffle(feature_samples[:, feature])
 
     return feature_samples
+
+
+def estimate_ftest_pvalue(X_training_a: np.ndarray,
+                          X_training_b: np.ndarray,
+                          Y_training: np.ndarray,
+                          X_test_a: np.ndarray,
+                          X_test_b: np.ndarray,
+                          Y_test: np.ndarray) -> float:
+    """Estimates the p-value for the null hypothesis that the same regression error with less parameters can be
+    achieved. This is, a linear model trained on a data set A with d number of features has the same performance
+    (in terms of squared error) relative to the number of features as a model trained on a data set B with k number
+    features, where k < d. Here, both data sets need to have the same target values. A small p-value would
+    indicate that the model performances are significantly different.
+
+    Note that all given test samples are utilized in the f-test.
+
+    See https://en.wikipedia.org/wiki/F-test#Regression_problems for more details.
+
+    :param X_training_a: Input training samples for model A.
+    :param X_training_b: Input training samples for model B. These samples should have less features than samples in X_training_a.
+    :param Y_training: Target training values.
+    :param X_test_a: Test samples for model A.
+    :param X_test_b: Test samples for model B.
+    :param Y_test: Test values.
+    :return: A p-value on [0, 1].
+    """
+    X_training_a, X_test_a = shape_into_2d(X_training_a, X_test_a)
+
+    if X_training_b.size > 0:
+        X_training_b, X_test_b = shape_into_2d(X_training_b, X_test_b)
+    else:
+        X_training_b = X_training_b.reshape(0, 0)
+        X_test_b = X_test_b.reshape(0, 0)
+
+    if X_training_a.shape[1] <= X_training_b.shape[1]:
+        raise ValueError("The data X_training_a should have more dimensions (model parameters) than the data "
+                         "X_training_b!")
+
+    ssr_a = np.sum(
+        (Y_test - LinearRegression().fit(X_training_a, Y_training).predict(X_test_a)) ** 2)
+
+    if X_training_b.shape[1] > 0:
+        ssr_b = np.sum(
+            (Y_test - LinearRegression().fit(X_training_b, Y_training).predict(X_test_b)) ** 2)
+    else:
+        ssr_b = np.sum((Y_test - np.mean(Y_test)) ** 2)
+
+    dof_diff_1 = (X_test_a.shape[1] - X_test_b.shape[1])  # p1 - p2
+    dof_diff_2 = (X_test_a.shape[0] - X_test_a.shape[1] - 1)  # n - p2 (parameters include intercept)
+
+    f_statistic = (ssr_b - ssr_a) / dof_diff_1 * dof_diff_2
+
+    if ssr_a < EPS:
+        ssr_a = 0
+    if ssr_b < EPS:
+        ssr_b = 0
+
+    if ssr_a == 0 and ssr_b == 0:
+        f_statistic = 0
+    elif ssr_a != 0:
+        f_statistic /= ssr_a
+
+    return stats.f.sf(f_statistic, dof_diff_1, dof_diff_2)
