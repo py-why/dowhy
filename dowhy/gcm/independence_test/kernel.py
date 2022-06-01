@@ -22,7 +22,7 @@ def kernel_based(X: np.ndarray,
                  Y: np.ndarray,
                  Z: Optional[np.ndarray] = None,
                  kernel: Callable[[np.ndarray], np.ndarray] = apply_rbf_kernel,
-                 scale_data: bool = False,
+                 scale_data: bool = True,
                  use_bootstrap: bool = True,
                  bootstrap_num_runs: int = 20,
                  bootstrap_num_samples_per_run: int = 2000,
@@ -77,7 +77,13 @@ def kernel_based(X: np.ndarray,
                 return _hsic(X, Y, kernel=kernel, scale_data=scale_data)
             else:
                 return _kci(X, Y, Z, kernel=kernel, scale_data=scale_data)
-        except LinAlgError:  # TODO: This is a temporary workaround. See https://issues.amazon.com/issues/causality-497
+        except LinAlgError:
+            # TODO: This is a temporary workaround.
+            #       Under some circumstances, the KCI test throws a "numpy.linalg.LinAlgError: SVD did not converge"
+            #       error, depending on the data samples. This is related to the utilized algorithms by numpy for SVD.
+            #       There is actually a robust version for SVD, but it is not included in numpy.
+            #       This can either be addressed by some augmenting the data, using a different SVD implementation or
+            #       wait until numpy updates the used algorithm.
             return np.nan
 
     if use_bootstrap and X.shape[0] > bootstrap_num_samples_per_run:
