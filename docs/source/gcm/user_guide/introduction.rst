@@ -20,7 +20,7 @@ graph, or, in case of root node variables, simply its distribution.
 
 The most general case of a GCM is a **probabilistic causal model** (PCM), where causal mechanisms are defined by
 **conditional stochastic models** and **stochastic models**. In the ``dowhy.gcm`` package, these are represented by
-:class:`~ProbabilsiticCausalModel`, :class:`~ConditionalStochasticModel`, and :class:`~StochasticModel`.
+:class:`~ProbabilisticCausalModel`, :class:`~ConditionalStochasticModel`, and :class:`~StochasticModel`.
 
 .. image:: pcm.png
    :width: 80%

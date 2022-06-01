@@ -50,4 +50,4 @@ expect, given that we changed the mechanism for variable :math:`Z` in our data g
 As the reader may have noticed, there is no fitting step involved when using this method. The
 reason is, that this function will call ``fit`` internally. To be precise, this function will
 make two copies of the causal graph and fit one graph to the first dataset and the second graph
-to the second datset.
+to the second dataset.
