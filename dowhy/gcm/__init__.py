@@ -9,6 +9,7 @@ from .confidence_intervals_cms import bootstrap_sampling, bootstrap_training_and
 from .fcms import PredictionModel, ClassificationModel, AdditiveNoiseModel, ClassifierFCM, PostNonlinearModel
 from .fitting_sampling import fit, draw_samples
 from .graph import StochasticModel, ConditionalStochasticModel, FunctionalCausalModel, DirectedGraph, is_root_node
+from .influence import arrow_strength, intrinsic_causal_influence
 from .stochastic_models import EmpiricalDistribution, BayesianGaussianMixtureDistribution, ScipyDistribution
 from .whatif import interventional_samples, counterfactual_samples
 from .distribution_change import distribution_change, distribution_change_of_graphs
