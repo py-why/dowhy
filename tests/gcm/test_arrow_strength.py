@@ -89,12 +89,54 @@ def test_arrow_strength_with_squared_mean_difference():
     assert causal_strengths[('X0', 'X2')] == approx(4, abs=0.4)
     assert causal_strengths[('X1', 'X2')] == approx(1, abs=0.4)
 
+
+@flaky(max_runs=3)
+def test_when_arrow_strength_with_variance_difference_then_returns_expected_results():
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([('X1', 'X2'), ('X0', 'X2')]))
+    causal_model.set_causal_mechanism('X0', ScipyDistribution(stats.norm, loc=0, scale=2))
+    causal_model.set_causal_mechanism('X1', ScipyDistribution(stats.norm, loc=0, scale=1))
+    causal_model.set_causal_mechanism('X2', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
+
+    X0 = np.random.normal(0, 2, 1000)
+    X1 = np.random.normal(0, 1, 1000)
+
+    test_data = pd.DataFrame({'X0': X0,
+                              'X1': X1,
+                              'X2': X0 + X1 + np.random.normal(0, 0.2, X0.shape[0])})
+    fit(causal_model, test_data)
+
     causal_strengths \
-        = arrow_strength(causal_model, 'X2', tolerance=10 ** -5,
-                         difference_estimation_func=lambda x, y:
-                         (np.mean(x).squeeze() - np.mean(y).squeeze()) ** 2)
-    assert causal_strengths[('X0', 'X2')] == approx(4, abs=0.4)
-    assert causal_strengths[('X1', 'X2')] == approx(1, abs=0.4)
+        = arrow_strength(causal_model,
+                         'X2',
+                         difference_estimation_func=lambda x, y: np.var(y) - np.var(x))
+    assert causal_strengths[('X0', 'X2')] == approx(4, abs=0.1)
+    assert causal_strengths[('X1', 'X2')] == approx(1, abs=0.1)
+
+
+@flaky(max_runs=3)
+def test_given_gcm_with_misspecified_mechanism_when_evaluate_arrow_strength_with__observational_data_then_gives_expected_results():
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([('X1', 'X2'), ('X0', 'X2')]))
+    # Here, we misspecify the mechanism on purpose by setting scale to 1 instead of 2.
+    causal_model.set_causal_mechanism('X0', ScipyDistribution(stats.norm, loc=0, scale=1))
+    causal_model.set_causal_mechanism('X1', ScipyDistribution(stats.norm, loc=0, scale=1))
+    causal_model.set_causal_mechanism('X2', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
+
+    X0 = np.random.normal(0, 2, 1000)  # The standard deviation in the data is actually 2.
+    X1 = np.random.normal(0, 1, 1000)
+
+    test_data = pd.DataFrame({'X0': X0,
+                              'X1': X1,
+                              'X2': X0 + X1 + np.random.normal(0, 0.2, X0.shape[0])})
+    fit(causal_model, test_data)
+
+    # If we provide the observational data here, we can mitigate the misspecification of the causal mechanism.
+    causal_strengths \
+        = arrow_strength(causal_model,
+                         'X2',
+                         parent_samples=test_data,
+                         difference_estimation_func=lambda x, y: np.var(y) - np.var(x))
+    assert causal_strengths[('X0', 'X2')] == approx(4, abs=0.1)
+    assert causal_strengths[('X1', 'X2')] == approx(1, abs=0.1)
 
 
 @flaky(max_runs=5)
