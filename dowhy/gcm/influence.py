@@ -50,6 +50,10 @@ def arrow_strength(causal_model: ProbabilisticCausalModel,
     :param causal_model: The probabilistic causal model for whose target node we compute the strength of incoming
                          edges for.
     :param target_node: The target node whose incoming edges' strength is to be computed.
+    :param parent_samples: Optional samples from the parents of the target_node. If None are given, they are generated
+                           based on the provided causal model. Providing observational data can help to mitigate
+                           misspecifications in the graph, such as missing interactions between root nodes or 
+                           confounders.
     :param num_samples_conditional: Sample size to use for estimating the distance between distributions.
     :param max_num_runs: The maximum number of times to resample and estimate the strength to report the average
                          strength.
@@ -57,7 +61,7 @@ def arrow_strength(causal_model: ProbabilisticCausalModel,
                       running it max_num_runs times.
     :param n_jobs: The number of jobs to run in parallel. Set it to -1 to use all processors.
     :param difference_estimation_func: Optional: How to measure the distance between two distributions. By default,
-                                       the expectation of squared differences is estimated for a continuous target node
+                                       the difference of the variance is estimated for a continuous target node
                                        and the KL divergence for a categorical target node.
     :return: Causal strength of each edge.
     """
@@ -103,7 +107,7 @@ def arrow_strength_of_model(conditional_stochastic_model: ConditionalStochasticM
             difference_estimation_func = estimate_kl_divergence_of_probabilities
         else:
             def difference_estimation_func(old, new):
-                return (np.mean(new) - np.mean(old)).squeeze() ** 2
+                return np.var(new) - np.var(old)
 
     if isinstance(conditional_stochastic_model, ProbabilityEstimatorModel):
         samples_creation_method = conditional_stochastic_model.estimate_probabilities
