@@ -3,10 +3,12 @@
 Classes in this module should be considered experimental, meaning there might be breaking API changes in the future.
 """
 
-from typing import Optional, Any, Union
+from typing import Optional, Any, Union, Callable
+
+import networkx as nx
 
 from dowhy.gcm.graph import DirectedGraph, StochasticModel, ConditionalStochasticModel, FunctionalCausalModel, \
-    CAUSAL_MECHANISM, InvertibleFunctionalCausalModel
+    CAUSAL_MECHANISM, InvertibleFunctionalCausalModel, clone_causal_models
 
 
 class ProbabilisticCausalModel:
@@ -14,11 +16,18 @@ class ProbabilisticCausalModel:
     causal relationships and corresponding causal mechanism for each node describing the data generation process. The
     causal mechanisms can be any general stochastic models."""
 
-    def __init__(self, graph: Optional[DirectedGraph] = None):
+    def __init__(self,
+                 graph: Optional[DirectedGraph] = None,
+                 graph_copier: Callable[[DirectedGraph], DirectedGraph] = nx.DiGraph):
+        """
+        :param graph: Optional graph object to be used as causal graph.
+        :param graph_copier: Optional function that can copy a causal graph. Defaults to a networkx.DiGraph
+                             constructor.
+        """
         if graph is None:
-            import networkx as nx
             graph = nx.DiGraph()
         self.graph = graph
+        self.graph_copier = graph_copier
 
     def set_causal_mechanism(self, node: Any, mechanism: Union[StochasticModel, ConditionalStochasticModel]) -> None:
         """Assigns the generative causal model of node in the causal graph.
@@ -41,6 +50,12 @@ class ProbabilisticCausalModel:
                   :class:`~dowhy.gcm.graph.ConditionalStochasticModel`.
         """
         return self.graph.nodes[node][CAUSAL_MECHANISM]
+
+    def clone(self):
+        """Clones the causal model, but keeps causal mechanisms untrained."""
+        graph_copy = self.graph_copier(self.graph)
+        clone_causal_models(self.graph, graph_copy)
+        return self.__class__(graph_copy)
 
 
 class StructuralCausalModel(ProbabilisticCausalModel):
