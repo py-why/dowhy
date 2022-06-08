@@ -9,6 +9,7 @@ DoWhy can answer and explain the concepts behind them and how to interpret the r
     :maxdepth: 1
 
     quantify_arrow_strength
+    quantify_intrinsic_causal_influence
     simulate_impact_of_interventions
     computing_counterfactuals
     attribute_distributional_changes
