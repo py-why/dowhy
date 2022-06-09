@@ -51,6 +51,10 @@ to answer causal questions. With that in mind, the typical steps involved in ans
 ::
 
    causal_model = StructuralCausalModel(nx.DiGraph([('X', 'Y'), ('Y', 'Z')])) # X -> Y -> Z
+   auto.assign_causal_mechanisms(causal_model, data)
+
+Or manually assign causal mechanisms:
+::
    causal_model.set_causal_mechanism('X', EmpiricalDistribution())
    causal_model.set_causal_mechanism('Y', AdditiveNoiseModel(create_linear_regressor()))
    causal_model.set_causal_mechanism('Z', AdditiveNoiseModel(create_linear_regressor()))
@@ -91,15 +95,6 @@ built on top of our causal graph:
 >>> from dowhy import gcm
 >>> causal_model = gcm.StructuralCausalModel(causal_graph)
 
-This causal model allows us now to assign causal mechanisms to each node in the form of functional causal models.
-Section :doc:`customizing_model_assignment` will go into more detail on how this works exactly. For now, we'll assign
-an empirical distribution to the root node X, and an additive noise model to Y and Z:
-
->>> causal_model.set_causal_mechanism('X', gcm.EmpiricalDistribution())
->>> causal_model.set_causal_mechanism('Y', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
->>> causal_model.set_causal_mechanism('Z', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
-
-
 At this point we would normally load our dataset. For this introduction, we generate
 some synthetic data instead. The API takes data in form of Pandas DataFrames:
 
@@ -120,8 +115,25 @@ some synthetic data instead. The API takes data in form of Pandas DataFrames:
 Note how the columns X, Y, Z correspond to our nodes X, Y, Z in the graph constructed above. We can also see how the
 values of X influence the values of Y and how the values of Y influence the values of Z in that data set.
 
-In the real world, this data comes as an opaque stream of values, where we don't know how one
-variable influences another. The SCM-based  can basically help us to deconstruct these causal
+The causal model created above allows us now to assign causal mechanisms to each node in the form of functional causal
+models. Here, these mechanism can either be assigned manually if, for instance, prior knowledge about certain causal
+relationships are known or they can be assigned automatically using the :mod:`~dowhy.gcm.auto` module. For the latter,
+we simply call:
+
+>>> gcm.auto.assign_causal_mechanisms(causal_model, data)
+
+In case we want to have more control over the assigned mechanisms, we can do this manually as well. For instance, we can
+can assign an empirical distribution to the root node X and linear additive noise models to nodes Y and Z:
+
+>>> causal_model.set_causal_mechanism('X', gcm.EmpiricalDistribution())
+>>> causal_model.set_causal_mechanism('Y', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
+>>> causal_model.set_causal_mechanism('Z', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
+
+Section :doc:`customizing_model_assignment` will go into more detail on how one can even define a completely customized
+model or add their own implementation.
+
+In the real world, the data comes as an opaque stream of values, where we typically don't know how one
+variable influences another. The graphical causal models can help us to deconstruct these causal
 relationships again, even though we didn't know them before.
 
 Step 2: Fitting the SCM to the data
