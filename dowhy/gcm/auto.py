@@ -53,7 +53,7 @@ class AssignmentQuality(Enum):
 
 def assign_causal_mechanisms(causal_model: ProbabilisticCausalModel,
                              based_on: pd.DataFrame,
-                             quality: AssignmentQuality,
+                             quality: AssignmentQuality = AssignmentQuality.GOOD,
                              override_models: bool = False) -> None:
     """Automatically assigns appropriate causal models. If causal models are already assigned to nodes and
     override_models is set to False, this function only validates the assignments with respect to the graph structure.
