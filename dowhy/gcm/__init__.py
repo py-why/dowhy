@@ -10,5 +10,5 @@ from .graph import StochasticModel, ConditionalStochasticModel, FunctionalCausal
 from .stochastic_models import EmpiricalDistribution, BayesianGaussianMixtureDistribution, ScipyDistribution
 from .whatif import interventional_samples, counterfactual_samples
 from .distribution_change import distribution_change, distribution_change_of_graphs
-from .independence_test import kernel_based, approx_kernel_based
+from .independence_test import independence_test, kernel_based, approx_kernel_based
 from . import util, ml, auto
