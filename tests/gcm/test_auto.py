@@ -144,3 +144,8 @@ def test_given_non_linear_classification_problem_when_auto_assign_causal_models_
     assign_causal_mechanisms(causal_model, pd.DataFrame(data), quality=AssignmentQuality.BETTER)
     assert not isinstance(causal_model.causal_mechanism('Y').classifier_model.sklearn_model, LogisticRegression)
     assert not isinstance(causal_model.causal_mechanism('Y').classifier_model.sklearn_model, GaussianNB)
+
+
+def test_when_auto_called_from_main_namespace_returns_no_attribute_error():
+    from dowhy import gcm
+    _ = gcm.auto.AssignmentQuality.GOOD
