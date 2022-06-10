@@ -109,7 +109,7 @@ def attribute_anomalies(causal_model: InvertibleStructuralCausalModel,
     :param num_distribution_samples: Number of samples from X, the marginal distribution of the target. These are used
     for evaluating the tail probability in case of the IT score (attribute_mean_deviation is False) or as background
     samples in case of feature relevance (attribute_mean_deviation is True).
-    :param shapley_config: Config for the Shapley estimator.
+    :param shapley_config: :class:`~dowhy.gcm.shapley.ShapleyConfig` for the Shapley estimator.
     :return: A dictionary that assigns a numpy array to each upstream node including the target_node itself. The
     i-th entry of an array indicates the contribution of the corresponding node to the anomaly score of the target
     for the i-th observation in anomaly_samples.
