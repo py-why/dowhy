@@ -70,6 +70,7 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
                    num_discrete_instruments=0,
                    num_discrete_effect_modifiers=0,
                    stddev_treatment_noise = 1,
+                   stddev_outcome_noise = 0.01,
                    one_hot_encode = False):
     assert not (treatment_is_binary and treatment_is_category)
     W, X, Z, FD, c1, c2, ce, cz, cfd1, cfd2 = [None]*10
@@ -141,8 +142,8 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
                     (W_with_dummy.shape[1], num_frontdoor_variables))
             FD += W_with_dummy @ c1_frontdoor
 
-    def _compute_y(t, W, X, FD, beta, c2, ce, cfd2):
-        y = np.random.normal(0,0.01, num_samples)
+    def _compute_y(t, W, X, FD, beta, c2, ce, cfd2, stddev_outcome_noise):
+        y = np.random.normal(0,stddev_outcome_noise, num_samples)
         if num_frontdoor_variables > 0:
             y += FD @ cfd2
         else:
@@ -160,7 +161,7 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
             y = np.vectorize(convert_to_binary)(y,stochastic_discretization)
         return y
 
-    y = _compute_y(t, W_with_dummy, X_with_categorical, FD, beta, c2, ce, cfd2)
+    y = _compute_y(t, W_with_dummy, X_with_categorical, FD, beta, c2, ce, cfd2, stddev_outcome_noise)
 
     data = np.column_stack((t, y))
     if num_common_causes > 0:
@@ -180,8 +181,8 @@ def linear_dataset(beta, num_common_causes, num_samples, num_instruments=0,
         FD_T1 = FD_noise + (T1 @ cfd1)
         FD_T0 = FD_noise + (T0 @ cfd1)
     ate = np.mean(
-            _compute_y(T1, W_with_dummy, X_with_categorical, FD_T1, beta, c2, ce, cfd2) -
-            _compute_y(T0, W_with_dummy, X_with_categorical, FD_T0, beta, c2, ce, cfd2))
+            _compute_y(T1, W_with_dummy, X_with_categorical, FD_T1, beta, c2, ce, cfd2, stddev_outcome_noise) -
+            _compute_y(T0, W_with_dummy, X_with_categorical, FD_T0, beta, c2, ce, cfd2, stddev_outcome_noise))
 
     treatments = [("v" + str(i)) for i in range(0, num_treatments)]
     outcome = "y"
