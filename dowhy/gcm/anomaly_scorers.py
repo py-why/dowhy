@@ -200,4 +200,4 @@ class InverseDensityScorer(AnomalyScorer):
         if not self._fitted:
             raise ValueError("Scorer has not been fitted!")
 
-        return 1 / self._density_estimator.estimate_density(X)
+        return 1 / self._density_estimator.density(X)
