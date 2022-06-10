@@ -1,5 +1,4 @@
 import random
-from typing import List, Union
 
 import numpy as np
 import pytest
@@ -7,6 +6,7 @@ from flaky import flaky
 from pytest import approx
 
 from dowhy.gcm.shapley import estimate_shapley_values, ShapleyApproximationMethods, ShapleyConfig
+from dowhy.gcm.stats import permute_features
 from dowhy.gcm.util.general import means_difference
 
 
@@ -204,29 +204,7 @@ def _generate_data(num_vars):
 
 
 def _set_function_for_aggregated_feature_attribution(subset, X, model):
-    tmp = _permute_features(X, np.arange(0, X.shape[1])[subset == 0], False)
+    tmp = permute_features(X, np.arange(0, X.shape[1])[subset == 0], False)
     tmp[:, subset == 1] = X[0, subset == 1]
 
     return means_difference(model(tmp), X[0])
-
-
-def _permute_features(feature_samples: np.ndarray,
-                      features_to_permute: Union[List[int], np.ndarray],
-                      randomize_features_jointly: bool) -> np.ndarray:
-    # Making copy to ensure that the original object is not modified.
-    feature_samples = np.array(feature_samples)
-
-    if randomize_features_jointly:
-        # Permute samples jointly. This still represents an interventional distribution.
-        feature_samples[:, features_to_permute] \
-            = feature_samples[np.random.choice(feature_samples.shape[0],
-                                               feature_samples.shape[0],
-                                               replace=False)][:, features_to_permute]
-    else:
-        # Permute samples independently.
-        for feature in features_to_permute:
-            np.random.shuffle(feature_samples[:, feature])
-
-    return feature_samples
-
-
