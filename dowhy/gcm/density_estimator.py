@@ -10,6 +10,6 @@ class DensityEstimator(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def estimate_density(self, X: np.ndarray) -> np.ndarray:
+    def density(self, X: np.ndarray) -> np.ndarray:
         """Returns the density of each input."""
         raise NotImplementedError

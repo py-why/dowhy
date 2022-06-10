@@ -30,7 +30,7 @@ class GaussianMixtureDensityEstimator(DensityEstimator):
         self._gmm_model = BayesianGaussianMixture(n_components=self._num_components,
                                                   covariance_type='full').fit(shape_into_2d(X))
 
-    def estimate_density(self, X: np.ndarray) -> np.ndarray:
+    def density(self, X: np.ndarray) -> np.ndarray:
         if self._gmm_model is None:
             raise RuntimeError('%s has not been fitted!' % self.__class__.__name__)
 
@@ -39,6 +39,9 @@ class GaussianMixtureDensityEstimator(DensityEstimator):
 
 
 class KernelDensityEstimator1D(DensityEstimator):
+    """Represents a kernel based density estimator. The estimator uses the sklearn KernelDensity class internally.
+    """
+
     def __init__(self) -> None:
         self._kde_model = None
 
@@ -55,7 +58,7 @@ class KernelDensityEstimator1D(DensityEstimator):
         if X.shape[1] > 1:
             raise RuntimeError('%s only supports one dimensional data!' % self.__class__.__name__)
 
-    def estimate_density(self, X: np.ndarray) -> np.ndarray:
+    def density(self, X: np.ndarray) -> np.ndarray:
         if self._kde_model is None:
             raise RuntimeError('%s has not been fitted!' % self.__class__.__name__)
 
