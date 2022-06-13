@@ -121,8 +121,8 @@ def test_given_gcm_with_misspecified_mechanism_when_evaluate_arrow_strength_with
     causal_model.set_causal_mechanism('X1', ScipyDistribution(stats.norm, loc=0, scale=1))
     causal_model.set_causal_mechanism('X2', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
 
-    X0 = np.random.normal(0, 2, 1000)  # The standard deviation in the data is actually 2.
-    X1 = np.random.normal(0, 1, 1000)
+    X0 = np.random.normal(0, 2, 2000)  # The standard deviation in the data is actually 2.
+    X1 = np.random.normal(0, 1, 2000)
 
     test_data = pd.DataFrame({'X0': X0,
                               'X1': X1,
@@ -135,7 +135,7 @@ def test_given_gcm_with_misspecified_mechanism_when_evaluate_arrow_strength_with
                          'X2',
                          parent_samples=test_data,
                          difference_estimation_func=lambda x, y: np.var(y) - np.var(x))
-    assert causal_strengths[('X0', 'X2')] == approx(4, abs=0.1)
+    assert causal_strengths[('X0', 'X2')] == approx(4, abs=0.5)
     assert causal_strengths[('X1', 'X2')] == approx(1, abs=0.1)
 
 
