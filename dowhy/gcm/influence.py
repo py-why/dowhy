@@ -11,6 +11,7 @@ import pandas as pd
 from joblib import Parallel, delayed
 from numpy.matlib import repmat
 
+import dowhy.gcm.auto as auto
 from dowhy.gcm._noise import noise_samples_of_ancestors, compute_data_from_noise
 from dowhy.gcm.cms import ProbabilisticCausalModel, StructuralCausalModel
 from dowhy.gcm.constant import EPS
@@ -70,6 +71,7 @@ def arrow_strength(causal_model: ProbabilisticCausalModel,
     if is_root_node(causal_model.graph, target_node):
         raise ValueError("Target node %s is a root node, but it requires to have ancestors!" % target_node)
 
+    # Creating a smaller subgraph, which only contains upstream nodes that are connected to the target node.
     sub_causal_model = ProbabilisticCausalModel(node_connected_subgraph_view(causal_model.graph, target_node))
     validate_node(sub_causal_model.graph, target_node)
 
@@ -143,7 +145,7 @@ def arrow_strength_of_model(conditional_stochastic_model: ConditionalStochasticM
 
 def _estimate_direct_strength(draw_samples_func: Callable[[np.ndarray], np.ndarray],
                               distribution_samples: np.ndarray,
-                              target_columns: List[int],
+                              parents_subset: List[int],
                               difference_estimation_func:
                               Callable[[np.ndarray, np.ndarray], Union[np.ndarray, float]],
                               num_samples_conditional: int,
@@ -161,9 +163,13 @@ def _estimate_direct_strength(draw_samples_func: Callable[[np.ndarray], np.ndarr
                                            num_samples_conditional,
                                            replace=False)
 
-        removed_arrow_sampling = shape_into_2d(distribution_samples[:, target_columns][rnd_permutation])
+        # Sampling from the conditional distribution based on the current sample.
         conditional_distribution_samples = draw_samples_func(tmp_samples)
-        tmp_samples[:, target_columns] = removed_arrow_sampling
+
+        # Sampling from the conditional based on the current sample, but randomizing the inputs of all variables that
+        # are in the given subset. By this, we can simulate the impact on the conditional distribution when removing
+        # only the incoming edges of the variables in the subset.
+        tmp_samples[:, parents_subset] = distribution_samples[:, parents_subset][rnd_permutation]
         cond_dist_removed_arr_samples = draw_samples_func(tmp_samples)
 
         old_average_difference_result = average_difference_result
@@ -191,19 +197,19 @@ def _estimate_direct_strength(draw_samples_func: Callable[[np.ndarray], np.ndarr
 
 def intrinsic_causal_influence(causal_model: StructuralCausalModel,
                                target_node: Any,
-                               prediction_model: Union[PredictionModel, ClassificationModel, str] = 'exact',
+                               prediction_model: Union[PredictionModel, ClassificationModel, str] = 'approx',
                                attribution_func: Optional[Callable[[np.ndarray, np.ndarray], float]] = None,
                                num_training_samples: int = 100000,
-                               num_noise_samples: int = 7500,
-                               num_evaluation_samples: int = 1000,
+                               num_background_samples: int = 7500,
+                               num_samples_of_interest: int = 1000,
                                max_batch_size: int = 100,
-                               approx_select_model: Callable[[np.ndarray, np.ndarray],
-                                                             Union[PredictionModel, ClassificationModel]] = None,
+                               auto_assign_quality: auto.AssignmentQuality = auto.AssignmentQuality.GOOD,
                                shapley_config: Optional[ShapleyConfig] = None) -> Dict[Any, float]:
-    """Computes the causal contribution of each noise term in the functional causal model to the statistical property
-    (e.g. mean, variance) of the target node. We call this contribution *instrinsic* as noise terms, by definition,
-    do not inherit properties of observed parents. The contribution of each noise term is then the *intrinsic*
-    causal contribution of the corresponding node. For more scientific details, please refer to the paper below.
+    """Computes the causal contribution of each upstream noise term of the target node (including the noise of the
+    target itself) to the statistical property (e.g. mean, variance) of the target. We call this contribution
+    *intrinsic* as noise terms, by definition, do not inherit properties of observed parents. The contribution of each
+    noise term is then the *intrinsic* causal contribution of the corresponding node. For more scientific details,
+    please refer to the paper below.
 
     **Research Paper**:
     Janzing et al. *Quantifying causal contributions via structure preserving interventions*. arXiv:2007.00714, 2021.
@@ -225,41 +231,34 @@ def intrinsic_causal_influence(causal_model: StructuralCausalModel,
                              entropy or variance, but they might be relevant if, for instance, these shall be estimated
                              based on the residuals. By default, entropy is used if prediction model is a classifier,
                              variance otherwise.
-    :param num_training_samples: Number of samples for fitting the prediction_model. This number should be larger
-                                 than num_noise_samples + num_evaluation_samples.
-    :param num_noise_samples: Size of noise samples of upstream noise terms (of the target node) to draw from the
-                              causal graph. These will be used as background samples.
-    :param num_evaluation_samples: Size of noise samples to use in computing intrinsic causal contribution. These
-                                   will be used as samples of interest.
+    :param num_training_samples: Number of samples drawn from the graphical causal model that are used for fitting the
+                                 prediction_model (if necessary).
+    :param num_background_samples: Number of noise samples drawn from the graphical causal model that are used for
+                                   evaluating the set function. Here, these samples are the 'background samples' from
+                                   the noise distributions.
+    :param num_samples_of_interest: Number of noise samples drawn from the graphical causal model that are used for
+                                    evaluating the set function. Here, these samples are the 'samples of interest'.
     :param max_batch_size: Maximum batch size for estimating the predictions from evaluation samples. This has a
                            significant impact on the overall memory usage. If set to -1, all samples are used in one
                            batch.
-    :param approx_select_model: Optional function to select the prediction_model when prediction_model is set to
-                                'approx'. If not provided, defaults to auto.select_model().
-    :param shapley_config: Configuration for the Shapley estimator.
+    :param auto_assign_quality: Auto assign quality for the 'approx' prediction_model option.
+    :param shapley_config: :class:`~dowhy.gcm.shapley.ShapleyConfig` for the Shapley estimator.
     :return: Intrinsic causal contribution of each ancestor node to the statistical property defined by the
              attribution_func of the target node.
     """
     validate_causal_dag(causal_model.graph)
 
-    reduced_causal_model = StructuralCausalModel(node_connected_subgraph_view(causal_model.graph, target_node))
+    # Creating a smaller subgraph, which only contains upstream nodes that are connected to the target node.
+    sub_causal_model = StructuralCausalModel(node_connected_subgraph_view(causal_model.graph, target_node))
 
-    data_samples, noise_samples = \
-        noise_samples_of_ancestors(reduced_causal_model,
-                                   target_node,
-                                   max(num_training_samples, num_noise_samples + num_evaluation_samples))
+    data_samples, noise_samples = noise_samples_of_ancestors(sub_causal_model, target_node, num_training_samples)
     node_names = noise_samples.columns
-    noise_samples, target_samples = shape_into_2d(noise_samples.to_numpy(),
-                                                  data_samples[target_node].to_numpy())
+    noise_samples, target_samples = shape_into_2d(noise_samples.to_numpy(), data_samples[target_node].to_numpy())
 
     target_is_categorical = is_categorical(data_samples[target_node].to_numpy())
 
     if prediction_model == 'approx':
-        if approx_select_model is None:
-            from dowhy.gcm import auto
-            prediction_model = auto.select_model(noise_samples, target_samples, auto.AssignmentQuality.GOOD)
-        else:
-            prediction_model = approx_select_model(noise_samples, target_samples)
+        prediction_model = auto.select_model(noise_samples, target_samples, auto_assign_quality)
         prediction_model.fit(noise_samples, target_samples)
 
         if target_is_categorical:
@@ -268,12 +267,12 @@ def intrinsic_causal_influence(causal_model: StructuralCausalModel,
             prediction_method = prediction_model.predict
     elif prediction_model == 'exact':
         def exact_model(X: np.ndarray) -> np.ndarray:
-            return compute_data_from_noise(reduced_causal_model,
+            return compute_data_from_noise(sub_causal_model,
                                            pd.DataFrame(X, columns=[x for x in node_names]))[target_node].to_numpy()
 
         if target_is_categorical:
             list_of_classes = \
-                cast(ClassifierFCM, reduced_causal_model.causal_mechanism(target_node)).classifier_model.classes
+                cast(ClassifierFCM, sub_causal_model.causal_mechanism(target_node)).classifier_model.classes
 
             def prediction_method(X):
                 return (shape_into_2d(exact_model(X)) == list_of_classes).astype(float)
@@ -295,10 +294,15 @@ def intrinsic_causal_influence(causal_model: StructuralCausalModel,
             def attribution_func(x, _):
                 return estimate_variance(x)
 
+    _, noise_samples = noise_samples_of_ancestors(sub_causal_model,
+                                                  target_node,
+                                                  num_background_samples + num_samples_of_interest)
+    noise_samples = shape_into_2d(noise_samples.to_numpy())
+
     iccs = _estimate_iccs(attribution_func,
                           prediction_method,
-                          noise_samples[:num_noise_samples],
-                          noise_samples[num_noise_samples:num_noise_samples + num_evaluation_samples],
+                          noise_samples[:num_background_samples],
+                          noise_samples[num_background_samples:num_background_samples + num_samples_of_interest],
                           max_batch_size,
                           ShapleyConfig() if shapley_config is None else shapley_config)
 
