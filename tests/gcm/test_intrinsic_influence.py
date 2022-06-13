@@ -64,7 +64,7 @@ def test_intrinsic_causal_influence_categorical():
         -estimate_entropy_of_probabilities(log_mdl.predict_proba(np.column_stack([X0, N1, N2, N3])))
     expected_output_empty_subset = -estimate_entropy_of_probabilities(np.array([[0.5, 0.5]]))
 
-    iccs = intrinsic_causal_influence(causal_model, 'X3', prediction_model='approx', num_evaluation_samples=100)
+    iccs = intrinsic_causal_influence(causal_model, 'X3', prediction_model='approx', num_samples_of_interest=100)
     assert iccs['X0'] == approx(0.14, abs=0.05)
     assert iccs['X1'] == approx(0.01, abs=0.05)
     assert iccs['X2'] == approx(0.38, abs=0.05)
@@ -73,7 +73,7 @@ def test_intrinsic_causal_influence_categorical():
     assert np.sum([iccs[key] for key in iccs]) == approx(expected_output_full_subset - expected_output_empty_subset,
                                                          abs=0.05)
 
-    iccs = intrinsic_causal_influence(causal_model, 'X3', prediction_model='exact', num_evaluation_samples=100)
+    iccs = intrinsic_causal_influence(causal_model, 'X3', prediction_model='exact', num_samples_of_interest=100)
     assert iccs['X0'] == approx(0.14, abs=0.05)
     assert iccs['X1'] == approx(0.01, abs=0.05)
     assert iccs['X2'] == approx(0.38, abs=0.05)
@@ -119,7 +119,7 @@ def test_intrinsic_causal_influence_categorical_2():
     expected_output_full_subset = -estimate_entropy_of_probabilities(log_mdl.predict_proba(X))
     expected_output_empty_subset = -estimate_entropy_of_probabilities(np.array([[0.5, 0.5]]))
 
-    iccs = intrinsic_causal_influence(causal_model, 'X3', prediction_model='approx', num_evaluation_samples=100)
+    iccs = intrinsic_causal_influence(causal_model, 'X3', prediction_model='approx', num_samples_of_interest=100)
     assert iccs['X0'] == approx(0.05, abs=0.05)
     assert iccs['X1'] == approx(0.03, abs=0.05)
     assert iccs['X2'] == approx(0.1, abs=0.05)
@@ -128,7 +128,7 @@ def test_intrinsic_causal_influence_categorical_2():
     assert np.sum([iccs[key] for key in iccs]) == approx(expected_output_full_subset - expected_output_empty_subset,
                                                          abs=0.05)
 
-    iccs = intrinsic_causal_influence(causal_model, 'X3', prediction_model='exact', num_evaluation_samples=100)
+    iccs = intrinsic_causal_influence(causal_model, 'X3', prediction_model='exact', num_samples_of_interest=100)
     assert iccs['X0'] == approx(0.05, abs=0.05)
     assert iccs['X1'] == approx(0.03, abs=0.05)
     assert iccs['X2'] == approx(0.1, abs=0.05)
@@ -161,7 +161,7 @@ def test_given_only_categorical_data_when_estimate_icc_then_does_not_fail():
     expected_output_full_subset = -estimate_entropy_of_probabilities(log_mdl.predict_probabilities(X))
     expected_output_empty_subset = -estimate_entropy_of_probabilities(np.array([[0.5, 0.5]]))
 
-    iccs = intrinsic_causal_influence(causal_model, 'X3', prediction_model='approx', num_evaluation_samples=100)
+    iccs = intrinsic_causal_influence(causal_model, 'X3', prediction_model='approx', num_samples_of_interest=100)
     assert iccs['X0'] == approx(0.08, abs=0.03)
     assert iccs['X1'] == approx(0, abs=0.005)
     assert iccs['X2'] == approx(0.33, abs=0.05)
@@ -170,7 +170,7 @@ def test_given_only_categorical_data_when_estimate_icc_then_does_not_fail():
     assert np.sum([iccs[key] for key in iccs]) == approx(expected_output_full_subset - expected_output_empty_subset,
                                                          abs=0.05)
 
-    iccs = intrinsic_causal_influence(causal_model, 'X3', prediction_model='exact', num_evaluation_samples=100)
+    iccs = intrinsic_causal_influence(causal_model, 'X3', prediction_model='exact', num_samples_of_interest=100)
     assert iccs['X0'] == approx(0.08, abs=0.03)
     assert iccs['X1'] == approx(0, abs=0.005)
     assert iccs['X2'] == approx(0.33, abs=0.05)
