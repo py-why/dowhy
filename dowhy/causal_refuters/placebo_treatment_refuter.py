@@ -123,7 +123,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
                     self.logger.info("Using a Discrete Uniform Distribution with the following categories:{}"
                     .format(categories))
                     sample = np.random.choice(categories, size=num_rows)
-                    new_treatment = pd.Series(sample).astype('category')
+                    new_treatment = pd.Series(sample, index=self._data.index).astype('category')
 
             # Create a new column in the data by the name of placebo
             new_data = self._data.assign(placebo=new_treatment)
