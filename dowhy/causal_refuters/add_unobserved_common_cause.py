@@ -11,12 +11,28 @@ from sklearn.linear_model import LogisticRegression
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
 from dowhy.causal_estimator import CausalEstimator
+import dowhy.causal_estimators.econml 
 from dowhy.causal_refuters.linear_sensitivity_analyzer import LinearSensitivityAnalyzer
+from dowhy.causal_refuters.partial_linear_sensitivity_analyzer import PartialLinearSensitivityAnalyzer
+from dowhy.causal_refuters.non_parametric_sensitivity_analyzer import NonParametricSensitivityAnalyzer
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 
 class AddUnobservedCommonCause(CausalRefuter):
 
     """Add an unobserved confounder for refutation.
+    
+    AddUnobservedCommonCause class supports three methods:
+        1) Simulation based
+        2) Linear partial R2 based : Sensitivity Analysis for linear models.
+        3) Non-Parametric partial R2 based : Sensitivity Analyis for non-parametric models. Two important quantities used to estimate the bias are alpha and g
+         g := E[Y | T, W, Z] denotes the long regression function
+         g_s := E[Y | T, W] denotes the short regression function
+         α := (T - E[T | W, Z] ) / (E(T - E[T | W, Z]) ^ 2) denotes long reisz representer
+         α_s := (T - E[T | W] ) / (E(T - E[T | W]) ^ 2) denotes short reisz representer
+         Bias = E(g_s - g)(α_s - α) for partially linear models
+         Thus, The bound is the product of additional variations that omitted confounders generate in the regression function and in the reisz representer for partially linear models.
+         Whereas for non parametric models, Bias = S * Cg * Calpha 
+         where Cg and Calpha are explanatory powers of the confounder and S^2 = E(Y - g_s) ^ 2 * E(α_s ^ 2)
 
     Supports additional parameters that can be specified in the refute_estimate() method.
 
@@ -44,15 +60,24 @@ class AddUnobservedCommonCause(CausalRefuter):
         :param effect_fraction_on_treatment: float: If effect_strength_on_treatment is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on treatment. Defaults to 1.
         :param effect_fraction_on_outcome: float: If effect_strength_on_outcome is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on outcome. Defaults to 1.
         :param plotmethod: string: Type of plot to be shown. If None, no plot is generated. This parameter is used only only when more than one treatment confounder effect values or outcome confounder effect values are provided. Default is "colormesh". Supported values are "contour", "colormesh" when more than one value is provided for both confounder effect value parameters; "line" when provided for only one of them.
-        :param simulated_method_name: method type to add unobserved common cause. "linear-partial-R2" for linear sensitivity analysis
-        :param percent_change_estimate: It is the percentage of reduction of treatment estimate that could alter the results (default = 1)
-                                        if percent_change_estimate = 1, the robustness value describes the strength of association of confounders with treatment and outcome in order to reduce the estimate by 100% i.e bring it down to 0.
-        :param confounder_increases_estimate: True implies that confounder increases the absolute value of estimate and vice versa. (Default = False)
-        :param benchmark_common_causes: names of variables for bounding strength of confounders
-        :param significance_level: confidence interval for statistical inference(default = 0.05)
-        :param null_hypothesis_effect: assumed effect under the null hypothesis
+        :param simulated_method_name: method type to add unobserved common cause. 
+                                      "linear-partial-R2" for linear sensitivity analysis.
+                                      "non-parametric-partial-R2" for non parametric sensitivity analysis.
+        :param percent_change_estimate: It is the percentage of reduction of treatment estimate that could alter the results (default = 1).
+                                        if percent_change_estimate = 1, the robustness value describes the strength of association of confounders with treatment and outcome in order to reduce the estimate by 100% i.e bring it down to 0. (relevant only for Linear Sensitivity Analysis, ignore for rest)
+        :param confounder_increases_estimate: True implies that confounder increases the absolute value of estimate and vice versa. (Default = False). (relevant only for Linear Sensitivity Analysis, ignore for rest)
+        :param benchmark_common_causes: names of variables for bounding strength of confounders. (relevant only for Sensitivity Analysis, ignore for rest)
+        :param significance_level: confidence interval for statistical inference(default = 0.05). (relevant only for Sensitivity Analysis, ignore for rest)
+        :param null_hypothesis_effect: assumed effect under the null hypothesis. (relevant only for Linear Sensitivity Analysis, ignore for rest)
         :param plot_estimate: Generate contour plot for estimate while performing sensitivity analysis. (default = True). 
-                              To override the setting, set plot_estimate = False.
+                              To override the setting, set plot_estimate = False. (relevant only for Sensitivity Analysis, ignore for rest)
+        :param num_splits: number of splits for cross validation. (default = 5). (relevant only for Non Parametric Sensitivity Analysis, ignore for rest)
+        :param shuffle_data : shuffle data or not before splitting into folds (default = False). (relevant only for Non Parametric Sensitivity Analysis, ignore for rest)
+        :param shuffle_random_seed: seed for randomly shuffling data. (relevant only for Non Parametric Sensitivity Analysis, ignore for rest)
+        :param alpha_s_param_dict: dictionary with parameters for finding alpha_s. (relevant only for Non Parametric Sensitivity Analysis, ignore for rest)
+        :param g_s_estimator_list: list of estimator objects for finding g_s. These objects should have fit() and predict() functions implemented. (relevant only for Non Parametric Sensitivity Analysis, ignore for rest)
+        :param g_s_estimator_param_list: list of dictionaries with parameters for tuning respective estimators in "g_s_estimator_list". 
+                                         The order of the dictionaries in the list should be consistent with the estimator objects order in "g_s_estimator_list". (relevant only for Non Parametric Sensitivity Analysis, ignore for rest)
         """
         super().__init__(*args, **kwargs)
 
@@ -70,6 +95,12 @@ class AddUnobservedCommonCause(CausalRefuter):
         self.benchmark_common_causes = kwargs["benchmark_common_causes"] if "benchmark_common_causes" in kwargs else None
         self.null_hypothesis_effect = kwargs["null_hypothesis_effect"] if "null_hypothesis_effect" in kwargs else 0
         self.plot_estimate = kwargs["plot_estimate"] if "plot_estimate" in kwargs else True
+        self.num_splits = kwargs["num_splits"] if "num_splits" in kwargs else 5
+        self.shuffle_data = kwargs["shuffle_data"] if "shuffle_data" in kwargs else False
+        self.shuffle_random_seed = kwargs["shuffle_random_seed"] if "shuffle_random_seed" in kwargs else None
+        self.alpha_s_param_dict = kwargs["alpha_s_param_dict"] if "alpha_s_param_dict" in kwargs else None
+        self.g_s_estimator_list = kwargs["g_s_estimator_list"] if "g_s_estimator_list" in kwargs else None
+        self.g_s_estimator_param_list = kwargs["g_s_estimator_param_list"] if "g_s_estimator_param_list" in kwargs else None
         self.logger = logging.getLogger(__name__)
 
 
@@ -204,6 +235,36 @@ class AddUnobservedCommonCause(CausalRefuter):
             
             analyzer.check_sensitivity(plot = self.plot_estimate)
             return analyzer
+
+        
+        if self.simulated_method_name == "non-parametric-partial-R2":
+
+            #If the estimator used is LinearDML, partially linear sensitivity analysis can be performed
+            if(isinstance(self._estimate.estimator, dowhy.causal_estimators.econml.Econml)):
+                if (self._estimate.estimator._econml_methodname == "econml.dml.LinearDML"):
+                    analyzer = PartialLinearSensitivityAnalyzer(estimator = self._estimate._estimator_object, observed_common_causes = self._estimate.estimator._observed_common_causes, 
+                    treatment = self._estimate.estimator._treatment, outcome = self._estimate.estimator._outcome, 
+                    alpha_s_param_dict = self.alpha_s_param_dict,
+                    g_s_estimator_list = self.g_s_estimator_list,
+                    g_s_estimator_param_list = self.g_s_estimator_param_list,
+                    benchmark_common_causes= self.benchmark_common_causes,
+                    frac_strength_treatment = self.frac_strength_treatment, 
+                    frac_strength_outcome = self.frac_strength_outcome)
+                    analyzer.check_sensitivity(plot = self.plot_estimate)
+                    return analyzer
+
+            analyzer = NonParametricSensitivityAnalyzer(estimator = self._estimate.estimator,
+            theta_s = self._estimate.value,
+            alpha_s_param_dict = self.alpha_s_param_dict,
+            g_s_estimator_list = self.g_s_estimator_list,
+            g_s_estimator_param_list = self.g_s_estimator_param_list,
+            benchmark_common_causes= self.benchmark_common_causes,
+            frac_strength_treatment = self.frac_strength_treatment, 
+            frac_strength_outcome = self.frac_strength_outcome
+            )
+            analyzer.check_sensitivity(plot = self.plot_estimate)
+            return analyzer
+
         if self.kappa_t is None:
             self.kappa_t = self.infer_default_kappa_t()
         if self.kappa_y is None:
