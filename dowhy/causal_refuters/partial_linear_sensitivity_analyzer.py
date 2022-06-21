@@ -303,8 +303,20 @@ class PartialLinearSensitivityAnalyzer:
         # Partial R^2 of treatment after regressing over unobserved confounder and observed common causes
         r2t_uw = self.frac_strength_treatment * delta_r2t_wj + self.r2t_w
 
+        if r2y_uwt >=1:
+            raise ValueError("r2y_uwt can not be >= 1. Try a lower effect_fraction_on_outcome value")
+        if r2t_uw >= 1:
+            raise ValueError("r2t_uw can not be >= 1. Try a lower effect_fraction_on_treatment value")
+
         self.r2yu_tw = abs((r2y_uwt - self.r2y_tw) / (1 - self.r2y_tw))
         self.r2tu_w = abs((r2t_uw - self.r2t_w) / (1 - self.r2t_w))
+
+        if self.r2yu_tw >= 1:
+            self.r2yu_tw = 1
+            self.logger.warning("Warning: r2yu_tw can not be > 1. Try a lower effect_fraction_on_outcome. Setting r2yu_tw to 1")
+        if self.r2tu_w >= 1:
+            self.r2tu_w = 0.9999
+            self.logger.warning("Warning: r2tu_w can not be > 1. Try a lower effect_fraction_on_treatment. Setting r2tu_w to 1")
 
         benchmarking_results = self.perform_benchmarking(
             r2yu_tw=self.r2yu_tw, r2tu_w=self.r2tu_w)
