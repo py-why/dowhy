@@ -211,7 +211,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
     @pytest.mark.parametrize(["estimator_method", "effect_strength_on_t", "benchmark_common_causes", "simulated_method_name"],
-                                 [("backdoor.linear_regression", 2 , ["W3"], "non-parametric-partial-R2"), ])
+                                 [("backdoor.econml.dml.NonParamDML", 2 , ["W3"], "non-parametric-partial-R2"), ])
     @patch("matplotlib.pyplot.figure")
     def test_non_parametric_sensitivity_given_strength_of_confounding(self, mock_fig, estimator_method,
                                                               effect_strength_on_t, benchmark_common_causes, simulated_method_name):
@@ -220,6 +220,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
                                              num_common_causes=7,
                                              num_samples=500,
                                              num_treatments=1,
+                                             num_effect_modifiers = 1,
                                              stddev_treatment_noise=5,
                                              stddev_outcome_noise=5
                                              )
@@ -229,13 +230,22 @@ class TestAddUnobservedCommonCauseRefuter(object):
             data=data["df"],
             treatment=data["treatment_name"],
             outcome=data["outcome_name"],
+            effect_modifiers = data["effect_modifier_names"],
             graph=graph_str,
             test_significance=None,
         )
-        target_estimand = model.identify_effect(
-            proceed_when_unidentifiable=True)
+        target_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        #Non Parametric estimator
         estimate = model.estimate_effect(
-            target_estimand, method_name=estimator_method)
+            target_estimand, method_name=estimator_method,
+            method_params={
+                                        'init_params': {'model_y':GradientBoostingRegressor(),
+                                                        'model_t': GradientBoostingRegressor(),
+                                                        'model_final': GradientBoostingRegressor()
+                                                       },
+                                        'fit_params': {'cache_values': True,}
+                                     }
+            )
         ate_estimate = data['ate']
         refute = model.refute_estimate(target_estimand, estimate,
                                        method_name="add_unobserved_common_cause",

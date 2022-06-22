@@ -10,197 +10,26 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.compose import ColumnTransformer, make_column_selector
 from dowhy.utils.util import get_numeric_features
+from dowhy.causal_refuters.partial_linear_sensitivity_analyzer import PartialLinearSensitivityAnalyzer
 from dowhy.causal_refuters.reisz import ReiszRegressor, ReiszRepresenter, generate_moment_function, get_alpha_estimator, get_generic_regressor, create_polynomial_function
 
 
-class NonParametricSensitivityAnalyzer():
+class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
     """
     Class to perform Non parametric Senitivity Analysis
-
-    :param estimator: estimator of the causal model
-    :param num_splits: number of splits for cross validation. (default = 5)
-    :param shuffle_data : shuffle data or not before splitting into folds (default = False)
-    :param shuffle_random_seed: seed for randomly shuffling data
-    :param r2yu_tw: proportion of residual variance in the outcome explained by confounders
-    :param r2tu_w: proportion of residual variance in the treatment explained by confounders
     :param theta_s: point estimate for the estimator
-    :param benchmark_common_causes: names of variables for bounding strength of confounders
-    :param significance_level: confidence interval for statistical inference(default = 0.05)
-    :param frac_strength_treatment: strength of association between unobserved confounder and treatment compared to benchmark covariate
-    :param frac_strength_outcome: strength of association between unobserved confounder and outcome compared to benchmark covariate
-    :param alpha_s_param_dict: dictionary with parameters for finding alpha_s 
-    :param g_s_estimator_list: list of estimator objects for finding g_s. These objects should have fit() and predict() functions.
-    :param g_s_estimator_param_list: list of dictionaries with parameters for tuning respective estimators in "g_s_estimator_list". 
-                                     The order of the dictionaries in the list should be consistent with the estimator objects order in "g_s_estimator_list"
+    
     """
 
-    def __init__(self, estimator, num_splits=5,
-                 reisz_polynomial_max_degree=3, shuffle_data=False,
-                 shuffle_random_seed=None, r2yu_tw=0.01, r2tu_w=0.05, theta_s=None,
-                 frac_strength_treatment=None, frac_strength_outcome=None, benchmark_common_causes=None,
-                 significance_level=0.05, alpha_s_param_dict=None, g_s_estimator_list=None, g_s_estimator_param_list=None):
-        self.estimator = estimator
-        self.num_splits = num_splits
-        self.shuffle_data = shuffle_data
-        self.shuffle_random_seed = shuffle_random_seed
-        self.reisz_polynomial_max_degree = reisz_polynomial_max_degree
-        self.alpha_s_param_dict = alpha_s_param_dict
-        self.g_s_estimator_list = g_s_estimator_list
-        self.g_s_estimator_param_list = g_s_estimator_param_list
-        self.r2yu_tw = r2yu_tw
-        self.r2tu_w = r2tu_w
-        self.significance_level = significance_level
-        self.theta_s = theta_s
-        self.benchmark_common_causes = benchmark_common_causes
-        self.frac_strength_outcome = frac_strength_outcome
-        self.frac_strength_treatment = frac_strength_treatment
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.theta_s = kwargs["theta_s"] if "theta_s" in kwargs else 0
 
-        self.get_reisz_fn = None
-        self.get_reg_fn = None
-        self.moment_function = None
-
-        self.lower_confidence_bound = None
-        self.upper_confidence_bound = None
-        self.RV = None
-        self.RV_alpha = None
-        self.point_estimate = None
-        self.standard_error = None
+        self.moment_function = None    
         self.alpha_s = None
         self.m_alpha = None
         self.g_s = None
         self.m_g = None
-        self.nu_2 = None
-        self.sigma_2 = None
-        self.S2 = None
-        self.neyman_orthogonal_score_outcome = None
-        self.neyman_orthogonal_score_treatment = None
-        self.neyman_orthogonal_score_theta = None
-
-        self.r2t_w = 0  # Partial R^2 of treatment with observed common causes
-        self.r2y_tw = 0  # Partial R^2 of outcome with treatment and observed common causes
-        self.results = None
-
-    def calculate_robustness_value(self, alpha):
-        """
-        Function to compute the robustness value of estimate against the confounders
-        :param alpha: confidence interval for statistical inference
-
-        :returns: robustness value
-        """
-
-        for t_val in np.arange(0, 1, 0.01):
-            lower_bound, _, _ = self.get_confidence_levels(
-                r2yu_tw=t_val, r2tu_w=t_val, significance_level=alpha)
-            if lower_bound <= 0:
-                return t_val
-        return t_val
-
-    def compute_bounds(self, split_indices=None):
-        """
-        Computes the change in partial R^2 due to presence of unobserved confounders
-        :param split_indices: training and testing data indices obtained after cross folding
-
-        :returns delta_r2_y_wj: observed additive gains in explanatory power with outcome when including benchmark covariate  on regression equation
-        :returns delta_r2t_wj: observed additive gains in explanatory power with treatment when including benchmark covariate  on regression equation
-        """
-        features = self.estimator._observed_common_causes.copy()
-        treatment_df = self.estimator._treatment.copy()
-        T = treatment_df.values.ravel()
-        W = features.to_numpy()
-        Y = self.estimator._outcome.copy()
-        Y = Y.values.ravel()
-        num_samples = W.shape[0]
-        numeric_features = get_numeric_features(X=features)
-
-        treatment_model = get_generic_regressor(cv=split_indices,
-                                                X=W, Y=T, max_degree=self.reisz_polynomial_max_degree,
-                                                estimator_list=self.g_s_estimator_list,
-                                                estimator_param_list=self.g_s_estimator_param_list,
-                                                numeric_features=numeric_features
-                                                )  # Regressing over observed common causes with treatment as outcome
-
-        treatment_pred = np.zeros(num_samples)  # E[Treatment | W]
-        for train, test in split_indices:
-            reg_fn_fit = treatment_model.fit(W[train], T[train])
-            treatment_pred[test] = reg_fn_fit.predict(W[test])
-
-        # Partial R^2 of treatment with observed common causes
-        self.r2t_w = np.var(treatment_pred) / np.var(T)
-
-        # common causes after removing the benchmark causes
-        W_j_df = features.drop(self.benchmark_common_causes, axis=1)
-        numeric_features = get_numeric_features(X=W_j_df)
-        W_j = W_j_df.to_numpy()
-
-        treatment_model = get_generic_regressor(cv=split_indices,
-                                                X=W_j, Y=T, max_degree=self.reisz_polynomial_max_degree,
-                                                estimator_list=self.g_s_estimator_list,
-                                                estimator_param_list=self.g_s_estimator_param_list,
-                                                numeric_features=numeric_features
-                                                )  # Regressing over observed common causes removing benchmark causes with treatment as outcome
-
-        treatment_pred = np.zeros(num_samples)  # E[Treatment | W-j]
-        for train, test in split_indices:
-            reg_fn_fit = treatment_model.fit(W_j[train], T[train])
-            treatment_pred[test] = reg_fn_fit.predict(W_j[test])
-
-        # Partial R^2 of treatment with observed common causes removing benchmark causes
-        r2t_w_j = np.var(treatment_pred) / np.var(T)
-
-        delta_r2t_wj = (self.r2t_w - r2t_w_j)
-
-        # dataframe with treatment and observed common causes after removing benchmark causes
-        T_W_j_df = pd.concat([treatment_df, W_j_df], axis=1)
-        numeric_features = get_numeric_features(X=T_W_j_df)
-        T_W_j = T_W_j_df.to_numpy()
-
-        reg_function = get_generic_regressor(cv=split_indices,
-                                             X=T_W_j, Y=Y, max_degree=self.reisz_polynomial_max_degree,
-                                             estimator_list=self.g_s_estimator_list,
-                                             estimator_param_list=self.g_s_estimator_param_list,
-                                             numeric_features=numeric_features
-                                             )  # Regressing over observed common causes removing benchmark causes and treatment
-
-        reisz_function = get_alpha_estimator(cv=split_indices, X=T_W_j,
-                                             max_degree=self.reisz_polynomial_max_degree, param_grid_dict=self.alpha_s_param_dict)
-
-        for train, test in split_indices:
-            reg_fn_fit = reg_function.fit(T_W_j[train], Y[train])
-            self.g_s_j[test] = reg_fn_fit.predict(T_W_j[test])
-            reisz_fn_fit = reisz_function.fit(T_W_j[train])
-            self.alpha_s_j[test] = reisz_fn_fit.predict(T_W_j[test])
-
-        # Partial R^2 of outcome with observed common causes and treatment after removing benchmark causes
-        r2y_tw_j = np.var(self.g_s_j) / np.var(Y)
-        # Partial R^2 of outcome with observed common causes and treatment
-        self.r2y_tw = np.var(self.g_s) / np.var(Y)
-        delta_r2_y_wj = (self.r2y_tw - r2y_tw_j)
-
-        return delta_r2_y_wj, delta_r2t_wj
-
-    def perform_benchmarking(self, r2yu_tw, r2tu_w):
-        """
-        :param r2yu_tw: proportion of residual variance in the outcome explained by confounders
-        :param r2tu_w: proportion of residual variance in the treatment explained by confounders
-        """
-
-        lower_confidence_bound, upper_confidence_bound, bias = self.get_confidence_levels(
-            r2yu_tw=r2yu_tw, r2tu_w=r2tu_w, significance_level=0.05)
-        lower_ate_bound, upper_ate_bound, bias = self.get_confidence_levels(
-            r2yu_tw=r2yu_tw, r2tu_w=r2tu_w)
-
-        benchmarking_results = {
-            'r2tu_w': r2tu_w,
-            'r2yu_tw': r2yu_tw,
-            'short estimate': self.theta_s,
-            'bias': bias,
-            'lower_ate_bound': lower_ate_bound,
-            'upper_ate_bound': upper_ate_bound,
-            'lower_confidence_bound': lower_confidence_bound,
-            'upper_confidence_bound': upper_confidence_bound
-        }
-
-        return benchmarking_results
 
     def check_sensitivity(self, plot=True):
         """
@@ -220,14 +49,15 @@ class NonParametricSensitivityAnalyzer():
         :returns: instance of NonParametricSensitivityAnalyzer class
         """
 
-        features = self.estimator._observed_common_causes.copy()
-        treatment_df = self.estimator._treatment.copy()
+        features = self.observed_common_causes.copy()
+        treatment_df = self.treatment.copy()
+        W = features.to_numpy()
         X = pd.concat([treatment_df, features], axis=1)
-
+        T = treatment_df.values.ravel()
         numeric_features = get_numeric_features(X)
 
         X = X.to_numpy()
-        Y = self.estimator._outcome.copy()
+        Y = self.outcome.copy()
         Y = Y.values.ravel()
 
         cv = KFold(n_splits=self.num_splits, shuffle=self.shuffle_data,
@@ -271,12 +101,20 @@ class NonParametricSensitivityAnalyzer():
             2 * self.m_alpha[indices] - self.alpha_s[indices] ** 2)
         self.sigma_2 = np.mean((Y[indices] - self.g_s[indices]) ** 2)
         self.S2 = self.nu_2 * self.sigma_2
+        #self.S = np.sqrt(self.S2)
 
         Y_residual = Y[indices] - self.g_s[indices]
         self.neyman_orthogonal_score_outcome = Y_residual ** 2 - self.sigma_2
         self.neyman_orthogonal_score_treatment = 2 * \
             self.m_alpha[indices] - self.alpha_s[indices] ** 2 - self.nu_2
         self.neyman_orthogonal_score_theta = self.m[indices] - self.theta_s
+
+        # Partial R^2 of outcome with observed common causes and treatment
+        self.r2y_tw = np.var(self.g_s) / np.var(Y)
+
+        # Partial R^2 of treatment with observed common causes
+        numeric_features = get_numeric_features(features)
+        self.r2t_w = self.get_regression_partial_r2(X = W, Y = T, numeric_features = numeric_features, split_indices = split_indices)
 
         delta_r2_y_wj, delta_r2t_wj = self.compute_bounds(
             split_indices=split_indices)
@@ -314,153 +152,21 @@ class NonParametricSensitivityAnalyzer():
 
         return self
 
-    def get_confidence_levels(self, r2yu_tw, r2tu_w, significance_level=None):
+    def get_phi_lower_upper(self, Cg, Calpha):
         """
-        Function to compute estimated lower and upper bounds for given strength of confounding
+        Calculate lower and upper influence function (phi)
 
-        :param r2yu_tw: proportion of residual variance in the outcome explained by confounders
-        :param r2tu_w: proportion of residual variance in the treatment explained by confounders
-        :param significance_level: confidence interval for statistical inference
+        :param Cg: measure of strength of confounding that omitted variables generate in outcome regression
+        :param Calpha: measure of strength of confounding that omitted variables generate in treatment regression
 
-        :returns lower_confidence_bound: lower limit of confidence bound of the estimate
-        :returns upper_confidence_bound: upper limit of confidence bound of the estimate
-        :returns bias: omitted variable bias for the confounding scenario
+        :returns : lower bound of phi, upper bound of phi
         """
 
-        S = np.sqrt(self.S2)
-
-        Cg2 = r2yu_tw
-        Cg = np.sqrt(Cg2)
-        Calpha2 = r2tu_w / (1 - r2tu_w)
-        Calpha = np.sqrt(Calpha2)
-
-        bias = S * Cg * Calpha
-
-        bounds_estimator_upper = self.neyman_orthogonal_score_theta + ((Cg * Calpha) / (2 * S)) * (
+        bounds_estimator_upper = self.neyman_orthogonal_score_theta + ((Cg * Calpha) / (2 * self.S)) * (
             self.sigma_2 * self.neyman_orthogonal_score_treatment + self.nu_2 * self.neyman_orthogonal_score_treatment)
-        bounds_estimator_lower = self.neyman_orthogonal_score_theta - ((Cg * Calpha) / (2 * S)) * (
+        bounds_estimator_lower = self.neyman_orthogonal_score_theta - ((Cg * Calpha) / (2 * self.S)) * (
             self.sigma_2 * self.neyman_orthogonal_score_treatment + self.nu_2 * self.neyman_orthogonal_score_treatment)
 
-        expected_upper_bound = np.mean(
-            bounds_estimator_upper * bounds_estimator_upper)
-        expected_lower_bound = np.mean(
-            bounds_estimator_lower * bounds_estimator_lower)
+        return bounds_estimator_lower, bounds_estimator_upper
 
-        n1 = bounds_estimator_upper.shape[0]
-        n2 = bounds_estimator_lower.shape[0]
 
-        stddev_upper = np.sqrt(expected_upper_bound / n1)
-        stddev_lower = np.sqrt(expected_lower_bound / n2)
-
-        theta_lower = self.theta_s - bias
-        theta_upper = self.theta_s + bias
-
-        if significance_level is not None:
-            probability = scipy.stats.norm.ppf(1 - significance_level)
-            lower_confidence_bound = theta_lower - probability * \
-                np.sqrt(np.mean(stddev_lower * stddev_lower) +
-                        np.var(theta_lower))
-            upper_confidence_bound = theta_upper + probability * \
-                np.sqrt(np.mean(stddev_upper * stddev_upper) +
-                        np.var(theta_upper))
-
-        else:
-            lower_confidence_bound = theta_lower
-            upper_confidence_bound = theta_upper
-
-        return lower_confidence_bound, upper_confidence_bound, bias
-
-    def plot(self, plot_type="lower_confidence_bound", x_limit=0.8, y_limit=0.8,
-             num_points_per_contour=30, plot_size=(7, 7), contours_color="blue", critical_contour_color="red",
-             label_fontsize=9, contour_linewidths=0.75, contour_linestyles="solid",
-             contours_label_color="black", critical_label_color="red",
-             unadjusted_estimate_marker='D', unadjusted_estimate_color="black",
-             adjusted_estimate_marker='^', adjusted_estimate_color="red",
-             legend_position=(1.6, 0.6)):
-        """
-        Plots and summarizes the sensitivity bounds as a contour plot, as they vary with the partial R^2 of the unobserved confounder(s) with the treatment and the outcome
-        Two types of plots can be generated, based on adjusted estimates or adjusted t-values
-        X-axis: Partial R^2 of treatment and unobserved confounder(s)
-        Y-axis: Partial R^2 of outcome and unobserved confounder(s)
-        We also plot bounds on the partial R^2 of the unobserved confounders obtained from observed covariates
-
-        :param plot_type: possible values are 'bias','lower_ate_bound','upper_ate_bound','lower_confidence_bound','upper_confidence_bound'
-        :param x_limit: plot's maximum x_axis value (default = 0.8)
-        :param y_limit: plot's minimum y_axis value (default = 0.8)
-        :param num_points_per_contour: number of points to calculate and plot each contour line (default = 200)
-        :param plot_size: tuple denoting the size of the plot (default = (7,7))
-        :param contours_color: color of contour line (default = blue)
-                        String or array. If array, lines will be plotted with the specific color in ascending order.
-        :param critical_contour_color: color of threshold line (default = red)
-        :param label_fontsize: fontsize for labelling contours (default = 9)
-        :param contour_linewidths: linewidths for contours (default = 0.75)
-        :param contour_linestyles: linestyles for contours (default = "solid")
-                                See : https://matplotlib.org/3.5.0/gallery/lines_bars_and_markers/linestyles.html for more examples
-        :param contours_label_color: color of contour line label (default = black)
-        :param critical_label_color: color of threshold line label (default = red)
-        :param unadjusted_estimate_marker: marker type for unadjusted estimate in the plot (default = 'D')
-                                        See: https://matplotlib.org/stable/api/markers_api.html 
-        :parm unadjusted_estimate_color: marker color for unadjusted estimate in the plot (default = "black")
-        :param adjusted_estimate_marker: marker type for bias adjusted estimates in the plot (default = '^')
-        :parm adjusted_estimate_color: marker color for bias adjusted estimates in the plot (default = "red")
-        :param legend_position:tuple denoting the position of the legend (default = (1.6, 0.6))
-        """
-        critical_value = 0
-
-        fig, ax = plt.subplots(1, 1, figsize=plot_size)
-        ax.set_title("Sensitivity contour plot of %s" % plot_type)
-        ax.set_xlabel("Partial R^2 of confounder with treatment")
-        ax.set_ylabel("Partial R^2 of confounder with outcome")
-
-        if(self.r2tu_w > 0.8 or self.r2yu_tw > 0.8):
-            x_limit = 0.99
-            y_limit = 0.99
-
-        ax.set_xlim(-x_limit/20, x_limit)
-        ax.set_ylim(-y_limit/20, y_limit)
-
-        r2tu_w = np.arange(0.0, x_limit, x_limit / num_points_per_contour)
-        r2yu_tw = np.arange(0.0, y_limit, y_limit / num_points_per_contour)
-
-        undjusted_estimates = None
-        contour_values = np.zeros((len(r2yu_tw), len(r2tu_w)))
-
-        for i in range(len(r2yu_tw)):
-            y = r2yu_tw[i]
-            for j in range(len(r2tu_w)):
-                x = r2tu_w[j]
-                benchmarking_results = self.perform_benchmarking(
-                    r2yu_tw=y, r2tu_w=x)
-                contour_values[i][j] = benchmarking_results[plot_type]
-
-        contour_plot = ax.contour(r2tu_w, r2yu_tw, contour_values, colors=contours_color,
-                                  linewidths=contour_linewidths, linestyles=contour_linestyles)
-        ax.clabel(contour_plot, inline=1, fontsize=label_fontsize,
-                  colors=contours_label_color)
-
-        if (critical_value >= contour_values.min() and critical_value <= contour_values.max()):
-            contour_plot = ax.contour(r2tu_w, r2yu_tw, contour_values, colors=critical_contour_color,
-                                      linewidths=contour_linewidths, levels=[critical_value])
-            ax.clabel(contour_plot,  [critical_value], inline=1,
-                      fontsize=label_fontsize, colors=critical_label_color)
-
-        # Adding unadjusted point estimate
-        if(plot_type == "lower_confidence_bound" or plot_type == "upper_confidence_bound" or plot_type == "lower_ate_bound" or plot_type == "upper_ate_bound"):
-            ax.scatter([0], [0], marker=unadjusted_estimate_marker,
-                       color=unadjusted_estimate_color, label="Unadjusted({:1.2f})".format(self.theta_s))
-
-        # Adding bounds to partial R^2 values for given strength of confounders
-        if(self.frac_strength_treatment == self.frac_strength_outcome):
-            signs = str(round(self.frac_strength_treatment, 2))
-        else:
-            signs = str(round(self.frac_strength_treatment, 2)) + \
-                '/' + str(round(self.frac_strength_outcome, 2))
-        label = signs + ' X ' + \
-            str(self.benchmark_common_causes) + \
-            " ({:1.2f}) ".format(self.results[plot_type][0])
-        ax.scatter(self.r2tu_w, self.r2yu_tw, color=adjusted_estimate_color,
-                   marker=adjusted_estimate_marker, label=label)
-
-        plt.margins()
-        ax.legend(bbox_to_anchor=legend_position)
-        plt.show()

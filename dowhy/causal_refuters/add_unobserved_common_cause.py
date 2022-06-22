@@ -239,7 +239,8 @@ class AddUnobservedCommonCause(CausalRefuter):
         
         if self.simulated_method_name == "non-parametric-partial-R2":
 
-            #If the estimator used is LinearDML, partially linear sensitivity analysis can be performed
+            #If the estimator used is LinearDML, partially linear sensitivity analysis will be automatically chosen
+            
             if(isinstance(self._estimate.estimator, dowhy.causal_estimators.econml.Econml)):
                 if (self._estimate.estimator._econml_methodname == "econml.dml.LinearDML"):
                     analyzer = PartialLinearSensitivityAnalyzer(estimator = self._estimate._estimator_object, observed_common_causes = self._estimate.estimator._observed_common_causes, 
@@ -252,15 +253,17 @@ class AddUnobservedCommonCause(CausalRefuter):
                     frac_strength_outcome = self.frac_strength_outcome)
                     analyzer.check_sensitivity(plot = self.plot_estimate)
                     return analyzer
-
+            
             analyzer = NonParametricSensitivityAnalyzer(estimator = self._estimate.estimator,
-            theta_s = self._estimate.value,
+            observed_common_causes = self._estimate.estimator._observed_common_causes, 
+            treatment = self._estimate.estimator._treatment, outcome = self._estimate.estimator._outcome, 
             alpha_s_param_dict = self.alpha_s_param_dict,
             g_s_estimator_list = self.g_s_estimator_list,
             g_s_estimator_param_list = self.g_s_estimator_param_list,
             benchmark_common_causes= self.benchmark_common_causes,
             frac_strength_treatment = self.frac_strength_treatment, 
-            frac_strength_outcome = self.frac_strength_outcome
+            frac_strength_outcome = self.frac_strength_outcome,
+            theta_s = self._estimate.value
             )
             analyzer.check_sensitivity(plot = self.plot_estimate)
             return analyzer

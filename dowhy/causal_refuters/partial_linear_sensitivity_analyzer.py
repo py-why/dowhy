@@ -33,7 +33,7 @@ class PartialLinearSensitivityAnalyzer:
                  shuffle_random_seed=None,  reisz_polynomial_max_degree=3,
                  r2yu_tw=0.04, r2tu_w=0.03, significance_level=0.05, benchmark_common_causes=None,
                  frac_strength_treatment=None, frac_strength_outcome=None,
-                 observed_common_causes=None, treatment=None, outcome=None, g_s_estimator_list=None, alpha_s_param_dict=None, g_s_estimator_param_list=None):
+                 observed_common_causes=None, treatment=None, outcome=None, g_s_estimator_list=None, alpha_s_param_dict=None, g_s_estimator_param_list=None , **kwargs):
         self.estimator = estimator
         self.num_splits = num_splits
         self.shuffle_data = shuffle_data
@@ -59,10 +59,30 @@ class PartialLinearSensitivityAnalyzer:
         self.theta_s = None
         self.nu_2 = None
         self.sigma_2 = None
+        self.S2 = None
+        self.neyman_orthogonal_score_outcome = None
+        self.neyman_orthogonal_score_treatment = None
+        self.neyman_orthogonal_score_theta = None
 
         self.r2t_w = 0  # Partial R^2 of treatment with observed common causes
         self.r2y_tw = 0  # Partial R^2 of outcome with treatment and observed common causes
         self.results = None
+
+    def get_phi_lower_upper(self, Cg, Calpha):
+        """
+        Calculate lower and upper influence function (phi)
+
+        :param Cg: measure of strength of confounding that omitted variables generate in outcome regression
+        :param Calpha: measure of strength of confounding that omitted variables generate in treatment regression
+
+        :returns : lower bound of phi, upper bound of phi
+        """
+        phi_lower = self.neyman_orthogonal_score_theta - ((Cg * Calpha) / (2 * self.S)) * (-(self.sigma_2 / (
+            self.nu_2 ** 2)) * self.neyman_orthogonal_score_treatment + (1 / self.nu_2) * self.neyman_orthogonal_score_outcome)
+        phi_upper = self.neyman_orthogonal_score_theta + ((Cg * Calpha) / (2 * self.S)) * (-(self.sigma_2 / (
+            self.nu_2 ** 2)) * self.neyman_orthogonal_score_treatment + (1 / self.nu_2) * self.neyman_orthogonal_score_outcome)
+
+        return phi_lower, phi_upper
 
     def get_confidence_levels(self, r2yu_tw, r2tu_w, significance_level):
         """
@@ -91,24 +111,21 @@ class PartialLinearSensitivityAnalyzer:
         # Strength of confounding that omitted variables generate in treatment regression
         Calpha2 = r2tu_w / (1 - r2tu_w)
         Calpha = np.sqrt(Calpha2)
-        S = np.sqrt(self.S2)
+        self.S = np.sqrt(self.S2)
 
         bound = self.S2 * Cg2 * Calpha2
         bias = np.sqrt(bound)
 
-        phi_lower = self.neyman_orthogonal_score_theta + ((Cg * Calpha) / (2 * S)) * (-(self.sigma_2 / (
-            self.nu_2 ** 2)) * self.neyman_orthogonal_score_treatment + (1 / self.nu_2) * self.neyman_orthogonal_score_outcome)
-        phi_upper = self.neyman_orthogonal_score_theta - ((Cg * Calpha) / (2 * S)) * (-(self.sigma_2 / (
-            self.nu_2 ** 2)) * self.neyman_orthogonal_score_treatment + (1 / self.nu_2) * self.neyman_orthogonal_score_outcome)
+        phi_lower, phi_upper = self.get_phi_lower_upper(Cg = Cg, Calpha = Calpha)
 
-        expected_phi_lower2 = np.mean(phi_lower * phi_lower)
-        expected_phi_upper2 = np.mean(phi_upper * phi_upper)
+        expected_phi_lower = np.mean(phi_lower * phi_lower)
+        expected_phi_upper = np.mean(phi_upper * phi_upper)
 
         n1 = phi_lower.shape[0]
         n2 = phi_upper.shape[0]
 
-        stddev_lower = np.sqrt(expected_phi_lower2 / n1)
-        stddev_upper = np.sqrt(expected_phi_upper2 / n2)
+        stddev_lower = np.sqrt(expected_phi_lower / n1)
+        stddev_upper = np.sqrt(expected_phi_upper / n2)
 
         theta_lower = self.theta_s - bias
         theta_upper = self.theta_s + bias
@@ -146,6 +163,8 @@ class PartialLinearSensitivityAnalyzer:
         """
         :param r2yu_tw: proportion of residual variance in the outcome explained by confounders
         :param r2tu_w: proportion of residual variance in the treatment explained by confounders
+
+        :returns: python dictionary storing values of r2tu_w, r2yu_tw, short estimate, bias, lower_ate_bound,upper_ate_bound, lower_confidence_bound, upper_confidence_bound
         """
 
         lower_confidence_bound, upper_confidence_bound, bias = self.get_confidence_levels(
@@ -166,6 +185,34 @@ class PartialLinearSensitivityAnalyzer:
 
         return benchmarking_results
 
+    def get_regression_partial_r2(self, X, Y, numeric_features, split_indices):
+        """
+        Calculates the pearson non parametric partial R^2 from a regression function.
+
+        :param X: numpy array containing set of regressors 
+        :param Y: outcome variable in regression
+        :param numeric_features: list of indices of columns with numeric features
+        :param split_indices: training and testing data indices obtained after cross folding
+
+        :returns: partial R^2 value
+        """
+        regression_model = get_generic_regressor(cv=split_indices,
+                                                X=X, Y=Y, max_degree=self.reisz_polynomial_max_degree,
+                                                estimator_list=self.g_s_estimator_list,
+                                                estimator_param_list=self.g_s_estimator_param_list,
+                                                numeric_features=numeric_features
+                                                ) 
+
+        num_samples = X.shape[0]
+        regression_pred = np.zeros(num_samples) 
+        for train, test in split_indices:
+            reg_fn_fit = regression_model.fit(X[train], Y[train])
+            regression_pred[test] = reg_fn_fit.predict(X[test])
+
+        partial_r2 = np.var(regression_pred) / np.var(Y)
+
+        return partial_r2
+
     def compute_bounds(self, split_indices=None):
         """
         Computes the change in partial R^2 due to presence of unobserved confounders
@@ -181,27 +228,14 @@ class PartialLinearSensitivityAnalyzer:
         Y = self.outcome.copy()
         Y = Y.values.ravel()
         num_samples = W.shape[0]
-        numeric_features = get_numeric_features(X=features)
 
         # common causes after removing the benchmark causes
         W_j_df = features.drop(self.benchmark_common_causes, axis=1)
         numeric_features = get_numeric_features(X=W_j_df)
         W_j = W_j_df.to_numpy()
 
-        treatment_model = get_generic_regressor(cv=split_indices,
-                                                X=W_j, Y=T, max_degree=self.reisz_polynomial_max_degree,
-                                                estimator_list=self.g_s_estimator_list,
-                                                estimator_param_list=self.g_s_estimator_param_list,
-                                                numeric_features=numeric_features
-                                                )  # Regressing over observed common causes removing benchmark causes with treatment as outcome
-
-        treatment_pred = np.zeros(num_samples)  # E[Treatment | W-j]
-        for train, test in split_indices:
-            reg_fn_fit = treatment_model.fit(W_j[train], T[train])
-            treatment_pred[test] = reg_fn_fit.predict(W_j[test])
-
         # Partial R^2 of treatment with observed common causes removing benchmark causes
-        r2t_w_j = np.var(treatment_pred) / np.var(T)
+        r2t_w_j = self.get_regression_partial_r2(X = W_j, Y = T, numeric_features = numeric_features, split_indices = split_indices)
 
         delta_r2t_wj = (self.r2t_w - r2t_w_j)
 
@@ -243,7 +277,7 @@ class PartialLinearSensitivityAnalyzer:
 
         self.point_estimate = self.estimator.intercept__inference().point_estimate
         self.standard_error = self.estimator.intercept__inference().stderr
-        self.theta_s = self.point_estimate
+        self.theta_s = self.point_estimate[0]
 
         features = self.observed_common_causes.copy()
         treatment_df = self.treatment.copy()
@@ -278,16 +312,12 @@ class PartialLinearSensitivityAnalyzer:
 
         self.S2 = self.sigma_2 / self.nu_2
 
-        self.neyman_orthogonal_score_outcome = residualized_outcome * \
-            residualized_outcome - self.sigma_2
-        self.neyman_orthogonal_score_treatment = residualized_treatment * \
-            residualized_treatment - self.nu_2
-        self.neyman_orthogonal_score_theta = (
-            residualized_outcome - residualized_treatment * self.theta_s) * residualized_treatment / self.nu_2
+        self.neyman_orthogonal_score_outcome = residualized_outcome * residualized_outcome - self.sigma_2
+        self.neyman_orthogonal_score_treatment = residualized_treatment * residualized_treatment - self.nu_2
+        self.neyman_orthogonal_score_theta = (residualized_outcome - residualized_treatment * self.theta_s) * residualized_treatment / self.nu_2
 
         self.g_s = Y - residualized_outcome
-        self.alpha_s = (residualized_treatment) / \
-            np.mean(residualized_treatment * residualized_treatment)
+        self.alpha_s = (residualized_treatment) / np.mean(residualized_treatment * residualized_treatment)
         # Partial R^2 of treatment with observed common causes
         self.r2t_w = np.var(T - residualized_treatment) / np.var(T)
         self.r2y_tw = np.var(Y - residualized_outcome) / np.var(Y)
@@ -408,7 +438,7 @@ class PartialLinearSensitivityAnalyzer:
         # Adding unadjusted point estimate
         if(plot_type == "lower_confidence_bound" or plot_type == "upper_confidence_bound" or plot_type == "lower_ate_bound" or plot_type == "upper_ate_bound"):
             ax.scatter([0], [0], marker=unadjusted_estimate_marker, color=unadjusted_estimate_color,
-                       label="Unadjusted({:1.2f})".format(self.theta_s[0]))
+                       label="Unadjusted({:1.2f})".format(self.theta_s))
 
         # Adding bounds to partial R^2 values for given strength of confounders
         if(self.frac_strength_treatment == self.frac_strength_outcome):
