@@ -3,6 +3,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import KFold
+from sklearn.linear_model import LinearRegression, Lasso, SGDRegressor, Ridge, RidgeCV
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.compose import ColumnTransformer, make_column_selector
 from dowhy.utils.util import get_numeric_features
 from dowhy.causal_refuters.reisz import ReiszRegressor, ReiszRepresenter, generate_moment_function, get_alpha_estimator, get_generic_regressor, create_polynomial_function
 
@@ -60,6 +64,7 @@ class PartialLinearSensitivityAnalyzer:
         self.nu_2 = None
         self.sigma_2 = None
         self.S2 = None
+        self.S = None
         self.neyman_orthogonal_score_outcome = None
         self.neyman_orthogonal_score_treatment = None
         self.neyman_orthogonal_score_theta = None
@@ -147,10 +152,10 @@ class PartialLinearSensitivityAnalyzer:
 
     def calculate_robustness_value(self, alpha):
         """
-                Function to compute the robustness value of estimate against the confounders
-                :param alpha: confidence interval for statistical inference
+        Function to compute the robustness value of estimate against the confounders
+        :param alpha: confidence interval for statistical inference
 
-                :returns: robustness value
+        :returns: robustness value
         """
         for t_val in np.arange(0, 1, 0.01):
             lower_confidence_bound, _, _ = self.get_confidence_levels(
@@ -196,12 +201,12 @@ class PartialLinearSensitivityAnalyzer:
 
         :returns: partial R^2 value
         """
+
         regression_model = get_generic_regressor(cv=split_indices,
-                                                X=X, Y=Y, max_degree=self.reisz_polynomial_max_degree,
-                                                estimator_list=self.g_s_estimator_list,
-                                                estimator_param_list=self.g_s_estimator_param_list,
-                                                numeric_features=numeric_features
-                                                ) 
+        X=X, Y=Y, max_degree=self.reisz_polynomial_max_degree,
+        estimator_list=self.g_s_estimator_list, 
+        estimator_param_list=self.g_s_estimator_param_list,
+        numeric_features=numeric_features) 
 
         num_samples = X.shape[0]
         regression_pred = np.zeros(num_samples) 
@@ -213,10 +218,11 @@ class PartialLinearSensitivityAnalyzer:
 
         return partial_r2
 
-    def compute_bounds(self, split_indices=None):
+    def compute_bounds(self, split_indices=None, second_stage_linear = False):
         """
         Computes the change in partial R^2 due to presence of unobserved confounders
         :param split_indices: training and testing data indices obtained after cross folding
+        :param second_stage_linear: True if second stage regression is linear else False (default = False)
 
         :returns delta_r2_y_wj: observed additive gains in explanatory power with outcome when including benchmark covariate  on regression equation
         :returns delta_r2t_wj: observed additive gains in explanatory power with treatment when including benchmark covariate  on regression equation
@@ -244,12 +250,34 @@ class PartialLinearSensitivityAnalyzer:
         numeric_features = get_numeric_features(X=T_W_j_df)
         T_W_j = T_W_j_df.to_numpy()
 
-        reg_function = get_generic_regressor(cv=split_indices,
-                                             X=T_W_j, Y=Y, max_degree=self.reisz_polynomial_max_degree,
-                                             estimator_list=self.g_s_estimator_list,
-                                             estimator_param_list=self.g_s_estimator_param_list,
-                                             numeric_features=numeric_features
-                                             )  # Regressing over observed common causes removing benchmark causes and treatment
+        if second_stage_linear is True:
+            reg_function = get_generic_regressor(cv = split_indices, 
+                           X = T_W_j, Y = Y, max_degree = self.reisz_polynomial_max_degree, 
+                           estimator_list = [LinearRegression(),
+                           Pipeline([('scale', ColumnTransformer([('num', StandardScaler(), numeric_features)],
+                                                  remainder='passthrough')),
+                                     ('lasso_model', Lasso())]),
+                            SGDRegressor(alpha = 0.001),
+                            Ridge(),
+                            RidgeCV(cv = 5)
+                           ], 
+                           estimator_param_list = [{'fit_intercept' : [True, False]},
+                           {'lasso_model__alpha': [0.01, 0.001, 1e-4, 1e-5, 1e-6]},
+                           {'alpha' : [0.0001, 1e-5, 0.01]},
+                           {'alpha' : [0.0001, 1e-5, 0.01, 1, 2]},
+                           {
+                            'cv' : [2,3,4]}
+                           ], 
+                           numeric_features = numeric_features
+                           )  # Regressing over observed common causes removing benchmark causes and treatment
+        
+        else: 
+            reg_function = get_generic_regressor(cv=split_indices,
+                           X=T_W_j, Y=Y, max_degree=self.reisz_polynomial_max_degree,
+                           estimator_list=self.g_s_estimator_list,
+                           estimator_param_list=self.g_s_estimator_param_list,
+                           numeric_features=numeric_features,
+                           )  # Regressing over observed common causes removing benchmark causes and treatment
 
         reisz_function = get_alpha_estimator(cv=split_indices, X=T_W_j,
                                              max_degree=self.reisz_polynomial_max_degree, param_grid_dict=self.alpha_s_param_dict)
@@ -281,10 +309,10 @@ class PartialLinearSensitivityAnalyzer:
 
         features = self.observed_common_causes.copy()
         treatment_df = self.treatment.copy()
-        X = pd.concat([treatment_df, features], axis=1)
-
-        numeric_features = get_numeric_features(X)
-        X = X.to_numpy()
+        X_df = pd.concat([treatment_df, features], axis=1)
+        W = features.to_numpy()
+        numeric_features = get_numeric_features(X_df)
+        X = X_df.to_numpy()
         T = treatment_df.to_numpy()
         Y = self.outcome.copy()
         Y = Y.to_numpy()
@@ -317,22 +345,25 @@ class PartialLinearSensitivityAnalyzer:
         self.neyman_orthogonal_score_theta = (residualized_outcome - residualized_treatment * self.theta_s) * residualized_treatment / self.nu_2
 
         self.g_s = Y - residualized_outcome
-        self.alpha_s = (residualized_treatment) / np.mean(residualized_treatment * residualized_treatment)
+        self.alpha_s = (residualized_treatment) / np.mean(residualized_treatment * residualized_treatment)     
+
         # Partial R^2 of treatment with observed common causes
-        self.r2t_w = np.var(T - residualized_treatment) / np.var(T)
-        self.r2y_tw = np.var(Y - residualized_outcome) / np.var(Y)
+        numeric_features = get_numeric_features(X =features)
+        self.r2t_w = self.get_regression_partial_r2(X = W, Y = T, numeric_features = numeric_features, split_indices = split_indices)
+
+        numeric_features = get_numeric_features(X = X_df)
+        self.r2y_tw = self.get_regression_partial_r2(X = X, Y = Y, numeric_features = numeric_features, split_indices = split_indices)
 
         self.g_s_j = np.zeros(num_samples)
         self.alpha_s_j = np.zeros(num_samples)
 
         delta_r2_y_wj, delta_r2t_wj = self.compute_bounds(
-            split_indices=split_indices)
+            split_indices=split_indices, second_stage_linear=True)
 
         # Partial R^2 of outcome after regressing over unobserved confounder, observed common causes and treatment
         r2y_uwt = self.frac_strength_outcome * delta_r2_y_wj + self.r2y_tw
         # Partial R^2 of treatment after regressing over unobserved confounder and observed common causes
         r2t_uw = self.frac_strength_treatment * delta_r2t_wj + self.r2t_w
-
         if r2y_uwt >=1:
             raise ValueError("r2y_uwt can not be >= 1. Try a lower effect_fraction_on_outcome value")
         if r2t_uw >= 1:
@@ -429,7 +460,7 @@ class PartialLinearSensitivityAnalyzer:
         ax.clabel(contour_plot, inline=1, fontsize=label_fontsize,
                   colors=contours_label_color)
 
-        if (critical_value >= contour_values.min() and critical_value <= contour_values.max()):
+        if (critical_value >= contour_values.min() and critical_value <= contour_values.max() and plot_type != "bias"):
             contour_plot = ax.contour(r2tu_w, r2yu_tw, contour_values, colors=critical_contour_color,
                                       linewidths=contour_linewidths, levels=[critical_value])
             ax.clabel(contour_plot,  [critical_value], inline=1,

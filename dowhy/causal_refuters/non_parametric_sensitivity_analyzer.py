@@ -17,13 +17,30 @@ from dowhy.causal_refuters.reisz import ReiszRegressor, ReiszRepresenter, genera
 class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
     """
     Class to perform Non parametric Senitivity Analysis
+    :param estimator: estimator of the causal model
+        :param num_splits: number of splits for cross validation. (default = 5)
+        :param shuffle_data : shuffle data or not before splitting into folds (default = False)
+        :param shuffle_random_seed: seed for randomly shuffling data
+        :param r2yu_tw: proportion of residual variance in the outcome explained by confounders
+        :param r2tu_w: proportion of residual variance in the treatment explained by confounders
+        :param benchmark_common_causes: names of variables for bounding strength of confounders
+        :param significance_level: confidence interval for statistical inference(default = 0.05)
+        :param frac_strength_treatment: strength of association between unobserved confounder and treatment compared to benchmark covariate
+        :param frac_strength_outcome: strength of association between unobserved confounder and outcome compared to benchmark covariate
+        :param alpha_s_param_dict: dictionary with parameters for finding alpha_s 
+        :param g_s_estimator_list: list of estimator objects for finding g_s. These objects should have fit() and predict() functions.
+        :param g_s_estimator_param_list: list of dictionaries with parameters for tuning respective estimators in "g_s_estimator_list". 
+                                         The order of the dictionaries in the list should be consistent with the estimator objects order in "g_s_estimator_list"
+        :param observed_common_causes: common causes dataframe
+        :param outcome: outcome dataframe
+        :param treatment: treatment dataframe
     :param theta_s: point estimate for the estimator
     
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, theta_s, **kwargs):
         super().__init__(*args, **kwargs)
-        self.theta_s = kwargs["theta_s"] if "theta_s" in kwargs else 0
+        self.theta_s = theta_s
 
         self.moment_function = None    
         self.alpha_s = None
@@ -34,9 +51,6 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
     def check_sensitivity(self, plot=True):
         """
         Function to perform sensitivity analysis. 
-
-        :param plot: plot = True generates a plot of lower confidence bound of the estimate for different variations of unobserved confounding.
-                     plot = False overrides the setting
         The following formulas are used in the analysis.
         θ+ = θ_s + S * C_g * C_α
         θ- = θ_s - S * C_g * C_α
@@ -46,6 +60,9 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
         σ² = E[Y - gs]^2
         ν^2 = 2 * E[m(W, α_s )] - E[α_s ^ 2]
 
+        :param plot: plot = True generates a plot of lower confidence bound of the estimate for different variations of unobserved confounding.
+                     plot = False overrides the setting
+        
         :returns: instance of NonParametricSensitivityAnalyzer class
         """
 
