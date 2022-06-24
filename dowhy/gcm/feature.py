@@ -24,8 +24,8 @@ def parent_relevance(causal_model: StructuralCausalModel,
                      parent_samples: Optional[pd.DataFrame] = None,
                      subset_scoring_func:
                      Optional[Callable[[np.ndarray, np.ndarray], Union[np.ndarray, float]]] = None,
-                     num_background_samples: int = 5000,
-                     num_evaluation_samples: int = 500,
+                     num_samples_randomization: int = 5000,
+                     num_samples_baseline: int = 500,
                      max_batch_size: int = 100,
                      shapley_config: Optional[ShapleyConfig] = None) -> Tuple[Dict[Any, Any], np.ndarray]:
     """Estimates the distribution based relevance of the direct parents of the given target_node. This is, the 
@@ -48,18 +48,18 @@ def parent_relevance(causal_model: StructuralCausalModel,
     :param causal_model: The fitted structural causal model.
     :param target_node: Node with the causal model of interest.
     :param parent_samples: Samples for the parents of the given target_node. If None is given, new samples are
-                           generated based on the graph.
+                           generated based on the graph. These samples are used for randomizing features that are not in the subset.
     :param subset_scoring_func: Set function for estimating the quantity of interest based on the model outcomes. This function
                                 expects two inputs; the outcome of the causal model for some samples if certain features are permuted and the 
                                 outcome of the model for the same samples when no features were permuted. The set functions represents the 
                                 comparison between the samples, for instance, the variance of deviations. This is then used as the 'characteristic function'
                                 in coalition games when estimating the Shapley values.
-    :param num_background_samples: Number of samples used as background parent samples for evaluating the set function. 
-                                   If no parent_samples are given, this represents the number of generated samples from
-                                   the joint distribution of the parents. Consider increasing this number for more 
-                                   accurate results or reducing it for less memory consumption and faster runtime.
-    :param num_evaluation_samples: Number of samples on which the set functions are evaluated on. Consider increasing 
-                                   this number for more accurate results or reducing it for less memory consumption and faster runtime.
+    :param num_samples_randomization: Number of samples used as background parent samples for evaluating the set function.
+                                      If no parent_samples are given, this represents the number of generated samples from
+                                      the joint distribution of the parents and are used for randomizing features that are 
+                                      not in the subset. Consider increasing this number for more accurate results or reducing it for less memory consumption and faster runtime.
+    :param num_samples_baseline: Number of samples on which the set functions are evaluated on. These samples are used as fixed observations for
+                                 parents that are in the subset. Consider increasing this number for more accurate results or reducing it for less memory consumption and faster runtime.
     :param max_batch_size: Maximum batch size for estimating multiple predictions at once. This has a significant influence on the
                           overall memory usage. If set to -1, all samples are used in one batch.
     :param shapley_config: :class:`~dowhy.gcm.shapley.ShapleyConfig` for the Shapley estimator.
@@ -76,7 +76,7 @@ def parent_relevance(causal_model: StructuralCausalModel,
 
     if parent_samples is None:
         parent_samples \
-            = draw_samples(causal_model, max(num_background_samples, num_evaluation_samples))[ordered_predecessors]
+            = draw_samples(causal_model, max(num_samples_randomization, num_samples_baseline))[ordered_predecessors]
 
     if subset_scoring_func is None:
         if isinstance(causal_model.causal_mechanism(target_node), ProbabilityEstimatorModel):
@@ -96,8 +96,8 @@ def parent_relevance(causal_model: StructuralCausalModel,
     shapley_vales = feature_relevance_distribution(model,
                                                    feature_samples=samples_features,
                                                    subset_scoring_func=subset_scoring_func,
-                                                   max_num_background_samples=num_background_samples,
-                                                   max_num_evaluation_samples=num_evaluation_samples,
+                                                   max_num_samples_randomization=num_samples_randomization,
+                                                   max_num_baseline_samples=num_samples_baseline,
                                                    max_batch_size=max_batch_size,
                                                    shapley_config=shapley_config)
 
@@ -110,8 +110,8 @@ def feature_relevance_distribution(prediction_method: Callable[[np.ndarray], np.
                                    feature_samples: np.ndarray,
                                    subset_scoring_func:
                                    Callable[[np.ndarray, np.ndarray], Union[np.ndarray, float]],
-                                   max_num_background_samples: int = 5000,
-                                   max_num_evaluation_samples: int = 500,
+                                   max_num_samples_randomization: int = 5000,
+                                   max_num_baseline_samples: int = 500,
                                    max_batch_size: int = 100,
                                    randomize_features_jointly: bool = True,
                                    shapley_config: Optional[ShapleyConfig] = None) -> np.ndarray:
@@ -140,13 +140,13 @@ def feature_relevance_distribution(prediction_method: Callable[[np.ndarray], np.
                                 outcome of the model for the same samples when no features were permuted. The set functions represents the
                                 comparison between the samples, for instance, the variance of deviations. This is then used as the 'characteristic function'
                                 in coalition games when estimating the Shapley values.
-    :param max_num_background_samples: Maximum number of samples used as background samples. Consider increasing this 
-                                       number for more accurate results (if enough samples are available) or reducing it for less memory consumption and 
-                                       faster runtime.
-    :param max_num_evaluation_samples: Maximum number of samples on which the set functions are evaluated on. 
-                                       For instance, in case of taking the mean as set_function_summary_func, this defines the maximum number of samples
-                                       used to estimate the mean. Consider increasing this number for more accurate results (if enough samples are 
-                                       available) or reducing it for less memory consumption and faster runtime.
+    :param max_num_samples_randomization: Maximum number of samples used for randomizing the feature that are not in the susbet. Consider increasing this 
+                                          number for more accurate results (if enough samples are available) or reducing it for less memory consumption and 
+                                          faster runtime.
+    :param max_num_baseline_samples: Maximum number of samples on which the set function is evaluated on. These samples are used as fixed observations for
+                                     features that are in the subset. For instance, in case of taking the mean as set_function_summary_func, this defines the maximum number 
+                                     of samples used to estimate the mean. Consider increasing this number for more accurate results (if enough samples are 
+                                     available) or reducing it for less memory consumption and faster runtime.
     :param max_batch_size: Maximum batch size for a estimating the predictions. This has a significant influence on the
                            overall memory usage. If set to -1, all samples are used in one batch.
     :param randomize_features_jointly: If set to True, features that are not in a subset are jointly permuted. 
@@ -160,16 +160,16 @@ def feature_relevance_distribution(prediction_method: Callable[[np.ndarray], np.
     if shapley_config is None:
         shapley_config = ShapleyConfig()
 
-    samples_of_interest = feature_samples[np.random.choice(feature_samples.shape[0],
-                                                           min(max_num_evaluation_samples, feature_samples.shape[0]),
+    baseline_samples = feature_samples[np.random.choice(feature_samples.shape[0],
+                                                           min(max_num_baseline_samples, feature_samples.shape[0]),
                                                            replace=False)]
     feature_samples = feature_samples[np.random.choice(feature_samples.shape[0],
-                                                       min(max_num_background_samples, feature_samples.shape[0]),
+                                                       min(max_num_samples_randomization, feature_samples.shape[0]),
                                                        replace=False)]
 
     return feature_relevance_sample(prediction_method,
                                     feature_samples,
-                                    samples_of_interest,
+                                    baseline_samples,
                                     subset_scoring_func,
                                     None,
                                     True,
@@ -180,15 +180,15 @@ def feature_relevance_distribution(prediction_method: Callable[[np.ndarray], np.
 
 def feature_relevance_sample(prediction_method: Callable[[np.ndarray], np.ndarray],
                              feature_samples: np.ndarray,
-                             samples_of_interest: np.ndarray,
+                             baseline_samples: np.ndarray,
                              subset_scoring_func: Callable[[np.ndarray, np.ndarray],
                                                            Union[np.ndarray, float]],
-                             baseline_values: Optional[np.ndarray] = None,
+                             baseline_target_values: Optional[np.ndarray] = None,
                              average_set_function: bool = False,
                              max_batch_size: int = 100,
                              randomize_features_jointly: bool = True,
                              shapley_config: Optional[ShapleyConfig] = None) -> np.ndarray:
-    """Estimates the feature relevance of the prediction_method for each sample in samples_of_interest. This
+    """Estimates the feature relevance of the prediction_method for each sample in baseline_noise_samples. This
     method uses all samples given in feature_samples as 'background' samples. This is, they should represent samples
     from the joint distribution of the input features. The subset_scoring_func defines the comparison between the
     output of the prediction_method when certain features are randomized and the outputs when no features are
@@ -204,14 +204,15 @@ def feature_relevance_sample(prediction_method: Callable[[np.ndarray], np.ndarra
     In International Conference on Artificial Intelligence and Statistics (pp. 2907-2916). PMLR.
 
     :param prediction_method: A callable that is expected to return a prediction for given samples.
-    :param feature_samples: Samples from the joint distribution. These are used as 'background samples'.
-    :param samples_of_interest: Samples for the feature relevance should be estimated.
+    :param feature_samples: Samples from the joint distribution. These are used as 'background samples' to randomize features that are not in a subset.
+    :param baseline_samples: Samples for which the feature relevance should be estimated.
     :param subset_scoring_func: Set function for estimating the quantity of interest based on the model outcomes. This function
                                 expects two inputs; the outcome of the prediction model for some samples if certain features are permuted and the
                                 outcome of the model for the same samples when no features were permuted. A typical choice for regression models
                                 would be the difference between expectations. This is then used as the 'characteristic function'
                                 in coalition games when estimating the Shapley values.
-    :param baseline_values: These baseline values are compared with the subset specific outcomes of the prediction method. If set to None (default), the baseline values are the outcomes of the given prediction_method applied to the samples_of_interest, i.e. the outcome of the empty subset.
+    :param baseline_target_values: These baseline values are compared with the subset specific outcomes of the prediction method. If set to None (default),
+                                   the baseline values are the outcomes of the given prediction_method applied to the baseline_noise_samples, i.e. the outcome of the empty subset.
     :param max_batch_size: Maximum batch size for a estimating the predictions. This has a significant influence on the
                            overall memory usage. If set to -1, all samples are used in one batch.
     :param average_set_function: If set to True, the averaged result of the set function applied to each sample of
@@ -221,13 +222,13 @@ def feature_relevance_sample(prediction_method: Callable[[np.ndarray], np.ndarra
                                        Note that this still represents an interventional distribution. If set to False, features that are not in a subset
                                        are independently permuted. Note: The theory in the linked publication assumes that this is set to True.
     :param shapley_config: Config for the Shapley estimator.
-    :return: A numpy array with the feature relevance for each sample in samples_of_interest.
+    :return: A numpy array with the feature relevance for each sample in baseline_noise_samples.
     """
     feature_samples = shape_into_2d(feature_samples)
-    if baseline_values is None:
-        baseline_values = prediction_method(samples_of_interest)
+    if baseline_target_values is None:
+        baseline_target_values = prediction_method(baseline_samples)
     else:
-        if samples_of_interest.shape[0] != baseline_values.shape[0]:
+        if baseline_samples.shape[0] != baseline_target_values.shape[0]:
             raise ValueError("Samples of interest and the given baseline values need to have the same sample size! "
                              "Make sure that the given baseline values correspond to the samples of interest.")
 
@@ -235,19 +236,19 @@ def feature_relevance_sample(prediction_method: Callable[[np.ndarray], np.ndarra
         shapley_config = ShapleyConfig()
 
     def single_sample_set_function(subset: np.ndarray) -> Union[np.ndarray, float]:
-        results = np.zeros(baseline_values.shape[0])
+        results = np.zeros(baseline_target_values.shape[0])
         predictions = marginal_expectation(prediction_method,
                                            feature_samples=feature_samples,
-                                           samples_of_interest=samples_of_interest,
-                                           features_of_interest_indices=
+                                           baseline_samples=baseline_samples,
+                                           baseline_feature_indices=
                                            np.arange(0, feature_samples.shape[1])[subset == 1],
                                            return_averaged_results=False,
                                            feature_perturbation='randomize_columns_jointly'
                                            if randomize_features_jointly else 'randomize_columns_independently',
                                            max_batch_size=max_batch_size)
 
-        for i in range(baseline_values.shape[0]):
-            results[i] = subset_scoring_func(predictions[i], baseline_values[i])
+        for i in range(baseline_target_values.shape[0]):
+            results[i] = subset_scoring_func(predictions[i], baseline_target_values[i])
 
         if average_set_function:
             return np.mean(results)
