@@ -65,7 +65,7 @@ def test_when_using_parent_relevance_with_categorical_data_then_returns_correct_
 
     fit(causal_model, data=pd.DataFrame({'X0': X0, 'X1': X1, 'X2': X2, 'X3': X3, 'X4': X4, 'Y': Y}))
 
-    relevance, noise = parent_relevance(causal_model, 'Y', num_background_samples=1000, num_evaluation_samples=100)
+    relevance, noise = parent_relevance(causal_model, 'Y', num_samples_randomization=1000, num_samples_baseline=100)
 
     assert relevance[('X0', 'Y')] == approx(0.125, abs=0.05)
     assert relevance[('X1', 'Y')] == approx(0.125, abs=0.05)
@@ -118,7 +118,7 @@ def test_feature_relevance_sample_mean_diff():
 
     shapley_values = feature_relevance_sample(model,
                                               feature_samples=X,
-                                              samples_of_interest=X[:20],
+                                              baseline_samples=X[:20],
                                               subset_scoring_func=means_difference)
 
     for i in range(20):
@@ -137,25 +137,25 @@ def test_given_baseline_values_when_estimating_feature_relevance_sample_with_mea
     shapley_values_1 = \
         feature_relevance_sample(model,
                                  feature_samples=X,
-                                 samples_of_interest=X[:20],
+                                 baseline_samples=X[:20],
                                  subset_scoring_func=lambda x, y: np.mean(x) * y,
-                                 baseline_values=np.zeros(20),
+                                 baseline_target_values=np.zeros(20),
                                  shapley_config=ShapleyConfig(approximation_method=ShapleyApproximationMethods.EXACT))
 
     shapley_values_2 = \
         feature_relevance_sample(model,
                                  feature_samples=X,
-                                 samples_of_interest=X[:20],
+                                 baseline_samples=X[:20],
                                  subset_scoring_func=lambda x, y: np.mean(x) * y,
-                                 baseline_values=np.zeros(20) + 1,
+                                 baseline_target_values=np.zeros(20) + 1,
                                  shapley_config=ShapleyConfig(approximation_method=ShapleyApproximationMethods.EXACT))
 
     shapley_values_3 = \
         feature_relevance_sample(model,
                                  feature_samples=X,
-                                 samples_of_interest=X[:20],
+                                 baseline_samples=X[:20],
                                  subset_scoring_func=lambda x, y: np.mean(x) * y,
-                                 baseline_values=np.zeros(20) + 2,
+                                 baseline_target_values=np.zeros(20) + 2,
                                  shapley_config=ShapleyConfig(approximation_method=ShapleyApproximationMethods.EXACT))
 
     for i in range(20):
@@ -173,7 +173,7 @@ def test_feature_relevance_sample_mean_diff_with_certain_batch_size():
 
     shapley_values = feature_relevance_sample(model,
                                               feature_samples=X,
-                                              samples_of_interest=X,
+                                              baseline_samples=X,
                                               subset_scoring_func=means_difference,
                                               max_batch_size=123)
 

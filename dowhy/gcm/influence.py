@@ -200,8 +200,8 @@ def intrinsic_causal_influence(causal_model: StructuralCausalModel,
                                prediction_model: Union[PredictionModel, ClassificationModel, str] = 'approx',
                                attribution_func: Optional[Callable[[np.ndarray, np.ndarray], float]] = None,
                                num_training_samples: int = 100000,
-                               num_background_samples: int = 7500,
-                               num_samples_of_interest: int = 1000,
+                               num_samples_randomization: int = 7500,
+                               num_samples_baseline: int = 1000,
                                max_batch_size: int = 100,
                                auto_assign_quality: auto.AssignmentQuality = auto.AssignmentQuality.GOOD,
                                shapley_config: Optional[ShapleyConfig] = None) -> Dict[Any, float]:
@@ -233,11 +233,12 @@ def intrinsic_causal_influence(causal_model: StructuralCausalModel,
                              variance otherwise.
     :param num_training_samples: Number of samples drawn from the graphical causal model that are used for fitting the
                                  prediction_model (if necessary).
-    :param num_background_samples: Number of noise samples drawn from the graphical causal model that are used for
-                                   evaluating the set function. Here, these samples are the 'background samples' from
-                                   the noise distributions.
-    :param num_samples_of_interest: Number of noise samples drawn from the graphical causal model that are used for
-                                    evaluating the set function. Here, these samples are the 'samples of interest'.
+    :param num_samples_randomization: Number of noise samples drawn from the graphical causal model that are used for
+                                      evaluating the set function. Here, these samples are samples from
+                                      the noise distributions used for randomizing features that are not in the subset.
+    :param num_samples_baseline: Number of noise samples drawn from the graphical causal model that are used for
+                                 evaluating the set function. Here, these samples are used as fixed observations for
+                                 features that are in the subset.
     :param max_batch_size: Maximum batch size for estimating the predictions from evaluation samples. This has a
                            significant impact on the overall memory usage. If set to -1, all samples are used in one
                            batch.
@@ -296,13 +297,13 @@ def intrinsic_causal_influence(causal_model: StructuralCausalModel,
 
     _, noise_samples = noise_samples_of_ancestors(sub_causal_model,
                                                   target_node,
-                                                  num_background_samples + num_samples_of_interest)
+                                                  num_samples_randomization + num_samples_baseline)
     noise_samples = shape_into_2d(noise_samples.to_numpy())
 
     iccs = _estimate_iccs(attribution_func,
                           prediction_method,
-                          noise_samples[:num_background_samples],
-                          noise_samples[num_background_samples:num_background_samples + num_samples_of_interest],
+                          noise_samples[:num_samples_randomization],
+                          noise_samples[num_samples_randomization:num_samples_randomization + num_samples_baseline],
                           max_batch_size,
                           ShapleyConfig() if shapley_config is None else shapley_config)
 
@@ -312,10 +313,10 @@ def intrinsic_causal_influence(causal_model: StructuralCausalModel,
 def _estimate_iccs(attribution_func: Callable[[np.ndarray, np.ndarray], float],
                    prediction_method: Callable[[np.ndarray], np.ndarray],
                    noise_samples: np.ndarray,
-                   samples_of_interest: np.ndarray,
+                   baseline_noise_samples: np.ndarray,
                    max_batch_size: int,
                    shapley_config: ShapleyConfig):
-    target_values = shape_into_2d(prediction_method(samples_of_interest))
+    target_values = shape_into_2d(prediction_method(baseline_noise_samples))
 
     def icc_set_function(subset: np.ndarray) -> Union[np.ndarray, float]:
         if np.all(subset == 1):
@@ -328,12 +329,12 @@ def _estimate_iccs(attribution_func: Callable[[np.ndarray, np.ndarray], float],
             # predictions, seeing that the randomization yields the same values for each sample of interest (none of the
             # samples of interest are used to replace a (jointly) 'randomized' sample).
             predictions = \
-                repmat(np.mean(prediction_method(noise_samples), axis=0), samples_of_interest.shape[0], 1)
+                repmat(np.mean(prediction_method(noise_samples), axis=0), baseline_noise_samples.shape[0], 1)
         else:
             predictions = marginal_expectation(prediction_method,
                                                feature_samples=noise_samples,
-                                               samples_of_interest=samples_of_interest,
-                                               features_of_interest_indices=
+                                               baseline_samples=baseline_noise_samples,
+                                               baseline_feature_indices=
                                                np.arange(0, noise_samples.shape[1])[subset == 1],
                                                return_averaged_results=True,
                                                feature_perturbation='randomize_columns_jointly',

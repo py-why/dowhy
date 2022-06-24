@@ -338,35 +338,35 @@ def test_marginal_expectation_independent_categorical_nonlinear():
 
 def test_given_different_batch_sizes_when_estimating_marginal_expectation_then_returns_expected_result():
     X = np.random.normal(0, 1, (34, 3))
-    background_samples = np.random.normal(0, 1, (123, 3))
-    expected_non_aggregated = np.array([repmat(X[i, :], background_samples.shape[0], 1) for i in range(X.shape[0])])
+    feature_samples = np.random.normal(0, 1, (123, 3))
+    expected_non_aggregated = np.array([repmat(X[i, :], feature_samples.shape[0], 1) for i in range(X.shape[0])])
 
     def my_pred_func(X: np.ndarray) -> np.ndarray:
         return X.copy()
 
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
                                 max_batch_size=1) == approx(X)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
                                 max_batch_size=10) == approx(X)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
                                 max_batch_size=100) == approx(X)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
                                 max_batch_size=1000) == approx(X)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
-                                max_batch_size=background_samples.shape[0]) == approx(X)
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
+                                max_batch_size=feature_samples.shape[0]) == approx(X)
 
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
                                 max_batch_size=1,
                                 return_averaged_results=False) == approx(expected_non_aggregated)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
                                 max_batch_size=10,
                                 return_averaged_results=False) == approx(expected_non_aggregated)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
                                 max_batch_size=100,
                                 return_averaged_results=False) == approx(expected_non_aggregated)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
                                 max_batch_size=1000,
                                 return_averaged_results=False) == approx(expected_non_aggregated)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
-                                max_batch_size=background_samples.shape[0],
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
+                                max_batch_size=feature_samples.shape[0],
                                 return_averaged_results=False) == approx(expected_non_aggregated)
