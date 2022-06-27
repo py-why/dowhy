@@ -348,11 +348,9 @@ class PartialLinearSensitivityAnalyzer:
         self.alpha_s = (residualized_treatment) / np.mean(residualized_treatment * residualized_treatment)     
 
         # Partial R^2 of treatment with observed common causes
-        numeric_features = get_numeric_features(X =features)
-        self.r2t_w = self.get_regression_partial_r2(X = W, Y = T, numeric_features = numeric_features, split_indices = split_indices)
-
-        numeric_features = get_numeric_features(X = X_df)
-        self.r2y_tw = self.get_regression_partial_r2(X = X, Y = Y, numeric_features = numeric_features, split_indices = split_indices)
+        self.r2t_w = np.var(T[indices] - residualized_treatment) / np.var(T)
+        # Partial R^2 of outcome with observed common causes
+        self.r2y_tw = np.var(Y - residualized_outcome) / np.var(Y)
 
         self.g_s_j = np.zeros(num_samples)
         self.alpha_s_j = np.zeros(num_samples)
