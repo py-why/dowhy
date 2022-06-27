@@ -85,14 +85,12 @@ c. To be really pedantic, ensure it is fully 'activated'::
 
     chmod 777 pywhy
 
-d. Get the full path by
-
-.. code:: shell
+d. Get the full path by::
 
     cd pywhy
     pwd
 
-e. Copy that path you will need it later
+e. Copy that path you will need it later.
 
 f. Clone the repository::
 
@@ -102,15 +100,10 @@ g. Now open an python notebook and create a new python code cell. Type::
 
     %pip install -e <path from step d.>
 
-h. To test the installation:
-	    
-.. code:: python
+h. To test the installation::
 
-    import numpy as np, pandas as pd
-	from dowhy import CausalModel
-	import dowhy.datasets
-	import networkx as nx
-	from dowhy import gcm
+    import dowhy
+    
 
 This should run with no errors.
 	 
