@@ -61,7 +61,7 @@ Installing on Azure Machine Learning
 
 Eli Y. Kling {https://www.linkedin.com/in/elikling/}
 
-In Azure Machine Learning it is not that straight forward to identify in the  terminal window the python (Conda) envornoments used by the notebook. Thus, it is easier to run shell commands from within the notebook. The secret is NOT to use the ! magic but the %.
+In Azure Machine Learning it is not that straight forward to identify in the terminal window the python (Conda) envornoments used by the notebook. Thus, it is easier to run shell commands from within the notebook. The secret is NOT to use the ! magic but the %.
 
 **Getting the latest release**
 
@@ -96,7 +96,7 @@ f. Clone the repository::
 
     git clone https://github.com/py-why/dowhy
 
-g. Now open an python notebook and create a new python code cell. Type::
+g. Now open a python notebook and create a new python code cell. Type::
 
     %pip install -e <path from step d.>
 
