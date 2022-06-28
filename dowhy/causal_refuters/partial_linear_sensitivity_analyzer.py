@@ -1,8 +1,10 @@
 import scipy
 import numpy as np
 import pandas as pd
+import logging
 import matplotlib.pyplot as plt
 from sklearn.model_selection import KFold
+from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.linear_model import LinearRegression, Lasso, SGDRegressor, Ridge, RidgeCV
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -37,7 +39,8 @@ class PartialLinearSensitivityAnalyzer:
                  shuffle_random_seed=None,  reisz_polynomial_max_degree=3,
                  r2yu_tw=0.04, r2tu_w=0.03, significance_level=0.05, benchmark_common_causes=None,
                  frac_strength_treatment=None, frac_strength_outcome=None,
-                 observed_common_causes=None, treatment=None, outcome=None, g_s_estimator_list=None, alpha_s_param_dict=None, g_s_estimator_param_list=None , **kwargs):
+                 observed_common_causes=None, treatment=None, outcome=None,
+                 g_s_estimator_list=None, alpha_s_param_dict=None, g_s_estimator_param_list=None , **kwargs):
         self.estimator = estimator
         self.num_splits = num_splits
         self.shuffle_data = shuffle_data
@@ -72,6 +75,7 @@ class PartialLinearSensitivityAnalyzer:
         self.r2t_w = 0  # Partial R^2 of treatment with observed common causes
         self.r2y_tw = 0  # Partial R^2 of outcome with treatment and observed common causes
         self.results = None
+        self.logger = logging.getLogger(__name__)
 
     def get_phi_lower_upper(self, Cg, Calpha):
         """
@@ -332,7 +336,7 @@ class PartialLinearSensitivityAnalyzer:
         n_residuals = residualized_outcome.shape[0]
         indices = np.arange(0, n_residuals, 1)
 
-        residualized_outcome = residualized_outcome[indices]  # Y - g(Ws)
+        residualized_outcome = residualized_outcome[indices]  
         residualized_treatment = residualized_treatment[indices]
 
         self.sigma_2 = np.mean(residualized_outcome * residualized_outcome)
@@ -344,13 +348,40 @@ class PartialLinearSensitivityAnalyzer:
         self.neyman_orthogonal_score_treatment = residualized_treatment * residualized_treatment - self.nu_2
         self.neyman_orthogonal_score_theta = (residualized_outcome - residualized_treatment * self.theta_s) * residualized_treatment / self.nu_2
 
-        self.g_s = Y - residualized_outcome
-        self.alpha_s = (residualized_treatment) / np.mean(residualized_treatment * residualized_treatment)     
-
         # Partial R^2 of treatment with observed common causes
-        self.r2t_w = np.var(T[indices] - residualized_treatment) / np.var(T)
-        # Partial R^2 of outcome with observed common causes
-        self.r2y_tw = np.var(Y - residualized_outcome) / np.var(Y)
+        reg_function_fit = self.estimator.models_t[0][0]  #First Stage treatment model
+        treatment_model = np.zeros(num_samples)
+        treatment_model = reg_function_fit.predict(W) 
+        self.r2t_w = np.var(treatment_model) / np.var(T)
+
+        # Partial R^2 of outcome with treatment and observed common causes
+        self.g_s = np.zeros(num_samples)
+        self.alpha_s = np.zeros(num_samples)
+        numeric_features = get_numeric_features(X = X_df)
+        reg_function = get_generic_regressor(cv = split_indices, 
+                           X = X, Y = Y, max_degree = self.reisz_polynomial_max_degree, 
+                           estimator_list = [LinearRegression(),
+                           Pipeline([('scale', ColumnTransformer([('num', StandardScaler(), numeric_features)],
+                                                  remainder='passthrough')),
+                                     ('lasso_model', Lasso())]),
+                            SGDRegressor(alpha = 0.001),
+                            Ridge(),
+                            RidgeCV(cv = 5)
+                           ], 
+                           estimator_param_list = [{'fit_intercept' : [True, False]},
+                           {'lasso_model__alpha': [0.01, 0.001, 1e-4, 1e-5, 1e-6]},
+                           {'alpha' : [0.0001, 1e-5, 0.01]},
+                           {'alpha' : [0.0001, 1e-5, 0.01, 1, 2]},
+                           {
+                            'cv' : [2,3,4]}
+                           ], 
+                           numeric_features = numeric_features
+                           )
+        for train, test in split_indices:
+            reg_fn_fit = reg_function.fit(X[train], Y[train])
+            self.g_s[test] = reg_fn_fit.predict(X[test])
+
+        self.r2y_tw = np.var(self.g_s) / np.var(Y)
 
         self.g_s_j = np.zeros(num_samples)
         self.alpha_s_j = np.zeros(num_samples)
@@ -484,3 +515,16 @@ class PartialLinearSensitivityAnalyzer:
         plt.margins()
         ax.legend(bbox_to_anchor=legend_position)
         plt.show()
+    
+    def __str__(self):
+        s = "Sensitivity Analysis to Unobserved Confounding using R^2 paramterization\n\n"
+        s += "Coefficient Estimate : {0}\n".format(self.theta_s)
+        s += "Sensitivity Statistics : \n"
+        s += "Partial R2 of outcome regressing over treatment and observed common causes : {0}\n".format(self.r2y_tw)
+        s += "Robustness Value : {0}\n\n".format(self.RV)
+        s += "Interpretation of results :\n"
+        s += "Any confounder explaining less than {0}% percent of the residual variance of both the treatment and the outcome would not be strong enough to explain away the observed effect i.e bring down the estimate to 0 \n\n".format(round(self.RV* 100, 2))
+        s += "For a significance level of {0}%, any confounder explaining more than {1}% percent of the residual variance of both the treatment and the outcome would be strong enough to make the estimated effect not 'statistically significant'\n\n".format(self.significance_level*100,round(self.RV_alpha * 100, 2))
+        s += "Proportion of residual variance in the outcome explained by confounders is {0}% percent\n".format(round(self.r2yu_tw* 100, 2))
+        s += "Proportion of residual variance in the treatment explained by confounders is {0}% percent\n".format(round(self.r2tu_w* 100, 2))
+        return s

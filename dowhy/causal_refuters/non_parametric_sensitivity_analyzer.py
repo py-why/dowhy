@@ -1,6 +1,7 @@
 import scipy
 import pandas as pd
 import numpy as np
+import logging
 import matplotlib.pyplot as plt
 from sklearn.model_selection import KFold
 from econml.utilities import cross_product
@@ -70,8 +71,8 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
         treatment_df = self.treatment.copy()
         W = features.to_numpy()
         X = pd.concat([treatment_df, features], axis=1)
+        numeric_features = get_numeric_features(X = X)
         T = treatment_df.values.ravel()
-        numeric_features = get_numeric_features(X)
 
         X = X.to_numpy()
         Y = self.outcome.copy()
@@ -118,7 +119,7 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
             2 * self.m_alpha[indices] - self.alpha_s[indices] ** 2)
         self.sigma_2 = np.mean((Y[indices] - self.g_s[indices]) ** 2)
         self.S2 = self.nu_2 * self.sigma_2
-        #self.S = np.sqrt(self.S2)
+        self.S = np.sqrt(self.S2)
 
         Y_residual = Y[indices] - self.g_s[indices]
         self.neyman_orthogonal_score_outcome = Y_residual ** 2 - self.sigma_2
@@ -146,8 +147,8 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
         if r2t_uw >= 1:
             raise ValueError("r2t_uw can not be >= 1. Try a lower effect_fraction_on_treatment value")
 
-        self.r2yu_tw = (r2y_uwt - self.r2y_tw) / (1 - self.r2y_tw)
-        self.r2tu_w = (r2t_uw - self.r2t_w) / (1 - self.r2t_w)
+        self.r2yu_tw = abs((r2y_uwt - self.r2y_tw) / (1 - self.r2y_tw))
+        self.r2tu_w = abs((r2t_uw - self.r2t_w) / (1 - self.r2t_w))
 
         if self.r2yu_tw >= 1:
             self.r2yu_tw = 1

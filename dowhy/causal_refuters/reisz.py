@@ -3,7 +3,7 @@ from scipy import stats
 from econml.grf._base_grf import BaseGRF
 from econml.utilities import cross_product
 from econml.sklearn_extensions.model_selection import GridSearchCVList
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.linear_model import LinearRegression, Lasso
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -96,7 +96,8 @@ def get_generic_regressor(cv, X, Y, max_degree, estimator_list, estimator_param_
                            max_samples=0.80,
                            inference=False,
                            subforest_size=1,
-                           random_state=123)
+                           random_state=123),
+            GradientBoostingRegressor()
         ],
             param_grid_list=[
                 {'n_estimators': [50],
@@ -110,6 +111,10 @@ def get_generic_regressor(cv, X, Y, max_degree, estimator_list, estimator_param_
                  'min_samples_leaf': [10, 50],
                  'min_var_fraction_leaf': [0.01, 0.1],
                  'l2_regularizer': [1e-2, 1e-3]
+                 },
+                 {
+                     'learning_rate' : [0.01, 0.001],
+                     'n_estimators' : [50,200]
                  }
         ],
             cv=cv,
