@@ -24,14 +24,16 @@ class TestRefuter(object):
 
     def null_refutation_test(self, data=None, dataset="linear", beta=10,
             num_common_causes=1, num_instruments=1, num_samples=100000,
-            treatment_is_binary=True, num_dummyoutcome_simulations=None):
+            treatment_is_binary=True, treatment_is_category=False,
+            num_dummyoutcome_simulations=None):
         # Supports user-provided dataset object
         if data is None:
             data = dowhy.datasets.linear_dataset(beta=beta,
                                              num_common_causes=num_common_causes,
                                              num_instruments=num_instruments,
                                              num_samples=num_samples,
-                                             treatment_is_binary=treatment_is_binary)
+                                             treatment_is_binary=treatment_is_binary,
+                                             treatment_is_category=treatment_is_category)
 
         print(data['df'])
 
@@ -209,6 +211,18 @@ class TestRefuter(object):
             self.null_refutation_test(num_common_causes=0, num_samples=num_samples,
                     treatment_is_binary=False,
                     num_dummyoutcome_simulations=num_dummyoutcome_simulations)
+
+    def categorical_treatment_testsuite(self, num_samples=100000,
+                                       num_common_causes=1,tests_to_run="all",
+                                       num_dummyoutcome_simulations=2):
+        self.null_refutation_test(
+            num_common_causes=num_common_causes,num_samples=num_samples,
+            treatment_is_binary=False, treatment_is_category=True,
+            num_dummyoutcome_simulations=num_dummyoutcome_simulations)
+        if tests_to_run != "atleast-one-common-cause":
+            self.null_refutation_test(num_common_causes=0, num_samples=num_samples,
+                                      treatment_is_binary=False, treatment_is_category=True,
+                                      num_dummyoutcome_simulations=num_dummyoutcome_simulations)
 
 
 
