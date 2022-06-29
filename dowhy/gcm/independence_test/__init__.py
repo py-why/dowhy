@@ -4,7 +4,7 @@ from .regression import regression_based
 
 def independence_test(X, Y, conditioned_on=None, method="kernel"):
     """Performs a (conditional) independence test.
-    Two methods for (conditional) independence test are supported at the moment:
+    Three methods for (conditional) independence test are supported at the moment:
 
     * `kernel`: Kernel-based (conditional) independence test.
 
