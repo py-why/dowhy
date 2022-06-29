@@ -17,3 +17,10 @@ class TestPlaceboRefuter(object):
             estimator_method, num_samples):
         refuter_tester = TestRefuter(error_tolerance, estimator_method, "placebo_treatment_refuter")
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
+
+    @pytest.mark.parametrize(["error_tolerance", "estimator_method", "num_samples"],
+                             [(0.1, "backdoor.linear_regression", 5000)])
+    def test_refutation_placebo_refuter_category(self, error_tolerance,
+                                               estimator_method, num_samples):
+        refuter_tester = TestRefuter(error_tolerance, estimator_method, "placebo_treatment_refuter")
+        refuter_tester.categorical_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
