@@ -1,6 +1,9 @@
 import pytest
-import numpy as np
+import random
+import pandas as pd
 from .base import TestRefuter
+import dowhy.datasets
+
 
 @pytest.mark.usefixtures("fixed_seed")
 class TestPlaceboRefuter(object):
@@ -17,3 +20,25 @@ class TestPlaceboRefuter(object):
             estimator_method, num_samples):
         refuter_tester = TestRefuter(error_tolerance, estimator_method, "placebo_treatment_refuter")
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
+
+    @pytest.mark.parametrize(["error_tolerance", "estimator_method", "num_samples"],
+                             [(0.1, "backdoor.linear_regression", 5000)])
+    def test_refutation_placebo_refuter_category(self, error_tolerance,
+                                               estimator_method, num_samples):
+        refuter_tester = TestRefuter(error_tolerance, estimator_method, "placebo_treatment_refuter")
+        refuter_tester.categorical_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
+
+    @pytest.mark.parametrize(["error_tolerance", "estimator_method", "num_samples"],
+                             [(0.1, "backdoor.linear_regression", 5000)])
+    def test_refutation_placebo_refuter_category_non_consecutive_index(self, error_tolerance,
+                                                 estimator_method, num_samples):
+        refuter_tester = TestRefuter(error_tolerance, estimator_method, "placebo_treatment_refuter")
+        data = dowhy.datasets.linear_dataset(beta=10,
+                                             num_common_causes=1,
+                                             num_instruments=1,
+                                             num_samples=num_samples,
+                                             treatment_is_binary=False,
+                                             treatment_is_category=True)
+        random_index = random.sample(range(1, 10*num_samples), num_samples)
+        data['df'].index = random_index
+        refuter_tester.null_refutation_test(data=data)
