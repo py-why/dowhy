@@ -126,9 +126,9 @@ def test_interventional_samples_atomic_multiple_interventions():
                                                        X2=lambda x: x + 5), observed_data).to_numpy()
     sample = sample.squeeze()
     assert sample[0] == 10
-    assert sample[1] == approx(20, abs=0.2)
-    assert sample[2] == approx(10, abs=0.2)
-    assert sample[3] == approx(5, abs=0.2)
+    assert sample[1] == approx(20, abs=0.3)
+    assert sample[2] == approx(10, abs=0.3)
+    assert sample[3] == approx(5, abs=0.3)
 
 
 def test_interventional_samples_raise_error_all_parameter_none():

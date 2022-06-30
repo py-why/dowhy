@@ -30,6 +30,7 @@ class SklearnClassificationModel(SklearnRegressionModel, ClassificationModel):
         return shape_into_2d(
             self._sklearn_mdl.predict_proba(apply_one_hot_encoding(X, self._one_hot_encoders)))
 
+    @property
     def classes(self) -> List[str]:
         return self._sklearn_mdl.classes_
 

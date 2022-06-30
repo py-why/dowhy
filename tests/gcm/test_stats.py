@@ -6,7 +6,7 @@ from pytest import approx
 
 from dowhy.gcm.ml import create_hist_gradient_boost_classifier, create_hist_gradient_boost_regressor, \
     create_logistic_regression_classifier, create_linear_regressor
-from dowhy.gcm.stats import quantile_based_fwer, marginal_expectation
+from dowhy.gcm.stats import quantile_based_fwer, marginal_expectation, estimate_ftest_pvalue
 from dowhy.gcm.util.general import geometric_median
 
 
@@ -338,35 +338,89 @@ def test_marginal_expectation_independent_categorical_nonlinear():
 
 def test_given_different_batch_sizes_when_estimating_marginal_expectation_then_returns_expected_result():
     X = np.random.normal(0, 1, (34, 3))
-    background_samples = np.random.normal(0, 1, (123, 3))
-    expected_non_aggregated = np.array([repmat(X[i, :], background_samples.shape[0], 1) for i in range(X.shape[0])])
+    feature_samples = np.random.normal(0, 1, (123, 3))
+    expected_non_aggregated = np.array([repmat(X[i, :], feature_samples.shape[0], 1) for i in range(X.shape[0])])
 
     def my_pred_func(X: np.ndarray) -> np.ndarray:
         return X.copy()
 
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
                                 max_batch_size=1) == approx(X)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
                                 max_batch_size=10) == approx(X)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
                                 max_batch_size=100) == approx(X)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
                                 max_batch_size=1000) == approx(X)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
-                                max_batch_size=background_samples.shape[0]) == approx(X)
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
+                                max_batch_size=feature_samples.shape[0]) == approx(X)
 
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
                                 max_batch_size=1,
                                 return_averaged_results=False) == approx(expected_non_aggregated)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
                                 max_batch_size=10,
                                 return_averaged_results=False) == approx(expected_non_aggregated)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
                                 max_batch_size=100,
                                 return_averaged_results=False) == approx(expected_non_aggregated)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
                                 max_batch_size=1000,
                                 return_averaged_results=False) == approx(expected_non_aggregated)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
-                                max_batch_size=background_samples.shape[0],
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2],
+                                max_batch_size=feature_samples.shape[0],
                                 return_averaged_results=False) == approx(expected_non_aggregated)
+
+
+@flaky(max_runs=2)
+def test_given_linear_dependent_data_when_estimate_ftest_pvalue_then_returns_expected_result():
+    X_training = np.random.normal(0, 1, 1000)
+    Y_training = X_training + np.random.normal(0, 0.05, 1000)
+
+    X_test = np.random.normal(0, 1, 1000)
+    Y_test = X_test + np.random.normal(0, 0.05, 1000)
+
+    assert estimate_ftest_pvalue(X_training,
+                                 np.array([]),
+                                 Y_training,
+                                 X_test,
+                                 np.array([]),
+                                 Y_test) < 0.05
+
+    Y_training = np.random.normal(0, 0.05, 1000)
+    Y_test = np.random.normal(0, 0.05, 1000)
+
+    assert estimate_ftest_pvalue(X_training,
+                                 np.array([]),
+                                 Y_training,
+                                 X_test,
+                                 np.array([]),
+                                 Y_test) >= 0.05
+
+
+@flaky(max_runs=2)
+def test_given_multivariate_dependent_data_when_estimate_ftest_pvalue_then_returns_expected_result():
+    X1_training = np.random.normal(0, 1, 1000)
+    X2_training = np.random.normal(0, 1, 1000)
+    Y_training = X1_training + X2_training + np.random.normal(0, 0.05, 1000)
+
+    X1_test = np.random.normal(0, 1, 1000)
+    X2_test = np.random.normal(0, 1, 1000)
+    Y_test = X1_test + X2_test + np.random.normal(0, 0.05, 1000)
+
+    assert estimate_ftest_pvalue(np.column_stack([X1_training, X2_training]),
+                                 X1_training,
+                                 Y_training,
+                                 np.column_stack([X1_test, X2_test]),
+                                 X1_test,
+                                 Y_test) < 0.05
+
+    Y_training = X1_training + np.random.normal(0, 0.05, 1000)
+    Y_test = X1_test + np.random.normal(0, 0.05, 1000)
+
+    assert estimate_ftest_pvalue(np.column_stack([X1_training, X2_training]),
+                                 X1_training,
+                                 Y_training,
+                                 np.column_stack([X1_test, X2_test]),
+                                 X1_test,
+                                 Y_test) >= 0.05

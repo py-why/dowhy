@@ -42,6 +42,7 @@ class ClassificationModel(PredictionModel):
     def predict_probabilities(self, X: np.array) -> np.ndarray:
         raise NotImplementedError
 
+    @property
     @abstractmethod
     def classes(self) -> List[str]:
         raise NotImplementedError
@@ -174,6 +175,7 @@ class AdditiveNoiseModel(PostNonlinearModel):
     Given joint samples from (X, Y), this model can be fitted by first training a model f (e.g. using least squares
     regression) and then reconstruct N by N = Y - f(X), i.e. using the residual.
     """
+
     def __init__(self,
                  prediction_model: PredictionModel,
                  noise_model: Optional[StochasticModel] = None) -> None:
@@ -206,6 +208,7 @@ class ClassifierFCM(FunctionalCausalModel, ProbabilityEstimatorModel):
     the noise is used to make this sampling process deterministic by using the cumulative distribution functions defined
     by the given inputs.
     """
+
     def __init__(self, classifier_model: Optional[ClassificationModel] = None) -> None:
         self._classifier_model = classifier_model
 
@@ -267,7 +270,7 @@ class ClassifierFCM(FunctionalCausalModel, ProbabilityEstimatorModel):
         return ClassifierFCM(classifier_model=self._classifier_model.clone())
 
     def get_class_names(self, class_indices: np.ndarray) -> List[str]:
-        return [self._classifier_model.classes()[index] for index in class_indices]
+        return [self._classifier_model.classes[index] for index in class_indices]
 
     @property
     def classifier_model(self) -> ClassificationModel:

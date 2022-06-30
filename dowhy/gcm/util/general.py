@@ -185,6 +185,20 @@ def means_difference(randomized_predictions: np.ndarray, baseline_values: np.nda
     return np.mean(randomized_predictions).squeeze() - np.mean(baseline_values).squeeze()
 
 
+def variance_of_deviations(randomized_predictions: np.ndarray, baseline_values: np.ndarray) -> np.ndarray:
+    # Using the negative value here seeing that the Shapley estimation evaluates v(S u {i}) - v(S) for a subset S. In
+    # case of variance, we have v(S u {i}) <= v(S), which would result in a negative contribution of players to the
+    # target quantity (here, variance).
+    return -np.var((randomized_predictions - baseline_values).squeeze())
+
+
+def variance_of_matching_values(randomized_predictions: np.ndarray, baseline_values: np.ndarray) -> np.ndarray:
+    # Using the negative value here seeing that the Shapley estimation evaluates v(S u {i}) - v(S) for a subset S. In
+    # case of variance, we have v(S u {i}) <= v(S), which would result in a negative contribution of players to the
+    # target quantity (here, variance).
+    return -np.var((randomized_predictions == baseline_values).squeeze())
+
+
 def geometric_median(x: np.ndarray) -> np.ndarray:
     def distance_function(x_input: np.ndarray) -> np.ndarray:
         return np.sum(np.sqrt(np.sum((x_input - x) ** 2, axis=1)))
