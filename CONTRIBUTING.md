@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-10-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-11-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Contributors ✨
@@ -24,6 +24,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="http://toppare.github.io/"><img src="https://avatars.githubusercontent.com/u/6221127?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Baran Toppare</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=toppare" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/EgorKraevTransferwise"><img src="https://avatars.githubusercontent.com/u/62890791?v=4?s=100" width="100px;" alt=""/><br /><sub><b>EgorKraevTransferwise</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=EgorKraevTransferwise" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/ryanrussell"><img src="https://avatars.githubusercontent.com/u/523300?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ryan Russell</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=ryanrussell" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/MichaelMarien"><img src="https://avatars.githubusercontent.com/u/13829139?v=4?s=100" width="100px;" alt=""/><br /><sub><b>MichaelMarien</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=MichaelMarien" title="Code">💻</a></td>
   </tr>
 </table>
 
