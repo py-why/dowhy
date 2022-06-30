@@ -58,14 +58,14 @@ def refute_causal_structure(causal_graph: DirectedGraph,
 
         lmc_test_result = dict()
         if parents and non_descendants:
-            # test local Markov condition, nullhypothesis: conditional independence
+            # test local Markov condition, null hypothesis: conditional independence
             lmc_p_value = conditional_independence_test(data[node].values,
                                                         data[non_descendants].values,
                                                         data[parents].values)
             lmc_test_result = dict(p_value=lmc_p_value)
             all_p_values.append(lmc_p_value)
 
-        # test edge dependence, nullhypothesis: independence
+        # test edge dependence, null hypothesis: independence
         edge_dependence_result = dict()
         for parent in parents:
             edge_p_value = independence_test(data[parent].values, data[node].values)
