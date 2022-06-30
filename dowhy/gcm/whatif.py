@@ -12,9 +12,8 @@ import pandas as pd
 from dowhy.gcm._noise import compute_noise_from_data
 from dowhy.gcm.cms import ProbabilisticCausalModel, InvertibleStructuralCausalModel, StructuralCausalModel
 from dowhy.gcm.fitting_sampling import draw_samples
-from dowhy.gcm.graph import get_ordered_predecessors, is_root_node, DirectedGraph, validate_causal_dag, \
-    validate_node_in_graph
-from dowhy.gcm.util.general import convert_numpy_array_to_pandas_column as to_column
+from dowhy.gcm.graph import is_root_node, DirectedGraph, validate_causal_dag, \
+    validate_node_in_graph, get_ordered_predecessors
 
 
 def interventional_samples(causal_model: ProbabilisticCausalModel,
@@ -52,22 +51,25 @@ def _interventional_samples(pcm: ProbabilisticCausalModel,
                             observed_data: pd.DataFrame,
                             interventions: Dict[Any, Callable[[np.ndarray], np.ndarray]]) -> pd.DataFrame:
     samples = observed_data.copy()
+
     affected_nodes = _get_nodes_affected_by_intervention(pcm.graph, interventions.keys())
+    sorted_nodes = nx.topological_sort(pcm.graph)
 
     # Simulating interventions by propagating the effects through the graph. For this, we iterate over the nodes based
     # on their topological order.
-    for node in nx.topological_sort(pcm.graph):
+    for node in sorted_nodes:
         if node not in affected_nodes:
             continue
+
         if is_root_node(pcm.graph, node):
-            node_data = samples[node]
+            node_data = samples[node].to_numpy()
         else:
-            node_data = to_column(pcm.causal_mechanism(node).draw_samples(_parent_samples_of(node, pcm, samples)))
+            node_data = pcm.causal_mechanism(node).draw_samples(_parent_samples_of(node, pcm, samples))
 
         # After drawing samples of the node based on the data generation process, we apply the corresponding
         # intervention. The inputs of downstream nodes are therefore based on the outcome of the intervention in this
         # node.
-        samples[node] = _evaluate_intervention(node, interventions, node_data)
+        samples[node] = _evaluate_intervention(node, interventions, node_data.reshape(-1))
 
     return samples
 
@@ -139,15 +141,12 @@ def _counterfactual_samples(scm: StructuralCausalModel,
         if is_root_node(scm.graph, node):
             node_data = noise_data[node].to_numpy()
         else:
-            node_data = to_column(scm.causal_mechanism(node).evaluate(_parent_samples_of(node, scm, samples),
-                                                                      noise_data[node].to_numpy()))
-        samples[node] = _evaluate_intervention(node, interventions, node_data)
+            node_data = scm.causal_mechanism(node).evaluate(_parent_samples_of(node, scm, samples),
+                                                            noise_data[node].to_numpy())
+
+        samples[node] = _evaluate_intervention(node, interventions, node_data.reshape(-1))
 
     return samples
-
-
-def _parent_samples_of(node, scm, samples):
-    return samples[get_ordered_predecessors(scm.graph, node)].to_numpy()
 
 
 def _evaluate_intervention(node: Any,
@@ -167,3 +166,7 @@ def _evaluate_intervention(node: Any,
         return post_intervention_data
     else:
         return pre_intervention_data
+
+
+def _parent_samples_of(node: Any, scm: ProbabilisticCausalModel, samples: pd.DataFrame) -> np.ndarray:
+    return samples[get_ordered_predecessors(scm.graph, node)].to_numpy()

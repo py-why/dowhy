@@ -3,10 +3,9 @@ future.
 """
 
 import random
-from typing import Union, List, Dict, Any
+from typing import Dict
 
 import numpy as np
-import pandas as pd
 from scipy.optimize import minimize
 from sklearn.preprocessing import OneHotEncoder
 
@@ -38,50 +37,6 @@ def shape_into_2d(*args):
         return result[0]
     else:
         return result
-
-
-def convert_numpy_array_to_pandas_column(*args) -> Union[np.ndarray, List[np.ndarray]]:
-    """Prepares given np arrays to be used as column data in a pd data frame. This means, for np arrays with
-    one feature, a flatten version is returned for a better performance. For np arrays with multiple columns,
-    the entries (row-wise) are returned in a list.
-    Example:
-       array([[1], [2]]) -> array([1, 2])
-       array([[1, 2], [3, 4]]) -> list([[1, 2], [3, 4]])
-       array([[1]]) -> array([1])
-
-    :param args: The function expects numpy arrays and returns them as a list. This is equivalent to apply list(array)
-                 to each input separately and converting a scalar array into a list with one element.
-    :return: List versions of the input numpy arrays.
-    """
-
-    # TODO: Remove this function and refactor places where it is currently used accordingly.
-    def shaping(X):
-        X = X.squeeze()
-
-        if X.ndim == 0:
-            return np.array([X])
-
-        if X.ndim > 1:
-            return list(X)
-        else:
-            return X
-
-    result = [shaping(x) for x in args]
-
-    if len(result) == 1:
-        return result[0]
-    else:
-        return result
-
-
-def convert_to_data_frame(dict_with_np_arrays: Dict[Any, np.ndarray]) -> pd.DataFrame:
-    return pd.DataFrame(
-        {k: convert_numpy_array_to_pandas_column(v) for (k, v) in dict_with_np_arrays.items()})
-
-
-def column_stack_selected_numpy_arrays(dict_with_np_arrays: Union[Dict[Any, np.ndarray], pd.DataFrame],
-                                       keys: List[Any]) -> np.ndarray:
-    return np.column_stack([dict_with_np_arrays[x] for x in keys])
 
 
 def set_random_seed(random_seed: int) -> None:

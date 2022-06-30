@@ -4,42 +4,45 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 
-from dowhy.gcm.cms import InvertibleStructuralCausalModel, StructuralCausalModel
+from dowhy.gcm.cms import InvertibleStructuralCausalModel, StructuralCausalModel, ProbabilisticCausalModel
 from dowhy.gcm.fcms import PredictionModel
 from dowhy.gcm.graph import get_ordered_predecessors, is_root_node, validate_causal_dag, node_connected_subgraph_view
-from dowhy.gcm.util.general import convert_numpy_array_to_pandas_column, column_stack_selected_numpy_arrays, \
-    convert_to_data_frame, shape_into_2d
+from dowhy.gcm.util.general import shape_into_2d
 
 
 def compute_data_from_noise(causal_model: StructuralCausalModel,
                             noise_data: pd.DataFrame) -> pd.DataFrame:
-    result = {}
-    for node in nx.topological_sort(causal_model.graph):
-        if is_root_node(causal_model.graph, node):
-            result[node] = noise_data[node].to_numpy()
-        else:
-            result[node] = convert_numpy_array_to_pandas_column(
-                causal_model.causal_mechanism(node).evaluate(
-                    column_stack_selected_numpy_arrays(result, get_ordered_predecessors(causal_model.graph, node)),
-                    noise_data[node].to_numpy()))
+    validate_causal_dag(causal_model.graph)
 
-    return convert_to_data_frame(result)
+    sorted_nodes = list(nx.topological_sort(causal_model.graph))
+    data = pd.DataFrame(np.empty((noise_data.shape[0], len(sorted_nodes))), columns=sorted_nodes)
+
+    for node in sorted_nodes:
+        if is_root_node(causal_model.graph, node):
+            data[node] = noise_data[node].to_numpy()
+        else:
+            data[node] = causal_model.causal_mechanism(node).evaluate(
+                data[get_ordered_predecessors(causal_model.graph, node)].to_numpy(),
+                noise_data[node].to_numpy())
+
+    return data
 
 
 def compute_noise_from_data(causal_model: InvertibleStructuralCausalModel, observed_data: pd.DataFrame) -> pd.DataFrame:
     validate_causal_dag(causal_model.graph)
-    result = pd.DataFrame()
 
-    for node in nx.topological_sort(causal_model.graph):
+    sorted_noise = list(nx.topological_sort(causal_model.graph))
+    noise = pd.DataFrame(np.empty((observed_data.shape[0], len(sorted_noise))), columns=sorted_noise)
+
+    for node in sorted_noise:
         if is_root_node(causal_model.graph, node):
-            result[node] = observed_data[node]
+            noise[node] = observed_data[node].to_numpy()
         else:
-            result[node] = convert_numpy_array_to_pandas_column(
-                causal_model.causal_mechanism(node).estimate_noise(
-                    observed_data[node].to_numpy(),
-                    observed_data[get_ordered_predecessors(causal_model.graph, node)].to_numpy()))
+            noise[node] = causal_model.causal_mechanism(node).estimate_noise(
+                observed_data[node].to_numpy(),
+                _parent_samples_of(node, causal_model, observed_data))
 
-    return result
+    return noise
 
 
 def get_noise_dependent_function(causal_model: StructuralCausalModel,
@@ -121,12 +124,12 @@ def _get_approx_noise_dependent_function(causal_model: StructuralCausalModel,
 def noise_samples_of_ancestors(causal_model: StructuralCausalModel,
                                target_node: Any,
                                num_samples: int) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    sorted_nodes = nx.topological_sort(causal_model.graph)
+    sorted_nodes = list(nx.topological_sort(causal_model.graph))
     all_ancestors_of_node = nx.ancestors(causal_model.graph, target_node)
     all_ancestors_of_node.update({target_node})
 
-    drawn_noise_samples = {}
-    drawn_samples = {}
+    drawn_samples = pd.DataFrame(np.empty((num_samples, len(sorted_nodes))), columns=sorted_nodes)
+    drawn_noise_samples = pd.DataFrame(np.empty((num_samples, len(sorted_nodes))), columns=sorted_nodes)
 
     for node in sorted_nodes:
         if node not in all_ancestors_of_node:
@@ -140,9 +143,14 @@ def noise_samples_of_ancestors(causal_model: StructuralCausalModel,
             noise = causal_model.causal_mechanism(node).draw_noise_samples(num_samples)
             drawn_noise_samples[node] = noise
             drawn_samples[node] = causal_model.causal_mechanism(node).evaluate(
-                column_stack_selected_numpy_arrays(drawn_samples, get_ordered_predecessors(causal_model.graph, node)),
+                _parent_samples_of(node, causal_model, drawn_samples),
                 noise)
+
         if node == target_node:
             break
 
-    return convert_to_data_frame(drawn_samples), convert_to_data_frame(drawn_noise_samples)
+    return drawn_samples, drawn_noise_samples
+
+
+def _parent_samples_of(node: Any, scm: ProbabilisticCausalModel, samples: pd.DataFrame) -> np.ndarray:
+    return samples[get_ordered_predecessors(scm.graph, node)].to_numpy()
