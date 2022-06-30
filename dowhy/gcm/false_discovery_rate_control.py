@@ -6,6 +6,8 @@ from typing import Union, List, Optional, Callable
 from scipy.stats import rankdata
 import numpy as np 
 
+
+#this one might need to go to utils
 def numberfy(x):
     ''' if x could be a number return it as numeric even if it is in string format '''
     try:
@@ -15,8 +17,7 @@ def numberfy(x):
     return(nx)
 
 
-
-def adjusted_FDR_pvalues(unajusted_p_values: Union[np.ndarray, List[float]]) -> np.ndarray:
+def adjusted_fdr_pvalues(unajusted_p_values: Union[np.ndarray, List[float]]) -> np.ndarray:
                         
     """ adjusts p-values for FDR using the standard Benjamini-Hochberg (Stepup) procedure
     
@@ -61,7 +62,7 @@ def adjusted_FDR_pvalues(unajusted_p_values: Union[np.ndarray, List[float]]) -> 
     return adjfdr
 
 
-def adjusted_FDCR_pvalues(unajusted_p_values,
+def adjusted_fdcr_pvalues(unajusted_p_values,
                           belife_scores,
                           intersection_belife_score=10000.0
                           )-> np.ndarray:
