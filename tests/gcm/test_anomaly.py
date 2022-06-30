@@ -10,7 +10,7 @@ from dowhy.gcm import auto, AdditiveNoiseModel, fit, anomaly_scores, \
     MedianCDFQuantileScorer, ITAnomalyScorer, RescaledMedianCDFQuantileScorer, \
     MeanDeviationScorer, MedianDeviationScorer, InverseDensityScorer, EmpiricalDistribution, \
     ProbabilisticCausalModel
-from dowhy.gcm.anomaly import conditional_anomaly_score
+from dowhy.gcm.anomaly import conditional_anomaly_scores
 from dowhy.gcm.constant import EPS
 from dowhy.gcm.distribution_change import estimate_distribution_change_scores
 from dowhy.gcm.ml import create_linear_regressor
@@ -254,7 +254,7 @@ def test_given_simple_linear_data_when_estimate_conditional_anomaly_scores_then_
     anomaly_scorer = MeanDeviationScorer()
     anomaly_scorer.fit(N)
 
-    assert conditional_anomaly_score(X[:5], Y[:5], causal_model, MeanDeviationScorer).reshape(-1) \
+    assert conditional_anomaly_scores(X[:5], Y[:5], causal_model, MeanDeviationScorer).reshape(-1) \
            == approx(anomaly_scorer.score(Y[:5] - 2 * X[:5]), abs=0.1)
 
 

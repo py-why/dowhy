@@ -16,12 +16,12 @@ from dowhy.gcm.stats import permute_features
 from dowhy.gcm.util.general import shape_into_2d
 
 
-def conditional_anomaly_score(parent_samples: np.ndarray,
-                              target_samples: np.ndarray,
-                              causal_mechanism: ConditionalStochasticModel,
-                              anomaly_scorer_factory: Callable[[], AnomalyScorer] = MedianCDFQuantileScorer,
-                              num_samples_conditional: int = 10000) -> np.ndarray:
-    """Estimates the conditional anomaly score based on the expected outcomes of the causal model.
+def conditional_anomaly_scores(parent_samples: np.ndarray,
+                               target_samples: np.ndarray,
+                               causal_mechanism: ConditionalStochasticModel,
+                               anomaly_scorer_factory: Callable[[], AnomalyScorer] = MedianCDFQuantileScorer,
+                               num_samples_conditional: int = 10000) -> np.ndarray:
+    """Estimates the conditional anomaly scores based on the expected outcomes of the causal model.
 
     :param parent_samples: Samples from all parents of the target node.
     :param target_samples: Samples from the target node.
@@ -67,11 +67,11 @@ def anomaly_scores(causal_model: ProbabilisticCausalModel,
         else:
             tmp_anomaly_parent_samples = anomaly_data[get_ordered_predecessors(causal_model.graph, node)].to_numpy()
             tmp_anomaly_target_samples = anomaly_data[node].to_numpy()
-            results[node] = conditional_anomaly_score(tmp_anomaly_parent_samples,
-                                                      tmp_anomaly_target_samples,
-                                                      causal_model.causal_mechanism(node),
-                                                      anomaly_scorer_factory,
-                                                      num_samples_conditional)
+            results[node] = conditional_anomaly_scores(tmp_anomaly_parent_samples,
+                                                       tmp_anomaly_target_samples,
+                                                       causal_model.causal_mechanism(node),
+                                                       anomaly_scorer_factory,
+                                                       num_samples_conditional)
 
     return results
 
@@ -83,7 +83,7 @@ def attribute_anomalies(causal_model: InvertibleStructuralCausalModel,
                         attribute_mean_deviation: bool = False,
                         num_distribution_samples: int = 5000,
                         shapley_config: Optional[ShapleyConfig] = None) -> Dict[Any, np.ndarray]:
-    """ Estimates the contributions of upstream nodes to the anomaly score of the target_node for each sample in
+    """Estimates the contributions of upstream nodes to the anomaly score of the target_node for each sample in
     anomaly_samples. By default, the anomaly score is based on the information theoretic (IT) score
     -log(P(g(X) >= g(x))), where g is the anomaly_scorer, X samples from the marginal
     distribution of the target_node and x an observation of the target_node in anomaly_samples. If
@@ -127,20 +127,20 @@ def attribute_anomalies(causal_model: InvertibleStructuralCausalModel,
     noise_dependent_function, nodes_order = get_noise_dependent_function(causal_model, target_node)
     anomaly_scorer.fit(node_samples[target_node].to_numpy())
 
-    attributions = anomaly_score_attributions(noise_of_anomaly_samples[nodes_order].to_numpy(),
-                                              noise_samples[nodes_order].to_numpy(),
-                                              lambda x: anomaly_scorer.score(noise_dependent_function(x)),
-                                              attribute_mean_deviation,
-                                              shapley_config)
+    attributions = attribute_anomaly_scores(noise_of_anomaly_samples[nodes_order].to_numpy(),
+                                            noise_samples[nodes_order].to_numpy(),
+                                            lambda x: anomaly_scorer.score(noise_dependent_function(x)),
+                                            attribute_mean_deviation,
+                                            shapley_config)
 
     return {node: attributions[:, i] for i, node in enumerate(nodes_order)}
 
 
-def anomaly_score_attributions(anomaly_samples: np.ndarray,
-                               distribution_samples: np.ndarray,
-                               anomaly_scoring_func: Callable[[np.ndarray], np.ndarray],
-                               attribute_mean_deviation: bool,
-                               shapley_config: Optional[ShapleyConfig] = None) -> np.ndarray:
+def attribute_anomaly_scores(anomaly_samples: np.ndarray,
+                             distribution_samples: np.ndarray,
+                             anomaly_scoring_func: Callable[[np.ndarray], np.ndarray],
+                             attribute_mean_deviation: bool,
+                             shapley_config: Optional[ShapleyConfig] = None) -> np.ndarray:
     """Estimates the contributions of the features for each sample in anomaly_samples to the anomaly score obtained
     by the anomaly_scoring_func. If attribute_mean_deviation is set to False, the anomaly score is based on the
     information theoretic (IT) score -log(P(g(X) >= g(x))), where g is the anomaly_scoring_func, X samples from the
@@ -155,7 +155,7 @@ def anomaly_score_attributions(anomaly_samples: np.ndarray,
         anomaly_scoring_func = lambda x, y: estimate_inverse_density_score(x, y, density_estimator)
 
     Related paper:
-    Janzing, D., Budhathoki, K., Minorics, L., & Bloebaum, P. (2019).
+    Janzing, D., Budhathoki, K., Minorics, L., & Bloebaum, P. (2022).
     Causal structure based root cause analysis of outliers
     https://arxiv.org/abs/1912.02724
 
