@@ -21,8 +21,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Code repository &amp; Versions" href="../code_repo.html" />
-    <link rel="prev" title="Customizing Model Assignment" href="../gcm/user_guide/customizing_model_assignment.html" /> 
+    <link rel="next" title="Root cause analysis (RCA) of latencies in a microservice architecture" href="rca_microservice_architecture.html" />
+    <link rel="prev" title="Independence Tests" href="../gcm/user_guide/independence_tests.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -100,6 +100,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#Step-3:-Answering-a-causal-query-based-on-the-SCM">Step 3: Answering a causal query based on the SCM</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="rca_microservice_architecture.html">Root cause analysis (RCA) of latencies in a microservice architecture</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package</span></p>
 <ul>
@@ -426,20 +427,9 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<p>This causal model allows us now to assign causal mechanisms to each node in the form of functional causal models. For this basic example, we’ll use an empirical distribution for the root node X, and an additive noise model for Y and Z:</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">EmpiricalDistribution</span><span class="p">())</span>
-<span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
-<span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
-</pre></div>
-</div>
-</div>
 <p>At this point we would normally load our dataset. For this introduction, we generate some synthetic data instead. The API takes data in form of Pandas DataFrames:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span><span class="o">,</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -453,7 +443,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -483,46 +473,66 @@ div.rendered_html tbody tr:hover {
   <tbody>
     <tr>
       <th>0</th>
-      <td>1.076338</td>
-      <td>2.763681</td>
-      <td>7.835457</td>
+      <td>0.494903</td>
+      <td>2.195361</td>
+      <td>5.004906</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.172612</td>
-      <td>-0.776535</td>
-      <td>-3.262967</td>
+      <td>-0.217006</td>
+      <td>1.112651</td>
+      <td>2.975381</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>1.790508</td>
-      <td>4.582391</td>
-      <td>14.032967</td>
+      <td>2.588455</td>
+      <td>5.372491</td>
+      <td>15.279278</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-2.168174</td>
-      <td>-2.712969</td>
-      <td>-9.979541</td>
+      <td>-0.947472</td>
+      <td>-1.141824</td>
+      <td>-1.779449</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-0.212621</td>
-      <td>-1.400585</td>
-      <td>-5.207276</td>
+      <td>0.088247</td>
+      <td>-1.404565</td>
+      <td>-4.069067</td>
     </tr>
   </tbody>
 </table>
 </div></div>
 </div>
 <p>Note how the columns X, Y, Z correspond to our nodes X, Y, Z in the graph constructed above. We can also see how the values of X influence the values of Y and how the values of Y influence the values of Z in that data set.</p>
-<p>In the real world, this data comes as an opaque stream of values, where we don’t know how one variable influences another. SCM-based inference can basically help us to deconstruct these causal relationships again, even though we didn’t know them before.</p>
+<p>The causal model created above allows us now to assign causal mechanisms to each node in the form of functional causal models. Here, these mechanism can either be assigned manually if, for instance, prior knowledge about certain causal relationships are known or they can be assigned automatically using the <code class="docutils literal notranslate"><span class="pre">auto</span></code> module. For the latter, we simply call:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">assign_causal_mechanisms</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>In case we want to have more control over the assigned mechanisms, we can do this manually as well. For instance, we can can assign an empirical distribution to the root node X and linear additive noise models to nodes Y and Z:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">EmpiricalDistribution</span><span class="p">())</span>
+<span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+<span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+</pre></div>
+</div>
+</div>
+<p>In the real world, the data comes as an opaque stream of values, where we typically don’t know how one variable influences another. The graphical causal models can help us to deconstruct these causal relationships again, even though we didn’t know them before.</p>
 </section>
 <section id="Step-2:-Fitting-the-SCM-to-the-data">
 <h2>Step 2: Fitting the SCM to the data<a class="headerlink" href="#Step-2:-Fitting-the-SCM-to-the-data" title="Permalink to this headline"></a></h2>
 <p>With the data at hand and the graph constructed earlier, we can now train the SCM using <code class="docutils literal notranslate"><span class="pre">fit</span></code>:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
@@ -534,7 +544,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Z: 100%|██████████████████████████████████████████████████████| 3/3 [00:00&lt;00:00, 173.42it/s]
+Fitting causal mechanism of node Z: 100%|██████████████████████████████████████████████████████| 3/3 [00:00&lt;00:00, 448.00it/s]
 </pre></div></div>
 </div>
 <p>Fitting means, we learn the generative models of the variables in the SCM according to the data.</p>
@@ -547,7 +557,7 @@ Fitting causal mechanism of node Z: 100%|█████████████
 </div></blockquote>
 <p>This can be done via the <code class="docutils literal notranslate"><span class="pre">interventional_samples</span></code> function. Here’s how:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">samples</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">interventional_samples</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span>
@@ -558,7 +568,7 @@ Fitting causal mechanism of node Z: 100%|█████████████
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -588,38 +598,39 @@ Fitting causal mechanism of node Z: 100%|█████████████
   <tbody>
     <tr>
       <th>0</th>
-      <td>-1.276026</td>
+      <td>-1.341227</td>
       <td>2.34</td>
-      <td>7.003431</td>
+      <td>6.597742</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.265595</td>
+      <td>0.392790</td>
       <td>2.34</td>
-      <td>6.051983</td>
+      <td>6.097819</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.051601</td>
+      <td>-0.465173</td>
       <td>2.34</td>
-      <td>7.431603</td>
+      <td>6.042026</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-0.887553</td>
+      <td>0.744523</td>
       <td>2.34</td>
-      <td>6.495480</td>
+      <td>6.369113</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-2.019357</td>
+      <td>1.285477</td>
       <td>2.34</td>
-      <td>6.720843</td>
+      <td>6.557294</td>
     </tr>
   </tbody>
 </table>
 </div></div>
 </div>
+<p>This intervention says: “I’ll ignore any causal effects of X on Y, and set every value of Y to 2.34.” So the distribution of X will remain unchanged, whereas values of Y will be at a fixed value and Z will respond according to its causal model.</p>
 </section>
 </section>
 
@@ -627,8 +638,8 @@ Fitting causal mechanism of node Z: 100%|█████████████
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../gcm/user_guide/customizing_model_assignment.html" class="btn btn-neutral float-left" title="Customizing Model Assignment" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../code_repo.html" class="btn btn-neutral float-right" title="Code repository &amp; Versions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../gcm/user_guide/independence_tests.html" class="btn btn-neutral float-left" title="Independence Tests" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="rca_microservice_architecture.html" class="btn btn-neutral float-right" title="Root cause analysis (RCA) of latencies in a microservice architecture" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

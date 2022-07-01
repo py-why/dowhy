@@ -130,6 +130,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../gcm/user_guide/index.html">GCMs User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gcm_basic_example.html">Basic Example for GCM-Based Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rca_microservice_architecture.html">Root cause analysis (RCA) of latencies in a microservice architecture</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package</span></p>
 <ul>
@@ -622,9 +623,9 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(Expectation(y|W3,W0,W2,W1,W4))
+─────(Expectation(y|W0,W3,W1,W4,W2))
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W0,W2,W1,W4,U) = P(y|v0,W3,W0,W2,W1,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W4,W2,U) = P(y|v0,W0,W3,W1,W4,W2)
 
 ### Estimand : 2
 Estimand name: iv
@@ -668,16 +669,16 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(Expectation(y|W3,W0,W2,W1,W4))
+─────(Expectation(y|W0,W3,W1,W4,W2))
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W0,W2,W1,W4,U) = P(y|v0,W3,W0,W2,W1,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W4,W2,U) = P(y|v0,W0,W3,W1,W4,W2)
 
 ## Realized estimand
-b: y~v0+W3+W0+W2+W1+W4
+b: y~v0+W0+W3+W1+W4+W2
 Target units: ate
 
 ## Estimate
-Mean value: 10.016379806917847
+Mean value: 9.988900751185005
 
 </pre></div></div>
 </div>
@@ -706,8 +707,8 @@ Mean value: 10.016379806917847
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-2022-03-20 21:00:20.307028: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library &#39;libcudart.so.11.0&#39;; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
-2022-03-20 21:00:20.307251: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+2022-06-30 23:05:52.646331: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library &#39;libcudart.so.11.0&#39;; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2022-06-30 23:05:52.646686: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -724,18 +725,17 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(Expectation(y|W3,W0,W2,W1,W4))
+─────(Expectation(y|W0,W3,W1,W4,W2))
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W0,W2,W1,W4,U) = P(y|v0,W3,W0,W2,W1,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W4,W2,U) = P(y|v0,W0,W3,W1,W4,W2)
 
 ## Realized estimand
-b: y~v0+W3+W0+W2+W1+W4 |
+b: y~v0+W0+W3+W1+W4+W2 |
 Target units: ate
 
 ## Estimate
-Mean value: 10.114137692620712
-Effect estimates: [10.11413769 10.11413769 10.11413769 ... 10.11413769 10.11413769
- 10.11413769]
+Mean value: 9.923021451754114
+Effect estimates: [9.92302145 9.92302145 9.92302145 ... 9.92302145 9.92302145 9.92302145]
 
 </pre></div></div>
 </div>
@@ -759,9 +759,9 @@ estimate value of 0 when the action variable is replaced by a random variable, i
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:10.016379806917847
-New effect:-0.016513912199777346
-p value:0.38
+Estimated effect:9.988900751185005
+New effect:-0.0014610658117132776
+p value:0.49
 
 </pre></div></div>
 </div>
@@ -813,11 +813,11 @@ than learning a new toolkit. The power of EconML is that you can now implement t
 <div class="output_area docutils container">
 <div class="highlight"><pre>
    Treatment    Outcome        w0         s        w1
-0   9.671081  14.062582 -1.883648  8.454769  0.404156
-1   8.774500  16.472224  1.616968  1.456293  0.076127
-2   6.165711  12.692413  0.155912  9.038605  0.478678
-3   5.926666  11.459025 -0.131433  8.966867 -0.027819
-4  11.025320  19.553903  2.189411  4.345581  0.905974
+0  14.554361  27.757077 -2.952715  0.363200 -1.809420
+1  11.602479  21.621185 -2.359581  8.280788 -1.380441
+2   6.077263  12.798191  0.603637  1.157078  0.324230
+3   5.641831  10.268681 -0.351722  8.910047 -1.645558
+4   8.197922  16.408013 -1.597628  0.634069 -0.172482
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -923,9 +923,9 @@ b: Outcome~Treatment+w1+w0
 Target units: ate
 
 ## Estimate
-Mean value: 0.9989885473002724
+Mean value: 1.9982571542319454
 
-Causal Estimate is 0.9989885473002724
+Causal Estimate is 1.9982571542319454
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -981,8 +981,8 @@ b: Outcome~Treatment+w1+w0 |
 Target units: ate
 
 ## Estimate
-Mean value: 0.19620225500681196
-Effect estimates: [0.19620226 0.19620226 0.19620226 ... 0.19620226 0.19620226 0.19620226]
+Mean value: 1.1143291030614844
+Effect estimates: [1.1143291 1.1143291 1.1143291 ... 1.1143291 1.1143291 1.1143291]
 
 </pre></div></div>
 </div>
@@ -1005,9 +1005,9 @@ Effect estimates: [0.19620226 0.19620226 0.19620226 ... 0.19620226 0.19620226 0.
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a random common cause
-Estimated effect:0.19620225500681196
-New effect:0.20240772992090114
-p value:0.39
+Estimated effect:1.1143291030614844
+New effect:1.0929716907509976
+p value:0.25
 
 </pre></div></div>
 </div>
@@ -1028,9 +1028,9 @@ p value:0.39
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:0.19620225500681196
-New effect:-0.00012426909595826744
-p value:0.3907955060564391
+Estimated effect:1.1143291030614844
+New effect:-9.680446366512172e-05
+p value:0.4398797181782186
 
 </pre></div></div>
 </div>

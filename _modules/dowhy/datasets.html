@@ -86,6 +86,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_causal_discovery_example.html#id2">Causal Discovery with Causal Discovery Tool (CDT)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">GCM-based inference (Experimental)</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../gcm/user_guide/index.html">GCMs User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/gcm_basic_example.html">Basic Example for GCM-Based Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/rca_microservice_architecture.html">Root cause analysis (RCA) of latencies in a microservice architecture</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Package</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../code_repo.html">Code repository &amp; Versions</a></li>
@@ -189,6 +195,7 @@
                    <span class="n">num_discrete_instruments</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                    <span class="n">num_discrete_effect_modifiers</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                    <span class="n">stddev_treatment_noise</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                   <span class="n">stddev_outcome_noise</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
                    <span class="n">one_hot_encode</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
     <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="n">treatment_is_binary</span> <span class="ow">and</span> <span class="n">treatment_is_category</span><span class="p">)</span>
     <span class="n">W</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">FD</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">ce</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">cfd1</span><span class="p">,</span> <span class="n">cfd2</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="mi">10</span>
@@ -260,8 +267,8 @@
                     <span class="p">(</span><span class="n">W_with_dummy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">num_frontdoor_variables</span><span class="p">))</span>
             <span class="n">FD</span> <span class="o">+=</span> <span class="n">W_with_dummy</span> <span class="o">@</span> <span class="n">c1_frontdoor</span>
 
-    <span class="k">def</span> <span class="nf">_compute_y</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">FD</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">ce</span><span class="p">,</span> <span class="n">cfd2</span><span class="p">):</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_compute_y</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">FD</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">ce</span><span class="p">,</span> <span class="n">cfd2</span><span class="p">,</span> <span class="n">stddev_outcome_noise</span><span class="p">):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">stddev_outcome_noise</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">num_frontdoor_variables</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">y</span> <span class="o">+=</span> <span class="n">FD</span> <span class="o">@</span> <span class="n">cfd2</span>
         <span class="k">else</span><span class="p">:</span>
@@ -279,7 +286,7 @@
             <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">convert_to_binary</span><span class="p">)(</span><span class="n">y</span><span class="p">,</span><span class="n">stochastic_discretization</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">y</span>
 
-    <span class="n">y</span> <span class="o">=</span> <span class="n">_compute_y</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">W_with_dummy</span><span class="p">,</span> <span class="n">X_with_categorical</span><span class="p">,</span> <span class="n">FD</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">ce</span><span class="p">,</span> <span class="n">cfd2</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">_compute_y</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">W_with_dummy</span><span class="p">,</span> <span class="n">X_with_categorical</span><span class="p">,</span> <span class="n">FD</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">ce</span><span class="p">,</span> <span class="n">cfd2</span><span class="p">,</span> <span class="n">stddev_outcome_noise</span><span class="p">)</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">num_common_causes</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -299,8 +306,8 @@
         <span class="n">FD_T1</span> <span class="o">=</span> <span class="n">FD_noise</span> <span class="o">+</span> <span class="p">(</span><span class="n">T1</span> <span class="o">@</span> <span class="n">cfd1</span><span class="p">)</span>
         <span class="n">FD_T0</span> <span class="o">=</span> <span class="n">FD_noise</span> <span class="o">+</span> <span class="p">(</span><span class="n">T0</span> <span class="o">@</span> <span class="n">cfd1</span><span class="p">)</span>
     <span class="n">ate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
-            <span class="n">_compute_y</span><span class="p">(</span><span class="n">T1</span><span class="p">,</span> <span class="n">W_with_dummy</span><span class="p">,</span> <span class="n">X_with_categorical</span><span class="p">,</span> <span class="n">FD_T1</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">ce</span><span class="p">,</span> <span class="n">cfd2</span><span class="p">)</span> <span class="o">-</span>
-            <span class="n">_compute_y</span><span class="p">(</span><span class="n">T0</span><span class="p">,</span> <span class="n">W_with_dummy</span><span class="p">,</span> <span class="n">X_with_categorical</span><span class="p">,</span> <span class="n">FD_T0</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">ce</span><span class="p">,</span> <span class="n">cfd2</span><span class="p">))</span>
+            <span class="n">_compute_y</span><span class="p">(</span><span class="n">T1</span><span class="p">,</span> <span class="n">W_with_dummy</span><span class="p">,</span> <span class="n">X_with_categorical</span><span class="p">,</span> <span class="n">FD_T1</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">ce</span><span class="p">,</span> <span class="n">cfd2</span><span class="p">,</span> <span class="n">stddev_outcome_noise</span><span class="p">)</span> <span class="o">-</span>
+            <span class="n">_compute_y</span><span class="p">(</span><span class="n">T0</span><span class="p">,</span> <span class="n">W_with_dummy</span><span class="p">,</span> <span class="n">X_with_categorical</span><span class="p">,</span> <span class="n">FD_T0</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">ce</span><span class="p">,</span> <span class="n">cfd2</span><span class="p">,</span> <span class="n">stddev_outcome_noise</span><span class="p">))</span>
 
     <span class="n">treatments</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;v&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_treatments</span><span class="p">)]</span>
     <span class="n">outcome</span> <span class="o">=</span> <span class="s2">&quot;y&quot;</span>
@@ -671,7 +678,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Microsoft.</p>
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

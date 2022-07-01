@@ -89,6 +89,8 @@
 <p class="caption" role="heading"><span class="caption-text">GCM-based inference (Experimental)</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../gcm/user_guide/index.html">GCMs User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/gcm_basic_example.html">Basic Example for GCM-Based Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/rca_microservice_architecture.html">Root cause analysis (RCA) of latencies in a microservice architecture</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package</span></p>
 <ul>
@@ -165,9 +167,10 @@
     <span class="k">def</span> <span class="nf">predict_probabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
-<div class="viewcode-block" id="ClassificationModel.classes"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fcms.ClassificationModel.classes">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">classes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
 <div class="viewcode-block" id="InvertibleFunction"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fcms.InvertibleFunction">[docs]</a><span class="k">class</span> <span class="nc">InvertibleFunction</span><span class="p">:</span>
@@ -297,6 +300,7 @@
 <span class="sd">    Given joint samples from (X, Y), this model can be fitted by first training a model f (e.g. using least squares</span>
 <span class="sd">    regression) and then reconstruct N by N = Y - f(X), i.e. using the residual.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">prediction_model</span><span class="p">:</span> <span class="n">PredictionModel</span><span class="p">,</span>
                  <span class="n">noise_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StochasticModel</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -329,6 +333,7 @@
 <span class="sd">    the noise is used to make this sampling process deterministic by using the cumulative distribution functions defined</span>
 <span class="sd">    by the given inputs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classifier_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ClassificationModel</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_classifier_model</span> <span class="o">=</span> <span class="n">classifier_model</span>
 
@@ -390,7 +395,7 @@
         <span class="k">return</span> <span class="n">ClassifierFCM</span><span class="p">(</span><span class="n">classifier_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_classifier_model</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="ClassifierFCM.get_class_names"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fcms.ClassifierFCM.get_class_names">[docs]</a>    <span class="k">def</span> <span class="nf">get_class_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">class_indices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_classifier_model</span><span class="o">.</span><span class="n">classes</span><span class="p">()[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">class_indices</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_classifier_model</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">class_indices</span><span class="p">]</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">classifier_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ClassificationModel</span><span class="p">:</span>
@@ -404,7 +409,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Microsoft.</p>
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -89,6 +89,8 @@
 <p class="caption" role="heading"><span class="caption-text">GCM-based inference (Experimental)</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../gcm/user_guide/index.html">GCMs User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../example_notebooks/gcm_basic_example.html">Basic Example for GCM-Based Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../example_notebooks/rca_microservice_architecture.html">Root cause analysis (RCA) of latencies in a microservice architecture</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package</span></p>
 <ul>
@@ -111,6 +113,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../../../index.html">Module code</a> &raquo;</li>
+          <li><a href="../independence_test.html">dowhy.gcm.independence_test</a> &raquo;</li>
       <li>dowhy.gcm.independence_test.kernel_operation</li>
       <li class="wy-breadcrumbs-aside">
       </li>
@@ -127,84 +130,68 @@
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Callable</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">sklearn.kernel_approximation</span> <span class="kn">import</span> <span class="n">Nystroem</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">euclidean_distances</span>
-<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">scale</span>
 
 <span class="kn">from</span> <span class="nn">dowhy.gcm.util.general</span> <span class="kn">import</span> <span class="n">shape_into_2d</span><span class="p">,</span> <span class="n">is_categorical</span>
 
 
-<div class="viewcode-block" id="apply_rbf_kernel"><a class="viewcode-back" href="../../../../dowhy.gcm.independence_test.html#dowhy.gcm.independence_test.kernel_operation.apply_rbf_kernel">[docs]</a><span class="k">def</span> <span class="nf">apply_rbf_kernel</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-                     <span class="n">scale_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                     <span class="n">precision</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Estimates the RBF (Gaussian) kernel for the given input data.</span>
+<div class="viewcode-block" id="apply_rbf_kernel"><a class="viewcode-back" href="../../../../dowhy.gcm.independence_test.html#dowhy.gcm.independence_test.kernel_operation.apply_rbf_kernel">[docs]</a><span class="k">def</span> <span class="nf">apply_rbf_kernel</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                     <span class="n">precision</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estimates the RBF (Gaussian) kernel for the given input data.</span>
 
 <span class="sd">    :param X: Input data.</span>
-<span class="sd">    :param scale_data: True if the data should be standardize.</span>
 <span class="sd">    :param precision: Specific precision matrix for the RBF kernel. If None is given, this is inferred from the data.</span>
 <span class="sd">    :return: The outcome of applying a RBF (Gaussian) kernel on the data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">scale_data</span><span class="p">:</span>
-        <span class="n">X</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 
     <span class="n">distance_matrix</span> <span class="o">=</span> <span class="n">euclidean_distances</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">squared</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">precision</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">tmp</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">distance_matrix</span><span class="p">)</span>
-        <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span> <span class="o">-</span> <span class="n">numpy</span><span class="o">.</span><span class="n">tril</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">precision</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="n">tmp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">precision</span> <span class="o">=</span> <span class="n">_median_based_precision</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">precision</span> <span class="o">*</span> <span class="n">distance_matrix</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">precision</span> <span class="o">*</span> <span class="n">distance_matrix</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="apply_delta_kernel"><a class="viewcode-back" href="../../../../dowhy.gcm.independence_test.html#dowhy.gcm.independence_test.kernel_operation.apply_delta_kernel">[docs]</a><span class="k">def</span> <span class="nf">apply_delta_kernel</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<div class="viewcode-block" id="apply_delta_kernel"><a class="viewcode-back" href="../../../../dowhy.gcm.independence_test.html#dowhy.gcm.independence_test.kernel_operation.apply_delta_kernel">[docs]</a><span class="k">def</span> <span class="nf">apply_delta_kernel</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Applies the delta kernel, i.e. the distance is 1 if two entries are equal and 0 otherwise.</span>
 
 <span class="sd">    :param X: Input data.</span>
 <span class="sd">    :return: The outcome of the delta-kernel, a binary distance matrix.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">value</span><span class="p">:</span> <span class="n">value</span> <span class="o">==</span> <span class="n">X</span><span class="p">,</span> <span class="n">X</span><span class="p">)))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">value</span><span class="p">:</span> <span class="n">value</span> <span class="o">==</span> <span class="n">X</span><span class="p">,</span> <span class="n">X</span><span class="p">)))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="approximate_rbf_kernel_features"><a class="viewcode-back" href="../../../../dowhy.gcm.independence_test.html#dowhy.gcm.independence_test.kernel_operation.approximate_rbf_kernel_features">[docs]</a><span class="k">def</span> <span class="nf">approximate_rbf_kernel_features</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+<div class="viewcode-block" id="approximate_rbf_kernel_features"><a class="viewcode-back" href="../../../../dowhy.gcm.independence_test.html#dowhy.gcm.independence_test.kernel_operation.approximate_rbf_kernel_features">[docs]</a><span class="k">def</span> <span class="nf">approximate_rbf_kernel_features</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                                     <span class="n">num_random_components</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                                    <span class="n">scale_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                                    <span class="n">precision</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+                                    <span class="n">precision</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Applies the Nystroem method to create a NxD (D &lt;&lt; N) approximated RBF kernel map using a subset of the data,</span>
 <span class="sd">    where N is the number of samples in X and D the number of components.</span>
 
 <span class="sd">    :param X: Input data.</span>
 <span class="sd">    :param num_random_components: Number of components D for the approximated kernel map.</span>
-<span class="sd">    :param scale_data: Specific precision matrix for the RBF kernel. If None is given, this is inferred from the data.</span>
-<span class="sd">    :param precision:</span>
+<span class="sd">    :param precision: Specific precision matrix for the RBF kernel. If None is given, this is inferred from the data.</span>
 <span class="sd">    :return: A NxD approximated RBF kernel map, where N is the number of samples in X and D the number of components.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">scale_data</span><span class="p">:</span>
-        <span class="n">X</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">precision</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">tmp</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">euclidean_distances</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">squared</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-        <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span> <span class="o">-</span> <span class="n">numpy</span><span class="o">.</span><span class="n">tril</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">precision</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="n">tmp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">precision</span> <span class="o">=</span> <span class="n">_median_based_precision</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">Nystroem</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;rbf&#39;</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="n">precision</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="n">num_random_components</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="approximate_delta_kernel_features"><a class="viewcode-back" href="../../../../dowhy.gcm.independence_test.html#dowhy.gcm.independence_test.kernel_operation.approximate_delta_kernel_features">[docs]</a><span class="k">def</span> <span class="nf">approximate_delta_kernel_features</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">num_random_components</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<div class="viewcode-block" id="approximate_delta_kernel_features"><a class="viewcode-back" href="../../../../dowhy.gcm.independence_test.html#dowhy.gcm.independence_test.kernel_operation.approximate_delta_kernel_features">[docs]</a><span class="k">def</span> <span class="nf">approximate_delta_kernel_features</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">num_random_components</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Applies the Nystroem method to create a NxD (D &lt;&lt; N) approximated delta kernel map using a subset of the data,</span>
 <span class="sd">    where N is the number of samples in X and D the number of components. The delta kernel gives 1 if two entries are</span>
 <span class="sd">    equal and 0 otherwise.</span>
 
 <span class="sd">    :param X: Input data.</span>
 <span class="sd">    :param num_random_components: Number of components D for the approximated kernel map.</span>
-<span class="sd">    :param scale_data: Specific precision matrix for the RBF kernel. If None is given, this is inferred from the data.</span>
-<span class="sd">    :param precision:</span>
 <span class="sd">    :return: A NxD approximated RBF kernel map, where N is the number of samples in X and D the number of components.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
@@ -212,7 +199,7 @@
     <span class="k">def</span> <span class="nf">delta_function</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="n">y</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">unique_element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">X</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">unique_element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">X</span><span class="p">)):</span>
         <span class="n">X</span><span class="p">[</span><span class="n">X</span> <span class="o">==</span> <span class="n">unique_element</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">Nystroem</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="n">delta_function</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="n">num_random_components</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
@@ -221,7 +208,7 @@
     <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="auto_create_list_of_kernels"><a class="viewcode-back" href="../../../../dowhy.gcm.independence_test.html#dowhy.gcm.independence_test.kernel_operation.auto_create_list_of_kernels">[docs]</a><span class="k">def</span> <span class="nf">auto_create_list_of_kernels</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+<div class="viewcode-block" id="auto_create_list_of_kernels"><a class="viewcode-back" href="../../../../dowhy.gcm.independence_test.html#dowhy.gcm.independence_test.kernel_operation.auto_create_list_of_kernels">[docs]</a><span class="k">def</span> <span class="nf">auto_create_list_of_kernels</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 
     <span class="n">tmp_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -234,7 +221,7 @@
     <span class="k">return</span> <span class="n">tmp_list</span></div>
 
 
-<div class="viewcode-block" id="auto_create_list_of_kernel_approximations"><a class="viewcode-back" href="../../../../dowhy.gcm.independence_test.html#dowhy.gcm.independence_test.kernel_operation.auto_create_list_of_kernel_approximations">[docs]</a><span class="k">def</span> <span class="nf">auto_create_list_of_kernel_approximations</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+<div class="viewcode-block" id="auto_create_list_of_kernel_approximations"><a class="viewcode-back" href="../../../../dowhy.gcm.independence_test.html#dowhy.gcm.independence_test.kernel_operation.auto_create_list_of_kernel_approximations">[docs]</a><span class="k">def</span> <span class="nf">auto_create_list_of_kernel_approximations</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 
     <span class="n">tmp_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -245,6 +232,14 @@
             <span class="n">tmp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">approximate_delta_kernel_features</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">tmp_list</span></div>
+
+
+<span class="k">def</span> <span class="nf">_median_based_precision</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">euclidean_distances</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">squared</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">tril</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="n">tmp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span>
 </pre></div>
 
            </div>
@@ -254,7 +249,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Microsoft.</p>
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

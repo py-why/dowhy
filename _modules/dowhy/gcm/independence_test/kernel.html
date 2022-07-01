@@ -89,6 +89,8 @@
 <p class="caption" role="heading"><span class="caption-text">GCM-based inference (Experimental)</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../gcm/user_guide/index.html">GCMs User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../example_notebooks/gcm_basic_example.html">Basic Example for GCM-Based Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../example_notebooks/rca_microservice_architecture.html">Root cause analysis (RCA) of latencies in a microservice architecture</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package</span></p>
 <ul>
@@ -111,6 +113,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../../../index.html">Module code</a> &raquo;</li>
+          <li><a href="../independence_test.html">dowhy.gcm.independence_test</a> &raquo;</li>
       <li>dowhy.gcm.independence_test.kernel</li>
       <li class="wy-breadcrumbs-aside">
       </li>
@@ -132,12 +135,11 @@
 <span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
 <span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">pinv</span><span class="p">,</span> <span class="n">svd</span><span class="p">,</span> <span class="n">LinAlgError</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">gamma</span>
-<span class="kn">from</span> <span class="nn">sklearn.kernel_approximation</span> <span class="kn">import</span> <span class="n">Nystroem</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">scale</span>
 
 <span class="kn">import</span> <span class="nn">dowhy.gcm.config</span> <span class="k">as</span> <span class="nn">config</span>
 <span class="kn">from</span> <span class="nn">dowhy.gcm.constant</span> <span class="kn">import</span> <span class="n">EPS</span>
-<span class="kn">from</span> <span class="nn">dowhy.gcm.independence_test.kernel_operation</span> <span class="kn">import</span> <span class="n">auto_create_list_of_kernels</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.independence_test.kernel_operation</span> <span class="kn">import</span> <span class="n">apply_rbf_kernel</span><span class="p">,</span> <span class="n">approximate_rbf_kernel_features</span>
 <span class="kn">from</span> <span class="nn">dowhy.gcm.stats</span> <span class="kn">import</span> <span class="n">quantile_based_fwer</span>
 <span class="kn">from</span> <span class="nn">dowhy.gcm.util.general</span> <span class="kn">import</span> <span class="n">set_random_seed</span><span class="p">,</span> <span class="n">shape_into_2d</span><span class="p">,</span> <span class="n">apply_one_hot_encoding</span><span class="p">,</span> <span class="n">fit_one_hot_encoders</span>
 
@@ -145,9 +147,8 @@
 <div class="viewcode-block" id="kernel_based"><a class="viewcode-back" href="../../../../dowhy.gcm.independence_test.html#dowhy.gcm.independence_test.kernel.kernel_based">[docs]</a><span class="k">def</span> <span class="nf">kernel_based</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                  <span class="n">Y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                  <span class="n">Z</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">kernels_X</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">kernels_Y</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">kernels_Z</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">kernel</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="n">apply_rbf_kernel</span><span class="p">,</span>
+                 <span class="n">scale_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                  <span class="n">use_bootstrap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                  <span class="n">bootstrap_num_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
                  <span class="n">bootstrap_num_samples_per_run</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span>
@@ -174,12 +175,11 @@
 <span class="sd">    :param X: Data matrix for observations from X.</span>
 <span class="sd">    :param Y: Data matrix for observations from Y.</span>
 <span class="sd">    :param Z: Optional data matrix for observations from Z. This is the conditional variable.</span>
-<span class="sd">    :param kernels_X: A list of kernels corresponding to each column in X. If None is given, the RBF kernel is used for</span>
-<span class="sd">                      continuous data and the delta-kernel for categorical data.</span>
-<span class="sd">    :param kernels_Y: A list of kernels corresponding to each column in Y. If None is given, the RBF kernel is used for</span>
-<span class="sd">                      continuous data and the delta-kernel for categorical data.</span>
-<span class="sd">    :param kernels_Z: A list of kernels corresponding to each column in Z. If None is given, the RBF kernel is used for</span>
-<span class="sd">                      continuous data and the delta-kernel for categorical data.</span>
+<span class="sd">    :param kernel: A kernel for estimating the pairwise similarities between samples. The expected input is a n x d</span>
+<span class="sd">                   numpy array and the output is expected to be a n x n numpy array. By default, the RBF kernel is used.</span>
+<span class="sd">    :param scale_data: If set to True, the data will be standardized. If set to False, the data is taken as it is.</span>
+<span class="sd">                       Standardizing the data helps in identifying weak dependencies. If one is only interested in</span>
+<span class="sd">                       stronger ones, consider setting this to False.</span>
 <span class="sd">    :param use_bootstrap: If True, the independence tests are performed on multiple subsets of the data and the final</span>
 <span class="sd">                          p-value is constructed based on the provided p_value_adjust_func function.</span>
 <span class="sd">    :param bootstrap_num_runs: Number of bootstrap runs (only relevant if use_bootstrap is True).</span>
@@ -192,13 +192,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">bootstrap_n_jobs</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">default_n_jobs</span> <span class="k">if</span> <span class="n">bootstrap_n_jobs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">bootstrap_n_jobs</span>
 
-    <span class="k">if</span> <span class="n">kernels_X</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">kernels_X</span> <span class="o">=</span> <span class="n">auto_create_list_of_kernels</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">kernels_Y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">kernels_Y</span> <span class="o">=</span> <span class="n">auto_create_list_of_kernels</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">Z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">kernels_Z</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">kernels_Z</span> <span class="o">=</span> <span class="n">auto_create_list_of_kernels</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
-
     <span class="k">def</span> <span class="nf">evaluate_kernel_test_on_samples</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                                         <span class="n">Y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                                         <span class="n">Z</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
@@ -207,14 +200,9 @@
 
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">Z</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">_hsic</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span>
-                             <span class="n">kernels_X</span><span class="o">=</span><span class="n">kernels_X</span><span class="p">,</span>
-                             <span class="n">kernels_Y</span><span class="o">=</span><span class="n">kernels_Y</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">_hsic</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span> <span class="n">scale_data</span><span class="o">=</span><span class="n">scale_data</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">_kci</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span>
-                            <span class="n">kernels_X</span><span class="o">=</span><span class="n">kernels_X</span><span class="p">,</span>
-                            <span class="n">kernels_Y</span><span class="o">=</span><span class="n">kernels_Y</span><span class="p">,</span>
-                            <span class="n">kernels_Z</span><span class="o">=</span><span class="n">kernels_Z</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">_kci</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span> <span class="n">scale_data</span><span class="o">=</span><span class="n">scale_data</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">LinAlgError</span><span class="p">:</span>
             <span class="c1"># TODO: This is a temporary workaround.</span>
             <span class="c1">#       Under some circumstances, the KCI test throws a &quot;numpy.linalg.LinAlgError: SVD did not converge&quot;</span>
@@ -244,12 +232,14 @@
 <div class="viewcode-block" id="approx_kernel_based"><a class="viewcode-back" href="../../../../dowhy.gcm.independence_test.html#dowhy.gcm.independence_test.kernel.approx_kernel_based">[docs]</a><span class="k">def</span> <span class="nf">approx_kernel_based</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                         <span class="n">Y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                         <span class="n">Z</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                        <span class="n">num_random_features_X</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-                        <span class="n">num_random_features_Y</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-                        <span class="n">num_random_features_Z</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                        <span class="n">num_random_features_X</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+                        <span class="n">num_random_features_Y</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+                        <span class="n">num_random_features_Z</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
                         <span class="n">num_permutations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+                        <span class="n">approx_kernel</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="n">approximate_rbf_kernel_features</span><span class="p">,</span>
+                        <span class="n">scale_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                         <span class="n">use_bootstrap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                        <span class="n">bootstrap_num_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+                        <span class="n">bootstrap_num_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
                         <span class="n">bootstrap_num_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
                         <span class="n">bootstrap_n_jobs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                         <span class="n">p_value_adjust_func</span><span class="p">:</span>
@@ -279,9 +269,16 @@
 <span class="sd">    :param num_random_features_Y: Number of features sampled from the approximated kernel map for Y. </span>
 <span class="sd">    :param num_random_features_Z: Number of features sampled from the approximated kernel map for Z. </span>
 <span class="sd">    :param num_permutations: Number of permutations for estimating the test test statistic.</span>
+<span class="sd">    :param approx_kernel: The approximated kernel map. The expected input is a n x d numpy array and the output is </span>
+<span class="sd">                          expected to be a n x k numpy array with k &lt;&lt; d. By default, the Nystroem method with a RBF</span>
+<span class="sd">                          kernel is used.</span>
+<span class="sd">    :param scale_data: If set to True, the data will be standardized. If set to False, the data is taken as it is.</span>
+<span class="sd">                       Standardizing the data helps in identifying weak dependencies. If one is only interested in</span>
+<span class="sd">                       stronger ones, consider setting this to False.</span>
 <span class="sd">    :param use_bootstrap: If True, the independence tests are performed on multiple subsets of the data and the final</span>
 <span class="sd">                          p-value is constructed based on the provided p_value_adjust_func function.</span>
 <span class="sd">    :param bootstrap_num_runs: Number of bootstrap runs (only relevant if use_bootstrap is True).</span>
+<span class="sd">    :param bootstrap_num_samples: Maximum number of used samples per bootstrap run. </span>
 <span class="sd">    :param bootstrap_n_jobs: Number of parallel jobs for the boostrap runs.</span>
 <span class="sd">    :param p_value_adjust_func: A callable that expects a numpy array of multiple p-values and returns one p-value. This</span>
 <span class="sd">                                is typically used a family wise error rate control method.</span>
@@ -302,6 +299,8 @@
                     <span class="n">num_random_features_Y</span><span class="o">=</span><span class="n">num_random_features_Y</span><span class="p">,</span>
                     <span class="n">num_runs</span><span class="o">=</span><span class="n">bootstrap_num_runs</span><span class="p">,</span>
                     <span class="n">num_max_samples_per_run</span><span class="o">=</span><span class="n">bootstrap_num_samples</span><span class="p">,</span>
+                    <span class="n">approx_kernel</span><span class="o">=</span><span class="n">approx_kernel</span><span class="p">,</span>
+                    <span class="n">scale_data</span><span class="o">=</span><span class="n">scale_data</span><span class="p">,</span>
                     <span class="n">n_jobs</span><span class="o">=</span><span class="n">bootstrap_n_jobs</span><span class="p">,</span>
                     <span class="n">p_value_adjust_func</span><span class="o">=</span><span class="n">p_value_adjust_func</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -314,6 +313,8 @@
                      <span class="n">num_random_features_Z</span><span class="o">=</span><span class="n">num_random_features_Z</span><span class="p">,</span>
                      <span class="n">num_runs</span><span class="o">=</span><span class="n">bootstrap_num_runs</span><span class="p">,</span>
                      <span class="n">num_max_samples_per_run</span><span class="o">=</span><span class="n">bootstrap_num_samples</span><span class="p">,</span>
+                     <span class="n">approx_kernel</span><span class="o">=</span><span class="n">approx_kernel</span><span class="p">,</span>
+                     <span class="n">scale_data</span><span class="o">=</span><span class="n">scale_data</span><span class="p">,</span>
                      <span class="n">n_jobs</span><span class="o">=</span><span class="n">bootstrap_n_jobs</span><span class="p">,</span>
                      <span class="n">p_value_adjust_func</span><span class="o">=</span><span class="n">p_value_adjust_func</span><span class="p">)</span></div>
 
@@ -321,43 +322,32 @@
 <span class="k">def</span> <span class="nf">_kci</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
          <span class="n">Y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
          <span class="n">Z</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-         <span class="n">kernels_X</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
-         <span class="n">kernels_Y</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
-         <span class="n">kernels_Z</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+         <span class="n">kernel</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+         <span class="n">scale_data</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
          <span class="n">regularization_param</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="o">-</span><span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Tests the null hypothesis that X and Y are independent given Z using the kernel conditional independence test.</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Tests the null hypothesis that X and Y are independent given Z using the kernel conditional independence test.</span>
 
-<span class="sd">    This is a corrected reimplementation of the kci method in the CondIndTests R-package. Authors of the original R</span>
+<span class="sd">    This is a corrected reimplementation of the KCI method in the CondIndTests R-package. Authors of the original R</span>
 <span class="sd">    package: Christina Heinze-Deml, Jonas Peters, Asbjoern Marco Sinius Munk</span>
 
 <span class="sd">    :return: The p-value for the null hypothesis that X and Y are independent given Z.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="p">)</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span> <span class="o">=</span> <span class="n">_convert_to_numeric</span><span class="p">(</span><span class="o">*</span><span class="n">shape_into_2d</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">Z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;All variables need to have the same number of samples!&#39;</span><span class="p">)</span>
 
     <span class="n">n</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="n">k_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-    <span class="n">k_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-    <span class="n">k_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="n">scale_data</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
 
-    <span class="c1"># Applying kernels to each dimension. The product of the results is equivalent to the convolution of all kernels.</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">continue</span>
-        <span class="n">k_x</span> <span class="o">*=</span> <span class="n">kernels_X</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">Y</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">continue</span>
-        <span class="n">k_y</span> <span class="o">*=</span> <span class="n">kernels_Y</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">Y</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">Z</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">continue</span>
-        <span class="n">k_z</span> <span class="o">*=</span> <span class="n">kernels_Z</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">Z</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+    <span class="n">k_x</span> <span class="o">=</span> <span class="n">kernel</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">k_y</span> <span class="o">=</span> <span class="n">kernel</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
+    <span class="n">k_z</span> <span class="o">=</span> <span class="n">kernel</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
 
     <span class="n">k_xz</span> <span class="o">=</span> <span class="n">k_x</span> <span class="o">*</span> <span class="n">k_z</span>
 
@@ -403,11 +393,8 @@
 
     <span class="n">size_w</span> <span class="o">=</span> <span class="n">num_eigen_vec_xz_z</span> <span class="o">*</span> <span class="n">num_eigen_vec_y_z</span>
 
-    <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">size_w</span><span class="p">))</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_eigen_vec_xz_z</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_eigen_vec_y_z</span><span class="p">):</span>
-            <span class="n">w</span><span class="p">[:,</span> <span class="n">i</span> <span class="o">*</span> <span class="n">num_eigen_vec_y_z</span> <span class="o">+</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">empirical_kernel_map_xz_z</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">empirical_kernel_map_y_z</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="p">(</span><span class="n">empirical_kernel_map_y_z</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+         <span class="o">*</span> <span class="n">empirical_kernel_map_xz_z</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">empirical_kernel_map_y_z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">size_w</span> <span class="o">&gt;</span> <span class="n">n</span><span class="p">:</span>
         <span class="n">ww_prod</span> <span class="o">=</span> <span class="n">w</span> <span class="o">@</span> <span class="n">w</span><span class="o">.</span><span class="n">T</span>
@@ -435,17 +422,18 @@
 
 <span class="k">def</span> <span class="nf">_hsic</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
           <span class="n">Y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-          <span class="n">kernels_X</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
-          <span class="n">kernels_Y</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+          <span class="n">kernel</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+          <span class="n">scale_data</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
           <span class="n">cut_off_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">EPS</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Estimates the Hilbert-Schmidt Independence Criterion score for a pairwise independence test between variables X</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estimates the Hilbert-Schmidt Independence Criterion score for a pairwise independence test between variables X</span>
 <span class="sd">    and Y.</span>
 
 <span class="sd">    This is a reimplementation from the original Matlab code provided by the authors.</span>
 
 <span class="sd">    :return: The p-value for the null hypothesis that X and Y are independent.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">_convert_to_numeric</span><span class="p">(</span><span class="o">*</span><span class="n">shape_into_2d</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;All variables need to have the same number of samples!&#39;</span><span class="p">)</span>
@@ -456,21 +444,12 @@
 
     <span class="n">n</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="n">bone</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">scale_data</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
 
-    <span class="n">k_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-    <span class="n">l_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-
-    <span class="c1"># Applying kernels to each dimension. The product of the results is equivalent to the convolution of all kernels.</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">continue</span>
-        <span class="n">k_mat</span> <span class="o">*=</span> <span class="n">kernels_X</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">Y</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">continue</span>
-        <span class="n">l_mat</span> <span class="o">*=</span> <span class="n">kernels_Y</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">Y</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+    <span class="n">k_mat</span> <span class="o">=</span> <span class="n">kernel</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">l_mat</span> <span class="o">=</span> <span class="n">kernel</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
 
     <span class="n">k_c</span> <span class="o">=</span> <span class="n">_fast_centering</span><span class="p">(</span><span class="n">k_mat</span><span class="p">)</span>
     <span class="n">l_c</span> <span class="o">=</span> <span class="n">_fast_centering</span><span class="p">(</span><span class="n">l_mat</span><span class="p">)</span>
@@ -486,6 +465,7 @@
     <span class="n">k_mat</span> <span class="o">=</span> <span class="n">k_mat</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">k_mat</span><span class="p">))</span>
     <span class="n">l_mat</span> <span class="o">=</span> <span class="n">l_mat</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">l_mat</span><span class="p">))</span>
 
+    <span class="n">bone</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="n">mu_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">bone</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">k_mat</span> <span class="o">@</span> <span class="n">bone</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span> <span class="o">/</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">mu_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">bone</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">l_mat</span> <span class="o">@</span> <span class="n">bone</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span> <span class="o">/</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
@@ -524,31 +504,28 @@
     <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">gamma</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">statistic</span><span class="p">,</span> <span class="n">alpha_approx</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">beta_approx</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_rit</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-         <span class="n">Y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">_rit</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
          <span class="n">num_random_features_X</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
          <span class="n">num_random_features_Y</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
          <span class="n">num_permutations</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
          <span class="n">num_runs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-         <span class="n">num_max_samples_per_run</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
-         <span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-         <span class="n">p_value_adjust_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">quantile_based_fwer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Implementation of the Randomized Independence Test.</span>
-
-<span class="sd">    Based on the work:</span>
+         <span class="n">num_max_samples_per_run</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+         <span class="n">approx_kernel</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+         <span class="n">scale_data</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+         <span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+         <span class="n">p_value_adjust_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]],</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Implementation of the Randomized Independence Test based on the work:</span>
 <span class="sd">        Strobl, Eric V., Kun Zhang, and Shyam Visweswaran.</span>
 <span class="sd">        Approximate kernel-based conditional independence tests for fast non-parametric causal discovery.</span>
 <span class="sd">        Journal of Causal Inference 7.1 (2019).</span>
-
-<span class="sd">    This is an implementation in Python and is inspired by the implementation in R from</span>
-<span class="sd">        https://github.com/ericstrobl/RCIT/</span>
-<span class="sd">    written by Eric V. Strobl.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">n_jobs</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">default_n_jobs</span> <span class="k">if</span> <span class="n">n_jobs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">n_jobs</span>
 
-    <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
-    <span class="n">X</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">apply_one_hot_encoding</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">fit_one_hot_encoders</span><span class="p">(</span><span class="n">X</span><span class="p">)))</span>
-    <span class="n">Y</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">apply_one_hot_encoding</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">fit_one_hot_encoders</span><span class="p">(</span><span class="n">Y</span><span class="p">)))</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">_convert_to_numeric</span><span class="p">(</span><span class="o">*</span><span class="n">shape_into_2d</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">scale_data</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">evaluate_rit_on_samples</span><span class="p">(</span><span class="n">parallel_random_seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="n">set_random_seed</span><span class="p">(</span><span class="n">parallel_random_seed</span><span class="p">)</span>
@@ -561,8 +538,8 @@
             <span class="n">X_samples</span> <span class="o">=</span> <span class="n">X</span>
             <span class="n">Y_samples</span> <span class="o">=</span> <span class="n">Y</span>
 
-        <span class="n">random_features_x</span> <span class="o">=</span> <span class="n">Nystroem</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="n">num_random_features_X</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_samples</span><span class="p">)</span>
-        <span class="n">random_features_y</span> <span class="o">=</span> <span class="n">Nystroem</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="n">num_random_features_Y</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">Y_samples</span><span class="p">)</span>
+        <span class="n">random_features_x</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">approx_kernel</span><span class="p">(</span><span class="n">X_samples</span><span class="p">,</span> <span class="n">num_random_features_X</span><span class="p">))</span>
+        <span class="n">random_features_y</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">approx_kernel</span><span class="p">(</span><span class="n">Y_samples</span><span class="p">,</span> <span class="n">num_random_features_Y</span><span class="p">))</span>
 
         <span class="n">permutation_results_of_statistic</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_permutations</span><span class="p">):</span>
@@ -585,26 +562,25 @@
           <span class="n">num_random_features_Z</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
           <span class="n">num_permutations</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
           <span class="n">num_runs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-          <span class="n">num_max_samples_per_run</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
-          <span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-          <span class="n">p_value_adjust_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">quantile_based_fwer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Implementation of the Randomized Conditional Independence Test</span>
-
-<span class="sd">    Based on the work:</span>
+          <span class="n">num_max_samples_per_run</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+          <span class="n">approx_kernel</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+          <span class="n">scale_data</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+          <span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+          <span class="n">p_value_adjust_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]],</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Implementation of the Randomized Conditional Independence Test based on the work:</span>
 <span class="sd">        Strobl, Eric V., Kun Zhang, and Shyam Visweswaran.</span>
 <span class="sd">        Approximate kernel-based conditional independence tests for fast non-parametric causal discovery.</span>
 <span class="sd">        Journal of Causal Inference 7.1 (2019).</span>
-
-<span class="sd">    This is an implementation in Python and is inspired by the implementation in R from</span>
-<span class="sd">        https://github.com/ericstrobl/RCIT/</span>
-<span class="sd">    written by Eric V. Strobl.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">n_jobs</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">default_n_jobs</span> <span class="k">if</span> <span class="n">n_jobs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">n_jobs</span>
 
-    <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="p">)</span>
-    <span class="n">X</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">apply_one_hot_encoding</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">fit_one_hot_encoders</span><span class="p">(</span><span class="n">X</span><span class="p">)))</span>
-    <span class="n">Y</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">apply_one_hot_encoding</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">fit_one_hot_encoders</span><span class="p">(</span><span class="n">Y</span><span class="p">)))</span>
-    <span class="n">Z</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">apply_one_hot_encoding</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">fit_one_hot_encoders</span><span class="p">(</span><span class="n">Z</span><span class="p">)))</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span> <span class="o">=</span> <span class="n">_convert_to_numeric</span><span class="p">(</span><span class="o">*</span><span class="n">shape_into_2d</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">scale_data</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">parallel_job</span><span class="p">(</span><span class="n">parallel_random_seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="n">set_random_seed</span><span class="p">(</span><span class="n">parallel_random_seed</span><span class="p">)</span>
@@ -619,10 +595,10 @@
             <span class="n">Y_samples</span> <span class="o">=</span> <span class="n">Y</span>
             <span class="n">Z_samples</span> <span class="o">=</span> <span class="n">Z</span>
 
-        <span class="c1"># Apply approximate kernel mapping and create features for each (potentially multivariate) variable.</span>
-        <span class="n">random_features_x</span> <span class="o">=</span> <span class="n">Nystroem</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="n">num_random_features_X</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_samples</span><span class="p">)</span>
-        <span class="n">random_features_y</span> <span class="o">=</span> <span class="n">Nystroem</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="n">num_random_features_Y</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">Y_samples</span><span class="p">)</span>
-        <span class="n">random_features_z</span> <span class="o">=</span> <span class="n">Nystroem</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="n">num_random_features_Z</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">Z_samples</span><span class="p">)</span>
+        <span class="n">Y_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">Y_samples</span><span class="p">,</span> <span class="n">Z_samples</span><span class="p">])</span>
+        <span class="n">random_features_x</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">approx_kernel</span><span class="p">(</span><span class="n">X_samples</span><span class="p">,</span> <span class="n">num_random_features_X</span><span class="p">))</span>
+        <span class="n">random_features_y</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">approx_kernel</span><span class="p">(</span><span class="n">Y_samples</span><span class="p">,</span> <span class="n">num_random_features_Y</span><span class="p">))</span>
+        <span class="n">random_features_z</span> <span class="o">=</span> <span class="n">scale</span><span class="p">(</span><span class="n">approx_kernel</span><span class="p">(</span><span class="n">Z_samples</span><span class="p">,</span> <span class="n">num_random_features_Z</span><span class="p">))</span>
 
         <span class="n">cov_zz</span> <span class="o">=</span> <span class="n">_estimate_column_wise_covariances</span><span class="p">(</span><span class="n">random_features_z</span><span class="p">,</span> <span class="n">random_features_z</span><span class="p">)</span>
         <span class="n">inverse_cov_zz</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cho_solve</span><span class="p">(</span>
@@ -660,6 +636,10 @@
 
 <span class="k">def</span> <span class="nf">_estimate_column_wise_covariances</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">rowvar</span><span class="o">=</span><span class="kc">False</span><span class="p">)[:</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:]</span>
+
+
+<span class="k">def</span> <span class="nf">_convert_to_numeric</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">apply_one_hot_encoding</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">fit_one_hot_encoders</span><span class="p">(</span><span class="n">X</span><span class="p">))</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]</span>
 </pre></div>
 
            </div>
@@ -669,7 +649,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Microsoft.</p>
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

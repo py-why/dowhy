@@ -89,6 +89,8 @@
 <p class="caption" role="heading"><span class="caption-text">GCM-based inference (Experimental)</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../gcm/user_guide/index.html">GCMs User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../example_notebooks/gcm_basic_example.html">Basic Example for GCM-Based Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../example_notebooks/rca_microservice_architecture.html">Root cause analysis (RCA) of latencies in a microservice architecture</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package</span></p>
 <ul>
@@ -308,6 +310,20 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">randomized_predictions</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">baseline_values</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span></div>
 
 
+<div class="viewcode-block" id="variance_of_deviations"><a class="viewcode-back" href="../../../../dowhy.gcm.util.html#dowhy.gcm.util.general.variance_of_deviations">[docs]</a><span class="k">def</span> <span class="nf">variance_of_deviations</span><span class="p">(</span><span class="n">randomized_predictions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">baseline_values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="c1"># Using the negative value here seeing that the Shapley estimation evaluates v(S u {i}) - v(S) for a subset S. In</span>
+    <span class="c1"># case of variance, we have v(S u {i}) &lt;= v(S), which would result in a negative contribution of players to the</span>
+    <span class="c1"># target quantity (here, variance).</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">((</span><span class="n">randomized_predictions</span> <span class="o">-</span> <span class="n">baseline_values</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="variance_of_matching_values"><a class="viewcode-back" href="../../../../dowhy.gcm.util.html#dowhy.gcm.util.general.variance_of_matching_values">[docs]</a><span class="k">def</span> <span class="nf">variance_of_matching_values</span><span class="p">(</span><span class="n">randomized_predictions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">baseline_values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="c1"># Using the negative value here seeing that the Shapley estimation evaluates v(S u {i}) - v(S) for a subset S. In</span>
+    <span class="c1"># case of variance, we have v(S u {i}) &lt;= v(S), which would result in a negative contribution of players to the</span>
+    <span class="c1"># target quantity (here, variance).</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">((</span><span class="n">randomized_predictions</span> <span class="o">==</span> <span class="n">baseline_values</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">())</span></div>
+
+
 <div class="viewcode-block" id="geometric_median"><a class="viewcode-back" href="../../../../dowhy.gcm.util.html#dowhy.gcm.util.general.geometric_median">[docs]</a><span class="k">def</span> <span class="nf">geometric_median</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">distance_function</span><span class="p">(</span><span class="n">x_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">x_input</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)))</span>
@@ -322,7 +338,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Microsoft.</p>
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

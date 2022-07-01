@@ -28,7 +28,7 @@
             <a href="../../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
           </a>
               <div class="version">
-                0.7
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -86,6 +86,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_discovery_example.html#id2">Causal Discovery with Causal Discovery Tool (CDT)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">GCM-based inference (Experimental)</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gcm/user_guide/index.html">GCMs User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/gcm_basic_example.html">Basic Example for GCM-Based Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/rca_microservice_architecture.html">Root cause analysis (RCA) of latencies in a microservice architecture</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Package</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../code_repo.html">Code repository &amp; Versions</a></li>
@@ -131,6 +137,8 @@
 <span class="kn">from</span> <span class="nn">dowhy.causal_refuter</span> <span class="kn">import</span> <span class="n">CausalRefutation</span>
 <span class="kn">from</span> <span class="nn">dowhy.causal_refuter</span> <span class="kn">import</span> <span class="n">CausalRefuter</span>
 <span class="kn">from</span> <span class="nn">dowhy.causal_estimator</span> <span class="kn">import</span> <span class="n">CausalEstimator</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_refuters.linear_sensitivity_analyzer</span> <span class="kn">import</span> <span class="n">LinearSensitivityAnalyzer</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_estimators.linear_regression_estimator</span> <span class="kn">import</span> <span class="n">LinearRegressionEstimator</span>
 
 <div class="viewcode-block" id="AddUnobservedCommonCause"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.add_unobserved_common_cause.AddUnobservedCommonCause">[docs]</a><span class="k">class</span> <span class="nc">AddUnobservedCommonCause</span><span class="p">(</span><span class="n">CausalRefuter</span><span class="p">):</span>
 
@@ -162,6 +170,15 @@
 <span class="sd">        :param effect_fraction_on_treatment: float: If effect_strength_on_treatment is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on treatment. Defaults to 1.</span>
 <span class="sd">        :param effect_fraction_on_outcome: float: If effect_strength_on_outcome is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on outcome. Defaults to 1.</span>
 <span class="sd">        :param plotmethod: string: Type of plot to be shown. If None, no plot is generated. This parameter is used only only when more than one treatment confounder effect values or outcome confounder effect values are provided. Default is &quot;colormesh&quot;. Supported values are &quot;contour&quot;, &quot;colormesh&quot; when more than one value is provided for both confounder effect value parameters; &quot;line&quot; when provided for only one of them.</span>
+<span class="sd">        :param simulated_method_name: method type to add unobserved common cause. &quot;linear-partial-R2&quot; for linear sensitivity analysis</span>
+<span class="sd">        :param percent_change_estimate: It is the percentage of reduction of treatment estimate that could alter the results (default = 1)</span>
+<span class="sd">                                        if percent_change_estimate = 1, the robustness value describes the strength of association of confounders with treatment and outcome in order to reduce the estimate by 100% i.e bring it down to 0.</span>
+<span class="sd">        :param confounder_increases_estimate: True implies that confounder increases the absolute value of estimate and vice versa. (Default = False)</span>
+<span class="sd">        :param benchmark_common_causes: names of variables for bounding strength of confounders</span>
+<span class="sd">        :param significance_level: confidence interval for statistical inference(default = 0.05)</span>
+<span class="sd">        :param null_hypothesis_effect: assumed effect under the null hypothesis</span>
+<span class="sd">        :param plot_estimate: Generate contour plot for estimate while performing sensitivity analysis. (default = True). </span>
+<span class="sd">                              To override the setting, set plot_estimate = False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -173,6 +190,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">frac_strength_outcome</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;effect_fraction_on_outcome&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;effect_fraction_on_outcome&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">simulated_method_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;simulated_method_name&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;simulated_method_name&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="s2">&quot;linear_based&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plotmethod</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;plotmethod&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;plotmethod&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="s2">&quot;colormesh&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">percent_change_estimate</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;percent_change_estimate&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;percent_change_estimate&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="mf">1.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">significance_level</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;significance_level&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;significance_level&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="mf">0.05</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">confounder_increases_estimate</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;confounder_increases_estimate&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;confounder_increases_estimate&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">benchmark_common_causes</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;benchmark_common_causes&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;benchmark_common_causes&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">null_hypothesis_effect</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;null_hypothesis_effect&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;null_hypothesis_effect&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_estimate</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;plot_estimate&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;plot_estimate&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
@@ -290,6 +313,23 @@
 
 <span class="sd">        :return: CausalRefuter: An object that contains the estimated effect and a new effect and the name of the refutation used.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulated_method_name</span> <span class="o">==</span> <span class="s2">&quot;linear-partial-R2&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span> <span class="n">LinearRegressionEstimator</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Currently only LinearRegressionEstimator is supported for Sensitivity Analysis&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;The current implementation does not support effect modifiers&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frac_strength_outcome</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">frac_strength_outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frac_strength_treatment</span>
+
+            <span class="n">analyzer</span> <span class="o">=</span> <span class="n">LinearSensitivityAnalyzer</span><span class="p">(</span><span class="n">estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">treatment_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">,</span> 
+            <span class="n">percent_change_estimate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">percent_change_estimate</span><span class="p">,</span> <span class="n">significance_level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">significance_level</span><span class="p">,</span> <span class="n">benchmark_common_causes</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">benchmark_common_causes</span><span class="p">,</span> <span class="n">null_hypothesis_effect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">null_hypothesis_effect</span><span class="p">,</span>
+            <span class="n">frac_strength_treatment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frac_strength_treatment</span><span class="p">,</span> <span class="n">frac_strength_outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frac_strength_outcome</span><span class="p">,</span> <span class="n">common_causes_order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">_observed_common_causes</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+            
+            <span class="n">analyzer</span><span class="o">.</span><span class="n">check_sensitivity</span><span class="p">(</span><span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_estimate</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">analyzer</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kappa_t</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">kappa_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">infer_default_kappa_t</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kappa_y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -717,7 +757,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Microsoft.</p>
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
