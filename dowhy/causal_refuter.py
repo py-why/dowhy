@@ -175,7 +175,7 @@ class CausalRefuter:
         # Sort the simulations
         simulations.sort()
         # Obtain the median value
-        median_refute_values= simulations[int(num_simulations/2)]
+        median_refute_values = simulations[int(num_simulations/2)]
 
         # Performing a two sided test
         if estimate.value > median_refute_values:
