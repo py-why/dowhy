@@ -189,8 +189,8 @@ class CausalRefuter:
             estimate_index = np.searchsorted(simulations, estimate.value, side="right")
             # We get the probability with respect to the left tail.
             p_value = estimate_index / num_simulations
-
-        return p_value
+        # return twice the determined quantile as this is a two sided test
+        return 2*p_value
 
     def perform_normal_distribution_test(self, estimate, simulations):
         # Get the mean for the simulations
