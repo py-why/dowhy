@@ -5,4 +5,4 @@
     ../example_notebooks/gcm_basic_example
     ../example_notebooks/rca_microservice_architecture
     ../example_notebooks/gcm_gender_bias_study
-
+    ../example_notebooks/gcm_gender_bias_study_continued
