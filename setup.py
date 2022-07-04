@@ -9,6 +9,8 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path
 
+import versioneer
+
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
@@ -27,14 +29,10 @@ for e in extras:
     with open(req_file) as f:
         extras_require[e] = [line.strip() for line in f]
 
-# Loading version number
-with open(path.join(here, 'dowhy', 'VERSION')) as version_file:
-    version = version_file.read().strip()
-    print(version)
-
 setup(
     name='dowhy',
-    version=version,
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     description='DoWhy is a Python library for causal inference that supports explicit modeling and testing of causal assumptions.',  # Required
     license='MIT',
     long_description=long_description,
