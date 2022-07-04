@@ -49,4 +49,5 @@ These examples are also available on `GitHub <https://github
    identifying_effects_using_id_algorithm.ipynb
    rca_microservice_architecture
    gcm_supply_chain_dist_change
+   gcm-counterfactual-example
    gcm_401k_analysis
