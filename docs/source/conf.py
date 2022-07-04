@@ -14,19 +14,14 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath("../../"))
 
+sys.path.insert(0, os.path.abspath("../../"))
 
 # -- Project information -----------------------------------------------------
 
 project = 'DoWhy | An end-to-end library for causal inference'
 copyright = '2022, PyWhy contributors'
 author = 'Amit Sharma, Emre Kiciman'
-
-# The short X.Y version
-version = '0.8'
-# The full version, including alpha/beta/rc tags
-release = ''
 
 
 # -- General configuration ---------------------------------------------------
