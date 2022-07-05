@@ -14,6 +14,7 @@ from statsmodels.stats.multitest import multipletests
 from dowhy.gcm.cms import InvertibleStructuralCausalModel
 from dowhy.gcm.graph import DirectedGraph, get_ordered_predecessors, validate_causal_graph, is_root_node
 from dowhy.gcm.independence_test import kernel_based
+from dowhy.gcm.stats import quantile_based_fwer
 
 
 class RejectionResult(Enum):
@@ -59,9 +60,12 @@ def refute_causal_structure(causal_graph: DirectedGraph,
         lmc_test_result = dict()
         if parents and non_descendants:
             # test local Markov condition, null hypothesis: conditional independence
-            lmc_p_value = conditional_independence_test(data[node].values,
-                                                        data[non_descendants].values,
-                                                        data[parents].values)
+            p_values = []
+            for non_descendant in non_descendants:
+                p_values.append(conditional_independence_test(data[node].values,
+                                                              data[non_descendant].values,
+                                                              data[parents].values))
+            lmc_p_value = quantile_based_fwer(p_values)
             lmc_test_result = dict(p_value=lmc_p_value)
             all_p_values.append(lmc_p_value)
 
