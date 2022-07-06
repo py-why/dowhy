@@ -13,7 +13,8 @@ from sklearn.preprocessing import scale
 
 import dowhy.gcm.config as config
 from dowhy.gcm.constant import EPS
-from dowhy.gcm.independence_test.kernel_operation import apply_rbf_kernel, approximate_rbf_kernel_features
+from dowhy.gcm.independence_test.kernel_operation import approximate_rbf_kernel_features, \
+    apply_rbf_kernel_with_adaptive_precision
 from dowhy.gcm.stats import quantile_based_fwer
 from dowhy.gcm.util.general import set_random_seed, shape_into_2d, apply_one_hot_encoding, fit_one_hot_encoders
 
@@ -21,7 +22,7 @@ from dowhy.gcm.util.general import set_random_seed, shape_into_2d, apply_one_hot
 def kernel_based(X: np.ndarray,
                  Y: np.ndarray,
                  Z: Optional[np.ndarray] = None,
-                 kernel: Callable[[np.ndarray], np.ndarray] = apply_rbf_kernel,
+                 kernel: Callable[[np.ndarray], np.ndarray] = apply_rbf_kernel_with_adaptive_precision,
                  scale_data: bool = True,
                  use_bootstrap: bool = True,
                  bootstrap_num_runs: int = 20,
