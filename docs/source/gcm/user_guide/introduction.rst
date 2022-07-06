@@ -154,7 +154,16 @@ With the data at hand and the graph constructed earlier, we can now train the SC
 
 >>> gcm.fit(causal_model, data)
 
-Fitting means, we learn the generative models of the variables in the SCM according to the data.
+Fitting means, we learn the generative models of the variables in the SCM according to the data. This particularly allows us to generate completely new samples:
+
+>>> newly_generated_samples = gcm.draw_samples(causal_model, num_samples=1000)
+>>> newly_generated_samples.head()
+          X         Y         Z
+0  0.345497  0.351947  1.635614
+1 -0.718952  2.379878 -5.215655
+2  0.390906  0.184207  0.287986
+3 -1.422845 -2.266824 -7.566363
+4  1.046056  2.755358  9.474311
 
 Step 3: Answering a causal query based on the SCM
 -------------------------------------------------
