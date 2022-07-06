@@ -76,11 +76,11 @@ class TestAddUnobservedCommonCauseRefuter(object):
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
-    @pytest.mark.parametrize(["estimator_method", "effect_strength_on_t", "benchmark_common_causes", "simulated_method_name"],
+    @pytest.mark.parametrize(["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulated_method_name"],
                              [("backdoor.linear_regression", [1,2,3], ["W3"], "linear-partial-R2"),])
     @patch("matplotlib.pyplot.figure")
     def test_linear_sensitivity_with_confounders(self, mock_fig,estimator_method,
-            effect_strength_on_t, benchmark_common_causes, simulated_method_name):
+            effect_fraction_on_treatment, benchmark_common_causes, simulated_method_name):
         np.random.seed(100) 
         data = dowhy.datasets.linear_dataset( beta = 10,
                                       num_common_causes = 7,
@@ -105,7 +105,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
                                method_name = "add_unobserved_common_cause",
                                simulated_method_name = simulated_method_name, 
                                benchmark_common_causes = benchmark_common_causes,
-                               effect_fraction_on_treatment = effect_strength_on_t)
+                               effect_fraction_on_treatment = effect_fraction_on_treatment)
         
         if refute.confounder_increases_estimate == True:
                 bias_adjusted_estimate = refute.benchmarking_results['bias_adjusted_estimate']
@@ -122,11 +122,11 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert refute.stats['robustness_value'] >= 0 and refute.stats['robustness_value'] <= 1
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
-    @pytest.mark.parametrize(["estimator_method", "effect_strength_on_t", "benchmark_common_causes", "simulated_method_name"],
+    @pytest.mark.parametrize(["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulated_method_name"],
                              [("backdoor.linear_regression", [1,2,3], ["W3"], "linear-partial-R2"),])
     @patch("matplotlib.pyplot.figure")
     def test_linear_sensitivity_given_strength_of_confounding(self, mock_fig,estimator_method,
-            effect_strength_on_t, benchmark_common_causes, simulated_method_name):
+            effect_fraction_on_treatment, benchmark_common_causes, simulated_method_name):
         np.random.seed(100) 
         data = dowhy.datasets.linear_dataset( beta = 10,
                                       num_common_causes = 7,
@@ -151,7 +151,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
                                method_name = "add_unobserved_common_cause",
                                simulated_method_name = simulated_method_name, 
                                benchmark_common_causes = benchmark_common_causes,
-                               effect_fraction_on_treatment = effect_strength_on_t)
+                               effect_fraction_on_treatment = effect_fraction_on_treatment)
         
         # We calculate adjusted estimates for two sets of partial R^2 values. 
         bias_adjusted_terms = refute.compute_bias_adjusted(r2tu_w = np.array([0.7, 0.2]) , r2yu_tw = np.array([0.9, 0.3]))
@@ -163,11 +163,11 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert abs(original_estimate - estimate1) > abs(original_estimate - estimate2)
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
-    @pytest.mark.parametrize(["estimator_method", "effect_strength_on_t", "benchmark_common_causes", "simulated_method_name", "rvalue_threshold"],
+    @pytest.mark.parametrize(["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulated_method_name", "rvalue_threshold"],
                              [("backdoor.linear_regression", [1,2,3], ["W3"], "linear-partial-R2", 0.95),])
     @patch("matplotlib.pyplot.figure")
     def test_linear_sensitivity_dataset_without_confounders(self, mock_fig,estimator_method,
-            effect_strength_on_t, benchmark_common_causes, simulated_method_name, rvalue_threshold):
+            effect_fraction_on_treatment, benchmark_common_causes, simulated_method_name, rvalue_threshold):
         np.random.seed(100) 
         data = dowhy.datasets.linear_dataset( beta = 10,
                                       num_common_causes = 7,
@@ -191,7 +191,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
                                method_name = "add_unobserved_common_cause",
                                simulated_method_name = simulated_method_name, 
                                benchmark_common_causes = benchmark_common_causes,
-                               effect_fraction_on_treatment = effect_strength_on_t)
+                               effect_fraction_on_treatment = effect_fraction_on_treatment)
         
         if refute2.confounder_increases_estimate == True:
                 bias_adjusted_estimate = refute2.benchmarking_results['bias_adjusted_estimate']
@@ -210,17 +210,17 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert refute2.stats['robustness_value'] >= rvalue_threshold and refute2.stats['robustness_value'] <= 1 
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
-    @pytest.mark.parametrize(["estimator_method", "effect_strength_on_t", "benchmark_common_causes", "simulated_method_name"],
-                                 [("backdoor.econml.dml.NonParamDML", 2 , ["W3"], "non-parametric-partial-R2"), ])
+    
+    @pytest.mark.parametrize(["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulated_method_name"],
+                                 [("backdoor.econml.dml.KernelDML", 2 , ["W3"], "non-parametric-partial-R2"), ])
     @patch("matplotlib.pyplot.figure")
     def test_non_parametric_sensitivity_given_strength_of_confounding(self, mock_fig, estimator_method,
-                                                              effect_strength_on_t, benchmark_common_causes, simulated_method_name):
+                                                              effect_fraction_on_treatment, benchmark_common_causes, simulated_method_name):
         np.random.seed(100)
         data = dowhy.datasets.linear_dataset(beta=10,
                                              num_common_causes=7,
                                              num_samples=500,
                                              num_treatments=1,
-                                             num_effect_modifiers = 1,
                                              stddev_treatment_noise=5,
                                              stddev_outcome_noise=5
                                              )
@@ -230,7 +230,6 @@ class TestAddUnobservedCommonCauseRefuter(object):
             data=data["df"],
             treatment=data["treatment_name"],
             outcome=data["outcome_name"],
-            effect_modifiers = data["effect_modifier_names"],
             graph=graph_str,
             test_significance=None,
         )
@@ -241,7 +240,6 @@ class TestAddUnobservedCommonCauseRefuter(object):
             method_params={
                                         'init_params': {'model_y':GradientBoostingRegressor(),
                                                         'model_t': GradientBoostingRegressor(),
-                                                        'model_final': GradientBoostingRegressor()
                                                        },
                                         'fit_params': {'cache_values': True,}
                                      }
@@ -251,7 +249,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
                                        method_name="add_unobserved_common_cause",
                                        simulated_method_name=simulated_method_name,
                                        benchmark_common_causes=benchmark_common_causes,
-                                       effect_fraction_on_treatment=effect_strength_on_t)
+                                       effect_fraction_on_treatment=effect_fraction_on_treatment)
 
         assert refute.r2yu_tw >= 0 and refute.r2yu_tw <= 1
         assert refute.r2tu_w >= 0 and refute.r2tu_w <= 1
@@ -288,11 +286,11 @@ class TestAddUnobservedCommonCauseRefuter(object):
         # we patched figure plotting call to avoid drawing plots during tests
         assert mock_fig.call_count > 0    
     
-    @pytest.mark.parametrize(["estimator_method", "effect_strength_on_t", "benchmark_common_causes", "simulated_method_name"],
+    @pytest.mark.parametrize(["estimator_method", "effect_fraction_on_outcome", "benchmark_common_causes", "simulated_method_name"],
                                  [("backdoor.econml.dml.LinearDML", 2 , ["W3"], "non-parametric-partial-R2"), ])
     @patch("matplotlib.pyplot.figure")
     def test_partially_linear_sensitivity_given_strength_of_confounding(self, mock_fig, estimator_method,
-                                                              effect_strength_on_t, benchmark_common_causes, simulated_method_name):
+                                                              effect_fraction_on_outcome, benchmark_common_causes, simulated_method_name):
         np.random.seed(100)
         data = dowhy.datasets.linear_dataset(beta=10,
                                              num_common_causes=7,
@@ -326,7 +324,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
                                        method_name="add_unobserved_common_cause",
                                        simulated_method_name=simulated_method_name,
                                        benchmark_common_causes=benchmark_common_causes,
-                                       effect_fraction_on_treatment=effect_strength_on_t)
+                                       effect_fraction_on_outcome=effect_fraction_on_outcome)
         
         assert refute.r2yu_tw >= 0 and refute.r2yu_tw <= 1
         assert refute.r2tu_w >= 0 and refute.r2tu_w <= 1

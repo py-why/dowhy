@@ -60,7 +60,7 @@ def get_alpha_estimator(cv, X, max_degree, param_grid_dict):
         return estimator
 
 
-def get_generic_regressor(cv, X, Y, max_degree, estimator_list, estimator_param_list, numeric_features):
+def get_generic_regressor(cv, X, Y, max_degree = 3, estimator_list = None, estimator_param_list = None, numeric_features = None):
     """
     Finds the best estimator for reisz regression function (g_s)
 

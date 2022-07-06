@@ -301,6 +301,16 @@ class PartialLinearSensitivityAnalyzer:
     def check_sensitivity(self, plot=True):
         """
         Function to perform sensitivity analysis. 
+        Yres = Y - E[Y|W]
+        E[Y|W] = f(x) + theta_s * E[T|W]
+        Yres = Y - f(x) - theta_s * E[T|W]
+        g(s) = theta_s * T + f(x)
+        g(s) = theta_s * (T - E[T|W]) + f(x) + theta_s * E[T|W]
+        g(s) = theta_s * Tres +f(x) + theta_s * E[T|W]
+        Y - g(s) = Y - [theta_s * Tres + f(x) + theta_s * E[T|W] )
+        Y - g(s) = ( Y - f(x) -  theta_s * E[T|W]) - theta_s * Tres
+        Y - g(s) = Yres - theta_s * Tres
+        g(s) = Y - Yres + theta_s * Tres
         :param plot: plot = True generates a plot of lower confidence bound of the estimate for different variations of unobserved confounding.
                      plot = False overrides the setting
 
@@ -330,57 +340,34 @@ class PartialLinearSensitivityAnalyzer:
         # tuple of residuals from first stage estimation, features and confounders
         residuals = self.estimator.residuals_
 
-        residualized_outcome = residuals[0]
-        residualized_treatment = residuals[1]
+        residualized_outcome = residuals[0] # T-E[T|W]
+        residualized_treatment = residuals[1] # Y - E[Y|W]
+        W = residuals[3]
 
         n_residuals = residualized_outcome.shape[0]
         indices = np.arange(0, n_residuals, 1)
 
         residualized_outcome = residualized_outcome[indices]  
         residualized_treatment = residualized_treatment[indices]
+        residualized_outcome_second_stage = residualized_outcome - self.theta_s * residualized_treatment
 
-        self.sigma_2 = np.mean(residualized_outcome * residualized_outcome)
-        self.nu_2 = np.mean(residualized_treatment * residualized_treatment)
+        self.sigma_2 = np.mean(residualized_outcome_second_stage ** 2)
+        self.nu_2 = np.mean(residualized_treatment ** 2)
 
         self.S2 = self.sigma_2 / self.nu_2
 
-        self.neyman_orthogonal_score_outcome = residualized_outcome * residualized_outcome - self.sigma_2
+        self.neyman_orthogonal_score_outcome = residualized_outcome_second_stage * residualized_outcome_second_stage - self.sigma_2
         self.neyman_orthogonal_score_treatment = residualized_treatment * residualized_treatment - self.nu_2
-        self.neyman_orthogonal_score_theta = (residualized_outcome - residualized_treatment * self.theta_s) * residualized_treatment / self.nu_2
+        self.neyman_orthogonal_score_theta = (residualized_outcome_second_stage) * residualized_treatment / self.nu_2
 
         # Partial R^2 of treatment with observed common causes
         reg_function_fit = self.estimator.models_t[0][0]  #First Stage treatment model
         treatment_model = np.zeros(num_samples)
         treatment_model = reg_function_fit.predict(W) 
         self.r2t_w = np.var(treatment_model) / np.var(T)
-
+ 
         # Partial R^2 of outcome with treatment and observed common causes
-        self.g_s = np.zeros(num_samples)
-        self.alpha_s = np.zeros(num_samples)
-        numeric_features = get_numeric_features(X = X_df)
-        reg_function = get_generic_regressor(cv = split_indices, 
-                           X = X, Y = Y, max_degree = self.reisz_polynomial_max_degree, 
-                           estimator_list = [LinearRegression(),
-                           Pipeline([('scale', ColumnTransformer([('num', StandardScaler(), numeric_features)],
-                                                  remainder='passthrough')),
-                                     ('lasso_model', Lasso())]),
-                            SGDRegressor(alpha = 0.001),
-                            Ridge(),
-                            RidgeCV(cv = 5)
-                           ], 
-                           estimator_param_list = [{'fit_intercept' : [True, False]},
-                           {'lasso_model__alpha': [0.01, 0.001, 1e-4, 1e-5, 1e-6]},
-                           {'alpha' : [0.0001, 1e-5, 0.01]},
-                           {'alpha' : [0.0001, 1e-5, 0.01, 1, 2]},
-                           {
-                            'cv' : [2,3,4]}
-                           ], 
-                           numeric_features = numeric_features
-                           )
-        for train, test in split_indices:
-            reg_fn_fit = reg_function.fit(X[train], Y[train])
-            self.g_s[test] = reg_fn_fit.predict(X[test])
-
+        self.g_s = Y - residualized_outcome_second_stage
         self.r2y_tw = np.var(self.g_s) / np.var(Y)
 
         self.g_s_j = np.zeros(num_samples)
@@ -394,12 +381,14 @@ class PartialLinearSensitivityAnalyzer:
         # Partial R^2 of treatment after regressing over unobserved confounder and observed common causes
         r2t_uw = self.frac_strength_treatment * delta_r2t_wj + self.r2t_w
         if r2y_uwt >=1:
-            raise ValueError("r2y_uwt can not be >= 1. Try a lower effect_fraction_on_outcome value")
+            r2y_uwt = 0.9999
+            self.logger.warning("r2y_uwt can not be >= 1. Try a lower effect_fraction_on_outcome value. setting to 1")
         if r2t_uw >= 1:
-            raise ValueError("r2t_uw can not be >= 1. Try a lower effect_fraction_on_treatment value")
+            r2t_uw = 0.9999
+            self.logger.warning("r2t_uw can not be >= 1. Try a lower effect_fraction_on_treatment value. setting to 1")
 
-        self.r2yu_tw = abs((r2y_uwt - self.r2y_tw) / (1 - self.r2y_tw))
-        self.r2tu_w = abs((r2t_uw - self.r2t_w) / (1 - self.r2t_w))
+        self.r2yu_tw = ((r2y_uwt - self.r2y_tw) / (1 - self.r2y_tw))
+        self.r2tu_w = ((r2t_uw - self.r2t_w) / (1 - self.r2t_w))
 
         if self.r2yu_tw >= 1:
             self.r2yu_tw = 1
@@ -407,6 +396,10 @@ class PartialLinearSensitivityAnalyzer:
         if self.r2tu_w >= 1:
             self.r2tu_w = 0.9999
             self.logger.warning("Warning: r2tu_w can not be > 1. Try a lower effect_fraction_on_treatment. Setting r2tu_w to 1")
+        if self.r2yu_tw < 0:
+            self.r2yu_tw = 0
+        if self.r2tu_w < 0:
+            self.r2tu_w = 0
 
         benchmarking_results = self.perform_benchmarking(
             r2yu_tw=self.r2yu_tw, r2tu_w=self.r2tu_w)
