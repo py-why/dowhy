@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn import linear_model
+from sklearn.exceptions import NotFittedError
 
 from dowhy.causal_estimator import CausalEstimator
 
@@ -82,8 +83,12 @@ class PropensityScoreEstimator(CausalEstimator):
                     raise ValueError(f"""Propensity score column {self.propensity_score_column} does not exist, nor does a propensity_model. 
                     Please specify the column name that has your pre-computed propensity score, or a model to compute it.""")
                 else:
-                    self._data[self.propensity_score_column] = self.propensity_score_model.predict_proba(
-                        self._observed_common_causes)[:, 1]
+                    try:
+                        self._data[self.propensity_score_column] = self.propensity_score_model.predict_proba(
+                            self._observed_common_causes)[:, 1]
+                    except NotFittedError:
+                        raise NotFittedError("Please fit the propensity score model before calling predict_proba")
+
             else:
                 self.logger.info(f"INFO: Using pre-computed propensity score in column {self.propensity_score_column}")
 
