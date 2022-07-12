@@ -22,6 +22,7 @@ These examples are also available on `GitHub <https://github
    dowhy_causal_discovery_example
    dowhy_causal_api
    do_sampler_demo
+   gcm_basic_example
 
 .. toctree::
    :maxdepth: 1
@@ -46,3 +47,6 @@ These examples are also available on `GitHub <https://github
    dowhy_refuter_notebook
    dowhy_causal_discovery_example.ipynb
    identifying_effects_using_id_algorithm.ipynb
+   rca_microservice_architecture
+   gcm_supply_chain_dist_change
+   gcm_401k_analysis
