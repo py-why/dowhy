@@ -1,6 +1,11 @@
 Example notebooks
 =================
 
+These examples are also available on `GitHub <https://github
+.com/py-why/dowhy/tree/master/docs/source/example_notebooks>`_. You can `run them locally <https://docs.jupyter
+.org/en/latest/running.html>`_ after cloning `DoWhy <https://github.com/py-why/dowhy>`_ and `installing Jupyter
+<https://jupyter.org/install>`_.
+
 .. toctree::
    :maxdepth: 1
    :caption: Getting started
