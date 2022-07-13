@@ -2,6 +2,7 @@ import copy
 
 import numpy as np
 import logging
+from joblib import Parallel, delayed
 
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
@@ -20,13 +21,14 @@ class RandomCommonCause(CausalRefuter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._num_simulations = kwargs.pop("num_simulations", CausalRefuter.DEFAULT_NUM_SIMULATIONS )
-        self._random_state = kwargs.pop("random_state",None)
+        self._random_state = kwargs.pop("random_state", None)
+        self._n_jobs = kwargs.get('n_jobs', None)
+        self._verbose = kwargs.pop('verbose', False)
 
         self.logger = logging.getLogger(__name__)
 
     def refute_estimate(self):
         num_rows = self._data.shape[0]
-        sample_estimates = np.zeros(self._num_simulations)
         self.logger.info("Refutation over {} simulated datasets, each with a random common cause added"
                          .format(self._num_simulations))
 
@@ -34,7 +36,8 @@ class RandomCommonCause(CausalRefuter):
         identified_estimand = copy.deepcopy(self._target_estimand)
         # Adding a new backdoor variable to the identified estimand
         identified_estimand.set_backdoor_variables(new_backdoor_variables)
-        for index in range(self._num_simulations):
+        
+        def refute_once():
             if self._random_state is None:
                 new_data = self._data.assign(w_random=np.random.randn(num_rows))
             else:
@@ -43,8 +46,10 @@ class RandomCommonCause(CausalRefuter):
 
             new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
+            return new_effect.value
 
-            sample_estimates[index] = new_effect.value
+        sample_estimates = Parallel(n_jobs=self._n_jobs, verbose=self._verbose)(
+            delayed(refute_once)() for _ in range(self._num_simulations))
 
         refute = CausalRefutation(
             self._estimate.value,

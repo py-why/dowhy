@@ -3,6 +3,8 @@ import copy
 import numpy as np
 import pandas as pd
 import logging
+from joblib import Parallel, delayed
+
 
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
@@ -40,6 +42,8 @@ class PlaceboTreatmentRefuter(CausalRefuter):
             self._placebo_type = "Random Data"
         self._num_simulations = kwargs.pop("num_simulations",CausalRefuter.DEFAULT_NUM_SIMULATIONS)
         self._random_state = kwargs.pop("random_state",None)
+        self._n_jobs = kwargs.pop('n_jobs', None) # None or 1 as default?
+        self._verbose= kwargs.pop('verbose', False) # useful or not?
 
         self.logger = logging.getLogger(__name__)
 
@@ -65,7 +69,6 @@ class PlaceboTreatmentRefuter(CausalRefuter):
                 self._estimate.params["method_params"]["iv_instrument_name"] = \
                 ["placebo_" + s for s in parse_state(self._estimate.params["method_params"]["iv_instrument_name"])]
 
-        sample_estimates = np.zeros(self._num_simulations)
         self.logger.info("Refutation over {} simulated datasets of {} treatment"
                         .format(self._num_simulations
                         ,self._placebo_type)
@@ -75,7 +78,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         treatment_name = self._treatment_name[0] # Extract the name of the treatment variable
         type_dict = dict( self._data.dtypes )
 
-        for index in range(self._num_simulations):
+        def refute_once():
 
             if self._placebo_type == "permute":
                 permuted_idx = None
@@ -133,7 +136,12 @@ class PlaceboTreatmentRefuter(CausalRefuter):
             self.logger.debug(new_data[0:10])
             new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
-            sample_estimates[index] = new_effect.value
+            return new_effect.value
+
+        # assigning results to numpy_zeros array didn't work within Parallel
+        # will return a list, is that a problem of convert to numpy?
+        sample_estimates = Parallel(n_jobs=self._n_jobs, verbose=self._verbose)(
+            delayed(refute_once)() for _ in range(self._num_simulations))
 
         # Restoring the value of iv_instrument_name
         if self._target_estimand.identifier_method.startswith("iv"):
