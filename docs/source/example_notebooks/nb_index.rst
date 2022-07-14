@@ -1,6 +1,13 @@
 Example notebooks
 =================
 
+These examples are also available on `GitHub <https://github
+.com/py-why/dowhy/tree/master/docs/source/example_notebooks>`_. You can `run them locally <https://docs.jupyter
+.org/en/latest/running.html>`_ after cloning `DoWhy <https://github.com/py-why/dowhy>`_ and `installing Jupyter
+<https://jupyter.org/install>`_. Or you can run them directly in a web browser using the
+`Binder environment <https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F>`_. 
+
+
 .. toctree::
    :maxdepth: 1
    :caption: Getting started
@@ -15,6 +22,7 @@ Example notebooks
    dowhy_causal_discovery_example
    dowhy_causal_api
    do_sampler_demo
+   gcm_basic_example
 
 .. toctree::
    :maxdepth: 1
@@ -39,3 +47,7 @@ Example notebooks
    dowhy_refuter_notebook
    dowhy_causal_discovery_example.ipynb
    identifying_effects_using_id_algorithm.ipynb
+   rca_microservice_architecture
+   gcm_supply_chain_dist_change
+   gcm-counterfactual-example
+   gcm_401k_analysis

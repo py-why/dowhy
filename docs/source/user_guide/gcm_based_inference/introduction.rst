@@ -66,6 +66,7 @@ to answer causal questions. With that in mind, the typical steps involved in ans
 
 Or manually assign causal mechanisms:
 ::
+
    causal_model.set_causal_mechanism('X', EmpiricalDistribution())
    causal_model.set_causal_mechanism('Y', AdditiveNoiseModel(create_linear_regressor()))
    causal_model.set_causal_mechanism('Z', AdditiveNoiseModel(create_linear_regressor()))

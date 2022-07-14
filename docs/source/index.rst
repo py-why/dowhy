@@ -22,7 +22,8 @@
    :caption: User Guide
 
    user_guide/causality_intro
-   user_guide/four_steps_causality
+   user_guide/effect_inference/index
+   user_guide/gcm_based_inference/index
    example_notebooks/nb_index
 
 .. toctree::
@@ -32,13 +33,6 @@
 
    CATE estimation with DoWhy+EconML <example_notebooks/tutorial-causalinference-machinelearning-using-dowhy-econml>
    example_notebooks/nb_casestudies_index
-
-.. toctree::
-   :hidden: 
-   :maxdepth: 2
-   :caption: GCM-based inference (Experimental)
-
-   gcm/index
 
 .. toctree::
    :hidden:

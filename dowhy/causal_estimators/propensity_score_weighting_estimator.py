@@ -84,6 +84,7 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
                 raise ValueError(f"Propensity score column {self.propensity_score_column} does not exist. Please specify the column name that has your pre-computed propensity score.")
             else:
                 self.logger.info(f"INFO: Using pre-computed propensity score in column {self.propensity_score_column}")
+        self._refresh_propensity_score()
 
         # trim propensity score weights
         self._data[self.propensity_score_column] = np.minimum(self.max_ps_score, self._data[self.propensity_score_column])

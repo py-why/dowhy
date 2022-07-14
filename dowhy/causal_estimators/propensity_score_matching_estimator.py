@@ -61,6 +61,7 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
             else:
                 self.logger.info(f"INFO: Using pre-computed propensity score in column {self.propensity_score_column}")
 
+        self._refresh_propensity_score()
 
         # this assumes a binary treatment regime
         treated = self._data.loc[self._data[self._treatment_name[0]] == 1]

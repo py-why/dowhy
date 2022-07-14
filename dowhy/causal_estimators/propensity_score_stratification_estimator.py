@@ -79,6 +79,8 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
                 raise ValueError(f"Propensity score column {self.propensity_score_column} does not exist. Please specify the column name that has your pre-computed propensity score.")
             else:
                 self.logger.info(f"Using pre-computed propensity score incolumn {self.propensity_score_column}")
+        self._refresh_propensity_score()
+
         clipped = None
         # Infer the right strata based on clipping threshold
         if self.num_strata == "auto":
