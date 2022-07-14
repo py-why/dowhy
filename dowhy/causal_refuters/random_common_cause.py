@@ -17,13 +17,19 @@ class RandomCommonCause(CausalRefuter):
 
     :param random_state: The seed value to be added if we wish to repeat the same random behavior. If we with to repeat the same behavior we push the same seed in the psuedo-random generator
     :type random_state: int, RandomState, optional
+
+    :param n_jobs: The maximum number of concurrently running jobs. If -1 all CPUs are used. If 1 is given, no parallel computing code is used at all (this is the default).
+    :type n_jobs: int, optional
+
+    :param verbose: The verbosity level: if non zero, progress messages are printed. Above 50, the output is sent to stdout. The frequency of the messages increases with the verbosity level. If it more than 10, all iterations are reported. The default is 0.
+    :type verbose: int, optional
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._num_simulations = kwargs.pop("num_simulations", CausalRefuter.DEFAULT_NUM_SIMULATIONS )
         self._random_state = kwargs.pop("random_state", None)
         self._n_jobs = kwargs.get('n_jobs', None)
-        self._verbose = kwargs.pop('verbose', False)
+        self._verbose = kwargs.pop('verbose', 0)
 
         self.logger = logging.getLogger(__name__)
 
@@ -50,6 +56,7 @@ class RandomCommonCause(CausalRefuter):
 
         sample_estimates = Parallel(n_jobs=self._n_jobs, verbose=self._verbose)(
             delayed(refute_once)() for _ in range(self._num_simulations))
+        sample_estimates = np.array(sample_estimates)
 
         refute = CausalRefutation(
             self._estimate.value,

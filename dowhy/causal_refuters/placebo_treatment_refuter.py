@@ -24,6 +24,15 @@ class PlaceboTreatmentRefuter(CausalRefuter):
 
     :param random_state: The seed value to be added if we wish to repeat the same random behavior. If we want to repeat the same behavior we push the same seed in the psuedo-random generator.
     :type random_state: int, RandomState, optional
+
+    # using wording from joblib docs here since it's not that simple, depends on backend used
+    # btw should backend be another parameter?
+    # docs: https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html
+    :param n_jobs: The maximum number of concurrently running jobs. If -1 all CPUs are used. If 1 is given, no parallel computing code is used at all (this is the default).
+    :type n_jobs: int, optional
+
+    :param verbose: The verbosity level: if non zero, progress messages are printed. Above 50, the output is sent to stdout. The frequency of the messages increases with the verbosity level. If it more than 10, all iterations are reported. The default is 0.
+    :type verbose: int, optional
     """
 
     # Default value of the p value taken for the distribution
@@ -42,8 +51,8 @@ class PlaceboTreatmentRefuter(CausalRefuter):
             self._placebo_type = "Random Data"
         self._num_simulations = kwargs.pop("num_simulations",CausalRefuter.DEFAULT_NUM_SIMULATIONS)
         self._random_state = kwargs.pop("random_state",None)
-        self._n_jobs = kwargs.pop('n_jobs', None) # None or 1 as default?
-        self._verbose= kwargs.pop('verbose', False) # useful or not?
+        self._n_jobs = kwargs.pop('n_jobs', None)
+        self._verbose= kwargs.pop('verbose', 0)
 
         self.logger = logging.getLogger(__name__)
 
@@ -79,7 +88,6 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         type_dict = dict( self._data.dtypes )
 
         def refute_once():
-
             if self._placebo_type == "permute":
                 permuted_idx = None
                 if self._random_state is None:
@@ -138,10 +146,10 @@ class PlaceboTreatmentRefuter(CausalRefuter):
             new_effect = new_estimator.estimate_effect()
             return new_effect.value
 
-        # assigning results to numpy_zeros array didn't work within Parallel
-        # will return a list, is that a problem of convert to numpy?
+        # Run refutation in parallel
         sample_estimates = Parallel(n_jobs=self._n_jobs, verbose=self._verbose)(
             delayed(refute_once)() for _ in range(self._num_simulations))
+        sample_estimates = np.array(sample_estimates)
 
         # Restoring the value of iv_instrument_name
         if self._target_estimand.identifier_method.startswith("iv"):
