@@ -1,6 +1,7 @@
 from sklearn import linear_model
 from sklearn.neighbors import NearestNeighbors
 import pandas as pd
+import numpy as np
 
 from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_estimators.propensity_score_estimator import PropensityScoreEstimator
@@ -50,7 +51,8 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
         if self.recalculate_propensity_score is True:
             if self.propensity_score_model is None:
                 self.propensity_score_model = linear_model.LogisticRegression()
-            self.propensity_score_model.fit(self._observed_common_causes, self._treatment)
+            self._treatment_shaped = np.ravel(self._treatment)
+            self.propensity_score_model.fit(self._observed_common_causes, self._treatment_shaped)
             self._data[self.propensity_score_column] = self.propensity_score_model.predict_proba(self._observed_common_causes)[:, 1]
         else:
             # check if the user provides a propensity score column
