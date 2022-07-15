@@ -1,5 +1,5 @@
-GCMs User Guide
-===============
+GCM-based inference (Experimental)
+==================================
 
 .. toctree::
     :maxdepth: 1

@@ -1,0 +1,23 @@
+import networkx as nx
+import numpy as np
+import pandas as pd
+
+from dowhy.gcm.util import plot, plot_adjacency_matrix
+
+
+def test_when_plot_does_not_raise_exception():
+    plot(nx.DiGraph([('X', 'Y'), ('Y', 'Z')]))
+
+
+def test_plot_adjacency_matrix():
+    causal_graph = pd.DataFrame(np.array([[0, 1, 0], [0, 0, 1], [0, 0, 0]]),
+                                columns=['X', 'Y', 'Z'],
+                                index=['X', 'Y', 'Z'])
+
+    # Check if calling the method causes some import or runtime errors
+    plot_adjacency_matrix(causal_graph, is_directed=True)
+    # TODO: Plotting undirected graphs with networkx causes an error when an older networkx version is used with a newer
+    #  newer matplotlib version:
+    #  AttributeError: module 'matplotlib.cbook' has no attribute 'is_numlike'
+    #  Networkx 2.4+ should fix this issue.
+    # plot_adjacency_matrix(causal_graph, is_directed=False)
