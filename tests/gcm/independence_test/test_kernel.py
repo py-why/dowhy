@@ -43,7 +43,8 @@ def test_given_categorical_conditionally_dependent_data_when_perform_kernel_base
 
 
 @flaky(max_runs=2)
-def test_given_random_seed_when_perform_conditional_kernel_based_test_then_return_deterministic_result(_preserve_random_generator_state):
+def test_given_random_seed_when_perform_conditional_kernel_based_test_then_return_deterministic_result(
+        _preserve_random_generator_state):
     z = np.random.randn(1000, 1)
     x = np.exp(z + np.random.rand(1000, 1))
     y = np.exp(z + np.random.rand(1000, 1))
@@ -118,7 +119,8 @@ def test_given_categorical_dependent_data_when_perform_kernel_based_test_then_re
 
 
 @flaky(max_runs=2)
-def test_given_random_seed_when_perform_pairwise_kernel_based_test_then_return_deterministic_result(_preserve_random_generator_state):
+def test_given_random_seed_when_perform_pairwise_kernel_based_test_then_return_deterministic_result(
+        _preserve_random_generator_state):
     x = np.random.randn(1000, 1)
     y = x + np.random.randn(1000, 1)
 
@@ -181,7 +183,8 @@ def test_given_categorical_conditionally_dependent_data_when_perform_approx_kern
 
 
 @flaky(max_runs=2)
-def test_given_random_seed_when_perform_conditional_approx_kernel_based_test_then_return_deterministic_result(_preserve_random_generator_state):
+def test_given_random_seed_when_perform_conditional_approx_kernel_based_test_then_return_deterministic_result(
+        _preserve_random_generator_state):
     z = np.random.randn(1000, 1)
     x = np.exp(z + np.random.rand(1000, 1))
     y = np.exp(z + np.random.rand(1000, 1))
@@ -271,7 +274,8 @@ def test_given_categorical_dependent_data_when_perform_approx_kernel_based_test_
 
 
 @flaky(max_runs=2)
-def test_given_random_seed_when_perform_pairwise_approx_kernel_based_test_then_return_deterministic_result(_preserve_random_generator_state):
+def test_given_random_seed_when_perform_pairwise_approx_kernel_based_test_then_return_deterministic_result(
+        _preserve_random_generator_state):
     w = np.random.randn(1000, 1)
     x = w + np.random.rand(1000, 1)
 
@@ -325,6 +329,18 @@ def test_given_weak_dependency_when_perform_kernel_based_test_then_returns_expec
 
     assert kernel_based(X[:, 0], Y) <= 0.05
     assert kernel_based(np.random.choice(2, (10000, 1)), Y) > 0.05
+
+
+def test_given_constant_data_when_perform_kernel_based_test_then_returns_expected_result():
+    assert kernel_based(np.zeros(100), np.random.normal(0, 1, 100)) == 1.0
+    assert kernel_based(np.zeros(100), np.random.normal(0, 1, 100), np.random.normal(0, 1, 100)) == 1.0
+    assert not np.isnan(kernel_based(np.random.normal(0, 1, 100), np.random.normal(0, 1, 100), np.zeros(100)))
+
+
+def test_given_constant_data_when_perform_approx_kernel_based_test_then_returns_expected_result():
+    assert approx_kernel_based(np.zeros(100), np.random.normal(0, 1, 100)) == 1.0
+    assert approx_kernel_based(np.zeros(100), np.random.normal(0, 1, 100), np.random.normal(0, 1, 100)) == 1.0
+    assert not np.isnan(approx_kernel_based(np.random.normal(0, 1, 100), np.random.normal(0, 1, 100), np.zeros(100)))
 
 
 def _generate_categorical_data():
