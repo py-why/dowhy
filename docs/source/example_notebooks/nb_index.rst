@@ -23,6 +23,7 @@ These examples are also available on `GitHub <https://github
    dowhy_causal_api
    do_sampler_demo
    gcm_basic_example
+   gcm_draw_samples
 
 .. toctree::
    :maxdepth: 1
