@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-12-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-15-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Contributors ✨
@@ -28,6 +28,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="http://people.mpi-inf.mpg.de/~kbudhath/"><img src="https://avatars.githubusercontent.com/u/111277?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Kailashbuki</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=kailashbuki" title="Code">💻</a> <a href="https://github.com/py-why/dowhy/commits?author=kailashbuki" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/petergtz"><img src="https://avatars.githubusercontent.com/u/3618401?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Peter Götz</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=petergtz" title="Code">💻</a> <a href="https://github.com/py-why/dowhy/commits?author=petergtz" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/bloebp"><img src="https://avatars.githubusercontent.com/u/51325689?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Patrick Blöbaum</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=bloebp" title="Code">💻</a> <a href="https://github.com/py-why/dowhy/commits?author=bloebp" title="Documentation">📖</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/itsoum"><img src="https://avatars.githubusercontent.com/u/9675299?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ilias Tsoumas</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=itsoum" title="Code">💻</a></td>
   </tr>
 </table>
 
