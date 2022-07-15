@@ -60,4 +60,4 @@ problems
 * Helping update the documentation for DoWhy
 
 If you would like to contribute, you can raise a pull request. If you have
-questions before contributing, you can start by opening an issue on Github. 
+questions before contributing, you can start by opening an issue on Github.
