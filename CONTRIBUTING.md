@@ -60,5 +60,3 @@ problems
 
 If you would like to contribute, you can raise a pull request. If you have
 questions before contributing, you can start by opening an issue on Github.
-
-*Technical note: we govern code and documentaiton contribution through pull requests. We recomend you fork the repository, make the changes and aditions you have in mind. When you put in a pull request it will be added into out to-do que - your contirbution is much appriciated.*
