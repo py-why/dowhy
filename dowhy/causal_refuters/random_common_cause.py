@@ -28,8 +28,6 @@ class RandomCommonCause(CausalRefuter):
         super().__init__(*args, **kwargs)
         self._num_simulations = kwargs.pop("num_simulations", CausalRefuter.DEFAULT_NUM_SIMULATIONS )
         self._random_state = kwargs.pop("random_state", None)
-        self._n_jobs = kwargs.get('n_jobs', None)
-        self._verbose = kwargs.pop('verbose', 0)
 
         self.logger = logging.getLogger(__name__)
 
@@ -54,8 +52,13 @@ class RandomCommonCause(CausalRefuter):
             new_effect = new_estimator.estimate_effect()
             return new_effect.value
 
-        sample_estimates = Parallel(n_jobs=self._n_jobs, verbose=self._verbose)(
-            delayed(refute_once)() for _ in range(self._num_simulations))
+        # Run refutation in parallel
+        sample_estimates = Parallel(
+            n_jobs=self._n_jobs,
+            verbose=self._verbose,
+            prefer=self._prefer,
+            require=self._require
+        )(delayed(refute_once)() for _ in range(self._num_simulations))
         sample_estimates = np.array(sample_estimates)
 
         refute = CausalRefutation(

@@ -23,6 +23,14 @@ class CausalRefuter:
         self._outcome_name = self._target_estimand.outcome_variable
         self._random_seed = None
 
+        # joblib params for parallel processing
+        # is here the right place for them?
+        # could be packed into a dict too and then **dict since they are used together
+        self._n_jobs = kwargs.pop('n_jobs', None)
+        self._verbose = kwargs.pop('verbose', 0)
+        self._prefer = kwargs.pop('prefer', None)
+        self._require = kwargs.pop('require', None)
+
         if "random_seed" in kwargs:
             self._random_seed = kwargs['random_seed']
             np.random.seed(self._random_seed)

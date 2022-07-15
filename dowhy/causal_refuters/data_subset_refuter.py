@@ -1,7 +1,10 @@
-from dowhy.causal_refuter import CausalRefuter, CausalRefutation
-from dowhy.causal_estimator import CausalEstimator
 import numpy as np
 import logging
+from joblib import Parallel, delayed
+
+from dowhy.causal_refuter import CausalRefuter, CausalRefutation
+from dowhy.causal_estimator import CausalEstimator
+
 
 class DataSubsetRefuter(CausalRefuter):
     """Refute an estimate by rerunning it on a random subset of the original data.
@@ -36,7 +39,7 @@ class DataSubsetRefuter(CausalRefuter):
                          ,self._subset_fraction*len(self._data.index) )
                         )
 
-        for index in range(self._num_simulations):
+        def refute_once():
             if self._random_state is None:
                 new_data = self._data.sample(frac=self._subset_fraction)
             else:
@@ -45,7 +48,16 @@ class DataSubsetRefuter(CausalRefuter):
                                             
             new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
-            sample_estimates[index] = new_effect.value
+            return new_effect.value
+
+        # Run refutation in parallel
+        sample_estimates = Parallel(
+            n_jobs=self._n_jobs,
+            verbose=self._verbose,
+            prefer=self._prefer,
+            require=self._require
+        )(delayed(refute_once)() for _ in range(self._num_simulations))
+        sample_estimates = np.array(sample_estimates)
 
         refute = CausalRefutation(
             self._estimate.value,
