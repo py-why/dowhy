@@ -14,7 +14,7 @@ from dowhy.utils.api import parse_state
 class PlaceboTreatmentRefuter(CausalRefuter):
     """Refute an estimate by replacing treatment with a randomly-generated placebo variable.
 
-    Supports additional parameters that can be specified in the refute_estimate() method. For joblib-related parameters (n_jobs, verbose, prefer, require), please refer to the joblib documentation for more details (https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html).
+    Supports additional parameters that can be specified in the refute_estimate() method. For joblib-related parameters (n_jobs, verbose), please refer to the joblib documentation for more details (https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html).
 
     :param placebo_type: Default is to generate random values for the treatment. If placebo_type is "permute", then the original treatment values are permuted by row.
     :type placebo_type: str, optional
@@ -25,20 +25,11 @@ class PlaceboTreatmentRefuter(CausalRefuter):
     :param random_state: The seed value to be added if we wish to repeat the same random behavior. If we want to repeat the same behavior we push the same seed in the psuedo-random generator.
     :type random_state: int, RandomState, optional
 
-    # now the joblib parameters are saved in base CausalRefuter class in its init method
-    # but should their description still be here? CausalRefuter init method doesn't have a docstring
     :param n_jobs: The maximum number of concurrently running jobs. If -1 all CPUs are used. If 1 is given, no parallel computing code is used at all (this is the default).
-    :type n_jobs: int, optional, default: None
+    :type n_jobs: int, optional
 
     :param verbose: The verbosity level: if non zero, progress messages are printed. Above 50, the output is sent to stdout. The frequency of the messages increases with the verbosity level. If it more than 10, all iterations are reported. The default is 0.
     :type verbose: int, optional
-
-    # are below two descriptions good enough, don't feel like I understand this fully but using wording from joblib docs again
-    :param prefer: Soft hint to choose the default backend. The default process-based backend is 'loky' and the default thread-based backend is 'threading'.
-    :type prefer: str in {'processes', 'threads'}, optional
-
-    :param require: Soft hint to choose the default backend. The default process-based backend is 'loky' and the default thread-based backend is 'threading'.
-    :type require: 'sharedmem' or None, optional
     """
 
     # Default value of the p value taken for the distribution
@@ -153,9 +144,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         # Run refutation in parallel
         sample_estimates = Parallel(
             n_jobs=self._n_jobs, 
-            verbose=self._verbose,
-            prefer=self._prefer,
-            require=self._require
+            verbose=self._verbose
         )(delayed(refute_once)() for _ in range(self._num_simulations))
         sample_estimates = np.array(sample_estimates)
 

@@ -12,6 +12,8 @@ class RandomCommonCause(CausalRefuter):
     """Refute an estimate by introducing a randomly generated confounder
     (that may have been unobserved).
 
+    Supports additional parameters that can be specified in the refute_estimate() method. For joblib-related parameters (n_jobs, verbose), please refer to the joblib documentation for more details (https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html).
+
     :param num_simulations: The number of simulations to be run, which is ``CausalRefuter.DEFAULT_NUM_SIMULATIONS`` by default
     :type num_simulations: int, optional
 
@@ -55,9 +57,7 @@ class RandomCommonCause(CausalRefuter):
         # Run refutation in parallel
         sample_estimates = Parallel(
             n_jobs=self._n_jobs,
-            verbose=self._verbose,
-            prefer=self._prefer,
-            require=self._require
+            verbose=self._verbose
         )(delayed(refute_once)() for _ in range(self._num_simulations))
         sample_estimates = np.array(sample_estimates)
 
