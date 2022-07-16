@@ -277,13 +277,13 @@ class CausalModel:
             self.logger.warning("No directed path from {0} to {1}.".format(
                 self._treatment,
                 self._outcome))
-            estimate = CausalEstimate(0, identified_estimand, None,
+            return CausalEstimate(0, identified_estimand, None,
                 control_value=control_value,
                 treatment_value=treatment_value)
         # Check if estimator's target estimand is identified
         elif identified_estimand.estimands[identifier_name] is None:
             self.logger.error("No valid identified estimand available.")
-            estimate = CausalEstimate(None, None, None,
+            return CausalEstimate(None, None, None,
                                   control_value=control_value,
                                   treatment_value=treatment_value)
         else:
@@ -327,7 +327,7 @@ class CausalModel:
                 effect_modifiers=effect_modifiers,
                 method_params=method_params
             )
-        return estimate
+            return estimate
 
     def do(self, x, identified_estimand, method_name=None,
            fit_estimator=True, method_params=None):

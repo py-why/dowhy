@@ -145,14 +145,14 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
             (1 - self._data[self._treatment_name[0]]) * (1-p_treatment)
         )
 
-        if self._target_units == "ate":
+        if self._target_units == "ate" or isinstance(self._target_units, pd.DataFrame):
             weighting_scheme_name = self.weighting_scheme
         elif self._target_units == "att":
             weighting_scheme_name = "t" + self.weighting_scheme
         elif self._target_units == "atc":
             weighting_scheme_name = "c" + self.weighting_scheme
         else:
-            raise ValueError("Target units string value not supported")
+            raise ValueError(f"Target units value {self._target_units} not supported")
 
         # Calculating the effect
         self._data['d_y'] = (
