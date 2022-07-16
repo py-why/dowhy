@@ -202,34 +202,6 @@ class CausalEstimator:
 
         return est
 
-    def effect(self, df: pd.DataFrame, **kwargs) -> np.ndarray:
-        """
-        Replicate EconML estimate() method for built-in estimators
-        Evaluate fitted estimator on arbitrary dataframe, returning a vector of ATEs
-
-        :param df: a dataframe with the same columns that the estimator was fitted on
-        :param kwargs: any overrides for the estimator constructor
-        :return:
-        """
-
-        # combining them in this way allows to override method_params from kwargs
-        extra_params = {**self.method_params, **kwargs}
-        new_estimator = type(self)(
-            data=df,
-            identified_estimand=self._target_estimand,
-            treatment=self._target_estimand.treatment_variable,
-            outcome=self._target_estimand.outcome_variable,
-            test_significance=False,
-            evaluate_effect_strength=False,
-            confidence_intervals=False,
-            target_units=self._target_units,
-            effect_modifiers=self._effect_modifier_names,
-            **extra_params
-        )
-        scalar_effect = new_estimator.estimate_effect()
-        return np.ones(len(df)) * scalar_effect.value
-
-
     def estimate_effect_naive(self):
         # TODO Only works for binary treatment
         df_withtreatment = self._data.loc[self._data[self._treatment_name] == 1]
