@@ -11,10 +11,10 @@ import pandas as pd
 
 from dowhy.gcm._noise import compute_noise_from_data
 from dowhy.gcm.cms import ProbabilisticCausalModel, InvertibleStructuralCausalModel, StructuralCausalModel
+from dowhy.gcm.fcms import ClassifierFCM
 from dowhy.gcm.fitting_sampling import draw_samples
 from dowhy.gcm.graph import get_ordered_predecessors, is_root_node, DirectedGraph, validate_causal_dag, \
-    validate_node_in_graph
-from dowhy.gcm.util.general import convert_numpy_array_to_pandas_column as to_column
+    validate_node_in_graph, node_connected_subgraph_view
 
 
 def interventional_samples(causal_model: ProbabilisticCausalModel,
@@ -52,22 +52,25 @@ def _interventional_samples(pcm: ProbabilisticCausalModel,
                             observed_data: pd.DataFrame,
                             interventions: Dict[Any, Callable[[np.ndarray], np.ndarray]]) -> pd.DataFrame:
     samples = observed_data.copy()
+
     affected_nodes = _get_nodes_affected_by_intervention(pcm.graph, interventions.keys())
+    sorted_nodes = nx.topological_sort(pcm.graph)
 
     # Simulating interventions by propagating the effects through the graph. For this, we iterate over the nodes based
     # on their topological order.
-    for node in nx.topological_sort(pcm.graph):
+    for node in sorted_nodes:
         if node not in affected_nodes:
             continue
+
         if is_root_node(pcm.graph, node):
-            node_data = samples[node]
+            node_data = samples[node].to_numpy()
         else:
-            node_data = to_column(pcm.causal_mechanism(node).draw_samples(_parent_samples_of(node, pcm, samples)))
+            node_data = pcm.causal_mechanism(node).draw_samples(_parent_samples_of(node, pcm, samples))
 
         # After drawing samples of the node based on the data generation process, we apply the corresponding
         # intervention. The inputs of downstream nodes are therefore based on the outcome of the intervention in this
         # node.
-        samples[node] = _evaluate_intervention(node, interventions, node_data)
+        samples[node] = _evaluate_intervention(node, interventions, node_data.reshape(-1))
 
     return samples
 
@@ -139,15 +142,12 @@ def _counterfactual_samples(scm: StructuralCausalModel,
         if is_root_node(scm.graph, node):
             node_data = noise_data[node].to_numpy()
         else:
-            node_data = to_column(scm.causal_mechanism(node).evaluate(_parent_samples_of(node, scm, samples),
-                                                                      noise_data[node].to_numpy()))
-        samples[node] = _evaluate_intervention(node, interventions, node_data)
+            node_data = scm.causal_mechanism(node).evaluate(_parent_samples_of(node, scm, samples),
+                                                            noise_data[node].to_numpy())
+
+        samples[node] = _evaluate_intervention(node, interventions, node_data.reshape(-1))
 
     return samples
-
-
-def _parent_samples_of(node, scm, samples):
-    return samples[get_ordered_predecessors(scm.graph, node)].to_numpy()
 
 
 def _evaluate_intervention(node: Any,
@@ -167,3 +167,81 @@ def _evaluate_intervention(node: Any,
         return post_intervention_data
     else:
         return pre_intervention_data
+
+
+def average_causal_effect(causal_model: ProbabilisticCausalModel,
+                          target_node: Any,
+                          interventions_alternative: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
+                          interventions_reference: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
+                          observed_data: Optional[pd.DataFrame] = None,
+                          num_samples_to_draw: Optional[int] = None) -> float:
+    """ Estimates the average causal effect (ACE) on the target of two different sets of interventions.
+    The interventions can be specified through the parameters `interventions_alternative` and `interventions_reference`.
+    For example, if the alternative intervention is do(T := 1) and the reference intervention
+    is do(T := 0), then the average causal effect is given by ACE = E[Y | do(T := 1)] - E[Y | do(T := 0)]:
+        >>> average_causal_effect(causal_model, 'Y', {'T': lambda _ : 1}, {'T': lambda _ : 0})
+
+    We can also specify more complex interventions on multiple nodes:
+        >>> average_causal_effect(causal_model,
+        >>>                       'Y',
+        >>>                       {'T': lambda _ : 1, 'X0': lambda x : x + 1},
+        >>>                       {'T': lambda _ : 0, 'X0': lambda x : x * 2})
+    In the above, we would estimate ACE = E[Y | do(T := 1), do(X0 := X0 + 1)] - E[Y | do(T := 0), do(X0 := X0 * 2)].
+
+    Note: The target node can be a continuous real-valued variable or a categorical variable with at most two classes
+    (i.e. binary).
+
+    :param causal_model: The probabilistic causal model we perform this intervention on .
+    :param target_node: Target node for which the ACE is estimated.
+    :param interventions_alternative: Dictionary defining the interventions for the alternative values.
+    :param interventions_reference: Dictionary defining the interventions for the reference values.
+    :param observed_data: Factual data that we observe for the nodes in the causal graph. By default, new data
+                          is sampled using the causal model. If observational data is available, providing them
+                          might improve the accuracy by mitigating issues due to a misspecified graph and/or causal
+                          models.
+    :param num_samples_to_draw: Number of samples drawn from the causal model for estimating ACE if no observed data is
+                                given.
+    :return: The estimated average causal effect (ACE).
+    """
+    # For estimating the effect, we only need to consider the nodes that have a directed path to the target node, i.e.
+    # all ancestors of the target.
+    causal_model = ProbabilisticCausalModel(node_connected_subgraph_view(causal_model.graph, target_node))
+
+    validate_causal_dag(causal_model.graph)
+    for node in interventions_alternative:
+        validate_node_in_graph(causal_model.graph, node)
+    for node in interventions_reference:
+        validate_node_in_graph(causal_model.graph, node)
+
+    if observed_data is None and num_samples_to_draw is None:
+        raise ValueError("Either observed_samples or num_samples_to_draw need to be set!")
+    if observed_data is not None and num_samples_to_draw is not None:
+        raise ValueError("Either observed_samples or num_samples_to_draw need to be set, not both!")
+
+    if num_samples_to_draw is not None:
+        observed_data = draw_samples(causal_model, num_samples_to_draw)
+
+    samples_from_target_alt = _interventional_samples(causal_model, observed_data, interventions_alternative)[
+        target_node].to_numpy()
+    samples_from_target_ref = _interventional_samples(causal_model, observed_data, interventions_reference)[
+        target_node].to_numpy()
+
+    target_causal_model = causal_model.causal_mechanism(target_node)
+    if isinstance(target_causal_model, ClassifierFCM):
+        # The target node can be a continuous real-valued variable or a categorical variable with at most two classes
+        # (i.e. binary).
+        if observed_data[target_node].nunique() > 2:
+            raise ValueError(
+                "Cannot estimate average treatment effect of categorical data with more than 2 categories!")
+
+        class_names = target_causal_model.get_class_names(np.array([0, 1]))
+        samples_from_target_alt[samples_from_target_alt == class_names[0]] = 0
+        samples_from_target_alt[samples_from_target_alt == class_names[1]] = 1
+        samples_from_target_ref[samples_from_target_ref == class_names[0]] = 0
+        samples_from_target_ref[samples_from_target_ref == class_names[1]] = 1
+
+    return np.mean(samples_from_target_alt) - np.mean(samples_from_target_ref)
+
+
+def _parent_samples_of(node: Any, scm: ProbabilisticCausalModel, samples: pd.DataFrame) -> np.ndarray:
+    return samples[get_ordered_predecessors(scm.graph, node)].to_numpy()

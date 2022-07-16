@@ -60,7 +60,7 @@ class ProbabilisticCausalModel:
 
 class StructuralCausalModel(ProbabilisticCausalModel):
     """Represents a structural causal model (SCM), as required e.g. by
-    :func:`~dowhy.gcm.counterfactual_samples`. As compared to a :class:`~dowhy.gcm.ProbabilisticCausalModel`,
+    :func:`~dowhy.gcm.whatif.counterfactual_samples`. As compared to a :class:`~dowhy.gcm.cms.ProbabilisticCausalModel`,
     an SCM describes the data generation process in non-root nodes by functional causal models.
     """
 
@@ -73,9 +73,10 @@ class StructuralCausalModel(ProbabilisticCausalModel):
 
 class InvertibleStructuralCausalModel(StructuralCausalModel):
     """Represents an invertible structural graphical causal model, as required e.g. by
-    :func:`~dowhy.gcm.counterfactual_samples`. This is a subclass of :class:`~dowhy.gcm.StructuralCausalModel` and
-    has further restrictions on the class of causal mechanisms. Here, the mechanisms of non-root nodes need to be
-    invertible with respect to the noise, such as :class:`~dowhy.gcm.PostNonlinearModel`.
+    :func:`~dowhy.gcm.whatif.counterfactual_samples`. This is a subclass of
+    :class:`~dowhy.gcm.cms.StructuralCausalModel` and has further restrictions on the class of causal mechanisms.
+    Here, the mechanisms of non-root nodes need to be invertible with respect to the noise,
+    such as :class:`~dowhy.gcm.fcms.PostNonlinearModel`.
     """
 
     def set_causal_mechanism(self, target_node: Any,

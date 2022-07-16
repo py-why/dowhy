@@ -6,7 +6,7 @@ from flaky import flaky
 from pytest import approx
 
 from dowhy.gcm import ClassifierFCM, AdditiveNoiseModel, EmpiricalDistribution, fit, interventional_samples, \
-    ProbabilisticCausalModel, counterfactual_samples, InvertibleStructuralCausalModel
+    ProbabilisticCausalModel, counterfactual_samples, InvertibleStructuralCausalModel, average_causal_effect, auto
 from dowhy.gcm.ml import create_linear_regressor, create_logistic_regression_classifier
 
 
@@ -126,9 +126,9 @@ def test_interventional_samples_atomic_multiple_interventions():
                                                        X2=lambda x: x + 5), observed_data).to_numpy()
     sample = sample.squeeze()
     assert sample[0] == 10
-    assert sample[1] == approx(20, abs=0.2)
-    assert sample[2] == approx(10, abs=0.2)
-    assert sample[3] == approx(5, abs=0.2)
+    assert sample[1] == approx(20, abs=0.3)
+    assert sample[2] == approx(10, abs=0.3)
+    assert sample[3] == approx(5, abs=0.3)
 
 
 def test_interventional_samples_raise_error_all_parameter_none():
@@ -144,7 +144,8 @@ def test_interventional_samples_raise_error_both_parameter_given():
     observed_data = pd.DataFrame({'X0': [0], 'X1': [1], 'X2': [2], 'X3': [3]})
 
     with pytest.raises(ValueError):
-        interventional_samples(causal_model, dict(X0=lambda x: 10), observed_data=observed_data, num_samples_to_draw=100)
+        interventional_samples(causal_model, dict(X0=lambda x: 10), observed_data=observed_data,
+                               num_samples_to_draw=100)
 
 
 def test_counterfactual_samples_with_observed_samples():
@@ -192,3 +193,43 @@ def test_counterfactual_samples_raises_error_both_parameter_given():
                                dict(X0=lambda x: 10),
                                observed_data=pd.DataFrame({'X0': [1], 'X1': [3], 'X2': [3], 'X3': [4]}),
                                noise_data=pd.DataFrame({'X0': [1], 'X1': [4], 'X2': [3], 'X3': [4]}))
+
+
+@flaky(max_runs=3)
+def test_given_continuous_target_when_estimate_average_causal_effect_then_return_expected_result():
+    T = np.random.choice(2, 1000, replace=True)
+    X0 = np.random.normal(0, 0.2, 1000) + T
+    X1 = np.random.normal(0, 0.2, 1000) + 0.5 * T
+    Y = X0 + X1 + np.random.normal(0, 0.1, 1000)
+
+    data = pd.DataFrame(dict(T=T, X0=X0, X1=X1, Y=Y))
+
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([('T', 'X0'), ('T', 'X1'), ('X0', 'Y'), ('X1', 'Y')]))
+    auto.assign_causal_mechanisms(causal_model, data, auto.AssignmentQuality.GOOD)
+    fit(causal_model, data)
+
+    assert average_causal_effect(causal_model,
+                                 'Y',
+                                 interventions_alternative={'T': lambda x: 1},
+                                 interventions_reference={'T': lambda x: 0},
+                                 num_samples_to_draw=1000) == approx(1.5, abs=0.1)
+
+
+@flaky(max_runs=3)
+def test_given_binary_target_when_estimate_average_causal_effect_then_return_expected_result():
+    T = np.random.choice(2, 1000, replace=True)
+    X0 = np.random.normal(0, 0.1, 1000) + T
+    X1 = np.random.normal(0, 0.1, 1000) + 0.5 * T
+    Y = ((X0 + X1 + np.random.normal(0, 0.1, 1000)) >= 1.5).astype(str)
+
+    data = pd.DataFrame(dict(T=T, X0=X0, X1=X1, Y=Y))
+
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([('T', 'X0'), ('T', 'X1'), ('X0', 'Y'), ('X1', 'Y')]))
+    auto.assign_causal_mechanisms(causal_model, data, auto.AssignmentQuality.GOOD)
+    fit(causal_model, data)
+
+    assert average_causal_effect(causal_model,
+                                 'Y',
+                                 interventions_alternative={'T': lambda x: 1},
+                                 interventions_reference={'T': lambda x: 0},
+                                 num_samples_to_draw=1000) == approx(0.5, abs=0.1)

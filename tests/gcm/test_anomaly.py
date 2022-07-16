@@ -10,204 +10,83 @@ from dowhy.gcm import auto, AdditiveNoiseModel, fit, anomaly_scores, \
     MedianCDFQuantileScorer, ITAnomalyScorer, RescaledMedianCDFQuantileScorer, \
     MeanDeviationScorer, MedianDeviationScorer, InverseDensityScorer, EmpiricalDistribution, \
     ProbabilisticCausalModel
-from dowhy.gcm.anomaly import conditional_anomaly_score
+from dowhy.gcm.anomaly import conditional_anomaly_scores
 from dowhy.gcm.constant import EPS
 from dowhy.gcm.distribution_change import estimate_distribution_change_scores
 from dowhy.gcm.ml import create_linear_regressor
 
 
-def _create_scm_for_distribution_change():
-    causal_model = ProbabilisticCausalModel(nx.DiGraph([('X0', 'X1'), ('X0', 'X2'), ('X2', 'X3')]))
-    causal_model.set_causal_mechanism('X0', EmpiricalDistribution())
-    causal_model.set_causal_mechanism('X1', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-    causal_model.set_causal_mechanism('X2', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-    causal_model.set_causal_mechanism('X3', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-    return causal_model
+def test_given_outlier_observation_when_estimate_anomaly_scores_using_median_cdf_quantile_scorer_then_returns_expected_result():
+    pcm, outlier_observation = _create_pcm_and_outlier_observation()
 
-
-def test_estimate_anomaly_scores_using_median_cdf_quantile_anomaly_scoring():
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
-
-    original_observations = pd.DataFrame({'X0': X0,
-                                          'X1': X1,
-                                          'X2': X2,
-                                          'X3': X3})
-    outlier_observations = pd.DataFrame({'X0': X0[:1],
-                                         'X1': X1[:1] + np.std(X1.data) * 3,
-                                         'X2': X2[:1],
-                                         'X3': X3[:1]})
-
-    causal_model = ProbabilisticCausalModel(nx.DiGraph([('X0', 'X1'), ('X0', 'X2'), ('X2', 'X3')]))
-    causal_model.set_causal_mechanism('X0', EmpiricalDistribution())
-    causal_model.set_causal_mechanism('X1', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-    causal_model.set_causal_mechanism('X2', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-    causal_model.set_causal_mechanism('X3', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-
-    fit(causal_model, original_observations)
-
-    assert max(anomaly_scores(causal_model,
-                              outlier_observations,
+    assert max(anomaly_scores(pcm,
+                              outlier_observation,
                               anomaly_scorer_factory=MedianCDFQuantileScorer).items(),
                key=operator.itemgetter(1))[0] == 'X1'
 
-    assert max(anomaly_scores(causal_model,
-                              outlier_observations,
+    assert max(anomaly_scores(pcm,
+                              outlier_observation,
                               anomaly_scorer_factory=
                               lambda: ITAnomalyScorer(MedianCDFQuantileScorer())).items(),
                key=operator.itemgetter(1))[0] == 'X1'
 
 
-def test_estimate_anomaly_scores_using_rescaled_median_cdf_quantile_scores():
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
+def test_given_outlier_observation_when_estimate_anomaly_scores_using_rescaled_median_cdf_quantile_scorer_then_returns_expected_result():
+    pcm, outlier_observation = _create_pcm_and_outlier_observation()
 
-    original_observations = pd.DataFrame({'X0': X0,
-                                          'X1': X1,
-                                          'X2': X2,
-                                          'X3': X3})
-    outlier_observations = pd.DataFrame({'X0': X0[:1],
-                                         'X1': X1[:1] + np.std(X1.data) * 3,
-                                         'X2': X2[:1],
-                                         'X3': X3[:1]})
-
-    causal_model = ProbabilisticCausalModel(nx.DiGraph([('X0', 'X1'), ('X0', 'X2'), ('X2', 'X3')]))
-    causal_model.set_causal_mechanism('X0', EmpiricalDistribution())
-    causal_model.set_causal_mechanism('X1', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-    causal_model.set_causal_mechanism('X2', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-    causal_model.set_causal_mechanism('X3', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-
-    fit(causal_model, original_observations)
-
-    assert max(anomaly_scores(causal_model,
-                              outlier_observations,
+    assert max(anomaly_scores(pcm,
+                              outlier_observation,
                               anomaly_scorer_factory=RescaledMedianCDFQuantileScorer).items(),
                key=operator.itemgetter(1))[0] == 'X1'
 
-    assert max(anomaly_scores(causal_model,
-                              outlier_observations,
+    assert max(anomaly_scores(pcm,
+                              outlier_observation,
                               anomaly_scorer_factory=
                               lambda: ITAnomalyScorer(RescaledMedianCDFQuantileScorer())).items(),
                key=operator.itemgetter(1))[0] == 'X1'
 
 
-def test_estimate_anomaly_scores_using_mean_deviation_anomaly_scoring_function():
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
+def test_given_outlier_observation_when_estimate_anomaly_scores_using_mean_deviation_scorer_then_returns_expected_result():
+    pcm, outlier_observation = _create_pcm_and_outlier_observation()
 
-    original_observations = pd.DataFrame({'X0': X0,
-                                          'X1': X1,
-                                          'X2': X2,
-                                          'X3': X3})
-    outlier_observations = pd.DataFrame({'X0': X0[:1],
-                                         'X1': X1[:1] + np.std(X1.data) * 3,
-                                         'X2': X2[:1],
-                                         'X3': X3[:1]})
-
-    causal_model = ProbabilisticCausalModel(nx.DiGraph([('X0', 'X1'), ('X0', 'X2'), ('X2', 'X3')]))
-    causal_model.set_causal_mechanism('X0', EmpiricalDistribution())
-    causal_model.set_causal_mechanism('X1', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-    causal_model.set_causal_mechanism('X2', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-    causal_model.set_causal_mechanism('X3', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-
-    fit(causal_model, original_observations)
-
-    assert max(anomaly_scores(causal_model,
-                              outlier_observations,
+    assert max(anomaly_scores(pcm,
+                              outlier_observation,
                               anomaly_scorer_factory=lambda: MeanDeviationScorer())
                .items(),
                key=operator.itemgetter(1))[0] == 'X1'
 
-    assert max(anomaly_scores(causal_model,
-                              outlier_observations,
+    assert max(anomaly_scores(pcm,
+                              outlier_observation,
                               anomaly_scorer_factory=lambda: ITAnomalyScorer(MeanDeviationScorer())).items(),
                key=operator.itemgetter(1))[0] == 'X1'
 
 
-def test_estimate_anomaly_scores_using_median_deviation_anomaly_scoring_function():
-    print(np.random.get_state())
+def test_given_outlier_observation_when_estimate_anomaly_scores_using_median_deviation_scorer_then_returns_expected_result():
+    pcm, outlier_observation = _create_pcm_and_outlier_observation()
 
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
-
-    original_observations = pd.DataFrame({'X0': X0,
-                                          'X1': X1,
-                                          'X2': X2,
-                                          'X3': X3})
-    outlier_observations = pd.DataFrame({'X0': X0[:1],
-                                         'X1': X1[:1] + np.std(X1.data) * 3,
-                                         'X2': X2[:1],
-                                         'X3': X3[:1]})
-
-    causal_model = ProbabilisticCausalModel(nx.DiGraph([('X0', 'X1'), ('X0', 'X2'), ('X2', 'X3')]))
-    causal_model.set_causal_mechanism('X0', EmpiricalDistribution())
-    causal_model.set_causal_mechanism('X1', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-    causal_model.set_causal_mechanism('X2', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-    causal_model.set_causal_mechanism('X3', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-
-    fit(causal_model, original_observations)
-
-    assert max(anomaly_scores(causal_model,
-                              outlier_observations,
+    assert max(anomaly_scores(pcm,
+                              outlier_observation,
                               anomaly_scorer_factory=lambda: MedianDeviationScorer())
                .items(),
                key=operator.itemgetter(1))[0] == 'X1'
 
-    assert max(anomaly_scores(causal_model,
-                              outlier_observations,
+    assert max(anomaly_scores(pcm,
+                              outlier_observation,
                               anomaly_scorer_factory=lambda: ITAnomalyScorer(MedianDeviationScorer())).items(),
                key=operator.itemgetter(1))[0] == 'X1'
 
 
-def test_when_estimate_inverse_density_score_then_returns_expected_results():
-    print(np.random.get_state())
+def test_given_outlier_observation_when_estimate_anomaly_scores_using_inverse_density_scorer_then_returns_expected_result():
+    pcm, outlier_observation = _create_pcm_and_outlier_observation()
 
-    X0 = np.random.uniform(-1, 1, 500)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 500)
-    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 500)
-    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 500)
-
-    original_observations = pd.DataFrame({'X0': X0,
-                                          'X1': X1,
-                                          'X2': X2,
-                                          'X3': X3})
-    outlier_observations = pd.DataFrame({'X0': X0[:1],
-                                         'X1': X1[:1] + np.std(X1.data) * 3,
-                                         'X2': X2[:1],
-                                         'X3': X3[:1]})
-
-    causal_model = ProbabilisticCausalModel(nx.DiGraph([('X0', 'X1'), ('X0', 'X2'), ('X2', 'X3')]))
-    causal_model.set_causal_mechanism('X0', EmpiricalDistribution())
-    causal_model.set_causal_mechanism('X1', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-    causal_model.set_causal_mechanism('X2', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-    causal_model.set_causal_mechanism('X3', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-
-    fit(causal_model, original_observations)
-
-    assert max(anomaly_scores(causal_model,
-                              outlier_observations,
+    assert max(anomaly_scores(pcm,
+                              outlier_observation,
                               anomaly_scorer_factory=lambda: InverseDensityScorer()).items(),
                key=operator.itemgetter(1))[0] == 'X1'
 
 
-def test_estimate_distribution_change_scores():
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
-
-    original_observations = pd.DataFrame({'X0': X0,
-                                          'X1': X1,
-                                          'X2': X2,
-                                          'X3': X3})
+def test_given_data_with_change_in_mechanism_when_estimate_distribution_change_score_then_returns_expected_result():
+    causal_model, original_observations = _create_scm_for_distribution_change()
 
     X0 = np.random.uniform(-1, 1, 1000)
     X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
@@ -219,24 +98,13 @@ def test_estimate_distribution_change_scores():
                                          'X2': X2,
                                          'X3': X3})
 
-    causal_model = _create_scm_for_distribution_change()
-    fit(causal_model, original_observations)
-
     assert \
         max(estimate_distribution_change_scores(causal_model, original_observations, outlier_observations).items(),
             key=operator.itemgetter(1))[0] == 'X2'
 
 
-def test_estimate_distribution_change_scores_with_expectation():
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
-
-    original_observations = pd.DataFrame({'X0': X0,
-                                          'X1': X1,
-                                          'X2': X2,
-                                          'X3': X3})
+def test_given_data_with_change_in_mechanism_when_estimate_distribution_change_score_using_difference_in_means_then_returns_expected_result():
+    causal_model, original_observations = _create_scm_for_distribution_change()
 
     X0 = np.random.uniform(-1, 1, 1000)
     X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
@@ -247,9 +115,6 @@ def test_estimate_distribution_change_scores_with_expectation():
                                          'X1': X1,
                                          'X2': X2,
                                          'X3': X3})
-
-    causal_model = _create_scm_for_distribution_change()
-    fit(causal_model, original_observations)
 
     scores = estimate_distribution_change_scores(
         causal_model,
@@ -265,16 +130,8 @@ def test_estimate_distribution_change_scores_with_expectation():
     assert max(scores.items(), key=operator.itemgetter(1))[0] == 'X2'
 
 
-def test_estimate_distribution_change_scores_with_expectation_root_node():
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
-
-    original_observations = pd.DataFrame({'X0': X0,
-                                          'X1': X1,
-                                          'X2': X2,
-                                          'X3': X3})
+def test_given_data_with_change_in_root_node_when_estimate_distribution_change_score_using_difference_in_means_then_returns_expected_result():
+    causal_model, original_observations = _create_scm_for_distribution_change()
 
     # Here, changing the mechanism.
     X0 = np.random.uniform(-1.5, 1, 1000)
@@ -285,9 +142,6 @@ def test_estimate_distribution_change_scores_with_expectation_root_node():
                                          'X1': X1,
                                          'X2': X2,
                                          'X3': X3})
-
-    causal_model = _create_scm_for_distribution_change()
-    fit(causal_model, original_observations)
 
     scores = estimate_distribution_change_scores(
         causal_model,
@@ -333,16 +187,8 @@ def test_given_graph_with_multiple_parents_when_estimate_distribution_change_sco
 
 
 @flaky(max_runs=5)
-def test_estimate_distribution_change_scores_with_variance():
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
-
-    original_observations = pd.DataFrame({'X0': X0,
-                                          'X1': X1,
-                                          'X2': X2,
-                                          'X3': X3})
+def test_given_data_with_change_in_mechanism_when_estimate_distribution_change_score_using_difference_in_variance_then_returns_expected_result():
+    causal_model, original_observations = _create_scm_for_distribution_change()
 
     X0 = np.random.uniform(-1, 1, 1000)
     X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
@@ -353,9 +199,6 @@ def test_estimate_distribution_change_scores_with_variance():
                                          'X1': X1,
                                          'X2': X2,
                                          'X3': X3})
-
-    causal_model = _create_scm_for_distribution_change()
-    fit(causal_model, original_observations)
 
     scores = estimate_distribution_change_scores(
         causal_model,
@@ -372,40 +215,8 @@ def test_estimate_distribution_change_scores_with_variance():
 
 
 @flaky(max_runs=5)
-def test_when_using_estimate_distribution_change_scores_without_fdrc_then_returns_valid_results():
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
-
-    original_observations = pd.DataFrame({'X0': X0,
-                                          'X1': X1,
-                                          'X2': X2,
-                                          'X3': X3})
-
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    # Here, changing the mechanism.
-    X2 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
-    outlier_observations = pd.DataFrame({'X0': X0,
-                                         'X1': X1,
-                                         'X2': X2,
-                                         'X3': X3})
-
-    causal_model = _create_scm_for_distribution_change()
-    fit(causal_model, original_observations)
-
-    assert max(estimate_distribution_change_scores(causal_model,
-                                                   original_observations,
-                                                   outlier_observations,
-                                                   mechanism_change_test_fdr_control_method=None).items(),
-               key=operator.itemgetter(1))[0] == 'X2'
-
-
-@flaky(max_runs=5)
-def test_estimate_anomaly_scores_does_not_raise_an_error_with_multivariate_inputs():
-    """ This test verifies that estimate_anomaly_scores correctly handles multivariate input features, which
+def test_given_multivariate_inputs_when_estimate_anomaly_scores_then_does_not_raise_error():
+    """This test verifies that estimate_anomaly_scores correctly handles multivariate input features, which
      caused problems in an earlier version. """
 
     causal_model = ProbabilisticCausalModel(nx.DiGraph([('X1', 'X0'), ('X2', 'X0'), ('X3', 'X0'), ('X4', 'X0')]))
@@ -431,7 +242,7 @@ def test_estimate_anomaly_scores_does_not_raise_an_error_with_multivariate_input
 
 
 @flaky(max_runs=3)
-def test_estimate_conditional_anomaly_score():
+def test_given_simple_linear_data_when_estimate_conditional_anomaly_scores_then_returns_expected_result():
     X = np.random.normal(0, 1, 1000)
     N = np.random.normal(0, 1, 1000)
 
@@ -443,5 +254,48 @@ def test_estimate_conditional_anomaly_score():
     anomaly_scorer = MeanDeviationScorer()
     anomaly_scorer.fit(N)
 
-    assert conditional_anomaly_score(X[:5], Y[:5], causal_model, MeanDeviationScorer).reshape(-1) \
+    assert conditional_anomaly_scores(X[:5], Y[:5], causal_model, MeanDeviationScorer).reshape(-1) \
            == approx(anomaly_scorer.score(Y[:5] - 2 * X[:5]), abs=0.1)
+
+
+def _create_scm_for_distribution_change():
+    X0 = np.random.uniform(-1, 1, 1000)
+    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
+    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
+    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
+
+    original_observations = pd.DataFrame({'X0': X0,
+                                          'X1': X1,
+                                          'X2': X2,
+                                          'X3': X3})
+
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([('X0', 'X1'), ('X0', 'X2'), ('X2', 'X3')]))
+    causal_model.set_causal_mechanism('X0', EmpiricalDistribution())
+    causal_model.set_causal_mechanism('X1', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
+    causal_model.set_causal_mechanism('X2', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
+    causal_model.set_causal_mechanism('X3', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
+    fit(causal_model, original_observations)
+
+    return causal_model, original_observations
+
+
+def _create_pcm_and_outlier_observation():
+    X0 = np.random.uniform(-1, 1, 1000)
+    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
+    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
+    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
+
+    original_observations = pd.DataFrame({'X0': X0,
+                                          'X1': X1,
+                                          'X2': X2,
+                                          'X3': X3})
+    outlier_observation = pd.DataFrame({'X0': X0[:1],
+                                        'X1': X1[:1] + np.std(X1.data) * 3,  # Creating an anomaly here
+                                        'X2': X2[:1],
+                                        'X3': X3[:1]})
+
+    pcm = ProbabilisticCausalModel(nx.DiGraph([('X0', 'X1'), ('X0', 'X2'), ('X2', 'X3')]))
+    auto.assign_causal_mechanisms(pcm, original_observations)
+    fit(pcm, original_observations)
+
+    return pcm, outlier_observation

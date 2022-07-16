@@ -16,12 +16,12 @@ from dowhy.gcm.stats import permute_features
 from dowhy.gcm.util.general import shape_into_2d
 
 
-def conditional_anomaly_score(parent_samples: np.ndarray,
-                              target_samples: np.ndarray,
-                              causal_mechanism: ConditionalStochasticModel,
-                              anomaly_scorer_factory: Callable[[], AnomalyScorer] = MedianCDFQuantileScorer,
-                              num_samples_conditional: int = 10000) -> np.ndarray:
-    """Estimates the conditional anomaly score based on the expected outcomes of the causal model.
+def conditional_anomaly_scores(parent_samples: np.ndarray,
+                               target_samples: np.ndarray,
+                               causal_mechanism: ConditionalStochasticModel,
+                               anomaly_scorer_factory: Callable[[], AnomalyScorer] = MedianCDFQuantileScorer,
+                               num_samples_conditional: int = 10000) -> np.ndarray:
+    """Estimates the conditional anomaly scores based on the expected outcomes of the causal model.
 
     :param parent_samples: Samples from all parents of the target node.
     :param target_samples: Samples from the target node.
@@ -67,11 +67,11 @@ def anomaly_scores(causal_model: ProbabilisticCausalModel,
         else:
             tmp_anomaly_parent_samples = anomaly_data[get_ordered_predecessors(causal_model.graph, node)].to_numpy()
             tmp_anomaly_target_samples = anomaly_data[node].to_numpy()
-            results[node] = conditional_anomaly_score(tmp_anomaly_parent_samples,
-                                                      tmp_anomaly_target_samples,
-                                                      causal_model.causal_mechanism(node),
-                                                      anomaly_scorer_factory,
-                                                      num_samples_conditional)
+            results[node] = conditional_anomaly_scores(tmp_anomaly_parent_samples,
+                                                       tmp_anomaly_target_samples,
+                                                       causal_model.causal_mechanism(node),
+                                                       anomaly_scorer_factory,
+                                                       num_samples_conditional)
 
     return results
 
@@ -83,7 +83,7 @@ def attribute_anomalies(causal_model: InvertibleStructuralCausalModel,
                         attribute_mean_deviation: bool = False,
                         num_distribution_samples: int = 5000,
                         shapley_config: Optional[ShapleyConfig] = None) -> Dict[Any, np.ndarray]:
-    """ Estimates the contributions of upstream nodes to the anomaly score of the target_node for each sample in
+    """Estimates the contributions of upstream nodes to the anomaly score of the target_node for each sample in
     anomaly_samples. By default, the anomaly score is based on the information theoretic (IT) score
     -log(P(g(X) >= g(x))), where g is the anomaly_scorer, X samples from the marginal
     distribution of the target_node and x an observation of the target_node in anomaly_samples. If
@@ -105,14 +105,15 @@ def attribute_anomalies(causal_model: InvertibleStructuralCausalModel,
     :param anomaly_samples: Anomalous observations for which the contributions are estimated.
     :param anomaly_scorer: Anomaly scorer g. If None is given, a MedianCDFQuantileScorer is used.
     :param attribute_mean_deviation: If set to False, the contribution is estimated based on the IT score and if it is
-    set to True, the contribution is based on the feature relevance with respect to the given scoring function.
+                                     set to True, the contribution is based on the feature relevance with respect to the given scoring function.
     :param num_distribution_samples: Number of samples from X, the marginal distribution of the target. These are used
-    for evaluating the tail probability in case of the IT score (attribute_mean_deviation is False) or as background
-    samples in case of feature relevance (attribute_mean_deviation is True).
+                                     for evaluating the tail probability in case of the IT score
+                                     (attribute_mean_deviation is False) or as samples for randomization in case of
+                                     feature relevance (attribute_mean_deviation is True).
     :param shapley_config: :class:`~dowhy.gcm.shapley.ShapleyConfig` for the Shapley estimator.
     :return: A dictionary that assigns a numpy array to each upstream node including the target_node itself. The
-    i-th entry of an array indicates the contribution of the corresponding node to the anomaly score of the target
-    for the i-th observation in anomaly_samples.
+             i-th entry of an array indicates the contribution of the corresponding node to the anomaly score of the target
+             for the i-th observation in anomaly_samples.
     """
     validate_causal_dag(causal_model.graph)
 
@@ -126,21 +127,21 @@ def attribute_anomalies(causal_model: InvertibleStructuralCausalModel,
     noise_dependent_function, nodes_order = get_noise_dependent_function(causal_model, target_node)
     anomaly_scorer.fit(node_samples[target_node].to_numpy())
 
-    attributions = anomaly_score_attributions(noise_of_anomaly_samples[nodes_order].to_numpy(),
-                                              noise_samples[nodes_order].to_numpy(),
-                                              lambda x: anomaly_scorer.score(noise_dependent_function(x)),
-                                              attribute_mean_deviation,
-                                              shapley_config)
+    attributions = attribute_anomaly_scores(noise_of_anomaly_samples[nodes_order].to_numpy(),
+                                            noise_samples[nodes_order].to_numpy(),
+                                            lambda x: anomaly_scorer.score(noise_dependent_function(x)),
+                                            attribute_mean_deviation,
+                                            shapley_config)
 
     return {node: attributions[:, i] for i, node in enumerate(nodes_order)}
 
 
-def anomaly_score_attributions(samples_of_interest: np.ndarray,
-                               distribution_samples: np.ndarray,
-                               anomaly_scoring_func: Callable[[np.ndarray], np.ndarray],
-                               attribute_mean_deviation: bool,
-                               shapley_config: Optional[ShapleyConfig] = None) -> np.ndarray:
-    """Estimates the contributions of the features for each sample in samples_of_interest to the anomaly score obtained
+def attribute_anomaly_scores(anomaly_samples: np.ndarray,
+                             distribution_samples: np.ndarray,
+                             anomaly_scoring_func: Callable[[np.ndarray], np.ndarray],
+                             attribute_mean_deviation: bool,
+                             shapley_config: Optional[ShapleyConfig] = None) -> np.ndarray:
+    """Estimates the contributions of the features for each sample in anomaly_samples to the anomaly score obtained
     by the anomaly_scoring_func. If attribute_mean_deviation is set to False, the anomaly score is based on the
     information theoretic (IT) score -log(P(g(X) >= g(x))), where g is the anomaly_scoring_func, X samples from the
     marginal distribution of the target_node and x an observation of the target_node in anomaly_samples. If
@@ -154,30 +155,31 @@ def anomaly_score_attributions(samples_of_interest: np.ndarray,
         anomaly_scoring_func = lambda x, y: estimate_inverse_density_score(x, y, density_estimator)
 
     Related paper:
-    Janzing, D., Budhathoki, K., Minorics, L., & Bloebaum, P. (2019).
+    Janzing, D., Budhathoki, K., Minorics, L., & Bloebaum, P. (2022).
     Causal structure based root cause analysis of outliers
     https://arxiv.org/abs/1912.02724
 
-    :param samples_of_interest: Samples x for which the contributions are estimated. The dimensionality of these samples
-                                doesn't matter as long as the anomaly_scoring_func supports it.
+    :param anomaly_samples: Samples x for which the contributions are estimated. The dimensionality of these samples
+                            doesn't matter as long as the anomaly_scoring_func supports it.
     :param distribution_samples: Samples from the (non-anomalous) distribution X.
     :param anomaly_scoring_func: A function g that takes a sample from X as input and returns an anomaly score.
     :param attribute_mean_deviation: If set to False, the contribution is estimated based on the IT score and if it is
-    set to True, the contribution is based on the feature relevance with respect to the given scoring function.
+                                     set to True, the contribution is based on the feature relevance with respect to the
+                                     given scoring function.
     :param shapley_config: :class:`~dowhy.gcm.shapley.ShapleyConfig` for the Shapley estimator.
-    :return: A numpy array with the feature contributions to the anomaly score for each sample in samples_of_interest.
+    :return: A numpy array with the feature contributions to the anomaly score for each sample in anomaly_samples.
     """
     if attribute_mean_deviation:
         expectation_of_score = np.mean(anomaly_scoring_func(distribution_samples))
     else:
-        anomaly_scores = anomaly_scoring_func(samples_of_interest)
+        anomaly_scores = anomaly_scoring_func(anomaly_samples)
 
     def set_function(subset: np.ndarray) -> Union[np.ndarray, float]:
         feature_samples = permute_features(distribution_samples, np.arange(0, subset.shape[0])[subset == 0], True)
 
-        result = np.zeros(samples_of_interest.shape[0])
-        for i in range(samples_of_interest.shape[0]):
-            feature_samples[:, subset == 1] = samples_of_interest[i, subset == 1]
+        result = np.zeros(anomaly_samples.shape[0])
+        for i in range(anomaly_samples.shape[0]):
+            feature_samples[:, subset == 1] = anomaly_samples[i, subset == 1]
 
             if attribute_mean_deviation:
                 # Usual feature relevance using the mean deviation as set function, i.e. g(x) - E[g(X)]
@@ -188,7 +190,7 @@ def anomaly_score_attributions(samples_of_interest: np.ndarray,
 
         return result
 
-    return estimate_shapley_values(set_function, samples_of_interest.shape[1], shapley_config)
+    return estimate_shapley_values(set_function, anomaly_samples.shape[1], shapley_config)
 
 
 def _relative_frequency(conditions: np.ndarray):

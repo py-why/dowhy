@@ -520,6 +520,19 @@ Bibtex::
   year={2020}
   }
 
+And if you find the gcm package useful for your work, please also cite us as:
+
+Patrick Blöbaum, Peter Götz, Kailash Budhathoki, Atalanti A. Mastakouri, Dominik Janzing. DoWhy-GCM: An extension of DoWhy for causal inference in graphical causal models. 2022. https://arxiv.org/abs/2206.06821
+
+Bibtex::
+
+    @article{dowhy_gcm,
+      author = {Bl{\"o}baum, Patrick and G{\"o}tz, Peter and Budhathoki, Kailash and Mastakouri, Atalanti A. and Janzing, Dominik},
+      title = {DoWhy-GCM: An extension of DoWhy for causal inference in graphical causal models},
+      journal={arXiv preprint arXiv:2206.06821},
+      year={2022}
+    }
+
 Roadmap 
 =======
 The `projects <https://github.com/microsoft/dowhy/projects>`_ page lists the next steps for DoWhy. If you would like to contribute, have a look at the current projects. If you have a specific request for DoWhy, please `raise an issue <https://github.com/microsoft/dowhy/issues>`_.

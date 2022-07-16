@@ -6,12 +6,12 @@ from pytest import approx
 
 from dowhy.gcm import auto, MedianCDFQuantileScorer, InverseDensityScorer, fit, \
     AdditiveNoiseModel, PredictionModel, attribute_anomalies, InvertibleStructuralCausalModel
-from dowhy.gcm.anomaly import anomaly_score_attributions, _relative_frequency
+from dowhy.gcm.anomaly import attribute_anomaly_scores, _relative_frequency
 from dowhy.gcm.density_estimators import GaussianMixtureDensityEstimator
 
 
 @flaky(max_runs=3)
-def test_given_simple_gaussian_data_when_estimate_anomaly_score_attributions_with_it_score_then_returns_qualitatively_correct_results():
+def test_given_simple_gaussian_data_when_attribute_anomaly_scores_with_it_score_then_returns_qualitatively_correct_results():
     Z = np.random.normal(0, 1, 5000)
     X0 = Z + np.random.normal(0, 1, 5000)
     X1 = Z + np.random.normal(0, 1, 5000)
@@ -32,10 +32,10 @@ def test_given_simple_gaussian_data_when_estimate_anomaly_score_attributions_wit
                                 [0, 3, 3, 0],
                                 [3, 0, 3, 3]])
 
-    contributions = anomaly_score_attributions(anomaly_samples,
-                                               original_observations,
-                                               anomaly_scorer.score,
-                                               False)
+    contributions = attribute_anomaly_scores(anomaly_samples,
+                                             original_observations,
+                                             anomaly_scorer.score,
+                                             False)
 
     # In the first sample, only the first variable is anomalous. Therefore, it should have the highest contribution
     # and it should be "significantly" higher than the contribution of the other ones (here, we just arbitrarily say
@@ -72,7 +72,7 @@ def test_given_simple_gaussian_data_when_estimate_anomaly_score_attributions_wit
 
 
 @flaky(max_runs=3)
-def test_given_simple_gaussian_data_when_estimate_anomaly_score_attributions_with_feature_relevance_then_returns_qualitatively_correct_results():
+def test_given_simple_gaussian_data_when_attribute_anomaly_scores_with_feature_relevance_then_returns_qualitatively_correct_results():
     X0 = np.random.normal(0, 1, 5000)
     X1 = np.random.normal(0, 1, 5000)
     X2 = np.random.normal(0, 1, 5000)
@@ -91,10 +91,10 @@ def test_given_simple_gaussian_data_when_estimate_anomaly_score_attributions_wit
                                 [0, 3, 3, 0],
                                 [3, 0, 3, 3]])
 
-    contributions = anomaly_score_attributions(anomaly_samples,
-                                               original_observations,
-                                               anomaly_scorer.score,
-                                               True)
+    contributions = attribute_anomaly_scores(anomaly_samples,
+                                             original_observations,
+                                             anomaly_scorer.score,
+                                             True)
 
     assert np.argmax(contributions[0]) == 0  # The biggest contribution to the score should be for the first variable.
     assert contributions[0][0] > 0  # The contribution should be positive (anomalous variable).
@@ -145,7 +145,7 @@ def test_given_simple_causal_chain_with_linear_relationships_when_attribute_anom
                                  'X3': np.array([10, 10, 20])})
 
     scores = attribute_anomalies(causal_model,
-                                      'X3',
+                                 'X3',
                                  anomaly_data,
                                  anomaly_scorer=MedianCDFQuantileScorer(),
                                  num_distribution_samples=num_training_samples,
@@ -201,7 +201,7 @@ def test_given_simple_causal_chain_with_linear_relationships_when_attribute_anom
                                  'X3': np.array([10, 10, 20])})
 
     scores = attribute_anomalies(causal_model,
-                                      'X3',
+                                 'X3',
                                  anomaly_data,
                                  anomaly_scorer=MedianCDFQuantileScorer(),
                                  num_distribution_samples=num_training_samples,
@@ -271,7 +271,7 @@ def test_given_non_trivial_graph_with_nonlinear_relationships_when_attribute_ano
                                  'X3': np.array([10000, 12100, 110])})
 
     scores = attribute_anomalies(causal_model,
-                                      'X3',
+                                 'X3',
                                  anomaly_data,
                                  anomaly_scorer=MedianCDFQuantileScorer(),
                                  num_distribution_samples=num_training_samples,

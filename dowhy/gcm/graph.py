@@ -22,6 +22,7 @@ PARENTS_DURING_FIT = 'parents_during_fit'
 
 class HasNodes(Protocol):
     """This protocol defines a trait for classes having nodes."""
+
     @property
     @abstractmethod
     def nodes(self):
@@ -31,6 +32,7 @@ class HasNodes(Protocol):
 
 class HasEdges(Protocol):
     """This protocol defines a trait for classes having edges."""
+
     @property
     @abstractmethod
     def edges(self):
@@ -45,6 +47,7 @@ class DirectedGraph(HasNodes, HasEdges, Protocol):
     compatible with DirectedGraph. While in most cases a networkx.DiGraph is the class of choice when constructing
     a causal graph, anyone can choose to provide their own implementation of the DirectGraph interface.
     """
+
     @abstractmethod
     def predecessors(self, node):
         raise NotImplementedError

@@ -47,18 +47,7 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
         self.logger.info(self.symbolic_estimator)
 
     def _estimate_effect(self):
-        if self.recalculate_propensity_score is True:
-            if self.propensity_score_model is None:
-                self.propensity_score_model = linear_model.LogisticRegression()
-            self.propensity_score_model.fit(self._observed_common_causes, self._treatment)
-            self._data[self.propensity_score_column] = self.propensity_score_model.predict_proba(self._observed_common_causes)[:, 1]
-        else:
-            # check if the user provides a propensity score column
-            if self.propensity_score_column not in self._data.columns:
-                raise ValueError(f"Propensity score column {self.propensity_score_column} does not exist. Please specify the column name that has your pre-computed propensity score.")
-            else:
-                self.logger.info(f"INFO: Using pre-computed propensity score in column {self.propensity_score_column}")
-
+        self._refresh_propensity_score()
 
         # this assumes a binary treatment regime
         treated = self._data.loc[self._data[self._treatment_name[0]] == 1]

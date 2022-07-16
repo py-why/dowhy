@@ -1,5 +1,5 @@
-GCMs User Guide
-===============
+GCM-based inference (Experimental)
+==================================
 
 .. toctree::
     :maxdepth: 1
@@ -8,3 +8,5 @@ GCMs User Guide
     introduction
     answering_causal_questions/index
     customizing_model_assignment
+    estimating_confidence_intervals
+    independence_tests

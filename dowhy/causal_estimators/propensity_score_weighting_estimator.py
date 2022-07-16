@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from sklearn import linear_model
+
 
 from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_estimators.propensity_score_estimator import PropensityScoreEstimator
@@ -72,17 +72,7 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
         self.max_ps_score = max_ps_score
 
     def _estimate_effect(self):
-        if self.recalculate_propensity_score is True:
-            if self.propensity_score_model is None:
-                self.propensity_score_model = linear_model.LogisticRegression()
-            self.propensity_score_model.fit(self._observed_common_causes, self._treatment)
-            self._data[self.propensity_score_column] = self.propensity_score_model.predict_proba(self._observed_common_causes)[:, 1]
-        else:
-            # check if user provides the propensity score column
-            if self.propensity_score_column not in self._data.columns:
-                raise ValueError(f"Propensity score column {self.propensity_score_column} does not exist. Please specify the column name that has your pre-computed propensity score.")
-            else:
-                self.logger.info(f"INFO: Using pre-computed propensity score in column {self.propensity_score_column}")
+        self._refresh_propensity_score()
 
         # trim propensity score weights
         self._data[self.propensity_score_column] = np.minimum(self.max_ps_score, self._data[self.propensity_score_column])

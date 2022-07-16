@@ -26,20 +26,7 @@ def preserve_random_generator_state():
 
 @flaky(max_runs=5)
 def test_given_kl_divergence_attribution_func_when_estimate_arrow_strength_then_returns_expected_results():
-    causal_model = ProbabilisticCausalModel(nx.DiGraph([('X1', 'X2'), ('X0', 'X2')]))
-    causal_model.set_causal_mechanism('X1', ScipyDistribution(stats.norm, loc=0, scale=1))
-    causal_model.set_causal_mechanism('X0', ScipyDistribution(stats.norm, loc=0, scale=1))
-    causal_model.set_causal_mechanism('X2', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-
-    X0 = np.random.normal(0, 1, 1000)
-    X1 = np.random.normal(0, 1, 1000)
-
-    test_data = pd.DataFrame({'X0': X0,
-                              'X1': X1,
-                              'X2': 3 * X0 + X1 + np.random.normal(0, 0.2, X0.shape[0])})
-    fit(causal_model, test_data)
-
-    causal_strengths = arrow_strength(causal_model,
+    causal_strengths = arrow_strength(_create_causal_model(),
                                       'X2',
                                       difference_estimation_func=estimate_kl_divergence_continuous)
     assert causal_strengths[('X0', 'X2')] == approx(2.76, abs=0.4)
@@ -47,76 +34,18 @@ def test_given_kl_divergence_attribution_func_when_estimate_arrow_strength_then_
 
 
 @flaky(max_runs=5)
-def test_given_continuous_data_with_default_atttribution_func_when_estimate_arrow_strength_then_returns_expected_results():
-    causal_model = ProbabilisticCausalModel(nx.DiGraph([('X1', 'X2'), ('X0', 'X2')]))
-    causal_model.set_causal_mechanism('X1', ScipyDistribution(stats.norm, loc=0, scale=1))
-    causal_model.set_causal_mechanism('X0', ScipyDistribution(stats.norm, loc=0, scale=1))
-    causal_model.set_causal_mechanism('X2', AdditiveNoiseModel(
-        prediction_model=create_linear_regressor()))
+def test_given_continuous_data_with_default_attribution_func_when_estimate_arrow_strength_then_returns_expected_results():
+    causal_strengths = arrow_strength(_create_causal_model(), 'X2')
 
-    X0 = np.random.normal(0, 1, 1000)
-    X1 = np.random.normal(0, 1, 1000)
-
-    test_data = pd.DataFrame({'X0': X0,
-                              'X1': X1,
-                              'X2': 3 * X0 + X1 + np.random.normal(0, 0.2, X0.shape[0])})
-    fit(causal_model, test_data)
-
-    causal_strengths = arrow_strength(causal_model, 'X2', tolerance=10 ** -4)
+    # By default, the strength is measure with respect to the variance.
     assert causal_strengths[('X0', 'X2')] == approx(9, abs=0.5)
     assert causal_strengths[('X1', 'X2')] == approx(1, abs=0.2)
-
-
-@flaky(max_runs=5)
-def test_arrow_strength_with_squared_mean_difference():
-    causal_model = ProbabilisticCausalModel(nx.DiGraph([('X1', 'X2'), ('X0', 'X2')]))
-    causal_model.set_causal_mechanism('X1', ScipyDistribution(stats.norm, loc=0, scale=1))
-    causal_model.set_causal_mechanism('X0', ScipyDistribution(stats.norm, loc=0, scale=1))
-    causal_model.set_causal_mechanism('X2', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-
-    X0 = np.random.normal(0, 1, 1000)
-    X1 = np.random.normal(0, 1, 1000)
-
-    test_data = pd.DataFrame({'X0': X0,
-                              'X1': X1,
-                              'X2': 2 * X0 + X1 + np.random.normal(0, 0.2, X0.shape[0])})
-    fit(causal_model, test_data)
-
-    causal_strengths \
-        = arrow_strength(causal_model, 'X2', tolerance=10 ** -5,
-                         difference_estimation_func=lambda x, y:
-                         (np.mean(x).squeeze() - np.mean(y).squeeze()) ** 2)
-    assert causal_strengths[('X0', 'X2')] == approx(4, abs=0.4)
-    assert causal_strengths[('X1', 'X2')] == approx(1, abs=0.4)
-
-
-@flaky(max_runs=3)
-def test_when_arrow_strength_with_variance_difference_then_returns_expected_results():
-    causal_model = ProbabilisticCausalModel(nx.DiGraph([('X1', 'X2'), ('X0', 'X2')]))
-    causal_model.set_causal_mechanism('X0', ScipyDistribution(stats.norm, loc=0, scale=2))
-    causal_model.set_causal_mechanism('X1', ScipyDistribution(stats.norm, loc=0, scale=1))
-    causal_model.set_causal_mechanism('X2', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-
-    X0 = np.random.normal(0, 2, 1000)
-    X1 = np.random.normal(0, 1, 1000)
-
-    test_data = pd.DataFrame({'X0': X0,
-                              'X1': X1,
-                              'X2': X0 + X1 + np.random.normal(0, 0.2, X0.shape[0])})
-    fit(causal_model, test_data)
-
-    causal_strengths \
-        = arrow_strength(causal_model,
-                         'X2',
-                         difference_estimation_func=lambda x, y: np.var(y) - np.var(x))
-    assert causal_strengths[('X0', 'X2')] == approx(4, abs=0.1)
-    assert causal_strengths[('X1', 'X2')] == approx(1, abs=0.1)
 
 
 @flaky(max_runs=3)
 def test_given_gcm_with_misspecified_mechanism_when_evaluate_arrow_strength_with__observational_data_then_gives_expected_results():
     causal_model = ProbabilisticCausalModel(nx.DiGraph([('X1', 'X2'), ('X0', 'X2')]))
-    # Here, we misspecify the mechanism on purpose by setting scale to 1 instead of 2.
+    # Here, we misspecified the mechanism on purpose by setting scale to 1 instead of 2.
     causal_model.set_causal_mechanism('X0', ScipyDistribution(stats.norm, loc=0, scale=1))
     causal_model.set_causal_mechanism('X1', ScipyDistribution(stats.norm, loc=0, scale=1))
     causal_model.set_causal_mechanism('X2', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
@@ -140,7 +69,7 @@ def test_given_gcm_with_misspecified_mechanism_when_evaluate_arrow_strength_with
 
 
 @flaky(max_runs=5)
-def test_arrow_strength_of_model_classifier():
+def test_given_categorical_target_node_when_estimate_arrow_strength_of_model_classifier_then_returns_expected_result():
     X = np.random.random((1000, 5))
     Y = []
 
@@ -154,3 +83,20 @@ def test_arrow_strength_of_model_classifier():
     classifier_sem.fit(X, np.array(Y).astype(str))
 
     assert arrow_strength_of_model(classifier_sem, X) == approx(np.array([0.3, 0.3, 0, 0, 0]), abs=0.1)
+
+
+def _create_causal_model():
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([('X1', 'X2'), ('X0', 'X2')]))
+    causal_model.set_causal_mechanism('X1', ScipyDistribution(stats.norm, loc=0, scale=1))
+    causal_model.set_causal_mechanism('X0', ScipyDistribution(stats.norm, loc=0, scale=1))
+    causal_model.set_causal_mechanism('X2', AdditiveNoiseModel(prediction_model=create_linear_regressor()))
+
+    X0 = np.random.normal(0, 1, 1000)
+    X1 = np.random.normal(0, 1, 1000)
+
+    test_data = pd.DataFrame({'X0': X0,
+                              'X1': X1,
+                              'X2': 3 * X0 + X1 + np.random.normal(0, 0.2, X0.shape[0])})
+    fit(causal_model, test_data)
+
+    return causal_model
