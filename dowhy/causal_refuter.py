@@ -208,7 +208,7 @@ class CausalRefuter:
 
         return p_value
 
-    def refute_estimate(self):
+    def refute_estimate(self, show_progress_bar=True):
         raise NotImplementedError
 
 

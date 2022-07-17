@@ -1,7 +1,10 @@
-from dowhy.causal_refuter import CausalRefuter, CausalRefutation
-from dowhy.causal_estimator import CausalEstimator
 import numpy as np
 import logging
+import tqdm
+from tqdm.notebook import tnrange, tqdm
+
+from dowhy.causal_refuter import CausalRefuter, CausalRefutation
+from dowhy.causal_estimator import CausalEstimator
 
 class DataSubsetRefuter(CausalRefuter):
     """Refute an estimate by rerunning it on a random subset of the original data.
@@ -28,7 +31,7 @@ class DataSubsetRefuter(CausalRefuter):
 
         self.logger = logging.getLogger(__name__)
 
-    def refute_estimate(self):
+    def refute_estimate(self, show_progress_bar=True):
 
         sample_estimates = np.zeros(self._num_simulations)
         self.logger.info("Refutation over {} simulated datasets of size {} each"
@@ -36,7 +39,7 @@ class DataSubsetRefuter(CausalRefuter):
                          ,self._subset_fraction*len(self._data.index) )
                         )
 
-        for index in range(self._num_simulations):
+        for index in tqdm(range(self._num_simulations), colour='green', disable = not show_progress_bar, desc="Simulating"):
             if self._random_state is None:
                 new_data = self._data.sample(frac=self._subset_fraction)
             else:

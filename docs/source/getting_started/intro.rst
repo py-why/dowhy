@@ -74,7 +74,7 @@ DoWhy supports two formats for providing the causal graph: `gml <https://github.
 
     # IV. Refute the obtained estimate using multiple robustness checks.
     refute_results = model.refute_estimate(identified_estimand, estimate,
-                                           method_name="random_common_cause")
+                                           method_name="random_common_cause", show_progress_bar=True)
 
 DoWhy stresses on the interpretability of its output. At any point in the analysis,
 you can inspect the untested assumptions, identified estimands (if any) and the

@@ -1,5 +1,6 @@
 import copy
-
+import tqdm
+from tqdm.notebook import tnrange, tqdm
 import numpy as np
 import logging
 
@@ -24,7 +25,7 @@ class RandomCommonCause(CausalRefuter):
 
         self.logger = logging.getLogger(__name__)
 
-    def refute_estimate(self):
+    def refute_estimate(self, show_progress_bar=True):
         num_rows = self._data.shape[0]
         sample_estimates = np.zeros(self._num_simulations)
         self.logger.info("Refutation over {} simulated datasets, each with a random common cause added"
@@ -34,7 +35,7 @@ class RandomCommonCause(CausalRefuter):
         identified_estimand = copy.deepcopy(self._target_estimand)
         # Adding a new backdoor variable to the identified estimand
         identified_estimand.set_backdoor_variables(new_backdoor_variables)
-        for index in range(self._num_simulations):
+        for index in tqdm(range(self._num_simulations), colour='green', disable = not show_progress_bar, desc="Refuting Estimates: "):
             if self._random_state is None:
                 new_data = self._data.assign(w_random=np.random.randn(num_rows))
             else:

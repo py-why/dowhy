@@ -1,5 +1,6 @@
 import copy
-
+import tqdm
+from tqdm.notebook import tnrange, tqdm
 import numpy as np
 import pandas as pd
 import logging
@@ -44,7 +45,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         self.logger = logging.getLogger(__name__)
 
 
-    def refute_estimate(self):
+    def refute_estimate(self, show_progress_bar=True):
         # only permute is supported for iv methods
         if self._target_estimand.identifier_method.startswith("iv"):
             if self._placebo_type != "permute":
@@ -75,7 +76,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         treatment_name = self._treatment_name[0] # Extract the name of the treatment variable
         type_dict = dict( self._data.dtypes )
 
-        for index in range(self._num_simulations):
+        for index in tqdm(range(self._num_simulations), colour='green', disable = not show_progress_bar, desc="Refuting Estimates: "):
 
             if self._placebo_type == "permute":
                 permuted_idx = None

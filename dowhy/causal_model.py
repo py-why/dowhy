@@ -386,7 +386,7 @@ class CausalModel:
                 raise NotImplementedError
         return estimate
 
-    def refute_estimate(self, estimand, estimate, method_name=None, **kwargs):
+    def refute_estimate(self, estimand, estimate, method_name=None, show_progress_bar=True, **kwargs):
         """Refute an estimated causal effect.
 
         If method_name is provided, uses the provided method. In the future, we may support automatic selection of suitable refutation tests. Following refutation methods are supported.
@@ -398,6 +398,7 @@ class CausalModel:
         :param estimand: target estimand, an instance of the IdentifiedEstimand class (typically, the output of identify_effect)
         :param estimate: estimate to be refuted, an instance of the CausalEstimate class (typically, the output of estimate_effect)
         :param method_name: name of the refutation method
+        :param show_progress_bar: Boolean flag on whether to show a progress bar
         :param kwargs:  (optional) additional arguments that are passed directly to the refutation method. Can specify a random seed here to ensure reproducible results ('random_seed' parameter). For method-specific parameters, consult the documentation for the specific method. All refutation methods are in the causal_refuters subpackage.
 
         :returns: an instance of the RefuteResult class
@@ -417,7 +418,7 @@ class CausalModel:
             estimate=estimate,
             **kwargs
         )
-        res = refuter.refute_estimate()
+        res = refuter.refute_estimate(show_progress_bar)
         return res
 
     def view_model(self, layout="dot", size=(8, 6), file_name="causal_model"):
