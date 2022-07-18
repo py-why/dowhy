@@ -24,7 +24,7 @@ copyright = '2022, PyWhy contributors'
 author = 'Amit Sharma, Emre Kiciman'
 
 # The short X.Y version
-version = '0.7.1'
+version = '0.8'
 # The full version, including alpha/beta/rc tags
 release = ''
 
