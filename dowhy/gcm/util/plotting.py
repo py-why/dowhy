@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Dict, Tuple, Any
+from typing import Optional, Dict, Tuple, Any, List
 
 import networkx as nx
 import pandas as pd
@@ -13,6 +13,7 @@ def plot(causal_graph: nx.Graph,
          causal_strengths: Optional[Dict[Tuple[Any, Any], float]] = None,
          filename: Optional[str] = None,
          display_plot: bool = True,
+         figure_size: Optional[List[int]] = None,
          **kwargs) -> None:
     """Convenience function to plot causal graphs. This function uses different backends based on what's
     available on the system. The best result is achieved when using Graphviz as the backend. This requires both
@@ -24,6 +25,8 @@ def plot(causal_graph: nx.Graph,
     :param causal_strengths: An optional dictionary with Edge -> float entries.
     :param filename: An optional filename if the output should be plotted into a file.
     :param display_plot: Optionally specify if the plot should be displayed or not (default to True).
+    :param figure_size: A tuple to define the width and height (as a tuple) of the pyplot. This is used to parameter to
+                        modify pyplot's 'figure.figsize' parameter. If None is given, the current/default value is used.
     :param kwargs: Remaining parameters will be passed through to the backend verbatim.
 
     **Example usage**::
@@ -38,6 +41,7 @@ def plot(causal_graph: nx.Graph,
                                         causal_strengths=causal_strengths,
                                         filename=filename,
                                         display_plot=display_plot,
+                                        figure_size=figure_size,
                                         **kwargs)
         except Exception as error:
             _logger.info("There was an error when trying to plot the graph via graphviz, falling back to networkx "
@@ -47,6 +51,7 @@ def plot(causal_graph: nx.Graph,
                                         causal_strengths=causal_strengths,
                                         filename=filename,
                                         display_plot=display_plot,
+                                        figure_size=figure_size,
                                         **kwargs)
 
     except ImportError:
@@ -58,6 +63,7 @@ def plot(causal_graph: nx.Graph,
                                     causal_strengths=causal_strengths,
                                     filename=filename,
                                     display_plot=display_plot,
+                                    figure_size=figure_size,
                                     **kwargs)
 
 
@@ -75,7 +81,8 @@ def _plot_causal_graph_networkx(causal_graph: nx.Graph,
                                 causal_strengths: Optional[Dict[Tuple[Any, Any], float]] = None,
                                 filename: Optional[str] = None,
                                 display_plot: bool = True,
-                                label_wrap_length: int = 3) -> None:
+                                label_wrap_length: int = 3,
+                                figure_size: Optional[List[int]] = None) -> None:
     if 'graph' not in causal_graph.graph:
         causal_graph.graph['graph'] = {'rankdir': 'TD'}
 
@@ -111,7 +118,12 @@ def _plot_causal_graph_networkx(causal_graph: nx.Graph,
 
         labels[node] = ''.join(node_name_splits)
 
+    if figure_size is not None:
+        org_fig_size = pyplot.rcParams['figure.figsize']
+        pyplot.rcParams['figure.figsize'] = figure_size
+
     figure = pyplot.figure()
+
     nx.draw(causal_graph,
             pos=layout,
             node_color='lightblue',
@@ -123,11 +135,14 @@ def _plot_causal_graph_networkx(causal_graph: nx.Graph,
             width=[_calc_arrow_width(causal_strengths[(s, t)], max_strength)
                    for (s, t) in causal_graph.edges()])
 
-    if filename is not None:
-        figure.savefig(filename)
-
     if display_plot:
         pyplot.show()
+
+    if figure_size is not None:
+        pyplot.rcParams['figure.figsize'] = org_fig_size
+
+    if filename is not None:
+        figure.savefig(filename)
 
 
 def _calc_arrow_width(strength: float, max_strength: float):
