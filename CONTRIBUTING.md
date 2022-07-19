@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-16-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-17-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Contributors ✨
@@ -32,6 +32,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tr>
     <td align="center"><a href="https://github.com/itsoum"><img src="https://avatars.githubusercontent.com/u/9675299?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ilias Tsoumas</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=itsoum" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/elikling"><img src="https://avatars.githubusercontent.com/u/8556526?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Eli Y. Kling</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=elikling" title="Documentation">📖</a></td>
+    <td align="center"><a href="http://astoeffelbauer.github.io"><img src="https://avatars.githubusercontent.com/u/54737457?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Andreas Stöffelbauer</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=astoeffelbauer" title="Code">💻</a></td>
   </tr>
 </table>
 
