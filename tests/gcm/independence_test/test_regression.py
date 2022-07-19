@@ -110,3 +110,11 @@ def test_regression_based_conditional_independence_test_categorical_dependent():
     x, y, z = _generate_categorical_data()
 
     assert regression_based(x, z, y) < 0.05
+
+
+@flaky(max_runs=3)
+def test_given_pairwise_linear_dependent_data_when_perform_regression_based_test_then_returns_expected_result():
+    X = np.random.normal(size=500)
+    Y = 2 * X + np.random.normal(0, 4, size=500)
+
+    assert regression_based(X, Y) > 0.05

@@ -14,7 +14,7 @@ from dowhy.gcm.util.general import shape_into_2d, apply_one_hot_encoding, fit_on
 def regression_based(X: np.ndarray,
                      Y: np.ndarray,
                      Z: Optional[np.ndarray] = None,
-                     num_components_all_inputs: int = 40,
+                     num_components_multiplier: int = 10,
                      num_runs: int = 20,
                      p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float] = quantile_based_fwer,
                      f_test_samples_ratio: Optional[float] = 0.3,
@@ -42,9 +42,9 @@ def regression_based(X: np.ndarray,
     :param X: Input data for X.
     :param Y: Input data for Y.
     :param Z: Input data for Z. The set of variables to (optionally) condition on.
-    :param num_components_all_inputs: Number of kernel features when combining X and Z. If Z is not given, it will be
-                                      replaced with an empty array. If Z is given, half of the number is used to
-                                      generate features for Z.
+    :param num_components_multiplier: Factor for creating kernel features. The total number of generated features is
+                                      the number of columns of an input matrix times this factor. If Z is not given, it
+                                      will be replaced with an empty array.
     :param num_runs: Number of runs. This equals the number of estimated p-values, which get adjusted by the
                      p_value_adjust_func.
     :param p_value_adjust_func: A callable that expects a numpy array of multiple p-values and returns one p-value. This
@@ -57,9 +57,9 @@ def regression_based(X: np.ndarray,
     :return: The p-value for the null hypothesis that X and Y are independent given Z. If Z is not given,
              then for the hypothesis that X and Y are independent.
     """
-    if num_components_all_inputs < 2:
-        raise ValueError("Need at least two components for all inputs, but only %d were given!"
-                         % num_components_all_inputs)
+    if num_components_multiplier < 1:
+        raise ValueError("The components multiplied should be at least one, but got %d!"
+                         % num_components_multiplier)
 
     X, Y = shape_into_2d(X, Y)
 
@@ -84,10 +84,12 @@ def regression_based(X: np.ndarray,
                 Z = org_Z[random_indices]
 
         if Z is not None:
-            all_inputs = Nystroem(n_components=num_components_all_inputs).fit_transform(np.column_stack([X, Z]))
-            input_Z = Nystroem(n_components=num_components_all_inputs // 2).fit_transform(Z)
+            all_inputs = Nystroem(n_components=X.shape[1] * num_components_multiplier +
+                                               Z.shape[1] * num_components_multiplier) \
+                .fit_transform(np.column_stack([X, Z]))
+            input_Z = Nystroem(n_components=Z.shape[1] * num_components_multiplier).fit_transform(Z)
         else:
-            all_inputs = Nystroem(n_components=num_components_all_inputs).fit_transform(X)
+            all_inputs = Nystroem(n_components=X.shape[1] * num_components_multiplier).fit_transform(X)
             input_Z = np.array([]).reshape(1, -1)
 
         if f_test_samples_ratio is not None:
