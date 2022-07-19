@@ -6,6 +6,7 @@ from pytest import approx
 
 from dowhy.gcm import AdditiveNoiseModel, distribution_change, distribution_change_of_graphs, fit, \
     ProbabilisticCausalModel, EmpiricalDistribution
+from dowhy.gcm.distribution_change import _check_significant_mechanism_change, mechanism_change_test
 from dowhy.gcm.ml import create_linear_regressor
 from dowhy.gcm.shapley import ShapleyConfig
 
@@ -135,6 +136,33 @@ def test_when_using_distribution_change_with_return_additional_info_then_returns
         if node == 'X1':
             continue
         assert type(causal_model_old.causal_mechanism(node)) == type(causal_model_new.causal_mechanism(node))
+
+
+def test_given_shifted_distribution_in_root_node_when_check_significant_mechanism_change_then_only_identifies_root_node():
+    X0 = np.random.uniform(-1, 1, 1000)
+    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
+    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
+    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
+    original_observations = pd.DataFrame({'X0': X0, 'X1': X1, 'X2': X2, 'X3': X3})
+
+    X0 = np.random.uniform(10, 20, 1000)
+    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
+    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
+    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
+    outlier_observations = pd.DataFrame({'X0': X0, 'X1': X1, 'X2': X2, 'X3': X3})
+
+    results = _check_significant_mechanism_change(nx.DiGraph([('X0', 'X1'), ('X0', 'X2'), ('X2', 'X3')]),
+                                                  original_observations,
+                                                  outlier_observations,
+                                                  mechanism_change_test,
+                                                  0.05,
+                                                  'fdr_bh')
+
+    for node in results:
+        if node == 'X0':
+            assert results[node]
+        else:
+            assert not results[node]
 
 
 def _assign_causal_mechanisms(causal_model):
