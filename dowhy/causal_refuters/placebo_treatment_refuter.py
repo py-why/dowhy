@@ -3,6 +3,8 @@ import copy
 import numpy as np
 import pandas as pd
 import logging
+from joblib import Parallel, delayed
+
 
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
@@ -12,7 +14,7 @@ from dowhy.utils.api import parse_state
 class PlaceboTreatmentRefuter(CausalRefuter):
     """Refute an estimate by replacing treatment with a randomly-generated placebo variable.
 
-    Supports additional parameters that can be specified in the refute_estimate() method.
+    Supports additional parameters that can be specified in the refute_estimate() method. For joblib-related parameters (n_jobs, verbose), please refer to the joblib documentation for more details (https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html).
 
     :param placebo_type: Default is to generate random values for the treatment. If placebo_type is "permute", then the original treatment values are permuted by row.
     :type placebo_type: str, optional
@@ -22,6 +24,12 @@ class PlaceboTreatmentRefuter(CausalRefuter):
 
     :param random_state: The seed value to be added if we wish to repeat the same random behavior. If we want to repeat the same behavior we push the same seed in the psuedo-random generator.
     :type random_state: int, RandomState, optional
+
+    :param n_jobs: The maximum number of concurrently running jobs. If -1 all CPUs are used. If 1 is given, no parallel computing code is used at all (this is the default).
+    :type n_jobs: int, optional
+
+    :param verbose: The verbosity level: if non zero, progress messages are printed. Above 50, the output is sent to stdout. The frequency of the messages increases with the verbosity level. If it more than 10, all iterations are reported. The default is 0.
+    :type verbose: int, optional
     """
 
     # Default value of the p value taken for the distribution
@@ -65,7 +73,6 @@ class PlaceboTreatmentRefuter(CausalRefuter):
                 self._estimate.params["method_params"]["iv_instrument_name"] = \
                 ["placebo_" + s for s in parse_state(self._estimate.params["method_params"]["iv_instrument_name"])]
 
-        sample_estimates = np.zeros(self._num_simulations)
         self.logger.info("Refutation over {} simulated datasets of {} treatment"
                         .format(self._num_simulations
                         ,self._placebo_type)
@@ -75,8 +82,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         treatment_name = self._treatment_name[0] # Extract the name of the treatment variable
         type_dict = dict( self._data.dtypes )
 
-        for index in range(self._num_simulations):
-
+        def refute_once():
             if self._placebo_type == "permute":
                 permuted_idx = None
                 if self._random_state is None:
@@ -133,7 +139,14 @@ class PlaceboTreatmentRefuter(CausalRefuter):
             self.logger.debug(new_data[0:10])
             new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
-            sample_estimates[index] = new_effect.value
+            return new_effect.value
+
+        # Run refutation in parallel
+        sample_estimates = Parallel(
+            n_jobs=self._n_jobs, 
+            verbose=self._verbose
+        )(delayed(refute_once)() for _ in range(self._num_simulations))
+        sample_estimates = np.array(sample_estimates)
 
         # Restoring the value of iv_instrument_name
         if self._target_estimand.identifier_method.startswith("iv"):

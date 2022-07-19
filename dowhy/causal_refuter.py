@@ -11,6 +11,8 @@ class CausalRefuter:
 
     Subclasses implement specific refutations methods.
 
+    # todo: add docstring for common parameters here and remove from child refuter classes
+
     """
     # Default value for the number of simulations to be conducted
     DEFAULT_NUM_SIMULATIONS = 100
@@ -22,6 +24,10 @@ class CausalRefuter:
         self._treatment_name = self._target_estimand.treatment_variable
         self._outcome_name = self._target_estimand.outcome_variable
         self._random_seed = None
+
+        # joblib params for parallel processing
+        self._n_jobs = kwargs.pop('n_jobs', None)
+        self._verbose = kwargs.pop('verbose', 0)
 
         if "random_seed" in kwargs:
             self._random_seed = kwargs['random_seed']
