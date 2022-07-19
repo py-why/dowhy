@@ -18,6 +18,9 @@ from sklearn.model_selection import train_test_split
 
 from dowhy.causal_refuters.add_unobserved_common_cause import AddUnobservedCommonCause
 
+import tqdm
+from tqdm.notebook import tnrange, tqdm
+
 TestFraction = namedtuple('TestFraction', ['base','other'])
 
 class DummyOutcomeRefuter(CausalRefuter):
@@ -214,7 +217,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         self._outcome_name_str = self._outcome_name[0]
         self.logger = logging.getLogger(__name__)
 
-    def refute_estimate(self):
+    def refute_estimate(self, show_progress_bar=True):
 
         # We need to change the identified estimand
         # We thus, make a copy. This is done as we don't want
@@ -238,7 +241,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         # Train and the Validation Datasets. Thus, we run the simulation loop followed by the training and the validation
         # loops. Thus, we can get different values everytime we get the estimator.
 
-        for _ in range( self._num_simulations ):
+        for index in tqdm(range(self._num_simulations), colour='green', disable = not show_progress_bar, desc="Refuting Estimates: "):
             estimates = []
 
             if estimator_present == False:

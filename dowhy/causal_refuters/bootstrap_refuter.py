@@ -5,6 +5,9 @@ import random
 from sklearn.utils import resample
 import logging
 
+import tqdm
+from tqdm.notebook import tnrange, tqdm
+
 class BootstrapRefuter(CausalRefuter):
     """
     Refute an estimate by running it on a random sample of the data containing measurement error in the 
@@ -82,7 +85,7 @@ class BootstrapRefuter(CausalRefuter):
             raise ValueError("Probability of Flip cannot be greater than 1")
 
     
-    def refute_estimate(self, *args, **kwargs):
+    def refute_estimate(self, show_progress_bar=True, *args, **kwargs):
         if self._sample_size > len(self._data):
                 self.logger.warning("The sample size is larger than the population size")
 
@@ -92,7 +95,7 @@ class BootstrapRefuter(CausalRefuter):
                          ,self._sample_size )
                         ) 
         
-        for index in range(self._num_simulations):
+        for index in tqdm(range(self._num_simulations), colour='green', disable = not show_progress_bar, desc="Refuting Estimates: "):
             if self._random_state is None:
                 new_data = resample(self._data, 
                                 n_samples=self._sample_size )

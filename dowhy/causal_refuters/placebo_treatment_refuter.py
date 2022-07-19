@@ -3,6 +3,8 @@ import copy
 import numpy as np
 import pandas as pd
 import logging
+import tqdm
+from tqdm.notebook import tnrange, tqdm
 
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
@@ -75,7 +77,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         treatment_name = self._treatment_name[0] # Extract the name of the treatment variable
         type_dict = dict( self._data.dtypes )
 
-        for index in range(self._num_simulations):
+        for index in tqdm(range(self._num_simulations), colour='green', disable = not show_progress_bar, desc="Refuting Estimates: "):
 
             if self._placebo_type == "permute":
                 permuted_idx = None
