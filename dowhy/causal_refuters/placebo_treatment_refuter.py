@@ -5,6 +5,9 @@ import pandas as pd
 import logging
 from joblib import Parallel, delayed
 
+import tqdm
+from tqdm.notebook import tqdm
+
 
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
@@ -52,7 +55,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         self.logger = logging.getLogger(__name__)
 
 
-    def refute_estimate(self):
+    def refute_estimate(self, show_progress_bar=False):
         # only permute is supported for iv methods
         if self._target_estimand.identifier_method.startswith("iv"):
             if self._placebo_type != "permute":
@@ -145,7 +148,9 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         sample_estimates = Parallel(
             n_jobs=self._n_jobs, 
             verbose=self._verbose
-        )(delayed(refute_once)() for _ in range(self._num_simulations))
+        )(delayed(refute_once)() for _ in tqdm(range(self._num_simulations), disable = not show_progress_bar, colour='green', desc="Refuting Estimates: "))
+        
+        # for _ in range(self._num_simulations))
         sample_estimates = np.array(sample_estimates)
 
         # Restoring the value of iv_instrument_name

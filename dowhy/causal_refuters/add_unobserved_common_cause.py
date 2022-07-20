@@ -4,6 +4,9 @@ import numpy as np
 import pandas as pd
 import scipy.stats
 
+import tqdm
+from tqdm.notebook import tqdm
+
 import math
 import statsmodels.api as sm
 from sklearn.preprocessing import StandardScaler
@@ -179,7 +182,7 @@ class AddUnobservedCommonCause(CausalRefuter):
         else:
             return np.arange(min_coeff, max_coeff, step)
 
-    def refute_estimate(self):
+    def refute_estimate(self, show_progress_bar=False):
         """
         This function attempts to add an unobserved common cause to the outcome and the treatment. At present, we have implemented the behavior for one dimensional behaviors for continuous
         and binary variables. This function can either take single valued inputs or a range of inputs. The function then looks at the data type of the input and then decides on the course of
@@ -229,7 +232,8 @@ class AddUnobservedCommonCause(CausalRefuter):
 
                 results_matrix = np.random.rand(len(self.kappa_t),len(self.kappa_y)) # Matrix to hold all the results of NxM
                 orig_data = copy.deepcopy(self._data)
-                for i in range(len(self.kappa_t)):
+                
+                for i in tqdm(range(len(self.kappa_t)), colour='green', disable = not show_progress_bar, desc="Refuting Estimates: "):
                     for j in range(len(self.kappa_y)):
                         new_data = self.include_confounders_effect(orig_data, self.kappa_t[i], self.kappa_y[j])
                         new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
@@ -282,7 +286,7 @@ class AddUnobservedCommonCause(CausalRefuter):
                 outcomes = np.random.rand(len(self.kappa_t))
                 orig_data = copy.deepcopy(self._data)
 
-                for i in range(0,len(self.kappa_t)):
+                for i in tqdm(range(0,len(self.kappa_t)), colour='green', disable = not show_progress_bar, desc="Refuting Estimates: "):
                     new_data = self.include_confounders_effect(orig_data, self.kappa_t[i], self.kappa_y)
                     new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
                     new_effect = new_estimator.estimate_effect()
@@ -316,7 +320,7 @@ class AddUnobservedCommonCause(CausalRefuter):
                 outcomes = np.random.rand(len(self.kappa_y))
                 orig_data = copy.deepcopy(self._data)
 
-                for i in range(0, len(self.kappa_y)):
+                for i in tqdm(range(0,len(self.kappa_y)), colour='green', disable = not show_progress_bar, desc="Refuting Estimates: "):
                     new_data = self.include_confounders_effect(orig_data, self.kappa_t, self.kappa_y[i])
                     new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
                     new_effect = new_estimator.estimate_effect()
