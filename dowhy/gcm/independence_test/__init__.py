@@ -10,6 +10,7 @@ def independence_test(X, Y, conditioned_on=None, method="kernel"):
 
       * K. Zhang, J. Peters, D. Janzing, B. Schölkopf. *Kernel-based Conditional Independence Test and Application in Causal Discovery*. UAI'11, Pages 804–813, 2011.
       * A. Gretton, K. Fukumizu, C.-H. Teo, L. Song, B. Schölkopf, A. Smola. *A Kernel Statistical Test of Independence*. NIPS 21, 2007.
+      Here, we utilize the implementations of the https://github.com/cmu-phil/causal-learn package.
 
     * `approx_kernel`: Approximate kernel-based (conditional) independence test.
 

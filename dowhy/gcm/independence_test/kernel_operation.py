@@ -2,59 +2,13 @@
 future.
 """
 
-from typing import Optional, List, Callable
+from typing import Optional
 
 import numpy as np
 from sklearn.kernel_approximation import Nystroem
 from sklearn.metrics import euclidean_distances
 
-from dowhy.gcm.util.general import shape_into_2d, is_categorical
-
-
-def apply_rbf_kernel(X: np.ndarray,
-                     precision: Optional[float] = None) -> np.ndarray:
-    """
-    Estimates the RBF (Gaussian) kernel for the given input data.
-
-    :param X: Input data.
-    :param precision: Specific precision matrix for the RBF kernel. If None is given, this is inferred from the data.
-    :return: The outcome of applying a RBF (Gaussian) kernel on the data.
-    """
-    X = shape_into_2d(X)
-
-    distance_matrix = euclidean_distances(X, squared=True)
-
-    if precision is None:
-        precision = _median_based_precision(distance_matrix)
-
-    return np.exp(-precision * distance_matrix)
-
-
-def apply_rbf_kernel_with_adaptive_precision(X: np.ndarray) -> np.ndarray:
-    """Estimates the RBF (Gaussian) kernel for the given input data. Here, each column is scaled by an individual
-    precision parameter which is automatically inferred from the data.
-
-    :param X: Input data.
-    :return: The outcome of applying a RBF (Gaussian) kernel on the data.
-    """
-    X = shape_into_2d(X)
-
-    result = np.ones((X.shape[0], X.shape[0]))
-    for i in range(X.shape[1]):
-        distance_matrix = euclidean_distances(X, squared=True)
-        result *= np.exp(-_median_based_precision(distance_matrix) * distance_matrix)
-
-    return result
-
-
-def apply_delta_kernel(X: np.ndarray) -> np.ndarray:
-    """Applies the delta kernel, i.e. the distance is 1 if two entries are equal and 0 otherwise.
-
-    :param X: Input data.
-    :return: The outcome of the delta-kernel, a binary distance matrix.
-    """
-    X = shape_into_2d(X)
-    return np.array(list(map(lambda value: value == X, X))).reshape(X.shape[0], X.shape[0]).astype(np.float)
+from dowhy.gcm.util.general import shape_into_2d
 
 
 def approximate_rbf_kernel_features(X: np.ndarray,
@@ -97,32 +51,6 @@ def approximate_delta_kernel_features(X: np.ndarray, num_random_components: int)
     result[result != 0] = 1
 
     return result
-
-
-def auto_create_list_of_kernels(X: np.ndarray) -> List[Callable[[np.ndarray], np.ndarray]]:
-    X = shape_into_2d(X)
-
-    tmp_list = []
-    for i in range(X.shape[1]):
-        if not is_categorical(X[:, i]):
-            tmp_list.append(apply_rbf_kernel)
-        else:
-            tmp_list.append(apply_delta_kernel)
-
-    return tmp_list
-
-
-def auto_create_list_of_kernel_approximations(X: np.ndarray) -> List[Callable[[np.ndarray, int], np.ndarray]]:
-    X = shape_into_2d(X)
-
-    tmp_list = []
-    for i in range(X.shape[1]):
-        if not is_categorical(X[:, i]):
-            tmp_list.append(approximate_rbf_kernel_features)
-        else:
-            tmp_list.append(approximate_delta_kernel_features)
-
-    return tmp_list
 
 
 def _median_based_precision(distances: np.ndarray) -> float:
