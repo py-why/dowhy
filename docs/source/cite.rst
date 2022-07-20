@@ -1,5 +1,6 @@
 Citing this package
-====================
+-------------------
+
 If you find DoWhy useful for your research work, please cite us as follows:
 
 Amit Sharma, Emre Kiciman. DoWhy: An End-to-End Library for Causal Inference. 2020. https://arxiv.org/abs/2011.04216

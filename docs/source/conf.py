@@ -19,9 +19,9 @@ sys.path.insert(0, os.path.abspath("../../"))
 
 # -- Project information -----------------------------------------------------
 
-project = 'DoWhy | An end-to-end library for causal inference'
+project = 'DoWhy'
 copyright = '2022, PyWhy contributors'
-author = 'Amit Sharma, Emre Kiciman'
+author = 'PyWhy community'
 
 # The short X.Y version
 version = '0.8'
@@ -81,21 +81,15 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-# html_theme = 'sphinx-rtd-theme'
-# on_rtd is whether we are on readthedocs.org
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-if not on_rtd:
-    # only import and set the theme if we're building docs locally
-    import sphinx_rtd_theme
-    html_theme = 'sphinx_rtd_theme'
-    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-# otherwise, readthedocs.org uses their theme by default, so no need to specify it
+html_theme = "pydata_sphinx_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    "navbar_end": ["navbar-icon-links"]
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
