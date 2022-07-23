@@ -9,15 +9,37 @@ EXCEPTION_COND_NO_OPT = "Conditions to guarantee the existence of an optimal adj
 
 class EfficientBackdoor:
     """
-    Implements methods for finding optimal backdoor sets.
+    Implements methods for finding optimal (efficient) backdoor sets.
     """
 
     def __init__(self, graph, conditional_node_names=None, costs=None):
-        self.graph = graph
+        """
+        :param graph: CausalGraph
+            A causal graph.
+        :param costs: list
+            A list with non-negative costs associated with variables in the graph. Only used
+            for estimatand_type='non-parametric-ate' and method_name='efficient-mincost-adjustment'. If
+            not costs are provided by the user, and method_name='efficient-mincost-adjustment', costs
+            are assumed to be equal to one for all variables in the graph. The structure of the list should
+            be of the form [(node, {"cost": x}) for node in nodes].
+        :param conditional_node_names: list
+            A list with variables that are used to determine treatment. If none are
+            provided, it is assumed that the intervention sets the treatment to a constant.
+        """
+        assert (
+            len(graph.treatment_name) == 1
+        ), "The methods for computing efficient backdoor sets are only valid for one dimensional treatments"
+        assert (
+            len(graph.outcome_name) == 1
+        ), "The methods for computing efficient backdoor sets are only valid for one dimensional outcomes"
+        self.graph = graph.copy()
         if costs is None:
             # If no costs are passed, use uniform costs
+            warnings.warn(
+                "No costs were passed, so they will be assumed to be constant and equal to 1. This is only relevant when method_name='efficient-mincost-adjustment'"
+            )
             costs = [(node, {"cost": 1}) for node in self.graph._graph.nodes]
-        assert all([tup['cost'] > 0 for _, tup in costs]), "All costs must be positive"
+        assert all([tup["cost"] > 0 for _, tup in costs]), "All costs must be positive"
         self.graph._graph.add_nodes_from(costs)
         self.observed_nodes = set(
             [
@@ -28,24 +50,20 @@ class EfficientBackdoor:
         )
         if conditional_node_names is None:
             conditional_node_names = []
-        assert set(conditional_node_names).issubset(self.observed_nodes), "Some conditional variables are not marked as observed"
+        assert set(conditional_node_names).issubset(
+            self.observed_nodes
+        ), "Some conditional variables are not marked as observed"
         self.conditional_node_names = conditional_node_names
 
     def ancestors_all(self, nodes):
-        """Returns a set with all ancestors of nodes
-
-        Parameters
-        ----------
-        nodes : list
-           A list of nodes in the graph
-
-        Returns
-        ----------
-        ancestors: set
-
-        Notes
-        -----
+        """Method to compute the set of all ancestors of a set of nodes.
         A node is always an ancestor of itself.
+
+
+        :param nodes: list
+            A list of nodes in the graph.
+        :returns ancestors: set
+            The set of nodes that are ancestors of nodes in nodes.
         """
         ancestors = set()
 
@@ -58,11 +76,13 @@ class EfficientBackdoor:
         return ancestors
 
     def backdoor_graph(self, G):
-        """Returns the back-door graph associated with treatment and outcome.
+        """Method to compute the proper back-door graph associated with
+         treatment and outcome.
 
-        Returns
-        ----------
-        Gbd: nx.DiGraph()
+        :param G: nx.DiGraph
+            A directed acyclic graph.
+        :returns Gbd: nx.DiGraph
+            The proper backdoor graph of G.
         """
         Gbd = G.copy()
 
@@ -75,11 +95,12 @@ class EfficientBackdoor:
         return Gbd
 
     def causal_vertices(self):
-        """Returns the set of all vertices that lie in a causal path between treatment and outcome.
+        """Method to compute the set of all vertices that lie in a causal path
+         between treatment and outcome.
 
-        Returns
-        ----------
-        causal_vertices: set
+        :returns causal_vertices: set
+            A set with vertices lying on some causal path between treatment and
+            outcome.
         """
         causal_vertices = set()
         causal_paths = list(
@@ -98,11 +119,11 @@ class EfficientBackdoor:
         return causal_vertices
 
     def forbidden(self):
-        """Returns the forbidden set with respect to treatment and outcome.
+        """Method to compute the forbidden set with respect to treatment and
+         outcome.
 
-        Returns
-        ----------
-        forbidden: set
+        :returns forbidden: set
+            The forbidden set.
         """
         forbidden = set()
 
@@ -114,11 +135,14 @@ class EfficientBackdoor:
         return forbidden.union(self.graph.treatment_name[0])
 
     def ignore(self):
-        """Returns the set of ignorable vertices with respect to treatment, outcome, conditional and observable variables. Used in the construction of the H0 and H1 graphs.
+        """Method to compute the set of ignorable vertices with respect to
+         treatment, outcome, conditional and observable variables.
+         Used in the construction of the H0 and H1 graphs. See Smucler,
+         Sapienza and Rotnitzky (2021), Biometrika, for the full definition
+         of this set.
 
-        Returns
-        ----------
-        ignore: set
+        :returns ignore: set
+            The set of ignorable vertices.
         """
         set1 = set(
             self.ancestors_all(
@@ -137,18 +161,16 @@ class EfficientBackdoor:
         return ignore
 
     def unblocked(self, H, Z):
-        """Returns the unblocked set of Z with respect to the treatment variable.
+        """Method to compute the unblocked set of Z with respect to treatment.
+        See Smucler, Sapienza and Rotnitzky (2021), Biometrika, for the full
+        definition of this set.
 
-        Parameters
-        ----------
-        H : nx.Graph()
-            Undirected graph
-        Z : list of strings
-            Nodes in the graph
-
-        Returns
-        ----------
-        unblocked: set
+        :params H: nx.Graph
+            An undirected graph.
+        :param Z: list
+            A list with nodes in the graph H.
+        :returns unblocked: set
+            The unblocked set.
         """
 
         G2 = H.subgraph(H.nodes() - set(Z))
@@ -159,11 +181,12 @@ class EfficientBackdoor:
         return unblocked
 
     def build_H0(self):
-        """Returns the H0 graph associated with treatment, outcome, conditional and observable variables.
+        """Returns the H0 graph associated with treatment, outcome, conditional
+        and observable variables. See Smucler, Sapienza and Rotnitzky (2021),
+        Biometrika, for the full definition of this graph.
 
-        Returns
-        ----------
-        H0: nx.Graph()
+        :returns H0: nx.Graph
+            The H0 graph.
         """
         # restriction to ancestors
         anc = self.ancestors_all(
@@ -181,11 +204,12 @@ class EfficientBackdoor:
         return H0
 
     def build_H1(self):
-        """Returns the H1 graph associated with treatment, outcome, conditional and observable variables.
+        """Returns the H1 graph associated with treatment, outcome, conditional
+        and observable variables. See Smucler, Sapienza and Rotnitzky (2021),
+        Biometrika, for the full definition of this graph.
 
-        Returns
-        ----------
-        H1: nx.Graph()
+        :returns H1: nx.Graph
+            The H1 graph.
         """
         H0 = self.build_H0()
 
@@ -209,14 +233,15 @@ class EfficientBackdoor:
         return H1
 
     def build_D(self):
-        """Returns the D flow network associated with treatment, outcome, conditional and observable variables.
-        If a node does not have a 'cost' attribute, this function will assume
-        the cost is infinity
+        """Returns the D flow network associated with treatment, outcome,
+        conditional and observable variables. If a node does not have a 'cost'
+        attribute, this function will assume the cost is infinity.
 
+        See Smucler and Rotnitzky (2022), Journal of Causa Inference, for the
+        full definition of this flow network.
 
-        Returns
-        ----------
-        D: nx.DiGraph()
+        :returns D: nx.DiGraph
+            The D flow network.
         """
         H1 = self.build_H1()
         D = nx.DiGraph()
@@ -234,11 +259,11 @@ class EfficientBackdoor:
 
     def compute_smallest_mincut(self):
         """Returns a min-cut in the flow network D associated with
-        treatment, outcome, conditional and observable variables that is contained in any other min-cut
+        treatment, outcome, conditional and observable variables that is
+        contained in any other min-cut.
 
-        Returns
-        ----------
-        S_c: set
+        :returns S_c: set
+            The min-cut with the above property.
         """
         D = self.build_D()
         _, flow_dict = nx.algorithms.flow.maximum_flow(
@@ -270,16 +295,16 @@ class EfficientBackdoor:
 
     def h_operator(self, S):
         """Given a set S of vertices in the flow network D, returns the
-         operator h(S), a set of vertices in the undirected graph H1
+        operator h(S), a set of vertices in the undirected graph H1.
 
-        Parameters
-        ----------
-        S : set
-            A set of vertices in D
+        See Smucler and Rotnitzky (2022), Journal of Causal Inference, for the
+        full definition of this operator.
 
-        Returns
-        ----------
-        Z: set
+        :param S: set
+            A set of vertices in the flow network D associated treatment,
+            outcome, conditional and observable variables.
+        :returns Z: set
+            The set obtained from applying the h operator to S.
         """
         Z = set()
         for node in self.graph._graph.nodes:
@@ -291,11 +316,15 @@ class EfficientBackdoor:
         return Z
 
     def optimal_adj_set(self):
-        """Returns the optimal adjustment set with respect to treatment, outcome, conditional and observable variables
+        """Returns the optimal adjustment set with respect to treatment,
+        outcome, conditional and observable variables.
 
-        Returns
-        ----------
-        optimal: set
+        If the sufficient conditions for the existence of the optimal adjustment
+        set outlined in Smucler, Sapienza and Rotnitzky (2021), Biometrika, do
+        not hold, an error is raised.
+
+        :returns: optimal: set
+            The optimal adjustment set.
         """
         H1 = self.build_H1()
         if self.graph.treatment_name[0] in H1.neighbors(self.graph.outcome_name[0]):
@@ -313,11 +342,11 @@ class EfficientBackdoor:
             raise ValueError(EXCEPTION_COND_NO_OPT)
 
     def optimal_minimal_adj_set(self):
-        """Returns the optimal minimal adjustment set with respect to treatment, outcome, conditional and observable variables
+        """Returns the optimal minimal adjustment set with respect to treatment,
+        outcome, conditional and observable variables.
 
-        Returns
-        ----------
-        optimal_minimal: set
+        :returns: optimal_minimal: set
+            The optimal minimal adjustment set.
         """
 
         H1 = self.build_H1()
@@ -331,11 +360,14 @@ class EfficientBackdoor:
             return optimal_minimal
 
     def optimal_mincost_adj_set(self):
-        """Returns the optimal minimum cost adjustment set with respect to treatment, outcome, conditional and observable variables
+        """Returns the optimal minimum cost adjustment set with respect to
+        treatment, outcome, conditional and observable variables.
 
-        Returns
-        ----------
-        optimal_mincost: set
+        Note that when the costs are constant, this is the optimal adjustment
+        set among those of minimum cardinality.
+
+        :returns: optimal_mincost: set
+            The optimal minimum cost adjustment set.
         """
         H1 = self.build_H1()
         if self.graph.treatment_name[0] in H1.neighbors(self.graph.outcome_name[0]):
