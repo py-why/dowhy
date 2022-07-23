@@ -14,5 +14,7 @@ class TestEfficientBackdoorIdentification(object):
                             observed_node_names=example[1]['observed_node_names'],
                             )
             efficient_bd_identifier = EfficientBackdoor(graph=G, conditional_node_names=example[1]['conditional_node_names'],costs=example[1]['costs'])
+            assert efficient_bd_identifier.optimal_mincost_adj_set() == \
+                   example[1]['optimal_minimum_cost_adjustment_set']
             assert efficient_bd_identifier.optimal_minimal_adj_set() == example[1]['optimal_minimal_adjustment_set']
             assert efficient_bd_identifier.optimal_adj_set() == example[1]['optimal_adjustment_set']

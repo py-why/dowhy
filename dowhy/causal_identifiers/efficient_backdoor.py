@@ -15,11 +15,12 @@ class EfficientBackdoor:
     Implements methods for finding optimal backdoor sets.
     """
 
-    def __init__(self, graph, costs, conditional_node_names):
+    def __init__(self, graph, conditional_node_names, costs=None):
         self.graph = graph
         self.conditional_node_names = conditional_node_names
-        # TODO: costs are not being used, and the minimum_cost method does not really work
-        self.costs = costs
+        if not costs:
+            costs = [(node, {"cost": 1}) for node in self.graph._graph.nodes]
+        self.graph._graph.add_nodes_from(costs)
         self.observed_nodes = set([node for node in self.graph._graph.nodes if self.graph._graph.nodes[node]["observed"] == 'yes'])
 
     def ancestors_all(self, nodes):
@@ -253,7 +254,7 @@ class EfficientBackdoor:
         Z: set
         """
         Z = set()
-        for node in self.graph.nodes:
+        for node in self.graph._graph.nodes:
             nodep = node + "'"
             nodepp = node + "''"
             condition = nodep in S and nodepp not in S
