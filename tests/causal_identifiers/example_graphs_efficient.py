@@ -1,4 +1,3 @@
-# TODO, should this be added to the general examples_graphs.py?
 
 TEST_EFFICIENT_BD_SOLUTIONS = {
     # For all examples from these papers we use X for the treatment variable
@@ -273,7 +272,7 @@ TEST_EFFICIENT_BD_SOLUTIONS = {
         ],
     ),
     # The graph from Shrier and Platt (2008)
-    "alldiff_example_graph": dict(
+    "shrier_platt_2008": dict(
         graph_str="""graph[directed 1 node[id "coach" label "coach"]
                         node[id "team motivation" label "team motivation"]
                         node[id "fitness" label "fitness"]
