@@ -21,7 +21,13 @@ class EfficientBackdoor:
         if not costs:
             costs = [(node, {"cost": 1}) for node in self.graph._graph.nodes]
         self.graph._graph.add_nodes_from(costs)
-        self.observed_nodes = set([node for node in self.graph._graph.nodes if self.graph._graph.nodes[node]["observed"] == 'yes'])
+        self.observed_nodes = set(
+            [
+                node
+                for node in self.graph._graph.nodes
+                if self.graph._graph.nodes[node]["observed"] == "yes"
+            ]
+        )
 
     def ancestors_all(self, nodes):
         """Returns a set with all ancestors of nodes
@@ -58,7 +64,9 @@ class EfficientBackdoor:
         """
         Gbd = G.copy()
 
-        for path in nx.all_simple_edge_paths(G, self.graph.treatment_name[0], self.graph.outcome_name[0]):
+        for path in nx.all_simple_edge_paths(
+            G, self.graph.treatment_name[0], self.graph.outcome_name[0]
+        ):
             first_edge = path[0]
             Gbd.remove_edge(first_edge[0], first_edge[1])
 
@@ -72,7 +80,13 @@ class EfficientBackdoor:
         causal_vertices: set
         """
         causal_vertices = set()
-        causal_paths = list(nx.all_simple_paths(self.graph._graph, source=self.graph.treatment_name[0], target=self.graph.outcome_name[0]))
+        causal_paths = list(
+            nx.all_simple_paths(
+                self.graph._graph,
+                source=self.graph.treatment_name[0],
+                target=self.graph.outcome_name[0],
+            )
+        )
 
         for path in causal_paths:
             causal_vertices = causal_vertices.union(set(path))
@@ -91,7 +105,9 @@ class EfficientBackdoor:
         forbidden = set()
 
         for node in self.causal_vertices():
-            forbidden = forbidden.union(nx.descendants(self.graph._graph, node).union(node))
+            forbidden = forbidden.union(
+                nx.descendants(self.graph._graph, node).union(node)
+            )
 
         return forbidden.union(self.graph.treatment_name[0])
 
@@ -102,7 +118,12 @@ class EfficientBackdoor:
         ----------
         ignore: set
         """
-        set1 = set(self.ancestors_all(self.conditional_node_names + [self.graph.treatment_name[0], self.graph.outcome_name[0]]))
+        set1 = set(
+            self.ancestors_all(
+                self.conditional_node_names
+                + [self.graph.treatment_name[0], self.graph.outcome_name[0]]
+            )
+        )
         set1.remove(self.graph.treatment_name[0])
         set1.remove(self.graph.outcome_name[0])
 
@@ -143,7 +164,10 @@ class EfficientBackdoor:
         H0: nx.Graph()
         """
         # restriction to ancestors
-        anc = self.ancestors_all(self.conditional_node_names + [self.graph.treatment_name[0], self.graph.outcome_name[0]])
+        anc = self.ancestors_all(
+            self.conditional_node_names
+            + [self.graph.treatment_name[0], self.graph.outcome_name[0]]
+        )
         G2 = self.graph._graph.subgraph(anc)
 
         # back-door graph
@@ -216,7 +240,9 @@ class EfficientBackdoor:
         """
         D = self.build_D()
         _, flow_dict = nx.algorithms.flow.maximum_flow(
-            flowG=D, _s=self.graph.outcome_name[0] + "''", _t=self.graph.treatment_name[0] + "'"
+            flowG=D,
+            _s=self.graph.outcome_name[0] + "''",
+            _t=self.graph.treatment_name[0] + "'",
         )
         queu = [self.graph.outcome_name[0] + "''"]
         S_c = set()
@@ -273,12 +299,16 @@ class EfficientBackdoor:
         if self.graph.treatment_name[0] in H1.neighbors(self.graph.outcome_name[0]):
             raise NoAdjException(EXCEPTION_NO_ADJ)
         elif self.observed_nodes == self.graph._graph.nodes() or self.observed_nodes.issubset(
-            self.ancestors_all([self.graph.treatment_name[0], self.graph.outcome_name[0]])
+            self.ancestors_all(
+                [self.graph.treatment_name[0], self.graph.outcome_name[0]]
+            )
         ):
             optimal = nx.node_boundary(H1, set([self.graph.outcome_name[0]]))
             return optimal
         else:
-            warnings.warn("Conditions to guarantee the existence of an optimal adjustment set are not satisfied")
+            warnings.warn(
+                "Conditions to guarantee the existence of an optimal adjustment set are not satisfied"
+            )
             return None
 
     def optimal_minimal_adj_set(self):
