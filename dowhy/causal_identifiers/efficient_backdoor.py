@@ -329,7 +329,8 @@ class EfficientBackdoor:
             self.graph._graph.nodes()
         ) or self.observed_nodes.issubset(
             self.ancestors_all(
-                self.conditional_node_names + [self.graph.treatment_name[0], self.graph.outcome_name[0]]
+                self.conditional_node_names
+                + [self.graph.treatment_name[0], self.graph.outcome_name[0]]
             )
         ):
             optimal = nx.node_boundary(H1, {self.graph.outcome_name[0]})

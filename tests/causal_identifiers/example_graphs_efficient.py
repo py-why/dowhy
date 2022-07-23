@@ -308,24 +308,32 @@ TEST_EFFICIENT_BD_SOLUTIONS = {
                         edge[source "tissue weakness" target "Y"]
                         ]
 """,
-        observed_node_names=["team motivation",
-    "previous injury",
-    "X",
-    "coach",
-    "fitness",
-    "contact sport",
-    "neuromusc fatigue",
-    "tissue disorder",
-    "Y",
+        observed_node_names=[
+            "team motivation",
+            "previous injury",
+            "X",
+            "coach",
+            "fitness",
+            "contact sport",
+            "neuromusc fatigue",
+            "tissue disorder",
+            "Y",
         ],
         conditional_node_names=["previous injury", "team motivation"],
-        efficient_adjustment={"team motivation",
+        efficient_adjustment={
+            "team motivation",
             "previous injury",
             "contact sport",
             "tissue disorder",
-            "neuromusc fatigue"},
-        efficient_minimal_adjustment={"team motivation", "previous injury", "tissue disorder", "neuromusc fatigue"},
+            "neuromusc fatigue",
+        },
+        efficient_minimal_adjustment={
+            "team motivation",
+            "previous injury",
+            "tissue disorder",
+            "neuromusc fatigue",
+        },
         efficient_mincost_adjustment={"team motivation", "previous injury", "fitness"},
-        costs=None
-    )
+        costs=None,
+    ),
 }
