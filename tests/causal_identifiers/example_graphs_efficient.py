@@ -272,4 +272,60 @@ TEST_EFFICIENT_BD_SOLUTIONS = {
             ("O", {"cost": 1}),
         ],
     ),
+    # The graph from Shrier and Platt (2008)
+    "alldiff_example_graph": dict(
+        graph_str="""graph[directed 1 node[id "coach" label "coach"]
+                        node[id "team motivation" label "team motivation"]
+                        node[id "fitness" label "fitness"]
+                        node[id "pre-game prop" label "pre-game prop"]
+                        node[id "intra-game prop" label "intra-game prop"]                       
+                        node[id "neuromusc fatigue" label "neuromusc fatigue"]
+                        node[id "X" label "X"]
+                        node[id "previous injury" label "previous injury"]
+                        node[id "contact sport" label "contact sport"]
+                        node[id "genetics" label "genetics"]
+                        node[id "Y" label "Y"]
+                        node[id "tissue disorder" label "tissue disorder"]
+                        node[id "tissue weakness" label "tissue weakness"]
+                        edge[source "coach" target "team motivation"]
+                        edge[source "coach" target "fitness"]
+                        edge[source "fitness" target "pre-game prop"]
+                        edge[source "fitness" target "neuromusc fatigue"]
+                        edge[source "team motivation" target "X"]
+                        edge[source "team motivation" target "previous injury"]
+                        edge[source "pre-game prop" target "X"]
+                        edge[source "X" target "intra-game prop"]
+                        edge[source "contact sport" target "previous injury"]
+                        edge[source "contact sport" target "intra-game prop"]
+                        edge[source "intra-game prop" target "Y"]
+                        edge[source "genetics" target "fitness"]
+                        edge[source "genetics" target "neuromusc fatigue"]
+                        edge[source "genetics" target "tissue disorder"]
+                        edge[source "tissue disorder" target "neuromusc fatigue"]
+                        edge[source "tissue disorder" target "tissue weakness"]
+                        edge[source "neuromusc fatigue" target "intra-game prop"]
+                        edge[source "neuromusc fatigue" target "Y"]
+                        edge[source "tissue weakness" target "Y"]
+                        ]
+""",
+        observed_node_names=["team motivation",
+    "previous injury",
+    "X",
+    "coach",
+    "fitness",
+    "contact sport",
+    "neuromusc fatigue",
+    "tissue disorder",
+    "Y",
+        ],
+        conditional_node_names=["previous injury", "team motivation"],
+        efficient_adjustment={"team motivation",
+            "previous injury",
+            "contact sport",
+            "tissue disorder",
+            "neuromusc fatigue"},
+        efficient_minimal_adjustment={"team motivation", "previous injury", "tissue disorder", "neuromusc fatigue"},
+        efficient_mincost_adjustment={"team motivation", "previous injury", "fitness"},
+        costs=None
+    )
 }

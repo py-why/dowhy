@@ -457,6 +457,10 @@ class CausalIdentifier:
         :returns:  backdoor_sets, a list of dictionaries, with each dictionary
         having as values a backdoor set.
         """
+        if costs is None and self.method_name == "efficient-mincost-adjustment":
+            self.logger.warning(
+                "No costs were passed, so they will be assumed to be constant and equal to 1."
+            )
         efficient_bd = EfficientBackdoor(
             graph=self._graph,
             conditional_node_names=conditional_node_names,

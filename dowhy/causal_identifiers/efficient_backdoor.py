@@ -1,6 +1,5 @@
 import networkx as nx
 import numpy as np
-import warnings
 
 
 EXCEPTION_NO_ADJ = "An adjustment set formed by observable variables does not exist"
@@ -35,9 +34,6 @@ class EfficientBackdoor:
         self.graph = graph
         if costs is None:
             # If no costs are passed, use uniform costs
-            warnings.warn(
-                "No costs were passed, so they will be assumed to be constant and equal to 1. This is only relevant when method_name='efficient-mincost-adjustment'"
-            )
             costs = [(node, {"cost": 1}) for node in self.graph._graph.nodes]
         assert all([tup["cost"] > 0 for _, tup in costs]), "All costs must be positive"
         self.graph._graph.add_nodes_from(costs)
@@ -333,7 +329,7 @@ class EfficientBackdoor:
             self.graph._graph.nodes()
         ) or self.observed_nodes.issubset(
             self.ancestors_all(
-                [self.graph.treatment_name[0], self.graph.outcome_name[0]]
+                self.conditional_node_names + [self.graph.treatment_name[0], self.graph.outcome_name[0]]
             )
         ):
             optimal = nx.node_boundary(H1, {self.graph.outcome_name[0]})
