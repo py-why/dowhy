@@ -6,6 +6,7 @@ import sympy as sp
 import sympy.stats as spstats
 
 import dowhy.utils.cli_helpers as cli
+from dowhy.causal_identifiers.efficient_backdoor import EfficientBackdoor
 from dowhy.utils.api import parse_state
 
 
@@ -25,7 +26,12 @@ class CausalIdentifier:
     BACKDOOR_EXHAUSTIVE="exhaustive-search"
     BACKDOOR_MIN="minimal-adjustment"
     BACKDOOR_MAX="maximal-adjustment"
-    METHOD_NAMES = {BACKDOOR_DEFAULT, BACKDOOR_EXHAUSTIVE, BACKDOOR_MIN, BACKDOOR_MAX}
+    BACKDOOR_EFFICIENT="efficient-adjustment"
+    BACKDOOR_MIN_EFFICIENT = "efficient-minimal-adjustment"
+    BACKDOOR_MINCOST_EFFICIENT = "efficient-mincost-adjustment"
+    METHOD_NAMES = {BACKDOOR_DEFAULT, BACKDOOR_EXHAUSTIVE, BACKDOOR_MIN, BACKDOOR_MAX,
+                    BACKDOOR_EFFICIENT, BACKDOOR_MIN_EFFICIENT, BACKDOOR_MINCOST_EFFICIENT}
+    EFFICIENT_METHODS = {BACKDOOR_EFFICIENT, BACKDOOR_MIN_EFFICIENT, BACKDOOR_MINCOST_EFFICIENT}
     DEFAULT_BACKDOOR_METHOD = BACKDOOR_DEFAULT
 
     def __init__(self, graph, estimand_type,
@@ -39,7 +45,7 @@ class CausalIdentifier:
         self._proceed_when_unidentifiable = proceed_when_unidentifiable
         self.logger = logging.getLogger(__name__)
 
-    def identify_effect(self, optimize_backdoor=False):
+    def identify_effect(self, optimize_backdoor=False, costs=None, conditional_node_names=None):
         """Main method that returns an identified estimand (if one exists).
 
         If estimand_type is non-parametric ATE, then  uses backdoor, instrumental variable and frontdoor identification methods,  to check if an identified estimand exists, based on the causal graph.
@@ -55,7 +61,7 @@ class CausalIdentifier:
                     outcome_variable=self.outcome_name,
                     no_directed_path=True)
         if self.estimand_type == CausalIdentifier.NONPARAMETRIC_ATE:
-            return self.identify_ate_effect(optimize_backdoor=optimize_backdoor)
+            return self.identify_ate_effect(optimize_backdoor=optimize_backdoor, costs=costs, conditional_node_names=conditional_node_names)
         elif self.estimand_type == CausalIdentifier.NONPARAMETRIC_NDE:
             return self.identify_nde_effect()
         elif self.estimand_type == CausalIdentifier.NONPARAMETRIC_NIE:
@@ -66,18 +72,23 @@ class CausalIdentifier:
                 CausalIdentifier.NONPARAMETRIC_NDE,
                 CausalIdentifier.NONPARAMETRIC_NIE))
 
-    def identify_ate_effect(self, optimize_backdoor):
+    def identify_ate_effect(self, optimize_backdoor, costs=None, conditional_node_names=None):
         estimands_dict = {}
         mediation_first_stage_confounders = None
         mediation_second_stage_confounders = None
         ### 1. BACKDOOR IDENTIFICATION
-        # First, checking if there are any valid backdoor adjustment sets
-        if optimize_backdoor == False:
-            backdoor_sets = self.identify_backdoor(self.treatment_name, self.outcome_name)
-        else:
-            from dowhy.causal_identifiers.backdoor import Backdoor
-            path = Backdoor(self._graph._graph, self.treatment_name, self.outcome_name)
-            backdoor_sets = path.get_backdoor_vars()
+        # Pick algorithm to compute backdoor sets according to method chosen
+        if self.method_name not in CausalIdentifier.EFFICIENT_METHODS:
+            # First, checking if there are any valid backdoor adjustment sets
+            if optimize_backdoor == False:
+                backdoor_sets = self.identify_backdoor(self.treatment_name, self.outcome_name)
+            else:
+                from dowhy.causal_identifiers.backdoor import Backdoor
+                path = Backdoor(self._graph._graph, self.treatment_name, self.outcome_name)
+                backdoor_sets = path.get_backdoor_vars()
+        elif self.method_name in CausalIdentifier.EFFICIENT_METHODS:
+            backdoor_sets = self.identify_efficient_backdoor(costs=costs,
+                                                             conditional_node_names=conditional_node_names)
         estimands_dict, backdoor_variables_dict = self.build_backdoor_estimands_dict(
                 self.treatment_name,
                 self.outcome_name,
@@ -308,6 +319,23 @@ class CausalIdentifier:
                         max_iterations= CausalIdentifier.MAX_BACKDOOR_ITERATIONS)
         else:
             raise ValueError(f"Identifier method {method_name} not supported. Try one of the following: {CausalIdentifier.METHOD_NAMES}")
+        return backdoor_sets
+
+    def identify_efficient_backdoor(self, costs=None, conditional_node_names=None):
+        efficient_bd = EfficientBackdoor(
+            graph=self._graph,
+            conditional_node_names=conditional_node_names,
+            costs=costs,
+        )
+        if self.method_name == "efficient-adjustment":
+            backdoor_set = efficient_bd.optimal_adj_set()
+            backdoor_sets = [{'backdoor_set': tuple(backdoor_set)}]
+        elif self.method_name == "efficient-minimal-adjustment":
+            backdoor_set = efficient_bd.optimal_minimal_adj_set()
+            backdoor_sets = [{'backdoor_set': tuple(backdoor_set)}]
+        elif self.method_name == "efficient-mincost-adjustment":
+            backdoor_set = efficient_bd.optimal_mincost_adj_set()
+            backdoor_sets = [{'backdoor_set': tuple(backdoor_set)}]
         return backdoor_sets
 
     def find_valid_adjustment_sets(self, treatment_name, outcome_name,

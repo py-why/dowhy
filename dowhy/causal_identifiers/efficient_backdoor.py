@@ -2,12 +2,9 @@ import networkx as nx
 import numpy as np
 import warnings
 
-# TODO, how does Dowhy handle this? With exceptions?
+
 EXCEPTION_NO_ADJ = "An adjustment set formed by observable variables does not exist"
-
-
-class NoAdjException(Exception):
-    pass
+EXCEPTION_COND_NO_OPT = "Conditions to guarantee the existence of an optimal adjustment set are not satisfied"
 
 
 class EfficientBackdoor:
@@ -15,10 +12,13 @@ class EfficientBackdoor:
     Implements methods for finding optimal backdoor sets.
     """
 
-    def __init__(self, graph, conditional_node_names, costs=None):
+    def __init__(self, graph, conditional_node_names=None, costs=None):
         self.graph = graph
+        if not conditional_node_names:
+            conditional_node_names = []
         self.conditional_node_names = conditional_node_names
         if not costs:
+            # If no costs are passed, use uniform costs
             costs = [(node, {"cost": 1}) for node in self.graph._graph.nodes]
         self.graph._graph.add_nodes_from(costs)
         self.observed_nodes = set(
@@ -196,7 +196,7 @@ class EfficientBackdoor:
         for i, node1 in enumerate(vertices_list):
             for node2 in vertices_list[(i + 1) :]:
                 for path in nx.all_simple_paths(H0, source=node1, target=node2):
-                    if set(path).issubset(ignore_nodes.union(set([node1, node2]))):
+                    if set(path).issubset(ignore_nodes.union({node1, node2})):
                         H1.add_edge(node1, node2)
                         break
 
@@ -297,19 +297,18 @@ class EfficientBackdoor:
         """
         H1 = self.build_H1()
         if self.graph.treatment_name[0] in H1.neighbors(self.graph.outcome_name[0]):
-            raise NoAdjException(EXCEPTION_NO_ADJ)
-        elif self.observed_nodes == self.graph._graph.nodes() or self.observed_nodes.issubset(
+            raise ValueError(EXCEPTION_NO_ADJ)
+        elif self.observed_nodes == set(
+            self.graph._graph.nodes()
+        ) or self.observed_nodes.issubset(
             self.ancestors_all(
                 [self.graph.treatment_name[0], self.graph.outcome_name[0]]
             )
         ):
-            optimal = nx.node_boundary(H1, set([self.graph.outcome_name[0]]))
+            optimal = nx.node_boundary(H1, {self.graph.outcome_name[0]})
             return optimal
         else:
-            warnings.warn(
-                "Conditions to guarantee the existence of an optimal adjustment set are not satisfied"
-            )
-            return None
+            raise ValueError(EXCEPTION_COND_NO_OPT)
 
     def optimal_minimal_adj_set(self):
         """Returns the optimal minimal adjustment set with respect to treatment, outcome, conditional and observable variables
@@ -322,10 +321,10 @@ class EfficientBackdoor:
         H1 = self.build_H1()
 
         if self.graph.treatment_name[0] in H1.neighbors(self.graph.outcome_name[0]):
-            raise NoAdjException(EXCEPTION_NO_ADJ)
+            raise ValueError(EXCEPTION_NO_ADJ)
         else:
             optimal_minimal = self.unblocked(
-                H1, nx.node_boundary(H1, set([self.graph.outcome_name[0]]))
+                H1, nx.node_boundary(H1, [self.graph.outcome_name[0]])
             )
             return optimal_minimal
 
@@ -338,7 +337,7 @@ class EfficientBackdoor:
         """
         H1 = self.build_H1()
         if self.graph.treatment_name[0] in H1.neighbors(self.graph.outcome_name[0]):
-            raise NoAdjException(EXCEPTION_NO_ADJ)
+            raise ValueError(EXCEPTION_NO_ADJ)
         else:
             S_c = self.compute_smallest_mincut()
             optimal_mincost = self.h_operator(S_c)
