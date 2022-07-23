@@ -51,6 +51,13 @@ class CausalIdentifier:
         If estimand_type is non-parametric ATE, then  uses backdoor, instrumental variable and frontdoor identification methods,  to check if an identified estimand exists, based on the causal graph.
 
         :param self: instance of the CausalIdentifier class (or its subclass)
+        :param optimize_backdoor: if True, uses an optimised algorithm to compute the backdoor sets
+        :param costs: non-negative costs associated with variables in the graph. Only used
+        for estimand_type='non-parametric-ate' and method_name='efficient-mincost-adjustment'. If
+        no costs are provided by the user, and method_name='efficient-mincost-adjustment', costs
+        are assumed to be equal to one for all variables in the graph.
+        :param conditional_node_names: variables that are used to determine treatment. If none are
+        provided, it is assumed that the intervention is static.
         :returns:  target estimand, an instance of the IdentifiedEstimand class
         """
         # First, check if there is a directed path from action to outcome
@@ -322,6 +329,45 @@ class CausalIdentifier:
         return backdoor_sets
 
     def identify_efficient_backdoor(self, costs=None, conditional_node_names=None):
+        """Method implementing algorithms to compute efficient backdoor sets, as
+        described in Rotnitzky and Smucler (2020), Smucler, Sapienza and Rotnitzky (2021)
+        and Smucler and Rotnitzky (2022).
+
+        For method_name='efficient-adjustment', computes an optimal backdoor set,
+        that is, a backdoor set comprised of observable variables that yields non-parametric
+        estimators of the interventional mean with the smallest asymptotic variance
+        among those that are based on observable backdoor sets. This optimal backdoor
+        set always exists when no variables are latent, and the algorithm is guaranteed to compute
+        it in this case. Under a non-parametric graphical model with latent variables,
+        such a backdoor set can fail to exist. When certain sufficient conditions under which it is
+        known that such a backdoor set exists are not satisfied, an error is raised.
+
+        For method_name='efficient-minimal-adjustment', computes an optimal minimal backdoor set,
+        that is, a minimal backdoor set comprised of observable variables that yields non-parametric
+        estimators of the interventional mean with the smallest asymptotic variance
+        among those that are based on observable minimal backdoor sets.
+
+        For method_name='efficient-mincost-adjustment', computes an optimal minimum cost backdoor set,
+        that is, a minimum cost backdoor set comprised of observable variables that yields non-parametric
+        estimators of the interventional mean with the smallest asymptotic variance
+        among those that are based on observable minimum cost backdoor sets. The cost
+        of a backdoor set is defined as the sum of the costs of the variables that comprise it.
+
+        The various optimal backdoor sets computed by this method are not only optimal under
+        non-parametric graphical models and non-parametric estimators of interventional mean,
+        but also under linear graphical models and OLS estimators, per results in Henckel, Perkovic
+        and Maathuis (2020).
+
+        :param costs: a list with non-negative costs associated with variables in the graph. Only used
+        for estimatand_type='non-parametric-ate' and method_name='efficient-mincost-adjustment'. If
+        not costs are provided by the user, and method_name='efficient-mincost-adjustment', costs
+        are assumed to be equal to one for all variables in the graph. The structure of the list should
+        be of the form [(node, {"cost": x}) for node in nodes].
+        :param conditional_node_names: variables that are used to determine treatment. If none are
+        provided, it is assumed that the intervention sets the treatment to a constant.
+        :returns:  backdoor_sets, a list of dictionaries, with each dictionary
+        having as values a backdoor set.
+        """
         efficient_bd = EfficientBackdoor(
             graph=self._graph,
             conditional_node_names=conditional_node_names,

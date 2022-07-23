@@ -14,12 +14,10 @@ class EfficientBackdoor:
 
     def __init__(self, graph, conditional_node_names=None, costs=None):
         self.graph = graph
-        if not conditional_node_names:
-            conditional_node_names = []
-        self.conditional_node_names = conditional_node_names
-        if not costs:
+        if costs is None:
             # If no costs are passed, use uniform costs
             costs = [(node, {"cost": 1}) for node in self.graph._graph.nodes]
+        assert all([tup['cost'] > 0 for _, tup in costs]), "All costs must be positive"
         self.graph._graph.add_nodes_from(costs)
         self.observed_nodes = set(
             [
@@ -28,6 +26,10 @@ class EfficientBackdoor:
                 if self.graph._graph.nodes[node]["observed"] == "yes"
             ]
         )
+        if conditional_node_names is None:
+            conditional_node_names = []
+        assert set(conditional_node_names).issubset(self.observed_nodes), "Some conditional variables are not marked as observed"
+        self.conditional_node_names = conditional_node_names
 
     def ancestors_all(self, nodes):
         """Returns a set with all ancestors of nodes
