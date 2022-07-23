@@ -32,7 +32,7 @@ class EfficientBackdoor:
         assert (
             len(graph.outcome_name) == 1
         ), "The methods for computing efficient backdoor sets are only valid for one dimensional outcomes"
-        self.graph = graph.copy()
+        self.graph = graph
         if costs is None:
             # If no costs are passed, use uniform costs
             warnings.warn(
