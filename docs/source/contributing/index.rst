@@ -21,7 +21,7 @@ Here are some examples:
 If you would like to contribute, you can raise a pull request. If you have
 questions before contributing, you can start by opening an issue on Github. 
 
-For a guide to contributing and a list of all contributors, check out `CONTRIBUTING.md <https://github.com/microsoft/dowhy/blob/master/CONTRIBUTING.md>`_. Our contributor code of conduct is available [here](https://github.com/py-why/governance/blob/main/CODE-OF-CONDUCT.md). You can also join the DoWhy development channel on Discord: |discord|_
+For a guide to contributing and a list of all contributors, check out `CONTRIBUTING.md <https://github.com/py-why/dowhy/blob/master/CONTRIBUTING.md>`_. Our contributor code of conduct is available `here <https://github.com/py-why/governance/blob/main/CODE-OF-CONDUCT.md>`_. You can also join the DoWhy development channel on Discord: |discord|_
 
 .. |discord| image:: https://img.shields.io/discord/818456847551168542
 .. _discord: https://discord.gg/cSBGb3vsZb
