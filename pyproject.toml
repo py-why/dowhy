@@ -1,4 +1,71 @@
+[tool.poetry]
+name = "dowhy"
+version = "0.8.0"
+description = "DoWhy is a Python library for causal inference that supports explicit modeling and testing of causal assumptions"
+authors = []
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+scipy = "^1.8.1"
+statsmodels = "^0.13.2"
+numpy = "^1.23.1"
+pandas = "^1.4.3"
+networkx = "^2.8.5"
+sympy = "^1.10.1"
+scikit-learn = "^1.1.1"
+pydot = "^1.4.2"
+joblib = "^1.1.0"
+pandas-stubs = "^1.4.3"
+
+[tool.poetry.dev-dependencies]
+poethepoet = "^0.16.0"
+flake8 = "^4.0.1"
+black = "^22.6.0"
+isort = "^5.10.1"
+pytest = "^7.1.2"
+twine = "^4.0.1"
+nbformat = "^5.4.0"
+# Optional - the next verison of poetry will introduce dependency groups where
+# we can explicitly mark this as optional.
+matplotlib = "^3.5.2"
+jupyter = "^1.0.0"
+flaky = "^3.7.0"
+pygraphviz = "^1.9"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.pytest.ini_options]
 markers = [
     "advanced: not be to run each time. only on package updates."
 ]
+
+[tool.poe.tasks]
+# stop the build if there are Python syntax errors or undefined names
+_flake8Errors = "flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics"
+_flake8Warnings = "flake8 . --count --exit-zero --statistics"
+_black = 'black .'
+_isort = 'isort .'
+_preparePackage = "python setup.py check sdist bdist_wheel"
+_twine = "twine check dist/*s"
+
+test = "pytest -v -m \"not advanced\""
+
+[tool.poe.tasks.verifyPackage]
+sequence = ['_preparePackage', '_twine']
+ignore_fail = 'return_non_zero'
+
+# TODO: add formatting to build process
+[tool.poe.tasks.format]
+sequence = ['_black', '_isort']
+ignore_fail = 'return_non_zero'
+
+[tool.poe.tasks.lint]
+sequence = ['_flake8Errors', '_flake8Warnings']
+ignore_fail = 'return_non_zero'
+
+[tool.poe.tasks.verify]
+sequence = ['lint', 'test', 'verifyPackage']
+ignore_fail = "return_non_zero"
