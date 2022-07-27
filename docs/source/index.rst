@@ -14,7 +14,7 @@ DoWhy documentation
     code_repo
 
 
-.. image:: https://raw.githubusercontent.com/py-why/dowhy/master/docs/images/dowhy-schematic.png
+.. image:: https://raw.githubusercontent.com/py-why/dowhy/main/docs/images/dowhy-schematic.png
 
 Much like machine learning libraries have done for prediction, **"DoWhy" is a Python library that aims to spark
 causal thinking and analysis**. DoWhy provides a principled four-step interface for causal inference that focuses on

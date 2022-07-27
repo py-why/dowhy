@@ -1,7 +1,7 @@
-Comparison to other causal inference packages
-==================================================
+Comparison to other packages
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-DoWhy's API captures all four steps of causal inference: 
+DoWhy's effect inference API captures all four steps of causal inference:
 
 1. Model a causal inference problem using assumptions.
 2. Identify an expression for the causal effect under these assumptions ("causal estimand").
