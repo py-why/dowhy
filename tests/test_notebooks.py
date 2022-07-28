@@ -23,7 +23,16 @@ advanced_notebooks = [
                       # will be removed
                       "dowhy_optimize_backdoor_example.ipynb",
                       # applied notebook, not necessary to test each time
-                      "dowhy_ranking_methods.ipynb"
+                      "dowhy_ranking_methods.ipynb",
+                      
+                      #
+                      # Slow Notebooks
+                      #
+                      "dowhy_twins_example.ipynb",
+                      "gcm_rca_microservice_architecture.ipynb",
+                      "gcm_supply_chain_dist_change.ipynb",
+                      "dowhy_simple_example.ipynb",
+                      "gcm_401k_analysis.ipynb"
                       ]
 
 # Adding the dowhy root folder to the python path so that jupyter notebooks
