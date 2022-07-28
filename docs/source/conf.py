@@ -204,5 +204,5 @@ todo_include_todos = True
 autoclass_content = "both"
 
 smv_tag_whitelist = r'^v.*$'
-smv_branch_whitelist = "master"
+smv_branch_whitelist = "main"
 smv_released_pattern = r"refs/tags/v.*"
