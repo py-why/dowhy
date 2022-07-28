@@ -33,8 +33,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        echo "installing poetry dependencies"
         poetry install -E plotting
-        if [ -f requirements-incompatible.txt ]; then pip install -r requirements-incompatible.txt --use-deprecated=legacy-resolver; fi
+
+        # econml has a circular dependency loop with dowhy
+        echo "installing econml"
+        pip install econml
 
     - name: Verify DoWhy
       run: |
