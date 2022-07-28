@@ -1,0 +1,2642 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iterating over multiple refutation tests &mdash; DoWhy | An end-to-end library for causal inference  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Code repository &amp; Versions" href="../code_repo.html" />
+    <link rel="prev" title="Estimating effect of multiple treatments" href="dowhy_multiple_treatments.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
+          </a>
+              <div class="version">
+                v0.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introducing DoWhy</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">DoWhy | An end-to-end library for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html#graphical-models-and-potential-outcomes-best-of-both-worlds">Graphical Models and Potential Outcomes: Best of both worlds</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html#four-steps-of-causal-inference">Four steps of causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html#citing-this-package">Citing this package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html#roadmap">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html#contributing">Contributing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Quick-Start Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Starter Notebooks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Case Study Notebooks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">DoWhy-The Causal Story Behind Hotel Booking Cancellations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_example_effect_of_memberrewards_program.html">Estimating the effect of a Member Rewards program</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refutation_testing.html">Applying refutation tests to the Lalonde and IHDP datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Notebooks</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_multiple_treatments.html">Estimating effect of multiple treatments</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Iterating over multiple refutation tests</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Import-Dependencies">Import Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Inspection-Parameters">Inspection Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Estimator-List">Estimator List</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Refuter-List">Refuter List</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Create-the-Datasets">Create the Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Inspect-Data">Inspect Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Create-the-CausalModels">Create the CausalModels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Inspect-Models">Inspect Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Identify-Effect">Identify Effect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Identified-Estimands">Identified Estimands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Estimate-Effect">Estimate Effect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Estimate-Values">Estimate Values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Refute-Estimate">Refute Estimate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Refutation-Values">Refutation Values</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../code_repo.html">Code repository &amp; Versions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dowhy.html">dowhy package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DoWhy | An end-to-end library for causal inference</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="nb_advanced_index.html">&lt;no title&gt;</a> &raquo;</li>
+      <li>Iterating over multiple refutation tests</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/example_notebooks/dowhy_refuter_notebook.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.jp-RenderedHTMLCommon thead,
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+.jp-RenderedHTMLCommon th,
+div.rendered_html th {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+.jp-RenderedHTMLCommon tbody tr:hover,
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="Iterating-over-multiple-refutation-tests">
+<h1>Iterating over multiple refutation tests<a class="headerlink" href="#Iterating-over-multiple-refutation-tests" title="Permalink to this heading"></a></h1>
+<p>The objective of this notebook is to compare the ability of refuters to detect the problems in a given set of estimators. Note: This notebook makes use of the optional dependencies: - pygraphviz - causalml</p>
+<section id="Import-Dependencies">
+<h2>Import Dependencies<a class="headerlink" href="#Import-Dependencies" title="Permalink to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dowhy.datasets</span> <span class="kn">import</span> <span class="n">linear_dataset</span>
+<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span> <span class="nn">causalml</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Inspection-Parameters">
+<h2>Inspection Parameters<a class="headerlink" href="#Inspection-Parameters" title="Permalink to this heading"></a></h2>
+<p>These parameters give us the option of inspecting the intermediate steps to sanity check the steps performed</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">inspect_datasets</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">inspect_models</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">inspect_identified_estimands</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">inspect_estimates</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">inspect_refutations</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Estimator-List">
+<h2>Estimator List<a class="headerlink" href="#Estimator-List" title="Permalink to this heading"></a></h2>
+<p>We pass a list of strings, corresponding to the estimators of interest</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimator_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;backdoor.propensity_score_matching&quot;</span><span class="p">,</span> <span class="s2">&quot;backdoor.propensity_score_weighting&quot;</span><span class="p">,</span> <span class="s2">&quot;backdoor.causalml.inference.meta.LRSRegressor&quot;</span><span class="p">]</span>
+<span class="n">method_params</span><span class="o">=</span> <span class="p">[</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">{</span> <span class="s2">&quot;init_params&quot;</span><span class="p">:{}</span> <span class="p">}</span> <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Refuter-List">
+<h2>Refuter List<a class="headerlink" href="#Refuter-List" title="Permalink to this heading"></a></h2>
+<p>A list of strings, corresponding to each refuter we wish to run</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refuter_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;bootstrap_refuter&quot;</span><span class="p">,</span> <span class="s2">&quot;data_subset_refuter&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Create-the-Datasets">
+<h2>Create the Datasets<a class="headerlink" href="#Create-the-Datasets" title="Permalink to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Parameters for creating the Dataset</span>
+<span class="n">TREATMENT_IS_BINARY</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">BETA</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">NUM_SAMPLES</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">NUM_CONFOUNDERS</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">NUM_INSTRUMENTS</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">NUM_EFFECT_MODIFIERS</span> <span class="o">=</span> <span class="mi">2</span>
+
+<span class="c1"># Creating a Linear Dataset with the given parameters</span>
+<span class="n">linear_data</span> <span class="o">=</span> <span class="n">linear_dataset</span><span class="p">(</span>
+            <span class="n">beta</span> <span class="o">=</span> <span class="n">BETA</span><span class="p">,</span>
+            <span class="n">num_common_causes</span> <span class="o">=</span> <span class="n">NUM_CONFOUNDERS</span><span class="p">,</span>
+            <span class="n">num_instruments</span> <span class="o">=</span> <span class="n">NUM_INSTRUMENTS</span><span class="p">,</span>
+            <span class="n">num_effect_modifiers</span> <span class="o">=</span> <span class="n">NUM_EFFECT_MODIFIERS</span><span class="p">,</span>
+            <span class="n">num_samples</span> <span class="o">=</span> <span class="n">NUM_SAMPLES</span><span class="p">,</span>
+            <span class="n">treatment_is_binary</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="p">)</span>
+<span class="c1"># Other datasets come here</span>
+
+
+<span class="c1"># Append them together in an array</span>
+<span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span><span class="n">linear_data</span><span class="p">]</span>
+<br/></pre></div>
+</div>
+</div>
+</section>
+<section id="Inspect-Data">
+<h2>Inspect Data<a class="headerlink" href="#Inspect-Data" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dataset_num</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">if</span> <span class="n">inspect_datasets</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;####### Dataset </span><span class="si">{}</span><span class="s2">###########################################################################################&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dataset_num</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#############################################################################################################&quot;</span><span class="p">)</span>
+        <span class="n">dataset_num</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+####### Dataset 1###########################################################################################
+         X0        X1   Z0        Z1   Z2        W0        W1        W2  \
+0  2.296454 -1.105707  0.0  0.872820  1.0 -1.017451 -1.121472  0.618193
+1  1.186473 -1.012574  0.0  0.094944  0.0 -1.996002 -0.868432 -2.147540
+2  0.697345 -0.421525  1.0  0.582726  1.0 -0.287837 -1.625909 -1.624035
+3  0.728708 -0.863882  1.0  0.623053  1.0 -2.926781 -1.116355 -0.367452
+4 -0.801555  0.554153  1.0  0.791654  1.0 -2.985773 -0.083998 -0.072799
+
+         W3        W4     v0          y
+0 -0.111623  0.609580   True  14.862008
+1 -1.543804 -0.003589  False -12.178909
+2 -1.750058  0.397615   True   2.765377
+3 -0.333454  0.768779   True   5.936453
+4  0.509324  2.133821   True  13.790278
+#############################################################################################################
+</pre></div></div>
+</div>
+</section>
+<section id="Create-the-CausalModels">
+<h2>Create the CausalModels<a class="headerlink" href="#Create-the-CausalModels" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">models</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">:</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">],</span>
+                <span class="n">treatment</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;treatment_name&#39;</span><span class="p">],</span>
+                <span class="n">outcome</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;outcome_name&#39;</span><span class="p">],</span>
+                <span class="n">graph</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;gml_graph&#39;</span><span class="p">]</span>
+            <span class="p">)</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.causal_model:Model to find the causal effect of treatment [&#39;v0&#39;] on outcome [&#39;y&#39;]
+</pre></div></div>
+</div>
+</section>
+<section id="Inspect-Models">
+<h2>Inspect Models<a class="headerlink" href="#Inspect-Models" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_num</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">if</span> <span class="n">inspect_models</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;####### Model </span><span class="si">{}</span><span class="s2">#############################################################################################&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_num</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Common Causes:&quot;</span><span class="p">,</span><span class="n">model</span><span class="o">.</span><span class="n">_common_causes</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Effect Modifiers:&quot;</span><span class="p">,</span><span class="n">model</span><span class="o">.</span><span class="n">_effect_modifiers</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Instruments:&quot;</span><span class="p">,</span><span class="n">model</span><span class="o">.</span><span class="n">_instruments</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Outcome:&quot;</span><span class="p">,</span><span class="n">model</span><span class="o">.</span><span class="n">_outcome</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Treatment:&quot;</span><span class="p">,</span><span class="n">model</span><span class="o">.</span><span class="n">_treatment</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#############################################################################################################&quot;</span><span class="p">)</span>
+        <span class="n">model_num</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+####### Model 1#############################################################################################
+Common Causes: [&#39;W3&#39;, &#39;W1&#39;, &#39;W2&#39;, &#39;Unobserved Confounders&#39;, &#39;W0&#39;, &#39;W4&#39;]
+Effect Modifiers: [&#39;X1&#39;, &#39;X0&#39;]
+Instruments: [&#39;Z2&#39;, &#39;Z0&#39;, &#39;Z1&#39;]
+Outcome: [&#39;y&#39;]
+Treatment: [&#39;v0&#39;]
+#############################################################################################################
+</pre></div></div>
+</div>
+</section>
+<section id="Identify-Effect">
+<h2>Identify Effect<a class="headerlink" href="#Identify-Effect" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">identified_estimands</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+    <span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">identified_estimands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.causal_identifier:Common causes of treatment and outcome:[&#39;W3&#39;, &#39;W1&#39;, &#39;W2&#39;, &#39;Unobserved Confounders&#39;, &#39;W0&#39;, &#39;W4&#39;]
+WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.
+INFO:dowhy.causal_identifier:Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True.
+INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[&#39;Z2&#39;, &#39;Z0&#39;, &#39;Z1&#39;]
+</pre></div></div>
+</div>
+</section>
+<section id="Identified-Estimands">
+<h2>Identified Estimands<a class="headerlink" href="#Identified-Estimands" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimand_count</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">for</span> <span class="n">estimand</span> <span class="ow">in</span> <span class="n">identified_estimands</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;####### Identified Estimand </span><span class="si">{}</span><span class="s2">#####################################################################################&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">estimand_count</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">estimand</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;###################################################################################################################&quot;</span><span class="p">)</span>
+    <span class="n">estimand_count</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+####### Identified Estimand 1#####################################################################################
+Estimand type: nonparametric-ate
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(Expectation(y|W3,W1,W2,W0,W4))
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W1,W2,W0,W4,U) = P(y|v0,W3,W1,W2,W0,W4)
+### Estimand : 2
+Estimand name: iv
+Estimand expression:
+Expectation(Derivative(y, [Z2, Z0, Z1])*Derivative([v0], [Z2, Z0, Z1])**(-1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z2,Z0,Z1})
+Estimand assumption 2, Exclusion: If we remove {Z2,Z0,Z1}→{v0}, then ¬({Z2,Z0,Z1}→y)
+
+###################################################################################################################
+</pre></div></div>
+</div>
+</section>
+<section id="Estimate-Effect">
+<h2>Estimate Effect<a class="headerlink" href="#Estimate-Effect" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimate_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">identified_estimands</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">estimator_list</span><span class="p">)):</span>
+        <span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span>
+                        <span class="n">identified_estimands</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                        <span class="n">method_name</span><span class="o">=</span><span class="n">estimator_list</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
+                        <span class="n">method_params</span><span class="o">=</span><span class="n">method_params</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                  <span class="p">)</span>
+        <span class="n">estimate_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+/home/tanmay/create-refute-notebook/lib/python3.6/site-packages/sklearn/utils/validation.py:760: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+/home/tanmay/create-refute-notebook/lib/python3.6/site-packages/sklearn/utils/validation.py:760: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)
+The sklearn.utils.testing module is  deprecated in version 0.22 and will be removed in version 0.24. The corresponding classes / functions should instead be imported from sklearn.utils. Anything that cannot be imported from sklearn.utils is now part of the private API.
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+</pre></div></div>
+</div>
+</section>
+<section id="Estimate-Values">
+<h2>Estimate Values<a class="headerlink" href="#Estimate-Values" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimand_count</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">if</span> <span class="n">inspect_estimates</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">estimand</span> <span class="ow">in</span> <span class="n">estimate_list</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;####### Estimand </span><span class="si">{}</span><span class="s2">#######################################################################################&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">estimand_count</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;*** Class Name ***&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">estimand</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;estimator_class&#39;</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">estimand</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;########################################################################################################&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="n">estimand_count</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+####### Estimand 1#######################################################################################
+*** Class Name ***
+
+&lt;class &#39;dowhy.causal_estimators.propensity_score_matching_estimator.PropensityScoreMatchingEstimator&#39;&gt;
+
+*** Causal Estimate ***
+
+## Target estimand
+Estimand type: nonparametric-ate
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(Expectation(y|W3,W1,W2,W0,W4))
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W1,W2,W0,W4,U) = P(y|v0,W3,W1,W2,W0,W4)
+### Estimand : 2
+Estimand name: iv
+Estimand expression:
+Expectation(Derivative(y, [Z2, Z0, Z1])*Derivative([v0], [Z2, Z0, Z1])**(-1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z2,Z0,Z1})
+Estimand assumption 2, Exclusion: If we remove {Z2,Z0,Z1}→{v0}, then ¬({Z2,Z0,Z1}→y)
+
+## Realized estimand
+b: y~v0+W3+W1+W2+W0+W4
+## Estimate
+Value: 11.803018265480263
+
+########################################################################################################
+
+####### Estimand 2#######################################################################################
+*** Class Name ***
+
+&lt;class &#39;dowhy.causal_estimators.propensity_score_weighting_estimator.PropensityScoreWeightingEstimator&#39;&gt;
+
+*** Causal Estimate ***
+
+## Target estimand
+Estimand type: nonparametric-ate
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(Expectation(y|W3,W1,W2,W0,W4))
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W1,W2,W0,W4,U) = P(y|v0,W3,W1,W2,W0,W4)
+### Estimand : 2
+Estimand name: iv
+Estimand expression:
+Expectation(Derivative(y, [Z2, Z0, Z1])*Derivative([v0], [Z2, Z0, Z1])**(-1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z2,Z0,Z1})
+Estimand assumption 2, Exclusion: If we remove {Z2,Z0,Z1}→{v0}, then ¬({Z2,Z0,Z1}→y)
+
+## Realized estimand
+b: y~v0+W3+W1+W2+W0+W4
+## Estimate
+Value: 11.20381938129325
+
+########################################################################################################
+
+####### Estimand 3#######################################################################################
+*** Class Name ***
+
+&lt;class &#39;dowhy.causal_estimators.causalml.Causalml&#39;&gt;
+
+*** Causal Estimate ***
+
+## Target estimand
+Estimand type: nonparametric-ate
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(Expectation(y|W3,W1,W2,W0,W4))
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W1,W2,W0,W4,U) = P(y|v0,W3,W1,W2,W0,W4)
+### Estimand : 2
+Estimand name: iv
+Estimand expression:
+Expectation(Derivative(y, [Z2, Z0, Z1])*Derivative([v0], [Z2, Z0, Z1])**(-1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z2,Z0,Z1})
+Estimand assumption 2, Exclusion: If we remove {Z2,Z0,Z1}→{v0}, then ¬({Z2,Z0,Z1}→y)
+
+## Realized estimand
+b: y~v0+W3+W1+W2+W0+W4
+## Estimate
+Value: [11.82969029]
+
+########################################################################################################
+
+</pre></div></div>
+</div>
+</section>
+<section id="Refute-Estimate">
+<h2>Refute Estimate<a class="headerlink" href="#Refute-Estimate" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refutation_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">estimand</span> <span class="ow">in</span> <span class="n">identified_estimands</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">estimate</span> <span class="ow">in</span> <span class="n">estimate_list</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">refuter</span> <span class="ow">in</span> <span class="n">refuter_list</span><span class="p">:</span>
+            <span class="n">ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span><span class="n">method_name</span><span class="o">=</span><span class="n">refuter</span><span class="p">)</span>
+            <span class="n">refutation_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:dowhy.causal_refuters.bootstrap_refuter:All variables required: Running bootstrap adding noise to confounders, instrumental variables and effect modifiers.
+INFO:dowhy.causal_refuters.bootstrap_refuter:INFO: The chosen variables are: W3,W1,W2,W0,W4,Z2,Z0,Z1,X1,X0
+INFO:dowhy.causal_refuters.bootstrap_refuter:Refutation over 100 simulated datasets of size 1000 each
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_refuters.bootstrap_refuter:Making use of Bootstrap as we have more than 100 examples.
+                 Note: The greater the number of examples, the more accurate are the confidence estimates
+INFO:dowhy.causal_refuters.data_subset_refuter:Refutation over 0.8 simulated datasets of size 800.0 each
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Matching Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_refuters.data_subset_refuter:Making use of Bootstrap as we have more than 100 examples.
+                 Note: The greater the number of examples, the more accurate are the confidence estimates
+INFO:dowhy.causal_refuters.bootstrap_refuter:All variables required: Running bootstrap adding noise to confounders, instrumental variables and effect modifiers.
+INFO:dowhy.causal_refuters.bootstrap_refuter:INFO: The chosen variables are: W3,W1,W2,W0,W4,Z2,Z0,Z1,X1,X0
+INFO:dowhy.causal_refuters.bootstrap_refuter:Refutation over 100 simulated datasets of size 1000 each
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_refuters.bootstrap_refuter:Making use of Bootstrap as we have more than 100 examples.
+                 Note: The greater the number of examples, the more accurate are the confidence estimates
+INFO:dowhy.causal_refuters.data_subset_refuter:Refutation over 0.8 simulated datasets of size 800.0 each
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_estimator:INFO: Using Propensity Score Weighting Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+INFO:dowhy.causal_refuters.data_subset_refuter:Making use of Bootstrap as we have more than 100 examples.
+                 Note: The greater the number of examples, the more accurate are the confidence estimates
+INFO:dowhy.causal_refuters.bootstrap_refuter:All variables required: Running bootstrap adding noise to confounders, instrumental variables and effect modifiers.
+INFO:dowhy.causal_refuters.bootstrap_refuter:INFO: The chosen variables are: W3,W1,W2,W0,W4,Z2,Z0,Z1,X1,X0
+INFO:dowhy.causal_refuters.bootstrap_refuter:Refutation over 100 simulated datasets of size 1000 each
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_refuters.bootstrap_refuter:Making use of Bootstrap as we have more than 100 examples.
+                 Note: The greater the number of examples, the more accurate are the confidence estimates
+INFO:dowhy.causal_refuters.data_subset_refuter:Refutation over 0.8 simulated datasets of size 800.0 each
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_estimator:INFO: Using CausalML Estimator
+INFO:dowhy.causal_estimator:b: y~v0+W3+W1+W2+W0+W4
+INFO:dowhy.causal_refuters.data_subset_refuter:Making use of Bootstrap as we have more than 100 examples.
+                 Note: The greater the number of examples, the more accurate are the confidence estimates
+</pre></div></div>
+</div>
+</section>
+<section id="Refutation-Values">
+<h2>Refutation Values<a class="headerlink" href="#Refutation-Values" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refuter_count</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">if</span> <span class="n">inspect_refutations</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">refutation</span> <span class="ow">in</span> <span class="n">refutation_list</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;####### Refutation </span><span class="si">{}</span><span class="s2">#######################################################################################&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">refuter_count</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;*** Class Name ***&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">refutation</span><span class="o">.</span><span class="n">refutation_type</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">refutation</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;########################################################################################################&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="n">refuter_count</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+####### Refutation 1#######################################################################################
+*** Class Name ***
+
+Refute: Bootstrap Sample Dataset
+
+Refute: Bootstrap Sample Dataset
+Estimated effect:11.803018265480263
+New effect:11.726840078548117
+p value:0.45999999999999996
+
+########################################################################################################
+
+####### Refutation 2#######################################################################################
+*** Class Name ***
+
+Refute: Use a subset of data
+
+Refute: Use a subset of data
+Estimated effect:11.803018265480263
+New effect:11.82215833537287
+p value:0.46
+
+########################################################################################################
+
+####### Refutation 3#######################################################################################
+*** Class Name ***
+
+Refute: Bootstrap Sample Dataset
+
+Refute: Bootstrap Sample Dataset
+Estimated effect:11.20381938129325
+New effect:11.206283926881234
+p value:0.46
+
+########################################################################################################
+
+####### Refutation 4#######################################################################################
+*** Class Name ***
+
+Refute: Use a subset of data
+
+Refute: Use a subset of data
+Estimated effect:11.20381938129325
+New effect:11.210124590456866
+p value:0.45
+
+########################################################################################################
+
+####### Refutation 5#######################################################################################
+*** Class Name ***
+
+Refute: Bootstrap Sample Dataset
+
+Refute: Bootstrap Sample Dataset
+Estimated effect:[11.82969029]
+New effect:11.807504795997904
+p value:[0.48]
+
+########################################################################################################
+
+####### Refutation 6#######################################################################################
+*** Class Name ***
+
+Refute: Use a subset of data
+
+Refute: Use a subset of data
+Estimated effect:[11.82969029]
+New effect:11.820573703471123
+p value:[0.46]
+
+########################################################################################################
+
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dowhy_multiple_treatments.html" class="btn btn-neutral float-left" title="Estimating effect of multiple treatments" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../code_repo.html" class="btn btn-neutral float-right" title="Code repository &amp; Versions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: v0.5
+    <span class="fa fa-caret-down"></span>
+  </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="../../v0.1-alpha/index.html">v0.1-alpha</a></dd>
+            <dd><a href="../../v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+            <dd><a href="../../v0.2/index.html">v0.2</a></dd>
+            <dd><a href="../../v0.4/index.html">v0.4</a></dd>
+            <dd><a href="dowhy_refuter_notebook.html">v0.5</a></dd>
+            <dd><a href="../../v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="../../v0.6/index.html">v0.6</a></dd>
+            <dd><a href="../../v0.7/index.html">v0.7</a></dd>
+            <dd><a href="../../v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="../../v0.8/index.html">v0.8</a></dd>
+        </dl>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

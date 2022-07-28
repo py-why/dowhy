@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customizing Causal Mechanism Assignment &mdash; DoWhy | An end-to-end library for causal inference  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Estimating Confidence Intervals" href="estimating_confidence_intervals.html" />
+    <link rel="prev" title="Attributing Distributional Changes" href="answering_causal_questions/attribute_distributional_changes.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
+          </a>
+              <div class="version">
+                v0.8
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/intro.html">Introduction to DoWhy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_simple_example.html">Quick-start notebook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/comparison.html">Comparison to other packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/cite.html">Citing this package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../causality_intro.html">Introduction to causality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../effect_inference/index.html">Effect inference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">GCM-based inference (Experimental)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="answering_causal_questions/index.html">Answering Causal Questions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Customizing Causal Mechanism Assignment</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#using-ground-truth-models">Using ground truth models</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="estimating_confidence_intervals.html">Estimating Confidence Intervals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="independence_tests.html">Independence Tests</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/nb_index.html">Example notebooks</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials/Case studies</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/tutorial-causalinference-machinelearning-using-dowhy-econml.html">CATE estimation with DoWhy+EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_example_effect_of_memberrewards_program.html">Effect of membership rewards program</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">Understanding hotel booking cancellations</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/index.html">Contributing to DoWhy</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../code_repo.html">Code repository &amp; Versions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dowhy.html">dowhy package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">DoWhy | An end-to-end library for causal inference</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">GCM-based inference (Experimental)</a> &raquo;</li>
+      <li>Customizing Causal Mechanism Assignment</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/user_guide/gcm_based_inference/customizing_model_assignment.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="customizing-causal-mechanism-assignment">
+<h1>Customizing Causal Mechanism Assignment<a class="headerlink" href="#customizing-causal-mechanism-assignment" title="Permalink to this heading"></a></h1>
+<p>In GCM-based inference, fitting means, we learn the generative model of the variables in the graph from
+data. Before we can fit the variables to data, each node in a causal graph requires a
+generative causal model, or a “causal mechanism”. In this section, we’ll dive deeper into how to use
+this feature.</p>
+<p>To understand this, let’s pull up the mental model for a probabilistic causal model (PCM) again:</p>
+<a class="reference internal image-reference" href="../../_images/pcm.png"><img alt="Mental model for causal models" src="../../_images/pcm.png" style="width: 80%;" /></a>
+<p>On the left, it shows a trivial causal graph <span class="math notranslate nohighlight">\(X \rightarrow Y\)</span>. <span class="math notranslate nohighlight">\(X\)</span> is a so-called root
+node (it has no parents), <span class="math notranslate nohighlight">\(Y\)</span> is a non-root node (it <em>has</em> parents). We fundamentally
+distinguishes between these two types of nodes.</p>
+<p>For root nodes such as <span class="math notranslate nohighlight">\(X\)</span>, the distribution <span class="math notranslate nohighlight">\(P_x\)</span> is modeled using a stochastic model.
+Non-root nodes such as <span class="math notranslate nohighlight">\(Y\)</span> are modelled using a <em>conditional</em> stochastic model. DoWhy’s gcm package
+defines corresponding interfaces for both, namely <a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.graph.StochasticModel" title="dowhy.gcm.graph.StochasticModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">StochasticModel</span></code></a> and
+<a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.graph.ConditionalStochasticModel" title="dowhy.gcm.graph.ConditionalStochasticModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalStochasticModel</span></code></a>.</p>
+<p>The gcm package also provides ready-to-use implementations, such as <code class="xref py py-class docutils literal notranslate"><span class="pre">ScipyDistribution</span></code> or <a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.stochastic_models.BayesianGaussianMixtureDistribution" title="dowhy.gcm.stochastic_models.BayesianGaussianMixtureDistribution"><code class="xref py py-class docutils literal notranslate"><span class="pre">BayesianGaussianMixtureDistribution</span></code></a> for
+<a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.graph.StochasticModel" title="dowhy.gcm.graph.StochasticModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">StochasticModel</span></code></a>, and <a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.fcms.AdditiveNoiseModel" title="dowhy.gcm.fcms.AdditiveNoiseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdditiveNoiseModel</span></code></a> for
+<a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.graph.ConditionalStochasticModel" title="dowhy.gcm.graph.ConditionalStochasticModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalStochasticModel</span></code></a>.</p>
+<p>Knowing that, we can now start to manually assign causal models to nodes according to our needs.
+Say, we know from domain knowledge, that our root node X follows a normal distribution. In this
+case, we can explicitly assign this:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">gcm</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">ProbabilisticCausalModel</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">)]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">ScipyDistribution</span><span class="p">(</span><span class="n">norm</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>For the non-root node Y, let’s use an additive noise model (ANM), represented by the
+<a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.fcms.AdditiveNoiseModel" title="dowhy.gcm.fcms.AdditiveNoiseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdditiveNoiseModel</span></code></a> class. It has a
+structural assignment of the form: <span class="math notranslate nohighlight">\(Y := f(X) + N\)</span>. Here, f is a deterministic prediction
+function, whereas N is a noise term. Let’s put all of this together:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">prediction_model</span><span class="o">=</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">(),</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">noise_model</span><span class="o">=</span><span class="n">gcm</span><span class="o">.</span><span class="n">ScipyDistribution</span><span class="p">(</span><span class="n">norm</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>The rather interesting part here is the <code class="docutils literal notranslate"><span class="pre">prediction_model</span></code>, which corresponds to our function
+<span class="math notranslate nohighlight">\(f\)</span> above. This prediction model must satisfy the contract defined by
+<a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.fcms.PredictionModel" title="dowhy.gcm.fcms.PredictionModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionModel</span></code></a>, i.e. it must implement the methods:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>This interface is very analogous to model interfaces in many machine learning libraries, such as
+<a class="reference external" href="https://scikit-learn.org">Scikit Learn</a>. In fact the gcm package provides multiple adapter classes to
+make libraries such as Scikit Learn interoperable.</p>
+<p>Now that we have associated a data-generating process to each node in the causal graph, let us
+prepare the training data.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span><span class="o">,</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Y</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">X</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Finally, we can learn the parameters of those causal models from the training data.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">causal_model</span></code> is now ready to be used for various types of causal queries as explained in
+<a class="reference internal" href="answering_causal_questions/index.html"><span class="doc">Answering Causal Questions</span></a>.</p>
+<section id="using-ground-truth-models">
+<h2>Using ground truth models<a class="headerlink" href="#using-ground-truth-models" title="Permalink to this heading"></a></h2>
+<p>In some scenarios the ground truth models might be known and should be used instead. Let’s
+assume, we know that our relationship are linear with coefficients <span class="math notranslate nohighlight">\(\alpha = 2\)</span> and
+<span class="math notranslate nohighlight">\(\beta = 3\)</span>. Let’s make use of this knowledge by creating a custom prediction model that
+implements the <a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.fcms.PredictionModel" title="dowhy.gcm.fcms.PredictionModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionModel</span></code></a> interface:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">MyCustomModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">PredictionModel</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coefficient</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="bp">self</span><span class="o">.</span><span class="n">coefficient</span> <span class="o">=</span> <span class="n">coefficient</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="c1"># Nothing to fit here, since we know the ground truth.</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="k">pass</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefficient</span> <span class="o">*</span> <span class="n">X</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="k">return</span> <span class="n">MyCustomModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coefficient</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now we can use this in our ANMs instead:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">MyCustomModel</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="alert alert-block alert-danger docutils container">
+<p><strong>Important:</strong> When a function or algorithm is called that requires a causal graph, DoWhy GCM sorts the input
+features internally based on their <strong>alphabetical order</strong>. For instance, in case of the MyCustomModel above, if
+the names of the input features are ‘X2’ and ‘X1’, the model should expect ‘X1’ in the first input and ‘X2’ in
+the second column.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="answering_causal_questions/attribute_distributional_changes.html" class="btn btn-neutral float-left" title="Attributing Distributional Changes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="estimating_confidence_intervals.html" class="btn btn-neutral float-right" title="Estimating Confidence Intervals" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: v0.8
+    <span class="fa fa-caret-down"></span>
+  </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="../../../v0.1-alpha/index.html">v0.1-alpha</a></dd>
+            <dd><a href="../../../v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+            <dd><a href="../../../v0.2/index.html">v0.2</a></dd>
+            <dd><a href="../../../v0.4/index.html">v0.4</a></dd>
+            <dd><a href="../../../v0.5/index.html">v0.5</a></dd>
+            <dd><a href="../../../v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="../../../v0.6/index.html">v0.6</a></dd>
+            <dd><a href="../../../v0.7/index.html">v0.7</a></dd>
+            <dd><a href="../../../v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="customizing_model_assignment.html">v0.8</a></dd>
+        </dl>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

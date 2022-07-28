@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dowhy.gcm.confidence_intervals &mdash; DoWhy | An end-to-end library for causal inference  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
+          </a>
+              <div class="version">
+                v0.8
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/intro.html">Introduction to DoWhy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_simple_example.html">Quick-start notebook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/comparison.html">Comparison to other packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/cite.html">Citing this package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/causality_intro.html">Introduction to causality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/effect_inference/index.html">Effect inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/gcm_based_inference/index.html">GCM-based inference (Experimental)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/nb_index.html">Example notebooks</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials/Case studies</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/tutorial-causalinference-machinelearning-using-dowhy-econml.html">CATE estimation with DoWhy+EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_example_effect_of_memberrewards_program.html">Effect of membership rewards program</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">Understanding hotel booking cancellations</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing/index.html">Contributing to DoWhy</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../code_repo.html">Code repository &amp; Versions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dowhy.html">dowhy package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">DoWhy | An end-to-end library for causal inference</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>dowhy.gcm.confidence_intervals</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for dowhy.gcm.confidence_intervals</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This module provides functionality to estimate confidence intervals via bootstrapping.</span>
+
+<span class="sd">Functions in this module should be considered experimental, meaning there might be breaking API changes in the future.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="kn">from</span> <span class="nn">dowhy.gcm</span> <span class="kn">import</span> <span class="n">config</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.util.general</span> <span class="kn">import</span> <span class="n">shape_into_2d</span><span class="p">,</span> <span class="n">set_random_seed</span>
+
+
+<div class="viewcode-block" id="estimate_geometric_median"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.confidence_intervals.estimate_geometric_median">[docs]</a><span class="k">def</span> <span class="nf">estimate_geometric_median</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">distance_function</span><span class="p">(</span><span class="n">x_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">x_input</span> <span class="o">-</span> <span class="n">X</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">minimize</span><span class="p">(</span><span class="n">distance_function</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="confidence_intervals"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.confidence_intervals.confidence_intervals">[docs]</a><span class="k">def</span> <span class="nf">confidence_intervals</span><span class="p">(</span><span class="n">estimation_func</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                                                <span class="n">Callable</span><span class="p">[[],</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
+                         <span class="n">confidence_level</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span>
+                         <span class="n">num_bootstrap_resamples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+                         <span class="n">bootstrap_results_summary_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+                         <span class="o">=</span> <span class="n">estimate_geometric_median</span><span class="p">,</span>
+                         <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> \
+        <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estimates confidence intervals based on the outputs generated by calling the given estimation_func. Since one result</span>
+<span class="sd">    for each repetition is produced, all results can be summarized by the method defined in</span>
+<span class="sd">    summary_method_of_bootstrap_results.</span>
+<span class="sd">    For instance, summary_method_of_bootstrap_results = lambda x: numpy.mean(x, axis=0) to get the mean over all runs.</span>
+<span class="sd">    By default, the geometric median is returned.</span>
+
+<span class="sd">    Currently, the confidence intervals are empirically estimated based on the n-th estimated quantiles (without bias</span>
+<span class="sd">    correction) of the results, where the quantiles are determined by the given confidence_level.</span>
+
+<span class="sd">    NOTE: The outputs of estimation_func are assumed to be pairwise independent. For multidimensional outputs of</span>
+<span class="sd">    estimation_func, this could be violated and should be kept in mind. For instance, when evaluating the outcome of</span>
+<span class="sd">    interventions in a graph like X -&gt; Y -&gt; Z, the confidence intervals are estimate independently for X, Y and Z</span>
+<span class="sd">    although they have a strong dependency. If estimation_func returns one dimensional results, as for instance when</span>
+<span class="sd">    estimating the direct arrow strength, then there should be no problem.</span>
+
+<span class="sd">    **Example usage with numpy array output:**</span>
+
+<span class="sd">        &gt;&gt;&gt; def estimation_func() -&gt; np.ndarray:</span>
+<span class="sd">        &gt;&gt;&gt;     return direct_arrow_strength_of_model(causal_model, parent_data)</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; arrow_strengths, confidence_intervals = confidence_intervals(estimation_func)</span>
+
+<span class="sd">    **Example usage with dictionary output:**</span>
+
+<span class="sd">        &gt;&gt;&gt; def estimation_func() -&gt; Dict[Any, float]:</span>
+<span class="sd">        &gt;&gt;&gt;     return distribution_change(</span>
+<span class="sd">        &gt;&gt;&gt;             causal_dag, original_observations, outlier_observations, &#39;X3&#39;)</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; mean_contributions, confidence_intervals = confidence_intervals(estimation_func)</span>
+
+<span class="sd">    More details about the estimation of confidence intervals via bootstrapping can be found `here &lt;https://ocw.mit.edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings/MIT18_05S14_Reading24.pdf&gt;`_.</span>
+
+<span class="sd">    :param estimation_func: Function that generates a non-deterministic output for which the confidence interval(s) are</span>
+<span class="sd">           estimated.</span>
+<span class="sd">    :param confidence_level: Confidence level of the interval.</span>
+<span class="sd">    :param num_bootstrap_resamples: Number of samples generated by estimation_func, i.e. number of times</span>
+<span class="sd">           is called. The higher the number, the more accurate the results and intervals,</span>
+<span class="sd">           but the slower the runtime.</span>
+<span class="sd">    :param bootstrap_results_summary_func: Function that takes a numpy array with all results as an input and returns</span>
+<span class="sd">           a single (potentially multidimensional) value/vector. For instance, the mean or median</span>
+<span class="sd">           over all results.</span>
+<span class="sd">    :param n_jobs: Number of parallel jobs. Each repetition can be estimated in parallel.</span>
+<span class="sd">           However, since many other functions of the library are already running in parallel (</span>
+<span class="sd">           such as distribution change), this is set to 1 by default. Only if it is certain that</span>
+<span class="sd">           the estimation_func is not running in parallel internally (e.g. when performing</span>
+<span class="sd">           interventions), this should be set to a different value.</span>
+<span class="sd">    :return: A tuple (summarized result over all repetitions based on</span>
+<span class="sd">             summary_method_of_bootstrap_results, confidence interval for each dimension/variable)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">num_bootstrap_resamples</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of repetitions should be greater than 0, but got </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">num_bootstrap_resamples</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">estimation_func_with_random_seed</span><span class="p">(</span><span class="n">random_seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+        <span class="n">set_random_seed</span><span class="p">(</span><span class="n">random_seed</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">estimation_func</span><span class="p">()</span>
+
+    <span class="n">random_seeds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">num_bootstrap_resamples</span><span class="p">)</span>
+    <span class="n">all_results</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)(</span><span class="n">delayed</span><span class="p">(</span><span class="n">estimation_func_with_random_seed</span><span class="p">)(</span><span class="n">random_seed</span><span class="p">)</span>
+                                          <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">random_seed</span> <span class="ow">in</span>
+                                          <span class="nb">enumerate</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="n">random_seeds</span><span class="p">,</span>
+                                                         <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                                         <span class="n">leave</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                         <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">show_progress_bars</span><span class="p">,</span>
+                                                         <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Estimating boostrap interval...&#39;</span><span class="p">)))</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">all_results</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">all_results</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span>
+        <span class="n">tmp_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">all_results</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">tmp_dict</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="n">summary_result</span> <span class="o">=</span> <span class="n">bootstrap_results_summary_func</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">tmp_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()]))</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">summary_result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tmp_dict</span><span class="p">)},</span> \
+               <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">_estimate_percentile_bounds</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tmp_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">confidence_level</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tmp_dict</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">all_results</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">all_results</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">bootstrap_results_summary_func</span><span class="p">(</span><span class="n">all_results</span><span class="p">),</span> \
+               <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">_estimate_percentile_bounds</span><span class="p">(</span><span class="n">all_results</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">confidence_level</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>
+                         <span class="nb">range</span><span class="p">(</span><span class="n">all_results</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])])</span></div>
+
+
+<span class="k">def</span> <span class="nf">_estimate_percentile_bounds</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">quantile</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Estimate bounds currently only supports one dimensional inputs!&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">quantile</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">quantile</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)])</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: v0.8
+    <span class="fa fa-caret-down"></span>
+  </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="../../../../v0.1-alpha/index.html">v0.1-alpha</a></dd>
+            <dd><a href="../../../../v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+            <dd><a href="../../../../v0.2/index.html">v0.2</a></dd>
+            <dd><a href="../../../../v0.4/index.html">v0.4</a></dd>
+            <dd><a href="../../../../v0.5/index.html">v0.5</a></dd>
+            <dd><a href="../../../../v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="../../../../v0.6/index.html">v0.6</a></dd>
+            <dd><a href="../../../../v0.7/index.html">v0.7</a></dd>
+            <dd><a href="../../../../v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="confidence_intervals.html">v0.8</a></dd>
+        </dl>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

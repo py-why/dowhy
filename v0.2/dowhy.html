@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dowhy package &mdash; DoWhy | An end-to-end library for causal inference  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="dowhy.api package" href="dowhy.api.html" />
+    <link rel="prev" title="Code repository &amp; Versions" href="code_repo.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
+          </a>
+              <div class="version">
+                v0.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">DoWhy | Making causal inference easy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_notebooks/lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code_repo.html">Code repository &amp; Versions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">dowhy package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dowhy.api.html">dowhy.api package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dowhy.causal_estimators.html">dowhy.causal_estimators package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dowhy.causal_refuters.html">dowhy.causal_refuters package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dowhy.data_transformers.html">dowhy.data_transformers package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dowhy.do_samplers.html">dowhy.do_samplers package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dowhy.utils.html">dowhy.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-dowhy.causal_estimator">dowhy.causal_estimator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-dowhy.causal_graph">dowhy.causal_graph module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-dowhy.causal_identifier">dowhy.causal_identifier module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-dowhy.causal_model">dowhy.causal_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-dowhy.causal_refuter">dowhy.causal_refuter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-dowhy.data_transformer">dowhy.data_transformer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-dowhy.datasets">dowhy.datasets module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-dowhy.do_sampler">dowhy.do_sampler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-dowhy.plotter">dowhy.plotter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-dowhy">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DoWhy | An end-to-end library for causal inference</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>dowhy package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/dowhy.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="dowhy-package">
+<h1>dowhy package<a class="headerlink" href="#dowhy-package" title="Permalink to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dowhy.api.html">dowhy.api package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.api.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.api.html#module-dowhy.api.causal_data_frame">dowhy.api.causal_data_frame module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.api.html#module-dowhy.api">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy.causal_estimators.html">dowhy.causal_estimators package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.causal_estimators.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.econml_cate_estimator">dowhy.causal_estimators.econml_cate_estimator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.instrumental_variable_estimator">dowhy.causal_estimators.instrumental_variable_estimator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.linear_regression_estimator">dowhy.causal_estimators.linear_regression_estimator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.propensity_score_matching_estimator">dowhy.causal_estimators.propensity_score_matching_estimator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.propensity_score_stratification_estimator">dowhy.causal_estimators.propensity_score_stratification_estimator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.propensity_score_weighting_estimator">dowhy.causal_estimators.propensity_score_weighting_estimator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.causal_estimators.html#module-dowhy.causal_estimators.regression_discontinuity_estimator">dowhy.causal_estimators.regression_discontinuity_estimator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.causal_estimators.html#module-dowhy.causal_estimators">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy.causal_refuters.html">dowhy.causal_refuters package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.causal_refuters.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.causal_refuters.html#module-dowhy.causal_refuters.add_unobserved_common_cause">dowhy.causal_refuters.add_unobserved_common_cause module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.causal_refuters.html#module-dowhy.causal_refuters.data_subset_refuter">dowhy.causal_refuters.data_subset_refuter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.causal_refuters.html#module-dowhy.causal_refuters.placebo_treatment_refuter">dowhy.causal_refuters.placebo_treatment_refuter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.causal_refuters.html#module-dowhy.causal_refuters.random_common_cause">dowhy.causal_refuters.random_common_cause module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.causal_refuters.html#module-dowhy.causal_refuters">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy.data_transformers.html">dowhy.data_transformers package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.data_transformers.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.data_transformers.html#module-dowhy.data_transformers.pca_reducer">dowhy.data_transformers.pca_reducer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.data_transformers.html#module-dowhy.data_transformers">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy.do_samplers.html">dowhy.do_samplers package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.do_samplers.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.do_samplers.html#module-dowhy.do_samplers.kernel_density_sampler">dowhy.do_samplers.kernel_density_sampler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.do_samplers.html#module-dowhy.do_samplers.mcmc_sampler">dowhy.do_samplers.mcmc_sampler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.do_samplers.html#module-dowhy.do_samplers.multivariate_weighting_sampler">dowhy.do_samplers.multivariate_weighting_sampler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.do_samplers.html#module-dowhy.do_samplers.weighting_sampler">dowhy.do_samplers.weighting_sampler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.do_samplers.html#module-dowhy.do_samplers">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy.utils.html">dowhy.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.utils.html#module-dowhy.utils.api">dowhy.utils.api module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.utils.html#module-dowhy.utils.cli_helpers">dowhy.utils.cli_helpers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.utils.html#module-dowhy.utils.propensity_score">dowhy.utils.propensity_score module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy.utils.html#module-dowhy.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-dowhy.causal_estimator">
+<span id="dowhy-causal-estimator-module"></span><h2>dowhy.causal_estimator module<a class="headerlink" href="#module-dowhy.causal_estimator" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="dowhy.causal_estimator.CausalEstimate">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_estimator.</span></span><span class="sig-name descname"><span class="pre">CausalEstimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_estimand</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">realized_estimand_expr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimator.html#CausalEstimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_estimator.CausalEstimate" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for the estimate object that every causal estimator returns</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_estimator.CausalEstimate.add_effect_strength">
+<span class="sig-name descname"><span class="pre">add_effect_strength</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strength_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimator.html#CausalEstimate.add_effect_strength"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_estimator.CausalEstimate.add_effect_strength" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_estimator.CausalEstimate.add_params">
+<span class="sig-name descname"><span class="pre">add_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimator.html#CausalEstimate.add_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_estimator.CausalEstimate.add_params" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_estimator.CausalEstimate.add_significance_test_results">
+<span class="sig-name descname"><span class="pre">add_significance_test_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_results</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimator.html#CausalEstimate.add_significance_test_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_estimator.CausalEstimate.add_significance_test_results" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dowhy.causal_estimator.CausalEstimator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_estimator.</span></span><span class="sig-name descname"><span class="pre">CausalEstimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identified_estimand</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_significance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluate_effect_strength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_intervals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect_modifiers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimator.html#CausalEstimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_estimator.CausalEstimator" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class for an estimator of causal effect.</p>
+<p>Subclasses implement different estimation methods. All estimation methods are in the package “dowhy.causal_estimators”</p>
+<p>Initializes an estimator with data and names of relevant variables.</p>
+<p>More description.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – data frame containing the data</p></li>
+<li><p><strong>identified_estimand</strong> – probability expression
+representing the target identified estimand to estimate.</p></li>
+<li><p><strong>treatment</strong> – name of the treatment variable</p></li>
+<li><p><strong>outcome</strong> – name of the outcome variable</p></li>
+<li><p><strong>control_value</strong> – Value of the treatment in the control group, for effect estimation.  If treatment is multi-variate, this can be a list.</p></li>
+<li><p><strong>treatment_value</strong> – Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.</p></li>
+<li><p><strong>test_significance</strong> – whether to test significance</p></li>
+<li><p><strong>evaluate_effect_strength</strong> – (Experimental) whether to evaluate the strength of effect</p></li>
+<li><p><strong>confidence_intervals</strong> – (Experimental) Binary flag indicating whether confidence intervals should be computed.</p></li>
+<li><p><strong>target_units</strong> – (Experimental) The units for which the treatment effect should be estimated. This can be a string for common specifications of target units (namely, “ate”, “att” and “atc”). It can also be a lambda function that can be used as an index for the data (pandas DataFrame). Alternatively, it can be a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.</p></li>
+<li><p><strong>effect_modifiers</strong> – variables on which to compute separate effects, or return a heterogeneous effect function. Not all methods support this currently.</p></li>
+<li><p><strong>params</strong> – (optional) additional method parameters</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>an instance of the estimator class.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_estimator.CausalEstimator.construct_symbolic_estimator">
+<span class="sig-name descname"><span class="pre">construct_symbolic_estimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimand</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimator.html#CausalEstimator.construct_symbolic_estimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_estimator.CausalEstimator.construct_symbolic_estimator" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_estimator.CausalEstimator.do">
+<span class="sig-name descname"><span class="pre">do</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimator.html#CausalEstimator.do"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_estimator.CausalEstimator.do" title="Permalink to this definition"></a></dt>
+<dd><p>Method that implements the do-operator.</p>
+<p>Given a value x for the treatment, returns the expected value of the outcome when the treatment is intervened to a value x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – Value of the treatment</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Value of the outcome when treatment is intervened/set to x.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_estimator.CausalEstimator.estimate_effect">
+<span class="sig-name descname"><span class="pre">estimate_effect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimator.html#CausalEstimator.estimate_effect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_estimator.CausalEstimator.estimate_effect" title="Permalink to this definition"></a></dt>
+<dd><p>Base estimation method that calls the estimate_effect method of its calling subclass.</p>
+<p>Can optionally also test significance and estimate effect strength for any returned estimate.</p>
+<p>TODO: Enable methods to return a confidence interval in addition to the point estimate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> – object instance of class Estimator</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>point estimate of causal effect</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_estimator.CausalEstimator.estimate_effect_naive">
+<span class="sig-name descname"><span class="pre">estimate_effect_naive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimator.html#CausalEstimator.estimate_effect_naive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_estimator.CausalEstimator.estimate_effect_naive" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_estimator.CausalEstimator.evaluate_effect_strength">
+<span class="sig-name descname"><span class="pre">evaluate_effect_strength</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimator.html#CausalEstimator.evaluate_effect_strength"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_estimator.CausalEstimator.evaluate_effect_strength" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_estimator.CausalEstimator.test_significance">
+<span class="sig-name descname"><span class="pre">test_significance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_simulations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimator.html#CausalEstimator.test_significance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_estimator.CausalEstimator.test_significance" title="Permalink to this definition"></a></dt>
+<dd><p>Test statistical significance of obtained estimate.</p>
+<p>Uses resampling to create a non-parametric significance test.
+A general procedure. Individual estimators can override this method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> – object instance of class Estimator</p></li>
+<li><p><strong>estimate</strong> – obtained estimate</p></li>
+<li><p><strong>num_simulations</strong> – (optional) number of simulations to run</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dowhy.causal_estimator.RealizedEstimand">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_estimator.</span></span><span class="sig-name descname"><span class="pre">RealizedEstimand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identified_estimand</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimator_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimator.html#RealizedEstimand"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_estimator.RealizedEstimand" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_estimator.RealizedEstimand.update_assumptions">
+<span class="sig-name descname"><span class="pre">update_assumptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimator_assumptions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimator.html#RealizedEstimand.update_assumptions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_estimator.RealizedEstimand.update_assumptions" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_estimator.RealizedEstimand.update_estimand_expression">
+<span class="sig-name descname"><span class="pre">update_estimand_expression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimand_expression</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimator.html#RealizedEstimand.update_estimand_expression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_estimator.RealizedEstimand.update_estimand_expression" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-dowhy.causal_graph">
+<span id="dowhy-causal-graph-module"></span><h2>dowhy.causal_graph module<a class="headerlink" href="#module-dowhy.causal_graph" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="dowhy.causal_graph.CausalGraph">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_graph.</span></span><span class="sig-name descname"><span class="pre">CausalGraph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treatment_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">common_cause_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect_modifier_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observed_node_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing_nodes_as_confounders</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_graph.html#CausalGraph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_graph.CausalGraph" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for creating and modifying the causal graph.</p>
+<p>Accepts a graph string (or a text file) in gml format (preferred) and dot format. Graphviz-like attributes can be set for edges and nodes. E.g. style=”dashed” as an edge attribute ensures that the edge is drawn with a dashed line.</p>
+<blockquote>
+<div><p>If a graph string is not given, names of treatment, outcome, and confounders, instruments and effect modifiers (if any) can be provided to create the graph.</p>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_graph.CausalGraph.add_missing_nodes_as_common_causes">
+<span class="sig-name descname"><span class="pre">add_missing_nodes_as_common_causes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observed_node_names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_graph.html#CausalGraph.add_missing_nodes_as_common_causes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_graph.CausalGraph.add_missing_nodes_as_common_causes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_graph.CausalGraph.add_node_attributes">
+<span class="sig-name descname"><span class="pre">add_node_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observed_node_names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_graph.html#CausalGraph.add_node_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_graph.CausalGraph.add_node_attributes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_graph.CausalGraph.add_unobserved_common_cause">
+<span class="sig-name descname"><span class="pre">add_unobserved_common_cause</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observed_node_names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_graph.html#CausalGraph.add_unobserved_common_cause"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_graph.CausalGraph.add_unobserved_common_cause" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_graph.CausalGraph.all_observed">
+<span class="sig-name descname"><span class="pre">all_observed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_graph.html#CausalGraph.all_observed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_graph.CausalGraph.all_observed" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_graph.CausalGraph.build_graph">
+<span class="sig-name descname"><span class="pre">build_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">common_cause_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect_modifier_names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_graph.html#CausalGraph.build_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_graph.CausalGraph.build_graph" title="Permalink to this definition"></a></dt>
+<dd><p>Creates nodes and edges based on variable names and their semantics.</p>
+<p>Currently only considers the graphical representation of “direct” effect modifiers. Thus, all effect modifiers are assumed to be “direct” unless otherwise expressed using a graph. Based on the taxonomy of effect modifiers by VanderWheele and Robins: “Four types of effect modification: A classification based on directed acyclic graphs. Epidemiology. 2007.”</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_graph.CausalGraph.do_surgery">
+<span class="sig-name descname"><span class="pre">do_surgery</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_outgoing_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_incoming_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_graph.html#CausalGraph.do_surgery"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_graph.CausalGraph.do_surgery" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_graph.CausalGraph.filter_unobserved_variables">
+<span class="sig-name descname"><span class="pre">filter_unobserved_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_graph.html#CausalGraph.filter_unobserved_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_graph.CausalGraph.filter_unobserved_variables" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_graph.CausalGraph.get_ancestors">
+<span class="sig-name descname"><span class="pre">get_ancestors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_graph.html#CausalGraph.get_ancestors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_graph.CausalGraph.get_ancestors" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_graph.CausalGraph.get_causes">
+<span class="sig-name descname"><span class="pre">get_causes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_graph.html#CausalGraph.get_causes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_graph.CausalGraph.get_causes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_graph.CausalGraph.get_common_causes">
+<span class="sig-name descname"><span class="pre">get_common_causes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_graph.html#CausalGraph.get_common_causes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_graph.CausalGraph.get_common_causes" title="Permalink to this definition"></a></dt>
+<dd><p>Assume that nodes1 causes nodes2 (e.g., nodes1 are the treatments and nodes2 are the outcomes)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_graph.CausalGraph.get_descendants">
+<span class="sig-name descname"><span class="pre">get_descendants</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_graph.html#CausalGraph.get_descendants"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_graph.CausalGraph.get_descendants" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_graph.CausalGraph.get_effect_modifiers">
+<span class="sig-name descname"><span class="pre">get_effect_modifiers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_graph.html#CausalGraph.get_effect_modifiers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_graph.CausalGraph.get_effect_modifiers" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_graph.CausalGraph.get_instruments">
+<span class="sig-name descname"><span class="pre">get_instruments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treatment_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_nodes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_graph.html#CausalGraph.get_instruments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_graph.CausalGraph.get_instruments" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_graph.CausalGraph.get_parents">
+<span class="sig-name descname"><span class="pre">get_parents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_graph.html#CausalGraph.get_parents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_graph.CausalGraph.get_parents" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_graph.CausalGraph.get_unconfounded_observed_subgraph">
+<span class="sig-name descname"><span class="pre">get_unconfounded_observed_subgraph</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_graph.html#CausalGraph.get_unconfounded_observed_subgraph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_graph.CausalGraph.get_unconfounded_observed_subgraph" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_graph.CausalGraph.view_graph">
+<span class="sig-name descname"><span class="pre">view_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dot'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_graph.html#CausalGraph.view_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_graph.CausalGraph.view_graph" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-dowhy.causal_identifier">
+<span id="dowhy-causal-identifier-module"></span><h2>dowhy.causal_identifier module<a class="headerlink" href="#module-dowhy.causal_identifier" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="dowhy.causal_identifier.CausalIdentifier">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_identifier.</span></span><span class="sig-name descname"><span class="pre">CausalIdentifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimand_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proceed_when_unidentifiable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_identifier.html#CausalIdentifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_identifier.CausalIdentifier" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that implements different identification methods.</p>
+<p>Currently supports backdoor and instrumental variable identification methods. The identification is based on the causal graph provided.</p>
+<p>Other specific ways of identification, such as the ID* algorithm, minimal adjustment criteria, etc. will be added in the future. 
+If you’d like to contribute, please raise an issue or a pull request on Github.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_identifier.CausalIdentifier.construct_backdoor_estimand">
+<span class="sig-name descname"><span class="pre">construct_backdoor_estimand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimand_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">common_causes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_identifier.html#CausalIdentifier.construct_backdoor_estimand"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_identifier.CausalIdentifier.construct_backdoor_estimand" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_identifier.CausalIdentifier.construct_iv_estimand">
+<span class="sig-name descname"><span class="pre">construct_iv_estimand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimand_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument_names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_identifier.html#CausalIdentifier.construct_iv_estimand"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_identifier.CausalIdentifier.construct_iv_estimand" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_identifier.CausalIdentifier.identify_effect">
+<span class="sig-name descname"><span class="pre">identify_effect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_identifier.html#CausalIdentifier.identify_effect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_identifier.CausalIdentifier.identify_effect" title="Permalink to this definition"></a></dt>
+<dd><p>Main method that returns an identified estimand (if one exists).</p>
+<p>Uses both backdoor and instrumental variable methods to check if an identified estimand exists, based on the causal graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> – instance of the CausalEstimator class (or its subclass)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>target estimand, an instance of the IdentifiedEstimand class</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dowhy.causal_identifier.IdentifiedEstimand">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_identifier.</span></span><span class="sig-name descname"><span class="pre">IdentifiedEstimand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treatment_variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimand_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimands</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backdoor_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrumental_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_identifier.html#IdentifiedEstimand"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_identifier.IdentifiedEstimand" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for storing a causal estimand, typically as a result of the identification step.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_identifier.IdentifiedEstimand.set_identifier_method">
+<span class="sig-name descname"><span class="pre">set_identifier_method</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_identifier.html#IdentifiedEstimand.set_identifier_method"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_identifier.IdentifiedEstimand.set_identifier_method" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-dowhy.causal_model">
+<span id="dowhy-causal-model-module"></span><h2>dowhy.causal_model module<a class="headerlink" href="#module-dowhy.causal_model" title="Permalink to this heading"></a></h2>
+<p>Module containing the main model class for the dowhy package.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="dowhy.causal_model.CausalModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_model.</span></span><span class="sig-name descname"><span class="pre">CausalModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">common_causes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instruments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect_modifiers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimand_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nonparametric-ate'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proceed_when_unidentifiable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing_nodes_as_confounders</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_model.html#CausalModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_model.CausalModel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Main class for storing the causal model state.</p>
+<p>Initialize data and create a causal graph instance.</p>
+<p>Assigns treatment and outcome variables.
+Also checks and finds the common causes and instruments for treatment
+and outcome.</p>
+<p>At least one of graph, common_causes or instruments must be provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> – a pandas dataframe containing treatment, outcome and other</p>
+</dd>
+</dl>
+<p>variables.
+:param treatment: name of the treatment variable
+:param outcome: name of the outcome variable
+:param graph: path to DOT file containing a DAG or a string containing
+a DAG specification in DOT format
+:param common_causes: names of common causes of treatment and _outcome
+:param instruments: names of instrumental variables for the effect of
+treatment on outcome
+:param effect_modifiers: names of variables that can modify the treatment effect (useful for heterogeneous treatment effect estimation)
+:param estimand_type: the type of estimand requested (currently only “nonparametric-ate” is supported). In the future, may support other specific parametric forms of identification.
+:proceed_when_unidentifiable: does the identification proceed by ignoring potential unobserved confounders. Binary flag.
+:missing_nodes_as_confounders: Binary flag indicating whether variables in the dataframe that are not included in the causal graph, should be  automatically included as confounder nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>an instance of CausalModel class</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_model.CausalModel.do">
+<span class="sig-name descname"><span class="pre">do</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identified_estimand</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_model.html#CausalModel.do"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_model.CausalModel.do" title="Permalink to this definition"></a></dt>
+<dd><p>Do operator for estimating values of the outcome after intervening on treatment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>identified_estimand</strong> – a probability expression
+that represents the effect to be estimated. Output of
+CausalModel.identify_effect method</p></li>
+<li><p><strong>method_name</strong> – any of the estimation method to be used. See docs for estimate_effect method for a list of supported estimation methods.</p></li>
+<li><p><strong>method_params</strong> – Dictionary containing any method-specific parameters. These are passed directly to the estimating method.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>an instance of the CausalEstimate class, containing the causal effect estimate
+and other method-dependent information</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_model.CausalModel.estimate_effect">
+<span class="sig-name descname"><span class="pre">estimate_effect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identified_estimand</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_significance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluate_effect_strength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_intervals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ate'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect_modifiers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_model.html#CausalModel.estimate_effect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_model.CausalModel.estimate_effect" title="Permalink to this definition"></a></dt>
+<dd><p>Estimate the identified causal effect.</p>
+<dl class="simple">
+<dt>Currently requires an explicit method name to be specified. Method names follow the convention of identification method followed by the specific estimation method: “[backdoor/iv].estimation_method_name”. Following methods are supported.</dt><dd><ul class="simple">
+<li><p>Propensity Score Matching: “backdoor.propensity_score_matching”</p></li>
+<li><p>Propensity Score Stratification: “backdoor.propensity_score_stratification”</p></li>
+<li><p>Propensity Score-based Inverse Weighting: “backdoor.propensity_score_weighting”</p></li>
+<li><p>Linear Regression: “backdoor.linear_regression”</p></li>
+<li><p>Instrumental Variables: “iv.instrumental_variable”</p></li>
+<li><p>Regression Discontinuity: “iv.regression_discontinuity”</p></li>
+</ul>
+</dd>
+</dl>
+<p>In addition, you can directly call any of the EconML estimation methods. The convention is “backdoor.econml.path-to-estimator-class”. For example, for the double machine learning estimator (“DMLCateEstimator” class) that is located inside “dml” module of EconML, you can use the method name, “backdoor.econml.dml.DMLCateEstimator”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>identified_estimand</strong> – a probability expression
+that represents the effect to be estimated. Output of
+CausalModel.identify_effect method</p></li>
+<li><p><strong>method_name</strong> – name of the estimation method to be used.</p></li>
+<li><p><strong>control_value</strong> – Value of the treatment in the control group, for effect estimation.  If treatment is multi-variate, this can be a list.</p></li>
+<li><p><strong>treatment_value</strong> – Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.</p></li>
+<li><p><strong>test_significance</strong> – Binary flag on whether to additionally do a statistical signficance test for the estimate.</p></li>
+<li><p><strong>evaluate_effect_strength</strong> – (Experimental) Binary flag on whether to estimate the relative strength of the treatment’s effect. This measure can be used to compare different treatments for the same outcome (by running this method with different treatments sequentially).</p></li>
+<li><p><strong>confidence_intervals</strong> – (Experimental) Binary flag indicating whether confidence intervals should be computed.</p></li>
+<li><p><strong>target_units</strong> – (Experimental) The units for which the treatment effect should be estimated. This can be of three types. (1) a string for common specifications of target units (namely, “ate”, “att” and “atc”), (2) a lambda function that can be used as an index for the data (pandas DataFrame), or (3) a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.</p></li>
+<li><p><strong>effect_modifiers</strong> – Names of effect modifier variables can be (optionally) specified here too, since they do not affect identification. If None, the effect_modifiers from the CausalModel are used.</p></li>
+<li><p><strong>method_params</strong> – Dictionary containing any method-specific parameters. These are passed directly to the estimating method. See the docs for each estimation method for allowed method-specific params.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An instance of the CausalEstimate class, containing the causal effect estimate
+and other method-dependent information</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_model.CausalModel.identify_effect">
+<span class="sig-name descname"><span class="pre">identify_effect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proceed_when_unidentifiable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_model.html#CausalModel.identify_effect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_model.CausalModel.identify_effect" title="Permalink to this definition"></a></dt>
+<dd><p>Identify the causal effect to be estimated, using properties of the causal graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>proceed_when_unidentifiable</strong> – Binary flag indicating whether identification should proceed in the presence of (potential) unobserved confounders.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a probability expression (estimand) for the causal effect if identified, else NULL</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_model.CausalModel.refute_estimate">
+<span class="sig-name descname"><span class="pre">refute_estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimand</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_model.html#CausalModel.refute_estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_model.CausalModel.refute_estimate" title="Permalink to this definition"></a></dt>
+<dd><p>Refute an estimated causal effect.</p>
+<dl class="simple">
+<dt>If method_name is provided, uses the provided method. In the future, we may support automatic selection of suitable refutation tests. Following refutation methods are supported.</dt><dd><ul class="simple">
+<li><p>Adding a randomly-generated confounder: “random_common_cause”</p></li>
+<li><p>Adding a confounder that is associated with both treatment and outcome: “add_unobserved_common_cause”</p></li>
+<li><p>Replacing the treatment with a placebo (random) variable): “placebo_treatment_refuter”</p></li>
+<li><p>Removing a random subset of the data: “data_subset_refuter”</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>estimand</strong> – target estimand, an instance of the IdentifiedEstimand class (typically, the output of identify_effect)</p></li>
+<li><p><strong>estimate</strong> – estimate to be refuted, an instance of the CausalEstimate class (typically, the output of estimate_effect)</p></li>
+<li><p><strong>method_name</strong> – name of the refutation method</p></li>
+<li><p><strong>**kwargs</strong> – <p>(optional) additional arguments that are passed directly to the refutation method. Can specify a random seed here to ensure reproducible results (‘random_seed’ parameter). For method-specific parameters, consult the documentation for the specific method. All refutation methods are in the causal_refuters subpackage.</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>an instance of the RefuteResult class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_model.CausalModel.summary">
+<span class="sig-name descname"><span class="pre">summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_model.html#CausalModel.summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_model.CausalModel.summary" title="Permalink to this definition"></a></dt>
+<dd><p>Print a text summary of the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_model.CausalModel.view_model">
+<span class="sig-name descname"><span class="pre">view_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dot'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_model.html#CausalModel.view_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_model.CausalModel.view_model" title="Permalink to this definition"></a></dt>
+<dd><p>View the causal DAG.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>layout</strong> – string specifying the layout of the graph.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a visualization of the graph</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-dowhy.causal_refuter">
+<span id="dowhy-causal-refuter-module"></span><h2>dowhy.causal_refuter module<a class="headerlink" href="#module-dowhy.causal_refuter" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="dowhy.causal_refuter.CausalRefutation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_refuter.</span></span><span class="sig-name descname"><span class="pre">CausalRefutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimated_effect</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_effect</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refutation_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuter.html#CausalRefutation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_refuter.CausalRefutation" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for storing the result of a refutation method.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dowhy.causal_refuter.CausalRefuter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_refuter.</span></span><span class="sig-name descname"><span class="pre">CausalRefuter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identified_estimand</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimate</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuter.html#CausalRefuter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_refuter.CausalRefuter" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class for different refutation methods.</p>
+<p>Subclasses implement specific refutations methods.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_refuter.CausalRefuter.get_estimator_object">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_estimator_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identified_estimand</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuter.html#CausalRefuter.get_estimator_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_refuter.CausalRefuter.get_estimator_object" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_refuter.CausalRefuter.refute_estimate">
+<span class="sig-name descname"><span class="pre">refute_estimate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuter.html#CausalRefuter.refute_estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_refuter.CausalRefuter.refute_estimate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-dowhy.data_transformer">
+<span id="dowhy-data-transformer-module"></span><h2>dowhy.data_transformer module<a class="headerlink" href="#module-dowhy.data_transformer" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="dowhy.data_transformer.DimensionalityReducer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.data_transformer.</span></span><span class="sig-name descname"><span class="pre">DimensionalityReducer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndims</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/data_transformer.html#DimensionalityReducer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.data_transformer.DimensionalityReducer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.data_transformer.DimensionalityReducer.reduce">
+<span class="sig-name descname"><span class="pre">reduce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/data_transformer.html#DimensionalityReducer.reduce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.data_transformer.DimensionalityReducer.reduce" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-dowhy.datasets">
+<span id="dowhy-datasets-module"></span><h2>dowhy.datasets module<a class="headerlink" href="#module-dowhy.datasets" title="Permalink to this heading"></a></h2>
+<p>Module for generating some sample datasets.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="dowhy.datasets.choice">
+<span class="sig-prename descclassname"><span class="pre">dowhy.datasets.</span></span><span class="sig-name descname"><span class="pre">choice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dowhy.datasets.choice" title="Permalink to this definition"></a></dt>
+<dd><p>Generates a random sample from a given 1-D array</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 1.7.0.</span></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>New code should use the <code class="docutils literal notranslate"><span class="pre">choice</span></code> method of a <code class="docutils literal notranslate"><span class="pre">default_rng()</span></code>
+instance instead; please see the <span class="xref std std-ref">random-quick-start</span>.</p>
+</div>
+<dl class="simple">
+<dt>a<span class="classifier">1-D array-like or int</span></dt><dd><p>If an ndarray, a random sample is generated from its elements.
+If an int, the random sample is generated as if it were <code class="docutils literal notranslate"><span class="pre">np.arange(a)</span></code></p>
+</dd>
+<dt>size<span class="classifier">int or tuple of ints, optional</span></dt><dd><p>Output shape.  If the given shape is, e.g., <code class="docutils literal notranslate"><span class="pre">(m,</span> <span class="pre">n,</span> <span class="pre">k)</span></code>, then
+<code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">k</span></code> samples are drawn.  Default is None, in which case a
+single value is returned.</p>
+</dd>
+<dt>replace<span class="classifier">boolean, optional</span></dt><dd><p>Whether the sample is with or without replacement. Default is True,
+meaning that a value of <code class="docutils literal notranslate"><span class="pre">a</span></code> can be selected multiple times.</p>
+</dd>
+<dt>p<span class="classifier">1-D array-like, optional</span></dt><dd><p>The probabilities associated with each entry in a.
+If not given, the sample assumes a uniform distribution over all
+entries in <code class="docutils literal notranslate"><span class="pre">a</span></code>.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>samples<span class="classifier">single item or ndarray</span></dt><dd><p>The generated random samples</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>If a is an int and less than zero, if a or p are not 1-dimensional,
+if a is an array-like of size 0, if p is not a vector of
+probabilities, if a and p have different lengths, or if
+replace=False and the sample size is greater than the population
+size</p>
+</dd>
+</dl>
+<p>randint, shuffle, permutation
+Generator.choice: which should be used in new code</p>
+<p>Setting user-specified probabilities through <code class="docutils literal notranslate"><span class="pre">p</span></code> uses a more general but less
+efficient sampler than the default. The general sampler produces a different sample
+than the optimized sampler even if each element of <code class="docutils literal notranslate"><span class="pre">p</span></code> is 1 / len(a).</p>
+<p>Sampling random rows from a 2-D array is not possible with this function,
+but is possible with <cite>Generator.choice</cite> through its <code class="docutils literal notranslate"><span class="pre">axis</span></code> keyword.</p>
+<p>Generate a uniform random sample from np.arange(5) of size 3:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">array([0, 3, 4]) # random</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#This is equivalent to np.random.randint(0,5,3)</span>
+</pre></div>
+</div>
+<p>Generate a non-uniform random sample from np.arange(5) of size 3:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">array([3, 3, 0]) # random</span>
+</pre></div>
+</div>
+<p>Generate a uniform random sample from np.arange(5) of size 3 without
+replacement:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="go">array([3,1,0]) # random</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#This is equivalent to np.random.permutation(np.arange(5))[:3]</span>
+</pre></div>
+</div>
+<p>Generate a non-uniform random sample from np.arange(5) of size
+3 without replacement:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">array([2, 3, 0]) # random</span>
+</pre></div>
+</div>
+<p>Any of the above can be repeated with an arbitrary array-like
+instead of just integers. For instance:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">aa_milne_arr</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pooh&#39;</span><span class="p">,</span> <span class="s1">&#39;rabbit&#39;</span><span class="p">,</span> <span class="s1">&#39;piglet&#39;</span><span class="p">,</span> <span class="s1">&#39;Christopher&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">aa_milne_arr</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">])</span>
+<span class="go">array([&#39;pooh&#39;, &#39;pooh&#39;, &#39;pooh&#39;, &#39;Christopher&#39;, &#39;piglet&#39;], # random</span>
+<span class="go">      dtype=&#39;&lt;U11&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dowhy.datasets.create_dot_graph">
+<span class="sig-prename descclassname"><span class="pre">dowhy.datasets.</span></span><span class="sig-name descname"><span class="pre">create_dot_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treatments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">common_causes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instruments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect_modifiers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/datasets.html#create_dot_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.datasets.create_dot_graph" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dowhy.datasets.create_gml_graph">
+<span class="sig-prename descclassname"><span class="pre">dowhy.datasets.</span></span><span class="sig-name descname"><span class="pre">create_gml_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treatments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">common_causes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instruments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect_modifiers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/datasets.html#create_gml_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.datasets.create_gml_graph" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dowhy.datasets.linear_dataset">
+<span class="sig-prename descclassname"><span class="pre">dowhy.datasets.</span></span><span class="sig-name descname"><span class="pre">linear_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_common_causes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_instruments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_effect_modifiers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_treatments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_is_binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_is_binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/datasets.html#linear_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.datasets.linear_dataset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dowhy.datasets.sigmoid">
+<span class="sig-prename descclassname"><span class="pre">dowhy.datasets.</span></span><span class="sig-name descname"><span class="pre">sigmoid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/datasets.html#sigmoid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.datasets.sigmoid" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dowhy.datasets.simple_iv_dataset">
+<span class="sig-prename descclassname"><span class="pre">dowhy.datasets.</span></span><span class="sig-name descname"><span class="pre">simple_iv_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_treatments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_is_binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_is_binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/datasets.html#simple_iv_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.datasets.simple_iv_dataset" title="Permalink to this definition"></a></dt>
+<dd><p>Simple instrumental variable dataset with a single IV and a single confounder.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dowhy.datasets.stochastically_convert_to_binary">
+<span class="sig-prename descclassname"><span class="pre">dowhy.datasets.</span></span><span class="sig-name descname"><span class="pre">stochastically_convert_to_binary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/datasets.html#stochastically_convert_to_binary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.datasets.stochastically_convert_to_binary" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dowhy.datasets.xy_dataset">
+<span class="sig-prename descclassname"><span class="pre">dowhy.datasets.</span></span><span class="sig-name descname"><span class="pre">xy_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sd_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/datasets.html#xy_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.datasets.xy_dataset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-dowhy.do_sampler">
+<span id="dowhy-do-sampler-module"></span><h2>dowhy.do_sampler module<a class="headerlink" href="#module-dowhy.do_sampler" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="dowhy.do_sampler.DoSampler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.do_sampler.</span></span><span class="sig-name descname"><span class="pre">DoSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">causal_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_original_treatment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_sampler.html#DoSampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.do_sampler.DoSampler" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class for a sampler from the interventional distribution.</p>
+<p>Initializes a do sampler with data and names of relevant variables.</p>
+<p>Do sampling implements the do() operation from Pearl (2000). This is an operation is defined on a causal
+bayesian network, an explicit implementation of which is the basis for the MCMC sampling method.</p>
+<p>We abstract the idea behind the three-step process to allow other methods, as well. The <cite>disrupt_causes</cite>
+method is the means to make treatment assignment ignorable. In the Pearlian framework, this is where we cut the
+edges pointing into the causal state. With other methods, this will typically be by using some approach which
+assumes conditional ignorability (e.g. weighting, or explicit conditioning with Robins G-formula.)</p>
+<p>Next, the <cite>make_treatment_effective</cite> method reflects the assumption that the intervention we impose is
+“effective”. Most simply, we fix the causal state to some specific value. We skip this step there is no value
+specified for the causal state, and the original values are used instead.</p>
+<p>Finally, we sample from the resulting distribution. This can be either from a <cite>point_sample</cite> method, in the case
+that the inference method doesn’t support batch sampling, or the <cite>sample</cite> method in the case that it does. For
+convenience, the <cite>point_sample</cite> method parallelizes with <cite>multiprocessing</cite> using the <cite>num_cores</cite> kwargs to set
+the number of cores to use for parallelization.</p>
+<p>While different methods will have their own class attributes, the <cite>_df</cite> method should be common to all methods.
+This is them temporary dataset which starts as a copy of the original data, and is modified to reflect the steps
+of the do operation. Read through the existing methods (weighting is likely the most minimal) to get an idea of
+how this works to implement one yourself.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – pandas.DataFrame containing the data</p></li>
+<li><p><strong>identified_estimand</strong> – dowhy.causal_identifier.IdentifiedEstimand: and estimand using a backdoor method</p></li>
+</ul>
+</dd>
+</dl>
+<p>for effect identification.
+:param treatments: list or str:  names of the treatment variables
+:param outcomes: list or str: names of the outcome variables
+:param variable_types: dict: A dictionary containing the variable’s names and types. ‘c’ for continuous, ‘o’
+for ordered, ‘d’ for discrete, and ‘u’ for unordered discrete.
+:param keep_original_treatment: bool: Whether to use <cite>make_treatment_effective</cite>, or to keep the original
+treatment assignments.
+:param params: (optional) additional method parameters</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.do_sampler.DoSampler.disrupt_causes">
+<span class="sig-name descname"><span class="pre">disrupt_causes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_sampler.html#DoSampler.disrupt_causes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.do_sampler.DoSampler.disrupt_causes" title="Permalink to this definition"></a></dt>
+<dd><p>Override this method to render treatment assignment conditionally ignorable
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.do_sampler.DoSampler.do_sample">
+<span class="sig-name descname"><span class="pre">do_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_sampler.html#DoSampler.do_sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.do_sampler.DoSampler.do_sample" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.do_sampler.DoSampler.make_treatment_effective">
+<span class="sig-name descname"><span class="pre">make_treatment_effective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_sampler.html#DoSampler.make_treatment_effective"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.do_sampler.DoSampler.make_treatment_effective" title="Permalink to this definition"></a></dt>
+<dd><p>This is more likely the implementation you’d like to use, but some methods may require overriding this method
+to make the treatment effective.
+:param x:
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.do_sampler.DoSampler.point_sample">
+<span class="sig-name descname"><span class="pre">point_sample</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_sampler.html#DoSampler.point_sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.do_sampler.DoSampler.point_sample" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.do_sampler.DoSampler.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_sampler.html#DoSampler.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.do_sampler.DoSampler.reset" title="Permalink to this definition"></a></dt>
+<dd><p>If your <cite>DoSampler</cite> has more attributes that the <cite>_df</cite> attribute, you should reset them all to their
+initialization values by overriding this method.
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.do_sampler.DoSampler.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/do_sampler.html#DoSampler.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.do_sampler.DoSampler.sample" title="Permalink to this definition"></a></dt>
+<dd><p>By default, this expects a sampler to be built on class initialization which contains a <cite>sample</cite> method.
+Override this method if you want to use a different approach to sampling.
+:return:</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-dowhy.plotter">
+<span id="dowhy-plotter-module"></span><h2>dowhy.plotter module<a class="headerlink" href="#module-dowhy.plotter" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="dowhy.plotter.plot_causal_effect">
+<span class="sig-prename descclassname"><span class="pre">dowhy.plotter.</span></span><span class="sig-name descname"><span class="pre">plot_causal_effect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/plotter.html#plot_causal_effect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.plotter.plot_causal_effect" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dowhy.plotter.plot_treatment_outcome">
+<span class="sig-prename descclassname"><span class="pre">dowhy.plotter.</span></span><span class="sig-name descname"><span class="pre">plot_treatment_outcome</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treatment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_var</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/plotter.html#plot_treatment_outcome"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.plotter.plot_treatment_outcome" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-dowhy">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-dowhy" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="code_repo.html" class="btn btn-neutral float-left" title="Code repository &amp; Versions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dowhy.api.html" class="btn btn-neutral float-right" title="dowhy.api package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: v0.2
+    <span class="fa fa-caret-down"></span>
+  </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="../v0.1-alpha/dowhy.html">v0.1-alpha</a></dd>
+            <dd><a href="../v0.1.1-alpha/dowhy.html">v0.1.1-alpha</a></dd>
+            <dd><a href="dowhy.html">v0.2</a></dd>
+            <dd><a href="../v0.4/dowhy.html">v0.4</a></dd>
+            <dd><a href="../v0.5/dowhy.html">v0.5</a></dd>
+            <dd><a href="../v0.5.1/dowhy.html">v0.5.1</a></dd>
+            <dd><a href="../v0.6/dowhy.html">v0.6</a></dd>
+            <dd><a href="../v0.7/dowhy.html">v0.7</a></dd>
+            <dd><a href="../v0.7.1/dowhy.html">v0.7.1</a></dd>
+            <dd><a href="../v0.8/dowhy.html">v0.8</a></dd>
+        </dl>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

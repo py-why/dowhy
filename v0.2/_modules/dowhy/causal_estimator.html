@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dowhy.causal_estimator &mdash; DoWhy | An end-to-end library for causal inference  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
+          </a>
+              <div class="version">
+                v0.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">DoWhy | Making causal inference easy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code_repo.html">Code repository &amp; Versions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dowhy.html">dowhy package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">DoWhy | An end-to-end library for causal inference</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>dowhy.causal_estimator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for dowhy.causal_estimator</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sympy</span> <span class="k">as</span> <span class="nn">sp</span>
+
+
+<div class="viewcode-block" id="CausalEstimator"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_estimator.CausalEstimator">[docs]</a><span class="k">class</span> <span class="nc">CausalEstimator</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Base class for an estimator of causal effect.</span>
+
+<span class="sd">    Subclasses implement different estimation methods. All estimation methods are in the package &quot;dowhy.causal_estimators&quot;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">identified_estimand</span><span class="p">,</span> <span class="n">treatment</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span>
+                 <span class="n">control_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">treatment_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">test_significance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">evaluate_effect_strength</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">confidence_intervals</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">target_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">effect_modifiers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes an estimator with data and names of relevant variables.</span>
+
+<span class="sd">        More description.</span>
+
+<span class="sd">        :param data: data frame containing the data</span>
+<span class="sd">        :param identified_estimand: probability expression</span>
+<span class="sd">            representing the target identified estimand to estimate.</span>
+<span class="sd">        :param treatment: name of the treatment variable</span>
+<span class="sd">        :param outcome: name of the outcome variable</span>
+<span class="sd">        :param control_value: Value of the treatment in the control group, for effect estimation.  If treatment is multi-variate, this can be a list.</span>
+<span class="sd">        :param treatment_value: Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.</span>
+<span class="sd">        :param test_significance: whether to test significance</span>
+<span class="sd">        :param evaluate_effect_strength: (Experimental) whether to evaluate the strength of effect</span>
+<span class="sd">        :param confidence_intervals: (Experimental) Binary flag indicating whether confidence intervals should be computed.</span>
+<span class="sd">        :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be a string for common specifications of target units (namely, &quot;ate&quot;, &quot;att&quot; and &quot;atc&quot;). It can also be a lambda function that can be used as an index for the data (pandas DataFrame). Alternatively, it can be a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.</span>
+<span class="sd">        :param effect_modifiers: variables on which to compute separate effects, or return a heterogeneous effect function. Not all methods support this currently.</span>
+<span class="sd">        :param params: (optional) additional method parameters</span>
+<span class="sd">        :returns: an instance of the estimator class.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span> <span class="o">=</span> <span class="n">identified_estimand</span>
+        <span class="c1"># Currently estimation methods only support univariate treatment and outcome</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span> <span class="o">=</span> <span class="n">treatment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name</span> <span class="o">=</span> <span class="n">outcome</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># assuming one-dimensional outcome</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_control_value</span> <span class="o">=</span> <span class="n">control_value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_treatment_value</span> <span class="o">=</span> <span class="n">treatment_value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_significance_test</span> <span class="o">=</span> <span class="n">test_significance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_effect_strength_eval</span> <span class="o">=</span> <span class="n">evaluate_effect_strength</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_target_units</span> <span class="o">=</span> <span class="n">target_units</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span> <span class="o">=</span> <span class="n">effect_modifiers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_confidence_intervals</span> <span class="o">=</span> <span class="n">confidence_intervals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifiers</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method_params</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="c1"># Checking if some parameters were set, otherwise setting to default values</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;num_simulations&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_simulations</span> <span class="o">=</span> <span class="mi">1000</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+        <span class="c1"># Setting more values</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name</span><span class="p">]</span>
+
+        <span class="c1"># Now saving the effect modifiers</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifiers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Effect modifiers: &quot;</span> <span class="o">+</span>
+                          <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_estimate_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="CausalEstimator.estimate_effect"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_estimator.CausalEstimator.estimate_effect">[docs]</a>    <span class="k">def</span> <span class="nf">estimate_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Base estimation method that calls the estimate_effect method of its calling subclass.</span>
+
+<span class="sd">        Can optionally also test significance and estimate effect strength for any returned estimate.</span>
+
+<span class="sd">        TODO: Enable methods to return a confidence interval in addition to the point estimate.</span>
+
+<span class="sd">        :param self: object instance of class Estimator</span>
+<span class="sd">        :returns: point estimate of causal effect</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">est</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimate_effect</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span> <span class="o">=</span> <span class="n">est</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_significance_test</span><span class="p">:</span>
+            <span class="n">signif_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_significance</span><span class="p">(</span><span class="n">est</span><span class="p">)</span>
+            <span class="n">est</span><span class="o">.</span><span class="n">add_significance_test_results</span><span class="p">(</span><span class="n">signif_dict</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_effect_strength_eval</span><span class="p">:</span>
+            <span class="n">effect_strength_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_effect_strength</span><span class="p">(</span><span class="n">est</span><span class="p">)</span>
+            <span class="n">est</span><span class="o">.</span><span class="n">add_effect_strength</span><span class="p">(</span><span class="n">effect_strength_dict</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">est</span></div>
+
+<div class="viewcode-block" id="CausalEstimator.estimate_effect_naive"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_estimator.CausalEstimator.estimate_effect_naive">[docs]</a>    <span class="k">def</span> <span class="nf">estimate_effect_naive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1">#TODO Only works for binary treatment</span>
+        <span class="n">df_withtreatment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">df_notreatment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">]</span><span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">est</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">df_withtreatment</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">df_notreatment</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">CausalEstimate</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_do</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="CausalEstimator.do"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_estimator.CausalEstimator.do">[docs]</a>    <span class="k">def</span> <span class="nf">do</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Method that implements the do-operator.</span>
+
+<span class="sd">        Given a value x for the treatment, returns the expected value of the outcome when the treatment is intervened to a value x.</span>
+
+<span class="sd">        :param x: Value of the treatment</span>
+<span class="sd">        :returns: Value of the outcome when treatment is intervened/set to x.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">est</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">est</span></div>
+
+<div class="viewcode-block" id="CausalEstimator.construct_symbolic_estimator"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_estimator.CausalEstimator.construct_symbolic_estimator">[docs]</a>    <span class="k">def</span> <span class="nf">construct_symbolic_estimator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimand</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="CausalEstimator.test_significance"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_estimator.CausalEstimator.test_significance">[docs]</a>    <span class="k">def</span> <span class="nf">test_significance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span> <span class="n">num_simulations</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test statistical significance of obtained estimate.</span>
+
+<span class="sd">        Uses resampling to create a non-parametric significance test.</span>
+<span class="sd">        A general procedure. Individual estimators can override this method.</span>
+
+<span class="sd">        :param self: object instance of class Estimator</span>
+<span class="sd">        :param estimate: obtained estimate</span>
+<span class="sd">        :param num_simulations: (optional) number of simulations to run</span>
+<span class="sd">        :returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">num_simulations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_simulations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_simulations</span>
+        <span class="n">null_estimates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_simulations</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_simulations</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">)</span>
+            <span class="n">est</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimate_effect</span><span class="p">()</span>
+            <span class="n">null_estimates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">est</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="n">sorted_null_estimates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">null_estimates</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Null estimates: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sorted_null_estimates</span><span class="p">))</span>
+        <span class="n">median_estimate</span> <span class="o">=</span> <span class="n">sorted_null_estimates</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">num_simulations</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)]</span>
+        <span class="c1"># Doing a two-sided test</span>
+        <span class="k">if</span> <span class="n">estimate</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;</span> <span class="n">median_estimate</span><span class="p">:</span>
+            <span class="c1"># Being conservative with the p-value reported</span>
+            <span class="n">estimate_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">sorted_null_estimates</span><span class="p">,</span> <span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
+            <span class="n">p_value</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">estimate_index</span> <span class="o">/</span> <span class="n">num_simulations</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">estimate</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;=</span> <span class="n">median_estimate</span><span class="p">:</span>
+            <span class="c1"># Being conservative with the p-value reported</span>
+            <span class="n">estimate_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">sorted_null_estimates</span><span class="p">,</span> <span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+            <span class="n">p_value</span> <span class="o">=</span> <span class="p">(</span><span class="n">estimate_index</span> <span class="o">/</span> <span class="n">num_simulations</span><span class="p">)</span>
+        <span class="n">signif_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;p_value&#39;</span><span class="p">:</span> <span class="n">p_value</span><span class="p">,</span>
+            <span class="s1">&#39;sorted_null_estimates&#39;</span><span class="p">:</span> <span class="n">sorted_null_estimates</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">signif_dict</span></div>
+
+<div class="viewcode-block" id="CausalEstimator.evaluate_effect_strength"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_estimator.CausalEstimator.evaluate_effect_strength">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate_effect_strength</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimate</span><span class="p">):</span>
+        <span class="n">fraction_effect_explained</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_effect_strength</span><span class="p">(</span><span class="n">estimate</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;fraction-effect&quot;</span><span class="p">)</span>
+        <span class="c1"># Need to test r-squared before supporting</span>
+        <span class="c1">#effect_r_squared = self._evaluate_effect_strength(estimate, method=&quot;r-squared&quot;)</span>
+        <span class="n">strength_dict</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;fraction-effect&#39;</span><span class="p">:</span> <span class="n">fraction_effect_explained</span>
+         <span class="c1">#       &#39;r-squared&#39;: effect_r_squared</span>
+                <span class="p">}</span>
+        <span class="k">return</span> <span class="n">strength_dict</span></div>
+
+    <span class="k">def</span> <span class="nf">_evaluate_effect_strength</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;fraction-effect&quot;</span><span class="p">):</span>
+        <span class="n">supported_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;fraction-effect&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_methods</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not supported for evaluating effect strength&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;fraction-effect&quot;</span><span class="p">:</span>
+            <span class="n">naive_obs_estimate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate_effect_naive</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">naive_obs_estimate</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">fraction_effect_explained</span> <span class="o">=</span> <span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="o">/</span><span class="n">naive_obs_estimate</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">return</span> <span class="n">fraction_effect_explained</span>
+        <span class="c1">#elif method == &quot;r-squared&quot;:</span>
+        <span class="c1">#    outcome_mean = np.mean(self._outcome)</span>
+        <span class="c1">#    total_variance = np.sum(np.square(self._outcome - outcome_mean))</span>
+            <span class="c1"># Assuming a linear model with one variable: the treatment</span>
+            <span class="c1"># Currently only works for continuous y</span>
+        <span class="c1">#    causal_model = outcome_mean + estimate.value*self._treatment</span>
+        <span class="c1">#    squared_residual = np.sum(np.square(self._outcome - causal_model))</span>
+        <span class="c1">#    r_squared = 1 - (squared_residual/total_variance)</span>
+        <span class="c1">#    return r_squared</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="CausalEstimate"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_estimator.CausalEstimate">[docs]</a><span class="k">class</span> <span class="nc">CausalEstimate</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Class for the estimate object that every causal estimator returns</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span> <span class="n">target_estimand</span><span class="p">,</span> <span class="n">realized_estimand_expr</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">estimate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_estimand</span> <span class="o">=</span> <span class="n">target_estimand</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">realized_estimand_expr</span> <span class="o">=</span> <span class="n">realized_estimand_expr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">significance_test</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">effect_strength</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="CausalEstimate.add_significance_test_results"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_estimator.CausalEstimate.add_significance_test_results">[docs]</a>    <span class="k">def</span> <span class="nf">add_significance_test_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_results</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">significance_test</span> <span class="o">=</span> <span class="n">test_results</span></div>
+
+<div class="viewcode-block" id="CausalEstimate.add_effect_strength"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_estimator.CausalEstimate.add_effect_strength">[docs]</a>    <span class="k">def</span> <span class="nf">add_effect_strength</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strength_dict</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">effect_strength</span> <span class="o">=</span> <span class="n">strength_dict</span></div>
+
+<div class="viewcode-block" id="CausalEstimate.add_params"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_estimator.CausalEstimate.add_params">[docs]</a>    <span class="k">def</span> <span class="nf">add_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;*** Causal Estimate ***</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">## Target estimand</span><span class="se">\n</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_estimand</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">## Realized estimand</span><span class="se">\n</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">realized_estimand_expr</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">## Estimate</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Value: </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">significance_test</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">## Statistical Significance</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">significance_test</span><span class="p">[</span><span class="s2">&quot;p_value&quot;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;p-value: </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">significance_test</span><span class="p">[</span><span class="s2">&quot;p_value&quot;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">s</span><span class="o">+=</span> <span class="s2">&quot;p-value: &lt;</span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">significance_test</span><span class="p">[</span><span class="s2">&quot;sorted_null_estimates&quot;</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">effect_strength</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">## Effect Strength</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Change in outcome attributable to treatment: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">effect_strength</span><span class="p">[</span><span class="s2">&quot;fraction-effect&quot;</span><span class="p">])</span>
+            <span class="c1">#s += &quot;Variance in outcome explained by treatment: {}\n&quot;.format(self.effect_strength[&quot;r-squared&quot;])</span>
+        <span class="k">return</span> <span class="n">s</span></div>
+
+
+<div class="viewcode-block" id="RealizedEstimand"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_estimator.RealizedEstimand">[docs]</a><span class="k">class</span> <span class="nc">RealizedEstimand</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimator_name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">treatment_variable</span> <span class="o">=</span> <span class="n">identified_estimand</span><span class="o">.</span><span class="n">treatment_variable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outcome_variable</span> <span class="o">=</span> <span class="n">identified_estimand</span><span class="o">.</span><span class="n">outcome_variable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backdoor_variables</span> <span class="o">=</span> <span class="n">identified_estimand</span><span class="o">.</span><span class="n">backdoor_variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instrumental_variables</span> <span class="o">=</span> <span class="n">identified_estimand</span><span class="o">.</span><span class="n">instrumental_variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimand_type</span> <span class="o">=</span> <span class="n">identified_estimand</span><span class="o">.</span><span class="n">estimand_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimand_expression</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assumptions</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator_name</span> <span class="o">=</span> <span class="n">estimator_name</span>
+
+<div class="viewcode-block" id="RealizedEstimand.update_assumptions"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_estimator.RealizedEstimand.update_assumptions">[docs]</a>    <span class="k">def</span> <span class="nf">update_assumptions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator_assumptions</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assumptions</span> <span class="o">=</span> <span class="n">estimator_assumptions</span></div>
+
+<div class="viewcode-block" id="RealizedEstimand.update_estimand_expression"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_estimator.RealizedEstimand.update_estimand_expression">[docs]</a>    <span class="k">def</span> <span class="nf">update_estimand_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimand_expression</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimand_expression</span> <span class="o">=</span> <span class="n">estimand_expression</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Realized estimand: </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator_name</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Realized estimand type: </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimand_type</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Estimand expression:</span><span class="se">\n</span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">pretty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimand_expression</span><span class="p">))</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">ass_name</span><span class="p">,</span> <span class="n">ass_str</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">assumptions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Estimand assumption </span><span class="si">{0}</span><span class="s2">, </span><span class="si">{1}</span><span class="s2">: </span><span class="si">{2}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">ass_name</span><span class="p">,</span> <span class="n">ass_str</span><span class="p">)</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">s</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: v0.2
+    <span class="fa fa-caret-down"></span>
+  </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="../../../v0.1-alpha/index.html">v0.1-alpha</a></dd>
+            <dd><a href="../../../v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+            <dd><a href="causal_estimator.html">v0.2</a></dd>
+            <dd><a href="../../../v0.4/index.html">v0.4</a></dd>
+            <dd><a href="../../../v0.5/index.html">v0.5</a></dd>
+            <dd><a href="../../../v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="../../../v0.6/index.html">v0.6</a></dd>
+            <dd><a href="../../../v0.7/index.html">v0.7</a></dd>
+            <dd><a href="../../../v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="../../../v0.8/index.html">v0.8</a></dd>
+        </dl>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

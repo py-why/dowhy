@@ -1,0 +1,279 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Do-sampler Introduction\n",
+    "by Adam Kelleher\n",
+    "\n",
+    "The \"do-sampler\" is a new feature in do-why. While most potential-outcomes oriented estimators focus on estimating the specific contrast $E[Y_0 - Y_1]$, Pearlian inference focuses on more fundamental quantities like the joint distribution of a set of outcomes Y, $P(Y)$, which can be used to derive other statistics of interest.\n",
+    "\n",
+    "Generally, it's hard to represent a probability distribution non-parametrically. Even if you could, you wouldn't want to gloss over finite-sample problems with you data you used to generate it. With these issues in mind, we decided to represent interventional distributions by sampling from them with an object called to \"do-sampler\". With these samples, we can hope to compute finite-sample statistics of our interventional data. If we bootstrap many such samples, we can even hope for good sampling distributions for these statistics. \n",
+    "\n",
+    "The user should note that this is still an area of active research, so you should be careful about being too confident in bootstrapped error bars from do-samplers.\n",
+    "\n",
+    "Note that do samplers sample from the outcome distribution, and so will vary significantly from sample to sample. To use them to compute outcomes, it's recommended to generate several such samples to get an idea of the posterior variance of your statistic of interest.\n",
+    "\n",
+    "## Pearlian Interventions\n",
+    "\n",
+    "Following the notion of an intervention in a Pearlian causal model, our do-samplers implement a sequence of steps:\n",
+    "\n",
+    "1. Disrupt causes\n",
+    "2. Make Effective\n",
+    "3. Propagate and sample\n",
+    "\n",
+    "In the first stage, we imagine cutting the in-edges to all of the variables we're intervening on. In the second stage, we set the value of those variables to their interventional quantities. In the third stage, we propagate that value forward through our model to compute interventional outcomes with a sampling procedure.\n",
+    "\n",
+    "In practice, there are many ways we can implement these steps. They're most explicit when we build the model as a linear bayesian network in PyMC3, which is what underlies the MCMC do sampler. In that case, we fit one bayesian network to the data, then construct a new network representing the interventional network. The structural equations are set with the parameters fit in the initial network, and we sample from that new network to get our do sample.\n",
+    "\n",
+    "In the weighting do sampler, we abstractly think of \"disrupting the causes\" by accounting for selection into the causal state through propensity score estimation. These scores contain the information used to block back-door paths, and so have the same statistics effect as cutting edges into the causal state. We make the treatment effective by selecting the subset of our data set with the correct value of the causal state. Finally, we generated a weighted random sample using inverse propensity weighting to get our do sample.\n",
+    "\n",
+    "There are other ways you could implement these three steps, but the formula is the same. We've abstracted them out as abstract class methods which you should override if you'd like to create your own do sampler!\n",
+    "\n",
+    "## Statefulness\n",
+    "\n",
+    "The do sampler when accessed through the high-level pandas API is stateless by default.This makes it intuitive to work with, and you can generate different samples with repeated calls to the `pandas.DataFrame.causal.do`. It can be made stateful, which is sometimes useful. \n",
+    "\n",
+    "The 3-stage process we mentioned before is implemented by passing an internal `pandas.DataFrame` through each of the three stages, but regarding it as temporary. The internal dataframe is reset by default before returning the result.\n",
+    "\n",
+    "It can be much more efficient to maintain state in the do sampler between generating samples. This is especially true when step 1 requires fitting an expensive model, as is the case with the MCMC do sampler, the kernel density sampler, and the weighting sampler. \n",
+    "\n",
+    "Instead of re-fitting the model for each sample, you'd like to fit it once, and then generate many samples from the do sampler. You can do this by setting the kwarg `stateful=True` when you call the `pandas.DataFrame.causal.do` method. To reset the state of the dataframe (deleting the model as well as the internal dataframe), you can call the `pandas.DataFrame.causal.reset` method.\n",
+    "\n",
+    "Through the lower-level API, the sampler is stateful by default. The assumption is that a \"power user\" who is using the low-level API will want more control over the sampling process. In this case, state is carried by internal dataframe `self._df`, which is a copy of the dataframe passed on instantiation. The original dataframe is kept in `self._data`, and is used when the user resets state. \n",
+    "\n",
+    "## Integration\n",
+    "\n",
+    "The do-sampler is built on top of the identification abstraction used throughout do-why. It uses a `dowhy.CausalModel` to perform identification, and builds any models it needs automatically using this identification.\n",
+    "\n",
+    "## Specifying Interventions\n",
+    "\n",
+    "There is a kwarg on the `dowhy.do_sampler.DoSampler` object called `keep_original_treatment`. While an intervention might be to set all units treatment values to some specific value, it's often natural to keep them set as they were, and instead remove confounding bias during effect estimation. If you'd prefer not to specify an intervention, you can set the kwarg like `keep_original_treatment=True`, and the second stage of the 3-stage process will be skipped. In that case, any intervention specified on sampling will be ignored.\n",
+    "\n",
+    "If the `keep_original_treatment` flag is set to false (it is by default), then you must specify an intervention when you sample from the do sampler. For details, see the demo below!\n",
+    "\n",
+    "\n",
+    "## Demo\n",
+    "\n",
+    "First, let's generate some data and a causal model. Here, Z confounds our causal state, D, with the outcome, Y."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import os, sys\n",
+    "sys.path.append(os.path.abspath(\"../../../\"))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import dowhy.api"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "N = 5000\n",
+    "\n",
+    "z = np.random.uniform(size=N)\n",
+    "d = np.random.binomial(1., p=1./(1. + np.exp(-5. * z)))\n",
+    "y = 2. * z + d + 0.1 * np.random.normal(size=N)\n",
+    "\n",
+    "df = pd.DataFrame({'Z': z, 'D': d, 'Y': y})"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "The history saving thread hit an unexpected error (OperationalError('disk I/O error')).History will not be written to the database.\n"
+     ]
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/latex": [
+       "$\\displaystyle 1.6060040533144169$"
+      ],
+      "text/plain": [
+       "1.6060040533144169"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "(df[df.D == 1].mean() - df[df.D == 0].mean())['Y']"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "So the naive effect is around 60% high. Now, let's build a causal model for this data."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from dowhy import CausalModel\n",
+    "\n",
+    "causes = ['D']\n",
+    "outcomes = ['Y']\n",
+    "common_causes = ['Z']\n",
+    "\n",
+    "model = CausalModel(df, \n",
+    "                    causes,\n",
+    "                    outcomes,\n",
+    "                    common_causes=common_causes)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now that we have a model, we can try to identify the causal effect."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "identification = model.identify_effect(proceed_when_unidentifiable=True)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Identification works! We didn't actually need to do this yet, since it will happen internally with the do sampler, but it can't hurt to check that identification works before proceeding. Now, let's build the sampler."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from dowhy.do_samplers.weighting_sampler import WeightingSampler\n",
+    "\n",
+    "sampler = WeightingSampler(df,\n",
+    "                           causal_model=model,\n",
+    "                           keep_original_treatment=True,\n",
+    "                           variable_types={'D': 'b', 'Z': 'c', 'Y': 'c'}\n",
+    "                          )\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now, we can just sample from the interventional distribution! Since we set the `keep_original_treatment` flag to `False`, any treatment we pass here will be ignored. Here, we'll just pass `None` to acknowledge that we know we don't want to pass anything.\n",
+    "\n",
+    "If you'd prefer to specify an intervention, you can just put the interventional value here instead as a list or numpy array.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "interventional_df = sampler.do_sample(None)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/latex": [
+       "$\\displaystyle 0.9909850953227604$"
+      ],
+      "text/plain": [
+       "0.9909850953227604"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "(interventional_df[interventional_df.D == 1].mean() - interventional_df[interventional_df.D == 0].mean())['Y']"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now we're much closer to the true effect, which is around 1.0!"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.5"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": false,
+   "sideBar": true,
+   "skip_h1_title": true,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

@@ -1,0 +1,1004 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Lalonde Pandas API Example\n",
+    "by Adam Kelleher"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We'll run through a quick example using the high-level Python API for the DoSampler. The DoSampler is different from most classic causal effect estimators. Instead of estimating statistics under interventions, it aims to provide the generality of Pearlian causal inference. In that context, the joint distribution of the variables under an intervention is the quantity of interest. It's hard to represent a joint distribution nonparametrically, so instead we provide a sample from that distribution, which we call a \"do\" sample.\n",
+    "\n",
+    "Here, when you specify an outcome, that is the variable you're sampling under an intervention. We still have to do the usual process of making sure the quantity (the conditional interventional distribution of the outcome) is identifiable. We leverage the familiar components of the rest of the package to do that \"under the hood\". You'll notice some similarity in the kwargs for the DoSampler.\n",
+    "\n",
+    "## Getting the Data\n",
+    "\n",
+    "First, download the data from the LaLonde example."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import os, sys\n",
+    "sys.path.append(os.path.abspath(\"../../../\"))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "R[write to console]: Loading required package: MASS\n",
+      "\n",
+      "R[write to console]: ## \n",
+      "##  Matching (Version 4.9-7, Build Date: 2020-02-05)\n",
+      "##  See http://sekhon.berkeley.edu/matching for additional documentation.\n",
+      "##  Please cite software as:\n",
+      "##   Jasjeet S. Sekhon. 2011. ``Multivariate and Propensity Score Matching\n",
+      "##   Software with Automated Balance Optimization: The Matching package for R.''\n",
+      "##   Journal of Statistical Software, 42(7): 1-52. \n",
+      "##\n",
+      "\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "from rpy2.robjects import r as R\n",
+    "\n",
+    "%load_ext rpy2.ipython\n",
+    "#%R install.packages(\"Matching\")\n",
+    "%R library(Matching)\n",
+    "%R data(lalonde)\n",
+    "%R -o lalonde\n",
+    "lalonde.to_csv(\"lalonde.csv\",index=False)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# the data already loaded in the previous cell. we include the import\n",
+    "# here you so you don't have to keep re-downloading it.\n",
+    "\n",
+    "import pandas as pd\n",
+    "\n",
+    "lalonde=pd.read_csv(\"lalonde.csv\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## The `causal` Namespace"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We've created a \"namespace\" for `pandas.DataFrame`s containing causal inference methods. You can access it here with `lalonde.causal`, where `lalonde` is our `pandas.DataFrame`, and `causal` contains all our new methods! These methods are magically loaded into your existing (and future) dataframes when you `import dowhy.api`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import dowhy.api"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now that we have the `causal` namespace, lets give it a try! \n",
+    "\n",
+    "## The `do` Operation\n",
+    "\n",
+    "The key feature here is the `do` method, which produces a new dataframe replacing the treatment variable with values specified, and the outcome with a sample from the interventional distribution of the outcome. If you don't specify a value for the treatment, it leaves the treatment untouched:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "WARNING:dowhy.causal_model:Causal Graph not provided. DoWhy will construct a graph based on data inputs.\n",
+      "INFO:dowhy.causal_graph:If this is observed data (not from a randomized experiment), there might always be missing confounders. Adding a node named \"Unobserved Confounders\" to reflect this.\n",
+      "INFO:dowhy.causal_model:Model to find the causal effect of treatment ['treat'] on outcome ['re78']\n",
+      "WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.\n",
+      "INFO:dowhy.causal_identifier:Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True.\n",
+      "INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[]\n",
+      "INFO:dowhy.causal_identifier:Frontdoor variables for treatment and outcome:[]\n",
+      "INFO:dowhy.do_sampler:Using WeightingSampler for do sampling.\n",
+      "INFO:dowhy.do_sampler:Caution: do samplers assume iid data.\n"
+     ]
+    }
+   ],
+   "source": [
+    "do_df = lalonde.causal.do(x='treat',\n",
+    "                          outcome='re78',\n",
+    "                          common_causes=['nodegr', 'black', 'hisp', 'age', 'educ', 'married'],\n",
+    "                          variable_types={'age': 'c', 'educ':'c', 'black': 'd', 'hisp': 'd', \n",
+    "                                          'married': 'd', 'nodegr': 'd','re78': 'c', 'treat': 'b'},\n",
+    "                         proceed_when_unidentifiable=True)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Notice you get the usual output and prompts about identifiability. This is all `dowhy` under the hood!\n",
+    "\n",
+    "We now have an interventional sample in `do_df`. It looks very similar to the original dataframe. Compare them:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>age</th>\n",
+       "      <th>educ</th>\n",
+       "      <th>black</th>\n",
+       "      <th>hisp</th>\n",
+       "      <th>married</th>\n",
+       "      <th>nodegr</th>\n",
+       "      <th>re74</th>\n",
+       "      <th>re75</th>\n",
+       "      <th>re78</th>\n",
+       "      <th>u74</th>\n",
+       "      <th>u75</th>\n",
+       "      <th>treat</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>37</td>\n",
+       "      <td>11</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>9930.05</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>22</td>\n",
+       "      <td>9</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>3595.89</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>30</td>\n",
+       "      <td>12</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>24909.50</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>27</td>\n",
+       "      <td>11</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>7506.15</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>33</td>\n",
+       "      <td>8</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>289.79</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   age  educ  black  hisp  married  nodegr  re74  re75      re78  u74  u75  \\\n",
+       "0   37    11      1     0        1       1   0.0   0.0   9930.05    1    1   \n",
+       "1   22     9      0     1        0       1   0.0   0.0   3595.89    1    1   \n",
+       "2   30    12      1     0        0       0   0.0   0.0  24909.50    1    1   \n",
+       "3   27    11      1     0        0       1   0.0   0.0   7506.15    1    1   \n",
+       "4   33     8      1     0        0       1   0.0   0.0    289.79    1    1   \n",
+       "\n",
+       "   treat  \n",
+       "0      1  \n",
+       "1      1  \n",
+       "2      1  \n",
+       "3      1  \n",
+       "4      1  "
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "lalonde.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>age</th>\n",
+       "      <th>educ</th>\n",
+       "      <th>black</th>\n",
+       "      <th>hisp</th>\n",
+       "      <th>married</th>\n",
+       "      <th>nodegr</th>\n",
+       "      <th>re74</th>\n",
+       "      <th>re75</th>\n",
+       "      <th>re78</th>\n",
+       "      <th>u74</th>\n",
+       "      <th>u75</th>\n",
+       "      <th>treat</th>\n",
+       "      <th>propensity_score</th>\n",
+       "      <th>weight</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>36</td>\n",
+       "      <td>10</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.000</td>\n",
+       "      <td>14690.40</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0.608415</td>\n",
+       "      <td>1.643616</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>19</td>\n",
+       "      <td>9</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>798.908</td>\n",
+       "      <td>17685.20</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.376588</td>\n",
+       "      <td>2.655423</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>18</td>\n",
+       "      <td>8</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.000</td>\n",
+       "      <td>2787.96</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.323637</td>\n",
+       "      <td>3.089879</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>27</td>\n",
+       "      <td>10</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.000</td>\n",
+       "      <td>18739.90</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.427786</td>\n",
+       "      <td>2.337620</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>26</td>\n",
+       "      <td>11</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.000</td>\n",
+       "      <td>17231.00</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.363940</td>\n",
+       "      <td>2.747705</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   age  educ  black  hisp  married  nodegr  re74     re75      re78  u74  u75  \\\n",
+       "0   36    10      1     0        0       1   0.0    0.000  14690.40    1    1   \n",
+       "1   19     9      1     0        0       1   0.0  798.908  17685.20    1    0   \n",
+       "2   18     8      0     1        1       1   0.0    0.000   2787.96    1    1   \n",
+       "3   27    10      1     0        1       1   0.0    0.000  18739.90    1    1   \n",
+       "4   26    11      1     0        0       1   0.0    0.000  17231.00    1    1   \n",
+       "\n",
+       "   treat  propensity_score    weight  \n",
+       "0      0          0.608415  1.643616  \n",
+       "1      1          0.376588  2.655423  \n",
+       "2      1          0.323637  3.089879  \n",
+       "3      1          0.427786  2.337620  \n",
+       "4      1          0.363940  2.747705  "
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "do_df.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Treatment Effect Estimation\n",
+    "\n",
+    "We could get a naive estimate before for a treatment effect by doing"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/latex": [
+       "$\\displaystyle 1794.3430848752569$"
+      ],
+      "text/plain": [
+       "1794.3430848752569"
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "(lalonde[lalonde['treat'] == 1].mean() - lalonde[lalonde['treat'] == 0].mean())['re78']"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We can do the same with our new sample from the interventional distribution to get a causal effect estimate"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/latex": [
+       "$\\displaystyle 1402.1412181313126$"
+      ],
+      "text/plain": [
+       "1402.1412181313126"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "(do_df[do_df['treat'] == 1].mean() - do_df[do_df['treat'] == 0].mean())['re78']"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We could get some rough error bars on the outcome using the normal approximation for a 95% confidence interval, like\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/latex": [
+       "$\\displaystyle 1097.6842382573182$"
+      ],
+      "text/plain": [
+       "1097.6842382573182"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import numpy as np\n",
+    "1.96*np.sqrt((do_df[do_df['treat'] == 1].var()/len(do_df[do_df['treat'] == 1])) + \n",
+    "             (do_df[do_df['treat'] == 0].var()/len(do_df[do_df['treat'] == 0])))['re78']"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "but note that these DO NOT contain propensity score estimation error. For that, a bootstrapping procedure might be more appropriate."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "This is just one statistic we can compute from the interventional distribution of `'re78'`. We can get all of the interventional moments as well, including functions of `'re78'`. We can leverage the full power of pandas, like"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "count      445.000000\n",
+       "mean      4813.743891\n",
+       "std       5961.933400\n",
+       "min          0.000000\n",
+       "25%          0.000000\n",
+       "50%       3418.100000\n",
+       "75%       8087.490000\n",
+       "max      60307.900000\n",
+       "Name: re78, dtype: float64"
+      ]
+     },
+     "execution_count": 11,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "do_df['re78'].describe()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "count      445.000000\n",
+       "mean      5300.765138\n",
+       "std       6631.493362\n",
+       "min          0.000000\n",
+       "25%          0.000000\n",
+       "50%       3701.810000\n",
+       "75%       8124.720000\n",
+       "max      60307.900000\n",
+       "Name: re78, dtype: float64"
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "lalonde['re78'].describe()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "and even plot aggregations, like"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%matplotlib inline"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<AxesSubplot:xlabel='treat', ylabel='re78'>"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "import seaborn as sns\n",
+    "\n",
+    "sns.barplot(data=lalonde, x='treat', y='re78')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<AxesSubplot:xlabel='treat', ylabel='re78'>"
+      ]
+     },
+     "execution_count": 15,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "sns.barplot(data=do_df, x='treat', y='re78')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Specifying Interventions\n",
+    "\n",
+    "You can find the distribution of the outcome under an intervention to set the value of the treatment. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "WARNING:dowhy.causal_model:Causal Graph not provided. DoWhy will construct a graph based on data inputs.\n",
+      "INFO:dowhy.causal_graph:If this is observed data (not from a randomized experiment), there might always be missing confounders. Adding a node named \"Unobserved Confounders\" to reflect this.\n",
+      "INFO:dowhy.causal_model:Model to find the causal effect of treatment ['treat'] on outcome ['re78']\n",
+      "WARNING:dowhy.causal_identifier:If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.\n",
+      "INFO:dowhy.causal_identifier:Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True.\n",
+      "INFO:dowhy.causal_identifier:Instrumental variables for treatment and outcome:[]\n",
+      "INFO:dowhy.causal_identifier:Frontdoor variables for treatment and outcome:[]\n",
+      "INFO:dowhy.do_sampler:Using WeightingSampler for do sampling.\n",
+      "INFO:dowhy.do_sampler:Caution: do samplers assume iid data.\n"
+     ]
+    }
+   ],
+   "source": [
+    "do_df = lalonde.causal.do(x={'treat': 1},\n",
+    "                          outcome='re78',\n",
+    "                          common_causes=['nodegr', 'black', 'hisp', 'age', 'educ', 'married'],\n",
+    "                          variable_types={'age': 'c', 'educ':'c', 'black': 'd', 'hisp': 'd', \n",
+    "                                          'married': 'd', 'nodegr': 'd','re78': 'c', 'treat': 'b'},\n",
+    "                         proceed_when_unidentifiable=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>age</th>\n",
+       "      <th>educ</th>\n",
+       "      <th>black</th>\n",
+       "      <th>hisp</th>\n",
+       "      <th>married</th>\n",
+       "      <th>nodegr</th>\n",
+       "      <th>re74</th>\n",
+       "      <th>re75</th>\n",
+       "      <th>re78</th>\n",
+       "      <th>u74</th>\n",
+       "      <th>u75</th>\n",
+       "      <th>treat</th>\n",
+       "      <th>propensity_score</th>\n",
+       "      <th>weight</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>31</td>\n",
+       "      <td>9</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.00</td>\n",
+       "      <td>0.00</td>\n",
+       "      <td>26817.60</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.286869</td>\n",
+       "      <td>3.485909</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>18</td>\n",
+       "      <td>10</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>2143.41</td>\n",
+       "      <td>1784.27</td>\n",
+       "      <td>11141.40</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.363234</td>\n",
+       "      <td>2.753047</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>17</td>\n",
+       "      <td>9</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1716.51</td>\n",
+       "      <td>1253.44</td>\n",
+       "      <td>5445.20</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.373445</td>\n",
+       "      <td>2.677774</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>19</td>\n",
+       "      <td>10</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.00</td>\n",
+       "      <td>0.00</td>\n",
+       "      <td>3228.50</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.364786</td>\n",
+       "      <td>2.741331</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>24</td>\n",
+       "      <td>12</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>13765.80</td>\n",
+       "      <td>2842.76</td>\n",
+       "      <td>6167.68</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0.537084</td>\n",
+       "      <td>1.861906</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   age  educ  black  hisp  married  nodegr      re74     re75      re78  u74  \\\n",
+       "0   31     9      0     1        0       1      0.00     0.00  26817.60    1   \n",
+       "1   18    10      1     0        0       1   2143.41  1784.27  11141.40    0   \n",
+       "2   17     9      1     0        0       1   1716.51  1253.44   5445.20    0   \n",
+       "3   19    10      1     0        0       1      0.00     0.00   3228.50    1   \n",
+       "4   24    12      1     0        0       0  13765.80  2842.76   6167.68    0   \n",
+       "\n",
+       "   u75  treat  propensity_score    weight  \n",
+       "0    1      1          0.286869  3.485909  \n",
+       "1    0      1          0.363234  2.753047  \n",
+       "2    0      1          0.373445  2.677774  \n",
+       "3    1      1          0.364786  2.741331  \n",
+       "4    0      1          0.537084  1.861906  "
+      ]
+     },
+     "execution_count": 17,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "do_df.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "This new dataframe gives the distribution of `'re78'` when `'treat'` is set to `1`."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "For much more detail on how the `do` method works, check the docstring:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Help on method do in module dowhy.api.causal_data_frame:\n",
+      "\n",
+      "do(x, method='weighting', num_cores=1, variable_types={}, outcome=None, params=None, dot_graph=None, common_causes=None, estimand_type='nonparametric-ate', proceed_when_unidentifiable=False, stateful=False) method of dowhy.api.causal_data_frame.CausalAccessor instance\n",
+      "    The do-operation implemented with sampling. This will return a pandas.DataFrame with the outcome\n",
+      "    variable(s) replaced with samples from P(Y|do(X=x)).\n",
+      "    \n",
+      "    If the value of `x` is left unspecified (e.g. as a string or list), then the original values of `x` are left in\n",
+      "    the DataFrame, and Y is sampled from its respective P(Y|do(x)). If the value of `x` is specified (passed with a\n",
+      "    `dict`, where variable names are keys, and values are specified) then the new `DataFrame` will contain the\n",
+      "    specified values of `x`.\n",
+      "    \n",
+      "    For some methods, the `variable_types` field must be specified. It should be a `dict`, where the keys are\n",
+      "    variable names, and values are 'o' for ordered discrete, 'u' for un-ordered discrete, 'd' for discrete, or 'c'\n",
+      "    for continuous.\n",
+      "    \n",
+      "    Inference requires a set of control variables. These can be provided explicitly using `common_causes`, which\n",
+      "    contains a list of variable names to control for. These can be provided implicitly by specifying a causal graph\n",
+      "    with `dot_graph`, from which they will be chosen using the default identification method.\n",
+      "    \n",
+      "    When the set of control variables can't be identified with the provided assumptions, a prompt will raise to the\n",
+      "    user asking whether to proceed. To automatically over-ride the prompt, you can set the flag\n",
+      "    `proceed_when_unidentifiable` to `True`.\n",
+      "    \n",
+      "    Some methods build components during inference which are expensive. To retain those components for later\n",
+      "    inference (e.g. successive calls to `do` with different values of `x`), you can set the `stateful` flag to `True`.\n",
+      "    Be cautious about using the `do` operation statefully. State is set on the namespace, rather than the method, so\n",
+      "    can behave unpredictably. To reset the namespace and run statelessly again, you can call the `reset` method.\n",
+      "    \n",
+      "    :param x: str, list, dict: The causal state on which to intervene, and (optional) its interventional value(s).\n",
+      "    :param method: The inference method to use with the sampler. Currently, `'mcmc'`, `'weighting'`, and\n",
+      "    `'kernel_density'` are supported. The `mcmc` sampler requires `pymc3>=3.7`.\n",
+      "    :param num_cores: int: if the inference method only supports sampling a point at a time, this will parallelize\n",
+      "    sampling.\n",
+      "    :param variable_types: dict: The dictionary containing the variable types. Must contain the union of the causal\n",
+      "    state, control variables, and the outcome.\n",
+      "    :param outcome: str: The outcome variable.\n",
+      "    :param params: dict: extra parameters to set as attributes on the sampler object\n",
+      "    :param dot_graph: str: A string specifying the causal graph.\n",
+      "    :param common_causes: list: A list of strings containing the variable names to control for.\n",
+      "    :param estimand_type: str: 'nonparametric-ate' is the only one currently supported. Others may be added later, to allow for specific, parametric estimands.\n",
+      "    :param proceed_when_unidentifiable: bool: A flag to over-ride user prompts to proceed when effects aren't\n",
+      "    identifiable with the assumptions provided.\n",
+      "    :param stateful: bool: Whether to retain state. By default, the do operation is stateless.\n",
+      "    :return: pandas.DataFrame: A DataFrame containing the sampled outcome\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "help(lalonde.causal.do)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.5"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

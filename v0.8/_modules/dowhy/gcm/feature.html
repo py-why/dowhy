@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dowhy.gcm.feature &mdash; DoWhy | An end-to-end library for causal inference  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
+          </a>
+              <div class="version">
+                v0.8
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/intro.html">Introduction to DoWhy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_simple_example.html">Quick-start notebook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/comparison.html">Comparison to other packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/cite.html">Citing this package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/causality_intro.html">Introduction to causality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/effect_inference/index.html">Effect inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/gcm_based_inference/index.html">GCM-based inference (Experimental)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/nb_index.html">Example notebooks</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials/Case studies</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/tutorial-causalinference-machinelearning-using-dowhy-econml.html">CATE estimation with DoWhy+EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_example_effect_of_memberrewards_program.html">Effect of membership rewards program</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">Understanding hotel booking cancellations</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing/index.html">Contributing to DoWhy</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../code_repo.html">Code repository &amp; Versions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dowhy.html">dowhy package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">DoWhy | An end-to-end library for causal inference</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>dowhy.gcm.feature</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for dowhy.gcm.feature</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This module allows to estimate the feature relevance of inputs with respect to a given model. While these models can</span>
+<span class="sd">be blackbox prediction models, it is also possible to explain causal mechanisms with respect to the direct parents.</span>
+<span class="sd">In these cases, it would be possible to incorporate the noise to represent the part of the generation process that</span>
+<span class="sd">cannot be explained by the parents.</span>
+
+<span class="sd">Functions in this module should be considered experimental, meaning there might be breaking API changes in the future.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">dowhy.gcm.cms</span> <span class="kn">import</span> <span class="n">StructuralCausalModel</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.fcms</span> <span class="kn">import</span> <span class="n">ProbabilityEstimatorModel</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.fitting_sampling</span> <span class="kn">import</span> <span class="n">draw_samples</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.graph</span> <span class="kn">import</span> <span class="n">get_ordered_predecessors</span><span class="p">,</span> <span class="n">is_root_node</span><span class="p">,</span> <span class="n">validate_node</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.shapley</span> <span class="kn">import</span> <span class="n">estimate_shapley_values</span><span class="p">,</span> <span class="n">ShapleyConfig</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.stats</span> <span class="kn">import</span> <span class="n">marginal_expectation</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.util.general</span> <span class="kn">import</span> <span class="n">shape_into_2d</span><span class="p">,</span> <span class="n">variance_of_matching_values</span><span class="p">,</span> <span class="n">variance_of_deviations</span>
+
+
+<div class="viewcode-block" id="parent_relevance"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.feature.parent_relevance">[docs]</a><span class="k">def</span> <span class="nf">parent_relevance</span><span class="p">(</span><span class="n">causal_model</span><span class="p">:</span> <span class="n">StructuralCausalModel</span><span class="p">,</span>
+                     <span class="n">target_node</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+                     <span class="n">parent_samples</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">subset_scoring_func</span><span class="p">:</span>
+                     <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">num_samples_randomization</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
+                     <span class="n">num_samples_baseline</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
+                     <span class="n">max_batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+                     <span class="n">shapley_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ShapleyConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Estimates the distribution based relevance of the direct parents of the given target_node. This is, the </span>
+<span class="sd">    relevance of direct parents as input features of the the underlying causal model of target_node. Here, the </span>
+<span class="sd">    unobserved noise is considered as a direct parent (input) as well. Samples utilized for the estimation are drawn </span>
+<span class="sd">    from the given causal graph.</span>
+<span class="sd">    </span>
+<span class="sd">    By default, the used subset_scoring_func is based on the variance between Y and Y&#39;, where Y is the outputs of</span>
+<span class="sd">    the causal model and Y&#39; the outputs of the models when certain features are randomized. In case of continuous data,</span>
+<span class="sd">    the feature relevance adds up to Var(Y - Y&#39;).</span>
+<span class="sd">    </span>
+<span class="sd">    Note: The feature relevance based on the distribution cannot be directly compared with the feature relevance for </span>
+<span class="sd">    single samples. If this is desired, the set function needs to be defined accordingly.</span>
+<span class="sd">    </span>
+<span class="sd">    Related paper:</span>
+<span class="sd">    Janzing, D., Minorics, L., &amp; Bloebaum, P. (2020). </span>
+<span class="sd">    Feature relevance quantification in explainable AI: A causal problem. </span>
+<span class="sd">    In International Conference on Artificial Intelligence and Statistics (pp. 2907-2916). PMLR.</span>
+<span class="sd">    </span>
+<span class="sd">    :param causal_model: The fitted structural causal model.</span>
+<span class="sd">    :param target_node: Node with the causal model of interest.</span>
+<span class="sd">    :param parent_samples: Samples for the parents of the given target_node. If None is given, new samples are</span>
+<span class="sd">                           generated based on the graph. These samples are used for randomizing features that are not in the subset.</span>
+<span class="sd">    :param subset_scoring_func: Set function for estimating the quantity of interest based on the model outcomes. This function</span>
+<span class="sd">                                expects two inputs; the outcome of the causal model for some samples if certain features are permuted and the </span>
+<span class="sd">                                outcome of the model for the same samples when no features were permuted. The set functions represents the </span>
+<span class="sd">                                comparison between the samples, for instance, the variance of deviations. This is then used as the &#39;characteristic function&#39;</span>
+<span class="sd">                                in coalition games when estimating the Shapley values.</span>
+<span class="sd">    :param num_samples_randomization: Number of samples used as background parent samples for evaluating the set function.</span>
+<span class="sd">                                      If no parent_samples are given, this represents the number of generated samples from</span>
+<span class="sd">                                      the joint distribution of the parents and are used for randomizing features that are </span>
+<span class="sd">                                      not in the subset. Consider increasing this number for more accurate results or reducing it for less memory consumption and faster runtime.</span>
+<span class="sd">    :param num_samples_baseline: Number of samples on which the set functions are evaluated on. These samples are used as fixed observations for</span>
+<span class="sd">                                 parents that are in the subset. Consider increasing this number for more accurate results or reducing it for less memory consumption and faster runtime.</span>
+<span class="sd">    :param max_batch_size: Maximum batch size for estimating multiple predictions at once. This has a significant influence on the</span>
+<span class="sd">                          overall memory usage. If set to -1, all samples are used in one batch.</span>
+<span class="sd">    :param shapley_config: :class:`~dowhy.gcm.shapley.ShapleyConfig` for the Shapley estimator.</span>
+<span class="sd">    :return: There are two return vales. A dictionary with the feature relevance for each direct parent of the given </span>
+<span class="sd">             target_node and the feature relevance of noise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">validate_node</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">target_node</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">is_root_node</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">target_node</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot compute feature relevance of parents for the target node </span><span class="si">%s</span><span class="s2"> as it is a root node.&quot;</span>
+                         <span class="s2">&quot;It does not have parents.&quot;</span> <span class="o">%</span> <span class="n">target_node</span><span class="p">)</span>
+
+    <span class="n">ordered_predecessors</span> <span class="o">=</span> <span class="n">get_ordered_predecessors</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">target_node</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">parent_samples</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">parent_samples</span> \
+            <span class="o">=</span> <span class="n">draw_samples</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">num_samples_randomization</span><span class="p">,</span> <span class="n">num_samples_baseline</span><span class="p">))[</span><span class="n">ordered_predecessors</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">subset_scoring_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">causal_mechanism</span><span class="p">(</span><span class="n">target_node</span><span class="p">),</span> <span class="n">ProbabilityEstimatorModel</span><span class="p">):</span>
+            <span class="n">subset_scoring_func</span> <span class="o">=</span> <span class="n">variance_of_matching_values</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">subset_scoring_func</span> <span class="o">=</span> <span class="n">variance_of_deviations</span>
+
+    <span class="n">parent_samples</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">parent_samples</span><span class="p">[</span><span class="n">ordered_predecessors</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
+    <span class="n">noise_samples</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span>
+        <span class="n">causal_model</span><span class="o">.</span><span class="n">causal_mechanism</span><span class="p">(</span><span class="n">target_node</span><span class="p">)</span><span class="o">.</span><span class="n">draw_noise_samples</span><span class="p">(</span><span class="n">parent_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">samples_features</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">parent_samples</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">),</span> <span class="n">noise_samples</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)])</span>
+
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">causal_model</span><span class="o">.</span><span class="n">causal_mechanism</span><span class="p">(</span><span class="n">target_node</span><span class="p">)</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="n">noise_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+                                                                   <span class="n">X</span><span class="p">[:,</span> <span class="o">-</span><span class="n">noise_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:])</span>
+
+    <span class="n">shapley_vales</span> <span class="o">=</span> <span class="n">feature_relevance_distribution</span><span class="p">(</span><span class="n">model</span><span class="p">,</span>
+                                                   <span class="n">feature_samples</span><span class="o">=</span><span class="n">samples_features</span><span class="p">,</span>
+                                                   <span class="n">subset_scoring_func</span><span class="o">=</span><span class="n">subset_scoring_func</span><span class="p">,</span>
+                                                   <span class="n">max_num_samples_randomization</span><span class="o">=</span><span class="n">num_samples_randomization</span><span class="p">,</span>
+                                                   <span class="n">max_num_baseline_samples</span><span class="o">=</span><span class="n">num_samples_baseline</span><span class="p">,</span>
+                                                   <span class="n">max_batch_size</span><span class="o">=</span><span class="n">max_batch_size</span><span class="p">,</span>
+                                                   <span class="n">shapley_config</span><span class="o">=</span><span class="n">shapley_config</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{(</span><span class="n">predecessor</span><span class="p">,</span> <span class="n">target_node</span><span class="p">):</span> <span class="n">shapley_vales</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">predecessor</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ordered_predecessors</span><span class="p">)}</span>
+
+    <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">shapley_vales</span><span class="p">[</span><span class="o">-</span><span class="n">noise_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:]</span></div>
+
+
+<div class="viewcode-block" id="feature_relevance_distribution"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.feature.feature_relevance_distribution">[docs]</a><span class="k">def</span> <span class="nf">feature_relevance_distribution</span><span class="p">(</span><span class="n">prediction_method</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                                   <span class="n">feature_samples</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                   <span class="n">subset_scoring_func</span><span class="p">:</span>
+                                   <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+                                   <span class="n">max_num_samples_randomization</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
+                                   <span class="n">max_num_baseline_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
+                                   <span class="n">max_batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+                                   <span class="n">randomize_features_jointly</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                                   <span class="n">shapley_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ShapleyConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Estimates the population based feature relevance of the input features for the given prediction_method. This</span>
+<span class="sd">    method uses all samples given in feature_samples by comparing the output of the prediction_method given certain</span>
+<span class="sd">    features are randomized with the outputs when no features are randomized. The subset_scoring_func defines</span>
+<span class="sd">    how these predictions are compared. For instance, the variance of deviations.</span>
+<span class="sd">    </span>
+<span class="sd">    If the randomized predictions should rather be compared to the original data, this has (and can) be defined via</span>
+<span class="sd">    the set function by ignoring the second input parameter (the predicted values using all feauters). Instead, the</span>
+<span class="sd">    original data can be used.</span>
+<span class="sd">    </span>
+<span class="sd">    Note: The distribution level relevance is estimated by taking the expectation of the outcome of the set functions</span>
+<span class="sd">    when applied to multiple samples. Due to the linearity of the Shapley value estimation, this is equivalent to taking</span>
+<span class="sd">    the expectation over the Shapley values.</span>
+
+<span class="sd">    Related paper:</span>
+<span class="sd">    Janzing, D., Minorics, L., &amp; Bloebaum, P. (2020).</span>
+<span class="sd">    Feature relevance quantification in explainable AI: A causal problem.</span>
+<span class="sd">    In International Conference on Artificial Intelligence and Statistics (pp. 2907-2916). PMLR.</span>
+
+<span class="sd">    :param prediction_method: A callable that is expected to return a prediction for given samples.</span>
+<span class="sd">    :param feature_samples: Samples from the joint distribution.</span>
+<span class="sd">    :param subset_scoring_func: Set function for estimating the quantity of interest based on the model outcomes. This function</span>
+<span class="sd">                                expects two inputs; the outcome of the prediction model for some samples if certain features are permuted and the</span>
+<span class="sd">                                outcome of the model for the same samples when no features were permuted. The set functions represents the</span>
+<span class="sd">                                comparison between the samples, for instance, the variance of deviations. This is then used as the &#39;characteristic function&#39;</span>
+<span class="sd">                                in coalition games when estimating the Shapley values.</span>
+<span class="sd">    :param max_num_samples_randomization: Maximum number of samples used for randomizing the feature that are not in the susbet. Consider increasing this </span>
+<span class="sd">                                          number for more accurate results (if enough samples are available) or reducing it for less memory consumption and </span>
+<span class="sd">                                          faster runtime.</span>
+<span class="sd">    :param max_num_baseline_samples: Maximum number of samples on which the set function is evaluated on. These samples are used as fixed observations for</span>
+<span class="sd">                                     features that are in the subset. For instance, in case of taking the mean as set_function_summary_func, this defines the maximum number </span>
+<span class="sd">                                     of samples used to estimate the mean. Consider increasing this number for more accurate results (if enough samples are </span>
+<span class="sd">                                     available) or reducing it for less memory consumption and faster runtime.</span>
+<span class="sd">    :param max_batch_size: Maximum batch size for a estimating the predictions. This has a significant influence on the</span>
+<span class="sd">                           overall memory usage. If set to -1, all samples are used in one batch.</span>
+<span class="sd">    :param randomize_features_jointly: If set to True, features that are not in a subset are jointly permuted. </span>
+<span class="sd">                                       Note that this still represents an interventional distribution. If set to False, features that are not in a subset </span>
+<span class="sd">                                       are independently permuted. Note: The theory in the linked publication assumes that this is set to True.</span>
+<span class="sd">    :param shapley_config: Config for the Shapley estimator.</span>
+<span class="sd">    :return: A numpy array with the feature relevance of each input feature.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">feature_samples</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">feature_samples</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">shapley_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">shapley_config</span> <span class="o">=</span> <span class="n">ShapleyConfig</span><span class="p">()</span>
+
+    <span class="n">baseline_samples</span> <span class="o">=</span> <span class="n">feature_samples</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">feature_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                           <span class="nb">min</span><span class="p">(</span><span class="n">max_num_baseline_samples</span><span class="p">,</span> <span class="n">feature_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                                                           <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)]</span>
+    <span class="n">feature_samples</span> <span class="o">=</span> <span class="n">feature_samples</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">feature_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                       <span class="nb">min</span><span class="p">(</span><span class="n">max_num_samples_randomization</span><span class="p">,</span> <span class="n">feature_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                                                       <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)]</span>
+
+    <span class="k">return</span> <span class="n">feature_relevance_sample</span><span class="p">(</span><span class="n">prediction_method</span><span class="p">,</span>
+                                    <span class="n">feature_samples</span><span class="p">,</span>
+                                    <span class="n">baseline_samples</span><span class="p">,</span>
+                                    <span class="n">subset_scoring_func</span><span class="p">,</span>
+                                    <span class="kc">None</span><span class="p">,</span>
+                                    <span class="kc">True</span><span class="p">,</span>
+                                    <span class="n">max_batch_size</span><span class="p">,</span>
+                                    <span class="n">randomize_features_jointly</span><span class="p">,</span>
+                                    <span class="n">shapley_config</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="feature_relevance_sample"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.feature.feature_relevance_sample">[docs]</a><span class="k">def</span> <span class="nf">feature_relevance_sample</span><span class="p">(</span><span class="n">prediction_method</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                             <span class="n">feature_samples</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                             <span class="n">baseline_samples</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                             <span class="n">subset_scoring_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                                                           <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+                             <span class="n">baseline_target_values</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                             <span class="n">average_set_function</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                             <span class="n">max_batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+                             <span class="n">randomize_features_jointly</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                             <span class="n">shapley_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ShapleyConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Estimates the feature relevance of the prediction_method for each sample in baseline_noise_samples. This</span>
+<span class="sd">    method uses all samples given in feature_samples as &#39;background&#39; samples. This is, they should represent samples</span>
+<span class="sd">    from the joint distribution of the input features. The subset_scoring_func defines the comparison between the</span>
+<span class="sd">    output of the prediction_method when certain features are randomized and the outputs when no features are</span>
+<span class="sd">    randomized. The most common function would be the difference between the expectations.</span>
+
+<span class="sd">    If the randomized predictions should rather be compared to the original data, this has (and can) be defined via</span>
+<span class="sd">    the set function by ignoring the second input parameter (the predicted values using all feauters). Instead, the</span>
+<span class="sd">    original data can be used.</span>
+
+<span class="sd">    Related paper:</span>
+<span class="sd">    Janzing, D., Minorics, L., &amp; Bloebaum, P. (2020).</span>
+<span class="sd">    Feature relevance quantification in explainable AI: A causal problem.</span>
+<span class="sd">    In International Conference on Artificial Intelligence and Statistics (pp. 2907-2916). PMLR.</span>
+
+<span class="sd">    :param prediction_method: A callable that is expected to return a prediction for given samples.</span>
+<span class="sd">    :param feature_samples: Samples from the joint distribution. These are used as &#39;background samples&#39; to randomize features that are not in a subset.</span>
+<span class="sd">    :param baseline_samples: Samples for which the feature relevance should be estimated.</span>
+<span class="sd">    :param subset_scoring_func: Set function for estimating the quantity of interest based on the model outcomes. This function</span>
+<span class="sd">                                expects two inputs; the outcome of the prediction model for some samples if certain features are permuted and the</span>
+<span class="sd">                                outcome of the model for the same samples when no features were permuted. A typical choice for regression models</span>
+<span class="sd">                                would be the difference between expectations. This is then used as the &#39;characteristic function&#39;</span>
+<span class="sd">                                in coalition games when estimating the Shapley values.</span>
+<span class="sd">    :param baseline_target_values: These baseline values are compared with the subset specific outcomes of the prediction method. If set to None (default),</span>
+<span class="sd">                                   the baseline values are the outcomes of the given prediction_method applied to the baseline_noise_samples, i.e. the outcome of the empty subset.</span>
+<span class="sd">    :param max_batch_size: Maximum batch size for a estimating the predictions. This has a significant influence on the</span>
+<span class="sd">                           overall memory usage. If set to -1, all samples are used in one batch.</span>
+<span class="sd">    :param average_set_function: If set to True, the averaged result of the set function applied to each sample of</span>
+<span class="sd">                                 interest is used for estimating the Shapley values. If set to False, Shapley values for each sample of interest</span>
+<span class="sd">                                 are estimated separately.</span>
+<span class="sd">    :param randomize_features_jointly: If set to True, features that are not in a subset are jointly permuted.</span>
+<span class="sd">                                       Note that this still represents an interventional distribution. If set to False, features that are not in a subset</span>
+<span class="sd">                                       are independently permuted. Note: The theory in the linked publication assumes that this is set to True.</span>
+<span class="sd">    :param shapley_config: Config for the Shapley estimator.</span>
+<span class="sd">    :return: A numpy array with the feature relevance for each sample in baseline_noise_samples.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">feature_samples</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">feature_samples</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">baseline_target_values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">baseline_target_values</span> <span class="o">=</span> <span class="n">prediction_method</span><span class="p">(</span><span class="n">baseline_samples</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">baseline_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">baseline_target_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Samples of interest and the given baseline values need to have the same sample size! &quot;</span>
+                             <span class="s2">&quot;Make sure that the given baseline values correspond to the samples of interest.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">shapley_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">shapley_config</span> <span class="o">=</span> <span class="n">ShapleyConfig</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">single_sample_set_function</span><span class="p">(</span><span class="n">subset</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">baseline_target_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="n">marginal_expectation</span><span class="p">(</span><span class="n">prediction_method</span><span class="p">,</span>
+                                           <span class="n">feature_samples</span><span class="o">=</span><span class="n">feature_samples</span><span class="p">,</span>
+                                           <span class="n">baseline_samples</span><span class="o">=</span><span class="n">baseline_samples</span><span class="p">,</span>
+                                           <span class="n">baseline_feature_indices</span><span class="o">=</span>
+                                           <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">feature_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="n">subset</span> <span class="o">==</span> <span class="mi">1</span><span class="p">],</span>
+                                           <span class="n">return_averaged_results</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                           <span class="n">feature_perturbation</span><span class="o">=</span><span class="s1">&#39;randomize_columns_jointly&#39;</span>
+                                           <span class="k">if</span> <span class="n">randomize_features_jointly</span> <span class="k">else</span> <span class="s1">&#39;randomize_columns_independently&#39;</span><span class="p">,</span>
+                                           <span class="n">max_batch_size</span><span class="o">=</span><span class="n">max_batch_size</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">baseline_target_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">subset_scoring_func</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">baseline_target_values</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">average_set_function</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">results</span>
+
+    <span class="k">return</span> <span class="n">estimate_shapley_values</span><span class="p">(</span><span class="n">single_sample_set_function</span><span class="p">,</span> <span class="n">feature_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">shapley_config</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: v0.8
+    <span class="fa fa-caret-down"></span>
+  </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="../../../../v0.1-alpha/index.html">v0.1-alpha</a></dd>
+            <dd><a href="../../../../v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+            <dd><a href="../../../../v0.2/index.html">v0.2</a></dd>
+            <dd><a href="../../../../v0.4/index.html">v0.4</a></dd>
+            <dd><a href="../../../../v0.5/index.html">v0.5</a></dd>
+            <dd><a href="../../../../v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="../../../../v0.6/index.html">v0.6</a></dd>
+            <dd><a href="../../../../v0.7/index.html">v0.7</a></dd>
+            <dd><a href="../../../../v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="feature.html">v0.8</a></dd>
+        </dl>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

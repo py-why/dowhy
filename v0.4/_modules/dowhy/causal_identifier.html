@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dowhy.causal_identifier &mdash; DoWhy | An end-to-end library for causal inference  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
+          </a>
+              <div class="version">
+                v0.4
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">DoWhy | Making causal inference easy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_notebooks/lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code_repo.html">Code repository &amp; Versions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dowhy.html">dowhy package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">DoWhy | An end-to-end library for causal inference</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>dowhy.causal_identifier</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for dowhy.causal_identifier</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">sympy</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">import</span> <span class="nn">sympy.stats</span> <span class="k">as</span> <span class="nn">spstats</span>
+
+<span class="kn">import</span> <span class="nn">dowhy.utils.cli_helpers</span> <span class="k">as</span> <span class="nn">cli</span>
+
+<span class="kn">from</span> <span class="nn">dowhy.utils.api</span> <span class="kn">import</span> <span class="n">parse_state</span>
+
+
+<div class="viewcode-block" id="CausalIdentifier"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_identifier.CausalIdentifier">[docs]</a><span class="k">class</span> <span class="nc">CausalIdentifier</span><span class="p">:</span>
+    
+    <span class="sd">&quot;&quot;&quot;Class that implements different identification methods. </span>
+
+<span class="sd">    Currently supports backdoor and instrumental variable identification methods. The identification is based on the causal graph provided. </span>
+
+<span class="sd">    Other specific ways of identification, such as the ID* algorithm, minimal adjustment criteria, etc. will be added in the future. </span>
+<span class="sd">    If you&#39;d like to contribute, please raise an issue or a pull request on Github.  </span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">estimand_type</span><span class="p">,</span> <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="n">graph</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimand_type</span> <span class="o">=</span> <span class="n">estimand_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">treatment_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">outcome_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_proceed_when_unidentifiable</span> <span class="o">=</span> <span class="n">proceed_when_unidentifiable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CausalIdentifier.identify_effect"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_identifier.CausalIdentifier.identify_effect">[docs]</a>    <span class="k">def</span> <span class="nf">identify_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;Main method that returns an identified estimand (if one exists). </span>
+
+<span class="sd">        Uses both backdoor and instrumental variable methods to check if an identified estimand exists, based on the causal graph. </span>
+
+<span class="sd">        :param self: instance of the CausalEstimator class (or its subclass)</span>
+<span class="sd">        :returns:  target estimand, an instance of the IdentifiedEstimand class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">estimands_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">causes_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_causes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span><span class="p">)</span>
+        <span class="n">causes_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_causes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">remove_edges</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;sources&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span><span class="p">,</span> <span class="s1">&#39;targets&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span><span class="p">})</span>
+        <span class="n">common_causes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">causes_t</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">causes_y</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Common causes of treatment and outcome:&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">common_causes</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">all_observed</span><span class="p">(</span><span class="n">common_causes</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;All common causes are observed. Causal effect can be identified.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;If this is observed data (not from a randomized experiment), there might always be missing confounders. Causal effect cannot be identified perfectly.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_proceed_when_unidentifiable</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s2">&quot;Continuing by ignoring these unobserved confounders because proceed_when_unidentifiable flag is True.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cli</span><span class="o">.</span><span class="n">query_yes_no</span><span class="p">(</span>
+                    <span class="s2">&quot;WARN: Do you want to continue by ignoring any unobserved confounders? (use proceed_when_unidentifiable=True to disable this prompt)&quot;</span><span class="p">,</span>
+                    <span class="n">default</span><span class="o">=</span><span class="kc">None</span>
+                <span class="p">)</span>
+        <span class="n">observed_common_causes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">filter_unobserved_variables</span><span class="p">(</span><span class="n">common_causes</span><span class="p">)</span>
+        <span class="n">observed_common_causes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">observed_common_causes</span><span class="p">)</span>
+
+        <span class="n">backdoor_estimand_expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">construct_backdoor_estimand</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">estimand_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">treatment_name</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">observed_common_causes</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Identified expression = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">backdoor_estimand_expr</span><span class="p">))</span>
+        <span class="n">estimands_dict</span><span class="p">[</span><span class="s2">&quot;backdoor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">backdoor_estimand_expr</span>
+
+        <span class="c1"># Now checking if there is also a valid iv estimand</span>
+        <span class="n">instrument_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_instruments</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span><span class="p">,</span>
+                                                       <span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Instrumental variables for treatment and outcome:&quot;</span> <span class="o">+</span>
+                         <span class="nb">str</span><span class="p">(</span><span class="n">instrument_names</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">instrument_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">iv_estimand_expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">construct_iv_estimand</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimand_type</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">treatment_name</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">outcome_name</span><span class="p">,</span>
+                <span class="n">instrument_names</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Identified expression = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">iv_estimand_expr</span><span class="p">))</span>
+            <span class="n">estimands_dict</span><span class="p">[</span><span class="s2">&quot;iv&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iv_estimand_expr</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">estimands_dict</span><span class="p">[</span><span class="s2">&quot;iv&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">estimand</span> <span class="o">=</span> <span class="n">IdentifiedEstimand</span><span class="p">(</span>
+            <span class="n">treatment_variable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">treatment_name</span><span class="p">,</span>
+            <span class="n">outcome_variable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">outcome_name</span><span class="p">,</span>
+            <span class="n">estimand_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">estimand_type</span><span class="p">,</span>
+            <span class="n">estimands</span><span class="o">=</span><span class="n">estimands_dict</span><span class="p">,</span>
+            <span class="n">backdoor_variables</span><span class="o">=</span><span class="n">observed_common_causes</span><span class="p">,</span>
+            <span class="n">instrumental_variables</span><span class="o">=</span><span class="n">instrument_names</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">estimand</span></div>
+
+<div class="viewcode-block" id="CausalIdentifier.construct_backdoor_estimand"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_identifier.CausalIdentifier.construct_backdoor_estimand">[docs]</a>    <span class="k">def</span> <span class="nf">construct_backdoor_estimand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimand_type</span><span class="p">,</span> <span class="n">treatment_name</span><span class="p">,</span>
+                                    <span class="n">outcome_name</span><span class="p">,</span> <span class="n">common_causes</span><span class="p">):</span>
+        <span class="c1"># TODO: outputs string for now, but ideally should do symbolic</span>
+        <span class="c1"># expressions Mon 19 Feb 2018 04:54:17 PM DST</span>
+        <span class="c1"># TODO Better support for multivariate treatments</span>
+
+        <span class="n">expr</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">estimand_type</span> <span class="o">==</span> <span class="s2">&quot;nonparametric-ate&quot;</span><span class="p">:</span>
+            <span class="n">outcome_name</span> <span class="o">=</span> <span class="n">outcome_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">num_expr_str</span> <span class="o">=</span> <span class="n">outcome_name</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">common_causes</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">num_expr_str</span> <span class="o">+=</span> <span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">common_causes</span><span class="p">)</span>
+            <span class="n">expr</span> <span class="o">=</span> <span class="s2">&quot;d(&quot;</span> <span class="o">+</span> <span class="n">num_expr_str</span> <span class="o">+</span> <span class="s2">&quot;)/d&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">treatment_name</span><span class="p">)</span>
+            <span class="n">sym_mu</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s2">&quot;mu&quot;</span><span class="p">)</span>
+            <span class="n">sym_sigma</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s2">&quot;sigma&quot;</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">sym_outcome</span> <span class="o">=</span> <span class="n">spstats</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">num_expr_str</span><span class="p">,</span> <span class="n">sym_mu</span><span class="p">,</span> <span class="n">sym_sigma</span><span class="p">)</span>
+            <span class="c1"># sym_common_causes = [sp.stats.Normal(common_cause, sym_mu, sym_sigma) for common_cause in common_causes]</span>
+            <span class="n">sym_treatment_symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">sp</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">treatment_name</span><span class="p">]</span>
+            <span class="n">sym_treatment</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">sym_treatment_symbols</span><span class="p">)</span>
+            <span class="n">sym_conditional_outcome</span> <span class="o">=</span> <span class="n">spstats</span><span class="o">.</span><span class="n">Expectation</span><span class="p">(</span><span class="n">sym_outcome</span><span class="p">)</span>
+            <span class="n">sym_effect</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">Derivative</span><span class="p">(</span><span class="n">sym_conditional_outcome</span><span class="p">,</span> <span class="n">sym_treatment</span><span class="p">)</span>
+
+            <span class="n">sym_assumptions</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;Unconfoundedness&#39;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="sa">u</span><span class="s2">&quot;If U</span><span class="se">\N{RIGHTWARDS ARROW}</span><span class="s2">{{</span><span class="si">{0}</span><span class="s2">}} and U</span><span class="se">\N{RIGHTWARDS ARROW}</span><span class="si">{1}</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; then P(</span><span class="si">{1}</span><span class="s2">|</span><span class="si">{0}</span><span class="s2">,</span><span class="si">{2}</span><span class="s2">,U) = P(</span><span class="si">{1}</span><span class="s2">|</span><span class="si">{0}</span><span class="s2">,</span><span class="si">{2}</span><span class="s2">)&quot;</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">treatment_name</span><span class="p">),</span> <span class="n">outcome_name</span><span class="p">,</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">common_causes</span><span class="p">))</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Estimand type not supported. Supported estimand types are &#39;non-parametric-ate&#39;.&quot;</span><span class="p">)</span>
+
+        <span class="n">estimand</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;estimand&#39;</span><span class="p">:</span> <span class="n">sym_effect</span><span class="p">,</span>
+            <span class="s1">&#39;assumptions&#39;</span><span class="p">:</span> <span class="n">sym_assumptions</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">estimand</span></div>
+
+<div class="viewcode-block" id="CausalIdentifier.construct_iv_estimand"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_identifier.CausalIdentifier.construct_iv_estimand">[docs]</a>    <span class="k">def</span> <span class="nf">construct_iv_estimand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimand_type</span><span class="p">,</span> <span class="n">treatment_name</span><span class="p">,</span>
+                              <span class="n">outcome_name</span><span class="p">,</span> <span class="n">instrument_names</span><span class="p">):</span>
+        <span class="c1"># TODO: support multivariate treatments better.</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">estimand_type</span> <span class="o">==</span> <span class="s2">&quot;nonparametric-ate&quot;</span><span class="p">:</span>
+            <span class="n">outcome_name</span> <span class="o">=</span> <span class="n">outcome_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">sym_outcome</span> <span class="o">=</span> <span class="n">spstats</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">outcome_name</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">sym_treatment_symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">spstats</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">treatment_name</span><span class="p">]</span>
+            <span class="n">sym_treatment</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">sym_treatment_symbols</span><span class="p">)</span>
+            <span class="n">sym_instrument_symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">sp</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">inst</span><span class="p">)</span> <span class="k">for</span> <span class="n">inst</span> <span class="ow">in</span> <span class="n">instrument_names</span><span class="p">]</span>
+            <span class="n">sym_instrument</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">sym_instrument_symbols</span><span class="p">)</span>  <span class="c1"># &quot;,&quot;.join(instrument_names))</span>
+            <span class="n">sym_outcome_derivative</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">Derivative</span><span class="p">(</span><span class="n">sym_outcome</span><span class="p">,</span> <span class="n">sym_instrument</span><span class="p">)</span>
+            <span class="n">sym_treatment_derivative</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">Derivative</span><span class="p">(</span><span class="n">sym_treatment</span><span class="p">,</span> <span class="n">sym_instrument</span><span class="p">)</span>
+            <span class="n">sym_effect</span> <span class="o">=</span> <span class="n">spstats</span><span class="o">.</span><span class="n">Expectation</span><span class="p">(</span><span class="n">sym_outcome_derivative</span> <span class="o">/</span> <span class="n">sym_treatment_derivative</span><span class="p">)</span>
+            <span class="n">sym_assumptions</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;As-if-random&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="s2">&quot;If U</span><span class="se">\N{RIGHTWARDS ARROW}\N{RIGHTWARDS ARROW}</span><span class="si">{0}</span><span class="s2"> then &quot;</span>
+                    <span class="s2">&quot;</span><span class="se">\N{NOT SIGN}</span><span class="s2">(U </span><span class="se">\N{RIGHTWARDS ARROW}\N{RIGHTWARDS ARROW}</span><span class="s2">{{</span><span class="si">{1}</span><span class="s2">}})&quot;</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outcome_name</span><span class="p">,</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">instrument_names</span><span class="p">)),</span>
+                <span class="s2">&quot;Exclusion&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="sa">u</span><span class="s2">&quot;If we remove {{</span><span class="si">{0}</span><span class="s2">}}</span><span class="se">\N{RIGHTWARDS ARROW}</span><span class="s2">{{</span><span class="si">{1}</span><span class="s2">}}, then &quot;</span>
+                    <span class="sa">u</span><span class="s2">&quot;</span><span class="se">\N{NOT SIGN}</span><span class="s2">({{</span><span class="si">{0}</span><span class="s2">}}</span><span class="se">\N{RIGHTWARDS ARROW}</span><span class="si">{2}</span><span class="s2">)&quot;</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">instrument_names</span><span class="p">),</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">treatment_name</span><span class="p">),</span>
+                         <span class="n">outcome_name</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Estimand type not supported. Supported estimand types are &#39;non-parametric-ate&#39;.&quot;</span><span class="p">)</span>
+
+        <span class="n">estimand</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;estimand&#39;</span><span class="p">:</span> <span class="n">sym_effect</span><span class="p">,</span>
+            <span class="s1">&#39;assumptions&#39;</span><span class="p">:</span> <span class="n">sym_assumptions</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">estimand</span></div></div>
+
+
+<div class="viewcode-block" id="IdentifiedEstimand"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_identifier.IdentifiedEstimand">[docs]</a><span class="k">class</span> <span class="nc">IdentifiedEstimand</span><span class="p">:</span>
+
+    <span class="sd">&quot;&quot;&quot;Class for storing a causal estimand, typically as a result of the identification step. </span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">treatment_variable</span><span class="p">,</span> <span class="n">outcome_variable</span><span class="p">,</span>
+                 <span class="n">estimand_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">estimands</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">backdoor_variables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">instrumental_variables</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">treatment_variable</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="n">treatment_variable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outcome_variable</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="n">outcome_variable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backdoor_variables</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="n">backdoor_variables</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instrumental_variables</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="n">instrumental_variables</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimand_type</span> <span class="o">=</span> <span class="n">estimand_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimands</span> <span class="o">=</span> <span class="n">estimands</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifier_method</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="IdentifiedEstimand.set_identifier_method"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_identifier.IdentifiedEstimand.set_identifier_method">[docs]</a>    <span class="k">def</span> <span class="nf">set_identifier_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier_name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifier_method</span> <span class="o">=</span> <span class="n">identifier_name</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Estimand type: </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimand_type</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimands</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;### Estimand : </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Estimand name: </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;No such variable found!</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sp_expr_str</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">pretty</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s2">&quot;estimand&quot;</span><span class="p">],</span> <span class="n">use_unicode</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Estimand expression:</span><span class="se">\n</span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sp_expr_str</span><span class="p">)</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">for</span> <span class="n">ass_name</span><span class="p">,</span> <span class="n">ass_str</span> <span class="ow">in</span> <span class="n">v</span><span class="p">[</span><span class="s2">&quot;assumptions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Estimand assumption </span><span class="si">{0}</span><span class="s2">, </span><span class="si">{1}</span><span class="s2">: </span><span class="si">{2}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">ass_name</span><span class="p">,</span> <span class="n">ass_str</span><span class="p">)</span>
+                    <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">s</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: v0.4
+    <span class="fa fa-caret-down"></span>
+  </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="../../../v0.1-alpha/index.html">v0.1-alpha</a></dd>
+            <dd><a href="../../../v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+            <dd><a href="../../../v0.2/index.html">v0.2</a></dd>
+            <dd><a href="causal_identifier.html">v0.4</a></dd>
+            <dd><a href="../../../v0.5/index.html">v0.5</a></dd>
+            <dd><a href="../../../v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="../../../v0.6/index.html">v0.6</a></dd>
+            <dd><a href="../../../v0.7/index.html">v0.7</a></dd>
+            <dd><a href="../../../v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="../../../v0.8/index.html">v0.8</a></dd>
+        </dl>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

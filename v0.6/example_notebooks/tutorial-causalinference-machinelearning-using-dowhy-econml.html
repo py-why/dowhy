@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML) &mdash; DoWhy | An end-to-end library for causal inference  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="nb_index.html" />
+    <link rel="prev" title="DoWhy | An end-to-end library for causal inference" href="../readme.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
+          </a>
+              <div class="version">
+                v0.6
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introducing DoWhy</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">DoWhy | An end-to-end library for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html#graphical-models-and-potential-outcomes-best-of-both-worlds">Graphical Models and Potential Outcomes: Best of both worlds</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html#four-steps-of-causal-inference">Four steps of causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html#citing-this-package">Citing this package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html#roadmap">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html#contributing">Contributing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Quick-Start Tutorial</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Why-causal-inference?">Why causal inference?</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Defining-a-causal-effect">Defining a causal effect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#The-difference-between-prediction-and-causal-inference">The difference between prediction and causal inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Two-fundamental-challenges-for-causal-inference">Two fundamental challenges for causal inference</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#The-four-steps-of-causal-inference">The four steps of causal inference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#The-DoWhy+EconML-solution">The DoWhy+EconML solution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#A-mystery-dataset:-Can-you-find-out-if-if-there-is-a-causal-effect?">A mystery dataset: Can you find out if if there is a causal effect?</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Model-assumptions-about-the-data-generating-process-using-a-causal-graph">Model assumptions about the data-generating process using a causal graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Identify-the-correct-estimand-for-the-target-quantity-based-on-the-causal-model">Identify the correct estimand for the target quantity based on the causal model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Estimate-the-target-estimand">Estimate the target estimand</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Check-robustness-of-the-estimate-using-refutation-tests">Check robustness of the estimate using refutation tests</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Case-studies-using-DoWhy+EconML">Case-studies using DoWhy+EconML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Estimating-the-impact-of-a-customer-loyalty-program">Estimating the impact of a customer loyalty program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Recommendation-A/B-testing-at-an-online-company">Recommendation A/B testing at an online company</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#User-segmentation-for-targeting-interventions">User segmentation for targeting interventions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Multi-investment-attribution-at-a-software-company">Multi-investment attribution at a software company</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Connections-to-fundamental-machine-learning-challenges">Connections to fundamental machine learning challenges</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Further-resources">Further resources</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#DoWhy+EconML-libraries">DoWhy+EconML libraries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Video-Lecture-on-causal-inference-and-its-connections-to-machine-learning">Video Lecture on causal inference and its connections to machine learning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Detailed-KDD-Tutorial-on-Causal-Inference">Detailed KDD Tutorial on Causal Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Book-chapters-on-causality-and-machine-learning">Book chapters on causality and machine learning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Causality-and-Machine-Learning-group-at-Microsoft">Causality and Machine Learning group at Microsoft</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Starter Notebooks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Case Study Notebooks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">DoWhy-The Causal Story Behind Hotel Booking Cancellations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_example_effect_of_memberrewards_program.html">Estimating the effect of a Member Rewards program</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refutation_testing.html">Applying refutation tests to the Lalonde and IHDP datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Notebooks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_multiple_treatments.html">Estimating effect of multiple treatments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../code_repo.html">Code repository &amp; Versions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dowhy.html">dowhy package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DoWhy | An end-to-end library for causal inference</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/example_notebooks/tutorial-causalinference-machinelearning-using-dowhy-econml.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.jp-RenderedHTMLCommon thead,
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+.jp-RenderedHTMLCommon th,
+div.rendered_html th {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+.jp-RenderedHTMLCommon tbody tr:hover,
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="Tutorial-on-Causal-Inference-and-its-Connections-to-Machine-Learning-(Using-DoWhy+EconML)">
+<h1>Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)<a class="headerlink" href="#Tutorial-on-Causal-Inference-and-its-Connections-to-Machine-Learning-(Using-DoWhy+EconML)" title="Permalink to this heading"></a></h1>
+<p>This tutorial presents a walk-through on using DoWhy+EconML libraries for causal inference. Along the way, we’ll highlight the connections to machine learning—how machine learning helps in building causal effect estimators, and how causal reasoning can be help build more robust machine learning models.</p>
+<p>Examples of data science questions that are fundamentally causal inference questions: * <strong>A/B experiments</strong>: If I change the algorithm, will it lead to a higher success rate? * <strong>Policy decisions</strong>: If we adopt this treatment/policy, will it lead to a healthier patient/more revenue/etc.? * <strong>Policy evaluation</strong>: Knowing what I know now, did my policy help or hurt? * <strong>Credit attribution</strong>: Are people buying because of the recommendation algorithm? Would they have bought anyway?</p>
+<p>In this tutorial, you will: * Learn how causal reasoning is necessary for decision-making, and the difference between a prediction and decision-making task.</p>
+<ul class="simple">
+<li><p>Get hands-on with estimating causal effects using the four steps of causal inference: <strong>model, identify, estimate and refute</strong>.</p></li>
+<li><p>See how DoWhy+EconML can help you estimate causal effects with <strong>4 lines of code</strong>, using the latest methods from statistics and machine learning to estimate the causal effect and evaluate its robustness to modeling assumptions.</p></li>
+<li><p>Work through <strong>real-world case-studies</strong> with Jupyter notebooks on applying causal reasoning in different scenarios including estimating impact of a customer loyalty program on future transactions, predicting which users will be positively impacted by an intervention (such as an ad), pricing products, and attributing which factors contribute most to an outcome.</p></li>
+<li><p>Learn about the connections between causal inference and the challenges of modern machine learning models.</p></li>
+</ul>
+<h1><p>Table of Contents</p>
+</h1><div class="toc"><ul class="toc-item"><li><p>1  Why causal inference?</p>
+<ul class="toc-item"><li><p>1.1  Defining a causal effect</p>
+</li><li><p>1.2  The difference between prediction and causal inference</p>
+</li><li><p>1.3  Two fundamental challenges for causal inference</p>
+</li></ul></li><li><p>2  The four steps of causal inference</p>
+<ul class="toc-item"><li><p>2.1  The DoWhy+EconML solution</p>
+</li><li><p>2.2  A mystery dataset: Can you find out if if there is a causal effect?</p>
+<ul class="toc-item"><li><p>2.2.1  Model assumptions about the data-generating process using a causal graph</p>
+</li><li><p>2.2.2  Identify the correct estimand for the target quantity based on the causal model</p>
+</li><li><p>2.2.3  Estimate the target estimand</p>
+</li><li><p>2.2.4  Check robustness of the estimate using refutation tests</p>
+</li></ul></li></ul></li><li><p>3  Case-studies using DoWhy+EconML</p>
+<ul class="toc-item"><li><p>3.1  Estimating the impact of a customer loyalty program</p>
+</li><li><p>3.2  Recommendation A/B testing at an online company</p>
+</li><li><p>3.3  User segmentation for targeting interventions</p>
+</li><li><p>3.4  Multi-investment attribution at a software company</p>
+</li></ul></li><li><p>4  Connections to fundamental machine learning challenges</p>
+</li><li><p>5  Further resources</p>
+<ul class="toc-item"><li><p>5.1  DoWhy+EconML libraries</p>
+</li><li><p>5.2  Video Lecture on causal inference and its connections to machine learning</p>
+</li><li><p>5.3  Detailed KDD Tutorial on Causal Inference</p>
+</li><li><p>5.4  Book chapters on causality and machine learning</p>
+</li><li><p>5.5  Causality and Machine Learning group at Microsoft</p>
+</li></ul></li></ul></div><section id="Why-causal-inference?">
+<h2>Why causal inference?<a class="headerlink" href="#Why-causal-inference?" title="Permalink to this heading"></a></h2>
+<p>Many key data science tasks are about decision-making. Data scientists are regularly called upon to support decision-makers at all levels, helping them make the best use of data in support of achieving desired outcomes. For example, an executive making investment and resourcing decisions, a marketer determining discounting policies, a product team prioritizing which features to ship, or a doctor deciding which treatment to administer to a patient.</p>
+<p>Each of these decision-makers is asking a what-if question. Data-driven answers to such questions require understanding the <em>causes</em> of an event and how to take action to improve future outcomes.</p>
+<section id="Defining-a-causal-effect">
+<h3>Defining a causal effect<a class="headerlink" href="#Defining-a-causal-effect" title="Permalink to this heading"></a></h3>
+<p>Suppose that we want to find the causal effect of taking an action A on the outcome Y. To define the causal effect, consider two worlds: 1. World 1 (Real World): Where the action A was taken and Y observed 2. World 2 (<em>Counterfactual</em> World): Where the action A was not taken (but everything else is the same)</p>
+<p>Causal effect is the difference between Y values attained in the real world versus the counterfactual world.</p>
+<div class="math notranslate nohighlight">
+\[{E}[Y_{real, A=1}] - E[Y_{counterfactual, A=0}]\]</div>
+<p><img alt="Real and Counterfactual Worlds" src="../_images/real_vs_counterfactual_world.png" /></p>
+<p>In other words, A causes Y iff changing A leads to a change in Y, <em>keeping everything else constant</em>. Changing A while keeping everything else constant is called an <strong>intervention</strong>, and represented by a special notation, <span class="math notranslate nohighlight">\(do(A)\)</span>.</p>
+<p>Formally, causal effect is the magnitude by which Y is changed by a unit <em>interventional</em> change in A:</p>
+<div class="math notranslate nohighlight">
+\[E[Y│do(A=1)]−E[Y|do(A=0)]\]</div>
+<p>To estimate the effect, the <em>gold standard</em> is to conduct a randomized experiment where a randomized subset of units is acted upon (<span class="math notranslate nohighlight">\(A=1\)</span>) and the other subset is not (<span class="math notranslate nohighlight">\(A=0\)</span>). These subsets approximate the disjoint real and counterfactual worlds and randomization ensures that there is not systematic difference between the two subsets (<em>“keeping everything else constant”</em>).</p>
+<p>However, it is not always feasible to a run a randomized experiment. To answer causal questions, we often need to rely on observational or logged data. Such observed data is biased by correlations and unobserved confounding and thus there are systematic differences in which units were acted upon and which units were not. For example, a new marketing campaign may be deployed during the holiday season, a new feature may only have been applied to high-activity users, or the older patients may have
+been more likely to receive the new drug, and so on. The goal of causal inference methods is to remove such correlations and confounding from the data and estimate the <em>true</em> effect of an action, as given by the equation above.</p>
+</section>
+<section id="The-difference-between-prediction-and-causal-inference">
+<h3>The difference between prediction and causal inference<a class="headerlink" href="#The-difference-between-prediction-and-causal-inference" title="Permalink to this heading"></a></h3>
+<table><tr><td><p><img alt="Drawing" src="../_images/supervised_ml_schematic.png" /></p>
+</td><td><p><img alt="Drawing" src="../_images/causalinference_schematic.png" /></p>
+</td></tr></table></section>
+<section id="Two-fundamental-challenges-for-causal-inference">
+<h3>Two fundamental challenges for causal inference<a class="headerlink" href="#Two-fundamental-challenges-for-causal-inference" title="Permalink to this heading"></a></h3>
+<p>We never observe the counterfactual world</p>
+<ul class="simple">
+<li><p>Cannot directly calculate the causal effect</p></li>
+<li><p>Must estimate the counterfactuals</p></li>
+<li><p>Challenges in validation</p></li>
+</ul>
+<p>Multiple causal mechanisms can be fit to a single data distribution * Data alone is not enough for causal inference * Need domain knowledge and assumptions</p>
+</section>
+</section>
+<section id="The-four-steps-of-causal-inference">
+<h2>The four steps of causal inference<a class="headerlink" href="#The-four-steps-of-causal-inference" title="Permalink to this heading"></a></h2>
+<p>Since there is no ground-truth test dataset available that an estimate can be compared to, causal inference requires a series of principled steps to achieve a good estimator.</p>
+<p>Let us illustrate the four steps through a sample dataset. This tutorial requires you to download two libraries: DoWhy and EconML. Both can be installed by the following command: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">dowhy</span> <span class="pre">econml</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Required libraries</span>
+<span class="kn">import</span> <span class="nn">dowhy</span>
+<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+
+<span class="c1"># Avoiding unnecessary log messges and warnings</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;dowhy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">sklearn.exceptions</span> <span class="kn">import</span> <span class="n">DataConversionWarning</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">DataConversionWarning</span><span class="p">)</span>
+
+<span class="c1"># Load some sample data</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">linear_dataset</span><span class="p">(</span>
+    <span class="n">beta</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">num_common_causes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">num_instruments</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">num_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+    <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p><strong>I. Modeling</strong></p>
+<p>The first step is to encode our domain knowledge into a causal model, often represented as a graph. The final outcome of a causal inference analysis depends largely on the input assumptions, so this step is quite important. To estimate the causal effect, most common problems involve specifying two types of variables:</p>
+<ol class="arabic simple">
+<li><p><strong>Confounders</strong>: These are variables that cause both the action and the outcome. As a result, any observed correlation between the action and the outcome may simply be due to the confounder variables, and not due to any causal relationship from the action to the outcome.</p></li>
+<li><p><strong>Instrumental Variables</strong>: These are special variables that cause the action, but do not directly affect the outcome. In addition, they are not affected by any variable that affects the outcome. Instrumental variables can help reduce bias, if used in the correct way.</p></li>
+</ol>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># I. Create a causal model from the data and domain knowledge.</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span>
+    <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
+    <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
+    <span class="n">common_causes</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;common_causes_names&quot;</span><span class="p">],</span>
+    <span class="n">intrumental_variables</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;instrument_names&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>To visualize the graph, we can write,</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">(</span><span class="n">layout</span><span class="o">=</span><span class="s2">&quot;dot&quot;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_tutorial-causalinference-machinelearning-using-dowhy-econml_8_0.png" src="../_images/example_notebooks_tutorial-causalinference-machinelearning-using-dowhy-econml_8_0.png" />
+</div>
+</div>
+<p>In general, you can specify a causal graph that describes the mechanisms of the data-generating process for a given dataset. Each arrow in the graph denotes a causal mechanism: “A-&gt;B” implies that the variable A causes variable B.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># I. Create a causal model from the data and given graph.</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span>
+    <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;gml_graph&quot;</span><span class="p">])</span>
+<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">(</span><span class="n">layout</span><span class="o">=</span><span class="s2">&quot;dot&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p><strong>II. Identification</strong></p>
+<p>Both ways of providing domain knowledge (either through named variable sets of confounders and instrumental variables, or through a causal graph) correspond to an underlying causal graph. Given a causal graph and a target quantity (e.g., effect of A on B), the process of identifcation is to check whether the target quantity can be estimated given the observed variables. Importantly, identification only considers the names of variables that are available in the observed data; it does not need
+access to the data itself. Related to the two kinds of variables above, there are two main identification methods for causal inference.</p>
+<ol class="arabic">
+<li><p><strong>Backdoor criterion</strong> (or more generally, adjustment sets): If all common causes of the action A and the outcome Y are observed, then the backdoor criterion implies that the causal effect can be identified by conditioning on all the common causes. This is a simplified definition (refer to Chapter 3 of the CausalML book for a formal definition).</p>
+<div class="math notranslate nohighlight">
+\[E[Y│do(A=a)] = E_W E[Y|A=a, W=w]\]</div>
+</li>
+</ol>
+<p>where <span class="math notranslate nohighlight">\(W\)</span> refers to the set of common causes (confounders) of <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(Y\)</span>.</p>
+<ol class="arabic simple" start="2">
+<li><p><strong>Instrumental variable (IV) identification</strong>: If there is an instrumental variable available, then we can estimate effect even when any (or none) of the common causes of action and outcome are unobserved. The IV identification utilizes the fact that the instrument only affects the action directly, so the effect of the instrument on the outcome can be broken up into two sequential parts: the effect of the instrument on the action and the effect of the action on the treatment. It then relies
+on estimating the effect of the instrument on the action and the outcome to estimate the effect of the action on the outcome. For a binary instrument, the effect estimate is given by,</p></li>
+</ol>
+<div class="math notranslate nohighlight">
+\[E[Y│do(A=1)] -E[Y│do(A=0)]  =\frac{E[Y│Z=1]- E[Y│Z=0]}{E[A│Z=1]- E[A│Z=0]}\]</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># II. Identify causal effect and return target estimands</span>
+<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Estimand type: nonparametric-ate
+
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(Expectation(y|W0,W2,W1,W3,W4))
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,W3,W4,U) = P(y|v0,W0,W2,W1,W3,W4)
+
+### Estimand : 2
+Estimand name: iv
+Estimand expression:
+Expectation(Derivative(y, [Z0, Z1])*Derivative([v0], [Z0, Z1])**(-1))
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
+Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
+
+### Estimand : 3
+Estimand name: frontdoor
+No such variable found!
+
+</pre></div></div>
+</div>
+<p><strong>III. Estimation</strong></p>
+<p>As the name suggests, the estimation step involves building a statistical estimator that can compute the target estimand identified in the previous step. Many estimators have been proposed for causal inference. DoWhy implements a few of the standard estimators while EconML implements a powerful set of estimators that use machine learning.</p>
+<p>We show an example of using Propensity Score Stratification using DoWhy, and a machine learning-based method called Double-ML using EconML.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># III. Estimate the target estimand using a statistical method.</span>
+<span class="n">propensity_strat_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+                                 <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.dowhy.propensity_score_stratification&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">propensity_strat_estimate</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Identified estimand
+Estimand type: nonparametric-ate
+
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(Expectation(y|W0,W2,W1,W3,W4))
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,W3,W4,U) = P(y|v0,W0,W2,W1,W3,W4)
+
+## Realized estimand
+b: y~v0+W0+W2+W1+W3+W4
+Target units: ate
+
+## Estimate
+Mean value: 10.014616535147312
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">econml</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">PolynomialFeatures</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LassoCV</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostingRegressor</span>
+<span class="n">dml_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+                                    <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.econml.dml.DML&quot;</span><span class="p">,</span>
+                                    <span class="n">method_params</span><span class="o">=</span><span class="p">{</span>
+                                        <span class="s1">&#39;init_params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;model_y&#39;</span><span class="p">:</span><span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
+                                                        <span class="s1">&#39;model_t&#39;</span><span class="p">:</span> <span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
+                                                        <span class="s1">&#39;model_final&#39;</span><span class="p">:</span><span class="n">LassoCV</span><span class="p">(</span><span class="n">fit_intercept</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="p">},</span>
+                                        <span class="s1">&#39;fit_params&#39;</span><span class="p">:</span> <span class="p">{}</span>
+                                     <span class="p">})</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dml_estimate</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Identified estimand
+Estimand type: nonparametric-ate
+
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(Expectation(y|W0,W2,W1,W3,W4))
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,W3,W4,U) = P(y|v0,W0,W2,W1,W3,W4)
+
+## Realized estimand
+b: y~v0+W0+W2+W1+W3+W4 |
+Target units: ate
+
+## Estimate
+Mean value: 10.023701526335056
+Effect estimates: [10.02370153 10.02370153 10.02370153 ... 10.02370153 10.02370153
+ 10.02370153]
+
+</pre></div></div>
+</div>
+<p><strong>IV. Refutation</strong></p>
+<p>Finally, checking robustness of the estimate is probably the most important step of a causal analysis. We obtained an estimate using Steps 1-3, but each step may have made certain assumptions that may not be true. Absent of a proper validation “test” set, this step relies on <em>refutation</em> tests that seek to refute the correctness of an obtained estimate using properties of a good estimator. For example, a refutation test (<code class="docutils literal notranslate"><span class="pre">placebo_treatment_refuter</span></code>) checks whether the estimator returns an
+estimate value of 0 when the action variable is replaced by a random variable, independent of all other variables.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># IV. Refute the obtained estimate using multiple robustness checks.</span>
+<span class="n">refute_results</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">propensity_strat_estimate</span><span class="p">,</span>
+                                       <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;placebo_treatment_refuter&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">refute_results</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Refute: Use a Placebo Treatment
+Estimated effect:10.014616535147312
+New effect:-0.001240824909823009
+p value:0.45
+
+</pre></div></div>
+</div>
+<section id="The-DoWhy+EconML-solution">
+<h3>The DoWhy+EconML solution<a class="headerlink" href="#The-DoWhy+EconML-solution" title="Permalink to this heading"></a></h3>
+<p>We will use the DoWhy+EconML libraries for causal inference. DoWhy provides a general API for the four steps and EconML provides advanced estimators for the Estimation step.</p>
+<p>DoWhy allows you to visualize, formalize, and test the assumptions they are making, so that you can better understand the analysis and avoid reaching incorrect conclusions. It does so by focusing on assumptions explicitly and introducing automated checks on validity of assumptions to the extent possible. As you will see, the power of DoWhy is that it provides a formal causal framework to encode domain knowledge and it can run automated robustness checks to validate the causal estimate from any
+estimator method.</p>
+<p>Additionally, as data becomes high-dimensional, we need specialized methods that can handle known confounding. Here we use EconML that implements many of the state-of-the-art causal estimation approaches. This package has a common API for all the techniques, and each technique is implemented as a sequence of machine learning tasks allowing for the use of any existing machine learning software to solve these subtasks, allowing you to plug-in the ML models that you are already familiar with rather
+than learning a new toolkit. The power of EconML is that you can now implement the state-of-the-art in causal inference just as easily as you can run a linear regression or a random forest.</p>
+<p>Together, DoWhy+EconML make answering what if questions a whole lot easier by providing a state-of-the-art, end-to-end framework for causal inference, including the latest causal estimation and automated robustness procedures.</p>
+</section>
+<section id="A-mystery-dataset:-Can-you-find-out-if-if-there-is-a-causal-effect?">
+<h3>A mystery dataset: Can you find out if if there is a causal effect?<a class="headerlink" href="#A-mystery-dataset:-Can-you-find-out-if-if-there-is-a-causal-effect?" title="Permalink to this heading"></a></h3>
+<p>To walk-through the four steps, let us consider the <strong>Mystery Dataset</strong> problem. Suppose you are given some data with treatment and outcome. Can you determine whether the treatment causes the outcome, or the correlation is purely due to another common cause?</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">dowhy.datasets</span><span class="o">,</span> <span class="nn">dowhy.plotter</span>
+</pre></div>
+</div>
+</div>
+<p>Below we create a dataset where the true causal effect is decided by random variable. It can be either 0 or 1.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rvar</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">0.2</span> <span class="k">else</span> <span class="mi">0</span>
+<span class="n">is_linear</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># A non-linear dataset. Change to True to see results for a linear dataset.</span>
+<span class="n">data_dict</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">xy_dataset</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span> <span class="n">effect</span><span class="o">=</span><span class="n">rvar</span><span class="p">,</span>
+                                      <span class="n">num_common_causes</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                                      <span class="n">is_linear</span><span class="o">=</span><span class="n">is_linear</span><span class="p">,</span>
+                                      <span class="n">sd_error</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+<span class="n">dowhy</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">plot_treatment_outcome</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">]],</span> <span class="n">df</span><span class="p">[</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">]],</span>
+                             <span class="n">df</span><span class="p">[</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;time_val&quot;</span><span class="p">]])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+   Treatment    Outcome        w0         s        w1
+0  12.630846  24.623801 -2.580494  0.434753 -1.347023
+1  10.746278  20.853413  2.111399  1.625736 -0.569495
+2  21.689118  42.446524 -3.925405  7.273121 -1.034146
+3  21.720635  42.706588  3.999241  2.972445 -2.468980
+4  10.409912  20.036106  2.067560  1.609878 -1.512199
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_tutorial-causalinference-machinelearning-using-dowhy-econml_22_1.png" src="../_images/example_notebooks_tutorial-causalinference-machinelearning-using-dowhy-econml_22_1.png" />
+</div>
+</div>
+<section id="Model-assumptions-about-the-data-generating-process-using-a-causal-graph">
+<h4>Model assumptions about the data-generating process using a causal graph<a class="headerlink" href="#Model-assumptions-about-the-data-generating-process-using-a-causal-graph" title="Permalink to this heading"></a></h4>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+        <span class="n">treatment</span><span class="o">=</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
+        <span class="n">outcome</span><span class="o">=</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
+        <span class="n">common_causes</span><span class="o">=</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;common_causes_names&quot;</span><span class="p">],</span>
+        <span class="n">instruments</span><span class="o">=</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;instrument_names&quot;</span><span class="p">])</span>
+<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">(</span><span class="n">layout</span><span class="o">=</span><span class="s2">&quot;dot&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Identify-the-correct-estimand-for-the-target-quantity-based-on-the-causal-model">
+<h4>Identify the correct estimand for the target quantity based on the causal model<a class="headerlink" href="#Identify-the-correct-estimand-for-the-target-quantity-based-on-the-causal-model" title="Permalink to this heading"></a></h4>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Estimand type: nonparametric-ate
+
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+     d
+────────────(Expectation(Outcome|w0,w1))
+d[Treatment]
+Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w0,w1,U) = P(Outcome|Treatment,w0,w1)
+
+### Estimand : 2
+Estimand name: iv
+No such variable found!
+
+### Estimand : 3
+Estimand name: frontdoor
+No such variable found!
+
+</pre></div></div>
+</div>
+<p>Since this is observed data, the warning asks you if there are any unobserved confounders that are missing in this dataset. If there are, then ignoring them will lead to an incorrect estimate. If you want to disable the warning, you can use <code class="docutils literal notranslate"><span class="pre">proceed_when_unidentifiable=True</span></code> as an additional parameter to <code class="docutils literal notranslate"><span class="pre">identify_effect</span></code>.</p>
+</section>
+<section id="Estimate-the-target-estimand">
+<h4>Estimate the target estimand<a class="headerlink" href="#Estimate-the-target-estimand" title="Permalink to this heading"></a></h4>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+
+<span class="c1"># Plot Slope of line between action and outcome = causal effect</span>
+<span class="n">dowhy</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">plot_causal_effect</span><span class="p">(</span><span class="n">estimate</span><span class="p">,</span> <span class="n">df</span><span class="p">[</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">]],</span> <span class="n">df</span><span class="p">[</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">]])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Identified estimand
+Estimand type: nonparametric-ate
+
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+     d
+────────────(Expectation(Outcome|w0,w1))
+d[Treatment]
+Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w0,w1,U) = P(Outcome|Treatment,w0,w1)
+
+## Realized estimand
+b: Outcome~Treatment+w0+w1
+Target units: ate
+
+## Estimate
+Mean value: 1.9991154434265186
+
+Causal Estimate is 1.9991154434265186
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_tutorial-causalinference-machinelearning-using-dowhy-econml_29_1.png" src="../_images/example_notebooks_tutorial-causalinference-machinelearning-using-dowhy-econml_29_1.png" />
+</div>
+</div>
+<p>As you can see, for a non-linear data-generating process, the linear regression model is unable to distinguish the causal effect from the observed correlation.</p>
+<p>If the DGP was linear, however, then simple linear regression would have worked. To see that, try setting <code class="docutils literal notranslate"><span class="pre">is_linear=True</span></code> in cell <strong>10</strong> above.</p>
+<p>To model non-linear data (and data with high-dimensional confounders), we need more advanced methods. Below is an example using the double machine learning estimator from EconML. This estimator uses machine learning-based methods like gradient boosting trees to learn the relationship between the outcome and confounders, and the treatment and confounders, and then finally compares the residual variation between the outcome and treatment.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">PolynomialFeatures</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LassoCV</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostingRegressor</span>
+<span class="n">dml_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.econml.dml.DML&quot;</span><span class="p">,</span>
+                                     <span class="n">control_value</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                                     <span class="n">treatment_value</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                                 <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;init_params&quot;</span><span class="p">:{</span><span class="s1">&#39;model_y&#39;</span><span class="p">:</span><span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
+                                                              <span class="s1">&#39;model_t&#39;</span><span class="p">:</span> <span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
+                                                              <span class="s2">&quot;model_final&quot;</span><span class="p">:</span><span class="n">LassoCV</span><span class="p">(</span><span class="n">fit_intercept</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                                                              <span class="s1">&#39;featurizer&#39;</span><span class="p">:</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="n">degree</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">include_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)},</span>
+                                               <span class="s2">&quot;fit_params&quot;</span><span class="p">:{}})</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dml_estimate</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Identified estimand
+Estimand type: nonparametric-ate
+
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+     d
+────────────(Expectation(Outcome|w0,w1))
+d[Treatment]
+Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w0,w1,U) = P(Outcome|Treatment,w0,w1)
+
+## Realized estimand
+b: Outcome~Treatment+w0+w1 |
+Target units: ate
+
+## Estimate
+Mean value: 0.9640759858071759
+Effect estimates: [0.96407599 0.96407599 0.96407599 ... 0.96407599 0.96407599 0.96407599]
+
+</pre></div></div>
+</div>
+<p>As you can see, the DML method obtains a better estimate, that is closer to the true causal effect of 1.</p>
+</section>
+<section id="Check-robustness-of-the-estimate-using-refutation-tests">
+<h4>Check robustness of the estimate using refutation tests<a class="headerlink" href="#Check-robustness-of-the-estimate-using-refutation-tests" title="Permalink to this heading"></a></h4>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">res_random</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">dml_estimate</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;random_common_cause&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">res_random</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Refute: Add a Random Common Cause
+Estimated effect:0.9640759858071759
+New effect:0.9331218724624653
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">res_placebo</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">dml_estimate</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;placebo_treatment_refuter&quot;</span><span class="p">,</span> <span class="n">placebo_type</span><span class="o">=</span><span class="s2">&quot;permute&quot;</span><span class="p">,</span>
+        <span class="n">num_simulations</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">res_placebo</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Refute: Use a Placebo Treatment
+Estimated effect:0.9640759858071759
+New effect:9.847648418438584e-06
+p value:0.4920449538936432
+
+</pre></div></div>
+</div>
+</section>
+</section>
+</section>
+<section id="Case-studies-using-DoWhy+EconML">
+<h2>Case-studies using DoWhy+EconML<a class="headerlink" href="#Case-studies-using-DoWhy+EconML" title="Permalink to this heading"></a></h2>
+<p>In practice, as the data becomes high-dimensional, simple estimators will not estimate the correct causal effect. More advanced supervised machine learning models also do not work and often are worse than simple regression, because they include additional regularization techniques that help in minimizing predictive error, but can have unwanted effects on estimating the causal effect. Therefore, we need methods targeted to estimate the causal effect. At the same time, we also need suitable
+refutation methods that can check the robustness of the estimate.</p>
+<p>Here is an example of using DoWhy+EconML for a high-dimensional dataset.</p>
+<p>More details are in this <a class="reference external" href="https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb">notebook</a>.</p>
+<p>Below we provide links to case studies that illustrate the use of DoWhy+EconML.</p>
+<section id="Estimating-the-impact-of-a-customer-loyalty-program">
+<h3>Estimating the impact of a customer loyalty program<a class="headerlink" href="#Estimating-the-impact-of-a-customer-loyalty-program" title="Permalink to this heading"></a></h3>
+<p><a class="reference external" href="https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb">Link to full notebook</a></p>
+</section>
+<section id="Recommendation-A/B-testing-at-an-online-company">
+<h3>Recommendation A/B testing at an online company<a class="headerlink" href="#Recommendation-A/B-testing-at-an-online-company" title="Permalink to this heading"></a></h3>
+<p><a class="reference external" href="https://github.com/microsoft/EconML/blob/master/notebooks/CustomerScenarios/Case%20Study%20-%20Recommendation%20AB%20Testing%20at%20An%20Online%20Travel%20Company%20-%20EconML%20%2B%20DoWhy.ipynb">Link to full notebook</a></p>
+</section>
+<section id="User-segmentation-for-targeting-interventions">
+<h3>User segmentation for targeting interventions<a class="headerlink" href="#User-segmentation-for-targeting-interventions" title="Permalink to this heading"></a></h3>
+<p><a class="reference external" href="https://github.com/microsoft/EconML/blob/master/notebooks/CustomerScenarios/Case%20Study%20-%20Customer%20Segmentation%20at%20An%20Online%20Media%20Company%20-%20EconML%20%2B%20DoWhy.ipynb">Link to full notebook</a></p>
+</section>
+<section id="Multi-investment-attribution-at-a-software-company">
+<h3>Multi-investment attribution at a software company<a class="headerlink" href="#Multi-investment-attribution-at-a-software-company" title="Permalink to this heading"></a></h3>
+<p><a class="reference external" href="https://github.com/microsoft/EconML/blob/master/notebooks/CustomerScenarios/Case%20Study%20-%20Multi-investment%20Attribution%20at%20A%20Software%20Company%20-%20EconML%20%2B%20DoWhy.ipynb">Link to full notebook</a></p>
+</section>
+</section>
+<section id="Connections-to-fundamental-machine-learning-challenges">
+<h2>Connections to fundamental machine learning challenges<a class="headerlink" href="#Connections-to-fundamental-machine-learning-challenges" title="Permalink to this heading"></a></h2>
+<p>Causality is connected to many fundamental challenges in building machine learning models, including out-of-distribution generalization, fairness, explanability and privacy.</p>
+<p><img alt="ML challenges" src="../_images/causality_ml_example_challenges.png" /></p>
+<p>How causality can help in solving many of the challenges above is an active area of research.</p>
+</section>
+<section id="Further-resources">
+<h2>Further resources<a class="headerlink" href="#Further-resources" title="Permalink to this heading"></a></h2>
+<section id="DoWhy+EconML-libraries">
+<h3>DoWhy+EconML libraries<a class="headerlink" href="#DoWhy+EconML-libraries" title="Permalink to this heading"></a></h3>
+<p>DoWhy code: <a class="reference external" href="https://github.com/microsoft/dowhy">https://github.com/microsoft/dowhy</a></p>
+<p>DoWhy notebooks: <a class="reference external" href="https://github.com/microsoft/dowhy/tree/master/docs/source/example_notebooks">https://github.com/microsoft/dowhy/tree/master/docs/source/example_notebooks</a></p>
+<p>EconML code: <a class="reference external" href="https://github.com/microsoft/econml">https://github.com/microsoft/econml</a></p>
+<p>EconML notebooks: <a class="reference external" href="https://github.com/microsoft/EconML/tree/master/notebooks">https://github.com/microsoft/EconML/tree/master/notebooks</a></p>
+</section>
+<section id="Video-Lecture-on-causal-inference-and-its-connections-to-machine-learning">
+<h3>Video Lecture on causal inference and its connections to machine learning<a class="headerlink" href="#Video-Lecture-on-causal-inference-and-its-connections-to-machine-learning" title="Permalink to this heading"></a></h3>
+<p>Microsoft Research Webinar: <a class="reference external" href="https://note.microsoft.com/MSR-Webinar-DoWhy-Library-Registration-On-Demand.html">https://note.microsoft.com/MSR-Webinar-DoWhy-Library-Registration-On-Demand.html</a></p>
+</section>
+<section id="Detailed-KDD-Tutorial-on-Causal-Inference">
+<h3>Detailed KDD Tutorial on Causal Inference<a class="headerlink" href="#Detailed-KDD-Tutorial-on-Causal-Inference" title="Permalink to this heading"></a></h3>
+<p><a class="reference external" href="https://causalinference.gitlab.io/kdd-tutorial/">https://causalinference.gitlab.io/kdd-tutorial/</a></p>
+</section>
+<section id="Book-chapters-on-causality-and-machine-learning">
+<h3>Book chapters on causality and machine learning<a class="headerlink" href="#Book-chapters-on-causality-and-machine-learning" title="Permalink to this heading"></a></h3>
+<p><a class="reference external" href="http://causalinference.gitlab.io/">http://causalinference.gitlab.io/</a></p>
+</section>
+<section id="Causality-and-Machine-Learning-group-at-Microsoft">
+<h3>Causality and Machine Learning group at Microsoft<a class="headerlink" href="#Causality-and-Machine-Learning-group-at-Microsoft" title="Permalink to this heading"></a></h3>
+<p><a class="reference external" href="https://www.microsoft.com/en-us/research/group/causal-inference/">https://www.microsoft.com/en-us/research/group/causal-inference/</a></p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../readme.html" class="btn btn-neutral float-left" title="DoWhy | An end-to-end library for causal inference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="nb_index.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: v0.6
+    <span class="fa fa-caret-down"></span>
+  </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="../../v0.1-alpha/index.html">v0.1-alpha</a></dd>
+            <dd><a href="../../v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+            <dd><a href="../../v0.2/index.html">v0.2</a></dd>
+            <dd><a href="../../v0.4/index.html">v0.4</a></dd>
+            <dd><a href="../../v0.5/index.html">v0.5</a></dd>
+            <dd><a href="../../v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">v0.6</a></dd>
+            <dd><a href="../../v0.7/index.html">v0.7</a></dd>
+            <dd><a href="../../v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="../../v0.8/index.html">v0.8</a></dd>
+        </dl>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

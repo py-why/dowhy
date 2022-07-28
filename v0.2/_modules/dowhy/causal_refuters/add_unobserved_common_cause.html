@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dowhy.causal_refuters.add_unobserved_common_cause &mdash; DoWhy | An end-to-end library for causal inference  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
+          </a>
+              <div class="version">
+                v0.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">DoWhy | Making causal inference easy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/do_sampler_demo.html">Do-sampler Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../code_repo.html">Code repository &amp; Versions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dowhy.html">dowhy package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">DoWhy | An end-to-end library for causal inference</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+          <li><a href="../causal_refuters.html">dowhy.causal_refuters</a> &raquo;</li>
+      <li>dowhy.causal_refuters.add_unobserved_common_cause</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for dowhy.causal_refuters.add_unobserved_common_cause</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">dowhy.causal_refuter</span> <span class="kn">import</span> <span class="n">CausalRefutation</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_refuter</span> <span class="kn">import</span> <span class="n">CausalRefuter</span>
+
+
+<div class="viewcode-block" id="AddUnobservedCommonCause"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.add_unobserved_common_cause.AddUnobservedCommonCause">[docs]</a><span class="k">class</span> <span class="nc">AddUnobservedCommonCause</span><span class="p">(</span><span class="n">CausalRefuter</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Add an unobserved confounder for refutation.</span>
+
+<span class="sd">    Supports additional parameters that can be specified in the refute_estimate() method.</span>
+
+<span class="sd">    - &#39;confounders_effect_on_treatment&#39;: how the simulated confounder affects the value of treatment. This can be linear (for continuous treatment) or binary_flip (for binary treatment)</span>
+<span class="sd">    - &#39;confounders_effect_on_outcome&#39;: how the simulated confounder affects the value of outcome. This can be linear (for continuous outcome) or binary_flip (for binary outcome)</span>
+<span class="sd">    - &#39;effect_strength_on_treatment&#39;: parameter for the strength of the effect of simulated confounder on treatment. For linear effect, it is the regression coeffient. For binary_flip, it is the probability that simulated confounder&#39;s effect flips the value of treatment from 0 to 1 (or vice-versa).</span>
+<span class="sd">    - &#39;effect_strength_on_outcome&#39;: parameter for the strength of the effect of simulated confounder on outcome. For linear effect, it is the regression coeffient. For binary_flip, it is the probability that simulated confounder&#39;s effect flips the value of outcome from 0 to 1 (or vice-versa).</span>
+
+<span class="sd">    TODO: Needs scaled version of the parameters and an interpretation module</span>
+<span class="sd">    (e.g., in comparison to biggest effect of known confounder)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">effect_on_t</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;confounders_effect_on_treatment&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;confounders_effect_on_treatment&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="s2">&quot;binary_flip&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">effect_on_y</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;confounders_effect_on_outcome&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;confounders_effect_on_outcome&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="s2">&quot;linear&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kappa_t</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;effect_strength_on_treatment&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kappa_y</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;effect_strength_on_outcome&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="AddUnobservedCommonCause.refute_estimate"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.add_unobserved_common_cause.AddUnobservedCommonCause.refute_estimate">[docs]</a>    <span class="k">def</span> <span class="nf">refute_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">new_data</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+        <span class="n">new_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_confounders_effect</span><span class="p">(</span><span class="n">new_data</span><span class="p">)</span>
+
+        <span class="n">new_estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_estimator_object</span><span class="p">(</span><span class="n">new_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="p">)</span>
+        <span class="n">new_effect</span> <span class="o">=</span> <span class="n">new_estimator</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">()</span>
+        <span class="n">refute</span> <span class="o">=</span> <span class="n">CausalRefutation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">new_effect</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                                  <span class="n">refutation_type</span><span class="o">=</span><span class="s2">&quot;Refute: Add an Unobserved Common Cause&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">refute</span></div>
+
+<div class="viewcode-block" id="AddUnobservedCommonCause.include_confounders_effect"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.add_unobserved_common_cause.AddUnobservedCommonCause.include_confounders_effect">[docs]</a>    <span class="k">def</span> <span class="nf">include_confounders_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data</span><span class="p">):</span>
+        <span class="n">num_rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">w_random</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">num_rows</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">effect_on_t</span> <span class="o">==</span> <span class="s2">&quot;binary_flip&quot;</span><span class="p">:</span>
+            <span class="n">new_data</span><span class="p">[</span><span class="s1">&#39;temp_rand_no&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">num_rows</span><span class="p">)</span>
+            <span class="n">new_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">new_data</span><span class="p">[</span><span class="s1">&#39;temp_rand_no&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kappa_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span> <span class="p">]</span>  <span class="o">=</span> <span class="mi">1</span><span class="o">-</span> <span class="n">new_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">tname</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_bool_dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">tname</span><span class="p">]):</span>
+                    <span class="n">new_data</span> <span class="o">=</span> <span class="n">new_data</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="n">tname</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">},</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">new_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;temp_rand_no&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">effect_on_t</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span><span class="p">:</span>
+            <span class="n">confounder_t_effect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kappa_t</span> <span class="o">*</span> <span class="n">w_random</span>
+            <span class="n">new_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">num_rows</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">buffer</span><span class="o">=</span><span class="n">confounder_t_effect</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">effect_on_t</span> <span class="o">+</span> <span class="s2">&quot;&#39; method not supported for confounders&#39; effect on treatment&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">effect_on_y</span> <span class="o">==</span> <span class="s2">&quot;binary_flip&quot;</span><span class="p">:</span>
+            <span class="n">new_data</span><span class="p">[</span><span class="s1">&#39;temp_rand_no&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">num_rows</span><span class="p">)</span>
+            <span class="n">new_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">new_data</span><span class="p">[</span><span class="s1">&#39;temp_rand_no&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kappa_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name</span> <span class="p">]</span>  <span class="o">=</span> <span class="mi">1</span><span class="o">-</span> <span class="n">new_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name</span><span class="p">]</span>
+            <span class="n">new_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;temp_rand_no&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">effect_on_y</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span><span class="p">:</span>
+            <span class="n">confounder_y_effect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kappa_y</span> <span class="o">*</span> <span class="n">w_random</span>
+            <span class="n">new_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">num_rows</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">buffer</span><span class="o">=</span><span class="n">confounder_y_effect</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">effect_on_y</span><span class="o">+</span> <span class="s2">&quot;&#39; method not supported for confounders&#39; effect on outcome&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_data</span></div></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: v0.2
+    <span class="fa fa-caret-down"></span>
+  </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="../../../../v0.1-alpha/index.html">v0.1-alpha</a></dd>
+            <dd><a href="../../../../v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+            <dd><a href="add_unobserved_common_cause.html">v0.2</a></dd>
+            <dd><a href="../../../../v0.4/index.html">v0.4</a></dd>
+            <dd><a href="../../../../v0.5/index.html">v0.5</a></dd>
+            <dd><a href="../../../../v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="../../../../v0.6/index.html">v0.6</a></dd>
+            <dd><a href="../../../../v0.7/index.html">v0.7</a></dd>
+            <dd><a href="../../../../v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="../../../../v0.8/index.html">v0.8</a></dd>
+        </dl>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

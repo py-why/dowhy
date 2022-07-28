@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dowhy.do_samplers.mcmc_sampler &mdash; DoWhy | An end-to-end library for causal inference  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
+          </a>
+              <div class="version">
+                v0.1.1-alpha
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">DoWhy | Making causal inference easy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../do_sampler_demo.html">Do-sampler Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../code_repo.html">Code repository</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dowhy.html">dowhy package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">dowhy</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">DoWhy | An end-to-end library for causal inference</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+          <li><a href="../do_samplers.html">dowhy.do_samplers</a> &raquo;</li>
+      <li>dowhy.do_samplers.mcmc_sampler</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for dowhy.do_samplers.mcmc_sampler</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">dowhy.do_sampler</span> <span class="kn">import</span> <span class="n">DoSampler</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pymc3</span> <span class="k">as</span> <span class="nn">pm</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+
+
+<div class="viewcode-block" id="McmcSampler"><a class="viewcode-back" href="../../../dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler">[docs]</a><span class="k">class</span> <span class="nc">McmcSampler</span><span class="p">(</span><span class="n">DoSampler</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">variable_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">num_cores</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keep_original_treatment</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">causal_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        g, df, data_types</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">variable_types</span><span class="o">=</span><span class="n">variable_types</span><span class="p">,</span> <span class="n">causal_model</span><span class="o">=</span><span class="n">causal_model</span><span class="p">,</span>
+                 <span class="n">num_cores</span><span class="o">=</span><span class="n">num_cores</span><span class="p">,</span> <span class="n">keep_original_treatment</span><span class="o">=</span><span class="n">keep_original_treatment</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using McmcSampler for do sampling.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point_sampler</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_sampler</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;causal_model&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_unconfounded_observed_subgraph</span><span class="p">()</span>
+        <span class="n">g_fit</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_trace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_causal_model</span><span class="p">(</span><span class="n">g_fit</span><span class="p">,</span>
+                                                  <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
+                                                  <span class="bp">self</span><span class="o">.</span><span class="n">_variable_types</span><span class="p">)</span>
+
+<div class="viewcode-block" id="McmcSampler.apply_data_types"><a class="viewcode-back" href="../../../dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler.apply_data_types">[docs]</a>    <span class="k">def</span> <span class="nf">apply_data_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">data_types</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nx</span><span class="o">.</span><span class="n">topological_sort</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">()[</span><span class="n">node</span><span class="p">][</span><span class="s2">&quot;variable_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_types</span><span class="p">[</span><span class="n">node</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">g</span></div>
+
+<div class="viewcode-block" id="McmcSampler.apply_parents"><a class="viewcode-back" href="../../../dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler.apply_parents">[docs]</a>    <span class="k">def</span> <span class="nf">apply_parents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nx</span><span class="o">.</span><span class="n">topological_sort</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">()[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;parent_names&quot;</span><span class="p">):</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">()[</span><span class="n">node</span><span class="p">][</span><span class="s2">&quot;parent_names&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">parent</span> <span class="k">for</span> <span class="n">parent</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">in_edges</span><span class="p">(</span><span class="n">node</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">g</span></div>
+
+<div class="viewcode-block" id="McmcSampler.apply_parameters"><a class="viewcode-back" href="../../../dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler.apply_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">apply_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">initialization_trace</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nx</span><span class="o">.</span><span class="n">topological_sort</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+            <span class="n">parent_names</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">()[</span><span class="n">node</span><span class="p">][</span><span class="s2">&quot;parent_names&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">parent_names</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">initialization_trace</span><span class="p">:</span>
+                    <span class="n">sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">df</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()]</span> <span class="o">+</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">/</span> <span class="n">df</span><span class="p">[</span><span class="n">parent_names</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">())</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+                    <span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">df</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()]</span> <span class="o">+</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">/</span> <span class="n">df</span><span class="p">[</span><span class="n">parent_names</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">())</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+                    <span class="n">node_sd</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">node_sd</span> <span class="o">=</span> <span class="n">initialization_trace</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_sd&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">)]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                    <span class="n">mu</span> <span class="o">=</span> <span class="n">initialization_trace</span><span class="p">[</span><span class="s2">&quot;beta_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">)]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">sd</span> <span class="o">=</span> <span class="n">initialization_trace</span><span class="p">[</span><span class="s2">&quot;beta_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">)]</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">()[</span><span class="n">node</span><span class="p">][</span><span class="s2">&quot;parameters&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;beta_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">),</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sd</span><span class="p">,</span>
+                                                          <span class="n">shape</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">parent_names</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">()[</span><span class="n">node</span><span class="p">][</span><span class="s2">&quot;sd&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Exponential</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_sd&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">),</span> <span class="n">lam</span><span class="o">=</span><span class="n">node_sd</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">g</span></div>
+
+<div class="viewcode-block" id="McmcSampler.build_bayesian_network"><a class="viewcode-back" href="../../../dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler.build_bayesian_network">[docs]</a>    <span class="k">def</span> <span class="nf">build_bayesian_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nx</span><span class="o">.</span><span class="n">topological_sort</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">()[</span><span class="n">node</span><span class="p">][</span><span class="s2">&quot;parent_names&quot;</span><span class="p">]:</span>
+                <span class="n">mu</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">()[</span><span class="n">node</span><span class="p">][</span><span class="s2">&quot;parameters&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># intercept</span>
+                <span class="n">mu</span> <span class="o">+=</span> <span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">()[</span><span class="n">node</span><span class="p">][</span><span class="s2">&quot;parent_names&quot;</span><span class="p">]],</span>
+                                  <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">()[</span><span class="n">node</span><span class="p">][</span><span class="s2">&quot;parameters&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span>
+                <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">()[</span><span class="n">node</span><span class="p">][</span><span class="s2">&quot;variable_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span>
+                    <span class="n">sd</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">()[</span><span class="n">node</span><span class="p">][</span><span class="s2">&quot;sd&quot;</span><span class="p">]</span>
+                    <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">()[</span><span class="n">node</span><span class="p">][</span><span class="s2">&quot;variable&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">),</span>
+                                                            <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sd</span><span class="p">,</span>
+                                                            <span class="n">observed</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="n">node</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">()[</span><span class="n">node</span><span class="p">][</span><span class="s2">&quot;variable_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span>
+                    <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">()[</span><span class="n">node</span><span class="p">][</span><span class="s2">&quot;variable&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">),</span>
+                                                               <span class="n">logit_p</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span>
+                                                               <span class="n">observed</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="n">node</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unrecognized variable type: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">()[</span><span class="n">node</span><span class="p">][</span><span class="s2">&quot;variable_type&quot;</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">g</span></div>
+
+<div class="viewcode-block" id="McmcSampler.fit_causal_model"><a class="viewcode-back" href="../../../dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler.fit_causal_model">[docs]</a>    <span class="k">def</span> <span class="nf">fit_causal_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">data_types</span><span class="p">,</span> <span class="n">initialization_trace</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">nx</span><span class="o">.</span><span class="n">is_directed_acyclic_graph</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+                <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_types</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">data_types</span><span class="p">)</span>
+                <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_parents</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+                <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_parameters</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">initialization_trace</span><span class="o">=</span><span class="n">initialization_trace</span><span class="p">)</span>
+                <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_bayesian_network</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+                <span class="n">trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Graph is not a DAG!&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">g</span><span class="p">,</span> <span class="n">trace</span></div>
+
+<div class="viewcode-block" id="McmcSampler.sample_prior_causal_model"><a class="viewcode-back" href="../../../dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler.sample_prior_causal_model">[docs]</a>    <span class="k">def</span> <span class="nf">sample_prior_causal_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">data_types</span><span class="p">,</span> <span class="n">initialization_trace</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">nx</span><span class="o">.</span><span class="n">is_directed_acyclic_graph</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+                <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_types</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">data_types</span><span class="p">)</span>
+                <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_parents</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+                <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_parameters</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">initialization_trace</span><span class="o">=</span><span class="n">initialization_trace</span><span class="p">)</span>
+                <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_bayesian_network</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+                <span class="n">trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_prior_predictive</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Graph is not a DAG!&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">g</span><span class="p">,</span> <span class="n">trace</span></div>
+
+<div class="viewcode-block" id="McmcSampler.do_x_surgery"><a class="viewcode-back" href="../../../dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler.do_x_surgery">[docs]</a>    <span class="k">def</span> <span class="nf">do_x_surgery</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">xi</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">remove_edges_from</span><span class="p">([(</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">in_edges</span><span class="p">(</span><span class="n">xi</span><span class="p">)])</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">()[</span><span class="n">xi</span><span class="p">][</span><span class="s2">&quot;parent_names&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">g</span></div>
+
+<div class="viewcode-block" id="McmcSampler.make_intervention_effective"><a class="viewcode-back" href="../../../dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler.make_intervention_effective">[docs]</a>    <span class="k">def</span> <span class="nf">make_intervention_effective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep_original_treatment</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span></div>
+
+<div class="viewcode-block" id="McmcSampler.do_sample"><a class="viewcode-back" href="../../../dowhy.do_samplers.html#dowhy.do_samplers.mcmc_sampler.McmcSampler.do_sample">[docs]</a>    <span class="k">def</span> <span class="nf">do_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="n">g_for_surgery</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="p">)</span>
+        <span class="n">g_modified</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_x_surgery</span><span class="p">(</span><span class="n">g_for_surgery</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_intervention_effective</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">g_modified</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_prior_causal_model</span><span class="p">(</span><span class="n">g_modified</span><span class="p">,</span>
+                                                           <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">,</span>
+                                                           <span class="bp">self</span><span class="o">.</span><span class="n">_variable_types</span><span class="p">,</span>
+                                                           <span class="n">initialization_trace</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_trace</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">trace</span> <span class="ow">and</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_treatment_names</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">trace</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_construct_sampler</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: v0.1.1-alpha
+    <span class="fa fa-caret-down"></span>
+  </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="../../../../v0.1-alpha/index.html">v0.1-alpha</a></dd>
+            <dd><a href="mcmc_sampler.html">v0.1.1-alpha</a></dd>
+            <dd><a href="../../../../v0.2/index.html">v0.2</a></dd>
+            <dd><a href="../../../../v0.4/index.html">v0.4</a></dd>
+            <dd><a href="../../../../v0.5/index.html">v0.5</a></dd>
+            <dd><a href="../../../../v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="../../../../v0.6/index.html">v0.6</a></dd>
+            <dd><a href="../../../../v0.7/index.html">v0.7</a></dd>
+            <dd><a href="../../../../v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="../../../../v0.8/index.html">v0.8</a></dd>
+        </dl>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
