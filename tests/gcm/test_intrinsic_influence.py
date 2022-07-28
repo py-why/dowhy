@@ -137,7 +137,7 @@ def test_intrinsic_causal_influence_categorical_2():
 
     assert np.sum([iccs[key] for key in iccs]) == approx(-expected_output_empty_subset, abs=0.05)
 
-
+@mark.advanced
 @flaky(max_runs=3)
 def test_given_only_categorical_data_when_estimate_icc_then_does_not_fail():
     causal_model = StructuralCausalModel(nx.DiGraph([('X0', 'X1'), ('X1', 'X2'), ('X2', 'X3')]))
