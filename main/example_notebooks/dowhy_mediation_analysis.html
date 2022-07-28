@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mediation analysis with DoWhy: Direct and Indirect Effects &mdash; DoWhy | An end-to-end library for causal inference  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions" href="dowhy_demo_dummy_outcome_refuter.html" />
+    <link rel="prev" title="Conditional Average Treatment Effects (CATE) with DoWhy and EconML" href="dowhy-conditional-treatment-effects.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
+          </a>
+              <div class="version">
+                main
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/intro.html">Introduction to DoWhy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_simple_example.html">Quick-start notebook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/comparison.html">Comparison to other packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/cite.html">Citing this package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/causality_intro.html">Introduction to causality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/effect_inference/index.html">Effect inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gcm_based_inference/index.html">GCM-based inference (Experimental)</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="nb_index.html">Example notebooks</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph_conditional_independence_refuter.html">Testing Assumptions in model with DoWhy: A simple example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy_interpreter.html">DoWhy: Interpreters for Causal Estimators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcm_basic_example.html">Basic Example for GCM-Based Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcm_draw_samples.html">Basic Example for generating samples from a GCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy_refutation_testing.html">Applying refutation tests to the Lalonde and IHDP datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Mediation analysis with DoWhy: Direct and Indirect Effects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Creating-a-dataset">Creating a dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Step-1:-Modeling-the-causal-mechanism">Step 1: Modeling the causal mechanism</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Step-2:-Identifying-the-natural-direct-and-indirect-effects">Step 2: Identifying the natural direct and indirect effects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Step-3:-Estimation-of-the-effect">Step 3: Estimation of the effect</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Natural-Indirect-Effect">Natural Indirect Effect</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Natural-Direct-Effect">Natural Direct Effect</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Step-4:-Refutations">Step 4: Refutations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy_multiple_treatments.html">Estimating effect of multiple treatments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcm_rca_microservice_architecture.html">Root cause analysis (RCA) of latencies in a microservice architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcm_supply_chain_dist_change.html">Root causes of changes in a supply chain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcm_counterfactual_medical_dry_eyes.html">Counterfactual analysis in a medical case using a GCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcm_401k_analysis.html">Impact of 401(k) eligibility on net financial assets</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials/Case studies</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">CATE estimation with DoWhy+EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_example_effect_of_memberrewards_program.html">Effect of membership rewards program</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">Understanding hotel booking cancellations</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing to DoWhy</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../code_repo.html">Code repository &amp; Versions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dowhy.html">dowhy package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DoWhy | An end-to-end library for causal inference</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="nb_index.html">Example notebooks</a> &raquo;</li>
+      <li>Mediation analysis with DoWhy: Direct and Indirect Effects</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/example_notebooks/dowhy_mediation_analysis.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.jp-RenderedHTMLCommon thead,
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+.jp-RenderedHTMLCommon th,
+div.rendered_html th {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+.jp-RenderedHTMLCommon tbody tr:hover,
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="Mediation-analysis-with-DoWhy:-Direct-and-Indirect-Effects">
+<h1>Mediation analysis with DoWhy: Direct and Indirect Effects<a class="headerlink" href="#Mediation-analysis-with-DoWhy:-Direct-and-Indirect-Effects" title="Permalink to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+
+<span class="c1"># Warnings and logging</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+keywords are unexpanded, not using
+</pre></div></div>
+</div>
+<section id="Creating-a-dataset">
+<h2>Creating a dataset<a class="headerlink" href="#Creating-a-dataset" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Creating a dataset with a single confounder and a single mediator (num_frontdoor_variables)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">linear_dataset</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">num_common_causes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+                                     <span class="n">num_instruments</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_effect_modifiers</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                     <span class="n">num_treatments</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                     <span class="n">num_frontdoor_variables</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                     <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                    <span class="n">outcome_is_binary</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+        FD0        W0        v0         y
+0 -1.823686  0.901911 -0.836992 -2.570407
+1  0.487328  0.714801  0.110568  3.260632
+2  0.309314  0.419460  0.526796  1.981921
+3  0.029145  0.620813  0.646814  1.753865
+4 -0.680520 -0.610968  0.374036 -3.494483
+</pre></div></div>
+</div>
+</section>
+<section id="Step-1:-Modeling-the-causal-mechanism">
+<h2>Step 1: Modeling the causal mechanism<a class="headerlink" href="#Step-1:-Modeling-the-causal-mechanism" title="Permalink to this heading"></a></h2>
+<p>We create a dataset following a causal graph based on the frontdoor criterion. That is, there is no direct effect of the treatment on outcome; all effect is mediated through the frontdoor variable FD0.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span><span class="n">df</span><span class="p">,</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;gml_graph&quot;</span><span class="p">],</span>
+                   <span class="n">missing_nodes_as_confounders</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_dowhy_mediation_analysis_5_0.png" src="../_images/example_notebooks_dowhy_mediation_analysis_5_0.png" />
+</div>
+</div>
+</section>
+<section id="Step-2:-Identifying-the-natural-direct-and-indirect-effects">
+<h2>Step 2: Identifying the natural direct and indirect effects<a class="headerlink" href="#Step-2:-Identifying-the-natural-direct-and-indirect-effects" title="Permalink to this heading"></a></h2>
+<p>We use the <code class="docutils literal notranslate"><span class="pre">estimand_type</span></code> argument to specify that the target estimand should be for a <strong>natural direct effect</strong> or the <strong>natural indirect effect</strong>. For definitions, see <a class="reference external" href="https://ftp.cs.ucla.edu/pub/stat_ser/r389-imai-etal-commentary-r421-reprint.pdf">Interpretation and Identification of Causal Mediation</a> by Judea Pearl.</p>
+<p><strong>Natural direct effect</strong>: Effect due to the path v0-&gt;y</p>
+<p><strong>Natural indirect effect</strong>: Effect due to the path v0-&gt;FD0-&gt;y (mediated by FD0).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Natural direct effect (nde)</span>
+<span class="n">identified_estimand_nde</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">estimand_type</span><span class="o">=</span><span class="s2">&quot;nonparametric-nde&quot;</span><span class="p">,</span>
+                                            <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand_nde</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Estimand type: nonparametric-nde
+
+### Estimand : 1
+Estimand name: mediation
+Estimand expression:
+ ⎡  d         ⎤
+E⎢─────(y|FD0)⎥
+ ⎣d[v₀]       ⎦
+Estimand assumption 1, Mediation: FD0 intercepts (blocks) all directed paths from v0 to y except the path {v0}→{y}.
+Estimand assumption 2, First-stage-unconfoundedness: If U→{v0} and U→{FD0} then P(FD0|v0,U) = P(FD0|v0)
+Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→y then P(y|FD0, v0, U) = P(y|FD0, v0)
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Natural indirect effect (nie)</span>
+<span class="n">identified_estimand_nie</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">estimand_type</span><span class="o">=</span><span class="s2">&quot;nonparametric-nie&quot;</span><span class="p">,</span>
+                                            <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand_nie</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Estimand type: nonparametric-nie
+
+### Estimand : 1
+Estimand name: mediation
+Estimand expression:
+ ⎡  d         d         ⎤
+E⎢──────(y)⋅─────([FD₀])⎥
+ ⎣d[FD₀]    d[v₀]       ⎦
+Estimand assumption 1, Mediation: FD0 intercepts (blocks) all directed paths from v0 to y except the path {v0}→{y}.
+Estimand assumption 2, First-stage-unconfoundedness: If U→{v0} and U→{FD0} then P(FD0|v0,U) = P(FD0|v0)
+Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→y then P(y|FD0, v0, U) = P(y|FD0, v0)
+
+</pre></div></div>
+</div>
+</section>
+<section id="Step-3:-Estimation-of-the-effect">
+<h2>Step 3: Estimation of the effect<a class="headerlink" href="#Step-3:-Estimation-of-the-effect" title="Permalink to this heading"></a></h2>
+<p>Currently only two stage linear regression is supported for estimation. We plan to add a non-parametric Monte Carlo method soon as described in <a class="reference external" href="https://projecteuclid.org/euclid.ss/1280841733">Imai, Keele and Yamamoto (2010)</a>.</p>
+<section id="Natural-Indirect-Effect">
+<h3>Natural Indirect Effect<a class="headerlink" href="#Natural-Indirect-Effect" title="Permalink to this heading"></a></h3>
+<p>The estimator converts the mediation effect estimation to a series of backdoor effect estimations. 1. The first-stage model estimates the effect from treatment (v0) to the mediator (FD0). 2. The second-stage model estimates the effect from mediator (FD0) to the outcome (Y).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">dowhy.causal_estimators.linear_regression_estimator</span>
+<span class="n">causal_estimate_nie</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand_nie</span><span class="p">,</span>
+                                        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;mediation.two_stage_regression&quot;</span><span class="p">,</span>
+                                       <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                       <span class="n">test_significance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                        <span class="n">method_params</span> <span class="o">=</span> <span class="p">{</span>
+                                            <span class="s1">&#39;first_stage_model&#39;</span><span class="p">:</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">causal_estimators</span><span class="o">.</span><span class="n">linear_regression_estimator</span><span class="o">.</span><span class="n">LinearRegressionEstimator</span><span class="p">,</span>
+                                            <span class="s1">&#39;second_stage_model&#39;</span><span class="p">:</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">causal_estimators</span><span class="o">.</span><span class="n">linear_regression_estimator</span><span class="o">.</span><span class="n">LinearRegressionEstimator</span>
+                                        <span class="p">}</span>
+                                       <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_nie</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+two_stage_regression
+{&#39;control_value&#39;: 0, &#39;treatment_value&#39;: 1, &#39;test_significance&#39;: False, &#39;evaluate_effect_strength&#39;: False, &#39;confidence_intervals&#39;: False, &#39;target_units&#39;: &#39;ate&#39;, &#39;effect_modifiers&#39;: [], &#39;first_stage_model&#39;: &lt;class &#39;dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator&#39;&gt;, &#39;second_stage_model&#39;: &lt;class &#39;dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator&#39;&gt;}
+{&#39;control_value&#39;: 0, &#39;treatment_value&#39;: 1, &#39;test_significance&#39;: False, &#39;evaluate_effect_strength&#39;: False, &#39;confidence_intervals&#39;: False, &#39;target_units&#39;: &#39;ate&#39;, &#39;effect_modifiers&#39;: [], &#39;first_stage_model&#39;: &lt;class &#39;dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator&#39;&gt;, &#39;second_stage_model&#39;: &lt;class &#39;dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator&#39;&gt;}
+*** Causal Estimate ***
+
+## Identified estimand
+Estimand type: nonparametric-nie
+
+### Estimand : 1
+Estimand name: mediation
+Estimand expression:
+ ⎡  d         d         ⎤
+E⎢──────(y)⋅─────([FD₀])⎥
+ ⎣d[FD₀]    d[v₀]       ⎦
+Estimand assumption 1, Mediation: FD0 intercepts (blocks) all directed paths from v0 to y except the path {v0}→{y}.
+Estimand assumption 2, First-stage-unconfoundedness: If U→{v0} and U→{FD0} then P(FD0|v0,U) = P(FD0|v0)
+Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→y then P(y|FD0, v0, U) = P(y|FD0, v0)
+
+## Realized estimand
+(b: FD0~v0+W0)*(b: y~FD0+W0)
+Target units: ate
+
+## Estimate
+Mean value: 5.926462229483253
+
+</pre></div></div>
+</div>
+<p>Note that the value equals the true value of the natural indirect effect (up to random noise).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_nie</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;ate&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+5.926462229483253 5.890323669507709
+</pre></div></div>
+</div>
+<p>The parameter is called <code class="docutils literal notranslate"><span class="pre">ate</span></code> because in the simulated dataset, the direct effect is set to be zero.</p>
+</section>
+<section id="Natural-Direct-Effect">
+<h3>Natural Direct Effect<a class="headerlink" href="#Natural-Direct-Effect" title="Permalink to this heading"></a></h3>
+<p>Now let us check whether the direct effect estimator returns the (correct) estimate of zero.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">causal_estimate_nde</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand_nde</span><span class="p">,</span>
+                                        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;mediation.two_stage_regression&quot;</span><span class="p">,</span>
+                                       <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                       <span class="n">test_significance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                        <span class="n">method_params</span> <span class="o">=</span> <span class="p">{</span>
+                                            <span class="s1">&#39;first_stage_model&#39;</span><span class="p">:</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">causal_estimators</span><span class="o">.</span><span class="n">linear_regression_estimator</span><span class="o">.</span><span class="n">LinearRegressionEstimator</span><span class="p">,</span>
+                                            <span class="s1">&#39;second_stage_model&#39;</span><span class="p">:</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">causal_estimators</span><span class="o">.</span><span class="n">linear_regression_estimator</span><span class="o">.</span><span class="n">LinearRegressionEstimator</span>
+                                        <span class="p">}</span>
+                                       <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_nde</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+two_stage_regression
+{&#39;control_value&#39;: 0, &#39;treatment_value&#39;: 1, &#39;test_significance&#39;: False, &#39;evaluate_effect_strength&#39;: False, &#39;confidence_intervals&#39;: False, &#39;target_units&#39;: &#39;ate&#39;, &#39;effect_modifiers&#39;: [], &#39;first_stage_model&#39;: &lt;class &#39;dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator&#39;&gt;, &#39;second_stage_model&#39;: &lt;class &#39;dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator&#39;&gt;}
+{&#39;control_value&#39;: 0, &#39;treatment_value&#39;: 1, &#39;test_significance&#39;: False, &#39;evaluate_effect_strength&#39;: False, &#39;confidence_intervals&#39;: False, &#39;target_units&#39;: &#39;ate&#39;, &#39;effect_modifiers&#39;: [], &#39;first_stage_model&#39;: &lt;class &#39;dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator&#39;&gt;, &#39;second_stage_model&#39;: &lt;class &#39;dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator&#39;&gt;}
+{&#39;control_value&#39;: 0, &#39;treatment_value&#39;: 1, &#39;test_significance&#39;: False, &#39;evaluate_effect_strength&#39;: False, &#39;confidence_intervals&#39;: False, &#39;target_units&#39;: &#39;ate&#39;, &#39;effect_modifiers&#39;: [], &#39;first_stage_model&#39;: &lt;class &#39;dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator&#39;&gt;, &#39;second_stage_model&#39;: &lt;class &#39;dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator&#39;&gt;}
+*** Causal Estimate ***
+
+## Identified estimand
+Estimand type: nonparametric-nde
+
+### Estimand : 1
+Estimand name: mediation
+Estimand expression:
+ ⎡  d         ⎤
+E⎢─────(y|FD0)⎥
+ ⎣d[v₀]       ⎦
+Estimand assumption 1, Mediation: FD0 intercepts (blocks) all directed paths from v0 to y except the path {v0}→{y}.
+Estimand assumption 2, First-stage-unconfoundedness: If U→{v0} and U→{FD0} then P(FD0|v0,U) = P(FD0|v0)
+Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→y then P(y|FD0, v0, U) = P(y|FD0, v0)
+
+## Realized estimand
+(b: y~v0+W0) - ((b: FD0~v0+W0)*(b: y~FD0+W0))
+Target units: ate
+
+## Estimate
+Mean value: -4.735006992540036e-05
+
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="Step-4:-Refutations">
+<h2>Step 4: Refutations<a class="headerlink" href="#Step-4:-Refutations" title="Permalink to this heading"></a></h2>
+<p>TODO</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dowhy-conditional-treatment-effects.html" class="btn btn-neutral float-left" title="Conditional Average Treatment Effects (CATE) with DoWhy and EconML" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dowhy_demo_dummy_outcome_refuter.html" class="btn btn-neutral float-right" title="A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: main
+    <span class="fa fa-caret-down"></span>
+  </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="../../v0.1-alpha/index.html">v0.1-alpha</a></dd>
+            <dd><a href="../../v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+            <dd><a href="../../v0.2/index.html">v0.2</a></dd>
+            <dd><a href="../../v0.4/index.html">v0.4</a></dd>
+            <dd><a href="../../v0.5/index.html">v0.5</a></dd>
+            <dd><a href="../../v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="../../v0.6/index.html">v0.6</a></dd>
+            <dd><a href="../../v0.7/index.html">v0.7</a></dd>
+            <dd><a href="../../v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="../../v0.8/index.html">v0.8</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="dowhy_mediation_analysis.html">main</a></dd>
+        </dl>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

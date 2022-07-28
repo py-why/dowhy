@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dowhy.gcm.validation &mdash; DoWhy | An end-to-end library for causal inference  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
+          </a>
+              <div class="version">
+                main
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/intro.html">Introduction to DoWhy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_simple_example.html">Quick-start notebook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/comparison.html">Comparison to other packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/cite.html">Citing this package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/causality_intro.html">Introduction to causality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/effect_inference/index.html">Effect inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/gcm_based_inference/index.html">GCM-based inference (Experimental)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/nb_index.html">Example notebooks</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials/Case studies</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/tutorial-causalinference-machinelearning-using-dowhy-econml.html">CATE estimation with DoWhy+EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_example_effect_of_memberrewards_program.html">Effect of membership rewards program</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">Understanding hotel booking cancellations</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing/index.html">Contributing to DoWhy</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../code_repo.html">Code repository &amp; Versions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dowhy.html">dowhy package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">DoWhy | An end-to-end library for causal inference</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>dowhy.gcm.validation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for dowhy.gcm.validation</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Contains a method to reject the causal graph and validate causal mechanisms such as post non-linear models.</span>
+
+<span class="sd">Classes and functions in this module should be considered experimental, meaning there might be breaking API changes in</span>
+<span class="sd">the future.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">auto</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span>
+
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">statsmodels.stats.multitest</span> <span class="kn">import</span> <span class="n">multipletests</span>
+
+<span class="kn">from</span> <span class="nn">dowhy.gcm.cms</span> <span class="kn">import</span> <span class="n">InvertibleStructuralCausalModel</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.graph</span> <span class="kn">import</span> <span class="n">DirectedGraph</span><span class="p">,</span> <span class="n">get_ordered_predecessors</span><span class="p">,</span> <span class="n">validate_causal_graph</span><span class="p">,</span> <span class="n">is_root_node</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.independence_test</span> <span class="kn">import</span> <span class="n">kernel_based</span>
+
+
+<div class="viewcode-block" id="RejectionResult"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.validation.RejectionResult">[docs]</a><span class="k">class</span> <span class="nc">RejectionResult</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">REJECTED</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">NOT_REJECTED</span> <span class="o">=</span> <span class="n">auto</span><span class="p">(),</span></div>
+
+
+<div class="viewcode-block" id="refute_causal_structure"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.validation.refute_causal_structure">[docs]</a><span class="k">def</span> <span class="nf">refute_causal_structure</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">:</span> <span class="n">DirectedGraph</span><span class="p">,</span>
+                            <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                            <span class="n">independence_test</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">kernel_based</span><span class="p">,</span>
+                            <span class="n">conditional_independence_test</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span>
+                                <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span>
+                            <span class="o">=</span> <span class="n">kernel_based</span><span class="p">,</span>
+                            <span class="n">significance_level</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+                            <span class="n">fdr_control_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;fdr_bh&#39;</span><span class="p">)</span> \
+        <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">RejectionResult</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]]]]]:</span>
+    <span class="sd">&quot;&quot;&quot;Validates the assumptions in a causal graph against data. To this end, at each node, we test if the node is dependent on each of its parents, and test the local Markov condition.</span>
+<span class="sd">    Note that valid local Markov conditions also imply a valid global Markov condition.</span>
+
+<span class="sd">    :param causal_graph: A directed acyclic graph (DAG).</span>
+<span class="sd">    :param data: Observations of variables in the DAG.</span>
+<span class="sd">    :param independence_test: Independence test to use for checking edge dependencies.</span>
+<span class="sd">    :param conditional_independence_test: Conditional independence test to use for checking local Markov condition.</span>
+<span class="sd">    :param significance_level: Significance level for (conditional) independence tests.</span>
+<span class="sd">    :param fdr_control_method: Method for false discovery rate (FDR) control. For various options, please refer to `this page &lt;https://www.statsmodels.org/dev/generated/statsmodels.stats.multitest.multipletests.html&gt;`_.</span>
+<span class="sd">    :return: Outcome of the validation process. The first element of the tuple indicates whether the graph is valid w.r.t. given data, and the second element gives the summary of tests at each node. An example for X-&gt;Y-&gt;Z:</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        [True, {&#39;X&#39;: {&#39;local_markov_test&#39;: {}, &#39;edge_dependence_test&#39;: {}},</span>
+<span class="sd">                &#39;Y&#39;: {&#39;local_markov_test&#39;: {}, &#39;edge_dependence_test&#39;: {&#39;X&#39;: {&#39;p_value&#39;: 0.5, &#39;fdr_adjusted_p_value&#39;: 0.5, &#39;success&#39;: True}}},</span>
+<span class="sd">                &#39;Z&#39;: {&#39;local_markov_test&#39;: {&#39;p_value&#39;: 0.0, &#39;fdr_adjusted_p_value&#39;: 0.5, &#39;success&#39;: False},</span>
+<span class="sd">                      &#39;edge_dependence_test&#39;: {&#39;Y&#39;: {&#39;p_value&#39;: 0.5, &#39;fdr_adjusted_p_value&#39;: 0.5, &#39;success&#39;: True}}}}]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">is_dag_valid</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">validation_summary</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">all_p_values</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">causal_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+        <span class="n">parents</span> <span class="o">=</span> <span class="n">get_ordered_predecessors</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+        <span class="n">non_descendants</span> <span class="o">=</span> <span class="n">_get_non_descendants</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">exclude_parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">lmc_test_result</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">parents</span> <span class="ow">and</span> <span class="n">non_descendants</span><span class="p">:</span>
+            <span class="c1"># test local Markov condition, null hypothesis: conditional independence</span>
+            <span class="n">lmc_p_value</span> <span class="o">=</span> <span class="n">conditional_independence_test</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                                                        <span class="n">data</span><span class="p">[</span><span class="n">non_descendants</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                                                        <span class="n">data</span><span class="p">[</span><span class="n">parents</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="n">lmc_test_result</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">p_value</span><span class="o">=</span><span class="n">lmc_p_value</span><span class="p">)</span>
+            <span class="n">all_p_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lmc_p_value</span><span class="p">)</span>
+
+        <span class="c1"># test edge dependence, null hypothesis: independence</span>
+        <span class="n">edge_dependence_result</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">parents</span><span class="p">:</span>
+            <span class="n">edge_p_value</span> <span class="o">=</span> <span class="n">independence_test</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">parent</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="n">edge_dependence_result</span><span class="p">[</span><span class="n">parent</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">p_value</span><span class="o">=</span><span class="n">edge_p_value</span><span class="p">)</span>
+            <span class="n">all_p_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge_p_value</span><span class="p">)</span>
+
+        <span class="n">validation_summary</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">local_markov_test</span><span class="o">=</span><span class="n">lmc_test_result</span><span class="p">,</span>
+            <span class="n">edge_dependence_test</span><span class="o">=</span><span class="n">edge_dependence_result</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">fdr_control_method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">successes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">all_p_values</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">significance_level</span>
+        <span class="n">adjusted_p_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">successes</span><span class="p">))</span>
+        <span class="n">adjusted_p_values</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">multipletests_result</span> <span class="o">=</span> <span class="n">multipletests</span><span class="p">(</span><span class="n">all_p_values</span><span class="p">,</span> <span class="n">significance_level</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">fdr_control_method</span><span class="p">)</span>
+        <span class="n">successes</span> <span class="o">=</span> <span class="n">multipletests_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">adjusted_p_values</span> <span class="o">=</span> <span class="n">multipletests_result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># The order of the p-values added to the list is deterministic.</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">causal_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;p_value&#39;</span> <span class="ow">in</span> <span class="n">validation_summary</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s1">&#39;local_markov_test&#39;</span><span class="p">]:</span>
+            <span class="n">validation_summary</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s1">&#39;local_markov_test&#39;</span><span class="p">][</span><span class="s1">&#39;fdr_adjusted_p_value&#39;</span><span class="p">]</span> \
+                <span class="o">=</span> <span class="n">adjusted_p_values</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">validation_summary</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s1">&#39;local_markov_test&#39;</span><span class="p">][</span><span class="s1">&#39;success&#39;</span><span class="p">]</span> \
+                <span class="o">=</span> <span class="ow">not</span> <span class="n">successes</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">is_dag_valid</span> <span class="o">&amp;=</span> <span class="ow">not</span> <span class="n">successes</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">get_ordered_predecessors</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+            <span class="n">validation_summary</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s1">&#39;edge_dependence_test&#39;</span><span class="p">][</span><span class="n">parent</span><span class="p">][</span><span class="s1">&#39;fdr_adjusted_p_value&#39;</span><span class="p">]</span> \
+                <span class="o">=</span> <span class="n">adjusted_p_values</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">validation_summary</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s1">&#39;edge_dependence_test&#39;</span><span class="p">][</span><span class="n">parent</span><span class="p">][</span><span class="s1">&#39;success&#39;</span><span class="p">]</span> \
+                <span class="o">=</span> <span class="n">successes</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">is_dag_valid</span> <span class="o">&amp;=</span> <span class="n">successes</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">is_dag_valid</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">RejectionResult</span><span class="o">.</span><span class="n">NOT_REJECTED</span><span class="p">,</span> <span class="n">validation_summary</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">RejectionResult</span><span class="o">.</span><span class="n">REJECTED</span><span class="p">,</span> <span class="n">validation_summary</span></div>
+
+
+<div class="viewcode-block" id="refute_invertible_model"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.validation.refute_invertible_model">[docs]</a><span class="k">def</span> <span class="nf">refute_invertible_model</span><span class="p">(</span><span class="n">causal_model</span><span class="p">:</span> <span class="n">InvertibleStructuralCausalModel</span><span class="p">,</span>
+                            <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                            <span class="n">independence_test</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">kernel_based</span><span class="p">,</span>
+                            <span class="n">significance_level</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+                            <span class="n">fdr_control_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RejectionResult</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Validate the assumption that the structural causal models can be represented by a</span>
+<span class="sd">    :py:class:`InvertibleFunctionalCausalModel &lt;dowhy.gcm.graph.InvertibleFunctionalCausalModel&gt;` (e.g. the causal mechanisms are</span>
+<span class="sd">    :py:class:`AdditiveNoiseModels &lt;dowhy.gcm.AdditiveNoiseModel&gt;` and/or :py:class:`PostNonlinearModels &lt;dowhy.gcm.PostNonlinearModel&gt;`).</span>
+<span class="sd">    For this, it is checked if the residual of a causal mechanism is independent of the mechanism&#39;s input</span>
+<span class="sd">    (i.e. we assume causal sufficiency here). For instance, :py:class:`PostNonlinearModels &lt;dowhy.gcm.PostNonlinearModel&gt;` represent</span>
+<span class="sd">        Y = f(g(X) + N),</span>
+<span class="sd">    where f is invertible (g does not need to be), X are the parents of Y and N is (assumed to be) independent noise.</span>
+<span class="sd">    The latter point is important here. For given data, we can then reconstruct N and perform an independence test between X and N.</span>
+
+<span class="sd">    Note that this method only validates the causal mechanisms and not the graph structure.</span>
+
+<span class="sd">    For the case of post non-linear models, see the following paper for more details:</span>
+<span class="sd">        Zhang, K., and A. Hyvärinen.</span>
+<span class="sd">        On the Identifiability of the Post-Nonlinear Causal Model.</span>
+<span class="sd">        25th Conference on Uncertainty in Artificial Intelligence (UAI 2009). AUAI Press, 2009.</span>
+
+<span class="sd">    :param causal_model: A fitted invertible structural causal model.</span>
+<span class="sd">    :param data: Observations of variables in the DAG.</span>
+<span class="sd">    :param independence_test: Independence test to use for checking if residual and input are dependent.</span>
+<span class="sd">    :param significance_level: Significance level for deciding whether input and residual is dependent.</span>
+<span class="sd">    :param fdr_control_method: Method for false discovery rate (FDR) control. For various options, please refer to `this page &lt;https://www.statsmodels.org/dev/generated/statsmodels.stats.multitest.multipletests.html&gt;`_.</span>
+<span class="sd">    :return: The outcome of the validation. The causal model can not be rejected if all causal mechanisms are consistent with</span>
+<span class="sd">             the invertible model assumption.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">validate_causal_graph</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+
+    <span class="n">all_p_values</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_root_node</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parents_samples</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">get_ordered_predecessors</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">node</span><span class="p">)]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+            <span class="n">residuals</span> <span class="o">=</span> <span class="n">causal_model</span><span class="o">.</span><span class="n">causal_mechanism</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="o">.</span><span class="n">estimate_noise</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">parents_samples</span><span class="p">)</span>
+
+            <span class="n">all_p_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">independence_test</span><span class="p">(</span><span class="n">parents_samples</span><span class="p">,</span> <span class="n">residuals</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">fdr_control_method</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_p_values</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">RejectionResult</span><span class="o">.</span><span class="n">NOT_REJECTED</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">all_p_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">significance_level</span><span class="p">)</span> \
+            <span class="k">else</span> <span class="n">RejectionResult</span><span class="o">.</span><span class="n">REJECTED</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">RejectionResult</span><span class="o">.</span><span class="n">REJECTED</span> \
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">multipletests</span><span class="p">(</span><span class="n">all_p_values</span><span class="p">,</span> <span class="n">significance_level</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">fdr_control_method</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> \
+            <span class="k">else</span> <span class="n">RejectionResult</span><span class="o">.</span><span class="n">NOT_REJECTED</span></div>
+
+
+<span class="k">def</span> <span class="nf">_get_non_descendants</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">:</span> <span class="n">DirectedGraph</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">exclude_parents</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+    <span class="n">nodes_to_exclude</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">descendants</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span><span class="o">.</span><span class="n">union</span><span class="p">({</span><span class="n">node</span><span class="p">})</span>
+    <span class="k">if</span> <span class="n">exclude_parents</span><span class="p">:</span>
+        <span class="n">nodes_to_exclude</span> <span class="o">=</span> <span class="n">nodes_to_exclude</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">causal_graph</span><span class="o">.</span><span class="n">predecessors</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">causal_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">nodes_to_exclude</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: main
+    <span class="fa fa-caret-down"></span>
+  </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="../../../../v0.1-alpha/index.html">v0.1-alpha</a></dd>
+            <dd><a href="../../../../v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+            <dd><a href="../../../../v0.2/index.html">v0.2</a></dd>
+            <dd><a href="../../../../v0.4/index.html">v0.4</a></dd>
+            <dd><a href="../../../../v0.5/index.html">v0.5</a></dd>
+            <dd><a href="../../../../v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="../../../../v0.6/index.html">v0.6</a></dd>
+            <dd><a href="../../../../v0.7/index.html">v0.7</a></dd>
+            <dd><a href="../../../../v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="../../../../v0.8/index.html">v0.8</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="validation.html">main</a></dd>
+        </dl>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Computing Counterfactuals &mdash; DoWhy | An end-to-end library for causal inference  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Estimating Average Causal Effects" href="average_causal_effect.html" />
+    <link rel="prev" title="Simulating the Impact of Interventions" href="simulate_impact_of_interventions.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
+          </a>
+              <div class="version">
+                main
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/intro.html">Introduction to DoWhy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_simple_example.html">Quick-start notebook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/comparison.html">Comparison to other packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/cite.html">Citing this package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../causality_intro.html">Introduction to causality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../effect_inference/index.html">Effect inference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">GCM-based inference (Experimental)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Answering Causal Questions</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="quantify_arrow_strength.html">Quantifying Arrow Strength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quantify_intrinsic_causal_influence.html">Quantifying Intrinsic Causal Influence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="simulate_impact_of_interventions.html">Simulating the Impact of Interventions</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Computing Counterfactuals</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#how-to-use-it">How to use it</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#understanding-the-method">Understanding the method</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="average_causal_effect.html">Estimating Average Causal Effects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="attribute_distributional_changes.html">Attributing Distributional Changes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../draw_samples.html">Generate samples from a GCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../customizing_model_assignment.html">Customizing Causal Mechanism Assignment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../estimating_confidence_intervals.html">Estimating Confidence Intervals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../independence_tests.html">Independence Tests</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/nb_index.html">Example notebooks</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials/Case studies</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/tutorial-causalinference-machinelearning-using-dowhy-econml.html">CATE estimation with DoWhy+EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/dowhy_example_effect_of_memberrewards_program.html">Effect of membership rewards program</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example_notebooks/DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">Understanding hotel booking cancellations</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing/index.html">Contributing to DoWhy</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../code_repo.html">Code repository &amp; Versions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dowhy.html">dowhy package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">DoWhy | An end-to-end library for causal inference</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">GCM-based inference (Experimental)</a> &raquo;</li>
+          <li><a href="index.html">Answering Causal Questions</a> &raquo;</li>
+      <li>Computing Counterfactuals</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/user_guide/gcm_based_inference/answering_causal_questions/computing_counterfactuals.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="computing-counterfactuals">
+<h1>Computing Counterfactuals<a class="headerlink" href="#computing-counterfactuals" title="Permalink to this heading"></a></h1>
+<p>By computing counterfactuals, we answer the question:</p>
+<blockquote>
+<div><p>I observed a certain outcome z for a variable Z where variable X was set to a value x. What
+would have happened to the value of Z, had I intervened on X to assign it a different value x’?</p>
+</div></blockquote>
+<p>As a concrete example, we can imagine the following:</p>
+<blockquote>
+<div><p>I’m seeing unhealthy high levels of my <a class="reference external" href="https://www.google.com/search?q=cholesterol+ldl">cholesterol LDL</a> (Z=10). I didn’t take any medication
+against it in recent months (X=0). What would have happened to my cholesterol LDL level (Z),
+had I taken a medication dosage of 5g a day (X := 5)?</p>
+</div></blockquote>
+<section id="how-to-use-it">
+<h2>How to use it<a class="headerlink" href="#how-to-use-it" title="Permalink to this heading"></a></h2>
+<p>To see how the method works, let’s generate some data:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span><span class="o">,</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span><span class="o">,</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">gcm</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Y</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">X</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Z</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">Y</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">training_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Next, we’ll model cause-effect relationships as an invertible SCM and fit it to the data:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">InvertibleStructuralCausalModel</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">)]))</span> <span class="c1"># X -&gt; Y -&gt; Z</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">EmpiricalDistribution</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">training_data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Finally, let’s compute the counterfactual when intervening on X:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">counterfactual_samples</span><span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">causal_model</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">observed_data</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">Y</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">Z</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">])))</span>
+<span class="go">   X         Y         Z</span>
+<span class="go">0  2  4.034229  9.073294</span>
+</pre></div>
+</div>
+<p>As we can see, <span class="math notranslate nohighlight">\(X\)</span> takes our treatment-/intervention-value of 2, and <span class="math notranslate nohighlight">\(Y\)</span> and <span class="math notranslate nohighlight">\(Z\)</span>
+take deterministic values, based on our trained causal models and fixed observed data. I.e., based
+on the data generation process, if <span class="math notranslate nohighlight">\(X = 1\)</span>, <span class="math notranslate nohighlight">\(Y = 2\)</span>, we would expect <span class="math notranslate nohighlight">\(Z\)</span> to
+be 6, but we <em>observed</em> <span class="math notranslate nohighlight">\(Z = 3\)</span>, which means the particular noise value for <span class="math notranslate nohighlight">\(Z\)</span> in this
+particular sample is approximately -2.98. Now, given that we know this hidden noise factor, we can
+estimate the counterfactual value of <span class="math notranslate nohighlight">\(Z\)</span>, had we set <span class="math notranslate nohighlight">\(X := 2\)</span>, which is approximately
+9.07 (as can be seen in the result above).</p>
+<p>This shows that the observed data is used to calculate the noise data in the system. We can also
+provide these noise values directly, via:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">counterfactual_samples</span><span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">causal_model</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">noise_data</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Y</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.007913</span><span class="p">],</span> <span class="n">Z</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">2.97568</span><span class="p">])))</span>
+<span class="go">   X         Y         Z</span>
+<span class="go">0  2  4.034229  9.073293</span>
+</pre></div>
+</div>
+<p>As we see, with <span class="math notranslate nohighlight">\(X = 2\)</span> and <span class="math notranslate nohighlight">\(Y \approx 4.03\)</span>, <span class="math notranslate nohighlight">\(Z\)</span> should be approximately 12. But
+we know the hidden noise for this sample, approximately -2.98. So the counterfactual outcome
+is again <span class="math notranslate nohighlight">\(Z \approx 9.07\)</span>.</p>
+</section>
+<section id="understanding-the-method">
+<h2>Understanding the method<a class="headerlink" href="#understanding-the-method" title="Permalink to this heading"></a></h2>
+<p>Counterfactuals are very similar to <a class="reference internal" href="simulate_impact_of_interventions.html"><span class="doc">Simulating the Impact of Interventions</span></a>, with an important
+difference: when performing interventions, we look into the future, for counterfactuals we look into
+an alternative past. To reflect this in the computation, when performing interventions, we generate
+all noise using our causal models. For counterfactuals, we use the noise from actual observed data.</p>
+<p>To expand on our example above, we assume there are other factors that contribute to cholesterol
+levels, e.g. exercising or genetic predisposition. While we <em>assume</em> medication helps against high
+LDL levels, it’s important to take into account all other factors that could also help against it.
+We want to prove <em>what</em> has helped. Hence, it’s important to use the noise from the real data,
+not some generated noise from our generative models. Otherwise, I may be able to reduce my
+cholesterol LDL level in the counterfactual world, where I take medication (X := 5), but not because
+I took the medication, but because the <em>generated noise</em> of Z also just happened to be low and so
+caused a low value for Z. By taking the <em>real</em> noise value of Z (derived from the observed data of
+Z), I can prove that it was the medication that helped.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="simulate_impact_of_interventions.html" class="btn btn-neutral float-left" title="Simulating the Impact of Interventions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="average_causal_effect.html" class="btn btn-neutral float-right" title="Estimating Average Causal Effects" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, PyWhy contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: main
+    <span class="fa fa-caret-down"></span>
+  </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="../../../../v0.1-alpha/index.html">v0.1-alpha</a></dd>
+            <dd><a href="../../../../v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+            <dd><a href="../../../../v0.2/index.html">v0.2</a></dd>
+            <dd><a href="../../../../v0.4/index.html">v0.4</a></dd>
+            <dd><a href="../../../../v0.5/index.html">v0.5</a></dd>
+            <dd><a href="../../../../v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="../../../../v0.6/index.html">v0.6</a></dd>
+            <dd><a href="../../../../v0.7/index.html">v0.7</a></dd>
+            <dd><a href="../../../../v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="../../../../v0.8/user_guide/gcm_based_inference/answering_causal_questions/computing_counterfactuals.html">v0.8</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="computing_counterfactuals.html">main</a></dd>
+        </dl>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
