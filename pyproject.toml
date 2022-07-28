@@ -73,15 +73,10 @@ _flake8Errors = "flake8 . --count --select=E9,F63,F7,F82 --show-source --statist
 _flake8Warnings = "flake8 . --count --exit-zero --statistics"
 _black = 'black .'
 _isort = 'isort .'
-_preparePackage = "python setup.py check sdist bdist_wheel"
-_twine = "twine check dist/*"
 
 test = "pytest -v -m \"not advanced\""
 jupyter = "jupyter nbconvert --to html docs/source/example_notebooks/dowhy_simple_example.ipynb"
-
-[tool.poe.tasks.verifyPackage]
-sequence = ['_preparePackage', '_twine']
-ignore_fail = 'return_non_zero'
+verifyPackage = "twine check dist/*"
 
 # TODO: add formatting to build process
 [tool.poe.tasks.format]
