@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 from flaky import flaky
-from pytest import approx
+from pytest import approx, mark
 from sklearn.linear_model import LogisticRegression
 
 from dowhy.gcm import auto, fit, intrinsic_causal_influence, StructuralCausalModel
@@ -12,7 +12,7 @@ from dowhy.gcm.ml import create_hist_gradient_boost_classifier
 from dowhy.gcm.uncertainty import estimate_variance, estimate_entropy_of_probabilities
 from dowhy.gcm.util.general import apply_one_hot_encoding, fit_one_hot_encoders
 
-
+@mark.advanced
 @flaky(max_runs=3)
 def test_intrinsic_causal_influence_variance_linear():
     causal_model = StructuralCausalModel(nx.DiGraph([('X0', 'X1'), ('X1', 'X2'), ('X2', 'X3')]))
@@ -41,6 +41,7 @@ def test_intrinsic_causal_influence_variance_linear():
     assert np.sum([iccs[key] for key in iccs]) == approx(estimate_variance(X3), abs=0.5)
 
 
+@mark.advanced
 @flaky(max_runs=3)
 def test_intrinsic_causal_influence_categorical():
     causal_model = StructuralCausalModel(nx.DiGraph([('X0', 'X1'), ('X1', 'X2'), ('X2', 'X3')]))
@@ -81,7 +82,7 @@ def test_intrinsic_causal_influence_categorical():
 
     assert np.sum([iccs[key] for key in iccs]) == approx(-expected_output_empty_subset, abs=0.05)
 
-
+@mark.advanced
 @flaky(max_runs=3)
 def test_intrinsic_causal_influence_categorical_2():
     causal_model = StructuralCausalModel(nx.DiGraph([('X0', 'X1'), ('X1', 'X2'), ('X2', 'X3')]))

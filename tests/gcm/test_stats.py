@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from flaky import flaky
 from numpy.matlib import repmat
-from pytest import approx
+from pytest import approx, mark
 
 from dowhy.gcm.ml import create_hist_gradient_boost_classifier, create_hist_gradient_boost_regressor, \
     create_logistic_regression_classifier, create_linear_regressor
@@ -227,7 +227,7 @@ def test_marginal_expectation_independent_categorical_linear():
                                                         'randomize_columns_independently')),
                           axis=0)) == approx(0.2, abs=1)
 
-
+@mark.advanced
 @flaky(max_runs=5)
 def test_marginal_expectation_independent_continuous_nonlinear():
     X = np.random.normal(0, 1, (2000, 3))

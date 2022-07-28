@@ -1,6 +1,7 @@
 import networkx as nx
 import numpy as np
 import pandas as pd
+import pytest
 from flaky import flaky
 
 from dowhy.gcm import auto, fit, kernel_based, refute_invertible_model, \
@@ -151,7 +152,7 @@ def test_given_non_linear_data_and_correct_dag_when_refute_invertible_model_then
                                    fdr_control_method='fdr_bh') \
            == RejectionResult.NOT_REJECTED
 
-
+@pytest.mark.advanced
 @flaky(max_runs=2)
 def test_given_non_linear_data_and_incorrect_dag_when_refute_invertible_model_then_reject_model():
     data = _generate_simple_non_linear_data()
@@ -171,7 +172,7 @@ def test_given_non_linear_data_and_incorrect_dag_when_refute_invertible_model_th
                                    fdr_control_method='fdr_bh') \
            == RejectionResult.REJECTED
 
-
+@pytest.mark.advanced
 @flaky(max_runs=3)
 def test_given_non_linear_data_and_incorrect_dag_with_collider_when_refute_invertible_model_then_reject_model():
     data = _generate_simple_non_linear_data()
