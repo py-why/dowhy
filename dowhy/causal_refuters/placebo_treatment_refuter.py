@@ -5,9 +5,7 @@ import pandas as pd
 import logging
 from joblib import Parallel, delayed
 
-import tqdm
-from tqdm.notebook import tqdm
-
+from tqdm.auto import tqdm
 
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
@@ -148,7 +146,7 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         sample_estimates = Parallel(
             n_jobs=self._n_jobs, 
             verbose=self._verbose
-        )(delayed(refute_once)() for _ in tqdm(range(self._num_simulations), disable = not show_progress_bar, colour='green', desc="Refuting Estimates: "))
+        )(delayed(refute_once)() for _ in tqdm(range(self._num_simulations), disable = not show_progress_bar, colour=CausalRefuter.PROGRESS_BAR_COLOR, desc="Refuting Estimates: "))
         
         # for _ in range(self._num_simulations))
         sample_estimates = np.array(sample_estimates)

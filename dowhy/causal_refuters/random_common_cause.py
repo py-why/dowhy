@@ -4,8 +4,7 @@ import numpy as np
 import logging
 from joblib import Parallel, delayed
 
-import tqdm
-from tqdm.notebook import tqdm
+from tqdm.auto import tqdm
 
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
@@ -61,7 +60,7 @@ class RandomCommonCause(CausalRefuter):
         sample_estimates = Parallel(
             n_jobs=self._n_jobs,
             verbose=self._verbose
-        )(delayed(refute_once)() for _ in tqdm(range(self._num_simulations), colour='green', disable = not show_progress_bar, desc="Refuting Estimates: "))
+        )(delayed(refute_once)() for _ in tqdm(range(self._num_simulations), colour=CausalRefuter.PROGRESS_BAR_COLOR, disable = not show_progress_bar, desc="Refuting Estimates: "))
         sample_estimates = np.array(sample_estimates)
 
         refute = CausalRefutation(
