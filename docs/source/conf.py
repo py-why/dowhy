@@ -14,19 +14,14 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath("../../"))
 
+sys.path.insert(0, os.path.abspath("../../"))
 
 # -- Project information -----------------------------------------------------
 
 project = 'DoWhy | An end-to-end library for causal inference'
 copyright = '2022, PyWhy contributors'
 author = 'Amit Sharma, Emre Kiciman'
-
-# The short X.Y version
-version = '0.8'
-# The full version, including alpha/beta/rc tags
-release = ''
 
 
 # -- General configuration ---------------------------------------------------
@@ -43,7 +38,8 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.todo',
     'nbsphinx',
-    'sphinx_rtd_theme'
+    'sphinx_rtd_theme',
+    "sphinx_multiversion",
 ]
 
 autodoc_mock_imports = ['matplotlib', 'causalml', 'pymc3', 'econml']
@@ -70,7 +66,13 @@ language = 'en'
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '.ipynb_checkpoints']
+exclude_patterns = [
+    '_build', 'Thumbs.db', '.DS_Store', '.ipynb_checkpoints',
+    'example_notebooks/dowhy_ranking_methods.ipynb',
+    'example_notebooks/dowhy_optimize_backdoor_example.ipynb',  # need to check why str_to_dot fails here
+    'example_notebooks/dowhy_causal_discovery_example.ipynb',  # need to check why str_to_dot fails here
+    'example_notebooks/dowhy_twins_example.ipynb',
+]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -201,3 +203,6 @@ todo_include_todos = True
 # init docstrings should also be included in class
 autoclass_content = "both"
 
+smv_tag_whitelist = r'^v.*$'
+smv_branch_whitelist = "main"
+smv_released_pattern = r"refs/tags/v.*"

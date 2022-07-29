@@ -1,5 +1,4 @@
 import logging
-from os import path
 from dowhy.causal_model import CausalModel
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
