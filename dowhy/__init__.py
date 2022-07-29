@@ -4,4 +4,5 @@ from . import _version
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
-__version__ = _version.get_versions()["version"]
+# 0.0.0 is standard placeholder for poetry-dynamic-versioning
+__version__ = "0.0.0"
