@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "dowhy"
 # 0.0.0 is standard placeholder for poetry-dynamic-versioning
-version = "0.0.0"
+version = "0.8.post22.dev0+6ebfa4e"
 description = "DoWhy is a Python library for causal inference that supports explicit modeling and testing of causal assumptions"
 authors = [
     "PyWhy Community <amshar@microsoft.com>"
@@ -13,7 +13,6 @@ repository = "https://github.com/pywhy/dowhy"
 classifiers = [  
     'Development Status :: 4 - Beta',
     'License :: OSI Approved :: MIT License',
-    'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
 ]
@@ -38,6 +37,7 @@ files = ["dowhy/__init__.py"]
 # Dependency compatibility notes:
 # * xgboost requires Python >=3.7,<3.11
 # * pygraphviz requires Python >=3.8
+# * networkx requires Python >= 3.8
 # * llvmlite requires Python >=3.6,<3.11
 #
 [tool.poetry.dependencies]
@@ -54,7 +54,6 @@ joblib = "^1.1.0"
 # causalml is wired to use llvmlite 0.36
 llvmlite = "^0.36.0"
 pygraphviz = {version = "^1.9", optional = true}
-pandas-stubs = {version = "^1.4.3", optional = true}
 matplotlib = {version = "^3.5.2", optional = true}
 # TODO: resolve circular dependency w/ econml
 econml = {version = "*", optional = true}
@@ -81,7 +80,6 @@ tqdm = "^4.64.0"
 mypy = "^0.971"
 econml = "*"
 pygraphviz = "^1.9"
-pytest-xdist = {version = "^2.5.0", extras = ["psutil"]}
 rpy2 = {version = "^3.5.2", optional = true}
 
 [build-system]
@@ -101,7 +99,7 @@ _black = 'black .'
 _isort = 'isort .'
 
 # testing tasks
-test = "pytest -v -m 'not advanced' -n auto --durations=0 --durations-min=15.0"
+test = "pytest -v -m 'not advanced' --durations=0 --durations-min=60.0"
 test_focused = "pytest -v -m 'focused'"
 
 jupyter = "jupyter nbconvert --to html docs/source/example_notebooks/dowhy_simple_example.ipynb"
