@@ -13,7 +13,7 @@ v0.7.1: Added Graph refuter. Support for dagitty graphs and external estimators
 
 * Better docs for estimators by adding the method-specific parameters directly in its own init method
 
-* Support use of custom external estimators 
+* Support use of custom external estimators
 
 * Consistent structure for init_params for dowhy and econml estimators
 
@@ -21,7 +21,7 @@ v0.7.1: Added Graph refuter. Support for dagitty graphs and external estimators
 
 * Bug fixes for GLM model, causal model with no confounders, and hotel case-study notebook
 
-Thank you @EgorKraevTransferwise, @ae-foster, @anusha0409 for your contributions! 
+Thank you @EgorKraevTransferwise, @ae-foster, @anusha0409 for your contributions!
 
 v0.7: Better Refuters for unobserved confounders and placebo treatment
 ----------------------------------------------------------------------
@@ -30,28 +30,28 @@ v0.7: Better Refuters for unobserved confounders and placebo treatment
 
 * **[Major]** Added new functionality of causal discovery [Experimental].
   DoWhy now supports discovery algorithms from external libraries like CDT.
-  `[Example notebook] <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_causal_discovery_example.ipynb>`_
+  `[Example notebook] <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_causal_discovery_example.ipynb>`_
 
-* **[Major]** Implemented ID algorithm for causal identification. [Experimental] 
+* **[Major]** Implemented ID algorithm for causal identification. [Experimental]
 
-* Added friendly text-based interpretation for DoWhy's effect estimate. 
+* Added friendly text-based interpretation for DoWhy's effect estimate.
 
 * Added a new estimation method, distance matching that relies on a distance
   metrics between inputs.
-  
-* Heuristics to infer default parameters for refuters. 
+
+* Heuristics to infer default parameters for refuters.
 
 * Inferring default strata automatically for propensity score stratification.
- 
+
 * Added support for custom propensity models in propensity-based estimation
-  methods. 
+  methods.
 
 * Bug fixes for confidence intervals for linear regression. Better version of
   bootstrap method.
 
 * Allow effect estimation without need to refit the model for econml estimators
 
-Big thanks to @AndrewC19, @ha2trinh, @siddhanthaldar, and @vojavocni 
+Big thanks to @AndrewC19, @ha2trinh, @siddhanthaldar, and @vojavocni
 
 v0.6: Better Refuters for unobserved confounders and placebo treatment
 ----------------------------------------------------------------------
@@ -77,7 +77,7 @@ v0.5-beta: Enhanced documentation and support for causal mediation
 
 **Installation**
 
-* DoWhy can be installed on Conda now! 
+* DoWhy can be installed on Conda now!
 
 **Code**
 
@@ -101,21 +101,21 @@ v0.5-beta: Enhanced documentation and support for causal mediation
 
 **Docs**
 
-* New case studies using DoWhy on `hotel booking cancellations <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.ipynb>`_ and `membership rewards programs <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb>`_
+* New case studies using DoWhy on `hotel booking cancellations <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.ipynb>`_ and `membership rewards programs <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb>`_
 
-* New `notebook <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_multiple_treatments.ipynb>`_ on using DoWhy+EconML for estimating effect of multiple treatments
+* New `notebook <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_multiple_treatments.ipynb>`_ on using DoWhy+EconML for estimating effect of multiple treatments
 
-* A `tutorial  <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/tutorial-causalinference-machinelearning-using-dowhy-econml.ipynb>`_ on causal inference using DoWhy and EconML
+* A `tutorial  <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/tutorial-causalinference-machinelearning-using-dowhy-econml.ipynb>`_ on causal inference using DoWhy and EconML
 
 * Better organization of docs and notebooks on the `documentation website <https://py-why.github.io/dowhy/>`_.
 
 **Community**
 
-* Created a `contributors page <https://github.com/microsoft/dowhy/blob/master/CONTRIBUTING.md>`_ with guidelines for contributing
+* Created a `contributors page <https://github.com/microsoft/dowhy/blob/main/CONTRIBUTING.md>`_ with guidelines for contributing
 
 * Added allcontributors bot so that new contributors can added just after their pull requests are merged
 
-A big thanks to @Tanmay-Kulkarni101, @ErikHambardzumyan, @Sid-darthvader for their contributions. 
+A big thanks to @Tanmay-Kulkarni101, @ErikHambardzumyan, @Sid-darthvader for their contributions.
 
 v0.4-beta: Powerful refutations and better support for heterogeneous treatment effects
 --------------------------------------------------------------------------------------
@@ -149,13 +149,13 @@ v0.2-alpha: CATE estimation and integration with EconML
 This release includes many major updates:
 
 * (BREAKING CHANGE) The CausalModel import is now simpler: "from dowhy import CausalModel"
-*  Multivariate treatments are now supported. 
-*  Conditional Average Treatment Effects (CATE) can be estimated for any subset of the data. Includes integration with EconML--any method from EconML can be called using DoWhy through the estimate_effect method (see example notebook). 
-*  Other than CATE, specific target estimands like ATT and ATC are also supported for many of the estimation methods.   
-* For reproducibility, you can specify a random seed for all refutation methods. 
+*  Multivariate treatments are now supported.
+*  Conditional Average Treatment Effects (CATE) can be estimated for any subset of the data. Includes integration with EconML--any method from EconML can be called using DoWhy through the estimate_effect method (see example notebook).
+*  Other than CATE, specific target estimands like ATT and ATC are also supported for many of the estimation methods.
+* For reproducibility, you can specify a random seed for all refutation methods.
 * Multiple bug fixes and updates to the documentation.
 
- 
+
 Includes contributions from @j-chou, @ktmud, @jrfiedler, @shounak112358, @Lnk2past. Thank you all!
 
 v0.1.1-alpha: First release

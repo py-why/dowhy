@@ -17,18 +17,18 @@ DoWhy | An end-to-end library for causal inference
 
   Introducing DoWhy and the 4 steps of causal inference | `Microsoft Research Blog <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Video Tutorial <https://note.microsoft.com/MSR-Webinar-DoWhy-Library-Registration-On-Demand.html>`_ | `Arxiv Paper <https://arxiv.org/abs/2011.04216>`_ | `Arxiv Paper (GCM-extension) <https://arxiv.org/abs/2206.06821>`_ | `Slides <https://www2.slideshare.net/AmitSharma315/dowhy-an-endtoend-library-for-causal-inference>`_
 
-  Read the `docs <https://py-why.github.io/dowhy/>`_ | Try it online! |Binder|_ 
+  Read the `docs <https://py-why.github.io/dowhy/>`_ | Try it online! |Binder|_
 
 .. |Binder| image:: https://mybinder.org/badge_logo.svg
-.. _Binder: https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F
+.. _Binder: https://mybinder.org/v2/gh/microsoft/dowhy/main?filepath=docs%2Fsource%2F
 
-**Case Studies using DoWhy**: `Hotel booking cancellations <https://towardsdatascience.com/beyond-predictive-models-the-causal-story-behind-hotel-booking-cancellations-d29e8558cbaf>`_ | `Effect of customer loyalty programs <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb>`_ | `Optimizing article headlines <https://medium.com/@akelleh/introducing-the-do-sampler-for-causal-inference-a3296ea9e78d>`_ | `Effect of home visits on infant health (IHDP) <https://towardsdatascience.com/implementing-causal-inference-a-key-step-towards-agi-de2cde8ea599>`_ | `Causes of customer churn/attrition <https://medium.com/geekculture/a-quickstart-for-causal-analysis-decision-making-with-dowhy-2ce2d4d1efa9>`_
+**Case Studies using DoWhy**: `Hotel booking cancellations <https://towardsdatascience.com/beyond-predictive-models-the-causal-story-behind-hotel-booking-cancellations-d29e8558cbaf>`_ | `Effect of customer loyalty programs <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb>`_ | `Optimizing article headlines <https://medium.com/@akelleh/introducing-the-do-sampler-for-causal-inference-a3296ea9e78d>`_ | `Effect of home visits on infant health (IHDP) <https://towardsdatascience.com/implementing-causal-inference-a-key-step-towards-agi-de2cde8ea599>`_ | `Causes of customer churn/attrition <https://medium.com/geekculture/a-quickstart-for-causal-analysis-decision-making-with-dowhy-2ce2d4d1efa9>`_
 
-.. image:: https://raw.githubusercontent.com/microsoft/dowhy/master/docs/images/dowhy-schematic.png
+.. image:: https://raw.githubusercontent.com/microsoft/dowhy/main/docs/images/dowhy-schematic.png
 
-As computing systems are more frequently and more actively intervening in societally critical domains such as healthcare, education, and governance, it is critical to correctly predict and understand the causal effects of these interventions. Without an A/B test, conventional machine learning methods, built on pattern recognition and correlational analyses, are insufficient for decision-making. 
+As computing systems are more frequently and more actively intervening in societally critical domains such as healthcare, education, and governance, it is critical to correctly predict and understand the causal effects of these interventions. Without an A/B test, conventional machine learning methods, built on pattern recognition and correlational analyses, are insufficient for decision-making.
 
-Much like machine learning libraries have done for prediction, **"DoWhy" is a Python library that aims to spark causal thinking and analysis**. DoWhy provides a principled four-step interface for causal inference that focuses on explicitly modeling causal assumptions and validating them as much as possible. The key feature of DoWhy is its state-of-the-art refutation API that can automatically test causal assumptions for any estimation method, thus making inference more robust and accessible to non-experts. DoWhy supports estimation of the average causal effect for backdoor, frontdoor, instrumental variable and other identification methods, and estimation of the conditional effect (CATE) through an integration with the EconML library.  
+Much like machine learning libraries have done for prediction, **"DoWhy" is a Python library that aims to spark causal thinking and analysis**. DoWhy provides a principled four-step interface for causal inference that focuses on explicitly modeling causal assumptions and validating them as much as possible. The key feature of DoWhy is its state-of-the-art refutation API that can automatically test causal assumptions for any estimation method, thus making inference more robust and accessible to non-experts. DoWhy supports estimation of the average causal effect for backdoor, frontdoor, instrumental variable and other identification methods, and estimation of the conditional effect (CATE) through an integration with the EconML library.
 
 For a quick introduction to causal inference, check out `amit-sharma/causal-inference-tutorial <https://github.com/amit-sharma/causal-inference-tutorial/>`_. We also gave a more comprehensive tutorial at the ACM Knowledge Discovery and Data Mining (`KDD 2018 <http://www.kdd.org/kdd2018/>`_) conference: `causalinference.gitlab.io/kdd-tutorial <http://causalinference.gitlab.io/kdd-tutorial/>`_. For an introduction to the four steps of causal inference and its implications for machine learning, you can access this video tutorial from Microsoft Research: `DoWhy Webinar <https://note.microsoft.com/MSR-Webinar-DoWhy-Library-Registration-On-Demand.html>`_.
 
@@ -54,7 +54,7 @@ News
   We have started adding support for graphical causal model-based inference (or in short GCM-based). At the moment,
   this includes support for interventions, counterfactuals, and attributing distribution changes. As part of this,
   we also added features for Shapley value estimation and independence tests. We're still in the process of fleshing
-  everything out, including `documentation <https://py-why.github.io/dowhy/gcm/>`_. Some of it is already on `master
+  everything out, including `documentation <https://py-why.github.io/dowhy/gcm/>`_. Some of it is already on `main
   <https://github.com/py-why/dowhy>`_, other parts are on feature branches (prefixed with ``gcm-``) with open
   pull-requests, other parts will appear as new pull-requests in the next couple of weeks. Be sure to watch this space
   here as we quickly expand functionality and documentation.
@@ -85,22 +85,22 @@ for causal inference, it is hard to compare their assumptions and robustness of 
 
 To see DoWhy in action, check out how it can be applied to estimate the effect
 of a subscription or rewards program for customers [`Rewards notebook
-<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb>`_] and for implementing and evaluating causal inference methods on benchmark datasets like the `Infant Health and Development Program (IHDP) <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_ihdp_data_example.ipynb>`_ dataset, `Infant Mortality (Twins) <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_twins_example.ipynb>`_ dataset, and the `Lalonde Jobs <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_lalonde_example.ipynb>`_ dataset.
+<https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb>`_] and for implementing and evaluating causal inference methods on benchmark datasets like the `Infant Health and Development Program (IHDP) <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_ihdp_data_example.ipynb>`_ dataset, `Infant Mortality (Twins) <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_twins_example.ipynb>`_ dataset, and the `Lalonde Jobs <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_lalonde_example.ipynb>`_ dataset.
 
 
 Installation
 -------------
 
-DoWhy support Python 3.6+. To install, you can use pip or conda. 
+DoWhy support Python 3.6+. To install, you can use pip or conda.
 
 **Latest Release**
 
 Install the latest `release <https://pypi.org/project/dowhy/>`__ using pip.
 
 .. code:: shell
-   
+
    pip install dowhy
-   
+
 Install the latest `release <https://anaconda.org/conda-forge/dowhy>`__ using conda.
 
 .. code:: shell
@@ -115,7 +115,7 @@ If you prefer the latest dev version, clone this repository and run the followin
 the repository.
 
 .. code:: shell
-    
+
     pip install -e .
 
 **Requirements**
@@ -133,7 +133,7 @@ DoWhy requires the following packages:
 If you face any problems, try installing dependencies manually.
 
 .. code:: shell
-    
+
     pip install -r requirements.txt
 
 Optionally, if you wish to input graphs in the dot format, then install pydot (or pygraphviz).
@@ -195,9 +195,9 @@ DoWhy stresses on the interpretability of its output. At any point in the analys
 you can inspect the untested assumptions, identified estimands (if any) and the
 estimate (if any). Here's a sample output of the linear regression estimator.
 
-.. image:: https://raw.githubusercontent.com/microsoft/dowhy/master/docs/images/regression_output.png
+.. image:: https://raw.githubusercontent.com/microsoft/dowhy/main/docs/images/regression_output.png
 
-For a full code example, check out the `Getting Started with DoWhy <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_ notebook. You can also use Conditional Average Treatment Effect (CATE) estimation methods from other libraries such as EconML and CausalML, as shown in the `Conditional Treatment Effects <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_ notebook. For more examples of using DoWhy, check out the Jupyter notebooks in `docs/source/example_notebooks <https://github.com/microsoft/dowhy/tree/master/docs/source/example_notebooks/>`_ or try them online at `Binder <https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F>`_. 
+For a full code example, check out the `Getting Started with DoWhy <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_ notebook. You can also use Conditional Average Treatment Effect (CATE) estimation methods from other libraries such as EconML and CausalML, as shown in the `Conditional Treatment Effects <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_ notebook. For more examples of using DoWhy, check out the Jupyter notebooks in `docs/source/example_notebooks <https://github.com/microsoft/dowhy/tree/main/docs/source/example_notebooks/>`_ or try them online at `Binder <https://mybinder.org/v2/gh/microsoft/dowhy/main?filepath=docs%2Fsource%2F>`_.
 
 
 GCM-based inference (experimental)
@@ -250,7 +250,7 @@ you can use the namespace as follows.
                          outcome='y',
                          common_causes=['W0']).groupby('v0').mean().plot(y='y', kind='bar')
 
-.. image:: https://raw.githubusercontent.com/microsoft/dowhy/master/docs/images/do_barplot.png
+.. image:: https://raw.githubusercontent.com/microsoft/dowhy/main/docs/images/do_barplot.png
 
 For some methods, the :code:`variable_types` field must be specified. It should be a :code:`dict`, where the keys are
 variable names, and values are 'o' for ordered discrete, 'u' for un-ordered discrete, 'd' for discrete, or 'c'
@@ -275,8 +275,8 @@ The :code:`do` method is built on top of the lower-level :code:`dowhy` objects, 
 identification automatically when you provide a graph instead of :code:`common_causes`.
 
 For more details, check out the `Pandas API
-<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_causal_api.ipynb>`_ notebook or the `Do Sampler <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/do_sampler_demo.ipynb>`_
-notebook. 
+<https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_causal_api.ipynb>`_ notebook or the `Do Sampler <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/do_sampler_demo.ipynb>`_
+notebook.
 
 Graphical Models and Potential Outcomes: Best of both worlds
 ============================================================
@@ -303,10 +303,10 @@ This workflow can be captured by four key verbs in DoWhy:
 - estimate
 - refute
 
-Using these verbs, DoWhy implements a causal inference engine that can support 
-a variety of methods. *model* encodes prior knowledge as a formal causal graph, *identify* uses 
-graph-based methods to identify the causal effect, *estimate* uses  
-statistical methods for estimating the identified estimand, and finally *refute* 
+Using these verbs, DoWhy implements a causal inference engine that can support
+a variety of methods. *model* encodes prior knowledge as a formal causal graph, *identify* uses
+graph-based methods to identify the causal effect, *estimate* uses
+statistical methods for estimating the identified estimand, and finally *refute*
 tries to refute the obtained estimate by testing robustness to assumptions.
 
 Key differences compared to available causal inference software
@@ -339,7 +339,7 @@ DoWhy brings three key differences compared to available software for causal inf
     automatically run sensitivity and robustness checks on the obtained estimate.
 
 Finally, DoWhy is easily extensible, allowing other implementations of the
-four verbs to co-exist (e.g., we support implementations of the *estimation* verb from 
+four verbs to co-exist (e.g., we support implementations of the *estimation* verb from
 EconML and CausalML libraries). The four verbs are mutually independent, so their
 implementations can be combined in any way.
 
@@ -360,7 +360,7 @@ knowledge about some of the variables. DoWhy automatically considers the rest
 of the variables as potential confounders.
 
 Currently, DoWhy supports two formats for graph input: `gml <https://github.com/GunterMueller/UNI_PASSAU_FMI_Graph_Drawing>`_ (preferred) and
-`dot <http://www.graphviz.org/documentation/>`_. We strongly suggest to use gml as the input format, as it works well with networkx. You can provide the graph either as a .gml file or as a string. If you prefer to use dot format, you will need to install additional packages (pydot or pygraphviz, see the installation section above). Both .dot files and string format are supported. 
+`dot <http://www.graphviz.org/documentation/>`_. We strongly suggest to use gml as the input format, as it works well with networkx. You can provide the graph either as a .gml file or as a string. If you prefer to use dot format, you will need to install additional packages (pydot or pygraphviz, see the installation section above). Both .dot files and string format are supported.
 
 While not recommended, you can also specify common causes and/or instruments directly
 instead of providing a graph.
@@ -375,7 +375,7 @@ Supported formats for specifying causal assumptions
   modifiers, frontdoor variables, etc.
 
 Examples of how to instantiate a causal model are in the `Getting Started
-<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_
+<https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_
 notebook.
 
 .. i comment image:: causal_model.png
@@ -385,7 +385,7 @@ II. Identify a target estimand under the model
 
 Based on the causal graph, DoWhy finds all possible ways of identifying a desired causal effect based on
 the graphical model. It uses graph-based criteria and do-calculus to find
-potential ways find expressions that can identify the causal effect. 
+potential ways find expressions that can identify the causal effect.
 
 Supported identification criteria
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -396,16 +396,16 @@ Supported identification criteria
 * Mediation (Direct and indirect effect identification)
 
 Different notebooks illustrate how to use these identification criteria. Check
-out the `Simple Backdoor <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_confounder_example.ipynb>`_ notebook for the back-door criterion, and the `Simple IV <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy-simple-iv-example.ipynb>`_ notebook for the instrumental variable criterion.
+out the `Simple Backdoor <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_confounder_example.ipynb>`_ notebook for the back-door criterion, and the `Simple IV <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy-simple-iv-example.ipynb>`_ notebook for the instrumental variable criterion.
 
 III. Estimate causal effect based on the identified estimand
 ------------------------------------------------------------
 
 DoWhy supports methods based on both back-door criterion and instrumental
 variables. It also provides a non-parametric confidence intervals and a permutation test for testing
-the statistical significance of obtained estimate. 
+the statistical significance of obtained estimate.
 
-Supported estimation methods 
+Supported estimation methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * Methods based on estimating the treatment assignment
@@ -426,8 +426,8 @@ Supported estimation methods
     * Two-stage linear regression
 
 Examples of using these methods are in the `Estimation methods
-<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_estimation_methods.ipynb>`_
-notebook. 
+<https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_estimation_methods.ipynb>`_
+notebook.
 
 Using EconML and CausalML estimation methods in DoWhy
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -437,7 +437,7 @@ of estimating conditional treatment effects using EconML's double machine
 learning estimator.
 
 .. code:: python
-	
+
 	from sklearn.preprocessing import PolynomialFeatures
 	from sklearn.linear_model import LassoCV
 	from sklearn.ensemble import GradientBoostingRegressor
@@ -449,14 +449,14 @@ learning estimator.
                         method_params={
                             "init_params":{'model_y':GradientBoostingRegressor(),
                                            'model_t': GradientBoostingRegressor(),
-                                           'model_final':LassoCV(), 
+                                           'model_final':LassoCV(),
                                            'featurizer':PolynomialFeatures(degree=1, include_bias=True)},
                             "fit_params":{}}
 						)
 
 
 More examples are in the `Conditional Treatment Effects with DoWhy
-<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_ notebook. 
+<https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_ notebook.
 
 IV. Refute the obtained estimate
 -------------------------------------
@@ -486,11 +486,11 @@ Supported refutation methods
 * **Data Subsets Validation**: Does the estimated effect change significantly when
   we replace the given dataset with a randomly selected subset? (*Hint: It
   should not*)
-* **Bootstrap Validation**: Does the estimated effect change significantly when we 
+* **Bootstrap Validation**: Does the estimated effect change significantly when we
   replace the given dataset with bootstrapped samples from the same dataset? (*Hint: It should not*)
 
-Examples of using refutation methods are in the `Refutations <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_refuter_notebook.ipynb>`_ notebook. For an advanced refutation that uses a simulated dataset based on user-provided or learnt data-generating processes, check out the `Dummy Outcome Refuter <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_demo_dummy_outcome_refuter.ipynb>`_ notebook. 
-As a practical example, `this notebook <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_refutation_testing.ipynb>`_ shows an application of refutation methods on evaluating effect estimators for the Infant Health and Development Program (IHDP) and Lalonde datasets. 
+Examples of using refutation methods are in the `Refutations <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_refuter_notebook.ipynb>`_ notebook. For an advanced refutation that uses a simulated dataset based on user-provided or learnt data-generating processes, check out the `Dummy Outcome Refuter <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_demo_dummy_outcome_refuter.ipynb>`_ notebook.
+As a practical example, `this notebook <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_refutation_testing.ipynb>`_ shows an application of refutation methods on evaluating effect estimators for the Infant Health and Development Program (IHDP) and Lalonde datasets.
 
 Citing this package
 ====================
@@ -507,7 +507,7 @@ Bibtex::
   year={2019}
   }
 
-Alternatively, you can cite our Arxiv paper on DoWhy. 
+Alternatively, you can cite our Arxiv paper on DoWhy.
 
 Amit Sharma, Emre Kiciman. DoWhy: An End-to-End Library for Causal Inference. 2020. https://arxiv.org/abs/2011.04216
 
@@ -533,14 +533,14 @@ Bibtex::
       year={2022}
     }
 
-Roadmap 
+Roadmap
 =======
 The `projects <https://github.com/microsoft/dowhy/projects>`_ page lists the next steps for DoWhy. If you would like to contribute, have a look at the current projects. If you have a specific request for DoWhy, please `raise an issue <https://github.com/microsoft/dowhy/issues>`_.
 
 Contributing
 ============
 
-This project welcomes contributions and suggestions. For a guide to contributing and a list of all contributors, check out `CONTRIBUTING.md <https://github.com/microsoft/dowhy/blob/master/CONTRIBUTING.md>`_. Our contributor code of conduct is available [here](https://github.com/py-why/governance/blob/main/CODE-OF-CONDUCT.md). You can also join the DoWhy development channel on Discord: |discord|_
+This project welcomes contributions and suggestions. For a guide to contributing and a list of all contributors, check out `CONTRIBUTING.md <https://github.com/microsoft/dowhy/blob/main/CONTRIBUTING.md>`_. Our contributor code of conduct is available [here](https://github.com/py-why/governance/blob/main/CODE-OF-CONDUCT.md). You can also join the DoWhy development channel on Discord: |discord|_
 
 .. |discord| image:: https://img.shields.io/discord/818456847551168542
 .. _discord: https://discord.gg/cSBGb3vsZb
