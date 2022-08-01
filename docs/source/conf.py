@@ -40,7 +40,10 @@ extensions = [
     'nbsphinx',
     'sphinx_rtd_theme',
     "sphinx_multiversion",
+    'sphinxcontrib.googleanalytics',
 ]
+
+googleanalytics_id = 'G-B139P18WHM'
 
 autodoc_mock_imports = ['matplotlib', 'causalml', 'pymc3', 'econml']
 
