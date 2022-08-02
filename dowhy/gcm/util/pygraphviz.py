@@ -12,7 +12,8 @@ def _plot_causal_graph_graphviz(causal_graph: nx.Graph,
                                 display_causal_strengths: bool = True,
                                 causal_strengths: Optional[Dict[Tuple[Any, Any], float]] = None,
                                 filename: Optional[str] = None,
-                                display_plot: bool = True) -> None:
+                                display_plot: bool = True,
+                                figure_size: Optional[Tuple[int, int]] = None) -> None:
     if causal_strengths is None:
         causal_strengths = {}
 
@@ -51,17 +52,25 @@ def _plot_causal_graph_graphviz(causal_graph: nx.Graph,
         pygraphviz_graph.draw(filename + file_extension)
 
     if display_plot:
-        _plot_as_pyplot_figure(pygraphviz_graph)
+        _plot_as_pyplot_figure(pygraphviz_graph, figure_size)
 
 
 def _calc_arrow_width(strength: float, max_strength: float):
     return 0.1 + 4.0 * float(abs(strength)) / float(max_strength)
 
 
-def _plot_as_pyplot_figure(pygraphviz_graph: pygraphviz.AGraph) -> None:
+def _plot_as_pyplot_figure(pygraphviz_graph: pygraphviz.AGraph, figure_size: Optional[Tuple[int, int]] = None) -> None:
     with tempfile.TemporaryDirectory() as tmp_dir_name:
         pygraphviz_graph.draw(tmp_dir_name + os.sep + 'Graph.png')
         img = image.imread(tmp_dir_name + os.sep + 'Graph.png')
+
+        if figure_size is not None:
+            org_fig_size = pyplot.rcParams['figure.figsize']
+            pyplot.rcParams['figure.figsize'] = figure_size
+
         pyplot.imshow(img)
         pyplot.axis('off')
         pyplot.show()
+
+        if figure_size is not None:
+            pyplot.rcParams['figure.figsize'] = org_fig_size

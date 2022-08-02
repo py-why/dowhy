@@ -232,7 +232,7 @@ def test_when_using_feature_relevance_distribution_with_entropy_set_function_the
 
 
 @flaky(max_runs=3)
-def test_given_misspecified_graph_when_estimating_parent_relevance_with_observed_datas_then_returns_correct_result():
+def test_given_misspecified_graph_when_estimating_parent_relevance_with_observed_data_then_returns_correct_result():
     causal_model_without = StructuralCausalModel(nx.DiGraph([('X0', 'X2'), ('X1', 'X2')]))
     causal_model_with = StructuralCausalModel(nx.DiGraph([('X0', 'X1'), ('X0', 'X2'), ('X1', 'X2')]))
 
@@ -251,5 +251,5 @@ def test_given_misspecified_graph_when_estimating_parent_relevance_with_observed
     feature_relevance_missing_edge, _ = parent_relevance(causal_model_without, 'X2', training_data)
     feature_relevance_with_edge, _ = parent_relevance(causal_model_with, 'X2')
 
-    assert feature_relevance_missing_edge[('X0', 'X2')] == approx(feature_relevance_with_edge[('X0', 'X2')], abs=0.1)
-    assert feature_relevance_missing_edge[('X1', 'X2')] == approx(feature_relevance_with_edge[('X1', 'X2')], abs=0.1)
+    assert feature_relevance_missing_edge[('X0', 'X2')] == approx(feature_relevance_with_edge[('X0', 'X2')], abs=0.15)
+    assert feature_relevance_missing_edge[('X1', 'X2')] == approx(feature_relevance_with_edge[('X1', 'X2')], abs=0.15)

@@ -53,7 +53,7 @@ def str_to_dot(string):
     :param string: Graph in DOT format.
     :returns: DOT string converted to a suitable format for the DoWhy library.
     '''
-    graph = string.replace('\n', ';').replace('\t','')
+    graph = string.strip().replace('\n', ';').replace('\t', '')
     graph = graph[:9] + graph[10:-2] + graph[-1] # Removing unnecessary characters from string
     return graph
 

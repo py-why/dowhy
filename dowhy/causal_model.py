@@ -245,49 +245,49 @@ class CausalModel:
                 effect_modifiers = self.get_effect_modifiers()
             else:
                 effect_modifiers = self._effect_modifiers
+        if fit_estimator:
+            if method_name is None:
+                #TODO add propensity score as default backdoor method, iv as default iv method, add an informational message to show which method has been selected.
+                pass
+            else:
+                # TODO add dowhy as a prefix to all dowhy estimators
+                num_components = len(method_name.split("."))
+                str_arr = method_name.split(".", maxsplit=1)
+                identifier_name = str_arr[0]
+                estimator_name = str_arr[1]
+                identified_estimand.set_identifier_method(identifier_name)
+                # This is done as all dowhy estimators have two parts and external ones have two or more parts
+                if num_components > 2:
+                    estimator_package =  estimator_name.split(".")[0]
+                    if estimator_package == 'dowhy': # For updated dowhy methods
+                        estimator_method = estimator_name.split(".",maxsplit=1)[1] # discard dowhy from the full package name
+                        causal_estimator_class = causal_estimators.get_class_object(estimator_method + "_estimator")
+                    else:
+                        third_party_estimator_package = estimator_package
+                        causal_estimator_class = causal_estimators.get_class_object(third_party_estimator_package, estimator_name)
+                        if method_params is None:
+                            method_params = {}
+                        # Define the third-party estimation method to be used
+                        method_params[third_party_estimator_package + "_methodname"] = estimator_name
+                else: # For older dowhy methods
+                    print(estimator_name)
+                    # Process the dowhy estimators
+                    causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
+            if identified_estimand.no_directed_path:
+                self.logger.warning("No directed path from {0} to {1}.".format(
+                    self._treatment,
+                    self._outcome))
+                return CausalEstimate(0, identified_estimand, None,
+                    control_value=control_value,
+                    treatment_value=treatment_value)
+            # Check if estimator's target estimand is identified
+            elif identified_estimand.estimands[identifier_name] is None:
+                self.logger.error("No valid identified estimand available.")
+                return CausalEstimate(None, None, None,
+                                      control_value=control_value,
+                                      treatment_value=treatment_value)
+            else:
 
-        if method_name is None:
-            #TODO add propensity score as default backdoor method, iv as default iv method, add an informational message to show which method has been selected.
-            pass
-        else:
-            # TODO add dowhy as a prefix to all dowhy estimators
-            num_components = len(method_name.split("."))
-            str_arr = method_name.split(".", maxsplit=1)
-            identifier_name = str_arr[0]
-            estimator_name = str_arr[1]
-            identified_estimand.set_identifier_method(identifier_name)
-            # This is done as all dowhy estimators have two parts and external ones have two or more parts
-            if num_components > 2:
-                estimator_package =  estimator_name.split(".")[0]
-                if estimator_package == 'dowhy': # For updated dowhy methods
-                    estimator_method = estimator_name.split(".",maxsplit=1)[1] # discard dowhy from the full package name
-                    causal_estimator_class = causal_estimators.get_class_object(estimator_method + "_estimator")
-                else:
-                    third_party_estimator_package = estimator_package
-                    causal_estimator_class = causal_estimators.get_class_object(third_party_estimator_package, estimator_name)
-                    if method_params is None:
-                        method_params = {}
-                    # Define the third-party estimation method to be used
-                    method_params[third_party_estimator_package + "_methodname"] = estimator_name
-            else: # For older dowhy methods
-                print(estimator_name)
-                # Process the dowhy estimators
-                causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
-        if identified_estimand.no_directed_path:
-            self.logger.warning("No directed path from {0} to {1}.".format(
-                self._treatment,
-                self._outcome))
-            estimate = CausalEstimate(0, identified_estimand, None,
-                control_value=control_value,
-                treatment_value=treatment_value)
-        # Check if estimator's target estimand is identified
-        elif identified_estimand.estimands[identifier_name] is None:
-            self.logger.error("No valid identified estimand available.")
-            estimate = CausalEstimate(None, None, None,
-                                  control_value=control_value,
-                                  treatment_value=treatment_value)
-        else:
-            if fit_estimator:
                 if method_params is not None and (num_components <= 2 or estimator_package == 'dowhy'):
                     extra_args = method_params.get("init_params", {})
                 else:
@@ -307,26 +307,27 @@ class CausalModel:
                     effect_modifiers = effect_modifiers,
                     **method_params,
                     **extra_args)
-            else:
-                # Estimator had been computed in a previous call
-                assert self.causal_estimator is not None
-                self.causal_estimator.update_input(treatment_value, control_value,
-                        target_units)
+        else:
+            # Estimator had been computed in a previous call
+            assert self.causal_estimator is not None
+            causal_estimator_class = self.causal_estimator.__class__
+            self.causal_estimator.update_input(treatment_value, control_value,
+                    target_units)
 
-            estimate = self.causal_estimator.estimate_effect()
-            # Store parameters inside estimate object for refutation methods
-            # TODO: This add_params needs to move to the estimator class
-            # inside estimate_effect and estimate_conditional_effect
-            estimate.add_params(
-                estimand_type=identified_estimand.estimand_type,
-                estimator_class=causal_estimator_class,
-                test_significance=test_significance,
-                evaluate_effect_strength=evaluate_effect_strength,
-                confidence_intervals=confidence_intervals,
-                target_units=target_units,
-                effect_modifiers=effect_modifiers,
-                method_params=method_params
-            )
+        estimate = self.causal_estimator.estimate_effect()
+        # Store parameters inside estimate object for refutation methods
+        # TODO: This add_params needs to move to the estimator class
+        # inside estimate_effect and estimate_conditional_effect
+        estimate.add_params(
+            estimand_type=identified_estimand.estimand_type,
+            estimator_class=causal_estimator_class,
+            test_significance=test_significance,
+            evaluate_effect_strength=evaluate_effect_strength,
+            confidence_intervals=confidence_intervals,
+            target_units=target_units,
+            effect_modifiers=effect_modifiers,
+            method_params=method_params
+        )
         return estimate
 
     def do(self, x, identified_estimand, method_name=None,

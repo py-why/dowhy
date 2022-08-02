@@ -67,6 +67,19 @@ def kernel_based(X: np.ndarray,
     """
     bootstrap_n_jobs = config.default_n_jobs if bootstrap_n_jobs is None else bootstrap_n_jobs
 
+    X = _remove_constant_columns(X)
+    Y = _remove_constant_columns(Y)
+
+    if X.shape[1] == 0 or Y.shape[1] == 0:
+        # Either X and/or Y is constant.
+        return 1.0
+
+    if Z is not None:
+        Z = _remove_constant_columns(Z)
+        if Z.shape[1] == 0:
+            # If Z is empty, we are in the pairwise setting.
+            Z = None
+
     def evaluate_kernel_test_on_samples(X: np.ndarray,
                                         Y: np.ndarray,
                                         Z: np.ndarray,
@@ -160,6 +173,19 @@ def approx_kernel_based(X: np.ndarray,
     :return: The p-value for the null hypothesis that X and Y are independent (given Z).
     """
     bootstrap_n_jobs = config.default_n_jobs if bootstrap_n_jobs is None else bootstrap_n_jobs
+
+    X = _remove_constant_columns(X)
+    Y = _remove_constant_columns(Y)
+
+    if X.shape[1] == 0 or Y.shape[1] == 0:
+        # Either X and/or Y is constant.
+        return 1.0
+
+    if Z is not None:
+        Z = _remove_constant_columns(Z)
+        if Z.shape[1] == 0:
+            # If Z is empty, we are in the pairwise setting.
+            Z = None
 
     if not use_bootstrap:
         bootstrap_num_runs = 1
@@ -515,3 +541,8 @@ def _estimate_column_wise_covariances(X: np.ndarray, Y: np.ndarray) -> np.ndarra
 
 def _convert_to_numeric(*args) -> List[np.ndarray]:
     return [apply_one_hot_encoding(X, fit_one_hot_encoders(X)) for X in args]
+
+
+def _remove_constant_columns(X: np.ndarray) -> np.ndarray:
+    X = shape_into_2d(X)
+    return X[:, [np.unique(X[:, i]).shape[0] > 1 for i in range(X.shape[1])]]
