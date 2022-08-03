@@ -1,7 +1,10 @@
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
-<head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
 <script>
@@ -11,153 +14,457 @@
 
   gtag('config', 'G-B139P18WHM');
 </script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Conditional Average Treatment Effects (CATE) with DoWhy and EconML &mdash; DoWhy | An end-to-end library for causal inference  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script src="../_static/js/theme.js"></script>
+    <title>Conditional Average Treatment Effects (CATE) with DoWhy and EconML &#8212; DoWhy  documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Mediation analysis with DoWhy: Direct and Indirect Effects" href="dowhy_mediation_analysis.html" />
-    <link rel="prev" title="Lalonde Pandas API Example" href="lalonde_pandas_api.html" /> 
-</head>
+    <link rel="prev" title="Lalonde Pandas API Example" href="lalonde_pandas_api.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
-          </a>
-              <div class="version">
-                main
-              </div>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started/intro.html">Introduction to DoWhy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started/install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy_simple_example.html">Quick-start notebook</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started/comparison.html">Comparison to other packages</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started/cite.html">Citing this package</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../user_guide/causality_intro.html">Introduction to causality</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../user_guide/effect_inference/index.html">Effect inference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../user_guide/gcm_based_inference/index.html">GCM-based inference (Experimental)</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="nb_index.html">Example notebooks</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="graph_conditional_independence_refuter.html">Testing Assumptions in model with DoWhy: A simple example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_graph_example.html">Different ways to load an input graph</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_interpreter.html">DoWhy: Interpreters for Causal Estimators</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcm_basic_example.html">Basic Example for GCM-Based Inference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcm_draw_samples.html">Basic Example for generating samples from a GCM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_refutation_testing.html">Applying refutation tests to the Lalonde and IHDP datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Linear-Model">Linear Model</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#EconML-methods">EconML methods</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#CATE-Object-and-Confidence-Intervals">CATE Object and Confidence Intervals</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Can-provide-a-new-inputs-as-target-units-and-estimate-CATE-on-them.">Can provide a new inputs as target units and estimate CATE on them.</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Can-also-retrieve-the-raw-EconML-estimator-object-for-any-further-operations">Can also retrieve the raw EconML estimator object for any further operations</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#Works-with-any-EconML-method">Works with any EconML method</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#Binary-treatment,-Binary-outcome">Binary treatment, Binary outcome</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Instrumental-Variable-Method">Instrumental Variable Method</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Metalearners">Metalearners</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#Avoiding-retraining-the-estimator">Avoiding retraining the estimator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Refuting-the-estimate">Refuting the estimate</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#Adding-a-random-common-cause-variable">Adding a random common cause variable</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Adding-an-unobserved-common-cause-variable">Adding an unobserved common cause variable</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Replacing-treatment-with-a-random-(placebo)-variable">Replacing treatment with a random (placebo) variable</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Removing-a-random-subset-of-the-data">Removing a random subset of the data</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_multiple_treatments.html">Estimating effect of multiple treatments</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
-<li class="toctree-l2"><a class="reference internal" href="identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcm_rca_microservice_architecture.html">Root cause analysis (RCA) of latencies in a microservice architecture</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcm_supply_chain_dist_change.html">Root causes of changes in a supply chain</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcm_counterfactual_medical_dry_eyes.html">Counterfactual analysis in a medical case using a GCM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcm_401k_analysis.html">Impact of 401(k) eligibility on net financial assets</a></li>
-</ul>
-</li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Tutorials/Case studies</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">CATE estimation with DoWhy+EconML</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy_example_effect_of_memberrewards_program.html">Effect of membership rewards program</a></li>
-<li class="toctree-l1"><a class="reference internal" href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">Understanding hotel booking cancellations</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing to DoWhy</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Package</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../code_repo.html">Code repository &amp; Versions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../dowhy.html">dowhy package</a></li>
-</ul>
+    </div>
 
-        </div>
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">DoWhy  documentation</p>
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../getting_started/index.html">
+  Getting started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../user_guide/index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="nb_index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../dowhy.html">
+  API reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../contributing.html">
+  Contributing
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../code_repo.html">
+  Release notes
+ </a>
+</li>
+
+    
+</ul>
       </div>
-    </nav>
+      
+    </div>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">DoWhy | An end-to-end library for causal inference</a>
-      </nav>
-
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="nb_index.html">Example notebooks</a> &raquo;</li>
-      <li>Conditional Average Treatment Effects (CATE) with DoWhy and EconML</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/example_notebooks/dowhy-conditional-treatment-effects.ipynb.txt" rel="nofollow"> View page source</a>
-      </li>
-  </ul>
-  <hr/>
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+      <div class="navbar-end-item">
+        
+<div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        main-branch
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <!-- hard-coding the old versions, as no further old version will be added -->
+            <!-- It would be nice if this opened the same page in an older version, but that seems to be overkill
+                 right now. Therefore defaulting to the starting page (index). -->
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+            <dd><a href="/dowhy/v0.1-alpha/index.html">v0.1-alpha</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="dowhy-conditional-treatment-effects.html">main</a></dd>
+        </dl>
+    </div>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Getting started
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_simple_example.html">
+   Getting started with DoWhy: A simple example
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_confounder_example.html">
+   Confounding Example: Finding causal effects from observed data
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_estimation_methods.html">
+   DoWhy: Different estimation methods for causal inference
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="graph_conditional_independence_refuter.html">
+   Testing Assumptions in model with DoWhy: A simple example
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy-simple-iv-example.html">
+   Simple example on using Instrumental Variables method for estimation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="load_graph_example.html">
+   Different ways to load an input graph
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_interpreter.html">
+   DoWhy: Interpreters for Causal Estimators
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_api.html">
+   Demo for the DoWhy causal API
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="do_sampler_demo.html">
+   Do-sampler Introduction
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_basic_example.html">
+   Basic Example for GCM-Based Inference
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_draw_samples.html">
+   Basic Example for generating samples from a GCM
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Using benchmark datasets
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_ihdp_data_example.html">
+   DoWhy example on ihdp (Infant Health and Development Program) dataset
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_lalonde_example.html">
+   DoWhy example on the Lalonde dataset
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refutation_testing.html">
+   Applying refutation tests to the Lalonde and IHDP datasets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="lalonde_pandas_api.html">
+   Lalonde Pandas API Example
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Advanced
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Conditional Average Treatment Effects (CATE) with DoWhy and EconML
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_mediation_analysis.html">
+   Mediation analysis with DoWhy: Direct and Indirect Effects
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">
+   A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_multiple_treatments.html">
+   Estimating effect of multiple treatments
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refuter_notebook.html">
+   Iterating over multiple refutation tests
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="identifying_effects_using_id_algorithm.html">
+   Identifying Effect using ID Algorithm
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_rca_microservice_architecture.html">
+   Root cause analysis (RCA) of latencies in a microservice architecture
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_supply_chain_dist_change.html">
+   Root causes of changes in a supply chain
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_counterfactual_medical_dry_eyes.html">
+   Counterfactual analysis in a medical case using a GCM
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_401k_analysis.html">
+   Impact of 401(k) eligibility on net financial assets
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Linear-Model">
+   Linear Model
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#EconML-methods">
+   EconML methods
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#CATE-Object-and-Confidence-Intervals">
+     CATE Object and Confidence Intervals
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Can-provide-a-new-inputs-as-target-units-and-estimate-CATE-on-them.">
+     Can provide a new inputs as target units and estimate CATE on them.
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Can-also-retrieve-the-raw-EconML-estimator-object-for-any-further-operations">
+     Can also retrieve the raw EconML estimator object for any further operations
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Works-with-any-EconML-method">
+   Works with any EconML method
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Binary-treatment,-Binary-outcome">
+     Binary treatment, Binary outcome
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#Using-DRLearner-estimator">
+       Using DRLearner estimator
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Instrumental-Variable-Method">
+     Instrumental Variable Method
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Metalearners">
+     Metalearners
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Avoiding-retraining-the-estimator">
+   Avoiding retraining the estimator
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Refuting-the-estimate">
+   Refuting the estimate
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Adding-a-random-common-cause-variable">
+     Adding a random common cause variable
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Adding-an-unobserved-common-cause-variable">
+     Adding an unobserved common cause variable
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Replacing-treatment-with-a-random-(placebo)-variable">
+     Replacing treatment with a random (placebo) variable
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Removing-a-random-subset-of-the-data">
+     Removing a random subset of the data
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
   
 <style>
 /* CSS for nbsphinx extension */
@@ -413,28 +720,6 @@ div.rendered_html tbody tr:nth-child(odd) {
 div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
-
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
 </style>
 <section id="Conditional-Average-Treatment-Effects-(CATE)-with-DoWhy-and-EconML">
 <h1>Conditional Average Treatment Effects (CATE) with DoWhy and EconML<a class="headerlink" href="#Conditional-Average-Treatment-Effects-(CATE)-with-DoWhy-and-EconML" title="Permalink to this heading"></a></h1>
@@ -501,19 +786,19 @@ keywords are unexpanded, not using
 <div class="output_area docutils container">
 <div class="highlight"><pre>
          X0        X1   Z0        Z1        W0        W1 W2 W3         v0  \
-0  0.672168 -0.318266  0.0  0.928585  0.146990  0.785842  3  0  22.110232
-1  1.860483 -0.939018  0.0  0.842662 -0.178024 -1.192804  3  2  13.894633
-2  2.189992  0.083085  0.0  0.595020 -1.575504 -0.263187  0  0   5.701398
-3  0.521097  1.942503  0.0  0.753591 -0.903791 -0.996342  0  0   3.553577
-4  1.414173  0.972672  0.0  0.128331 -0.656513 -2.669595  0  2  -7.582911
+0 -1.572326 -0.276459  0.0  0.687287 -0.297432 -0.300103  1  3  22.455789
+1  2.038347 -0.579333  1.0  0.847914 -0.454881  1.322657  2  2  37.958127
+2  0.521409 -1.607899  1.0  0.261555 -1.994843  1.775260  0  3  33.533321
+3 -0.068117 -1.930997  1.0  0.291588 -0.865465 -1.148724  1  3  24.102600
+4  0.643261  0.242097  1.0  0.731762 -0.537193 -0.092098  1  0  19.088376
 
             y
-0  273.078440
-1  218.745022
-2   95.478427
-3   45.667766
-4 -119.858757
-True causal estimate is 10.780683451000215
+0   99.210708
+1  531.232852
+2  179.577943
+3   55.655902
+4  243.968410
+True causal estimate is 6.118369461806465
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -563,9 +848,9 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W2,W1,W3])
+─────(E[y|W0,W3,W2,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,W3,U) = P(y|v0,W0,W2,W1,W3)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W2,W1,U) = P(y|v0,W0,W3,W2,W1)
 
 ### Estimand : 2
 Estimand name: iv
@@ -605,7 +890,7 @@ No such variable(s) found!
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 linear_regression
-{&#39;control_value&#39;: 0, &#39;treatment_value&#39;: 1, &#39;test_significance&#39;: None, &#39;evaluate_effect_strength&#39;: False, &#39;confidence_intervals&#39;: False, &#39;target_units&#39;: &#39;ate&#39;, &#39;effect_modifiers&#39;: [&#39;X1&#39;, &#39;X0&#39;]}
+{&#39;control_value&#39;: 0, &#39;treatment_value&#39;: 1, &#39;test_significance&#39;: None, &#39;evaluate_effect_strength&#39;: False, &#39;confidence_intervals&#39;: False, &#39;target_units&#39;: &#39;ate&#39;, &#39;effect_modifiers&#39;: [&#39;X0&#39;, &#39;X1&#39;]}
 *** Causal Estimate ***
 
 ## Identified estimand
@@ -615,43 +900,43 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W2,W1,W3])
+─────(E[y|W0,W3,W2,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,W3,U) = P(y|v0,W0,W2,W1,W3)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W2,W1,U) = P(y|v0,W0,W3,W2,W1)
 
 ## Realized estimand
-b: y~v0+W0+W2+W1+W3+v0*X1+v0*X0
+b: y~v0+W0+W3+W2+W1+v0*X0+v0*X1
 Target units: ate
 
 ## Estimate
-Mean value: 10.780612612626442
+Mean value: 6.118261947286108
 ### Conditional Estimates
-__categorical__X1             __categorical__X0
-(-4.031000000000001, -0.687]  (-4.515000000000001, -0.659]     4.948772
-                              (-0.659, -0.0639]                7.774914
-                              (-0.0639, 0.453]                 9.446766
-                              (0.453, 1.037]                  11.165458
-                              (1.037, 4.089]                  14.012518
-(-0.687, -0.0896]             (-4.515000000000001, -0.659]     5.779252
-                              (-0.659, -0.0639]                8.531033
-                              (-0.0639, 0.453]                10.281218
-                              (0.453, 1.037]                  12.027692
-                              (1.037, 4.089]                  14.780351
-(-0.0896, 0.418]              (-4.515000000000001, -0.659]     6.209178
-                              (-0.659, -0.0639]                9.070008
-                              (-0.0639, 0.453]                10.771566
-                              (0.453, 1.037]                  12.462613
-                              (1.037, 4.089]                  15.353303
-(0.418, 1.021]                (-4.515000000000001, -0.659]     6.827148
-                              (-0.659, -0.0639]                9.540520
-                              (-0.0639, 0.453]                11.276597
-                              (0.453, 1.037]                  12.980988
-                              (1.037, 4.089]                  15.782068
-(1.021, 4.076]                (-4.515000000000001, -0.659]     7.636130
-                              (-0.659, -0.0639]               10.384022
-                              (-0.0639, 0.453]                12.134946
-                              (0.453, 1.037]                  13.814369
-                              (1.037, 4.089]                  16.509006
+__categorical__X0  __categorical__X1
+(-4.533, -1.394]   (-4.15, -1.423]      -3.393360
+                   (-1.423, -0.832]     -0.199065
+                   (-0.832, -0.342]      1.903760
+                   (-0.342, 0.253]       4.028011
+                   (0.253, 3.386]        7.421209
+(-1.394, -0.806]   (-4.15, -1.423]      -0.960558
+                   (-1.423, -0.832]      2.558583
+                   (-0.832, -0.342]      4.460922
+                   (-0.342, 0.253]       6.535613
+                   (0.253, 3.386]       10.031648
+(-0.806, -0.298]   (-4.15, -1.423]       0.706309
+                   (-1.423, -0.832]      4.040240
+                   (-0.832, -0.342]      6.078416
+                   (-0.342, 0.253]       8.147975
+                   (0.253, 3.386]       11.305030
+(-0.298, 0.3]      (-4.15, -1.423]       2.483708
+                   (-1.423, -0.832]      5.686462
+                   (-0.832, -0.342]      7.640197
+                   (-0.342, 0.253]       9.662662
+                   (0.253, 3.386]       13.210425
+(0.3, 3.429]       (-4.15, -1.423]       4.970184
+                   (-1.423, -0.832]      8.284515
+                   (-0.832, -0.342]     10.252953
+                   (-0.342, 0.253]      12.223415
+                   (0.253, 3.386]       15.864374
 dtype: float64
 </pre></div></div>
 </div>
@@ -697,18 +982,117 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W2,W1,W3])
+─────(E[y|W0,W3,W2,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,W3,U) = P(y|v0,W0,W2,W1,W3)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W2,W1,U) = P(y|v0,W0,W3,W2,W1)
 
 ## Realized estimand
-b: y~v0+W0+W2+W1+W3 | X1,X0
+b: y~v0+W0+W3+W2+W1 | X0,X1
 Target units: Data subset defined by a function
 
 ## Estimate
-Mean value: 15.09120970442912
-Effect estimates: [15.04707925 17.00632725 15.32572183 ... 13.02582729 15.66581175
- 16.38721765]
+Mean value: 12.302810992638177
+Effect estimates: [13.86797915 20.2033344   9.25575676 10.21736627  7.87971234  7.98301403
+ 11.90772361  5.29039365 10.84756733  8.90868587  4.96964745 14.27013483
+ 16.47502755 19.94699143  4.33749096 19.37889512 15.72817721  8.79084705
+ 11.5306224  26.0892967  15.50115461 13.47461261  9.34643725 14.09944046
+ 13.61426384 10.8779358  13.03740662  8.85596919 12.90516594 17.1794349
+  8.48061411 14.5456503  10.76423598  8.97404768  8.55118778  9.32398528
+ 12.91415075 11.00502657 14.6608963  15.38524251 12.19813131  2.49401858
+  4.82552208 11.62028684 21.11540798  8.38369156 12.2921723   6.80512864
+ 18.72803963 18.89208867  7.43084309 17.02204527 14.4203006  10.39005799
+ 10.427021   16.68845521 11.21776139 15.79760354 12.16913184 14.99503492
+ 17.69847768  7.97010051 10.85230217  6.66470699 16.11999429 15.75939562
+ 15.60861528 10.04530179 10.5033109   3.81229149 11.71362433  5.62583914
+ 14.57161903 17.87599772  9.78878085  6.54418691 13.26834893 26.0306126
+  9.19890215 13.22576553 11.21420113  9.99922511 14.18677927 16.58051703
+ 16.40672867 17.68738438 16.93719027  8.98544199 15.92950584 13.53140835
+ 17.33385895 19.4320189   7.35354298  6.74354534 10.09332147  7.15341965
+  9.05762452 10.08078775 15.36230961  9.87609548  3.22616951 10.75956898
+ 15.80027197  8.33002962 18.12134161 14.00979238  5.37202163  9.29723465
+ 14.56973386 21.14853174 11.86397096 18.40007028  5.78009162  8.32872172
+ 18.12673088 12.76140092 18.50681154 19.8956914  15.1591866   6.39753787
+  9.41574485 14.47239889 14.23210529 14.88890291 11.15701587 12.8591239
+  6.60816714 13.48023398 12.31356798 11.94046241 10.76652785 19.69490087
+ 17.98350903  8.26024865  8.18591326 12.81048429 13.34104043 10.10496442
+ 20.65576355  9.38210067 11.90746745 11.25221842 14.69256599 12.36724009
+  6.70477793 14.16562719 13.87369754  7.69431433 11.69748698  5.38837337
+ 18.33671732 12.31827126  9.36216861 17.28236955 12.48879931 13.78829017
+  9.40305272 12.4832525   9.45883366 18.53702684 17.18747437  8.00477735
+ 14.69429658 10.5679275  13.30330319 10.20907112  9.62327765  5.82402096
+  7.83946714 16.47620137 10.82281904 13.0995959   3.87115802  6.60780483
+  9.88032648 14.27756563  9.79483393 12.64236936  9.87164208 11.43617534
+  6.65200029 22.08488043 13.57417794 16.20495523 12.43838502 13.41341154
+ 17.36942557 14.73795011  8.01556384 13.19667696 24.05230111  9.62229526
+ 18.01429077 12.32575629 20.30796248  7.87297624 21.65447478 18.75394297
+ 10.10568069 10.69622097 17.92295865 20.92348801 12.49940914  9.16712609
+ 10.29057229  8.62828961 20.15808649 10.05757458 20.76983548 20.90485625
+ 13.35326323  9.92686593 16.31766147  9.86387609  9.1288139  16.59909073
+ 15.33783532  9.22025597 10.66102272  4.45251096  9.69329207 20.85404653
+ 14.96201765 10.93170247  3.6086394  10.85261006  7.56171998 10.60441945
+  8.19654172  6.56807611 12.56176904 15.00535343 12.98498229  6.05285514
+ 22.68494657  9.76608107 16.49000728  5.93606934 14.91132958 10.76362516
+ 14.37645888 11.96680252 13.74132178 11.71690388 17.15856697 10.65321531
+ 15.69325748 14.16430295 14.13589649  9.83261966  0.76752587 18.432212
+ 16.44109407  8.08700258 15.10598401 13.1297646  12.23579027 15.34631323
+ 16.13352606 13.42741228  8.97778351 12.41621942  8.81662531 19.82127979
+ 21.76017129 15.87682753 12.41194092 11.73592027 15.1931504  12.79031792
+ 11.43831831 15.30715896 10.96003758 13.89975091 16.18564939 13.05793867
+  0.73686292 17.05858375  8.38858581  9.44235991 19.53696553  5.00100842
+  5.74004636 10.13257615 10.01061559 12.06396632 11.58984965 17.27347934
+  5.51013304 19.9289669  11.13824439 20.33180062 16.10729324 15.42829596
+  9.02834545 12.86025346 11.40343763 10.32203828  8.27224154 13.1163454
+  8.63926888 15.70806882 16.25370665  7.45605094 13.89006812 14.96960873
+ 13.20723072  9.05372242 12.00754984  8.36198078 13.79481955 11.21335534
+  7.48888358  8.52163381 16.31973274 19.95466012  6.89758887  8.41026635
+ 12.00639386 15.05824897  7.42795068 20.90902604  7.45114718 14.75944432
+ 10.47922644 12.96267503 11.45652041 15.466458    8.18691352 16.40625291
+ 12.38032511  8.0364813   9.94134132 12.38109223 14.55147639  8.45061701
+ 11.47683713 13.12957554 15.77045947 12.44449894 18.90534851 11.21071099
+ 13.2031248  18.19589575  9.47657762  9.85312036 13.72689422 10.51367821
+ 12.58223846  6.05763092 15.02218468 17.06186142 13.582115   14.82557078
+ 11.36122479 16.01549559 13.08933215  3.80508847 18.83999383  4.69114768
+ 12.00497046  7.33268366  5.79128362 12.41785324  4.01572238 10.53534854
+ 18.75995381 11.04677781 16.39438546 11.51597523  6.9428633  21.07234662
+ 11.72392133  8.10410807 16.91975162 16.72770767 11.72006376  9.69763797
+ 10.3104927   9.71567572 12.25922486  8.66574859 16.38263739  6.71738314
+ 11.8348986  12.31272925 13.18255373  9.72257365  6.02224464 14.9321427
+  5.61262853 13.35093619 12.94602427 14.57694547 15.8461841   6.1123467
+ 16.04076238  4.85585161  7.82636107 12.16649232  6.39267119 17.26958899
+  8.48770875 11.09713315  9.26153073 14.33397743  9.40547534 15.35999933
+ 13.99352568 14.48134417 10.30527923 14.63345552  6.60726461 14.20883685
+  7.21225496 12.59108336  6.50660192 15.4702497   6.22373513  9.23799606
+  8.95680333 18.04709002 12.39869923 10.37701595 13.11019965 13.13116082
+  3.96523986  8.18059338  8.06623225 14.51117206 11.01247419 25.70899344
+  6.39859965  9.44233787 15.10927219 19.99669155  8.39148093 13.2197316
+ 16.2616419  10.6605784   5.36948478  7.31135599 14.31492358 12.67815599
+ 20.21035761 12.00129986  7.63691494 12.09083759  9.2622645  14.37322383
+ 17.31379729 15.42372604 13.84371005 12.00221964 15.25038395  7.94548634
+ 10.77950919 10.98555155 17.74405836 15.44514396 20.02216723  9.75982854
+ 16.22968693 11.14271553 10.56983787 10.36258271  9.28615868 10.13510097
+ 14.24515718 12.18363092 10.11289754 12.36047347  9.58980983 13.27358033
+ 16.53736677  6.66593971  6.41382031 18.49355605 11.68122316 19.61634424
+ 15.66451796 13.14981683  9.81956804 15.18013904  3.66314512 15.00432313
+ 17.85037723 10.30920269 11.31386389  3.20052826 13.7739256   9.08706895
+ 19.52765292 12.67747214  7.56063833 13.37929144  8.28750656 11.10442117
+  9.44149727 13.26028743 14.83224775  8.46650824 14.26431255 12.1298881
+  5.13551725 11.14934738 16.81566984 13.55512131  9.94865861  9.54404814
+ 13.37845358  9.40577126 14.64057895 14.13198773  5.65127935 14.26204474
+ 10.5597886  17.35346763 15.5317777   7.45241292 12.5878955   7.71097019
+ 17.54400651 13.51010931  7.44043189 14.99425373 12.63490522 22.85638018
+  4.99338948  8.1043711   8.8461507  16.18246392 12.33121045 10.80204842
+  9.29514176  9.87855672  7.25646382  5.61893539 18.89545693 12.98203978
+ 11.58732192 10.74639025 12.14933373 10.71968953 16.97183103 15.19606499
+  7.67616027  9.3946019  12.92421392 14.19225419 12.82022193 12.74735535
+ 12.33652502  5.42253635 11.75303789 10.19871292 12.13192248 10.09142549
+  6.67600311  8.73604003 12.44100761 13.9616872  17.27440479 12.65611386
+ 14.87963492 10.2501368  19.37174549 18.67418754 15.62516132  9.46491801
+ 22.07613707 16.13446431 14.95198869  8.46991785  5.96415878 11.88947557
+ 12.84174269 10.30278351 15.88730305 10.63449182 15.3995753  12.01663823
+ 11.43941738 15.87257736 10.38991399 10.96327465 14.56862103  9.9384923
+ 16.02273986 13.82135273 16.14491833 12.70119957  8.50599321  9.56253637
+ 11.91142483 15.50048209 12.44756058 10.86691375 11.23274456 15.22592933
+ 14.0346562  15.38098758 14.17885091 13.6850805  11.48951919]
 
 </pre></div></div>
 </div>
@@ -725,7 +1109,7 @@ Effect estimates: [15.04707925 17.00632725 15.32572183 ... 13.02582729 15.665811
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-True causal estimate is 10.780683451000215
+True causal estimate is 6.118369461806465
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -760,18 +1144,18 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W2,W1,W3])
+─────(E[y|W0,W3,W2,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,W3,U) = P(y|v0,W0,W2,W1,W3)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W2,W1,U) = P(y|v0,W0,W3,W2,W1)
 
 ## Realized estimand
-b: y~v0+W0+W2+W1+W3 | X1,X0
+b: y~v0+W0+W3+W2+W1 | X0,X1
 Target units:
 
 ## Estimate
-Mean value: 10.726604963687612
-Effect estimates: [11.79747202 15.00437755 16.97789021 ... 11.64728012 11.52206539
-  7.98351521]
+Mean value: 6.2097711635208475
+Effect estimates: [ 4.36749158 13.98388477  5.30141766 ...  9.95931217  6.67286419
+ -0.91356306]
 
 </pre></div></div>
 </div>
@@ -816,21 +1200,21 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W2,W1,W3])
+─────(E[y|W0,W3,W2,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,W3,U) = P(y|v0,W0,W2,W1,W3)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W2,W1,U) = P(y|v0,W0,W3,W2,W1)
 
 ## Realized estimand
-b: y~v0+W0+W2+W1+W3 | X1,X0
+b: y~v0+W0+W3+W2+W1 | X0,X1
 Target units: ate
 
 ## Estimate
-Mean value: 10.743259279968148
-Effect estimates: [11.8196286  15.03782263 17.00951993 ... 11.66729433 11.53436636
-  7.99213927]
-95.0% confidence interval: (array([11.85748028, 15.0923995 , 17.08629044, ..., 11.70564605,
-       11.56139277,  7.92223942]), array([12.00775731, 15.38991901, 17.41176543, ..., 11.84364505,
-       11.70646924,  8.05672074]))
+Mean value: 6.22307658849953
+Effect estimates: [ 4.39738956 13.90467249  5.34332321 ...  9.91231964  6.67980695
+ -0.79242519]
+95.0% confidence interval: (array([ 4.31179874, 13.79679603,  5.27750384, ...,  9.90957471,
+        6.7256337 , -0.94744259]), array([ 4.62761219, 14.56531445,  5.67813296, ..., 10.26468978,
+        6.90970963, -0.55722522]))
 
 </pre></div></div>
 </div>
@@ -863,8 +1247,8 @@ Effect estimates: [11.8196286  15.03782263 17.00951993 ... 11.66729433 11.534366
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[12.90486502 11.74062691 12.13464551 13.52716666 13.38867956 11.78836847
- 11.77121841 11.97155994 11.40184824 11.23524614]
+[12.75301129 14.486491   15.65434241 14.33026986 13.57552497 16.71672737
+ 12.70936181 14.2039103  14.23143698 15.12953011]
 </pre></div></div>
 </div>
 </section>
@@ -883,7 +1267,7 @@ Effect estimates: [11.8196286  15.03782263 17.00951993 ... 11.66729433 11.534366
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;econml.dml.dml.DML object at 0x7f9d83e5bd60&gt;
+&lt;econml.dml.dml.DML object at 0x7f9e27289940&gt;
 </pre></div></div>
 </div>
 </section>
@@ -918,30 +1302,30 @@ Effect estimates: [11.8196286  15.03782263 17.00951993 ... 11.66729433 11.534366
 <div class="output_area docutils container">
 <div class="highlight"><pre>
             X0        X1   Z0        Z1        W0        W1        W2  \
-0    -1.115566  0.499579  0.0  0.462241 -0.804668 -1.828220  1.211999
-1     1.212421 -0.196657  0.0  0.846780 -0.056574 -0.399142 -0.019511
-2    -0.468248  1.652359  1.0  0.523214  1.277760  0.756428  0.328109
-3    -1.914674 -0.217514  0.0  0.436949  1.072994 -0.402855  0.346463
-4    -0.953200  0.184406  0.0  0.639714  1.266898  2.502492  1.734901
+0     0.528393  0.373845  1.0  0.524787 -0.509900  0.230459 -0.005209
+1    -0.525059  0.665665  1.0  0.796246  1.582520 -0.626983  1.275259
+2     0.251581  2.567826  0.0  0.700689  1.119652 -2.413175  0.595198
+3     0.197340  1.320741  1.0  0.788653  0.934593 -1.718688 -0.889255
+4    -0.264730 -0.054459  1.0  0.686501 -0.477016  0.201512 -0.176500
 ...        ...       ...  ...       ...       ...       ...       ...
-9995 -1.500734  1.249122  0.0  0.532668  0.474124 -0.010080 -0.847845
-9996 -1.839039 -0.136410  1.0  0.126918 -0.995440  0.181669 -0.502775
-9997 -0.791186  0.445604  0.0  0.062029  1.154171  1.101291  0.678049
-9998 -2.426749  0.200452  0.0  0.683882  0.208542 -1.335401  0.652882
-9999 -0.953254  0.142723  0.0  0.385703 -0.913818  0.834330 -1.440710
+9995 -0.294732 -0.504828  1.0  0.574093  0.360858  0.179506 -0.027301
+9996  0.930848  1.304874  1.0  0.462798  0.347386  1.063402 -0.672607
+9997  2.220763 -0.144306  1.0  0.285696  2.360875 -0.941507 -0.205773
+9998  0.944089 -0.512548  1.0  0.412948  0.348259 -2.333894 -2.121014
+9999  1.578899  0.915673  1.0  0.850406  1.715599 -1.243528  0.422444
 
             W3  v0  y
-0    -0.935952   1  1
-1    -0.144763   1  1
-2     0.226886   1  1
-3     1.003446   1  1
-4    -2.291305   1  1
+0     1.082407   1  1
+1     1.650731   1  1
+2     2.171664   1  1
+3     3.133830   1  1
+4     2.652853   1  1
 ...        ...  .. ..
-9995 -0.378161   1  1
-9996 -0.499962   1  0
-9997 -0.197992   1  1
-9998 -0.205415   1  1
-9999 -1.693810   0  0
+9995  1.079301   1  1
+9996  1.025050   1  1
+9997 -0.574456   1  1
+9998  0.600865   0  0
+9999  1.467534   1  1
 
 [10000 rows x 10 columns]
 </pre></div></div>
@@ -981,19 +1365,19 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W2,W1,W3])
+─────(E[y|W0,W3,W2,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,W3,U) = P(y|v0,W0,W2,W1,W3)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W2,W1,U) = P(y|v0,W0,W3,W2,W1)
 
 ## Realized estimand
-b: y~v0+W0+W2+W1+W3 | X1,X0
+b: y~v0+W0+W3+W2+W1 | X0,X1
 Target units: ate
 
 ## Estimate
-Mean value: 0.6075948348618935
-Effect estimates: [0.58601958 0.64746728 0.66642979 ... 0.59660585 0.51889833 0.57580294]
+Mean value: 0.4417443613339107
+Effect estimates: [0.41084031 0.42408052 0.73892403 ... 0.38200531 0.28737642 0.52531907]
 
-True causal estimate is 0.3337
+True causal estimate is 0.4263
 </pre></div></div>
 </div>
 </section>
@@ -1043,12 +1427,12 @@ True causal estimate is 0.3337
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-2022-08-03 08:11:45.146627: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library &#39;libcudart.so.11.0&#39;; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /__t/Python/3.10.5/x64/lib
-2022-08-03 08:11:45.146665: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
-2022-08-03 08:11:46.918043: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library &#39;libcuda.so.1&#39;; dlerror: libcuda.so.1: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /__t/Python/3.10.5/x64/lib
-2022-08-03 08:11:46.918078: W tensorflow/stream_executor/cuda/cuda_driver.cc:269] failed call to cuInit: UNKNOWN ERROR (303)
-2022-08-03 08:11:46.918102: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:156] kernel driver does not appear to be running on this host (cd13a58acbde): /proc/driver/nvidia/version does not exist
-2022-08-03 08:11:46.918823: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 AVX512F FMA
+2022-08-03 14:38:36.154482: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library &#39;libcudart.so.11.0&#39;; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /__t/Python/3.10.5/x64/lib
+2022-08-03 14:38:36.154527: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+2022-08-03 14:38:37.985810: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library &#39;libcuda.so.1&#39;; dlerror: libcuda.so.1: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /__t/Python/3.10.5/x64/lib
+2022-08-03 14:38:37.985853: W tensorflow/stream_executor/cuda/cuda_driver.cc:269] failed call to cuInit: UNKNOWN ERROR (303)
+2022-08-03 14:38:37.985879: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:156] kernel driver does not appear to be running on this host (edc217d4b2c5): /proc/driver/nvidia/version does not exist
+2022-08-03 14:38:37.986153: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 AVX512F FMA
 To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
 </pre></div></div>
 </div>
@@ -1058,105 +1442,105 @@ To enable them in other operations, rebuild TensorFlow with the appropriate comp
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Epoch 1/25
-313/313 [==============================] - 1s 2ms/step - loss: 6.9162
+313/313 [==============================] - 1s 2ms/step - loss: 13.1816
 Epoch 2/25
-313/313 [==============================] - 0s 2ms/step - loss: 2.6778
+313/313 [==============================] - 1s 2ms/step - loss: 4.3013
 Epoch 3/25
-313/313 [==============================] - 0s 2ms/step - loss: 2.5317
+313/313 [==============================] - 1s 2ms/step - loss: 3.4048
 Epoch 4/25
-313/313 [==============================] - 0s 2ms/step - loss: 2.4400
+313/313 [==============================] - 1s 2ms/step - loss: 3.0199
 Epoch 5/25
-313/313 [==============================] - 0s 2ms/step - loss: 2.3954
+313/313 [==============================] - 1s 2ms/step - loss: 2.9517
 Epoch 6/25
-313/313 [==============================] - 0s 1ms/step - loss: 2.3806
+313/313 [==============================] - 1s 2ms/step - loss: 2.9073
 Epoch 7/25
-313/313 [==============================] - 0s 2ms/step - loss: 2.3583
+313/313 [==============================] - 1s 2ms/step - loss: 2.8886
 Epoch 8/25
-313/313 [==============================] - 0s 1ms/step - loss: 2.3452
+313/313 [==============================] - 1s 2ms/step - loss: 2.8372
 Epoch 9/25
-313/313 [==============================] - 0s 1ms/step - loss: 2.3333
+313/313 [==============================] - 1s 2ms/step - loss: 2.8143
 Epoch 10/25
-313/313 [==============================] - 0s 1ms/step - loss: 2.3191
+313/313 [==============================] - 1s 2ms/step - loss: 2.7870
 Epoch 11/25
-313/313 [==============================] - 0s 2ms/step - loss: 2.3144
+313/313 [==============================] - 1s 2ms/step - loss: 2.7783
 Epoch 12/25
-313/313 [==============================] - 0s 2ms/step - loss: 2.3132
+313/313 [==============================] - 1s 2ms/step - loss: 2.7544
 Epoch 13/25
-313/313 [==============================] - 0s 1ms/step - loss: 2.3020
+313/313 [==============================] - 1s 2ms/step - loss: 2.7259
 Epoch 14/25
-313/313 [==============================] - 0s 2ms/step - loss: 2.2992
+313/313 [==============================] - 1s 2ms/step - loss: 2.7002
 Epoch 15/25
-313/313 [==============================] - 0s 1ms/step - loss: 2.2921
+313/313 [==============================] - 1s 2ms/step - loss: 2.6256
 Epoch 16/25
-313/313 [==============================] - 0s 2ms/step - loss: 2.2825
+313/313 [==============================] - 1s 2ms/step - loss: 2.5941
 Epoch 17/25
-313/313 [==============================] - 0s 1ms/step - loss: 2.2812
+313/313 [==============================] - 1s 2ms/step - loss: 2.5777
 Epoch 18/25
-313/313 [==============================] - 0s 2ms/step - loss: 2.2772
+313/313 [==============================] - 1s 2ms/step - loss: 2.5866
 Epoch 19/25
-313/313 [==============================] - 0s 1ms/step - loss: 2.2712
+313/313 [==============================] - 1s 2ms/step - loss: 2.5658
 Epoch 20/25
-313/313 [==============================] - 0s 1ms/step - loss: 2.2668
+313/313 [==============================] - 1s 2ms/step - loss: 2.5652
 Epoch 21/25
-313/313 [==============================] - 0s 2ms/step - loss: 2.2633
+313/313 [==============================] - 1s 2ms/step - loss: 2.5546
 Epoch 22/25
-313/313 [==============================] - 0s 1ms/step - loss: 2.2658
+313/313 [==============================] - 1s 2ms/step - loss: 2.5529
 Epoch 23/25
-313/313 [==============================] - 0s 1ms/step - loss: 2.2642
+313/313 [==============================] - 1s 2ms/step - loss: 2.5532
 Epoch 24/25
-313/313 [==============================] - 0s 2ms/step - loss: 2.2623
+313/313 [==============================] - 1s 2ms/step - loss: 2.5517
 Epoch 25/25
-313/313 [==============================] - 0s 2ms/step - loss: 2.2647
+313/313 [==============================] - 1s 2ms/step - loss: 2.5412
 Epoch 1/25
-313/313 [==============================] - 1s 2ms/step - loss: 10427.9717
+313/313 [==============================] - 2s 3ms/step - loss: 25357.7227
 Epoch 2/25
-313/313 [==============================] - 1s 2ms/step - loss: 7373.4482
+313/313 [==============================] - 1s 3ms/step - loss: 9434.6719
 Epoch 3/25
-313/313 [==============================] - 1s 2ms/step - loss: 7226.7603
+313/313 [==============================] - 1s 3ms/step - loss: 7138.0513
 Epoch 4/25
-313/313 [==============================] - 1s 2ms/step - loss: 7262.1157
+313/313 [==============================] - 1s 3ms/step - loss: 6496.1919
 Epoch 5/25
-313/313 [==============================] - 1s 2ms/step - loss: 7237.2866
+313/313 [==============================] - 1s 3ms/step - loss: 6173.4434
 Epoch 6/25
-313/313 [==============================] - 1s 2ms/step - loss: 7153.6958
+313/313 [==============================] - 1s 3ms/step - loss: 6031.1699
 Epoch 7/25
-313/313 [==============================] - 1s 2ms/step - loss: 7162.2764
+313/313 [==============================] - 1s 3ms/step - loss: 5939.3940
 Epoch 8/25
-313/313 [==============================] - 1s 2ms/step - loss: 7162.2891
+313/313 [==============================] - 1s 3ms/step - loss: 5992.2842
 Epoch 9/25
-313/313 [==============================] - 1s 2ms/step - loss: 6991.7524
+313/313 [==============================] - 1s 3ms/step - loss: 5966.2803
 Epoch 10/25
-313/313 [==============================] - 1s 2ms/step - loss: 7073.3408
+313/313 [==============================] - 1s 3ms/step - loss: 6204.3438
 Epoch 11/25
-313/313 [==============================] - 1s 2ms/step - loss: 7029.7754
+313/313 [==============================] - 1s 3ms/step - loss: 5928.1245
 Epoch 12/25
-313/313 [==============================] - 1s 2ms/step - loss: 7001.3945
+313/313 [==============================] - 1s 3ms/step - loss: 5896.3853
 Epoch 13/25
-313/313 [==============================] - 1s 2ms/step - loss: 7140.7710
+313/313 [==============================] - 1s 3ms/step - loss: 5884.5840
 Epoch 14/25
-313/313 [==============================] - 1s 2ms/step - loss: 6999.9600
+313/313 [==============================] - 1s 3ms/step - loss: 5862.4702
 Epoch 15/25
-313/313 [==============================] - 1s 2ms/step - loss: 7204.3403
+313/313 [==============================] - 1s 3ms/step - loss: 5796.1807
 Epoch 16/25
-313/313 [==============================] - 1s 2ms/step - loss: 7254.7905
+313/313 [==============================] - 1s 3ms/step - loss: 5742.2588
 Epoch 17/25
-313/313 [==============================] - 1s 2ms/step - loss: 7133.8013
+313/313 [==============================] - 1s 3ms/step - loss: 5914.8740
 Epoch 18/25
-313/313 [==============================] - 1s 2ms/step - loss: 7074.6821
+313/313 [==============================] - 1s 3ms/step - loss: 5735.2139
 Epoch 19/25
-313/313 [==============================] - 1s 2ms/step - loss: 7008.1694
+313/313 [==============================] - 1s 3ms/step - loss: 5828.5820
 Epoch 20/25
-313/313 [==============================] - 1s 2ms/step - loss: 6984.4194
+313/313 [==============================] - 1s 3ms/step - loss: 5635.8081
 Epoch 21/25
-313/313 [==============================] - 1s 2ms/step - loss: 7172.6372
+313/313 [==============================] - 1s 3ms/step - loss: 5973.6235
 Epoch 22/25
-313/313 [==============================] - 1s 2ms/step - loss: 7021.1582
+313/313 [==============================] - 1s 3ms/step - loss: 5650.7520
 Epoch 23/25
-313/313 [==============================] - 1s 2ms/step - loss: 7069.8369
+313/313 [==============================] - 1s 3ms/step - loss: 5824.4976
 Epoch 24/25
-313/313 [==============================] - 1s 2ms/step - loss: 6965.5615
+313/313 [==============================] - 1s 3ms/step - loss: 5777.8633
 Epoch 25/25
-313/313 [==============================] - 1s 2ms/step - loss: 7172.8418
+313/313 [==============================] - 1s 3ms/step - loss: 5765.4219
 WARNING:tensorflow:
 The following Variables were used a Lambda layer&#39;s call (lambda_7), but
 are not present in its tracked objects:
@@ -1171,8 +1555,8 @@ are not present in its tracked objects:
 It is possible that this is intended behavior, but it is more likely
 an omission. This is a strong indication that this layer should be
 formulated as a subclassed Layer rather than a Lambda layer.
-276/276 [==============================] - 0s 836us/step
-276/276 [==============================] - 0s 846us/step
+211/211 [==============================] - 0s 1ms/step
+211/211 [==============================] - 0s 1ms/step
 *** Causal Estimate ***
 
 ## Identified estimand
@@ -1189,12 +1573,12 @@ Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
 Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
 
 ## Realized estimand
-b: y~v0+W0+W2+W1+W3 | X1,X0
+b: y~v0+W0+W3+W2+W1 | X0,X1
 Target units: Data subset defined by a function
 
 ## Estimate
-Mean value: 2.802612066268921
-Effect estimates: [3.4367676 4.791046  5.0495605 ... 3.376297  3.5699005 1.4441681]
+Mean value: 2.4075546264648438
+Effect estimates: [3.4238281  1.9673157  0.93130493 ... 2.0944748  3.5187683  2.2225266 ]
 
 </pre></div></div>
 </div>
@@ -1224,30 +1608,30 @@ Effect estimates: [3.4367676 4.791046  5.0495605 ... 3.376297  3.5699005 1.44416
 <div class="output_area docutils container">
 <div class="highlight"><pre>
             X0        X1        X2        X3        X4   Z0        Z1  \
-0     1.100645  0.595289 -0.652256 -0.147833  1.675831  0.0  0.994512
-1     1.612847  0.262347  2.304554  0.035547 -0.133471  0.0  0.541402
-2     1.810270  1.686942  1.067190  0.580385  1.112372  0.0  0.992900
-3     0.129477 -0.862574  0.740892  0.491679  0.467047  0.0  0.379089
-4     1.181523 -1.138534  0.385626 -1.307906 -0.175903  0.0  0.058345
+0    -0.885451 -0.023371  1.596865 -0.838343  0.561072  1.0  0.827397
+1     0.186795  1.124580  1.905557 -0.933781 -0.577835  1.0  0.733106
+2    -0.620230  1.641305  0.474671 -1.888135 -1.347722  1.0  0.719142
+3    -0.493649  0.446398  0.788400  0.193126 -0.571093  1.0  0.944020
+4     0.923805  2.155645  0.860564 -1.775238 -1.462548  1.0  0.534813
 ...        ...       ...       ...       ...       ...  ...       ...
-9995  0.270997  1.542221  1.619390  0.766502  1.422414  0.0  0.616141
-9996  1.762758  0.443408  0.601950  1.719590  3.486690  0.0  0.655364
-9997 -0.929136 -0.052280  1.315095  0.793618 -0.661470  0.0  0.029147
-9998  0.185722  0.233936  3.312334  1.070397  1.518491  0.0  0.339048
-9999 -0.094732  0.364377  0.884457  1.467062 -0.757300  0.0  0.934873
+9995 -1.032830 -1.146396  1.477133 -1.644706  0.113344  1.0  0.808962
+9996 -1.854939  0.296349  1.639934 -0.185335  0.545259  0.0  0.507666
+9997 -0.471276  2.426877  1.000187 -1.563669 -0.392419  1.0  0.094873
+9998  0.709922 -0.480099 -0.250673 -3.415531 -0.880727  1.0  0.263350
+9999  0.549477 -0.080252 -0.383327 -0.808842 -0.743617  1.0  0.390671
 
             W0        W1        W2        W3        W4  v0          y
-0     1.422699  2.226574 -0.766068  1.866223  0.040994   1  37.095902
-1    -0.823025  0.098584 -1.154942  0.690474 -0.825591   1  15.815951
-2     1.322929  1.471063 -0.552028  2.700050 -0.293170   1  44.559186
-3     0.819654 -0.059650 -0.384000 -0.172958  0.417936   1  10.627520
-4    -0.487249  1.355758 -1.775018  0.737841 -2.550439   0  -2.120380
+0     1.367380  0.181484 -1.828483  1.858258 -1.883897   1   2.556123
+1    -2.041605 -0.211679  0.095060  2.390794 -1.305126   1  15.508904
+2    -1.067907  1.323623 -1.109931  0.920250 -0.975908   1   7.590957
+3    -1.115036  3.816754 -1.056014  0.425164  0.469145   1  23.490691
+4    -0.257987  1.782484  0.031980 -0.296312 -0.324126   1  20.156183
 ...        ...       ...       ...       ...       ...  ..        ...
-9995  2.039854 -0.490606 -0.102351  0.580174 -0.636205   1  26.515811
-9996  1.503484  2.636824 -1.695139  1.288487 -2.083120   1  42.907659
-9997 -1.251466 -0.435730 -0.005403 -0.272366  2.374289   1   5.346797
-9998  0.098937 -1.261491 -0.698706  1.326415  1.217627   1  16.393513
-9999  0.255965  0.131886 -1.261891  0.643368 -2.564253   0  -5.150146
+9995 -1.275671  1.074269 -0.272947  1.245680 -1.509530   1  -1.006990
+9996  0.466123  1.509531 -1.305789  1.922652 -0.538949   1  13.227115
+9997 -1.697696 -0.866504 -1.197425  1.321036  1.513226   1  19.021803
+9998 -1.986057 -0.278394 -0.712993 -0.398500  0.727700   1  -1.227997
+9999  0.313809  0.571680 -0.205603 -1.079305  1.034986   1  10.557621
 
 [10000 rows x 14 columns]
 </pre></div></div>
@@ -1284,20 +1668,20 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W2,W1,W4,W3])
+─────(E[y|W0,W3,W4,W2,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,W4,W3,U) = P(y|v0,W0,W2,W1,W4,W3)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W4,W2,W1,U) = P(y|v0,W0,W3,W4,W2,W1)
 
 ## Realized estimand
-b: y~v0+X3+X2+X4+X1+X0+W0+W2+W1+W4+W3
+b: y~v0+X0+X3+X1+X2+X4+W0+W3+W4+W2+W1
 Target units: ate
 
 ## Estimate
-Mean value: 19.701518905456783
-Effect estimates: [28.40283563 21.82221116 36.27647731 ... 11.44338965 20.94152902
- 19.41939351]
+Mean value: 15.829351587450743
+Effect estimates: [11.07057376 18.00201791  9.67073416 ... 18.28731522  6.45568946
+ 14.67104812]
 
-True causal estimate is 16.300356264769494
+True causal estimate is 12.710512384854635
 </pre></div></div>
 </div>
 </section>
@@ -1335,19 +1719,19 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W2,W1,W4,W3])
+─────(E[y|W0,W3,W4,W2,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,W4,W3,U) = P(y|v0,W0,W2,W1,W4,W3)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W4,W2,W1,U) = P(y|v0,W0,W3,W4,W2,W1)
 
 ## Realized estimand
-b: y~v0+X3+X2+X4+X1+X0+W0+W2+W1+W4+W3
+b: y~v0+X0+X3+X1+X2+X4+W0+W3+W4+W2+W1
 Target units: Data subset provided as a data frame
 
 ## Estimate
-Mean value: 25.909857402554117
-Effect estimates: [25.15775833 43.18436569 15.63255109 26.46497986 19.10963204]
+Mean value: 15.062485468211335
+Effect estimates: [16.69437535 14.62541338 18.68227079 11.30534426 14.00502357]
 
-True causal estimate is 16.300356264769494
+True causal estimate is 12.710512384854635
 </pre></div></div>
 </div>
 </section>
@@ -1370,9 +1754,9 @@ True causal estimate is 16.300356264769494
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a random common cause
-Estimated effect:12.186422485592558
-New effect:12.162004836336378
-p value:0.15999999999999992
+Estimated effect:14.379060608723842
+New effect:14.404846475258111
+p value:0.8
 
 </pre></div></div>
 </div>
@@ -1396,8 +1780,8 @@ p value:0.15999999999999992
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add an Unobserved Common Cause
-Estimated effect:12.186422485592558
-New effect:12.153568555635108
+Estimated effect:14.379060608723842
+New effect:14.40366635550041
 
 </pre></div></div>
 </div>
@@ -1422,9 +1806,9 @@ New effect:12.153568555635108
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:12.186422485592558
-New effect:-0.042546297677136365
-p value:0.3089018587723661
+Estimated effect:14.379060608723842
+New effect:-0.036383752529100435
+p value:0.33427780820202535
 
 </pre></div></div>
 </div>
@@ -1448,9 +1832,9 @@ p value:0.3089018587723661
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a subset of data
-Estimated effect:12.186422485592558
-New effect:12.173208361000603
-p value:0.2240774037935549
+Estimated effect:14.379060608723842
+New effect:14.389340228024924
+p value:0.4637408354645215
 
 </pre></div></div>
 </div>
@@ -1460,60 +1844,55 @@ p value:0.2240774037935549
 </section>
 
 
-           </div>
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="lalonde_pandas_api.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Lalonde Pandas API Example</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="dowhy_mediation_analysis.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Mediation analysis with DoWhy: Direct and Indirect Effects</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+              </footer>
+              
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="lalonde_pandas_api.html" class="btn btn-neutral float-left" title="Lalonde Pandas API Example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="dowhy_mediation_analysis.html" class="btn btn-neutral float-right" title="Mediation analysis with DoWhy: Direct and Indirect Effects" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          
+      </div>
     </div>
 
-  <hr/>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
 
-  <div role="contentinfo">
-    <p>&#169; Copyright 2022, PyWhy contributors.</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
-        </div>
-      </div>
-    </section>
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, PyWhy contributors.<br>
+</p>
   </div>
   
-<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
-  <span class="rst-current-version" data-toggle="rst-current-version">
-    <span class="fa fa-book"> Other Versions</span>
-    v: main-branch
-    <span class="fa fa-caret-down"></span>
-  </span>
-    <div class="rst-other-versions">
-        <dl>
-            <dt>Releases</dt>
-            <dd><a href="../../v0.1-alpha/index.html">v0.1-alpha</a></dd>
-            <dd><a href="../../v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
-            <dd><a href="../../v0.2/index.html">v0.2</a></dd>
-            <dd><a href="../../v0.4/index.html">v0.4</a></dd>
-            <dd><a href="../../v0.5/index.html">v0.5</a></dd>
-            <dd><a href="../../v0.5.1/index.html">v0.5.1</a></dd>
-            <dd><a href="../../v0.6/index.html">v0.6</a></dd>
-            <dd><a href="../../v0.7/index.html">v0.7</a></dd>
-            <dd><a href="../../v0.7.1/index.html">v0.7.1</a></dd>
-            <dd><a href="../../v0.8/index.html">v0.8</a></dd>
-        </dl>
-        <dl>
-            <dt>Branches</dt>
-            <dd><a href="dowhy-conditional-treatment-effects.html">main</a></dd>
-        </dl>
-    </div>
-</div><script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
-
-</body>
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.0.2.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
 </html>

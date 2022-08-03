@@ -1,7 +1,10 @@
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
-<head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
 <script>
@@ -11,140 +14,401 @@
 
   gtag('config', 'G-B139P18WHM');
 </script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Testing Assumptions in model with DoWhy: A simple example &mdash; DoWhy | An end-to-end library for causal inference  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script src="../_static/js/theme.js"></script>
+    <title>Testing Assumptions in model with DoWhy: A simple example &#8212; DoWhy  documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Simple example on using Instrumental Variables method for estimation" href="dowhy-simple-iv-example.html" />
-    <link rel="prev" title="DoWhy: Different estimation methods for causal inference" href="dowhy_estimation_methods.html" /> 
-</head>
+    <link rel="prev" title="DoWhy: Different estimation methods for causal inference" href="dowhy_estimation_methods.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> DoWhy | An end-to-end library for causal inference
-          </a>
-              <div class="version">
-                main
-              </div>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started/intro.html">Introduction to DoWhy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started/install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy_simple_example.html">Quick-start notebook</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started/comparison.html">Comparison to other packages</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started/cite.html">Citing this package</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../user_guide/causality_intro.html">Introduction to causality</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../user_guide/effect_inference/index.html">Effect inference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../user_guide/gcm_based_inference/index.html">GCM-based inference (Experimental)</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="nb_index.html">Example notebooks</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="dowhy_simple_example.html">Getting started with DoWhy: A simple example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Testing Assumptions in model with DoWhy: A simple example</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Step-1:-Load-dataset">Step 1: Load dataset</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Step-2:-Input-causal-graph">Step 2: Input causal graph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Step-3:-Create-Causal-Model">Step 3: Create Causal Model</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Step-4:-Testing-for-Conditional-Independence">Step 4: Testing for Conditional Independence</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#Testing-for-a-set-of-edges">Testing for a set of edges</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#Testing-with-a-wrong-graph-input">Testing with a wrong graph input</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_graph_example.html">Different ways to load an input graph</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_interpreter.html">DoWhy: Interpreters for Causal Estimators</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcm_basic_example.html">Basic Example for GCM-Based Inference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcm_draw_samples.html">Basic Example for generating samples from a GCM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_refutation_testing.html">Applying refutation tests to the Lalonde and IHDP datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_multiple_treatments.html">Estimating effect of multiple treatments</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
-<li class="toctree-l2"><a class="reference internal" href="identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcm_rca_microservice_architecture.html">Root cause analysis (RCA) of latencies in a microservice architecture</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcm_supply_chain_dist_change.html">Root causes of changes in a supply chain</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcm_counterfactual_medical_dry_eyes.html">Counterfactual analysis in a medical case using a GCM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcm_401k_analysis.html">Impact of 401(k) eligibility on net financial assets</a></li>
-</ul>
-</li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Tutorials/Case studies</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">CATE estimation with DoWhy+EconML</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy_example_effect_of_memberrewards_program.html">Effect of membership rewards program</a></li>
-<li class="toctree-l1"><a class="reference internal" href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">Understanding hotel booking cancellations</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing to DoWhy</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Package</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../code_repo.html">Code repository &amp; Versions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../dowhy.html">dowhy package</a></li>
-</ul>
+    </div>
 
-        </div>
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">DoWhy  documentation</p>
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../getting_started/index.html">
+  Getting started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../user_guide/index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="nb_index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../dowhy.html">
+  API reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../contributing.html">
+  Contributing
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../code_repo.html">
+  Release notes
+ </a>
+</li>
+
+    
+</ul>
       </div>
-    </nav>
+      
+    </div>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">DoWhy | An end-to-end library for causal inference</a>
-      </nav>
-
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="nb_index.html">Example notebooks</a> &raquo;</li>
-      <li>Testing Assumptions in model with DoWhy: A simple example</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/example_notebooks/graph_conditional_independence_refuter.ipynb.txt" rel="nofollow"> View page source</a>
-      </li>
-  </ul>
-  <hr/>
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+      <div class="navbar-end-item">
+        
+<div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        main-branch
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <!-- hard-coding the old versions, as no further old version will be added -->
+            <!-- It would be nice if this opened the same page in an older version, but that seems to be overkill
+                 right now. Therefore defaulting to the starting page (index). -->
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+            <dd><a href="/dowhy/v0.1-alpha/index.html">v0.1-alpha</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="graph_conditional_independence_refuter.html">main</a></dd>
+        </dl>
+    </div>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Getting started
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_simple_example.html">
+   Getting started with DoWhy: A simple example
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_confounder_example.html">
+   Confounding Example: Finding causal effects from observed data
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_estimation_methods.html">
+   DoWhy: Different estimation methods for causal inference
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Testing Assumptions in model with DoWhy: A simple example
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy-simple-iv-example.html">
+   Simple example on using Instrumental Variables method for estimation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="load_graph_example.html">
+   Different ways to load an input graph
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_interpreter.html">
+   DoWhy: Interpreters for Causal Estimators
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_api.html">
+   Demo for the DoWhy causal API
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="do_sampler_demo.html">
+   Do-sampler Introduction
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_basic_example.html">
+   Basic Example for GCM-Based Inference
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_draw_samples.html">
+   Basic Example for generating samples from a GCM
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Using benchmark datasets
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_ihdp_data_example.html">
+   DoWhy example on ihdp (Infant Health and Development Program) dataset
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_lalonde_example.html">
+   DoWhy example on the Lalonde dataset
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refutation_testing.html">
+   Applying refutation tests to the Lalonde and IHDP datasets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="lalonde_pandas_api.html">
+   Lalonde Pandas API Example
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Advanced
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy-conditional-treatment-effects.html">
+   Conditional Average Treatment Effects (CATE) with DoWhy and EconML
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_mediation_analysis.html">
+   Mediation analysis with DoWhy: Direct and Indirect Effects
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">
+   A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_multiple_treatments.html">
+   Estimating effect of multiple treatments
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refuter_notebook.html">
+   Iterating over multiple refutation tests
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="identifying_effects_using_id_algorithm.html">
+   Identifying Effect using ID Algorithm
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_rca_microservice_architecture.html">
+   Root cause analysis (RCA) of latencies in a microservice architecture
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_supply_chain_dist_change.html">
+   Root causes of changes in a supply chain
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_counterfactual_medical_dry_eyes.html">
+   Counterfactual analysis in a medical case using a GCM
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_401k_analysis.html">
+   Impact of 401(k) eligibility on net financial assets
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Step-1:-Load-dataset">
+   Step 1: Load dataset
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Step-2:-Input-causal-graph">
+   Step 2: Input causal graph
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Step-3:-Create-Causal-Model">
+   Step 3: Create Causal Model
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Step-4:-Testing-for-Conditional-Independence">
+   Step 4: Testing for Conditional Independence
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Testing-for-a-set-of-edges">
+     Testing for a set of edges
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Testing-with-a-wrong-graph-input">
+   Testing with a wrong graph input
+  </a>
+ </li>
+</ul>
+
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
   
 <style>
 /* CSS for nbsphinx extension */
@@ -400,28 +664,6 @@ div.rendered_html tbody tr:nth-child(odd) {
 div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
-
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
 </style>
 <section id="Testing-Assumptions-in-model-with-DoWhy:-A-simple-example">
 <h1>Testing Assumptions in model with DoWhy: A simple example<a class="headerlink" href="#Testing-Assumptions-in-model-with-DoWhy:-A-simple-example" title="Permalink to this heading"></a></h1>
@@ -655,14 +897,14 @@ generating random graph - prob_type_of_data : 3-element tuple containing the pro
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 The following setting with f as discrete, j as continuous, (&#39;i&#39;,) as [&#39;continuous&#39;] not supported
-The following setting with g as continuous, b as continuous, (&#39;f&#39;,) as [&#39;discrete&#39;] not supported
-The following setting with g as continuous, d as continuous, (&#39;f&#39;,) as [&#39;discrete&#39;] not supported
-The following setting with g as continuous, a as discrete, (&#39;b&#39;,) as [&#39;continuous&#39;] not supported
-The following setting with h as discrete, j as continuous, (&#39;i&#39;,) as [&#39;continuous&#39;] not supported
+The following setting with j as continuous, a as discrete, (&#39;i&#39;,) as [&#39;continuous&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;i&#39;,) as [&#39;continuous&#39;] not supported
+The following setting with a as discrete, d as continuous, (&#39;b&#39;,) as [&#39;continuous&#39;] not supported
+The following setting with a as discrete, g as continuous, (&#39;b&#39;,) as [&#39;continuous&#39;] not supported
 The following setting with h as discrete, b as continuous, (&#39;g&#39;,) as [&#39;continuous&#39;] not supported
 The following setting with h as discrete, d as continuous, (&#39;g&#39;,) as [&#39;continuous&#39;] not supported
-The following setting with j as continuous, a as discrete, (&#39;i&#39;,) as [&#39;continuous&#39;] not supported
-The following setting with d as continuous, a as discrete, (&#39;b&#39;,) as [&#39;continuous&#39;] not supported
+The following setting with b as continuous, g as continuous, (&#39;f&#39;,) as [&#39;discrete&#39;] not supported
+The following setting with d as continuous, g as continuous, (&#39;f&#39;,) as [&#39;discrete&#39;] not supported
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -879,207 +1121,207 @@ Test passed:True
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The following setting with f as discrete, g as continuous, (&#39;e&#39;, &#39;j&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with f as discrete, g as continuous, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with f as discrete, g as continuous, (&#39;e&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with f as discrete, g as continuous, (&#39;e&#39;, &#39;i&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with f as discrete, j as continuous, (&#39;g&#39;, &#39;b&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
-The following setting with f as discrete, j as continuous, (&#39;g&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with f as discrete, j as continuous, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with f as discrete, j as continuous, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with f as discrete, j as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with f as discrete, j as continuous, (&#39;b&#39;, &#39;i&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
-The following setting with f as discrete, j as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with f as discrete, j as continuous, (&#39;a&#39;, &#39;i&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with f as discrete, d as continuous, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with f as discrete, i as continuous, (&#39;g&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
-The following setting with f as discrete, i as continuous, (&#39;h&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with f as discrete, i as continuous, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with f as discrete, i as continuous, (&#39;h&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with f as discrete, i as continuous, (&#39;e&#39;, &#39;j&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with f as discrete, i as continuous, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with f as discrete, i as continuous, (&#39;e&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;j&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
 The following setting with f as discrete, i as continuous, (&#39;j&#39;, &#39;c&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;j&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;j&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
 The following setting with f as discrete, i as continuous, (&#39;j&#39;, &#39;b&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
 The following setting with f as discrete, i as continuous, (&#39;j&#39;, &#39;d&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
-The following setting with f as discrete, i as continuous, (&#39;j&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;a&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;a&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
 The following setting with f as discrete, i as continuous, (&#39;c&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
 The following setting with f as discrete, i as continuous, (&#39;c&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;h&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;e&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, i as continuous, (&#39;e&#39;, &#39;g&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
 The following setting with f as discrete, i as continuous, (&#39;b&#39;, &#39;d&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
-The following setting with f as discrete, i as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with f as discrete, i as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with g as continuous, h as discrete, (&#39;e&#39;, &#39;j&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with g as continuous, h as discrete, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with g as continuous, h as discrete, (&#39;e&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with g as continuous, h as discrete, (&#39;e&#39;, &#39;i&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with g as continuous, j as continuous, (&#39;f&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
-The following setting with g as continuous, j as continuous, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with g as continuous, j as continuous, (&#39;f&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
-The following setting with g as continuous, j as continuous, (&#39;h&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
-The following setting with g as continuous, j as continuous, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with g as continuous, j as continuous, (&#39;h&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
-The following setting with g as continuous, j as continuous, (&#39;e&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
-The following setting with g as continuous, j as continuous, (&#39;c&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
-The following setting with g as continuous, j as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with g as continuous, j as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with g as continuous, j as continuous, (&#39;a&#39;, &#39;i&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with g as continuous, b as continuous, (&#39;f&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
-The following setting with g as continuous, b as continuous, (&#39;h&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
-The following setting with g as continuous, b as continuous, (&#39;e&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
-The following setting with g as continuous, d as continuous, (&#39;f&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
-The following setting with g as continuous, d as continuous, (&#39;h&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
-The following setting with g as continuous, d as continuous, (&#39;e&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
-The following setting with g as continuous, d as continuous, (&#39;c&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
-The following setting with g as continuous, a as discrete, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with g as continuous, a as discrete, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with g as continuous, a as discrete, (&#39;e&#39;, &#39;j&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with g as continuous, a as discrete, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with g as continuous, a as discrete, (&#39;e&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with g as continuous, a as discrete, (&#39;e&#39;, &#39;i&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with g as continuous, a as discrete, (&#39;j&#39;, &#39;b&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
-The following setting with g as continuous, a as discrete, (&#39;b&#39;, &#39;i&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, j as continuous, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, j as continuous, (&#39;g&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
-The following setting with h as discrete, j as continuous, (&#39;g&#39;, &#39;b&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, j as continuous, (&#39;g&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with h as discrete, j as continuous, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, j as continuous, (&#39;e&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, j as continuous, (&#39;e&#39;, &#39;i&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, j as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with h as discrete, j as continuous, (&#39;b&#39;, &#39;i&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, j as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with h as discrete, j as continuous, (&#39;a&#39;, &#39;i&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, b as continuous, (&#39;g&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
-The following setting with h as discrete, b as continuous, (&#39;e&#39;, &#39;j&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, b as continuous, (&#39;e&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, b as continuous, (&#39;e&#39;, &#39;i&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, d as continuous, (&#39;g&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
-The following setting with h as discrete, d as continuous, (&#39;e&#39;, &#39;j&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, d as continuous, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, d as continuous, (&#39;e&#39;, &#39;i&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, i as continuous, (&#39;f&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, i as continuous, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, i as continuous, (&#39;f&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, i as continuous, (&#39;g&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
-The following setting with h as discrete, i as continuous, (&#39;e&#39;, &#39;j&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, i as continuous, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, i as continuous, (&#39;e&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, i as continuous, (&#39;j&#39;, &#39;c&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
-The following setting with h as discrete, i as continuous, (&#39;j&#39;, &#39;b&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, i as continuous, (&#39;j&#39;, &#39;d&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, i as continuous, (&#39;j&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with h as discrete, i as continuous, (&#39;c&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, i as continuous, (&#39;c&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, i as continuous, (&#39;b&#39;, &#39;d&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
-The following setting with h as discrete, i as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with h as discrete, i as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with e as binary, j as continuous, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with e as binary, j as continuous, (&#39;g&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with e as binary, j as continuous, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with e as binary, j as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with e as binary, j as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with e as binary, j as continuous, (&#39;a&#39;, &#39;i&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with e as binary, i as continuous, (&#39;f&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with e as binary, i as continuous, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with e as binary, i as continuous, (&#39;f&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with e as binary, i as continuous, (&#39;h&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with e as binary, i as continuous, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with e as binary, i as continuous, (&#39;h&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with e as binary, i as continuous, (&#39;j&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with e as binary, i as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with e as binary, i as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, c as binary, (&#39;g&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, c as binary, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, c as binary, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, c as binary, (&#39;a&#39;, &#39;i&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, j as continuous, (&#39;i&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with f as discrete, j as continuous, (&#39;i&#39;, &#39;b&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, j as continuous, (&#39;a&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, j as continuous, (&#39;a&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, j as continuous, (&#39;a&#39;, &#39;g&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, j as continuous, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, j as continuous, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, j as continuous, (&#39;b&#39;, &#39;g&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, d as continuous, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, g as continuous, (&#39;i&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with f as discrete, g as continuous, (&#39;j&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with f as discrete, g as continuous, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with f as discrete, g as continuous, (&#39;e&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, j as continuous, (&#39;f&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, j as continuous, (&#39;f&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, j as continuous, (&#39;f&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, j as continuous, (&#39;f&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, j as continuous, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, j as continuous, (&#39;f&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, j as continuous, (&#39;a&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, j as continuous, (&#39;a&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, j as continuous, (&#39;a&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, j as continuous, (&#39;a&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, j as continuous, (&#39;a&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, j as continuous, (&#39;a&#39;, &#39;g&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, j as continuous, (&#39;c&#39;, &#39;h&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, j as continuous, (&#39;h&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, j as continuous, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, j as continuous, (&#39;h&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;f&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;f&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;j&#39;, &#39;c&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;j&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;j&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;j&#39;, &#39;b&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;j&#39;, &#39;d&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;c&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;c&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;h&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;e&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;e&#39;, &#39;g&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;b&#39;, &#39;d&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, a as discrete, (&#39;b&#39;, &#39;g&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, c as binary, (&#39;f&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, c as binary, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, c as binary, (&#39;f&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, c as binary, (&#39;j&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, c as binary, (&#39;j&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, c as binary, (&#39;a&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, c as binary, (&#39;a&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, c as binary, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, c as binary, (&#39;h&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;f&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;f&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;j&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;j&#39;, &#39;c&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;j&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;j&#39;, &#39;b&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;j&#39;, &#39;d&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;a&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;a&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;c&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;c&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;e&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;e&#39;, &#39;g&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, h as discrete, (&#39;b&#39;, &#39;d&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, e as binary, (&#39;f&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, e as binary, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, e as binary, (&#39;f&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, e as binary, (&#39;j&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, e as binary, (&#39;j&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, e as binary, (&#39;a&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, e as binary, (&#39;a&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, e as binary, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, e as binary, (&#39;h&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, b as continuous, (&#39;f&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, b as continuous, (&#39;f&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, b as continuous, (&#39;f&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, b as continuous, (&#39;f&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, b as continuous, (&#39;f&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, b as continuous, (&#39;f&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, b as continuous, (&#39;j&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, b as continuous, (&#39;j&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, b as continuous, (&#39;a&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, b as continuous, (&#39;a&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, b as continuous, (&#39;a&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, b as continuous, (&#39;a&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, b as continuous, (&#39;c&#39;, &#39;h&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, b as continuous, (&#39;h&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, b as continuous, (&#39;h&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, d as continuous, (&#39;f&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, d as continuous, (&#39;f&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, d as continuous, (&#39;f&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, d as continuous, (&#39;f&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, d as continuous, (&#39;f&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, d as continuous, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, d as continuous, (&#39;j&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, d as continuous, (&#39;j&#39;, &#39;h&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, d as continuous, (&#39;a&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, d as continuous, (&#39;a&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, d as continuous, (&#39;a&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, d as continuous, (&#39;a&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with i as continuous, d as continuous, (&#39;c&#39;, &#39;h&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
+The following setting with i as continuous, d as continuous, (&#39;h&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with i as continuous, d as continuous, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, c as binary, (&#39;i&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, c as binary, (&#39;a&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, c as binary, (&#39;a&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, c as binary, (&#39;a&#39;, &#39;g&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;i&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;i&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;i&#39;, &#39;b&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;a&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;a&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;a&#39;, &#39;g&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;e&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;e&#39;, &#39;g&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, h as discrete, (&#39;b&#39;, &#39;g&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, e as binary, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, e as binary, (&#39;i&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, e as binary, (&#39;a&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, e as binary, (&#39;a&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, e as binary, (&#39;a&#39;, &#39;g&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, e as binary, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
 The following setting with j as continuous, b as continuous, (&#39;f&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, b as continuous, (&#39;g&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, b as continuous, (&#39;h&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, b as continuous, (&#39;e&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, b as continuous, (&#39;c&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, b as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, b as continuous, (&#39;a&#39;, &#39;i&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, b as continuous, (&#39;i&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, b as continuous, (&#39;a&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with j as continuous, b as continuous, (&#39;a&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, b as continuous, (&#39;a&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with j as continuous, b as continuous, (&#39;a&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, b as continuous, (&#39;a&#39;, &#39;g&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
 The following setting with j as continuous, d as continuous, (&#39;f&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, d as continuous, (&#39;g&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, d as continuous, (&#39;h&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, d as continuous, (&#39;e&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, d as continuous, (&#39;c&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, d as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, d as continuous, (&#39;a&#39;, &#39;i&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with j as continuous, i as continuous, (&#39;f&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, i as continuous, (&#39;f&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
-The following setting with j as continuous, i as continuous, (&#39;f&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
-The following setting with j as continuous, i as continuous, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with j as continuous, i as continuous, (&#39;f&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with j as continuous, i as continuous, (&#39;f&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, i as continuous, (&#39;g&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, i as continuous, (&#39;h&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
-The following setting with j as continuous, i as continuous, (&#39;h&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
-The following setting with j as continuous, i as continuous, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with j as continuous, i as continuous, (&#39;h&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with j as continuous, i as continuous, (&#39;h&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, i as continuous, (&#39;e&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, i as continuous, (&#39;c&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, i as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with j as continuous, i as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with c as binary, i as continuous, (&#39;f&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with c as binary, i as continuous, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with c as binary, i as continuous, (&#39;f&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with c as binary, i as continuous, (&#39;h&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with c as binary, i as continuous, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with c as binary, i as continuous, (&#39;h&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with c as binary, i as continuous, (&#39;j&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with c as binary, i as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with c as binary, i as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with b as continuous, d as continuous, (&#39;e&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
-The following setting with b as continuous, d as continuous, (&#39;c&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
-The following setting with b as continuous, i as continuous, (&#39;f&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
-The following setting with b as continuous, i as continuous, (&#39;f&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
-The following setting with b as continuous, i as continuous, (&#39;f&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with b as continuous, i as continuous, (&#39;f&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
-The following setting with b as continuous, i as continuous, (&#39;f&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with b as continuous, i as continuous, (&#39;f&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
-The following setting with b as continuous, i as continuous, (&#39;h&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
-The following setting with b as continuous, i as continuous, (&#39;h&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with b as continuous, i as continuous, (&#39;h&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
-The following setting with b as continuous, i as continuous, (&#39;h&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with b as continuous, i as continuous, (&#39;h&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
-The following setting with b as continuous, i as continuous, (&#39;e&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
-The following setting with b as continuous, i as continuous, (&#39;j&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with b as continuous, i as continuous, (&#39;c&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
-The following setting with b as continuous, i as continuous, (&#39;d&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with d as continuous, i as continuous, (&#39;f&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
-The following setting with d as continuous, i as continuous, (&#39;f&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
-The following setting with d as continuous, i as continuous, (&#39;f&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with d as continuous, i as continuous, (&#39;f&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
-The following setting with d as continuous, i as continuous, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with d as continuous, i as continuous, (&#39;f&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
-The following setting with d as continuous, i as continuous, (&#39;h&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
-The following setting with d as continuous, i as continuous, (&#39;h&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with d as continuous, i as continuous, (&#39;h&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
-The following setting with d as continuous, i as continuous, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with d as continuous, i as continuous, (&#39;h&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
-The following setting with d as continuous, i as continuous, (&#39;e&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
-The following setting with d as continuous, i as continuous, (&#39;j&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with d as continuous, i as continuous, (&#39;c&#39;, &#39;a&#39;) as [&#39;binary&#39;, &#39;discrete&#39;] not supported
-The following setting with d as continuous, i as continuous, (&#39;b&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
-The following setting with a as discrete, i as continuous, (&#39;f&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with a as discrete, i as continuous, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with a as discrete, i as continuous, (&#39;f&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with a as discrete, i as continuous, (&#39;g&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
-The following setting with a as discrete, i as continuous, (&#39;g&#39;, &#39;b&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
-The following setting with a as discrete, i as continuous, (&#39;h&#39;, &#39;j&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with a as discrete, i as continuous, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with a as discrete, i as continuous, (&#39;h&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
-The following setting with a as discrete, i as continuous, (&#39;e&#39;, &#39;j&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with a as discrete, i as continuous, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with a as discrete, i as continuous, (&#39;e&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with a as discrete, i as continuous, (&#39;j&#39;, &#39;c&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
-The following setting with a as discrete, i as continuous, (&#39;j&#39;, &#39;b&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
-The following setting with a as discrete, i as continuous, (&#39;j&#39;, &#39;d&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
-The following setting with a as discrete, i as continuous, (&#39;c&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with a as discrete, i as continuous, (&#39;c&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
-The following setting with a as discrete, i as continuous, (&#39;b&#39;, &#39;d&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, d as continuous, (&#39;i&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, d as continuous, (&#39;a&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with j as continuous, d as continuous, (&#39;a&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, d as continuous, (&#39;a&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with j as continuous, d as continuous, (&#39;a&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, d as continuous, (&#39;a&#39;, &#39;g&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, g as continuous, (&#39;f&#39;, &#39;a&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, g as continuous, (&#39;f&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with j as continuous, g as continuous, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, g as continuous, (&#39;i&#39;, &#39;a&#39;) as [&#39;continuous&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, g as continuous, (&#39;a&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with j as continuous, g as continuous, (&#39;a&#39;, &#39;h&#39;) as [&#39;discrete&#39;, &#39;discrete&#39;] not supported
+The following setting with j as continuous, g as continuous, (&#39;a&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with j as continuous, g as continuous, (&#39;a&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, g as continuous, (&#39;a&#39;, &#39;d&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with j as continuous, g as continuous, (&#39;h&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with j as continuous, g as continuous, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with a as discrete, g as continuous, (&#39;f&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with a as discrete, g as continuous, (&#39;i&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with a as discrete, g as continuous, (&#39;i&#39;, &#39;b&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with a as discrete, g as continuous, (&#39;j&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with a as discrete, g as continuous, (&#39;j&#39;, &#39;b&#39;) as [&#39;continuous&#39;, &#39;continuous&#39;] not supported
+The following setting with a as discrete, g as continuous, (&#39;h&#39;, &#39;b&#39;) as [&#39;discrete&#39;, &#39;continuous&#39;] not supported
+The following setting with a as discrete, g as continuous, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with a as discrete, g as continuous, (&#39;e&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with h as discrete, b as continuous, (&#39;i&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with h as discrete, b as continuous, (&#39;j&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with h as discrete, b as continuous, (&#39;e&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with h as discrete, b as continuous, (&#39;e&#39;, &#39;g&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with h as discrete, d as continuous, (&#39;i&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with h as discrete, d as continuous, (&#39;j&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with h as discrete, d as continuous, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with h as discrete, d as continuous, (&#39;e&#39;, &#39;g&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with h as discrete, g as continuous, (&#39;i&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with h as discrete, g as continuous, (&#39;j&#39;, &#39;e&#39;) as [&#39;continuous&#39;, &#39;binary&#39;] not supported
+The following setting with h as discrete, g as continuous, (&#39;e&#39;, &#39;b&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with h as discrete, g as continuous, (&#39;e&#39;, &#39;d&#39;) as [&#39;binary&#39;, &#39;continuous&#39;] not supported
+The following setting with b as continuous, d as continuous, (&#39;a&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with b as continuous, d as continuous, (&#39;a&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with b as continuous, g as continuous, (&#39;f&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with b as continuous, g as continuous, (&#39;a&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with b as continuous, g as continuous, (&#39;h&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with d as continuous, g as continuous, (&#39;f&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with d as continuous, g as continuous, (&#39;a&#39;, &#39;c&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with d as continuous, g as continuous, (&#39;a&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
+The following setting with d as continuous, g as continuous, (&#39;h&#39;, &#39;e&#39;) as [&#39;discrete&#39;, &#39;binary&#39;] not supported
 </pre></div></div>
 </div>
 <p>We can see that since we input the wrong graph, many conditional independences were not met</p>
@@ -1116,60 +1358,55 @@ Test passed:False
 </section>
 
 
-           </div>
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="dowhy_estimation_methods.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">DoWhy: Different estimation methods for causal inference</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="dowhy-simple-iv-example.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Simple example on using Instrumental Variables method for estimation</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+              </footer>
+              
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="dowhy_estimation_methods.html" class="btn btn-neutral float-left" title="DoWhy: Different estimation methods for causal inference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="dowhy-simple-iv-example.html" class="btn btn-neutral float-right" title="Simple example on using Instrumental Variables method for estimation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          
+      </div>
     </div>
 
-  <hr/>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
 
-  <div role="contentinfo">
-    <p>&#169; Copyright 2022, PyWhy contributors.</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
-        </div>
-      </div>
-    </section>
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, PyWhy contributors.<br>
+</p>
   </div>
   
-<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
-  <span class="rst-current-version" data-toggle="rst-current-version">
-    <span class="fa fa-book"> Other Versions</span>
-    v: main-branch
-    <span class="fa fa-caret-down"></span>
-  </span>
-    <div class="rst-other-versions">
-        <dl>
-            <dt>Releases</dt>
-            <dd><a href="../../v0.1-alpha/index.html">v0.1-alpha</a></dd>
-            <dd><a href="../../v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
-            <dd><a href="../../v0.2/index.html">v0.2</a></dd>
-            <dd><a href="../../v0.4/index.html">v0.4</a></dd>
-            <dd><a href="../../v0.5/index.html">v0.5</a></dd>
-            <dd><a href="../../v0.5.1/index.html">v0.5.1</a></dd>
-            <dd><a href="../../v0.6/index.html">v0.6</a></dd>
-            <dd><a href="../../v0.7/index.html">v0.7</a></dd>
-            <dd><a href="../../v0.7.1/index.html">v0.7.1</a></dd>
-            <dd><a href="../../v0.8/index.html">v0.8</a></dd>
-        </dl>
-        <dl>
-            <dt>Branches</dt>
-            <dd><a href="graph_conditional_independence_refuter.html">main</a></dd>
-        </dl>
-    </div>
-</div><script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
-
-</body>
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.0.2.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
 </html>
