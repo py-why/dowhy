@@ -1,5 +1,5 @@
-Code repository & Versions
-==========================
+Release notes
+=============
 
 DoWhy is hosted on GitHub.
 

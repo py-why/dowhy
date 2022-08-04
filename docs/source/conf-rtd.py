@@ -86,15 +86,15 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "pydata_sphinx_theme"
+# html_theme = "pydata_sphinx_theme"
+# import sphinx_rtd_theme
+html_theme = 'sphinx_rtd_theme'
+# html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-html_theme_options = {
-    "navbar_end": ["navbar-icon-links", "versions"]
-}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -200,6 +200,6 @@ todo_include_todos = True
 # init docstrings should also be included in class
 autoclass_content = "both"
 
-smv_tag_whitelist = r'^v\d*\.(9|\d{2,})(\..*)?$'
-smv_branch_whitelist = "main"
+smv_tag_whitelist = r'^v0\.[0-8](\..*)?$'
+smv_branch_whitelist = None
 smv_released_pattern = r"refs/tags/v.*"
