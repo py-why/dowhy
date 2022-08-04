@@ -27,7 +27,7 @@ keywords = [
     'statistics',
     'graphical-model'
 ]
-include = ['docs', 'tests', 'CONTRIBUTING.md']
+include = ['docs', 'tests', 'CONTRIBUTING.md', 'LICENSE']
 readme = 'README.rst'
 
 [tool.poetry-dynamic-versioning]
@@ -56,7 +56,8 @@ scikit-learn = "1.0.2"
 pydot = "^1.4.2"
 joblib = "^1.1.0"
 # causalml is wired to use llvmlite 0.36
-llvmlite = "^0.36.0"
+causalml = {version = "^0.12.3", optional = true}
+llvmlite = {version = "^0.36.0", optional = true}
 pygraphviz = {version = "^1.9", optional = true}
 matplotlib = {version = "^3.5.2", optional = true}
 # TODO: resolve circular dependency w/ econml
@@ -65,6 +66,7 @@ tqdm = "^4.64.0"
 
 [tool.poetry.extras]
 plotting = ["matplotlib"]
+causalml = ["causalml", "llvmlite"]
 
 [tool.poetry.dev-dependencies]
 poethepoet = "^0.16.0"
@@ -76,11 +78,9 @@ twine = "^4.0.1"
 nbformat = "^5.4.0"
 jupyter = "^1.0.0"
 flaky = "^3.7.0"
-causalml = "^0.12.3"
 tensorflow = "^2.9.1"
 keras = "^2.9.0"
 xgboost = "^1.6.1"
-tqdm = "^4.64.0"
 mypy = "^0.971"
 econml = "*"
 pygraphviz = "^1.9"
@@ -105,8 +105,6 @@ _isort = 'isort .'
 # testing tasks
 test = "pytest -v -m 'not advanced' --durations=0 --durations-min=60.0"
 test_focused = "pytest -v -m 'focused'"
-
-jupyter = "jupyter nbconvert --to html docs/source/example_notebooks/dowhy_simple_example.ipynb"
 verifyPackage = "twine check dist/*"
 # TODO: replace with `poetry publish`
 uploadPackage = "twine upload dist/*"
