@@ -39,8 +39,8 @@ def test_adjFDR():
     assert abs(adjFDR[4] - 0.09333333)< 0.00000001
     assert abs(adjFDR[5] - 0.100)< 0.0001
 
-def test_adjusted_FDCR_pvalues()
-    #missmatched lengh pvalue vec and belife score vec
+def test_adjusted_FDCR_pvalues():
+    # missmatched lengh pvalue vec and belife score vec
     adjFDCR = adjusted_FDCR_pvalues((0.05, 0.01, 0.1),(1,1),0)
     assert adjFDCR == -17
 
