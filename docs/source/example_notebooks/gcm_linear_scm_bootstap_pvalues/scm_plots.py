@@ -3,6 +3,7 @@ from graphviz import Digraph
 import copy
 import pandas as pd
 import numpy as np
+from IPython.display import display
 
 AvaOrangeLight = "#FF5800"
 AvaOrangeDark  = "#DC4600"
