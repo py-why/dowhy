@@ -1,8 +1,9 @@
-from sklearn.neighbors import NearestNeighbors
-import pandas as pd
 import numpy as np
+import pandas as pd
+from sklearn.neighbors import NearestNeighbors
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
+
 
 class DistanceMatchingEstimator(CausalEstimator):
     """Simple matching estimator for binary treatments based on a distance
@@ -14,11 +15,11 @@ class DistanceMatchingEstimator(CausalEstimator):
     Supports additional parameters as listed below.
 
     """
-    # allowed types of distance metric
-    Valid_Dist_Metric_Params = ['p', 'V', 'VI', 'w']
 
-    def __init__(self, *args, num_matches_per_unit=1,
-                 distance_metric="minkowski", exact_match_cols=None, **kwargs):
+    # allowed types of distance metric
+    Valid_Dist_Metric_Params = ["p", "V", "VI", "w"]
+
+    def __init__(self, *args, num_matches_per_unit=1, distance_metric="minkowski", exact_match_cols=None, **kwargs):
         """
         :param num_matches_per_unit: The number of matches per data point.
             Default=1.
@@ -30,8 +31,7 @@ class DistanceMatchingEstimator(CausalEstimator):
         """
         # Required to ensure that self.method_params contains all the
         # parameters to create an object of this class
-        args_dict = {k: v for k, v in locals().items()
-                     if k not in type(self)._STD_INIT_ARGS}
+        args_dict = {k: v for k, v in locals().items() if k not in type(self)._STD_INIT_ARGS}
         args_dict.update(kwargs)
         super().__init__(*args, **args_dict)
         # Check if the treatment is one-dimensional
@@ -48,13 +48,14 @@ class DistanceMatchingEstimator(CausalEstimator):
         self.distance_metric = distance_metric
         self.exact_match_cols = exact_match_cols
 
-        self.logger.debug("Back-door variables used:" +
-                        ",".join(self._target_estimand.get_backdoor_variables()))
+        self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
 
         self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
         if self._observed_common_causes_names:
             if self.exact_match_cols is not None:
-                self._observed_common_causes_names = [v for v in self._observed_common_causes_names if v not in self.exact_match_cols]
+                self._observed_common_causes_names = [
+                    v for v in self._observed_common_causes_names if v not in self.exact_match_cols
+                ]
             self._observed_common_causes = self._data[self._observed_common_causes_names]
             # Convert the categorical variables into dummy/indicator variables
             # Basically, this gives a one hot encoding for each category
@@ -66,7 +67,6 @@ class DistanceMatchingEstimator(CausalEstimator):
             self.logger.error(error_msg)
             raise Exception(error_msg)
 
-
         # Dictionary of any user-provided params for the distance metric
         # that will be passed to sklearn nearestneighbors
         self.distance_metric_params = {}
@@ -74,7 +74,6 @@ class DistanceMatchingEstimator(CausalEstimator):
             param_val = getattr(self, param_name, None)
             if param_val is not None:
                 self.distance_metric_params[param_name] = param_val
-
 
         self.logger.info("INFO: Using Distance Matching Estimator")
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
@@ -84,8 +83,9 @@ class DistanceMatchingEstimator(CausalEstimator):
 
     def _estimate_effect(self):
         # this assumes a binary treatment regime
-        updated_df = pd.concat([self._observed_common_causes,
-            self._data[[self._outcome_name, self._treatment_name[0]]]], axis=1)
+        updated_df = pd.concat(
+            [self._observed_common_causes, self._data[[self._outcome_name, self._treatment_name[0]]]], axis=1
+        )
         if self.exact_match_cols is not None:
             updated_df = pd.concat([updated_df, self._data[self.exact_match_cols]], axis=1)
         treated = updated_df.loc[self._data[self._treatment_name[0]] == 1]
@@ -109,15 +109,13 @@ class DistanceMatchingEstimator(CausalEstimator):
         if fit_att:
             # estimate ATT on treated by summing over difference between matched neighbors
             if self.exact_match_cols is None:
-                control_neighbors = (
-                    NearestNeighbors(n_neighbors=self.num_matches_per_unit,
-                        metric=self.distance_metric,
-                        algorithm='ball_tree',
-                        **self.distance_metric_params)
-                    .fit(control[self._observed_common_causes.columns].values)
-                )
-                distances, indices = control_neighbors.kneighbors(
-                        treated[self._observed_common_causes.columns].values)
+                control_neighbors = NearestNeighbors(
+                    n_neighbors=self.num_matches_per_unit,
+                    metric=self.distance_metric,
+                    algorithm="ball_tree",
+                    **self.distance_metric_params,
+                ).fit(control[self._observed_common_causes.columns].values)
+                distances, indices = control_neighbors.kneighbors(treated[self._observed_common_causes.columns].values)
                 self.logger.debug("distances:")
                 self.logger.debug(distances)
 
@@ -132,7 +130,7 @@ class DistanceMatchingEstimator(CausalEstimator):
                 if self._target_units == "att":
                     est = att
                 elif self._target_units == "ate":
-                    est = att*numtreatedunits
+                    est = att * numtreatedunits
 
                 # Return indices in the original dataframe
                 self.matched_indices_att = {}
@@ -147,15 +145,15 @@ class DistanceMatchingEstimator(CausalEstimator):
                     control = group.loc[group[self._treatment_name[0]] == 0]
                     if treated.shape[0] == 0:
                         continue
-                    control_neighbors = (
-                        NearestNeighbors(n_neighbors=self.num_matches_per_unit,
-                            metric=self.distance_metric,
-                            algorithm='ball_tree',
-                            **self.distance_metric_params)
-                        .fit(control[self._observed_common_causes.columns].values)
-                    )
+                    control_neighbors = NearestNeighbors(
+                        n_neighbors=self.num_matches_per_unit,
+                        metric=self.distance_metric,
+                        algorithm="ball_tree",
+                        **self.distance_metric_params,
+                    ).fit(control[self._observed_common_causes.columns].values)
                     distances, indices = control_neighbors.kneighbors(
-                            treated[self._observed_common_causes.columns].values)
+                        treated[self._observed_common_causes.columns].values
+                    )
                     self.logger.debug("distances:")
                     self.logger.debug(distances)
 
@@ -163,26 +161,24 @@ class DistanceMatchingEstimator(CausalEstimator):
                         treated_outcome = treated.iloc[i][self._outcome_name].item()
                         control_outcome = np.mean(control.iloc[indices[i]][self._outcome_name].values)
                         att += treated_outcome - control_outcome
-                        #self.matched_indices_att[treated_df_index[i]] = control.iloc[indices[i]].index.tolist()
+                        # self.matched_indices_att[treated_df_index[i]] = control.iloc[indices[i]].index.tolist()
 
                 att /= numtreatedunits
 
                 if self._target_units == "att":
                     est = att
                 elif self._target_units == "ate":
-                    est = att*numtreatedunits
+                    est = att * numtreatedunits
 
         if fit_atc:
-            #Now computing ATC
-            treated_neighbors = (
-                NearestNeighbors(n_neighbors=self.num_matches_per_unit,
-                    metric=self.distance_metric,
-                    algorithm='ball_tree',
-                    **self.distance_metric_params)
-                .fit(treated[self._observed_common_causes.columns].values)
-            )
-            distances, indices = treated_neighbors.kneighbors(
-                    control[self._observed_common_causes.columns].values)
+            # Now computing ATC
+            treated_neighbors = NearestNeighbors(
+                n_neighbors=self.num_matches_per_unit,
+                metric=self.distance_metric,
+                algorithm="ball_tree",
+                **self.distance_metric_params,
+            ).fit(treated[self._observed_common_causes.columns].values)
+            distances, indices = treated_neighbors.kneighbors(control[self._observed_common_causes.columns].values)
 
             atc = 0
             for i in range(numcontrolunits):
@@ -195,8 +191,8 @@ class DistanceMatchingEstimator(CausalEstimator):
             if self._target_units == "atc":
                 est = atc
             elif self._target_units == "ate":
-                est += atc*numcontrolunits
-                est /= (numtreatedunits+numcontrolunits)
+                est += atc * numcontrolunits
+                est /= numtreatedunits + numcontrolunits
 
             # Return indices in the original dataframe
             self.matched_indices_atc = {}
@@ -204,11 +200,13 @@ class DistanceMatchingEstimator(CausalEstimator):
             for i in range(numcontrolunits):
                 self.matched_indices_atc[control_df_index[i]] = treated.iloc[indices[i]].index.tolist()
 
-        estimate = CausalEstimate(estimate=est,
-                                  control_value=self._control_value,
-                                  treatment_value=self._treatment_value,
-                                  target_estimand=self._target_estimand,
-                                  realized_estimand_expr=self.symbolic_estimator)
+        estimate = CausalEstimate(
+            estimate=est,
+            control_value=self._control_value,
+            treatment_value=self._treatment_value,
+            target_estimand=self._target_estimand,
+            realized_estimand_expr=self.symbolic_estimator,
+        )
         return estimate
 
     def construct_symbolic_estimator(self, estimand):

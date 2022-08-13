@@ -4,12 +4,12 @@ Functions in this module should be considered experimental, meaning there might 
 """
 
 from functools import partial
-from typing import Union, Callable, Any, Dict
+from typing import Any, Callable, Dict, Union
 
 import numpy as np
 import pandas as pd
 
-from dowhy.gcm.cms import ProbabilisticCausalModel, InvertibleStructuralCausalModel, StructuralCausalModel
+from dowhy.gcm.cms import InvertibleStructuralCausalModel, ProbabilisticCausalModel, StructuralCausalModel
 from dowhy.gcm.fitting_sampling import fit
 
 # A convenience function when computing confidence intervals specifically for non-deterministic causal queries. This
@@ -43,16 +43,17 @@ from dowhy.gcm.fitting_sampling import fit
 bootstrap_sampling = partial
 
 
-def bootstrap_training_and_sampling(f: Callable[[Union[ProbabilisticCausalModel,
-                                                       StructuralCausalModel,
-                                                       InvertibleStructuralCausalModel], Any],
-                                                Dict[Any, Union[np.ndarray, float]]],
-                                    causal_model: Union[ProbabilisticCausalModel,
-                                                        StructuralCausalModel,
-                                                        InvertibleStructuralCausalModel],
-                                    bootstrap_training_data: pd.DataFrame,
-                                    bootstrap_data_subset_size_fraction: float = 0.75,
-                                    *args, **kwargs):
+def bootstrap_training_and_sampling(
+    f: Callable[
+        [Union[ProbabilisticCausalModel, StructuralCausalModel, InvertibleStructuralCausalModel], Any],
+        Dict[Any, Union[np.ndarray, float]],
+    ],
+    causal_model: Union[ProbabilisticCausalModel, StructuralCausalModel, InvertibleStructuralCausalModel],
+    bootstrap_training_data: pd.DataFrame,
+    bootstrap_data_subset_size_fraction: float = 0.75,
+    *args,
+    **kwargs,
+):
     """A convenience function when computing confidence intervals specifically for causal queries. This function
     specifically bootstraps training *and* sampling.
 
@@ -80,9 +81,11 @@ def bootstrap_training_and_sampling(f: Callable[[Union[ProbabilisticCausalModel,
     def snapshot():
         causal_model_copy = causal_model.clone()
         sampled_data = bootstrap_training_data.iloc[
-            np.random.choice(bootstrap_training_data.shape[0],
-                             int(bootstrap_training_data.shape[0] * bootstrap_data_subset_size_fraction),
-                             replace=False)
+            np.random.choice(
+                bootstrap_training_data.shape[0],
+                int(bootstrap_training_data.shape[0] * bootstrap_data_subset_size_fraction),
+                replace=False,
+            )
         ]
         fit(causal_model_copy, sampled_data)
         return f(causal_model_copy, *args, **kwargs)

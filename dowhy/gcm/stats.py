@@ -2,7 +2,7 @@
 future.
 """
 
-from typing import Union, List, Optional, Callable
+from typing import Callable, List, Optional, Union
 
 import numpy as np
 from numpy.matlib import repmat
@@ -13,9 +13,9 @@ from dowhy.gcm.constant import EPS
 from dowhy.gcm.util.general import shape_into_2d
 
 
-def quantile_based_fwer(p_values: Union[np.ndarray, List[float]],
-                        p_values_scaling: Optional[np.ndarray] = None,
-                        quantile: float = 0.5) -> float:
+def quantile_based_fwer(
+    p_values: Union[np.ndarray, List[float]], p_values_scaling: Optional[np.ndarray] = None, quantile: float = 0.5
+) -> float:
     """Applies a quantile based family wise error rate (FWER) control to the given p-values. This is based on the
     approach described in:
 
@@ -51,14 +51,16 @@ def quantile_based_fwer(p_values: Union[np.ndarray, List[float]],
         return float(min(1.0, np.quantile(p_values / quantile, quantile)))
 
 
-def marginal_expectation(prediction_method: Callable[[np.ndarray], np.ndarray],
-                         feature_samples: np.ndarray,
-                         baseline_samples: np.ndarray,
-                         baseline_feature_indices: List[int],
-                         return_averaged_results: bool = True,
-                         feature_perturbation: str = 'randomize_columns_jointly',
-                         max_batch_size: int = -1) -> np.ndarray:
-    """ Estimates the marginal expectation for samples in baseline_noise_samples when randomizing features that are not
+def marginal_expectation(
+    prediction_method: Callable[[np.ndarray], np.ndarray],
+    feature_samples: np.ndarray,
+    baseline_samples: np.ndarray,
+    baseline_feature_indices: List[int],
+    return_averaged_results: bool = True,
+    feature_perturbation: str = "randomize_columns_jointly",
+    max_batch_size: int = -1,
+) -> np.ndarray:
+    """Estimates the marginal expectation for samples in baseline_noise_samples when randomizing features that are not
     part of baseline_feature_indices. This is, this function estimates
         y^i = E[Y | do(x^i_s)] := \\int_x_s' E[Y | x^i_s, x_s'] p(x_s') d x_s',
     where x^i_s is the i-th sample from baseline_noise_samples, s denotes the baseline_feature_indices and
@@ -95,9 +97,9 @@ def marginal_expectation(prediction_method: Callable[[np.ndarray], np.ndarray],
 
     features_to_randomize = np.delete(np.arange(0, feature_samples.shape[1]), baseline_feature_indices)
 
-    if feature_perturbation == 'randomize_columns_independently':
+    if feature_perturbation == "randomize_columns_independently":
         feature_samples = permute_features(feature_samples, features_to_randomize, False)
-    elif feature_perturbation == 'randomize_columns_jointly':
+    elif feature_perturbation == "randomize_columns_jointly":
         feature_samples = permute_features(feature_samples, features_to_randomize, True)
     else:
         raise ValueError("Unknown argument %s as feature_perturbation type!" % feature_perturbation)
@@ -119,15 +121,16 @@ def marginal_expectation(prediction_method: Callable[[np.ndarray], np.ndarray],
             # If the batch size would be larger than the remaining amount of samples, it is reduced to only include the
             # remaining baseline_noise_samples.
             adjusted_batch_size = baseline_samples.shape[0] - offset
-            inputs = inputs[:adjusted_batch_size * feature_samples.shape[0]]
+            inputs = inputs[: adjusted_batch_size * feature_samples.shape[0]]
         else:
             adjusted_batch_size = batch_size
 
         for index in range(adjusted_batch_size):
             # The inputs consist of batch_size many copies of feature_samples. Here, we set the columns of the features
             # in baseline_feature_indices to their respective values in baseline_noise_samples.
-            inputs[index * feature_samples.shape[0]:(index + 1) * feature_samples.shape[0],
-            baseline_feature_indices] = baseline_samples[offset + index, baseline_feature_indices]
+            inputs[
+                index * feature_samples.shape[0] : (index + 1) * feature_samples.shape[0], baseline_feature_indices
+            ] = baseline_samples[offset + index, baseline_feature_indices]
 
         # After creating the (potentially large) input data matrix, we can evaluate the prediction method.
         predictions = np.array(prediction_method(inputs))
@@ -137,29 +140,30 @@ def marginal_expectation(prediction_method: Callable[[np.ndarray], np.ndarray],
             if return_averaged_results:
                 # This would average all prediction results obtained for the 'offset + index'-th sample in
                 # baseline_noise_samples. This is, y^(offset + index) = E[Y | do(x^(offset + index)_s)].
-                result[offset + index] = np.mean(predictions[index * feature_samples.shape[0]:
-                                                             (index + 1) * feature_samples.shape[0]], axis=0)
+                result[offset + index] = np.mean(
+                    predictions[index * feature_samples.shape[0] : (index + 1) * feature_samples.shape[0]], axis=0
+                )
             else:
                 # This would return all prediction results obtained for the 'offset + index'-th sample in
                 # baseline_noise_samples, i.e. the results are not averaged.
-                result[offset + index] = predictions[index * feature_samples.shape[0]:
-                                                     (index + 1) * feature_samples.shape[0]]
+                result[offset + index] = predictions[
+                    index * feature_samples.shape[0] : (index + 1) * feature_samples.shape[0]
+                ]
 
     return np.array(result)
 
 
-def permute_features(feature_samples: np.ndarray,
-                     features_to_permute: Union[List[int], np.ndarray],
-                     randomize_features_jointly: bool) -> np.ndarray:
+def permute_features(
+    feature_samples: np.ndarray, features_to_permute: Union[List[int], np.ndarray], randomize_features_jointly: bool
+) -> np.ndarray:
     # Making copy to ensure that the original object is not modified.
     feature_samples = np.array(feature_samples)
 
     if randomize_features_jointly:
         # Permute samples jointly. This still represents an interventional distribution.
-        feature_samples[:, features_to_permute] \
-            = feature_samples[np.random.choice(feature_samples.shape[0],
-                                               feature_samples.shape[0],
-                                               replace=False)][:, features_to_permute]
+        feature_samples[:, features_to_permute] = feature_samples[
+            np.random.choice(feature_samples.shape[0], feature_samples.shape[0], replace=False)
+        ][:, features_to_permute]
     else:
         # Permute samples independently.
         for feature in features_to_permute:
@@ -168,12 +172,14 @@ def permute_features(feature_samples: np.ndarray,
     return feature_samples
 
 
-def estimate_ftest_pvalue(X_training_a: np.ndarray,
-                          X_training_b: np.ndarray,
-                          Y_training: np.ndarray,
-                          X_test_a: np.ndarray,
-                          X_test_b: np.ndarray,
-                          Y_test: np.ndarray) -> float:
+def estimate_ftest_pvalue(
+    X_training_a: np.ndarray,
+    X_training_b: np.ndarray,
+    Y_training: np.ndarray,
+    X_test_a: np.ndarray,
+    X_test_b: np.ndarray,
+    Y_test: np.ndarray,
+) -> float:
     """Estimates the p-value for the null hypothesis that the same regression error with less parameters can be
     achieved. This is, a linear model trained on a data set A with d number of features has the same performance
     (in terms of squared error) relative to the number of features as a model trained on a data set B with k number
@@ -201,20 +207,19 @@ def estimate_ftest_pvalue(X_training_a: np.ndarray,
         X_test_b = X_test_b.reshape(0, 0)
 
     if X_training_a.shape[1] <= X_training_b.shape[1]:
-        raise ValueError("The data X_training_a should have more dimensions (model parameters) than the data "
-                         "X_training_b!")
+        raise ValueError(
+            "The data X_training_a should have more dimensions (model parameters) than the data " "X_training_b!"
+        )
 
-    ssr_a = np.sum(
-        (Y_test - LinearRegression().fit(X_training_a, Y_training).predict(X_test_a)) ** 2)
+    ssr_a = np.sum((Y_test - LinearRegression().fit(X_training_a, Y_training).predict(X_test_a)) ** 2)
 
     if X_training_b.shape[1] > 0:
-        ssr_b = np.sum(
-            (Y_test - LinearRegression().fit(X_training_b, Y_training).predict(X_test_b)) ** 2)
+        ssr_b = np.sum((Y_test - LinearRegression().fit(X_training_b, Y_training).predict(X_test_b)) ** 2)
     else:
         ssr_b = np.sum((Y_test - np.mean(Y_test)) ** 2)
 
-    dof_diff_1 = (X_test_a.shape[1] - X_test_b.shape[1])  # p1 - p2
-    dof_diff_2 = (X_test_a.shape[0] - X_test_a.shape[1] - 1)  # n - p2 (parameters include intercept)
+    dof_diff_1 = X_test_a.shape[1] - X_test_b.shape[1]  # p1 - p2
+    dof_diff_2 = X_test_a.shape[0] - X_test_a.shape[1] - 1  # n - p2 (parameters include intercept)
 
     f_statistic = (ssr_b - ssr_a) / dof_diff_1 * dof_diff_2
 

@@ -61,7 +61,7 @@ def fit_one_hot_encoders(X: np.ndarray) -> Dict[int, OneHotEncoder]:
     one_hot_encoders = {}
     for column in range(X.shape[1]):
         if isinstance(X[0, column], str):
-            one_hot_encoders[column] = OneHotEncoder(handle_unknown='ignore')
+            one_hot_encoders[column] = OneHotEncoder(handle_unknown="ignore")
             one_hot_encoders[column].fit(X[:, column].reshape(-1, 1))
 
     return one_hot_encoders
@@ -85,7 +85,7 @@ def apply_one_hot_encoding(X: np.ndarray, one_hot_encoder_map: Dict[int, OneHotE
 
 
 def is_categorical(X: np.ndarray) -> bool:
-    """ Checks if all of the given columns are categorical, i.e. either a string or a boolean. Only if all of the
+    """Checks if all of the given columns are categorical, i.e. either a string or a boolean. Only if all of the
     columns are categorical, this method will return True. Alternatively, consider has_categorical for checking if any
     of the columns is categorical.
 
@@ -101,10 +101,11 @@ def is_categorical(X: np.ndarray) -> bool:
     status = True
     for column in range(X.shape[1]):
         if (isinstance(X[0, column], int) or isinstance(X[0, column], float)) and np.isnan(X[0, column]):
-            raise ValueError("Input contains NaN values! This is currently not supported. "
-                             "Consider imputing missing values.")
+            raise ValueError(
+                "Input contains NaN values! This is currently not supported. " "Consider imputing missing values."
+            )
 
-        status &= (isinstance(X[0, column], str) or isinstance(X[0, column], bool))
+        status &= isinstance(X[0, column], str) or isinstance(X[0, column], bool)
 
         if not status:
             break
@@ -113,7 +114,7 @@ def is_categorical(X: np.ndarray) -> bool:
 
 
 def has_categorical(X: np.ndarray) -> bool:
-    """ Checks if any of the given columns are categorical, i.e. either a string or a boolean. If any of the columns
+    """Checks if any of the given columns are categorical, i.e. either a string or a boolean. If any of the columns
     is categorical, this method will return True. Alternatively, consider is_categorical for checking if all columns are
     categorical.
 

@@ -1,9 +1,11 @@
 import logging
-import numpy as np
-import scipy.stats as st
 import random
 
+import numpy as np
+import scipy.stats as st
+
 from dowhy.utils.api import parse_state
+
 
 class CausalRefuter:
 
@@ -14,6 +16,7 @@ class CausalRefuter:
     # todo: add docstring for common parameters here and remove from child refuter classes
 
     """
+
     # Default value for the number of simulations to be conducted
     DEFAULT_NUM_SIMULATIONS = 100
 
@@ -26,49 +29,58 @@ class CausalRefuter:
         self._random_seed = None
 
         # joblib params for parallel processing
-        self._n_jobs = kwargs.pop('n_jobs', None)
-        self._verbose = kwargs.pop('verbose', 0)
+        self._n_jobs = kwargs.pop("n_jobs", None)
+        self._verbose = kwargs.pop("verbose", 0)
 
         if "random_seed" in kwargs:
-            self._random_seed = kwargs['random_seed']
+            self._random_seed = kwargs["random_seed"]
             np.random.seed(self._random_seed)
 
         self.logger = logging.getLogger(__name__)
 
         # Concatenate the confounders, instruments and effect modifiers
         try:
-            self._variables_of_interest = self._target_estimand.get_backdoor_variables() + \
-                                        self._target_estimand.instrumental_variables + \
-                                        self._estimate.params['effect_modifiers']
+            self._variables_of_interest = (
+                self._target_estimand.get_backdoor_variables()
+                + self._target_estimand.instrumental_variables
+                + self._estimate.params["effect_modifiers"]
+            )
         except AttributeError as attr_error:
             self.logger.error(attr_error)
 
     def choose_variables(self, required_variables):
-        '''
-            This method provides a way to choose the confounders whose values we wish to
-            modify for finding its effect on the ability of the treatment to affect the outcome.
-        '''
+        """
+        This method provides a way to choose the confounders whose values we wish to
+        modify for finding its effect on the ability of the treatment to affect the outcome.
+        """
 
         invert = None
 
         if required_variables is False:
 
-            self.logger.info("All variables required: Running bootstrap adding noise to confounders, instrumental variables and effect modifiers.")
+            self.logger.info(
+                "All variables required: Running bootstrap adding noise to confounders, instrumental variables and effect modifiers."
+            )
             return None
 
         elif required_variables is True:
 
-            self.logger.info("All variables required: Running bootstrap adding noise to confounders, instrumental variables and effect modifiers.")
+            self.logger.info(
+                "All variables required: Running bootstrap adding noise to confounders, instrumental variables and effect modifiers."
+            )
             return self._variables_of_interest
 
         elif type(required_variables) is int:
 
             if len(self._variables_of_interest) < required_variables:
-                self.logger.error("Too many variables passed.\n The number of  variables is: {}.\n The number of variables passed: {}".format(
-                    len(self._variables_of_interest),
-                    required_variables )
+                self.logger.error(
+                    "Too many variables passed.\n The number of  variables is: {}.\n The number of variables passed: {}".format(
+                        len(self._variables_of_interest), required_variables
+                    )
                 )
-                raise ValueError("The number of variables in the required_variables is greater than the number of confounders, instrumental variables and effect modifiers")
+                raise ValueError(
+                    "The number of variables in the required_variables is greater than the number of confounders, instrumental variables and effect modifiers"
+                )
             else:
                 # Shuffle the confounders
                 random.shuffle(self._variables_of_interest)
@@ -76,32 +88,40 @@ class CausalRefuter:
 
         elif type(required_variables) is list:
 
-           # Check if all are select or deselect variables
-            if all(variable[0] == '-' for variable in required_variables):
+            # Check if all are select or deselect variables
+            if all(variable[0] == "-" for variable in required_variables):
                 invert = True
                 required_variables = [variable[1:] for variable in required_variables]
-            elif all(variable[0] != '-' for variable in required_variables):
+            elif all(variable[0] != "-" for variable in required_variables):
                 invert = False
             else:
                 self.logger.error("{} has both select and delect variables".format(required_variables))
-                raise ValueError("It appears that there are some select and deselect variables. Note you can either select or delect variables at a time, but not both")
+                raise ValueError(
+                    "It appears that there are some select and deselect variables. Note you can either select or delect variables at a time, but not both"
+                )
 
             # Check if all the required_variables belong to confounders, instrumental variables or effect
             if set(required_variables) - set(self._variables_of_interest) != set([]):
-                self.logger.error("{} are not confounder, instrumental variable or effect modifier".format( list( set(required_variables) - set(self._variables_of_interest) ) ))
-                raise ValueError("At least one of required_variables is not a valid variable name, or it is not a confounder, instrumental variable or effect modifier")
+                self.logger.error(
+                    "{} are not confounder, instrumental variable or effect modifier".format(
+                        list(set(required_variables) - set(self._variables_of_interest))
+                    )
+                )
+                raise ValueError(
+                    "At least one of required_variables is not a valid variable name, or it is not a confounder, instrumental variable or effect modifier"
+                )
 
             if invert is False:
                 return required_variables
             elif invert is True:
-                return list( set(self._variables_of_interest) - set(required_variables) )
+                return list(set(self._variables_of_interest) - set(required_variables))
 
         else:
-            self.logger.error("Incorrect type: {}. Expected an int,list or bool".format( type(required_variables) ) )
+            self.logger.error("Incorrect type: {}. Expected an int,list or bool".format(type(required_variables)))
             raise TypeError("Expected int, list or bool. Got an unexpected datatype")
 
-    def test_significance(self, estimate, simulations, test_type='auto',significance_level=0.05):
-        """ Tests the statistical significance of the estimate obtained to the simulations produced by a refuter.
+    def test_significance(self, estimate, simulations, test_type="auto", significance_level=0.05):
+        """Tests the statistical significance of the estimate obtained to the simulations produced by a refuter.
 
         The basis behind using the sample statistics of the refuter when we are in fact testing the estimate,
         is due to the fact that, we would ideally expect them to follow the same distribition.
@@ -134,32 +154,44 @@ class CausalRefuter:
         # Initializing the p_value
         p_value = 0
 
-        if test_type == 'auto':
+        if test_type == "auto":
             num_simulations = len(simulations)
-            if num_simulations >= 100: # Bootstrapping
-                self.logger.info("Making use of Bootstrap as we have more than 100 examples.\n \
-                Note: The greater the number of examples, the more accurate are the confidence estimates")
+            if num_simulations >= 100:  # Bootstrapping
+                self.logger.info(
+                    "Making use of Bootstrap as we have more than 100 examples.\n \
+                Note: The greater the number of examples, the more accurate are the confidence estimates"
+                )
 
                 # Perform Bootstrap Significance Test with the original estimate and the set of refutations
                 p_value = self.perform_bootstrap_test(estimate, simulations)
 
             else:
-                self.logger.warning("We assume a Normal Distribution as the sample has less than 100 examples.\n \
-                Note: The underlying distribution may not be Normal. We assume that it approaches normal with the increase in sample size.")
+                self.logger.warning(
+                    "We assume a Normal Distribution as the sample has less than 100 examples.\n \
+                Note: The underlying distribution may not be Normal. We assume that it approaches normal with the increase in sample size."
+                )
 
                 # Perform Normal Tests of Significance with the original estimate and the set of refutations
                 p_value = self.perform_normal_distribution_test(estimate, simulations)
 
-        elif test_type == 'bootstrap':
-            self.logger.info("Performing Bootstrap Test with {} samples\n \
-            Note: The greater the number of examples, the more accurate are the confidence estimates".format( len(simulations) ) )
+        elif test_type == "bootstrap":
+            self.logger.info(
+                "Performing Bootstrap Test with {} samples\n \
+            Note: The greater the number of examples, the more accurate are the confidence estimates".format(
+                    len(simulations)
+                )
+            )
 
             # Perform Bootstrap Significance Test with the original estimate and the set of refutations
             p_value = self.perform_bootstrap_test(estimate, simulations)
 
-        elif test_type == 'normal_test':
-            self.logger.info("Performing Normal Test with {} samples\n \
-            Note: We assume that the underlying distribution is Normal.".format( len(simulations) ) )
+        elif test_type == "normal_test":
+            self.logger.info(
+                "Performing Normal Test with {} samples\n \
+            Note: We assume that the underlying distribution is Normal.".format(
+                    len(simulations)
+                )
+            )
 
             # Perform Normal Tests of Significance with the original estimate and the set of refutations
             p_value = self.perform_normal_distribution_test(estimate, simulations)
@@ -167,10 +199,7 @@ class CausalRefuter:
         else:
             raise NotImplementedError
 
-        significance_dict = {
-                "p_value":p_value,
-                "is_statistically_significant": p_value <= significance_level
-                }
+        significance_dict = {"p_value": p_value, "is_statistically_significant": p_value <= significance_level}
 
         return significance_dict
 
@@ -181,7 +210,7 @@ class CausalRefuter:
         # Sort the simulations
         simulations.sort()
         # Obtain the median value
-        median_refute_values = simulations[int(num_simulations/2)]
+        median_refute_values = simulations[int(num_simulations / 2)]
 
         # Performing a two sided test
         if estimate.value > median_refute_values:
@@ -189,14 +218,14 @@ class CausalRefuter:
             # We select side to be left as we want to find the first value that matches
             estimate_index = np.searchsorted(simulations, estimate.value, side="left")
             # We subtact 1 as we are finding the value from the right tail
-            p_value = 1 - (estimate_index/ num_simulations)
+            p_value = 1 - (estimate_index / num_simulations)
         else:
             # We take the side to be right as we want to find the last index that matches
             estimate_index = np.searchsorted(simulations, estimate.value, side="right")
             # We get the probability with respect to the left tail.
             p_value = estimate_index / num_simulations
         # return twice the determined quantile as this is a two sided test
-        return 2*p_value
+        return 2 * p_value
 
     def perform_normal_distribution_test(self, estimate, simulations):
         # Get the mean for the simulations
@@ -204,12 +233,11 @@ class CausalRefuter:
         # Get the standard deviation for the simulations
         std_dev_refute_values = np.std(simulations)
         # Get the Z Score [(val - mean)/ std_dev ]
-        z_score = (estimate.value - mean_refute_values)/ std_dev_refute_values
+        z_score = (estimate.value - mean_refute_values) / std_dev_refute_values
 
-
-        if z_score > 0: # Right Tail
+        if z_score > 0:  # Right Tail
             p_value = 1 - st.norm.cdf(z_score)
-        else: # Left Tail
+        else:  # Left Tail
             p_value = st.norm.cdf(z_score)
 
         return p_value
@@ -219,9 +247,7 @@ class CausalRefuter:
 
 
 class CausalRefutation:
-    """Class for storing the result of a refutation method.
-
-    """
+    """Class for storing the result of a refutation method."""
 
     def __init__(self, estimated_effect, new_effect, refutation_type):
         self.estimated_effect = estimated_effect
@@ -248,6 +274,7 @@ class CausalRefutation:
             method_name = self.refuter.interpret_method
         method_name_arr = parse_state(method_name)
         import dowhy.interpreters as interpreters
+
         for method in method_name_arr:
             interpreter = interpreters.get_class_object(method)
             interpreter(self, **kwargs).interpret()
@@ -259,6 +286,5 @@ class CausalRefutation:
             )
         else:
             return "{0}\nEstimated effect:{1}\nNew effect:{2}\np value:{3}\n".format(
-                self.refutation_type, self.estimated_effect, self.new_effect, self.refutation_result['p_value']
+                self.refutation_type, self.estimated_effect, self.new_effect, self.refutation_result["p_value"]
             )
-

@@ -1,13 +1,13 @@
 import logging
 
-import dowhy.causal_model
 import dowhy.causal_estimator
+import dowhy.causal_model
 import dowhy.causal_refuter
 
-class Interpreter:
-    """Base class for all interpretation methods.
 
-    """
+class Interpreter:
+    """Base class for all interpretation methods."""
+
     # Can use these lists to specify the models/estimators/refuters that a particular interpreter supports.  Throw a ValueError if the user provides an incompatible object to intepret.
     SUPPORTED_MODELS = []
     SUPPORTED_ESTIMATORS = []
@@ -41,11 +41,8 @@ class Interpreter:
         self.logger = logging.getLogger(__name__)
 
     def interpret(self):
-        """Method that implements the functionality of an interpreter. 
+        """Method that implements the functionality of an interpreter.
 
         To be overridden by interpreter sub-classes.
         """
         raise NotImplementedError
-
-
-
