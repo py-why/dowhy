@@ -511,7 +511,7 @@ been more likely to receive the new drug, and so on. The goal of causal inferenc
 <h2>The four steps of causal inference<a class="headerlink" href="#The-four-steps-of-causal-inference" title="Permalink to this heading"></a></h2>
 <p>Since there is no ground-truth test dataset available that an estimate can be compared to, causal inference requires a series of principled steps to achieve a good estimator.</p>
 <p>Let us illustrate the four steps through a sample dataset. This tutorial requires you to download two libraries: DoWhy and EconML. Both can be installed by the following command: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">dowhy</span> <span class="pre">econml</span></code>.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -537,14 +537,6 @@ been more likely to receive the new drug, and so on. The goal of causal inferenc
     <span class="n">stddev_treatment_noise</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-keywords are unexpanded, not using
-</pre></div></div>
 </div>
 <p><strong>I. Modeling</strong></p>
 <p>The first step is to encode our domain knowledge into a causal model, often represented as a graph. The final outcome of a causal inference analysis depends largely on the input assumptions, so this step is quite important. To estimate the causal effect, most common problems involve specifying two types of variables:</p>
@@ -636,9 +628,9 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W3,W2,W0,W1,W4])
+─────(E[y|W1,W4,W3,W0,W2])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W2,W0,W1,W4,U) = P(y|v0,W3,W2,W0,W1,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W4,W3,W0,W2,U) = P(y|v0,W1,W4,W3,W0,W2)
 
 ### Estimand : 2
 Estimand name: iv
@@ -646,9 +638,9 @@ Estimand expression:
  ⎡                              -1⎤
  ⎢    d        ⎛    d          ⎞  ⎥
 E⎢─────────(y)⋅⎜─────────([v₀])⎟  ⎥
- ⎣d[Z₀  Z₁]    ⎝d[Z₀  Z₁]      ⎠  ⎦
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
-Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
+ ⎣d[Z₁  Z₀]    ⎝d[Z₁  Z₀]      ⎠  ⎦
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z1,Z0})
+Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→{v0}, then ¬({Z1,Z0}→y)
 
 ### Estimand : 3
 Estimand name: frontdoor
@@ -685,16 +677,16 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W3,W2,W0,W1,W4])
+─────(E[y|W1,W4,W3,W0,W2])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W2,W0,W1,W4,U) = P(y|v0,W3,W2,W0,W1,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W4,W3,W0,W2,U) = P(y|v0,W1,W4,W3,W0,W2)
 
 ## Realized estimand
-b: y~v0+W3+W2+W0+W1+W4
+b: y~v0+W1+W4+W3+W0+W2
 Target units: ate
 
 ## Estimate
-Mean value: 9.978985157608184
+Mean value: 9.96352688874363
 
 </pre></div></div>
 </div>
@@ -732,17 +724,18 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W3,W2,W0,W1,W4])
+─────(E[y|W1,W4,W3,W0,W2])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W2,W0,W1,W4,U) = P(y|v0,W3,W2,W0,W1,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W4,W3,W0,W2,U) = P(y|v0,W1,W4,W3,W0,W2)
 
 ## Realized estimand
-b: y~v0+W3+W2+W0+W1+W4 |
+b: y~v0+W1+W4+W3+W0+W2 |
 Target units: ate
 
 ## Estimate
-Mean value: 9.961987931817635
-Effect estimates: [9.96198793 9.96198793 9.96198793 ... 9.96198793 9.96198793 9.96198793]
+Mean value: 10.010254927036554
+Effect estimates: [10.01025493 10.01025493 10.01025493 ... 10.01025493 10.01025493
+ 10.01025493]
 
 </pre></div></div>
 </div>
@@ -766,9 +759,9 @@ estimate value of 0 when the action variable is replaced by a random variable, i
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:9.978985157608184
-New effect:0.017741928018406856
-p value:0.88
+Estimated effect:9.96352688874363
+New effect:0.0012141268648452807
+p value:0.96
 
 </pre></div></div>
 </div>
@@ -820,11 +813,11 @@ than learning a new toolkit. The power of EconML is that you can now implement t
 <div class="output_area docutils container">
 <div class="highlight"><pre>
    Treatment    Outcome        w0         s        w1
-0  18.408212  37.008503  3.560039  2.336704 -1.364151
-1  16.902710  33.675137  3.346044  2.191325 -0.908814
-2   6.698493  13.134777 -0.261694  0.935613  1.416868
-3  21.092223  42.180638 -3.963842  7.190153 -2.165321
-4  25.553544  50.802520 -4.377420  0.105623  0.962166
+0   8.716113  17.156029 -1.505232  5.420516  0.683014
+1  15.009671  30.143427  2.994416  4.002788  0.460878
+2   8.386481  17.197627 -1.507708  8.578699  1.629539
+3  15.532439  31.271716  3.078005  2.039794 -0.094314
+4  11.403817  21.673714  2.305468  4.301742 -1.743456
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -930,9 +923,9 @@ b: Outcome~Treatment+w1+w0
 Target units: ate
 
 ## Estimate
-Mean value: 1.9995100975270246
+Mean value: 1.998860424511771
 
-Causal Estimate is 1.9995100975270246
+Causal Estimate is 1.998860424511771
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -988,8 +981,8 @@ b: Outcome~Treatment+w1+w0 |
 Target units: ate
 
 ## Estimate
-Mean value: 1.0334079992087895
-Effect estimates: [1.033408 1.033408 1.033408 ... 1.033408 1.033408 1.033408]
+Mean value: 0.9711624611257769
+Effect estimates: [0.97116246 0.97116246 0.97116246 ... 0.97116246 0.97116246 0.97116246]
 
 </pre></div></div>
 </div>
@@ -1012,9 +1005,9 @@ Effect estimates: [1.033408 1.033408 1.033408 ... 1.033408 1.033408 1.033408]
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a random common cause
-Estimated effect:1.0334079992087895
-New effect:1.069606759354338
-p value:0.24
+Estimated effect:0.9711624611257769
+New effect:0.9674797216011083
+p value:0.9199999999999999
 
 </pre></div></div>
 </div>
@@ -1035,9 +1028,9 @@ p value:0.24
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:1.0334079992087895
-New effect:-8.12823624119608e-05
-p value:0.43523340761698226
+Estimated effect:0.9711624611257769
+New effect:0.00027043103187100704
+p value:0.303788073785242
 
 </pre></div></div>
 </div>
