@@ -1,4 +1,4 @@
-Introduction to DoWhy 
+Introduction to DoWhy
 =====================
 
 The need for causal inference
