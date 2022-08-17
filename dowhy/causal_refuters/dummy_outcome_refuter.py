@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 import logging
 import pdb
+
+from tqdm.auto import tqdm
 from collections import OrderedDict, namedtuple
 from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
@@ -214,7 +216,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         self._outcome_name_str = self._outcome_name[0]
         self.logger = logging.getLogger(__name__)
 
-    def refute_estimate(self):
+    def refute_estimate(self, show_progress_bar=False):
 
         # We need to change the identified estimand
         # We thus, make a copy. This is done as we don't want
@@ -238,7 +240,8 @@ class DummyOutcomeRefuter(CausalRefuter):
         # Train and the Validation Datasets. Thus, we run the simulation loop followed by the training and the validation
         # loops. Thus, we can get different values everytime we get the estimator.
 
-        for _ in range( self._num_simulations ):
+        # for _ in range( self._num_simulations ):
+        for _ in tqdm(range(self._num_simulations), colour=CausalRefuter.PROGRESS_BAR_COLOR, disable = not show_progress_bar, desc="Refuting Estimates: "):
             estimates = []
 
             if estimator_present == False:
