@@ -491,19 +491,19 @@ div.rendered_html tbody tr:hover {
 <div class="output_area docutils container">
 <div class="highlight"><pre>
          X0        X1   Z0        Z1        W0        W1 W2 W3         v0  \
-0 -0.053929 -0.217455  1.0  0.452509 -1.274327 -0.945357  1  3  17.675433
-1  0.788279  0.424730  1.0  0.759168 -1.883315  0.750125  0  2  13.949590
-2 -2.161960 -0.319667  1.0  0.347938  0.201037 -1.270162  3  3  31.004050
-3  0.104788 -0.959459  1.0  0.912452 -0.910965 -0.341119  3  0  26.156864
-4  0.159207  0.661504  1.0  0.658559 -1.845871  0.901825  2  0  16.216528
+0  0.811485 -0.959261  0.0  0.851201 -2.562383 -2.091201  0  3   1.321010
+1  1.105618 -0.096386  1.0  0.176116 -1.018537  0.912616  0  1  13.063616
+2 -0.328844 -2.629493  1.0  0.731838  0.216702  0.779804  3  1  30.578748
+3  1.806186 -0.312158  1.0  0.335505  0.408986  0.380497  0  1  20.959910
+4 -0.616567  0.371067  0.0  0.285178 -0.667192 -1.123237  1  1   4.147507
 
             y
-0  179.105354
-1  145.545836
-2  278.715291
-3  256.615664
-4  159.751419
-True causal estimate is 9.912457143229965
+0    8.789856
+1  183.789645
+2   52.612517
+3  327.350328
+4   34.020827
+True causal estimate is 7.95010638594482
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -553,9 +553,9 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W1,W3,W0])
+─────(E[y|W0,W1,W2,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W3,W0,U) = P(y|v0,W2,W1,W3,W0)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W1,W2,W3,U) = P(y|v0,W0,W1,W2,W3)
 
 ### Estimand : 2
 Estimand name: iv
@@ -563,9 +563,9 @@ Estimand expression:
  ⎡                              -1⎤
  ⎢    d        ⎛    d          ⎞  ⎥
 E⎢─────────(y)⋅⎜─────────([v₀])⎟  ⎥
- ⎣d[Z₁  Z₀]    ⎝d[Z₁  Z₀]      ⎠  ⎦
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z1,Z0})
-Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→{v0}, then ¬({Z1,Z0}→y)
+ ⎣d[Z₀  Z₁]    ⎝d[Z₀  Z₁]      ⎠  ⎦
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
+Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
 
 ### Estimand : 3
 Estimand name: frontdoor
@@ -595,7 +595,7 @@ No such variable(s) found!
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 linear_regression
-{&#39;control_value&#39;: 0, &#39;treatment_value&#39;: 1, &#39;test_significance&#39;: None, &#39;evaluate_effect_strength&#39;: False, &#39;confidence_intervals&#39;: False, &#39;target_units&#39;: &#39;ate&#39;, &#39;effect_modifiers&#39;: [&#39;X0&#39;, &#39;X1&#39;]}
+{&#39;control_value&#39;: 0, &#39;treatment_value&#39;: 1, &#39;test_significance&#39;: None, &#39;evaluate_effect_strength&#39;: False, &#39;confidence_intervals&#39;: False, &#39;target_units&#39;: &#39;ate&#39;, &#39;effect_modifiers&#39;: [&#39;X1&#39;, &#39;X0&#39;]}
 *** Causal Estimate ***
 
 ## Identified estimand
@@ -605,43 +605,43 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W1,W3,W0])
+─────(E[y|W0,W1,W2,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W3,W0,U) = P(y|v0,W2,W1,W3,W0)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W1,W2,W3,U) = P(y|v0,W0,W1,W2,W3)
 
 ## Realized estimand
-b: y~v0+W2+W1+W3+W0+v0*X0+v0*X1
+b: y~v0+W0+W1+W2+W3+v0*X1+v0*X0
 Target units: ate
 
 ## Estimate
-Mean value: 9.91246457086485
+Mean value: 7.9500210900446655
 ### Conditional Estimates
-__categorical__X0  __categorical__X1
-(-3.638, -0.92]    (-4.048, -1.033]      8.724363
-                   (-1.033, -0.443]      8.901404
-                   (-0.443, 0.0713]      9.045547
-                   (0.0713, 0.647]       9.088842
-                   (0.647, 3.338]        9.309681
-(-0.92, -0.331]    (-4.048, -1.033]      9.263814
-                   (-1.033, -0.443]      9.457074
-                   (-0.443, 0.0713]      9.565737
-                   (0.0713, 0.647]       9.676666
-                   (0.647, 3.338]        9.849777
-(-0.331, 0.187]    (-4.048, -1.033]      9.614713
-                   (-1.033, -0.443]      9.797168
-                   (-0.443, 0.0713]      9.916092
-                   (0.0713, 0.647]      10.025142
-                   (0.647, 3.338]       10.199357
-(0.187, 0.776]     (-4.048, -1.033]      9.970445
-                   (-1.033, -0.443]     10.151642
-                   (-0.443, 0.0713]     10.272728
-                   (0.0713, 0.647]      10.376307
-                   (0.647, 3.338]       10.543057
-(0.776, 3.581]     (-4.048, -1.033]     10.510796
-                   (-1.033, -0.443]     10.716972
-                   (-0.443, 0.0713]     10.795255
-                   (0.0713, 0.647]      10.942471
-                   (0.647, 3.338]       11.091409
+__categorical__X1  __categorical__X0
+(-4.876, -1.297]   (-4.086, -1.052]     -0.702120
+                   (-1.052, -0.495]      2.130954
+                   (-0.495, 0.0109]      3.875334
+                   (0.0109, 0.61]        5.754375
+                   (0.61, 3.54]          8.653852
+(-1.297, -0.705]   (-4.086, -1.052]      1.694074
+                   (-1.052, -0.495]      4.572013
+                   (-0.495, 0.0109]      6.347891
+                   (0.0109, 0.61]        8.205143
+                   (0.61, 3.54]         11.266908
+(-0.705, -0.186]   (-4.086, -1.052]      3.225918
+                   (-1.052, -0.495]      6.174365
+                   (-0.495, 0.0109]      7.861853
+                   (0.0109, 0.61]        9.794592
+                   (0.61, 3.54]         12.745801
+(-0.186, 0.409]    (-4.086, -1.052]      4.737131
+                   (-1.052, -0.495]      7.623524
+                   (-0.495, 0.0109]      9.475772
+                   (0.0109, 0.61]       11.253809
+                   (0.61, 3.54]         14.315012
+(0.409, 3.011]     (-4.086, -1.052]      7.126724
+                   (-1.052, -0.495]     10.134595
+                   (-0.495, 0.0109]     11.866671
+                   (0.0109, 0.61]       13.729317
+                   (0.61, 3.54]         16.881994
 dtype: float64
 </pre></div></div>
 </div>
@@ -687,18 +687,18 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W1,W3,W0])
+─────(E[y|W0,W1,W2,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W3,W0,U) = P(y|v0,W2,W1,W3,W0)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W1,W2,W3,U) = P(y|v0,W0,W1,W2,W3)
 
 ## Realized estimand
-b: y~v0+W2+W1+W3+W0 | X0,X1
+b: y~v0+W0+W1+W2+W3 | X1,X0
 Target units: Data subset defined by a function
 
 ## Estimate
-Mean value: 10.850214245669775
-Effect estimates: [10.78336647 11.04447817 10.57099384 ... 10.89645176 11.03886234
- 11.02303012]
+Mean value: 13.880184723071105
+Effect estimates: [13.58259424 15.41111042 19.32673909 ... 15.60131018  8.52054882
+ 13.74998269]
 
 </pre></div></div>
 </div>
@@ -715,7 +715,7 @@ Effect estimates: [10.78336647 11.04447817 10.57099384 ... 10.89645176 11.038862
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-True causal estimate is 9.912457143229965
+True causal estimate is 7.95010638594482
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -750,18 +750,18 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W1,W3,W0])
+─────(E[y|W0,W1,W2,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W3,W0,U) = P(y|v0,W2,W1,W3,W0)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W1,W2,W3,U) = P(y|v0,W0,W1,W2,W3)
 
 ## Realized estimand
-b: y~v0+W2+W1+W3+W0 | X0,X1
+b: y~v0+W0+W1+W2+W3 | X1,X0
 Target units:
 
 ## Estimate
-Mean value: 9.8770241241634
-Effect estimates: [ 9.8851098  10.56070436  8.50858226 ...  9.80068767 10.2283435
-  8.09685256]
+Mean value: 7.941336017160985
+Effect estimates: [10.08203493 13.57419516  1.33902036 ...  6.05417529  1.45438138
+  7.41411988]
 
 </pre></div></div>
 </div>
@@ -806,21 +806,21 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W1,W3,W0])
+─────(E[y|W0,W1,W2,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W3,W0,U) = P(y|v0,W2,W1,W3,W0)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W1,W2,W3,U) = P(y|v0,W0,W1,W2,W3)
 
 ## Realized estimand
-b: y~v0+W2+W1+W3+W0 | X0,X1
+b: y~v0+W0+W1+W2+W3 | X1,X0
 Target units: ate
 
 ## Estimate
-Mean value: 9.881577435722797
-Effect estimates: [ 9.89034448 10.57517919  8.4740438  ...  9.80412001 10.22145173
-  8.06459853]
-95.0% confidence interval: (array([ 9.89843672, 10.60771953,  8.36588449, ...,  9.80922662,
-       10.22081257,  7.90916779]), array([ 9.96959605, 10.73306926,  8.5246071 , ...,  9.87671968,
-       10.36227216,  8.11311475]))
+Mean value: 7.944918645429006
+Effect estimates: [10.03738959 13.55122795  1.26910213 ...  6.0514056   1.40987907
+  7.39531971]
+95.0% confidence interval: (array([10.03966394, 13.62373435,  1.01298654, ...,  6.05686114,
+        1.19519652,  7.41735683]), array([10.30616742, 13.97654237,  1.29597575, ...,  6.16944949,
+        1.43445989,  7.55303266]))
 
 </pre></div></div>
 </div>
@@ -853,8 +853,8 @@ Effect estimates: [ 9.89034448 10.57517919  8.4740438  ...  9.80412001 10.221451
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[10.17101606 10.62854798 10.30779658 10.58117057 10.14123791 10.63059094
- 10.46641596 10.25383657 10.66215114 10.07413393]
+[15.0935925  12.33981787 14.1057014  12.57147097 12.18542851 13.81475123
+ 13.77270682 12.42230778 13.35067045 12.85644768]
 </pre></div></div>
 </div>
 </section>
@@ -873,7 +873,7 @@ Effect estimates: [ 9.89034448 10.57517919  8.4740438  ...  9.80412001 10.221451
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;econml.dml.dml.DML object at 0x7f332c0843a0&gt;
+&lt;econml.dml.dml.DML object at 0x7f12013a2c10&gt;
 </pre></div></div>
 </div>
 </section>
@@ -908,30 +908,30 @@ Effect estimates: [ 9.89034448 10.57517919  8.4740438  ...  9.80412001 10.221451
 <div class="output_area docutils container">
 <div class="highlight"><pre>
             X0        X1   Z0        Z1        W0        W1        W2  \
-0    -0.252392  0.654380  1.0  0.973308 -1.178440  0.643588  1.969698
-1    -0.215696  1.044434  1.0  0.301230 -0.613271 -0.044395 -0.507691
-2    -0.211914  1.231417  0.0  0.545661  1.011842 -0.639834  0.348314
-3    -0.531677  0.311865  1.0  0.576570 -1.217293  2.326607  1.196507
-4     1.070275  0.697638  1.0  0.679367 -0.330779 -0.457872 -0.783906
+0     2.006394  0.416252  0.0  0.827061  0.217422  0.549715  0.479512
+1    -0.376217  0.006910  0.0  0.087786 -0.858667 -0.462970  1.067590
+2    -0.866469 -1.737131  1.0  0.685504 -1.277024 -2.062117  0.529376
+3     1.646219 -1.405467  0.0  0.619508 -1.490712  0.485472  0.796337
+4    -1.305944 -0.259172  0.0  0.729266 -0.388467 -0.062533  1.061382
 ...        ...       ...  ...       ...       ...       ...       ...
-9995  0.383035  2.098647  0.0  0.854842 -1.037949 -0.483472  1.141643
-9996  0.957346  0.739962  1.0  0.846594 -0.490066  0.248323  2.557153
-9997 -0.810629 -0.107745  0.0  0.605021 -0.185028  0.131241  1.097072
-9998 -1.746937 -0.534260  0.0  0.010670  0.069584 -0.766105  0.020408
-9999 -1.774553  0.187147  1.0  0.159758  1.842558  0.390806  0.151703
+9995 -2.402740  0.046415  0.0  0.122459  0.003817 -0.150135  2.513331
+9996 -2.496728  0.985645  0.0  0.038342 -1.006648  0.786748  0.497614
+9997 -0.686529 -1.881105  0.0  0.936829 -1.013712  0.281822 -0.354490
+9998 -0.151187 -0.303597  0.0  0.786091 -0.918630 -0.813110  0.343830
+9999  1.125621 -0.236305  0.0  0.238745 -0.916876 -0.109017  0.615368
 
             W3  v0  y
-0    -1.217794   1  1
-1    -0.270805   1  1
-2     1.044458   1  1
-3     0.298950   1  1
-4    -1.392135   1  1
+0    -0.383961   1  1
+1     0.813396   1  1
+2    -0.396408   1  0
+3     1.262403   1  1
+4    -0.221530   1  1
 ...        ...  .. ..
-9995 -0.519590   1  1
-9996 -0.076102   1  1
-9997 -0.396402   1  1
-9998  0.037890   0  1
-9999 -0.277061   1  1
+9995  0.499961   1  1
+9996 -0.582354   1  1
+9997  0.802490   1  1
+9998  0.978067   1  1
+9999  0.646495   1  1
 
 [10000 rows x 10 columns]
 </pre></div></div>
@@ -971,19 +971,19 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W1,W3,W0])
+─────(E[y|W0,W1,W2,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W3,W0,U) = P(y|v0,W2,W1,W3,W0)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W1,W2,W3,U) = P(y|v0,W0,W1,W2,W3)
 
 ## Realized estimand
-b: y~v0+W2+W1+W3+W0 | X0,X1
+b: y~v0+W0+W1+W2+W3 | X1,X0
 Target units: ate
 
 ## Estimate
-Mean value: 0.4868837795515091
-Effect estimates: [0.48496005 0.49007733 0.49220206 ... 0.46339218 0.43648653 0.44368048]
+Mean value: 0.6150681554613174
+Effect estimates: [0.69299112 0.64634162 0.51154431 ... 0.50187571 0.62441007 0.63793839]
 
-True causal estimate is 0.2784
+True causal estimate is 0.3797
 </pre></div></div>
 </div>
 </section>
@@ -1033,12 +1033,12 @@ True causal estimate is 0.2784
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-2022-08-16 14:08:24.839680: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library &#39;libcudart.so.11.0&#39;; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
-2022-08-16 14:08:24.839742: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
-2022-08-16 14:08:26.724035: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library &#39;libcuda.so.1&#39;; dlerror: libcuda.so.1: cannot open shared object file: No such file or directory
-2022-08-16 14:08:26.724074: W tensorflow/stream_executor/cuda/cuda_driver.cc:269] failed call to cuInit: UNKNOWN ERROR (303)
-2022-08-16 14:08:26.724100: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:156] kernel driver does not appear to be running on this host (b10450f6ff8f): /proc/driver/nvidia/version does not exist
-2022-08-16 14:08:26.724333: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+2022-08-18 14:48:36.300947: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library &#39;libcudart.so.11.0&#39;; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2022-08-18 14:48:36.300991: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+2022-08-18 14:48:38.057683: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library &#39;libcuda.so.1&#39;; dlerror: libcuda.so.1: cannot open shared object file: No such file or directory
+2022-08-18 14:48:38.057728: W tensorflow/stream_executor/cuda/cuda_driver.cc:269] failed call to cuInit: UNKNOWN ERROR (303)
+2022-08-18 14:48:38.057754: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:156] kernel driver does not appear to be running on this host (d715add5ae07): /proc/driver/nvidia/version does not exist
+2022-08-18 14:48:38.058058: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 AVX512F FMA
 To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
 </pre></div></div>
 </div>
@@ -1048,105 +1048,105 @@ To enable them in other operations, rebuild TensorFlow with the appropriate comp
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Epoch 1/25
-313/313 [==============================] - 2s 2ms/step - loss: 7.4071
+313/313 [==============================] - 1s 2ms/step - loss: 7.4167
 Epoch 2/25
-313/313 [==============================] - 1s 2ms/step - loss: 3.0953
+313/313 [==============================] - 1s 2ms/step - loss: 3.2818
 Epoch 3/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.7562
+313/313 [==============================] - 1s 2ms/step - loss: 2.8265
 Epoch 4/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.6946
+313/313 [==============================] - 1s 2ms/step - loss: 2.7147
 Epoch 5/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.6663
+313/313 [==============================] - 1s 2ms/step - loss: 2.6750
 Epoch 6/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.6393
+313/313 [==============================] - 1s 2ms/step - loss: 2.6364
 Epoch 7/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.6311
+313/313 [==============================] - 1s 2ms/step - loss: 2.6116
 Epoch 8/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.6042
+313/313 [==============================] - 1s 2ms/step - loss: 2.5847
 Epoch 9/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.5981
+313/313 [==============================] - 1s 2ms/step - loss: 2.5613
 Epoch 10/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.5735
+313/313 [==============================] - 1s 2ms/step - loss: 2.5476
 Epoch 11/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.5700
+313/313 [==============================] - 1s 2ms/step - loss: 2.5300
 Epoch 12/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.5558
+313/313 [==============================] - 1s 2ms/step - loss: 2.5241
 Epoch 13/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.5442
+313/313 [==============================] - 1s 2ms/step - loss: 2.5248
 Epoch 14/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.5439
+313/313 [==============================] - 1s 2ms/step - loss: 2.5212
 Epoch 15/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.5435
+313/313 [==============================] - 1s 2ms/step - loss: 2.5037
 Epoch 16/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.5348
+313/313 [==============================] - 1s 2ms/step - loss: 2.5067
 Epoch 17/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.5206
+313/313 [==============================] - 1s 2ms/step - loss: 2.5035
 Epoch 18/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.5213
+313/313 [==============================] - 1s 2ms/step - loss: 2.4948
 Epoch 19/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.5106
+313/313 [==============================] - 1s 2ms/step - loss: 2.5031
 Epoch 20/25
-313/313 [==============================] - 1s 3ms/step - loss: 2.5119
+313/313 [==============================] - 1s 2ms/step - loss: 2.4906
 Epoch 21/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.5101
+313/313 [==============================] - 1s 2ms/step - loss: 2.4968
 Epoch 22/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.5028
+313/313 [==============================] - 1s 2ms/step - loss: 2.4887
 Epoch 23/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.5029
+313/313 [==============================] - 1s 2ms/step - loss: 2.4880
 Epoch 24/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.5001
+313/313 [==============================] - 1s 2ms/step - loss: 2.4864
 Epoch 25/25
-313/313 [==============================] - 1s 2ms/step - loss: 2.4978
+313/313 [==============================] - 1s 2ms/step - loss: 2.4804
 Epoch 1/25
-313/313 [==============================] - 2s 3ms/step - loss: 16498.6289
+313/313 [==============================] - 2s 2ms/step - loss: 14318.6123
 Epoch 2/25
-313/313 [==============================] - 1s 3ms/step - loss: 9198.4795
+313/313 [==============================] - 1s 2ms/step - loss: 8066.5337
 Epoch 3/25
-313/313 [==============================] - 1s 3ms/step - loss: 8286.2119
+313/313 [==============================] - 1s 2ms/step - loss: 7467.1567
 Epoch 4/25
-313/313 [==============================] - 1s 3ms/step - loss: 8038.8970
+313/313 [==============================] - 1s 2ms/step - loss: 7346.2163
 Epoch 5/25
-313/313 [==============================] - 1s 3ms/step - loss: 8037.9800
+313/313 [==============================] - 1s 2ms/step - loss: 7374.8979
 Epoch 6/25
-313/313 [==============================] - 1s 3ms/step - loss: 8064.7891
+313/313 [==============================] - 1s 3ms/step - loss: 7318.9473
 Epoch 7/25
-313/313 [==============================] - 1s 3ms/step - loss: 8037.0190
+313/313 [==============================] - 1s 2ms/step - loss: 7485.0000
 Epoch 8/25
-313/313 [==============================] - 1s 3ms/step - loss: 8033.5806
+313/313 [==============================] - 1s 2ms/step - loss: 7357.5693
 Epoch 9/25
-313/313 [==============================] - 1s 3ms/step - loss: 8136.6118
+313/313 [==============================] - 1s 2ms/step - loss: 7105.2046
 Epoch 10/25
-313/313 [==============================] - 1s 3ms/step - loss: 7930.2402
+313/313 [==============================] - 1s 2ms/step - loss: 7317.3354
 Epoch 11/25
-313/313 [==============================] - 1s 3ms/step - loss: 7985.9712
+313/313 [==============================] - 1s 2ms/step - loss: 7314.7324
 Epoch 12/25
-313/313 [==============================] - 1s 3ms/step - loss: 7923.2729
+313/313 [==============================] - 1s 2ms/step - loss: 7197.4019
 Epoch 13/25
-313/313 [==============================] - 1s 3ms/step - loss: 7952.8091
+313/313 [==============================] - 1s 2ms/step - loss: 7125.9639
 Epoch 14/25
-313/313 [==============================] - 1s 3ms/step - loss: 7902.7061
+313/313 [==============================] - 1s 2ms/step - loss: 7157.7974
 Epoch 15/25
-313/313 [==============================] - 1s 3ms/step - loss: 7915.0361
+313/313 [==============================] - 1s 2ms/step - loss: 7093.3130
 Epoch 16/25
-313/313 [==============================] - 1s 3ms/step - loss: 7893.6938
+313/313 [==============================] - 1s 2ms/step - loss: 7114.7666
 Epoch 17/25
-313/313 [==============================] - 1s 3ms/step - loss: 7949.2388
+313/313 [==============================] - 1s 2ms/step - loss: 7149.7422
 Epoch 18/25
-313/313 [==============================] - 1s 3ms/step - loss: 7936.5078
+313/313 [==============================] - 1s 3ms/step - loss: 7185.6768
 Epoch 19/25
-313/313 [==============================] - 1s 3ms/step - loss: 7850.0933
+313/313 [==============================] - 1s 2ms/step - loss: 7198.3179
 Epoch 20/25
-313/313 [==============================] - 1s 3ms/step - loss: 7954.4360
+313/313 [==============================] - 1s 2ms/step - loss: 7363.0513
 Epoch 21/25
-313/313 [==============================] - 1s 3ms/step - loss: 7924.9121
+313/313 [==============================] - 1s 2ms/step - loss: 7098.5791
 Epoch 22/25
-313/313 [==============================] - 1s 3ms/step - loss: 7931.5854
+313/313 [==============================] - 1s 2ms/step - loss: 7102.8643
 Epoch 23/25
-313/313 [==============================] - 1s 3ms/step - loss: 7852.6221
+313/313 [==============================] - 1s 2ms/step - loss: 7142.3960
 Epoch 24/25
-313/313 [==============================] - 1s 3ms/step - loss: 7913.8682
+313/313 [==============================] - 1s 2ms/step - loss: 7149.4448
 Epoch 25/25
-313/313 [==============================] - 1s 3ms/step - loss: 7833.5400
+313/313 [==============================] - 1s 3ms/step - loss: 7198.6758
 WARNING:tensorflow:
 The following Variables were used a Lambda layer&#39;s call (lambda_7), but
 are not present in its tracked objects:
@@ -1161,8 +1161,8 @@ are not present in its tracked objects:
 It is possible that this is intended behavior, but it is more likely
 an omission. This is a strong indication that this layer should be
 formulated as a subclassed Layer rather than a Lambda layer.
-257/257 [==============================] - 0s 1ms/step
-257/257 [==============================] - 0s 1ms/step
+245/245 [==============================] - 0s 1ms/step
+245/245 [==============================] - 0s 1ms/step
 *** Causal Estimate ***
 
 ## Identified estimand
@@ -1174,17 +1174,18 @@ Estimand expression:
  ⎡                              -1⎤
  ⎢    d        ⎛    d          ⎞  ⎥
 E⎢─────────(y)⋅⎜─────────([v₀])⎟  ⎥
- ⎣d[Z₁  Z₀]    ⎝d[Z₁  Z₀]      ⎠  ⎦
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z1,Z0})
-Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→{v0}, then ¬({Z1,Z0}→y)
+ ⎣d[Z₀  Z₁]    ⎝d[Z₀  Z₁]      ⎠  ⎦
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
+Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
 
 ## Realized estimand
-b: y~v0+W2+W1+W3+W0 | X0,X1
+b: y~v0+W0+W1+W2+W3 | X1,X0
 Target units: Data subset defined by a function
 
 ## Estimate
-Mean value: 8.50003719329834
-Effect estimates: [10.003876   7.9452133  9.436607  ...  9.334251  10.132271   9.65905  ]
+Mean value: 2.109506130218506
+Effect estimates: [ 3.191948    3.3972778   2.7943916  ...  0.38806152  2.8929806
+ -0.7397995 ]
 
 </pre></div></div>
 </div>
@@ -1214,30 +1215,30 @@ Effect estimates: [10.003876   7.9452133  9.436607  ...  9.334251  10.132271   9
 <div class="output_area docutils container">
 <div class="highlight"><pre>
             X0        X1        X2        X3        X4   Z0        Z1  \
-0     0.082911  0.535892  0.727671  0.214622 -0.842672  1.0  0.570009
-1    -1.974313  0.936709 -0.837467  1.515093 -1.587762  1.0  0.065836
-2    -1.791553  1.717521  0.206623  1.440014 -0.119409  1.0  0.209254
-3    -0.188239  2.520266 -1.041977 -0.471082 -1.293116  1.0  0.315875
-4    -1.560103  1.387554 -0.444548 -0.009995 -1.924120  1.0  0.084107
+0    -0.310183 -1.258650  0.053922 -1.795035 -0.240502  1.0  0.585730
+1    -2.773209 -0.456459 -1.212899  0.618431 -0.300929  1.0  0.579274
+2     0.735628  0.333469 -1.814032 -0.359480  0.260954  1.0  0.414393
+3    -1.496532  0.090023 -0.148054 -1.981285  0.618003  1.0  0.061083
+4    -1.956343 -0.653768 -0.131751 -0.900587 -0.823371  1.0  0.987485
 ...        ...       ...       ...       ...       ...  ...       ...
-9995 -0.925273  1.751902 -1.566427  1.093563  0.109668  1.0  0.053929
-9996  1.301924  3.049173  1.480458  1.594120 -1.163473  1.0  0.601501
-9997  1.278191  0.457211  1.549213  2.602611 -0.656339  1.0  0.698572
-9998  0.460211 -0.879561 -1.845195  0.624885 -1.325760  1.0  0.397201
-9999  0.086404  0.941344  0.635005  1.702885 -2.132138  1.0  0.410346
+9995 -1.325054  0.134142  0.364382 -1.112337 -1.224954  1.0  0.649533
+9996 -0.851464  1.050535 -0.342766 -1.125482 -0.284448  1.0  0.684001
+9997 -1.717953  0.639946  1.085217 -1.000019 -0.426288  1.0  0.053382
+9998 -1.133155  0.026997  0.680331 -1.306331  1.841361  1.0  0.165285
+9999  1.499462  0.671948 -0.207115 -0.146563 -0.393486  1.0  0.687733
 
             W0        W1        W2        W3        W4  v0          y
-0     0.112013  0.083977  0.893952  0.238356  0.907284   1  16.872443
-1    -0.114110  2.024633 -0.967448  0.719721 -0.866291   1   7.342199
-2     0.058372  1.138451 -0.566043 -1.154677 -0.521615   1  14.150045
-3    -0.536825  0.669267 -0.778279  0.289808  0.640062   1  12.975831
-4    -0.142157  1.544718 -1.128649 -0.127795 -1.353935   1   2.882000
+0    -1.235380  3.027824  0.001225  3.076156  1.996185   1   4.524208
+1     1.069009 -2.691287  0.508861  0.324145  1.209429   1   8.690921
+2    -1.325201  0.276178 -0.786273  0.543725  1.874599   1   6.031726
+3    -0.111771  0.642752  1.154486  1.633914  0.614893   1  12.134936
+4    -1.883880  0.169639 -0.143790  0.645791 -0.637051   1  -5.510549
 ...        ...       ...       ...       ...       ...  ..        ...
-9995 -1.739419  2.333219 -0.082090 -0.233835 -2.547314   1  10.342691
-9996 -1.146802  1.046175  0.371192 -2.339545  0.432849   1  21.078114
-9997  0.585470  0.345738  0.145851  0.869807  3.244316   1  26.116256
-9998 -0.384529  2.391471 -0.672874 -0.940618 -0.932233   1  -1.430838
-9999 -0.346266 -0.009154 -0.233062 -1.165751  0.798221   1   9.448346
+9995  0.496855  0.364436  0.917768 -0.047561  1.186845   1   5.514900
+9996 -1.256948  0.338710 -0.505568  0.107713 -1.583412   1   2.070809
+9997  0.345836  1.430983  1.158359  0.996349  1.517498   1  12.868607
+9998 -2.081884  0.757591 -0.585911  1.027341  1.190046   1   7.985679
+9999 -2.181653 -0.280261 -0.871380  2.428294  0.879796   1   4.255155
 
 [10000 rows x 14 columns]
 </pre></div></div>
@@ -1274,20 +1275,20 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W1,W3,W4,W0])
+─────(E[y|W0,W1,W2,W4,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W3,W4,W0,U) = P(y|v0,W2,W1,W3,W4,W0)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W1,W2,W4,W3,U) = P(y|v0,W0,W1,W2,W4,W3)
 
 ## Realized estimand
-b: y~v0+X0+X1+X2+X4+X3+W2+W1+W3+W4+W0
+b: y~v0+X2+X1+X4+X3+X0+W0+W1+W2+W4+W3
 Target units: ate
 
 ## Estimate
-Mean value: 19.09315841494164
-Effect estimates: [21.45825204 16.56505378 21.9057878  ... 26.967697    7.98512013
- 16.32854532]
+Mean value: 8.301582458305198
+Effect estimates: [ 7.45161423 13.32122201 13.09229873 ... 14.40421434 16.39381737
+ 13.19494606]
 
-True causal estimate is 12.374832721199079
+True causal estimate is 4.428243224877965
 </pre></div></div>
 </div>
 </section>
@@ -1325,19 +1326,19 @@ Estimand type: nonparametric-ate
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W1,W3,W4,W0])
+─────(E[y|W0,W1,W2,W4,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W3,W4,W0,U) = P(y|v0,W2,W1,W3,W4,W0)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W1,W2,W4,W3,U) = P(y|v0,W0,W1,W2,W4,W3)
 
 ## Realized estimand
-b: y~v0+X0+X1+X2+X4+X3+W2+W1+W3+W4+W0
+b: y~v0+X2+X1+X4+X3+X0+W0+W1+W2+W4+W3
 Target units: Data subset provided as a data frame
 
 ## Estimate
-Mean value: 21.267634311686503
-Effect estimates: [23.12326185 29.18985174 25.13521197 10.12786877 18.76197722]
+Mean value: 12.942984238729561
+Effect estimates: [14.27972357  8.29290541 20.10085838 11.36532409 10.67610975]
 
-True causal estimate is 12.374832721199079
+True causal estimate is 4.428243224877965
 </pre></div></div>
 </div>
 </section>
@@ -1360,9 +1361,9 @@ True causal estimate is 12.374832721199079
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a random common cause
-Estimated effect:10.391689764092316
-New effect:10.384972110668683
-p value:0.78
+Estimated effect:13.251289521433398
+New effect:13.267240096666843
+p value:0.76
 
 </pre></div></div>
 </div>
@@ -1386,8 +1387,8 @@ p value:0.78
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add an Unobserved Common Cause
-Estimated effect:10.391689764092316
-New effect:10.371276762858598
+Estimated effect:13.251289521433398
+New effect:13.254261988988864
 
 </pre></div></div>
 </div>
@@ -1412,9 +1413,9 @@ New effect:10.371276762858598
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:10.391689764092316
-New effect:0.0007950102139761467
-p value:0.4910262030249193
+Estimated effect:13.251289521433398
+New effect:0.004761240060103341
+p value:0.478569537703347
 
 </pre></div></div>
 </div>
@@ -1438,9 +1439,9 @@ p value:0.4910262030249193
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a subset of data
-Estimated effect:10.391689764092316
-New effect:10.384410865989468
-p value:0.3577826558960123
+Estimated effect:13.251289521433398
+New effect:13.278309520491973
+p value:0.35499565865874194
 
 </pre></div></div>
 </div>
