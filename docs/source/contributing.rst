@@ -18,8 +18,8 @@ Here are some examples:
 * Helping extend the DoWhy API so that we can support new functionality like interpretability of the estimate, counterfactual prediction and more. 
 
 
-If you would like to contribute, you can raise a pull request. If you have
-questions before contributing, you can start by opening an issue on Github. 
+If you would like to contribute, you can raise a pull request, see :doc:`contributing/contributing-code` for more info.
+If you have questions before contributing, you can start by opening an issue on Github.
 
 For a guide to contributing and a list of all contributors, check out `CONTRIBUTING.md <https://github.com/py-why/dowhy/blob/master/CONTRIBUTING.md>`_. Our contributor code of conduct is available `here <https://github.com/py-why/governance/blob/main/CODE-OF-CONDUCT.md>`_. You can also join the DoWhy development channel on Discord: |discord|_
 
