@@ -211,7 +211,7 @@ def estimate_ftest_pvalue(X_training_a: np.ndarray,
         ssr_b = np.sum(
             (Y_test - LinearRegression().fit(X_training_b, Y_training).predict(X_test_b)) ** 2)
     else:
-        ssr_b = np.sum((Y_test - np.mean(Y_test)) ** 2)
+        ssr_b = np.sum((Y_test - np.mean(Y_training)) ** 2)
 
     dof_diff_1 = (X_test_a.shape[1] - X_test_b.shape[1])  # p1 - p2
     dof_diff_2 = (X_test_a.shape[0] - X_test_a.shape[1] - 1)  # n - p2 (parameters include intercept)

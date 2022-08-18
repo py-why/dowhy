@@ -1,50 +1,58 @@
-.. dowhy documentation master file, created by
-   sphinx-quickstart on Tue Mar 13 14:48:10 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-.. include:: getting_started/intro.rst
+DoWhy documentation
+===================
 
 .. toctree::
-   :hidden: 
-   :maxdepth: 2
-   :caption: Getting Started
-   
-   Introduction to DoWhy <getting_started/intro>
-   getting_started/install
-   Quick-start notebook <example_notebooks/dowhy_simple_example>
-   Comparison to other packages <getting_started/comparison>
-   getting_started/cite
+    :maxdepth: 3
+    :hidden:
+    :glob:
 
-.. toctree::
-   :hidden: 
-   :maxdepth: 2
-   :caption: User Guide
+    getting_started/index
+    User Guide <user_guide/index>
+    Examples <example_notebooks/nb_index>
+    dowhy
+    Contributing <contributing>
+    code_repo
 
-   user_guide/causality_intro
-   user_guide/effect_inference/index
-   user_guide/gcm_based_inference/index
-   example_notebooks/nb_index
 
-.. toctree::
-   :hidden: 
-   :maxdepth: 2
-   :caption: Tutorials/Case studies
+.. image:: https://raw.githubusercontent.com/py-why/dowhy/master/docs/images/dowhy-schematic.png
 
-   CATE estimation with DoWhy+EconML <example_notebooks/tutorial-causalinference-machinelearning-using-dowhy-econml>
-   example_notebooks/nb_casestudies_index
+Much like machine learning libraries have done for prediction, **"DoWhy" is a Python library that aims to spark
+causal thinking and analysis**. DoWhy provides a principled four-step interface for causal inference that focuses on
+explicitly modeling causal assumptions and validating them as much as possible. The key feature of DoWhy is its
+state-of-the-art refutation API that can automatically test causal assumptions for any estimation method, thus making
+inference more robust and accessible to non-experts. DoWhy supports estimation of the average causal effect for
+backdoor, frontdoor, instrumental variable and other identification methods, and estimation of the conditional effect
+(CATE) through an integration with the EconML library.
 
-.. toctree::
-   :hidden:
-   :maxdepth: 2
-   :caption: Contributing
+Getting started
+---------------
 
-   contributing/index
+New to DoWhy? Our :doc:`getting_started/index` guide will get you up to speed in minutes. Once completed, you'll be
+ready to check out our :doc:`example_notebooks/nb_index`, :doc:`user_guide/index`, and other sections.
 
-.. toctree::
-   :hidden: 
-   :maxdepth: 2
-   :caption: Package
+User Guide
+----------
 
-   code_repo
-   dowhy
+Complete newbie when it comes to causal inference and DoWhy? Then you probably want to read our
+comprehensive :doc:`user_guide/index`. It guides you through everything you need to know, including the concepts and
+science you need to know when trying to solve non-trivial problems.
+
+Examples
+--------
+
+If you prefer to learn by example, we recommend our :doc:`example_notebooks/nb_index`.
+
+API Reference
+-------------
+
+The :doc:`dowhy` guide contains a detailed description of the functions, modules, and objects included in DoWhy.
+The reference describes how the methods work and which parameters can be used. It assumes that you have an
+understanding of the key concepts.
+
+Contributing
+------------
+
+Want to add to the codebase or documentation? Check out our :doc:`contributing` guide.
+
+.. include:: cite.rst
+
