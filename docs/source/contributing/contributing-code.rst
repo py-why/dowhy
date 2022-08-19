@@ -8,83 +8,113 @@ To contribute code, basic knowledge of git is required, if you are unfamiliar
 with the git workflow, checkout `GitHub's tutorial <https://docs.github.com/en/get-started/quickstart/hello-world>`_.
 The following steps allow you to contribute code to DoWhy.
 
-1. Fork the `dowhy main repository <https://github.com/py-why/dowhy>`_
-2. Clone this repository to your local machine using
+#. Fork the `dowhy main repository <https://github.com/py-why/dowhy>`_
 
-.. code:: shell
+#. Clone this repository to your local machine using
 
-   git clone https://github.com/<YOUR_GITHUB_USERNAME>/dowhy
+   .. code:: shell
 
-3. Install DoWhy and its requirements. Poetry will create a virtual environment automatically,
-but if preferred, it can be created in a different way.
-By default, Poetry will install DoWhy in interactive mode.
-This way, you can immediately test your changes to the codebase.
+      git clone https://github.com/<YOUR_GITHUB_USERNAME>/dowhy
 
-.. code:: shell
+#. Install DoWhy and its requirements. Poetry will create a virtual environment automatically,
+   but if preferred, it can be created in a different way.
+   By default, Poetry will install DoWhy in interactive mode.
+   This way, you can immediately test your changes to the codebase.
 
-   cd dowhy
-   pip install --upgrade pip
-   poetry install -E "plotting causalml docs"
+   .. code:: shell
 
-.. note::
-   Installing pygraphviz can cause problems on some platforms.
-   One way, that works for most Linux distributions is to
-   first install graphviz and then pygraphviz as shown below.
-   Otherwise, please consult the documentation of `pygraphviz <https://pygraphviz.github.io/documentation/stable/install.html>`_.
+      cd dowhy
+      pip install --upgrade pip
+      poetry install -E "plotting causalml"
 
-.. code:: shell
+   .. note::
+      Installing pygraphviz can cause problems on some platforms.
+      One way, that works for most Linux distributions is to
+      first install graphviz and then pygraphviz as shown below.
+      Otherwise, please consult the documentation of `pygraphviz <https://pygraphviz.github.io/documentation/stable/install.html>`_.
 
-    sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
-    pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" \
-    --install-option="--library-path=/usr/lib/graphviz/"
+   .. code:: shell
 
-4. (optional) add dowhy as an upstream remote to keep your
-fork up-to-date with DoWhy's main branch.
+       sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
+       pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" \
+       --install-option="--library-path=/usr/lib/graphviz/"
 
-.. code:: shell
+#. (optional) add dowhy as an upstream remote to keep your
+   fork up-to-date with DoWhy's main branch.
 
-   git remote add upstream http://www.github.com/py-why/dowhy
+   .. code:: shell
 
-You are now ready to make changes to the code base locally.
+      git remote add upstream http://www.github.com/py-why/dowhy
+
+   You are now ready to make changes to the code base locally.
 
 Pull request checklist
 ----------------------------------
 
-1. Execute the flake8 linter for breaking warnings and fix all reported problems.
+#. Execute the flake8 linter for breaking warnings and fix all reported problems.
 
-.. code:: shell
+   .. code:: shell
 
-  poetry run poe lint
+     poetry run poe lint
 
-2. Add tests for your new code and execute the unittests to make sure
-you did not introduce any breaking changes or bugs.
+#. Add tests for your new code and execute the unittests to make sure
+   you did not introduce any breaking changes or bugs.
 
-.. code:: shell
+   .. code:: shell
 
-  poetry run poe test
+     poetry run poe test
 
-Note that you can also execute those tasks together
+   Note that you can also execute those tasks together
 
-.. code:: shell
+   .. code:: shell
 
-  poetry run poe verify
-A full list of available tasks can be obtained using
+     poetry run poe verify
 
-.. code:: shell
+   A full list of available tasks can be obtained using
 
-  poetry run poe -h
+   .. code:: shell
 
-The full test suite of DoWhy takes quite long. To speed up development cycles,
-you can restrict the tests executed as in the following example.
+     poetry run poe -h
 
-.. code:: shell
+   The full test suite of DoWhy takes quite long. To speed up development cycles,
+   you can restrict the tests executed as in the following example.
 
-  poetry run pytest -v tests/causal_refuters
+   .. code:: shell
 
-3. Once your code is finished and it passes all checks successfully,
-commit your changes. Make sure to add an informative commit message and to sign off your
-commits (DCO):
+     poetry run pytest -v tests/causal_refuters
 
-.. code:: shell
+#. Once your code is finished and it passes all checks successfully,
+   commit your changes. Make sure to add an informative commit message and to sign off your
+   commits:
 
-  git commit --signoff -m "informative commit message"
+   .. code:: shell
+
+     git commit --signoff -m "informative commit message"
+
+   By including this sign-off step, a commit is enriched with a Developer Certificate of Origin (DCO), containing the author's name and email address.
+   The DCO is a lightweight alternative to a CLA and affirms that the author is the source of the committed code and has the right to contribute it to the project.
+   For the full text, see `DCO <https://developercertificate.org>`_.
+
+   .. note::
+      Note the "--signoff" or shorthand "-s" is obligatory and commits without cannot be merged.
+      By default, most IDEs won't include this step within their git integration, so an additional setup may be required.
+
+   In case you made a single commit without adding the required DCO, you can do
+
+   .. code:: shell
+
+     git commit --amend --no-edit --signoff
+     git push -f origin <BRANCH_NAME>
+
+   In case of more commits, one way is to squash them together (example for 3 commits)
+
+   .. code:: shell
+
+     git reset --soft HEAD~3
+     git commit -s -m "new informative commit message of squashed commit"
+
+   or use a rebase with as many "^" as commits to be changed.
+
+   .. code:: shell
+
+      git rebase --signoff HEAD^^^
