@@ -15,7 +15,8 @@ The following steps allow you to contribute code to DoWhy.
 
    git clone https://github.com/<YOUR_GITHUB_USERNAME>/dowhy
 
-3. Install DoWhy and its requirements in your environment.
+3. Install DoWhy and its requirements. Poetry will create a virtual environment automatically,
+but if preferred, it can be created in a different way.
 By default, Poetry will install DoWhy in interactive mode.
 This way, you can immediately test your changes to the codebase.
 
@@ -78,7 +79,7 @@ you can restrict the tests executed as in the following example.
 
 .. code:: shell
 
-  pytest -v tests/causal_refuters
+  poetry run pytest -v tests/causal_refuters
 
 3. Once your code is finished and it passes all checks successfully,
 commit your changes. Make sure to add an informative commit message and to sign off your
