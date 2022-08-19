@@ -15,16 +15,7 @@ The following steps allow you to contribute code to DoWhy.
 
    git clone https://github.com/<YOUR_GITHUB_USERNAME>/dowhy
 
-3. [optional] Create a virtual environment using python venv or conda #check if poetry does this automatically
-
-.. code:: shell
-
-   virtualenv dowhy-env --python=python3.8
-   source dowhy-env/bin/activate
-
-Note this step is not necessary as Poetry will create a new environment by itself if needed.
-
-4. Install DoWhy and it's requirements in your environment.
+3. Install DoWhy and its requirements in your environment.
 By default, Poetry will install DoWhy in interactive mode.
 This way, you can immediately test your changes to the codebase.
 
@@ -36,9 +27,17 @@ This way, you can immediately test your changes to the codebase.
 
 .. note::
    Installing pygraphviz can cause problems on some platforms.
-   Please consult the documentation of `pygraphviz <https://pygraphviz.github.io/documentation/stable/install.html>`_
+   One way, that works for most Linux distributions is to
+   first install graphviz and then pygraphviz as shown below.
+   Otherwise, please consult the documentation of `pygraphviz <https://pygraphviz.github.io/documentation/stable/install.html>`_.
 
-5. (optional) add dowhy as an upstream remote to keep your
+.. code:: shell
+
+    sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
+    pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" \
+    --install-option="--library-path=/usr/lib/graphviz/"
+
+4. (optional) add dowhy as an upstream remote to keep your
 fork up-to-date with DoWhy's main branch.
 
 .. code:: shell
