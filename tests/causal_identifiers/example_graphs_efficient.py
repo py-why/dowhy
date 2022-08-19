@@ -1,4 +1,3 @@
-
 TEST_EFFICIENT_BD_SOLUTIONS = {
     # For all examples from these papers we use X for the treatment variable
     # instead of A.
