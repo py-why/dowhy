@@ -16,6 +16,7 @@ class CausalRefuter:
     """
     # Default value for the number of simulations to be conducted
     DEFAULT_NUM_SIMULATIONS = 100
+    PROGRESS_BAR_COLOR = 'green'
 
     def __init__(self, data, identified_estimand, estimate, **kwargs):
         self._data = data
@@ -214,7 +215,7 @@ class CausalRefuter:
 
         return p_value
 
-    def refute_estimate(self):
+    def refute_estimate(self, show_progress_bar=False):
         raise NotImplementedError
 
 
