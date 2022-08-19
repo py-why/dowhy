@@ -4,7 +4,7 @@ from flaky import flaky
 from pytest import approx
 from scipy import stats
 
-from dowhy.gcm import EmpiricalDistribution, BayesianGaussianMixtureDistribution, ScipyDistribution
+from dowhy.gcm import BayesianGaussianMixtureDistribution, EmpiricalDistribution, ScipyDistribution
 
 
 def test_bayesian_gaussian_mixture_distribution():
@@ -24,8 +24,8 @@ def test_bayesian_gaussian_mixture_distribution_runtime_error():
 def test_scipy_fixed_parametric_distribution():
     distribution = ScipyDistribution(stats.norm, loc=0, scale=1)
 
-    assert distribution.parameters['loc'] == 0
-    assert distribution.parameters['scale'] == 1
+    assert distribution.parameters["loc"] == 0
+    assert distribution.parameters["scale"] == 1
 
 
 @flaky(max_runs=5)
@@ -35,8 +35,8 @@ def test_scipy_fittable_parametric_distribution():
     X = np.random.normal(0, 1, 1000)
     distribution.fit(X)
 
-    assert distribution.parameters['loc'] == approx(0, abs=0.1)
-    assert distribution.parameters['scale'] == approx(1, abs=0.1)
+    assert distribution.parameters["loc"] == approx(0, abs=0.1)
+    assert distribution.parameters["scale"] == approx(1, abs=0.1)
 
 
 @flaky(max_runs=5)
@@ -67,8 +67,8 @@ def test_fitted_parameters_assigned_correctly_using_normal_distribution():
     distribution = ScipyDistribution(stats.norm)
     distribution.fit(ScipyDistribution(stats.norm, loc=3, scale=2).draw_samples(10000))
 
-    assert distribution.parameters['loc'] == approx(3, abs=0.3)
-    assert distribution.parameters['scale'] == approx(2, abs=0.3)
+    assert distribution.parameters["loc"] == approx(3, abs=0.3)
+    assert distribution.parameters["scale"] == approx(2, abs=0.3)
 
 
 @flaky(max_runs=5)
@@ -76,7 +76,7 @@ def test_fitted_parameters_assigned_correctly_using_beta_distribution():
     distribution = ScipyDistribution(stats.beta)
     distribution.fit(ScipyDistribution(stats.beta, a=2, b=0.5).draw_samples(10000))
 
-    assert distribution.parameters['loc'] == approx(0, abs=0.1)
-    assert distribution.parameters['scale'] == approx(1, abs=0.1)
-    assert distribution.parameters['a'] == approx(2, abs=0.5)
-    assert distribution.parameters['b'] == approx(0.5, abs=0.5)
+    assert distribution.parameters["loc"] == approx(0, abs=0.1)
+    assert distribution.parameters["scale"] == approx(1, abs=0.1)
+    assert distribution.parameters["a"] == approx(2, abs=0.5)
+    assert distribution.parameters["b"] == approx(0.5, abs=0.5)

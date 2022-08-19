@@ -4,7 +4,6 @@ import numpy as np
 
 
 class DensityEstimator(ABC):
-
     @abstractmethod
     def fit(self, X: np.ndarray) -> None:
         raise NotImplementedError

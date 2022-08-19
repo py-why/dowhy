@@ -3,7 +3,7 @@ from flaky import flaky
 from pytest import approx
 from sklearn.linear_model import LogisticRegression
 
-from dowhy.gcm.ml import create_logistic_regression_classifier, SklearnClassificationModel, create_linear_regressor
+from dowhy.gcm.ml import SklearnClassificationModel, create_linear_regressor, create_logistic_regression_classifier
 
 
 @flaky(max_runs=5)
@@ -15,9 +15,9 @@ def test_categorical_features():
     for i in range(1000):
         tmp_value = 2 * X0[i]
 
-        if X1[i] == '0':
+        if X1[i] == "0":
             tmp_value -= 5
-        elif X1[i] == '1':
+        elif X1[i] == "1":
             tmp_value += 10
         else:
             tmp_value += 5
@@ -31,7 +31,7 @@ def test_categorical_features():
     mdl = create_linear_regressor()
     mdl.fit(inputs, X2)
 
-    assert mdl.predict(np.array([[2, '1']], dtype=object)) == approx(14)
+    assert mdl.predict(np.array([[2, "1"]], dtype=object)) == approx(14)
     assert mdl.predict(inputs) == approx(X2.reshape(-1, 1))
 
 
@@ -43,9 +43,9 @@ def test_categorical_inputs():
     for i in range(1000):
         tmp_value = 2 * X0[i]
 
-        if X1[i] == '0':
+        if X1[i] == "0":
             tmp_value -= 5
-        elif X1[i] == '1':
+        elif X1[i] == "1":
             tmp_value += 10
         else:
             tmp_value += 5
@@ -59,11 +59,10 @@ def test_categorical_inputs():
     mdl = create_logistic_regression_classifier()
     mdl.fit(inputs, X2)
 
-    X2['True' == 1] = 1
-    X2['False' == 0] = 0
+    X2["True" == 1] = 1
+    X2["False" == 0] = 0
 
-    assert mdl.predict_probabilities(np.array([[2, '1']], dtype=object)) \
-           == approx(np.array([[0, 1]]), abs=0.01)
+    assert mdl.predict_probabilities(np.array([[2, "1"]], dtype=object)) == approx(np.array([[0, 1]]), abs=0.01)
     assert np.sum(np.argmax(mdl.predict_probabilities(inputs), axis=1) != X2) < 20
 
     _, counts = np.unique(mdl.predict(inputs), return_counts=True)

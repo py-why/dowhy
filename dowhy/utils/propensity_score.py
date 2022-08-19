@@ -1,16 +1,18 @@
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import GradientBoostingClassifier
-from statsmodels.nonparametric.kernel_density import KDEMultivariateConditional, EstimatorSettings
-from sklearn.preprocessing import LabelEncoder
-from pandas import get_dummies
-import numpy as np
 import logging
+
+import numpy as np
+from pandas import get_dummies
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import LabelEncoder
+from statsmodels.nonparametric.kernel_density import EstimatorSettings, KDEMultivariateConditional
+
 import dowhy.utils.api as api
 
 
-def propensity_of_treatment_score(data, covariates, treatment, model='logistic', variable_types=None):
-    if model == 'logistic':
-        model = LogisticRegression(solver='lbfgs')
+def propensity_of_treatment_score(data, covariates, treatment, model="logistic", variable_types=None):
+    if model == "logistic":
+        model = LogisticRegression(solver="lbfgs")
         data, covariates = binarize_discrete(data, covariates, variable_types)
         model = model.fit(data[covariates], data[treatment].values.ravel())
         scores = model.predict_proba(data[covariates])[:, 1]
@@ -24,24 +26,24 @@ def state_propensity_score(data, covariates, treatments, variable_types=None):
         raise Exception("Can't control for causal states. Remove treatment from covariates.")
     log_propensities = {}
     for i, treatment in enumerate(treatments):
-        if variable_types[treatment] in ['b']:
-            log_propensities[treatment] = np.log(binary_treatment_model(data.copy(),
-                                                                        covariates + treatments[i+1:],
-                                                                        treatment,
-                                                                        variable_types))
-        elif variable_types[treatment] in ['o', 'u', 'd']:
-            log_propensities[treatment] = np.log(categorical_treatment_model(data.copy(),
-                                                                             covariates + treatments[i+1:],
-                                                                             treatment,
-                                                                             variable_types))
-        elif variable_types[treatment] in ['c']:
-            log_propensities[treatment] = np.log(continuous_treatment_model(data.copy(),
-                                                                            covariates + treatments[i+1:],
-                                                                            treatment,
-                                                                            variable_types))
+        if variable_types[treatment] in ["b"]:
+            log_propensities[treatment] = np.log(
+                binary_treatment_model(data.copy(), covariates + treatments[i + 1 :], treatment, variable_types)
+            )
+        elif variable_types[treatment] in ["o", "u", "d"]:
+            log_propensities[treatment] = np.log(
+                categorical_treatment_model(data.copy(), covariates + treatments[i + 1 :], treatment, variable_types)
+            )
+        elif variable_types[treatment] in ["c"]:
+            log_propensities[treatment] = np.log(
+                continuous_treatment_model(data.copy(), covariates + treatments[i + 1 :], treatment, variable_types)
+            )
         else:
-            raise Exception("Variable type {} for variable {} is not a recognized format type.".format(variable_types[treatment],
-                                                                                                       treatment))
+            raise Exception(
+                "Variable type {} for variable {} is not a recognized format type.".format(
+                    variable_types[treatment], treatment
+                )
+            )
     scores = np.zeros(len(data))
     for treatment in treatments:
         scores += log_propensities[treatment]
@@ -50,7 +52,7 @@ def state_propensity_score(data, covariates, treatments, variable_types=None):
 
 def binary_treatment_model(data, covariates, treatment, variable_types):
     data, covariates = binarize_discrete(data, covariates, variable_types)
-    model = LogisticRegression(solver='lbfgs')
+    model = LogisticRegression(solver="lbfgs")
     model = model.fit(data[covariates], data[treatment])
     scores = model.predict_proba(data[covariates])
     scores = scores[range(len(scores)), data[treatment].values.astype(int)]
@@ -59,7 +61,7 @@ def binary_treatment_model(data, covariates, treatment, variable_types):
 
 def categorical_treatment_model(data, covariates, treatment, variable_types):
     data, covariates = binarize_discrete(data, covariates, variable_types)
-    model = LogisticRegression(multi_class='ovr', solver='lbfgs')
+    model = LogisticRegression(multi_class="ovr", solver="lbfgs")
     data[treatment], encoder = discrete_to_integer(data[treatment])
     model = model.fit(data[covariates], data[treatment])
     scores = model.predict_proba(data[covariates])
@@ -74,20 +76,22 @@ def continuous_treatment_model(data, covariates, treatment, variable_types):
     else:
         defaults = EstimatorSettings(n_jobs=-1, efficient=False)
 
-    if 'c' not in variable_types.values():
-        bw = 'cv_ml'
+    if "c" not in variable_types.values():
+        bw = "cv_ml"
     else:
-        bw = 'normal_reference'
+        bw = "normal_reference"
 
     indep_type = get_type_string(covariates, variable_types)
     dep_type = get_type_string([treatment], variable_types)
 
-    model = KDEMultivariateConditional(endog=data[treatment],
-                                       exog=data[covariates],
-                                       dep_type=''.join(dep_type),
-                                       indep_type=''.join(indep_type),
-                                       bw=bw,
-                                       defaults=defaults)
+    model = KDEMultivariateConditional(
+        endog=data[treatment],
+        exog=data[covariates],
+        dep_type="".join(dep_type),
+        indep_type="".join(indep_type),
+        bw=bw,
+        defaults=defaults,
+    )
     scores = model.pdf(endog_predict=data[treatment], exog_predict=data[covariates])
     return scores
 
@@ -95,16 +99,17 @@ def continuous_treatment_model(data, covariates, treatment, variable_types):
 def get_type_string(variables, variable_types):
     var_types = []
     for variable in variables:
-        if variable_types[variable] in ['b', 'd', 'o', 'u']:
-            if variable_types[variable] in ['o', 'u']:
+        if variable_types[variable] in ["b", "d", "o", "u"]:
+            if variable_types[variable] in ["o", "u"]:
                 var_types.append(variable_types[variable])
             else:
-                var_types.append('u')
-        elif variable_types[variable] in ['c']:
-            var_types.append('c')
+                var_types.append("u")
+        elif variable_types[variable] in ["c"]:
+            var_types.append("c")
         else:
-            raise Exception("Variable type {} for variable {} not a recognized type.".format(variable_types[variable],
-                                                                                             variable))
+            raise Exception(
+                "Variable type {} for variable {} not a recognized type.".format(variable_types[variable], variable)
+            )
     return "".join(var_types)
 
 
@@ -113,13 +118,13 @@ def binarize_discrete(data, covariates, variable_types):
     if variable_types:
         for variable in covariates:
             variable_type = variable_types[variable]
-            if variable_type in ['d', 'o', 'u']:
+            if variable_type in ["d", "o", "u"]:
                 dummies = get_dummies(data[variable])
                 dummies.columns = [variable + str(col) for col in dummies.columns]
                 dummies = dummies[dummies.columns[:-1]]
                 covariates += list(dummies.columns)
                 for var_name in dummies.columns:
-                    variable_types[var_name] = 'b'
+                    variable_types[var_name] = "b"
                 data[dummies.columns] = dummies
                 to_remove.append(variable)
     for variable in to_remove:

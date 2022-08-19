@@ -1,25 +1,27 @@
 """ Regression based (conditional) independence test. Testing independence via regression, i.e. if a variable has
 information about another variable, then they are dependent.
 """
-from typing import Callable, Optional, Union, List
+from typing import Callable, List, Optional, Union
 
 import numpy as np
 from sklearn.kernel_approximation import Nystroem
 from sklearn.preprocessing import scale
 
-from dowhy.gcm.stats import quantile_based_fwer, estimate_ftest_pvalue
-from dowhy.gcm.util.general import shape_into_2d, apply_one_hot_encoding, fit_one_hot_encoders
+from dowhy.gcm.stats import estimate_ftest_pvalue, quantile_based_fwer
+from dowhy.gcm.util.general import apply_one_hot_encoding, fit_one_hot_encoders, shape_into_2d
 
 
-def regression_based(X: np.ndarray,
-                     Y: np.ndarray,
-                     Z: Optional[np.ndarray] = None,
-                     num_components_all_inputs: int = 40,
-                     num_runs: int = 20,
-                     p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float] = quantile_based_fwer,
-                     f_test_samples_ratio: Optional[float] = 0.3,
-                     max_samples_per_run: int = 10000) -> float:
-    """ The main idea is that if X and Y are dependent, then X should help in predicting Y. If there is no dependency,
+def regression_based(
+    X: np.ndarray,
+    Y: np.ndarray,
+    Z: Optional[np.ndarray] = None,
+    num_components_all_inputs: int = 40,
+    num_runs: int = 20,
+    p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float] = quantile_based_fwer,
+    f_test_samples_ratio: Optional[float] = 0.3,
+    max_samples_per_run: int = 10000,
+) -> float:
+    """The main idea is that if X and Y are dependent, then X should help in predicting Y. If there is no dependency,
     then X should not help. When Z is given, the idea remains the same, but here X and Y are conditionally independent
     given Z if X does not help in predicting Y when knowing Z. This is, X has not additional information about Y given
     Z. In the pairwise case (Z is not given), the performances (in terms of squared error) between predicting Y based
@@ -58,8 +60,9 @@ def regression_based(X: np.ndarray,
              then for the hypothesis that X and Y are independent.
     """
     if num_components_all_inputs < 2:
-        raise ValueError("Need at least two components for all inputs, but only %d were given!"
-                         % num_components_all_inputs)
+        raise ValueError(
+            "Need at least two components for all inputs, but only %d were given!" % num_components_all_inputs
+        )
 
     X, Y = shape_into_2d(X, Y)
 
@@ -99,11 +102,15 @@ def regression_based(X: np.ndarray,
             training_indices = np.arange(0, all_inputs.shape[0])
             test_indices = training_indices
 
-        all_p_values.append(estimate_ftest_pvalue(all_inputs[training_indices],
-                                                  input_Z[training_indices],
-                                                  Y[training_indices],
-                                                  all_inputs[test_indices],
-                                                  input_Z[test_indices],
-                                                  Y[test_indices]))
+        all_p_values.append(
+            estimate_ftest_pvalue(
+                all_inputs[training_indices],
+                input_Z[training_indices],
+                Y[training_indices],
+                all_inputs[test_indices],
+                input_Z[test_indices],
+                Y[test_indices],
+            )
+        )
 
     return p_value_adjust_func(all_p_values)
