@@ -42,6 +42,7 @@
     <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -214,6 +215,8 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">pdb</span>
+
+<span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">tqdm</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span><span class="p">,</span> <span class="n">namedtuple</span>
 <span class="kn">from</span> <span class="nn">dowhy.causal_refuter</span> <span class="kn">import</span> <span class="n">CausalRefutation</span>
 <span class="kn">from</span> <span class="nn">dowhy.causal_refuter</span> <span class="kn">import</span> <span class="n">CausalRefuter</span>
@@ -424,7 +427,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
-<div class="viewcode-block" id="DummyOutcomeRefuter.refute_estimate"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.dummy_outcome_refuter.DummyOutcomeRefuter.refute_estimate">[docs]</a>    <span class="k">def</span> <span class="nf">refute_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="DummyOutcomeRefuter.refute_estimate"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.dummy_outcome_refuter.DummyOutcomeRefuter.refute_estimate">[docs]</a>    <span class="k">def</span> <span class="nf">refute_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="c1"># We need to change the identified estimand</span>
         <span class="c1"># We thus, make a copy. This is done as we don&#39;t want</span>
@@ -448,7 +451,8 @@
         <span class="c1"># Train and the Validation Datasets. Thus, we run the simulation loop followed by the training and the validation</span>
         <span class="c1"># loops. Thus, we can get different values everytime we get the estimator.</span>
 
-        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_simulations</span> <span class="p">):</span>
+        <span class="c1"># for _ in range( self._num_simulations ):</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_simulations</span><span class="p">),</span> <span class="n">colour</span><span class="o">=</span><span class="n">CausalRefuter</span><span class="o">.</span><span class="n">PROGRESS_BAR_COLOR</span><span class="p">,</span> <span class="n">disable</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">show_progress_bar</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Refuting Estimates: &quot;</span><span class="p">):</span>
             <span class="n">estimates</span> <span class="o">=</span> <span class="p">[]</span>
 
             <span class="k">if</span> <span class="n">estimator_present</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
