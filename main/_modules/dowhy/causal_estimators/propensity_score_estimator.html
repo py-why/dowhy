@@ -228,9 +228,15 @@
 <span class="sd">    Supports additional parameters as listed below.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">propensity_score_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">recalculate_propensity_score</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                 <span class="n">propensity_score_column</span><span class="o">=</span><span class="s2">&quot;propensity_score&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">propensity_score_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">recalculate_propensity_score</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">propensity_score_column</span><span class="o">=</span><span class="s2">&quot;propensity_score&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param propensity_score_model: Model used to compute propensity score.</span>
 <span class="sd">            Can be any classification model that supports fit() and</span>
@@ -243,8 +249,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Required to ensure that self.method_params contains all the</span>
         <span class="c1"># parameters to create an object of this class</span>
-        <span class="n">args_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                     <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_STD_INIT_ARGS</span><span class="p">}</span>
+        <span class="n">args_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_STD_INIT_ARGS</span><span class="p">}</span>
         <span class="n">args_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">args_dict</span><span class="p">)</span>
 
@@ -259,13 +264,12 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
         <span class="c1"># Checking if the treatment is binary</span>
         <span class="n">treatment_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">treatment_values</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">treatment_values</span><span class="p">]):</span>
             <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;Propensity score methods are applicable only for binary treatments&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Back-door variables used:&quot;</span> <span class="o">+</span>
-                        <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">get_backdoor_variables</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Back-door variables used:&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">get_backdoor_variables</span><span class="p">()))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">get_backdoor_variables</span><span class="p">()</span>
 
@@ -282,26 +286,31 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_refresh_propensity_score</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">            A custom estimator based on the way the propensity score estimates are to be used.</span>
-<span class="sd">            Invoked from the &#39;_estimate_effect&#39; method of various propensity score subclasses when the propensity score is not pre-computed.      </span>
-<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A custom estimator based on the way the propensity score estimates are to be used.</span>
+<span class="sd">        Invoked from the &#39;_estimate_effect&#39; method of various propensity score subclasses when the propensity score is not pre-computed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">recalculate_propensity_score</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">propensity_score_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">propensity_score_model</span> <span class="o">=</span> <span class="n">linear_model</span><span class="o">.</span><span class="n">LogisticRegression</span><span class="p">()</span>
             <span class="n">treatment_reshaped</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">propensity_score_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span><span class="p">,</span> <span class="n">treatment_reshaped</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">propensity_score_column</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propensity_score_model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">propensity_score_column</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propensity_score_model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span>
+            <span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># check if user provides the propensity score column</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">propensity_score_column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">propensity_score_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;Propensity score column </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">propensity_score_column</span><span class="si">}</span><span class="s2"> does not exist, nor does a propensity_model. </span>
-<span class="s2">                    Please specify the column name that has your pre-computed propensity score, or a model to compute it.&quot;&quot;&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;&quot;&quot;Propensity score column </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">propensity_score_column</span><span class="si">}</span><span class="s2"> does not exist, nor does a propensity_model. </span>
+<span class="s2">                    Please specify the column name that has your pre-computed propensity score, or a model to compute it.&quot;&quot;&quot;</span>
+                    <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">propensity_score_column</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propensity_score_model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span>
+                        <span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
                     <span class="k">except</span> <span class="n">NotFittedError</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="n">NotFittedError</span><span class="p">(</span><span class="s2">&quot;Please fit the propensity score model before calling predict_proba&quot;</span><span class="p">)</span>
 
@@ -309,20 +318,19 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;INFO: Using pre-computed propensity score in column </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">propensity_score_column</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PropensityScoreEstimator.construct_symbolic_estimator"><a class="viewcode-back" href="../../../dowhy.causal_estimators.html#dowhy.causal_estimators.propensity_score_estimator.PropensityScoreEstimator.construct_symbolic_estimator">[docs]</a>    <span class="k">def</span> <span class="nf">construct_symbolic_estimator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimand</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">            A symbolic string that conveys what each estimator does.</span>
-<span class="sd">            For instance, linear regression is expressed as</span>
-<span class="sd">            y ~ bx + e</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A symbolic string that conveys what each estimator does.</span>
+<span class="sd">        For instance, linear regression is expressed as</span>
+<span class="sd">        y ~ bx + e</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
     <span class="k">def</span> <span class="nf">_estimate_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">            A custom estimator based on the way the propensity score estimates are to be used.</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A custom estimator based on the way the propensity score estimates are to be used.</span>
 
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
-
 </pre></div>
 
               </article>

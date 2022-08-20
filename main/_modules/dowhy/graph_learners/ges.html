@@ -209,41 +209,44 @@
               <article class="bd-article" role="main">
                 
   <h1>Source code for dowhy.graph_learners.ges</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
+
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
-<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">dowhy.graph_learners</span> <span class="kn">import</span> <span class="n">GraphLearner</span>
 <span class="kn">from</span> <span class="nn">dowhy.utils.graph_operations</span> <span class="kn">import</span> <span class="o">*</span>
 
+
 <div class="viewcode-block" id="GES"><a class="viewcode-back" href="../../../dowhy.graph_learners.html#dowhy.graph_learners.ges.GES">[docs]</a><span class="k">class</span> <span class="nc">GES</span><span class="p">(</span><span class="n">GraphLearner</span><span class="p">):</span>
-	<span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">	Causal Discovery using GES method.</span>
-<span class="sd">	Link: https://pypi.org/project/ges/</span>
-<span class="sd">	&#39;&#39;&#39;</span>
-	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">full_method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">full_method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-		
-		<span class="n">library_class</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="n">full_method_name</span><span class="p">)</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">_method</span> <span class="o">=</span> <span class="n">library_class</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Causal Discovery using GES method.</span>
+<span class="sd">    Link: https://pypi.org/project/ges/</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="GES.learn_graph"><a class="viewcode-back" href="../../../dowhy.graph_learners.html#dowhy.graph_learners.ges.GES.learn_graph">[docs]</a>	<span class="k">def</span> <span class="nf">learn_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">		Discover causal graph and return the graph in DOT format.</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">full_method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">full_method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-<span class="sd">		&#39;&#39;&#39;</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">_adjacency_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_method</span><span class="o">.</span><span class="n">fit_bic</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">_adjacency_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_adjacency_matrix</span><span class="p">)</span>
+        <span class="n">library_class</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="n">full_method_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_method</span> <span class="o">=</span> <span class="n">library_class</span>
 
-		<span class="c1"># If labels provided</span>
-		<span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="n">labels</span>
+<div class="viewcode-block" id="GES.learn_graph"><a class="viewcode-back" href="../../../dowhy.graph_learners.html#dowhy.graph_learners.ges.GES.learn_graph">[docs]</a>    <span class="k">def</span> <span class="nf">learn_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Discover causal graph and return the graph in DOT format.</span>
 
-		<span class="bp">self</span><span class="o">.</span><span class="n">_graph_dot</span> <span class="o">=</span> <span class="n">adjacency_matrix_to_graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_adjacency_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span><span class="p">)</span>
-		
-		<span class="c1"># Return in valid DOT format</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">_graph_dot</span> <span class="o">=</span> <span class="n">str_to_dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph_dot</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
-		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_dot</span></div></div>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_adjacency_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_method</span><span class="o">.</span><span class="n">fit_bic</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_adjacency_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_adjacency_matrix</span><span class="p">)</span>
+
+        <span class="c1"># If labels provided</span>
+        <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="n">labels</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graph_dot</span> <span class="o">=</span> <span class="n">adjacency_matrix_to_graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_adjacency_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span><span class="p">)</span>
+
+        <span class="c1"># Return in valid DOT format</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graph_dot</span> <span class="o">=</span> <span class="n">str_to_dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph_dot</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_dot</span></div></div>
 </pre></div>
 
               </article>

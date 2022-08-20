@@ -272,7 +272,7 @@
     <span class="n">one_hot_encoders</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">one_hot_encoders</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">OneHotEncoder</span><span class="p">(</span><span class="n">handle_unknown</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+            <span class="n">one_hot_encoders</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">OneHotEncoder</span><span class="p">(</span><span class="n">handle_unknown</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
             <span class="n">one_hot_encoders</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">one_hot_encoders</span></div>
@@ -296,7 +296,7 @@
 
 
 <div class="viewcode-block" id="is_categorical"><a class="viewcode-back" href="../../../../dowhy.gcm.util.html#dowhy.gcm.util.general.is_categorical">[docs]</a><span class="k">def</span> <span class="nf">is_categorical</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Checks if all of the given columns are categorical, i.e. either a string or a boolean. Only if all of the</span>
+    <span class="sd">&quot;&quot;&quot;Checks if all of the given columns are categorical, i.e. either a string or a boolean. Only if all of the</span>
 <span class="sd">    columns are categorical, this method will return True. Alternatively, consider has_categorical for checking if any</span>
 <span class="sd">    of the columns is categorical.</span>
 
@@ -312,10 +312,11 @@
     <span class="n">status</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
         <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="p">],</span> <span class="nb">float</span><span class="p">))</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="p">]):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input contains NaN values! This is currently not supported. &quot;</span>
-                             <span class="s2">&quot;Consider imputing missing values.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Input contains NaN values! This is currently not supported. &quot;</span> <span class="s2">&quot;Consider imputing missing values.&quot;</span>
+            <span class="p">)</span>
 
-        <span class="n">status</span> <span class="o">&amp;=</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="p">],</span> <span class="nb">bool</span><span class="p">))</span>
+        <span class="n">status</span> <span class="o">&amp;=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="p">],</span> <span class="nb">bool</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">status</span><span class="p">:</span>
             <span class="k">break</span>
@@ -324,7 +325,7 @@
 
 
 <div class="viewcode-block" id="has_categorical"><a class="viewcode-back" href="../../../../dowhy.gcm.util.html#dowhy.gcm.util.general.has_categorical">[docs]</a><span class="k">def</span> <span class="nf">has_categorical</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Checks if any of the given columns are categorical, i.e. either a string or a boolean. If any of the columns</span>
+    <span class="sd">&quot;&quot;&quot;Checks if any of the given columns are categorical, i.e. either a string or a boolean. If any of the columns</span>
 <span class="sd">    is categorical, this method will return True. Alternatively, consider is_categorical for checking if all columns are</span>
 <span class="sd">    categorical.</span>
 

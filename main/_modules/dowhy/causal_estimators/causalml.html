@@ -210,15 +210,17 @@
                 
   <h1>Source code for dowhy.causal_estimators.causalml</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
+
+<span class="kn">import</span> <span class="nn">causalml</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">from</span> <span class="nn">dowhy.causal_estimator</span> <span class="kn">import</span> <span class="n">CausalEstimate</span><span class="p">,</span> <span class="n">CausalEstimator</span>
-<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
-<span class="kn">import</span> <span class="nn">causalml</span>
+
 
 <div class="viewcode-block" id="Causalml"><a class="viewcode-back" href="../../../dowhy.causal_estimators.html#dowhy.causal_estimators.causalml.Causalml">[docs]</a><span class="k">class</span> <span class="nc">Causalml</span><span class="p">(</span><span class="n">CausalEstimator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Wrapper class for estimators from the causalml library.</span>
+    <span class="sd">&quot;&quot;&quot;Wrapper class for estimators from the causalml library.</span>
 
 <span class="sd">    For a list of standard args and kwargs, see documentation for</span>
 <span class="sd">    :class:`~dowhy.causal_estimator.CausalEstimator`.</span>
@@ -227,6 +229,7 @@
 <span class="sd">    parameters of each estimator, refer to the CausalML docs.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">causalml_methodname</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param causalml_methodname: Fully qualified name of causalml estimator</span>
@@ -234,8 +237,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Required to ensure that self.method_params contains all the information</span>
         <span class="c1"># to create an object of this class</span>
-        <span class="n">args_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                     <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_STD_INIT_ARGS</span><span class="p">}</span>
+        <span class="n">args_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_STD_INIT_ARGS</span><span class="p">}</span>
         <span class="n">args_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">args_dict</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_causalml_methodname</span> <span class="o">=</span> <span class="n">causalml_methodname</span>
@@ -244,8 +246,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;The identifier method used </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier_method</span><span class="p">))</span>
 
         <span class="c1"># Check the backdoor variables being used</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Back-door variables used:&quot;</span> <span class="o">+</span>
-                          <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">get_backdoor_variables</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Back-door variables used:&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">get_backdoor_variables</span><span class="p">()))</span>
 
         <span class="c1"># Add the observed confounders and one hot encode the categorical variables</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">get_backdoor_variables</span><span class="p">()</span>
@@ -258,8 +259,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Check the instrumental variables involved</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Instrumental variables used:&quot;</span><span class="o">+</span>
-                        <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">instrumental_variables</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Instrumental variables used:&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">instrumental_variables</span><span class="p">))</span>
 
         <span class="c1"># Perform the same actions as the above</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_instrumental_variable_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">instrumental_variables</span>
@@ -270,9 +270,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_instrumental_variables</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Check if effect modifiers are used</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Effect Modifiers used:&quot;</span> <span class="o">+</span>
-                        <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">))</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Effect Modifiers used:&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">))</span>
 
         <span class="c1"># Get the class corresponding the the estimator to be used</span>
         <span class="n">estimator_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_causalml_class_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_causalml_methodname</span><span class="p">)</span>
@@ -290,49 +288,45 @@
             <span class="n">estimator_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">estimator_module</span><span class="p">,</span> <span class="n">class_name</span><span class="p">)</span>
 
         <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">,</span> <span class="ne">ImportError</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Error loading </span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1">. Double-check the method name and ensure that all causalml dependencies are installed.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">module_name</span><span class="p">,</span> <span class="n">class_name</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+                <span class="s2">&quot;Error loading </span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">. Double-check the method name and ensure that all causalml dependencies are installed.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">module_name</span><span class="p">,</span> <span class="n">class_name</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="n">estimator_class</span>
 
     <span class="k">def</span> <span class="nf">_estimate_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">X_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes_names</span> <span class="o">+</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span>
+        <span class="n">X_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observed_common_causes_names</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span>
 
         <span class="c1"># Both the outcome and the treatment have to be 1D arrays according to the CausalML API</span>
         <span class="n">y_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name</span>
-        <span class="n">treatment_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># As we have only one treatment variable</span>
+        <span class="n">treatment_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># As we have only one treatment variable</span>
         <span class="c1"># We want to pass &#39;v0&#39; rather than [&#39;v0&#39;] to prevent a shape mismatch</span>
 
-        <span class="n">func_args</span><span class="o">=</span><span class="p">{</span>
-            <span class="s1">&#39;X&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">X_names</span><span class="p">],</span>
-            <span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">y_name</span><span class="p">],</span>
-            <span class="s1">&#39;treatment&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">treatment_name</span><span class="p">]</span>
-        <span class="p">}</span>
+        <span class="n">func_args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;X&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">X_names</span><span class="p">],</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">y_name</span><span class="p">],</span> <span class="s2">&quot;treatment&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">treatment_name</span><span class="p">]}</span>
 
         <span class="n">arg_names</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getfullargspec</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">estimate_ate</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">matched_args</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">arg</span><span class="p">:</span> <span class="n">func_args</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">func_args</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">arg_names</span>
-        <span class="p">}</span>
+        <span class="n">matched_args</span> <span class="o">=</span> <span class="p">{</span><span class="n">arg</span><span class="p">:</span> <span class="n">func_args</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">func_args</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">arg_names</span><span class="p">}</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">matched_args</span><span class="p">)</span>
         <span class="n">value_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">estimate_ate</span><span class="p">(</span><span class="o">**</span><span class="n">matched_args</span><span class="p">)</span>
 
         <span class="c1"># For CATEs</span>
         <span class="n">arg_names</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getfullargspec</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">matched_args</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">arg</span><span class="p">:</span> <span class="n">func_args</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">func_args</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">arg_names</span>
-        <span class="p">}</span>
+        <span class="n">matched_args</span> <span class="o">=</span> <span class="p">{</span><span class="n">arg</span><span class="p">:</span> <span class="n">func_args</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">func_args</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">arg_names</span><span class="p">}</span>
         <span class="n">cate_estimates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="o">**</span><span class="n">matched_args</span><span class="p">)</span>
 
-        <span class="n">estimate</span> <span class="o">=</span> <span class="n">CausalEstimate</span><span class="p">(</span><span class="n">estimate</span><span class="o">=</span><span class="n">value_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                  <span class="n">control_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_control_value</span><span class="p">,</span>
-                                  <span class="n">treatment_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_value</span><span class="p">,</span>
-                                  <span class="n">target_estimand</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="p">,</span>
-                                  <span class="n">realized_estimand_expr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolic_estimator</span><span class="p">,</span>
-                                  <span class="n">cate_estimates</span> <span class="o">=</span> <span class="n">cate_estimates</span><span class="p">,</span>
-                                  <span class="n">effect_intervals</span><span class="o">=</span><span class="p">(</span><span class="n">value_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">value_tuple</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
-                                  <span class="n">_estimator_object</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="p">)</span>
+        <span class="n">estimate</span> <span class="o">=</span> <span class="n">CausalEstimate</span><span class="p">(</span>
+            <span class="n">estimate</span><span class="o">=</span><span class="n">value_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">control_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_control_value</span><span class="p">,</span>
+            <span class="n">treatment_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_value</span><span class="p">,</span>
+            <span class="n">target_estimand</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="p">,</span>
+            <span class="n">realized_estimand_expr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolic_estimator</span><span class="p">,</span>
+            <span class="n">cate_estimates</span><span class="o">=</span><span class="n">cate_estimates</span><span class="p">,</span>
+            <span class="n">effect_intervals</span><span class="o">=</span><span class="p">(</span><span class="n">value_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">value_tuple</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+            <span class="n">_estimator_object</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">estimate</span>
-
 
 <div class="viewcode-block" id="Causalml.construct_symbolic_estimator"><a class="viewcode-back" href="../../../dowhy.causal_estimators.html#dowhy.causal_estimators.causalml.Causalml.construct_symbolic_estimator">[docs]</a>    <span class="k">def</span> <span class="nf">construct_symbolic_estimator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimand</span><span class="p">):</span>
         <span class="n">expr</span> <span class="o">=</span> <span class="s2">&quot;b: &quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">estimand</span><span class="o">.</span><span class="n">outcome_variable</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;~&quot;</span>
@@ -341,7 +335,6 @@
         <span class="n">var_list</span> <span class="o">=</span> <span class="n">estimand</span><span class="o">.</span><span class="n">treatment_variable</span> <span class="o">+</span> <span class="n">estimand</span><span class="o">.</span><span class="n">get_backdoor_variables</span><span class="p">()</span>
         <span class="n">expr</span> <span class="o">+=</span> <span class="s2">&quot;+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">var_list</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">expr</span></div></div>
-
 </pre></div>
 
               </article>

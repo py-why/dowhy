@@ -209,27 +209,30 @@
               <article class="bd-article" role="main">
                 
   <h1>Source code for dowhy.utils.graph_operations</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">LifoQueue</span>
-<span class="kn">from</span> <span class="nn">dowhy.utils.ordered_set</span> <span class="kn">import</span> <span class="n">OrderedSet</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span></span><span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
+<span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">LifoQueue</span>
+
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">networkx.algorithms.dag</span> <span class="kn">import</span> <span class="n">is_directed_acyclic_graph</span>
 <span class="kn">from</span> <span class="nn">networkx.algorithms.shortest_paths.generic</span> <span class="kn">import</span> <span class="n">shortest_path</span>
 
+<span class="kn">from</span> <span class="nn">dowhy.utils.ordered_set</span> <span class="kn">import</span> <span class="n">OrderedSet</span>
+
+
 <div class="viewcode-block" id="adjacency_matrix_to_adjacency_list"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.graph_operations.adjacency_matrix_to_adjacency_list">[docs]</a><span class="k">def</span> <span class="nf">adjacency_matrix_to_adjacency_list</span><span class="p">(</span><span class="n">adjacency_matrix</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert the adjacency matrix of a graph to an adjacency list.</span>
 
 <span class="sd">    :param adjacency_matrix: A numpy array representing the graph adjacency matrix.</span>
 <span class="sd">    :param labels: List of labels.</span>
 <span class="sd">    :returns: Adjacency list as a dictionary.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">adjlist</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">adjacency_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">adjacency_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">adjacency_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
         <span class="n">adjlist</span><span class="p">[</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">adjacency_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
@@ -237,39 +240,43 @@
                 <span class="n">adjlist</span><span class="p">[</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">adjlist</span></div>
 
+
 <div class="viewcode-block" id="adjacency_matrix_to_graph"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.graph_operations.adjacency_matrix_to_graph">[docs]</a><span class="k">def</span> <span class="nf">adjacency_matrix_to_graph</span><span class="p">(</span><span class="n">adjacency_matrix</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a given graph adjacency matrix to DOT format.</span>
 
 <span class="sd">    :param adjacency_matrix: A numpy array representing the graph adjacency matrix.</span>
 <span class="sd">    :param labels: List of labels.</span>
 <span class="sd">    :returns: Graph in DOT format.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Only consider edges have absolute edge weight &gt; 0.01</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">adjacency_matrix</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.01</span>
     <span class="n">dirs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
     <span class="kn">import</span> <span class="nn">graphviz</span>
-    <span class="n">d</span> <span class="o">=</span> <span class="n">graphviz</span><span class="o">.</span><span class="n">Digraph</span><span class="p">(</span><span class="n">engine</span><span class="o">=</span><span class="s1">&#39;dot&#39;</span><span class="p">)</span>
-    <span class="n">names</span> <span class="o">=</span> <span class="n">labels</span> <span class="k">if</span> <span class="n">labels</span> <span class="k">else</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;x</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">adjacency_matrix</span><span class="p">))]</span>
+
+    <span class="n">d</span> <span class="o">=</span> <span class="n">graphviz</span><span class="o">.</span><span class="n">Digraph</span><span class="p">(</span><span class="n">engine</span><span class="o">=</span><span class="s2">&quot;dot&quot;</span><span class="p">)</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">labels</span> <span class="k">if</span> <span class="n">labels</span> <span class="k">else</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;x</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">adjacency_matrix</span><span class="p">))]</span>
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
         <span class="n">d</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">to</span><span class="p">,</span> <span class="n">from_</span><span class="p">,</span> <span class="n">coef</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">dirs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dirs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">adjacency_matrix</span><span class="p">[</span><span class="n">idx</span><span class="p">]):</span>
         <span class="n">d</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">names</span><span class="p">[</span><span class="n">from_</span><span class="p">],</span> <span class="n">names</span><span class="p">[</span><span class="n">to</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">coef</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">d</span></div>
 
+
 <div class="viewcode-block" id="str_to_dot"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.graph_operations.str_to_dot">[docs]</a><span class="k">def</span> <span class="nf">str_to_dot</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts input string from graphviz library to valid DOT graph format.</span>
 
 <span class="sd">    :param string: Graph in DOT format.</span>
 <span class="sd">    :returns: DOT string converted to a suitable format for the DoWhy library.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">graph</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
-    <span class="n">graph</span> <span class="o">=</span> <span class="n">graph</span><span class="p">[:</span><span class="mi">9</span><span class="p">]</span> <span class="o">+</span> <span class="n">graph</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">graph</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># Removing unnecessary characters from string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">graph</span><span class="p">[:</span><span class="mi">9</span><span class="p">]</span> <span class="o">+</span> <span class="n">graph</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">graph</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># Removing unnecessary characters from string</span>
     <span class="k">return</span> <span class="n">graph</span></div>
 
+
 <div class="viewcode-block" id="find_ancestor"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.graph_operations.find_ancestor">[docs]</a><span class="k">def</span> <span class="nf">find_ancestor</span><span class="p">(</span><span class="n">node_set</span><span class="p">,</span> <span class="n">node_names</span><span class="p">,</span> <span class="n">adjacency_matrix</span><span class="p">,</span> <span class="n">node2idx</span><span class="p">,</span> <span class="n">idx2node</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds ancestors of a given set of nodes in a given graph.</span>
 
 <span class="sd">    :param node_set: Set of nodes whos ancestors must be obtained.</span>
@@ -278,17 +285,19 @@
 <span class="sd">    :param node2idx: A dictionary mapping node names to their row or column index in the adjacency matrix.</span>
 <span class="sd">    :param idx2node: A dictionary mapping the row or column indices in the adjacency matrix to the corresponding node names.</span>
 <span class="sd">    :returns: OrderedSet containing ancestors of all nodes in the node_set.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">find_ancestor_help</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">node_names</span><span class="p">,</span> <span class="n">adjacency_matrix</span><span class="p">,</span> <span class="n">node2idx</span><span class="p">,</span> <span class="n">idx2node</span><span class="p">):</span>
         <span class="n">ancestors</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">()</span>
-        <span class="n">nodes_to_visit</span> <span class="o">=</span> <span class="n">LifoQueue</span><span class="p">(</span><span class="n">maxsize</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_names</span><span class="p">))</span>
+        <span class="n">nodes_to_visit</span> <span class="o">=</span> <span class="n">LifoQueue</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">node_names</span><span class="p">))</span>
         <span class="n">nodes_to_visit</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">node2idx</span><span class="p">[</span><span class="n">node_name</span><span class="p">])</span>
         <span class="k">while</span> <span class="ow">not</span> <span class="n">nodes_to_visit</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
             <span class="n">child</span> <span class="o">=</span> <span class="n">nodes_to_visit</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
             <span class="n">ancestors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">idx2node</span><span class="p">[</span><span class="n">child</span><span class="p">])</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">node_names</span><span class="p">)):</span>
-                <span class="k">if</span> <span class="n">idx2node</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ancestors</span> <span class="ow">and</span> <span class="n">adjacency_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">child</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># For edge a-&gt;b, a is along height and b is along width of adjacency matrix</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">idx2node</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ancestors</span> <span class="ow">and</span> <span class="n">adjacency_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">child</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
+                <span class="p">):</span>  <span class="c1"># For edge a-&gt;b, a is along height and b is along width of adjacency matrix</span>
                     <span class="n">nodes_to_visit</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ancestors</span>
 
@@ -297,15 +306,16 @@
         <span class="n">ancestors</span> <span class="o">=</span> <span class="n">ancestors</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">find_ancestor_help</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">node_names</span><span class="p">,</span> <span class="n">adjacency_matrix</span><span class="p">,</span> <span class="n">node2idx</span><span class="p">,</span> <span class="n">idx2node</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">ancestors</span></div>
 
+
 <div class="viewcode-block" id="induced_graph"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.graph_operations.induced_graph">[docs]</a><span class="k">def</span> <span class="nf">induced_graph</span><span class="p">(</span><span class="n">node_set</span><span class="p">,</span> <span class="n">adjacency_matrix</span><span class="p">,</span> <span class="n">node2idx</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    To obtain the induced graph corresponding to a subset of nodes.</span>
 
 <span class="sd">    :param node_set: Set of nodes whos ancestors must be obtained.</span>
 <span class="sd">    :param adjacency_matrix: Graph adjacency matrix.</span>
 <span class="sd">    :param node2idx: A dictionary mapping node names to their row or column index in the adjacency matrix.</span>
 <span class="sd">    :returns: Numpy array representing the adjacency matrix of the induced graph.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">node_idx_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">node2idx</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">node_set</span><span class="p">]</span>
     <span class="n">node_idx_list</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
     <span class="n">adjacency_matrix_induced</span> <span class="o">=</span> <span class="n">adjacency_matrix</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -313,23 +323,24 @@
     <span class="n">adjacency_matrix_induced</span> <span class="o">=</span> <span class="n">adjacency_matrix_induced</span><span class="p">[:,</span> <span class="n">node_idx_list</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">adjacency_matrix_induced</span></div>
 
+
 <div class="viewcode-block" id="find_c_components"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.graph_operations.find_c_components">[docs]</a><span class="k">def</span> <span class="nf">find_c_components</span><span class="p">(</span><span class="n">adjacency_matrix</span><span class="p">,</span> <span class="n">node_set</span><span class="p">,</span> <span class="n">idx2node</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Obtain C-components in a graph.</span>
 
 <span class="sd">    :param adjacency_matrix: Graph adjacency matrix.</span>
 <span class="sd">    :param node_set: Set of nodes whos ancestors must be obtained.</span>
 <span class="sd">    :param idx2node: A dictionary mapping the row or column indices in the adjacency matrix to the corresponding node names.</span>
 <span class="sd">    :returns: List of C-components in the graph.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">num_nodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_set</span><span class="p">)</span>
     <span class="n">adj_matrix</span> <span class="o">=</span> <span class="n">adjacency_matrix</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">adjacency_list</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">)]</span>
 
     <span class="c1"># Modify graph such that it only contains bidirected edges</span>
-    <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">h</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">adjacency_matrix</span><span class="p">[</span><span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">adjacency_matrix</span><span class="p">[</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_nodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">h</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">adjacency_matrix</span><span class="p">[</span><span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">adjacency_matrix</span><span class="p">[</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">adjacency_list</span><span class="p">[</span><span class="n">h</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
                 <span class="n">adjacency_list</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -355,23 +366,25 @@
 
     <span class="k">return</span> <span class="n">c_components</span></div>
 
+
 <div class="viewcode-block" id="daggity_to_dot"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.graph_operations.daggity_to_dot">[docs]</a><span class="k">def</span> <span class="nf">daggity_to_dot</span><span class="p">(</span><span class="n">daggity_string</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts the input daggity_string to valid DOT graph format.</span>
 
 <span class="sd">    :param daggity_string: Output graph from Daggity site</span>
-<span class="sd">    :returns: DOT string  </span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\n&#39;</span> <span class="p">,</span> <span class="s1">&#39;; &#39;</span> <span class="p">,</span> <span class="n">daggity_string</span><span class="p">)</span>
-    <span class="n">graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^dag &#39;</span><span class="p">,</span> <span class="s1">&#39;digraph &#39;</span><span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
-    <span class="n">graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;{;&#39;</span> <span class="p">,</span> <span class="s1">&#39;{&#39;</span> <span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
-    <span class="n">graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;};&#39;</span> <span class="p">,</span> <span class="s1">&#39;}&#39;</span> <span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
-    <span class="n">graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;outcome,*,&#39;</span> <span class="p">,</span> <span class="s1">&#39;&#39;</span> <span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
-    <span class="n">graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;adjusted,*&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span> <span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
-    <span class="n">graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;exposure,*&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span> <span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
-    <span class="n">graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;latent,*&#39;</span> <span class="p">,</span> <span class="s1">&#39;observed=&quot;no&quot;,&#39;</span><span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
-    <span class="n">graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;,]&#39;</span> <span class="p">,</span> <span class="s1">&#39;]&#39;</span> <span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
+<span class="sd">    :returns: DOT string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\n&quot;</span><span class="p">,</span> <span class="s2">&quot;; &quot;</span><span class="p">,</span> <span class="n">daggity_string</span><span class="p">)</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^dag &quot;</span><span class="p">,</span> <span class="s2">&quot;digraph &quot;</span><span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;{;&quot;</span><span class="p">,</span> <span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;};&quot;</span><span class="p">,</span> <span class="s2">&quot;}&quot;</span><span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;outcome,*,&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;adjusted,*&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;exposure,*&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;latent,*&quot;</span><span class="p">,</span> <span class="s1">&#39;observed=&quot;no&quot;,&#39;</span><span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;,]&quot;</span><span class="p">,</span> <span class="s2">&quot;]&quot;</span><span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">graph</span></div>
+
 
 <div class="viewcode-block" id="get_simple_ordered_tree"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.graph_operations.get_simple_ordered_tree">[docs]</a><span class="k">def</span> <span class="nf">get_simple_ordered_tree</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -385,7 +398,7 @@
         <span class="n">g</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="n">g</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">([(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="p">{})])</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">([(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">{})])</span>
     <span class="k">return</span> <span class="n">g</span></div>
 
 
@@ -417,11 +430,10 @@
     <span class="k">return</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span></div>
 
 
-
 <div class="viewcode-block" id="find_predecessor"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.graph_operations.find_predecessor">[docs]</a><span class="k">def</span> <span class="nf">find_predecessor</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds a predecessor, k, in the path between two nodes, i and j,</span>
-<span class="sd">    in the graph, g. </span>
+<span class="sd">    in the graph, g.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">parents</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">predecessors</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
     <span class="n">u</span> <span class="o">=</span> <span class="n">convert_to_undirected_graph</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
@@ -432,7 +444,6 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="k">pass</span>
     <span class="k">return</span> <span class="kc">None</span></div>
-
 
 
 <div class="viewcode-block" id="del_edge"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.graph_operations.del_edge">[docs]</a><span class="k">def</span> <span class="nf">del_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
@@ -446,6 +457,7 @@
 
         <span class="k">if</span> <span class="n">is_connected</span><span class="p">(</span><span class="n">g</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="n">g</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">([(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">{})])</span></div>
+
 
 <div class="viewcode-block" id="add_edge"><a class="viewcode-back" href="../../../dowhy.utils.html#dowhy.utils.graph_operations.add_edge">[docs]</a><span class="k">def</span> <span class="nf">add_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>

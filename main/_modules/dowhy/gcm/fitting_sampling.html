@@ -223,8 +223,13 @@
 
 <span class="kn">from</span> <span class="nn">dowhy.gcm</span> <span class="kn">import</span> <span class="n">config</span>
 <span class="kn">from</span> <span class="nn">dowhy.gcm.cms</span> <span class="kn">import</span> <span class="n">ProbabilisticCausalModel</span>
-<span class="kn">from</span> <span class="nn">dowhy.gcm.graph</span> <span class="kn">import</span> <span class="n">get_ordered_predecessors</span><span class="p">,</span> <span class="n">is_root_node</span><span class="p">,</span> <span class="n">PARENTS_DURING_FIT</span><span class="p">,</span> \
-    <span class="n">validate_causal_model_assignment</span><span class="p">,</span> <span class="n">validate_causal_dag</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.graph</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">PARENTS_DURING_FIT</span><span class="p">,</span>
+    <span class="n">get_ordered_predecessors</span><span class="p">,</span>
+    <span class="n">is_root_node</span><span class="p">,</span>
+    <span class="n">validate_causal_dag</span><span class="p">,</span>
+    <span class="n">validate_causal_model_assignment</span><span class="p">,</span>
+<span class="p">)</span>
 
 
 <div class="viewcode-block" id="fit"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fitting_sampling.fit">[docs]</a><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
@@ -233,21 +238,28 @@
 <span class="sd">    :param causal_model: The causal model containing the mechanisms that will be fitted.</span>
 <span class="sd">    :param data: Observations of nodes in the causal model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">progress_bar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Fitting causal models&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">leave</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                        <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">show_progress_bars</span><span class="p">)</span>
+    <span class="n">progress_bar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span>
+        <span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Fitting causal models&quot;</span><span class="p">,</span>
+        <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">leave</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">show_progress_bars</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">progress_bar</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Could not find data for node </span><span class="si">%s</span><span class="s1"> in the given training data! There should be a column &#39;</span>
-                               <span class="s1">&#39;containing samples for node </span><span class="si">%s</span><span class="s1">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">node</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;Could not find data for node </span><span class="si">%s</span><span class="s2"> in the given training data! There should be a column &quot;</span>
+                <span class="s2">&quot;containing samples for node </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+            <span class="p">)</span>
 
-        <span class="n">progress_bar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="s1">&#39;Fitting causal mechanism of node </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">node</span><span class="p">)</span>
+        <span class="n">progress_bar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="s2">&quot;Fitting causal mechanism of node </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">node</span><span class="p">)</span>
 
         <span class="n">fit_causal_model_of_target</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="fit_causal_model_of_target"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fitting_sampling.fit_causal_model_of_target">[docs]</a><span class="k">def</span> <span class="nf">fit_causal_model_of_target</span><span class="p">(</span><span class="n">causal_model</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span>
-                               <span class="n">target_node</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-                               <span class="n">training_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="fit_causal_model_of_target"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fitting_sampling.fit_causal_model_of_target">[docs]</a><span class="k">def</span> <span class="nf">fit_causal_model_of_target</span><span class="p">(</span>
+    <span class="n">causal_model</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span> <span class="n">target_node</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">training_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Fits only the causal mechanism of the given target node based on the training data.</span>
 
 <span class="sd">    :param causal_model: The causal model containing the target node.</span>
@@ -262,15 +274,17 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">causal_model</span><span class="o">.</span><span class="n">causal_mechanism</span><span class="p">(</span><span class="n">target_node</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
             <span class="n">X</span><span class="o">=</span><span class="n">training_data</span><span class="p">[</span><span class="n">get_ordered_predecessors</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">target_node</span><span class="p">)]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
-            <span class="n">Y</span><span class="o">=</span><span class="n">training_data</span><span class="p">[</span><span class="n">target_node</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
+            <span class="n">Y</span><span class="o">=</span><span class="n">training_data</span><span class="p">[</span><span class="n">target_node</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
+        <span class="p">)</span>
 
     <span class="c1"># To be able to validate that the graph structure did not change between fitting and causal query, we store the</span>
     <span class="c1"># parents of a node during fit. That way, before sampling, we can verify the parents are still the same. While</span>
     <span class="c1"># this would automatically fail when the number of parents is different, there are other more subtle cases,</span>
     <span class="c1"># where the number is still the same, but it&#39;s different parents, and therefore different data. That would yield</span>
     <span class="c1"># wrong results, but would not fail.</span>
-    <span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">target_node</span><span class="p">][</span><span class="n">PARENTS_DURING_FIT</span><span class="p">]</span> <span class="o">=</span> \
-        <span class="n">get_ordered_predecessors</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">target_node</span><span class="p">)</span></div>
+    <span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">target_node</span><span class="p">][</span><span class="n">PARENTS_DURING_FIT</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_ordered_predecessors</span><span class="p">(</span>
+        <span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">target_node</span>
+    <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="draw_samples"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fitting_sampling.draw_samples">[docs]</a><span class="k">def</span> <span class="nf">draw_samples</span><span class="p">(</span><span class="n">causal_model</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>

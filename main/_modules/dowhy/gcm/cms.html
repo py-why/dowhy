@@ -214,12 +214,19 @@
 <span class="sd">Classes in this module should be considered experimental, meaning there might be breaking API changes in the future.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
 
-<span class="kn">from</span> <span class="nn">dowhy.gcm.graph</span> <span class="kn">import</span> <span class="n">DirectedGraph</span><span class="p">,</span> <span class="n">StochasticModel</span><span class="p">,</span> <span class="n">ConditionalStochasticModel</span><span class="p">,</span> <span class="n">FunctionalCausalModel</span><span class="p">,</span> \
-    <span class="n">CAUSAL_MECHANISM</span><span class="p">,</span> <span class="n">InvertibleFunctionalCausalModel</span><span class="p">,</span> <span class="n">clone_causal_models</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.graph</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CAUSAL_MECHANISM</span><span class="p">,</span>
+    <span class="n">ConditionalStochasticModel</span><span class="p">,</span>
+    <span class="n">DirectedGraph</span><span class="p">,</span>
+    <span class="n">FunctionalCausalModel</span><span class="p">,</span>
+    <span class="n">InvertibleFunctionalCausalModel</span><span class="p">,</span>
+    <span class="n">StochasticModel</span><span class="p">,</span>
+    <span class="n">clone_causal_models</span><span class="p">,</span>
+<span class="p">)</span>
 
 
 <div class="viewcode-block" id="ProbabilisticCausalModel"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.cms.ProbabilisticCausalModel">[docs]</a><span class="k">class</span> <span class="nc">ProbabilisticCausalModel</span><span class="p">:</span>
@@ -227,9 +234,9 @@
 <span class="sd">    causal relationships and corresponding causal mechanism for each node describing the data generation process. The</span>
 <span class="sd">    causal mechanisms can be any general stochastic models.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">graph</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DirectedGraph</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">graph_copier</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">DirectedGraph</span><span class="p">],</span> <span class="n">DirectedGraph</span><span class="p">]</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DirectedGraph</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">graph_copier</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">DirectedGraph</span><span class="p">],</span> <span class="n">DirectedGraph</span><span class="p">]</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param graph: Optional graph object to be used as causal graph.</span>
 <span class="sd">        :param graph_copier: Optional function that can copy a causal graph. Defaults to a networkx.DiGraph</span>
@@ -290,8 +297,9 @@
 <span class="sd">    such as :class:`~dowhy.gcm.fcms.PostNonlinearModel`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="InvertibleStructuralCausalModel.set_causal_mechanism"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.cms.InvertibleStructuralCausalModel.set_causal_mechanism">[docs]</a>    <span class="k">def</span> <span class="nf">set_causal_mechanism</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_node</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-                             <span class="n">mechanism</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">StochasticModel</span><span class="p">,</span> <span class="n">InvertibleFunctionalCausalModel</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="InvertibleStructuralCausalModel.set_causal_mechanism"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.cms.InvertibleStructuralCausalModel.set_causal_mechanism">[docs]</a>    <span class="k">def</span> <span class="nf">set_causal_mechanism</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">target_node</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">mechanism</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">StochasticModel</span><span class="p">,</span> <span class="n">InvertibleFunctionalCausalModel</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="n">target_node</span><span class="p">,</span> <span class="n">mechanism</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="InvertibleStructuralCausalModel.causal_mechanism"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.cms.InvertibleStructuralCausalModel.causal_mechanism">[docs]</a>    <span class="k">def</span> <span class="nf">causal_mechanism</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">StochasticModel</span><span class="p">,</span> <span class="n">InvertibleFunctionalCausalModel</span><span class="p">]:</span>

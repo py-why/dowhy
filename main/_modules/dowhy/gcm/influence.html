@@ -215,7 +215,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -223,32 +223,38 @@
 <span class="kn">from</span> <span class="nn">numpy.matlib</span> <span class="kn">import</span> <span class="n">repmat</span>
 
 <span class="kn">import</span> <span class="nn">dowhy.gcm.auto</span> <span class="k">as</span> <span class="nn">auto</span>
-<span class="kn">from</span> <span class="nn">dowhy.gcm._noise</span> <span class="kn">import</span> <span class="n">noise_samples_of_ancestors</span><span class="p">,</span> <span class="n">compute_data_from_noise</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm._noise</span> <span class="kn">import</span> <span class="n">compute_data_from_noise</span><span class="p">,</span> <span class="n">noise_samples_of_ancestors</span>
 <span class="kn">from</span> <span class="nn">dowhy.gcm.cms</span> <span class="kn">import</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span> <span class="n">StructuralCausalModel</span>
 <span class="kn">from</span> <span class="nn">dowhy.gcm.constant</span> <span class="kn">import</span> <span class="n">EPS</span>
 <span class="kn">from</span> <span class="nn">dowhy.gcm.divergence</span> <span class="kn">import</span> <span class="n">estimate_kl_divergence_of_probabilities</span>
-<span class="kn">from</span> <span class="nn">dowhy.gcm.fcms</span> <span class="kn">import</span> <span class="n">ProbabilityEstimatorModel</span><span class="p">,</span> <span class="n">PredictionModel</span><span class="p">,</span> <span class="n">ClassificationModel</span><span class="p">,</span> <span class="n">ClassifierFCM</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.fcms</span> <span class="kn">import</span> <span class="n">ClassificationModel</span><span class="p">,</span> <span class="n">ClassifierFCM</span><span class="p">,</span> <span class="n">PredictionModel</span><span class="p">,</span> <span class="n">ProbabilityEstimatorModel</span>
 <span class="kn">from</span> <span class="nn">dowhy.gcm.fitting_sampling</span> <span class="kn">import</span> <span class="n">draw_samples</span>
-<span class="kn">from</span> <span class="nn">dowhy.gcm.graph</span> <span class="kn">import</span> <span class="n">get_ordered_predecessors</span><span class="p">,</span> <span class="n">is_root_node</span><span class="p">,</span> <span class="n">node_connected_subgraph_view</span><span class="p">,</span> \
-    <span class="n">ConditionalStochasticModel</span><span class="p">,</span> <span class="n">validate_node</span><span class="p">,</span> <span class="n">validate_causal_dag</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.graph</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ConditionalStochasticModel</span><span class="p">,</span>
+    <span class="n">get_ordered_predecessors</span><span class="p">,</span>
+    <span class="n">is_root_node</span><span class="p">,</span>
+    <span class="n">node_connected_subgraph_view</span><span class="p">,</span>
+    <span class="n">validate_causal_dag</span><span class="p">,</span>
+    <span class="n">validate_node</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">dowhy.gcm.shapley</span> <span class="kn">import</span> <span class="n">ShapleyConfig</span><span class="p">,</span> <span class="n">estimate_shapley_values</span>
 <span class="kn">from</span> <span class="nn">dowhy.gcm.stats</span> <span class="kn">import</span> <span class="n">marginal_expectation</span>
 <span class="kn">from</span> <span class="nn">dowhy.gcm.uncertainty</span> <span class="kn">import</span> <span class="n">estimate_entropy_of_probabilities</span><span class="p">,</span> <span class="n">estimate_variance</span>
-<span class="kn">from</span> <span class="nn">dowhy.gcm.util.general</span> <span class="kn">import</span> <span class="n">shape_into_2d</span><span class="p">,</span> <span class="n">set_random_seed</span><span class="p">,</span> <span class="n">is_categorical</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.util.general</span> <span class="kn">import</span> <span class="n">is_categorical</span><span class="p">,</span> <span class="n">set_random_seed</span><span class="p">,</span> <span class="n">shape_into_2d</span>
 
 <span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="arrow_strength"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.influence.arrow_strength">[docs]</a><span class="k">def</span> <span class="nf">arrow_strength</span><span class="p">(</span><span class="n">causal_model</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span>
-                   <span class="n">target_node</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-                   <span class="n">parent_samples</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                   <span class="n">num_samples_conditional</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
-                   <span class="n">max_num_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
-                   <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="o">-</span><span class="mi">4</span><span class="p">,</span>
-                   <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-                   <span class="n">difference_estimation_func</span><span class="p">:</span>
-                   <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> \
-        <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">float</span><span class="p">]:</span>
+<div class="viewcode-block" id="arrow_strength"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.influence.arrow_strength">[docs]</a><span class="k">def</span> <span class="nf">arrow_strength</span><span class="p">(</span>
+    <span class="n">causal_model</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span>
+    <span class="n">target_node</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">parent_samples</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">num_samples_conditional</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="n">max_num_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**-</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">difference_estimation_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">float</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Computes the causal strength of each edge directed to the target node.</span>
 <span class="sd">    The strength of an edge is quantified in terms of distance between conditional distributions of the target node in</span>
 <span class="sd">    the original graph and the imputed graph wherein the edge has been removed and the target node is fed a random</span>
@@ -264,7 +270,7 @@
 <span class="sd">    :param target_node: The target node whose incoming edges&#39; strength is to be computed.</span>
 <span class="sd">    :param parent_samples: Optional samples from the parents of the target_node. If None are given, they are generated</span>
 <span class="sd">                           based on the provided causal model. Providing observational data can help to mitigate</span>
-<span class="sd">                           misspecifications in the graph, such as missing interactions between root nodes or </span>
+<span class="sd">                           misspecifications in the graph, such as missing interactions between root nodes or</span>
 <span class="sd">                           confounders.</span>
 <span class="sd">    :param num_samples_conditional: Sample size to use for estimating the distance between distributions.</span>
 <span class="sd">    :param max_num_runs: The maximum number of times to resample and estimate the strength to report the average</span>
@@ -291,25 +297,28 @@
     <span class="k">if</span> <span class="n">parent_samples</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">parent_samples</span> <span class="o">=</span> <span class="n">draw_samples</span><span class="p">(</span><span class="n">sub_causal_model</span><span class="p">,</span> <span class="n">num_samples_conditional</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)[</span><span class="n">ordered_predecessors</span><span class="p">]</span>
 
-    <span class="n">direct_influences</span> <span class="o">=</span> <span class="n">arrow_strength_of_model</span><span class="p">(</span><span class="n">sub_causal_model</span><span class="o">.</span><span class="n">causal_mechanism</span><span class="p">(</span><span class="n">target_node</span><span class="p">),</span>
-                                                <span class="n">parent_samples</span><span class="p">[</span><span class="n">ordered_predecessors</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
-                                                <span class="n">num_samples_from_conditional</span><span class="o">=</span><span class="n">num_samples_conditional</span><span class="p">,</span>
-                                                <span class="n">max_num_runs</span><span class="o">=</span><span class="n">max_num_runs</span><span class="p">,</span>
-                                                <span class="n">tolerance</span><span class="o">=</span><span class="n">tolerance</span><span class="p">,</span>
-                                                <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
-                                                <span class="n">difference_estimation_func</span><span class="o">=</span><span class="n">difference_estimation_func</span><span class="p">)</span>
+    <span class="n">direct_influences</span> <span class="o">=</span> <span class="n">arrow_strength_of_model</span><span class="p">(</span>
+        <span class="n">sub_causal_model</span><span class="o">.</span><span class="n">causal_mechanism</span><span class="p">(</span><span class="n">target_node</span><span class="p">),</span>
+        <span class="n">parent_samples</span><span class="p">[</span><span class="n">ordered_predecessors</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
+        <span class="n">num_samples_from_conditional</span><span class="o">=</span><span class="n">num_samples_conditional</span><span class="p">,</span>
+        <span class="n">max_num_runs</span><span class="o">=</span><span class="n">max_num_runs</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="o">=</span><span class="n">tolerance</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+        <span class="n">difference_estimation_func</span><span class="o">=</span><span class="n">difference_estimation_func</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="k">return</span> <span class="p">{(</span><span class="n">predecessor</span><span class="p">,</span> <span class="n">target_node</span><span class="p">):</span> <span class="n">direct_influences</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">predecessor</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ordered_predecessors</span><span class="p">)}</span></div>
 
 
-<div class="viewcode-block" id="arrow_strength_of_model"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.influence.arrow_strength_of_model">[docs]</a><span class="k">def</span> <span class="nf">arrow_strength_of_model</span><span class="p">(</span><span class="n">conditional_stochastic_model</span><span class="p">:</span> <span class="n">ConditionalStochasticModel</span><span class="p">,</span>
-                            <span class="n">input_samples</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-                            <span class="n">num_samples_from_conditional</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
-                            <span class="n">max_num_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
-                            <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="o">-</span><span class="mi">4</span><span class="p">,</span>
-                            <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-                            <span class="n">difference_estimation_func</span><span class="p">:</span>
-                            <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                            <span class="n">input_subsets</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<div class="viewcode-block" id="arrow_strength_of_model"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.influence.arrow_strength_of_model">[docs]</a><span class="k">def</span> <span class="nf">arrow_strength_of_model</span><span class="p">(</span>
+    <span class="n">conditional_stochastic_model</span><span class="p">:</span> <span class="n">ConditionalStochasticModel</span><span class="p">,</span>
+    <span class="n">input_samples</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">num_samples_from_conditional</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="n">max_num_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**-</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">difference_estimation_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">input_subsets</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="n">input_samples</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">input_samples</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">input_subsets</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -319,6 +328,7 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">conditional_stochastic_model</span><span class="p">,</span> <span class="n">ProbabilityEstimatorModel</span><span class="p">):</span>
             <span class="n">difference_estimation_func</span> <span class="o">=</span> <span class="n">estimate_kl_divergence_of_probabilities</span>
         <span class="k">else</span><span class="p">:</span>
+
             <span class="k">def</span> <span class="nf">difference_estimation_func</span><span class="p">(</span><span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">new</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">old</span><span class="p">)</span>
 
@@ -328,10 +338,9 @@
         <span class="n">samples_creation_method</span> <span class="o">=</span> <span class="n">conditional_stochastic_model</span><span class="o">.</span><span class="n">draw_samples</span>
 
     <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
 
-        <span class="k">def</span> <span class="nf">parallel_job</span><span class="p">(</span><span class="n">subset</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-                         <span class="n">parallel_random_seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">parallel_job</span><span class="p">(</span><span class="n">subset</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">parallel_random_seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
             <span class="n">set_random_seed</span><span class="p">(</span><span class="n">parallel_random_seed</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="n">_estimate_direct_strength</span><span class="p">(</span>
@@ -341,27 +350,32 @@
                 <span class="n">difference_estimation_func</span><span class="p">,</span>
                 <span class="n">num_samples_from_conditional</span><span class="p">,</span>
                 <span class="n">max_num_runs</span><span class="p">,</span>
-                <span class="n">tolerance</span><span class="p">)</span>
+                <span class="n">tolerance</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="n">random_seeds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">input_subsets</span><span class="p">))</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)(</span><span class="n">delayed</span><span class="p">(</span><span class="n">parallel_job</span><span class="p">)(</span><span class="n">subset</span><span class="p">,</span> <span class="n">random_seed</span><span class="p">)</span>
-                                          <span class="k">for</span> <span class="n">subset</span><span class="p">,</span> <span class="n">random_seed</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">input_subsets</span><span class="p">,</span> <span class="n">random_seeds</span><span class="p">))</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)(</span>
+            <span class="n">delayed</span><span class="p">(</span><span class="n">parallel_job</span><span class="p">)(</span><span class="n">subset</span><span class="p">,</span> <span class="n">random_seed</span><span class="p">)</span> <span class="k">for</span> <span class="n">subset</span><span class="p">,</span> <span class="n">random_seed</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">input_subsets</span><span class="p">,</span> <span class="n">random_seeds</span><span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">results</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
-        <span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;At least one arrow strength is infinite. This typically happens if the causal models are &#39;</span>
-                        <span class="s1">&#39;deterministic, i.e. there is no noise or it is extremely small.&#39;</span><span class="p">)</span>
+        <span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;At least one arrow strength is infinite. This typically happens if the causal models are &quot;</span>
+            <span class="s2">&quot;deterministic, i.e. there is no noise or it is extremely small.&quot;</span>
+        <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">_estimate_direct_strength</span><span class="p">(</span><span class="n">draw_samples_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-                              <span class="n">distribution_samples</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-                              <span class="n">parents_subset</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-                              <span class="n">difference_estimation_func</span><span class="p">:</span>
-                              <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
-                              <span class="n">num_samples_conditional</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                              <span class="n">max_num_runs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                              <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_estimate_direct_strength</span><span class="p">(</span>
+    <span class="n">draw_samples_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">distribution_samples</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">parents_subset</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">difference_estimation_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+    <span class="n">num_samples_conditional</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">max_num_runs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="n">distribution_samples</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">distribution_samples</span><span class="p">)</span>
 
     <span class="n">aggregated_conditional_difference_result</span> <span class="o">=</span> <span class="mi">0</span>
@@ -370,9 +384,7 @@
     <span class="k">for</span> <span class="n">run</span><span class="p">,</span> <span class="n">sample</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">distribution_samples</span><span class="p">):</span>
         <span class="n">tmp_samples</span> <span class="o">=</span> <span class="n">repmat</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">num_samples_conditional</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-        <span class="n">rnd_permutation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">distribution_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                           <span class="n">num_samples_conditional</span><span class="p">,</span>
-                                           <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">rnd_permutation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">distribution_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">num_samples_conditional</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># Sampling from the conditional distribution based on the current sample.</span>
         <span class="n">conditional_distribution_samples</span> <span class="o">=</span> <span class="n">draw_samples_func</span><span class="p">(</span><span class="n">tmp_samples</span><span class="p">)</span>
@@ -385,8 +397,9 @@
 
         <span class="n">old_average_difference_result</span> <span class="o">=</span> <span class="n">average_difference_result</span>
 
-        <span class="n">aggregated_conditional_difference_result</span> <span class="o">+=</span> <span class="n">difference_estimation_func</span><span class="p">(</span><span class="n">conditional_distribution_samples</span><span class="p">,</span>
-                                                                               <span class="n">cond_dist_removed_arr_samples</span><span class="p">)</span>
+        <span class="n">aggregated_conditional_difference_result</span> <span class="o">+=</span> <span class="n">difference_estimation_func</span><span class="p">(</span>
+            <span class="n">conditional_distribution_samples</span><span class="p">,</span> <span class="n">cond_dist_removed_arr_samples</span>
+        <span class="p">)</span>
 
         <span class="n">average_difference_result</span> <span class="o">=</span> <span class="n">aggregated_conditional_difference_result</span> <span class="o">/</span> <span class="p">(</span><span class="n">run</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
@@ -406,16 +419,18 @@
     <span class="k">return</span> <span class="n">average_difference_result</span>
 
 
-<div class="viewcode-block" id="intrinsic_causal_influence"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.influence.intrinsic_causal_influence">[docs]</a><span class="k">def</span> <span class="nf">intrinsic_causal_influence</span><span class="p">(</span><span class="n">causal_model</span><span class="p">:</span> <span class="n">StructuralCausalModel</span><span class="p">,</span>
-                               <span class="n">target_node</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-                               <span class="n">prediction_model</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PredictionModel</span><span class="p">,</span> <span class="n">ClassificationModel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;approx&#39;</span><span class="p">,</span>
-                               <span class="n">attribution_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                               <span class="n">num_training_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100000</span><span class="p">,</span>
-                               <span class="n">num_samples_randomization</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">7500</span><span class="p">,</span>
-                               <span class="n">num_samples_baseline</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
-                               <span class="n">max_batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
-                               <span class="n">auto_assign_quality</span><span class="p">:</span> <span class="n">auto</span><span class="o">.</span><span class="n">AssignmentQuality</span> <span class="o">=</span> <span class="n">auto</span><span class="o">.</span><span class="n">AssignmentQuality</span><span class="o">.</span><span class="n">GOOD</span><span class="p">,</span>
-                               <span class="n">shapley_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ShapleyConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<div class="viewcode-block" id="intrinsic_causal_influence"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.influence.intrinsic_causal_influence">[docs]</a><span class="k">def</span> <span class="nf">intrinsic_causal_influence</span><span class="p">(</span>
+    <span class="n">causal_model</span><span class="p">:</span> <span class="n">StructuralCausalModel</span><span class="p">,</span>
+    <span class="n">target_node</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">prediction_model</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PredictionModel</span><span class="p">,</span> <span class="n">ClassificationModel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;approx&quot;</span><span class="p">,</span>
+    <span class="n">attribution_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">num_training_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100000</span><span class="p">,</span>
+    <span class="n">num_samples_randomization</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">7500</span><span class="p">,</span>
+    <span class="n">num_samples_baseline</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="n">max_batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="n">auto_assign_quality</span><span class="p">:</span> <span class="n">auto</span><span class="o">.</span><span class="n">AssignmentQuality</span> <span class="o">=</span> <span class="n">auto</span><span class="o">.</span><span class="n">AssignmentQuality</span><span class="o">.</span><span class="n">GOOD</span><span class="p">,</span>
+    <span class="n">shapley_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ShapleyConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Computes the causal contribution of each upstream noise term of the target node (including the noise of the</span>
 <span class="sd">    target itself) to the statistical property (e.g. mean, variance) of the target. We call this contribution</span>
 <span class="sd">    *intrinsic* as noise terms, by definition, do not inherit properties of observed parents. The contribution of each</span>
@@ -469,7 +484,7 @@
 
     <span class="n">target_is_categorical</span> <span class="o">=</span> <span class="n">is_categorical</span><span class="p">(</span><span class="n">data_samples</span><span class="p">[</span><span class="n">target_node</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
 
-    <span class="k">if</span> <span class="n">prediction_model</span> <span class="o">==</span> <span class="s1">&#39;approx&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">prediction_model</span> <span class="o">==</span> <span class="s2">&quot;approx&quot;</span><span class="p">:</span>
         <span class="n">prediction_model</span> <span class="o">=</span> <span class="n">auto</span><span class="o">.</span><span class="n">select_model</span><span class="p">(</span><span class="n">noise_samples</span><span class="p">,</span> <span class="n">target_samples</span><span class="p">,</span> <span class="n">auto_assign_quality</span><span class="p">)</span>
         <span class="n">prediction_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">noise_samples</span><span class="p">,</span> <span class="n">target_samples</span><span class="p">)</span>
 
@@ -477,56 +492,68 @@
             <span class="n">prediction_method</span> <span class="o">=</span> <span class="n">prediction_model</span><span class="o">.</span><span class="n">predict_probabilities</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">prediction_method</span> <span class="o">=</span> <span class="n">prediction_model</span><span class="o">.</span><span class="n">predict</span>
-    <span class="k">elif</span> <span class="n">prediction_model</span> <span class="o">==</span> <span class="s1">&#39;exact&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">prediction_model</span> <span class="o">==</span> <span class="s2">&quot;exact&quot;</span><span class="p">:</span>
+
         <span class="k">def</span> <span class="nf">exact_model</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">compute_data_from_noise</span><span class="p">(</span><span class="n">sub_causal_model</span><span class="p">,</span>
-                                           <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">node_names</span><span class="p">]))[</span><span class="n">target_node</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">compute_data_from_noise</span><span class="p">(</span><span class="n">sub_causal_model</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">node_names</span><span class="p">]))[</span>
+                <span class="n">target_node</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">target_is_categorical</span><span class="p">:</span>
-            <span class="n">list_of_classes</span> <span class="o">=</span> \
-                <span class="n">cast</span><span class="p">(</span><span class="n">ClassifierFCM</span><span class="p">,</span> <span class="n">sub_causal_model</span><span class="o">.</span><span class="n">causal_mechanism</span><span class="p">(</span><span class="n">target_node</span><span class="p">))</span><span class="o">.</span><span class="n">classifier_model</span><span class="o">.</span><span class="n">classes</span>
+            <span class="n">list_of_classes</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span>
+                <span class="n">ClassifierFCM</span><span class="p">,</span> <span class="n">sub_causal_model</span><span class="o">.</span><span class="n">causal_mechanism</span><span class="p">(</span><span class="n">target_node</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">classifier_model</span><span class="o">.</span><span class="n">classes</span>
 
             <span class="k">def</span> <span class="nf">prediction_method</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
                 <span class="k">return</span> <span class="p">(</span><span class="n">shape_into_2d</span><span class="p">(</span><span class="n">exact_model</span><span class="p">(</span><span class="n">X</span><span class="p">))</span> <span class="o">==</span> <span class="n">list_of_classes</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="n">prediction_method</span> <span class="o">=</span> <span class="n">exact_model</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prediction_model</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="s2">&quot;Invalid value for prediction_model: </span><span class="si">%s</span><span class="s2">! This should either be an instance of a PredictionModel or&quot;</span>
-            <span class="s2">&quot;one of the two string options &#39;exact&#39; or &#39;approx&#39;.&quot;</span> <span class="o">%</span> <span class="n">prediction_model</span><span class="p">)</span>
+            <span class="s2">&quot;one of the two string options &#39;exact&#39; or &#39;approx&#39;.&quot;</span> <span class="o">%</span> <span class="n">prediction_model</span>
+        <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">prediction_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">noise_samples</span><span class="p">,</span> <span class="n">target_samples</span><span class="p">)</span>
         <span class="n">prediction_method</span> <span class="o">=</span> <span class="n">prediction_model</span><span class="o">.</span><span class="n">predict</span>
 
     <span class="k">if</span> <span class="n">attribution_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">target_is_categorical</span><span class="p">:</span>
+
             <span class="k">def</span> <span class="nf">attribution_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
                 <span class="k">return</span> <span class="o">-</span><span class="n">estimate_entropy_of_probabilities</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
         <span class="k">else</span><span class="p">:</span>
+
             <span class="k">def</span> <span class="nf">attribution_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">estimate_variance</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-    <span class="n">_</span><span class="p">,</span> <span class="n">noise_samples</span> <span class="o">=</span> <span class="n">noise_samples_of_ancestors</span><span class="p">(</span><span class="n">sub_causal_model</span><span class="p">,</span>
-                                                  <span class="n">target_node</span><span class="p">,</span>
-                                                  <span class="n">num_samples_randomization</span> <span class="o">+</span> <span class="n">num_samples_baseline</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">noise_samples</span> <span class="o">=</span> <span class="n">noise_samples_of_ancestors</span><span class="p">(</span>
+        <span class="n">sub_causal_model</span><span class="p">,</span> <span class="n">target_node</span><span class="p">,</span> <span class="n">num_samples_randomization</span> <span class="o">+</span> <span class="n">num_samples_baseline</span>
+    <span class="p">)</span>
     <span class="n">noise_samples</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">noise_samples</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
 
-    <span class="n">iccs</span> <span class="o">=</span> <span class="n">_estimate_iccs</span><span class="p">(</span><span class="n">attribution_func</span><span class="p">,</span>
-                          <span class="n">prediction_method</span><span class="p">,</span>
-                          <span class="n">noise_samples</span><span class="p">[:</span><span class="n">num_samples_randomization</span><span class="p">],</span>
-                          <span class="n">noise_samples</span><span class="p">[</span><span class="n">num_samples_randomization</span><span class="p">:</span><span class="n">num_samples_randomization</span> <span class="o">+</span> <span class="n">num_samples_baseline</span><span class="p">],</span>
-                          <span class="n">max_batch_size</span><span class="p">,</span>
-                          <span class="n">ShapleyConfig</span><span class="p">()</span> <span class="k">if</span> <span class="n">shapley_config</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">shapley_config</span><span class="p">)</span>
+    <span class="n">iccs</span> <span class="o">=</span> <span class="n">_estimate_iccs</span><span class="p">(</span>
+        <span class="n">attribution_func</span><span class="p">,</span>
+        <span class="n">prediction_method</span><span class="p">,</span>
+        <span class="n">noise_samples</span><span class="p">[:</span><span class="n">num_samples_randomization</span><span class="p">],</span>
+        <span class="n">noise_samples</span><span class="p">[</span><span class="n">num_samples_randomization</span> <span class="p">:</span> <span class="n">num_samples_randomization</span> <span class="o">+</span> <span class="n">num_samples_baseline</span><span class="p">],</span>
+        <span class="n">max_batch_size</span><span class="p">,</span>
+        <span class="n">ShapleyConfig</span><span class="p">()</span> <span class="k">if</span> <span class="n">shapley_config</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">shapley_config</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">return</span> <span class="p">{</span><span class="n">node</span><span class="p">:</span> <span class="n">iccs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">node_names</span><span class="p">)}</span></div>
 
 
-<span class="k">def</span> <span class="nf">_estimate_iccs</span><span class="p">(</span><span class="n">attribution_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
-                   <span class="n">prediction_method</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-                   <span class="n">noise_samples</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-                   <span class="n">baseline_noise_samples</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-                   <span class="n">max_batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                   <span class="n">shapley_config</span><span class="p">:</span> <span class="n">ShapleyConfig</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_estimate_iccs</span><span class="p">(</span>
+    <span class="n">attribution_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">prediction_method</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">noise_samples</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">baseline_noise_samples</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">max_batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">shapley_config</span><span class="p">:</span> <span class="n">ShapleyConfig</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="n">target_values</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">prediction_method</span><span class="p">(</span><span class="n">baseline_noise_samples</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">icc_set_function</span><span class="p">(</span><span class="n">subset</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
@@ -539,17 +566,17 @@
             <span class="c1"># In case of the empty subset (all are jointly randomize), it boils down to taking the average over all</span>
             <span class="c1"># predictions, seeing that the randomization yields the same values for each sample of interest (none of the</span>
             <span class="c1"># samples of interest are used to replace a (jointly) &#39;randomized&#39; sample).</span>
-            <span class="n">predictions</span> <span class="o">=</span> \
-                <span class="n">repmat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">prediction_method</span><span class="p">(</span><span class="n">noise_samples</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">baseline_noise_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="n">repmat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">prediction_method</span><span class="p">(</span><span class="n">noise_samples</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">baseline_noise_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">predictions</span> <span class="o">=</span> <span class="n">marginal_expectation</span><span class="p">(</span><span class="n">prediction_method</span><span class="p">,</span>
-                                               <span class="n">feature_samples</span><span class="o">=</span><span class="n">noise_samples</span><span class="p">,</span>
-                                               <span class="n">baseline_samples</span><span class="o">=</span><span class="n">baseline_noise_samples</span><span class="p">,</span>
-                                               <span class="n">baseline_feature_indices</span><span class="o">=</span>
-                                               <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">noise_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="n">subset</span> <span class="o">==</span> <span class="mi">1</span><span class="p">],</span>
-                                               <span class="n">return_averaged_results</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                               <span class="n">feature_perturbation</span><span class="o">=</span><span class="s1">&#39;randomize_columns_jointly&#39;</span><span class="p">,</span>
-                                               <span class="n">max_batch_size</span><span class="o">=</span><span class="n">max_batch_size</span><span class="p">)</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="n">marginal_expectation</span><span class="p">(</span>
+                <span class="n">prediction_method</span><span class="p">,</span>
+                <span class="n">feature_samples</span><span class="o">=</span><span class="n">noise_samples</span><span class="p">,</span>
+                <span class="n">baseline_samples</span><span class="o">=</span><span class="n">baseline_noise_samples</span><span class="p">,</span>
+                <span class="n">baseline_feature_indices</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">noise_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="n">subset</span> <span class="o">==</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="n">return_averaged_results</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">feature_perturbation</span><span class="o">=</span><span class="s2">&quot;randomize_columns_jointly&quot;</span><span class="p">,</span>
+                <span class="n">max_batch_size</span><span class="o">=</span><span class="n">max_batch_size</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="n">attribution_func</span><span class="p">(</span><span class="n">shape_into_2d</span><span class="p">(</span><span class="n">predictions</span><span class="p">),</span> <span class="n">target_values</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">estimate_shapley_values</span><span class="p">(</span><span class="n">icc_set_function</span><span class="p">,</span> <span class="n">noise_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">shapley_config</span><span class="p">)</span>

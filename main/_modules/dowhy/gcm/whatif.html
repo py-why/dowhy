@@ -214,24 +214,32 @@
 <span class="sd">Functions in this module should be considered experimental, meaning there might be breaking API changes in the future.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">from</span> <span class="nn">dowhy.gcm._noise</span> <span class="kn">import</span> <span class="n">compute_noise_from_data</span>
-<span class="kn">from</span> <span class="nn">dowhy.gcm.cms</span> <span class="kn">import</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span> <span class="n">InvertibleStructuralCausalModel</span><span class="p">,</span> <span class="n">StructuralCausalModel</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.cms</span> <span class="kn">import</span> <span class="n">InvertibleStructuralCausalModel</span><span class="p">,</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span> <span class="n">StructuralCausalModel</span>
 <span class="kn">from</span> <span class="nn">dowhy.gcm.fcms</span> <span class="kn">import</span> <span class="n">ClassifierFCM</span>
 <span class="kn">from</span> <span class="nn">dowhy.gcm.fitting_sampling</span> <span class="kn">import</span> <span class="n">draw_samples</span>
-<span class="kn">from</span> <span class="nn">dowhy.gcm.graph</span> <span class="kn">import</span> <span class="n">get_ordered_predecessors</span><span class="p">,</span> <span class="n">is_root_node</span><span class="p">,</span> <span class="n">DirectedGraph</span><span class="p">,</span> <span class="n">validate_causal_dag</span><span class="p">,</span> \
-    <span class="n">validate_node_in_graph</span><span class="p">,</span> <span class="n">node_connected_subgraph_view</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.graph</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DirectedGraph</span><span class="p">,</span>
+    <span class="n">get_ordered_predecessors</span><span class="p">,</span>
+    <span class="n">is_root_node</span><span class="p">,</span>
+    <span class="n">node_connected_subgraph_view</span><span class="p">,</span>
+    <span class="n">validate_causal_dag</span><span class="p">,</span>
+    <span class="n">validate_node_in_graph</span><span class="p">,</span>
+<span class="p">)</span>
 
 
-<div class="viewcode-block" id="interventional_samples"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.whatif.interventional_samples">[docs]</a><span class="k">def</span> <span class="nf">interventional_samples</span><span class="p">(</span><span class="n">causal_model</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span>
-                           <span class="n">interventions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]],</span>
-                           <span class="n">observed_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                           <span class="n">num_samples_to_draw</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="interventional_samples"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.whatif.interventional_samples">[docs]</a><span class="k">def</span> <span class="nf">interventional_samples</span><span class="p">(</span>
+    <span class="n">causal_model</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span>
+    <span class="n">interventions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]],</span>
+    <span class="n">observed_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">num_samples_to_draw</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Performs intervention on nodes in the causal graph.</span>
 
 <span class="sd">    :param causal_model: The probabilistic causal model we perform this intervention on .</span>
@@ -259,9 +267,11 @@
     <span class="k">return</span> <span class="n">_interventional_samples</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">observed_data</span><span class="p">,</span> <span class="n">interventions</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">_interventional_samples</span><span class="p">(</span><span class="n">pcm</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span>
-                            <span class="n">observed_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                            <span class="n">interventions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_interventional_samples</span><span class="p">(</span>
+    <span class="n">pcm</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span>
+    <span class="n">observed_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">interventions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="n">samples</span> <span class="o">=</span> <span class="n">observed_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
     <span class="n">affected_nodes</span> <span class="o">=</span> <span class="n">_get_nodes_affected_by_intervention</span><span class="p">(</span><span class="n">pcm</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">interventions</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -302,10 +312,12 @@
     <span class="k">return</span> <span class="n">result</span>
 
 
-<div class="viewcode-block" id="counterfactual_samples"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.whatif.counterfactual_samples">[docs]</a><span class="k">def</span> <span class="nf">counterfactual_samples</span><span class="p">(</span><span class="n">causal_model</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">StructuralCausalModel</span><span class="p">,</span> <span class="n">InvertibleStructuralCausalModel</span><span class="p">],</span>
-                           <span class="n">interventions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]],</span>
-                           <span class="n">observed_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                           <span class="n">noise_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="counterfactual_samples"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.whatif.counterfactual_samples">[docs]</a><span class="k">def</span> <span class="nf">counterfactual_samples</span><span class="p">(</span>
+    <span class="n">causal_model</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">StructuralCausalModel</span><span class="p">,</span> <span class="n">InvertibleStructuralCausalModel</span><span class="p">],</span>
+    <span class="n">interventions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]],</span>
+    <span class="n">observed_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">noise_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Estimates counterfactual data for observed data if we were to perform specified interventions. This function</span>
 <span class="sd">    implements the 3-step process for computing counterfactuals by Pearl (see https://ftp.cs.ucla.edu/pub/stat_ser/r485.pdf).</span>
 
@@ -333,8 +345,10 @@
 
     <span class="k">if</span> <span class="n">noise_data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">observed_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">InvertibleStructuralCausalModel</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Since no noise_data is given, this has to be estimated from the given &quot;</span>
-                             <span class="s2">&quot;observed_data. This can only be done with InvertibleStructuralCausalModel.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Since no noise_data is given, this has to be estimated from the given &quot;</span>
+                <span class="s2">&quot;observed_data. This can only be done with InvertibleStructuralCausalModel.&quot;</span>
+            <span class="p">)</span>
         <span class="c1"># Abduction: For invertible SCMs, we recover exact noise values from data.</span>
         <span class="n">noise_data</span> <span class="o">=</span> <span class="n">compute_noise_from_data</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">observed_data</span><span class="p">)</span>
 
@@ -342,28 +356,32 @@
     <span class="k">return</span> <span class="n">_counterfactual_samples</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">interventions</span><span class="p">,</span> <span class="n">noise_data</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">_counterfactual_samples</span><span class="p">(</span><span class="n">scm</span><span class="p">:</span> <span class="n">StructuralCausalModel</span><span class="p">,</span>
-                            <span class="n">interventions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]],</span>
-                            <span class="n">noise_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_counterfactual_samples</span><span class="p">(</span>
+    <span class="n">scm</span><span class="p">:</span> <span class="n">StructuralCausalModel</span><span class="p">,</span>
+    <span class="n">interventions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]],</span>
+    <span class="n">noise_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="n">topologically_sorted_nodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">topological_sort</span><span class="p">(</span><span class="n">scm</span><span class="o">.</span><span class="n">graph</span><span class="p">))</span>
-    <span class="n">samples</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">noise_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">topologically_sorted_nodes</span><span class="p">))),</span>
-                           <span class="n">columns</span><span class="o">=</span><span class="n">topologically_sorted_nodes</span><span class="p">)</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">noise_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">topologically_sorted_nodes</span><span class="p">))),</span> <span class="n">columns</span><span class="o">=</span><span class="n">topologically_sorted_nodes</span>
+    <span class="p">)</span>
 
     <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">topologically_sorted_nodes</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">is_root_node</span><span class="p">(</span><span class="n">scm</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
             <span class="n">node_data</span> <span class="o">=</span> <span class="n">noise_data</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">node_data</span> <span class="o">=</span> <span class="n">scm</span><span class="o">.</span><span class="n">causal_mechanism</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">_parent_samples_of</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">scm</span><span class="p">,</span> <span class="n">samples</span><span class="p">),</span>
-                                                            <span class="n">noise_data</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
+            <span class="n">node_data</span> <span class="o">=</span> <span class="n">scm</span><span class="o">.</span><span class="n">causal_mechanism</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
+                <span class="n">_parent_samples_of</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">scm</span><span class="p">,</span> <span class="n">samples</span><span class="p">),</span> <span class="n">noise_data</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+            <span class="p">)</span>
 
         <span class="n">samples</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">_evaluate_intervention</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">interventions</span><span class="p">,</span> <span class="n">node_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">samples</span>
 
 
-<span class="k">def</span> <span class="nf">_evaluate_intervention</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-                           <span class="n">interventions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
-                           <span class="n">pre_intervention_data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_evaluate_intervention</span><span class="p">(</span>
+    <span class="n">node</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">interventions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">pre_intervention_data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="c1"># Check if we need to apply an intervention on the given node.</span>
     <span class="k">if</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">interventions</span><span class="p">:</span>
         <span class="c1"># Apply intervention function to the data of the node.</span>
@@ -372,21 +390,24 @@
         <span class="c1"># Check if the intervention function changes the shape of the data.</span>
         <span class="k">if</span> <span class="n">pre_intervention_data</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">post_intervention_data</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="s1">&#39;Dimension of data corresponding to the node `</span><span class="si">%s</span><span class="s1">` after intervention is different than before &#39;</span>
-                <span class="s1">&#39;intervention.&#39;</span> <span class="o">%</span> <span class="n">node</span><span class="p">)</span>
+                <span class="s2">&quot;Dimension of data corresponding to the node `</span><span class="si">%s</span><span class="s2">` after intervention is different than before &quot;</span>
+                <span class="s2">&quot;intervention.&quot;</span> <span class="o">%</span> <span class="n">node</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">post_intervention_data</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">pre_intervention_data</span>
 
 
-<div class="viewcode-block" id="average_causal_effect"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.whatif.average_causal_effect">[docs]</a><span class="k">def</span> <span class="nf">average_causal_effect</span><span class="p">(</span><span class="n">causal_model</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span>
-                          <span class="n">target_node</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-                          <span class="n">interventions_alternative</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]],</span>
-                          <span class="n">interventions_reference</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]],</span>
-                          <span class="n">observed_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                          <span class="n">num_samples_to_draw</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Estimates the average causal effect (ACE) on the target of two different sets of interventions.</span>
+<div class="viewcode-block" id="average_causal_effect"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.whatif.average_causal_effect">[docs]</a><span class="k">def</span> <span class="nf">average_causal_effect</span><span class="p">(</span>
+    <span class="n">causal_model</span><span class="p">:</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span>
+    <span class="n">target_node</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">interventions_alternative</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]],</span>
+    <span class="n">interventions_reference</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]],</span>
+    <span class="n">observed_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">num_samples_to_draw</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Estimates the average causal effect (ACE) on the target of two different sets of interventions.</span>
 <span class="sd">    The interventions can be specified through the parameters `interventions_alternative` and `interventions_reference`.</span>
 <span class="sd">    For example, if the alternative intervention is do(T := 1) and the reference intervention</span>
 <span class="sd">    is do(T := 0), then the average causal effect is given by ACE = E[Y | do(T := 1)] - E[Y | do(T := 0)]:</span>
@@ -433,9 +454,11 @@
         <span class="n">observed_data</span> <span class="o">=</span> <span class="n">draw_samples</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">num_samples_to_draw</span><span class="p">)</span>
 
     <span class="n">samples_from_target_alt</span> <span class="o">=</span> <span class="n">_interventional_samples</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">observed_data</span><span class="p">,</span> <span class="n">interventions_alternative</span><span class="p">)[</span>
-        <span class="n">target_node</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="n">target_node</span>
+    <span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
     <span class="n">samples_from_target_ref</span> <span class="o">=</span> <span class="n">_interventional_samples</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">observed_data</span><span class="p">,</span> <span class="n">interventions_reference</span><span class="p">)[</span>
-        <span class="n">target_node</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="n">target_node</span>
+    <span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
 
     <span class="n">target_causal_model</span> <span class="o">=</span> <span class="n">causal_model</span><span class="o">.</span><span class="n">causal_mechanism</span><span class="p">(</span><span class="n">target_node</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_causal_model</span><span class="p">,</span> <span class="n">ClassifierFCM</span><span class="p">):</span>
@@ -443,7 +466,8 @@
         <span class="c1"># (i.e. binary).</span>
         <span class="k">if</span> <span class="n">observed_data</span><span class="p">[</span><span class="n">target_node</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Cannot estimate average treatment effect of categorical data with more than 2 categories!&quot;</span><span class="p">)</span>
+                <span class="s2">&quot;Cannot estimate average treatment effect of categorical data with more than 2 categories!&quot;</span>
+            <span class="p">)</span>
 
         <span class="n">class_names</span> <span class="o">=</span> <span class="n">target_causal_model</span><span class="o">.</span><span class="n">get_class_names</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
         <span class="n">samples_from_target_alt</span><span class="p">[</span><span class="n">samples_from_target_alt</span> <span class="o">==</span> <span class="n">class_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">0</span>

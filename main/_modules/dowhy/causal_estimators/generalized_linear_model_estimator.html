@@ -209,8 +209,9 @@
               <article class="bd-article" role="main">
                 
   <h1>Source code for dowhy.causal_estimators.generalized_linear_model_estimator</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
-<span class="kn">import</span> <span class="nn">itertools</span>
+<span></span><span class="kn">import</span> <span class="nn">itertools</span>
+
+<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
 
 <span class="kn">from</span> <span class="nn">dowhy.causal_estimators.regression_estimator</span> <span class="kn">import</span> <span class="n">RegressionEstimator</span>
 
@@ -236,19 +237,20 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Required to ensure that self.method_params contains all the</span>
         <span class="c1"># parameters needed to create an object of this class</span>
-        <span class="n">args_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                     <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_STD_INIT_ARGS</span><span class="p">}</span>
+        <span class="n">args_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_STD_INIT_ARGS</span><span class="p">}</span>
         <span class="n">args_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">args_dict</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;INFO: Using Generalized Linear Model Estimator&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">glm_family</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">family</span> <span class="o">=</span> <span class="n">glm_family</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Need to specify the family for the generalized linear model. Provide a &#39;glm_family&#39; parameter in method_params, such as statsmodels.api.families.Binomial() for logistic regression.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Need to specify the family for the generalized linear model. Provide a &#39;glm_family&#39; parameter in method_params, such as statsmodels.api.families.Binomial() for logistic regression.&quot;</span>
+            <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">predict_score</span> <span class="o">=</span> <span class="n">predict_score</span>
         <span class="c1"># Checking if Y is binary</span>
         <span class="n">outcome_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_name</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">outcome_is_binary</span> <span class="o">=</span> <span class="nb">all</span><span class="p">([</span><span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">outcome_values</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outcome_is_binary</span> <span class="o">=</span> <span class="nb">all</span><span class="p">([</span><span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">outcome_values</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">_build_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_features</span><span class="p">()</span>
@@ -269,7 +271,10 @@
         <span class="n">var_list</span> <span class="o">=</span> <span class="n">estimand</span><span class="o">.</span><span class="n">treatment_variable</span> <span class="o">+</span> <span class="n">estimand</span><span class="o">.</span><span class="n">get_backdoor_variables</span><span class="p">()</span>
         <span class="n">expr</span> <span class="o">+=</span> <span class="s2">&quot;+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">var_list</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">:</span>
-            <span class="n">interaction_terms</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">*</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">estimand</span><span class="o">.</span><span class="n">treatment_variable</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">)]</span>
+            <span class="n">interaction_terms</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">*</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">estimand</span><span class="o">.</span><span class="n">treatment_variable</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">)</span>
+            <span class="p">]</span>
             <span class="n">expr</span> <span class="o">+=</span> <span class="s2">&quot;+&quot;</span> <span class="o">+</span> <span class="s2">&quot;+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">interaction_terms</span><span class="p">)</span>
         <span class="n">expr</span> <span class="o">+=</span> <span class="s2">&quot;)&quot;</span>
         <span class="k">return</span> <span class="n">expr</span></div></div>

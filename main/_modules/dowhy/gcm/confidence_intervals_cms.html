@@ -215,12 +215,12 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<span class="kn">from</span> <span class="nn">dowhy.gcm.cms</span> <span class="kn">import</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span> <span class="n">InvertibleStructuralCausalModel</span><span class="p">,</span> <span class="n">StructuralCausalModel</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.cms</span> <span class="kn">import</span> <span class="n">InvertibleStructuralCausalModel</span><span class="p">,</span> <span class="n">ProbabilisticCausalModel</span><span class="p">,</span> <span class="n">StructuralCausalModel</span>
 <span class="kn">from</span> <span class="nn">dowhy.gcm.fitting_sampling</span> <span class="kn">import</span> <span class="n">fit</span>
 
 <span class="c1"># A convenience function when computing confidence intervals specifically for non-deterministic causal queries. This</span>
@@ -254,16 +254,17 @@
 <span class="n">bootstrap_sampling</span> <span class="o">=</span> <span class="n">partial</span>
 
 
-<div class="viewcode-block" id="bootstrap_training_and_sampling"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.confidence_intervals_cms.bootstrap_training_and_sampling">[docs]</a><span class="k">def</span> <span class="nf">bootstrap_training_and_sampling</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Union</span><span class="p">[</span><span class="n">ProbabilisticCausalModel</span><span class="p">,</span>
-                                                       <span class="n">StructuralCausalModel</span><span class="p">,</span>
-                                                       <span class="n">InvertibleStructuralCausalModel</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span>
-                                                <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
-                                    <span class="n">causal_model</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProbabilisticCausalModel</span><span class="p">,</span>
-                                                        <span class="n">StructuralCausalModel</span><span class="p">,</span>
-                                                        <span class="n">InvertibleStructuralCausalModel</span><span class="p">],</span>
-                                    <span class="n">bootstrap_training_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                                    <span class="n">bootstrap_data_subset_size_fraction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
-                                    <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="bootstrap_training_and_sampling"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.confidence_intervals_cms.bootstrap_training_and_sampling">[docs]</a><span class="k">def</span> <span class="nf">bootstrap_training_and_sampling</span><span class="p">(</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span>
+        <span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ProbabilisticCausalModel</span><span class="p">,</span> <span class="n">StructuralCausalModel</span><span class="p">,</span> <span class="n">InvertibleStructuralCausalModel</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+    <span class="p">],</span>
+    <span class="n">causal_model</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProbabilisticCausalModel</span><span class="p">,</span> <span class="n">StructuralCausalModel</span><span class="p">,</span> <span class="n">InvertibleStructuralCausalModel</span><span class="p">],</span>
+    <span class="n">bootstrap_training_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">bootstrap_data_subset_size_fraction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
+    <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A convenience function when computing confidence intervals specifically for causal queries. This function</span>
 <span class="sd">    specifically bootstraps training *and* sampling.</span>
 
@@ -291,9 +292,11 @@
     <span class="k">def</span> <span class="nf">snapshot</span><span class="p">():</span>
         <span class="n">causal_model_copy</span> <span class="o">=</span> <span class="n">causal_model</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
         <span class="n">sampled_data</span> <span class="o">=</span> <span class="n">bootstrap_training_data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">bootstrap_training_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                             <span class="nb">int</span><span class="p">(</span><span class="n">bootstrap_training_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">bootstrap_data_subset_size_fraction</span><span class="p">),</span>
-                             <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+                <span class="n">bootstrap_training_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="nb">int</span><span class="p">(</span><span class="n">bootstrap_training_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">bootstrap_data_subset_size_fraction</span><span class="p">),</span>
+                <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="p">]</span>
         <span class="n">fit</span><span class="p">(</span><span class="n">causal_model_copy</span><span class="p">,</span> <span class="n">sampled_data</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">causal_model_copy</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>

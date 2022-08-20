@@ -215,7 +215,7 @@
 <span class="sd">the future.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span><span class="p">,</span> <span class="n">ABC</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
@@ -224,11 +224,11 @@
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Protocol</span>
 
 <span class="c1"># This constant is used as key when storing/accessing models as causal mechanisms in graph node attributes</span>
-<span class="n">CAUSAL_MECHANISM</span> <span class="o">=</span> <span class="s1">&#39;causal_mechanism&#39;</span>
+<span class="n">CAUSAL_MECHANISM</span> <span class="o">=</span> <span class="s2">&quot;causal_mechanism&quot;</span>
 
 <span class="c1"># This constant is used as key when storing the parents of a node during fitting. It&#39;s used for validation purposes</span>
 <span class="c1"># afterwards.</span>
-<span class="n">PARENTS_DURING_FIT</span> <span class="o">=</span> <span class="s1">&#39;parents_during_fit&#39;</span>
+<span class="n">PARENTS_DURING_FIT</span> <span class="o">=</span> <span class="s2">&quot;parents_during_fit&quot;</span>
 
 
 <div class="viewcode-block" id="HasNodes"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.graph.HasNodes">[docs]</a><span class="k">class</span> <span class="nc">HasNodes</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
@@ -353,7 +353,7 @@
 
 <div class="viewcode-block" id="validate_acyclic"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.graph.validate_acyclic">[docs]</a><span class="k">def</span> <span class="nf">validate_acyclic</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">:</span> <span class="n">DirectedGraph</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">has_cycle</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;The graph contains a cycle, but an acyclic graph is expected!&#39;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;The graph contains a cycle, but an acyclic graph is expected!&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="validate_causal_dag"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.graph.validate_causal_dag">[docs]</a><span class="k">def</span> <span class="nf">validate_causal_dag</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">:</span> <span class="n">DirectedGraph</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -378,20 +378,26 @@
 
     <span class="k">if</span> <span class="n">is_root_node</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">,</span> <span class="n">target_node</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">StochasticModel</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Node </span><span class="si">%s</span><span class="s1"> is a root node and, thus, requires a StochasticModel, &#39;</span>
-                               <span class="s1">&#39;but a </span><span class="si">%s</span><span class="s1"> was found!&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">target_node</span><span class="p">,</span> <span class="n">causal_model</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;Node </span><span class="si">%s</span><span class="s2"> is a root node and, thus, requires a StochasticModel, &quot;</span>
+                <span class="s2">&quot;but a </span><span class="si">%s</span><span class="s2"> was found!&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">target_node</span><span class="p">,</span> <span class="n">causal_model</span><span class="p">)</span>
+            <span class="p">)</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">ConditionalStochasticModel</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Node </span><span class="si">%s</span><span class="s1"> has parents and, thus, requires a ConditionalStochasticModel, &#39;</span>
-                           <span class="s1">&#39;but a </span><span class="si">%s</span><span class="s1"> was found!&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">target_node</span><span class="p">,</span> <span class="n">causal_model</span><span class="p">))</span></div>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s2">&quot;Node </span><span class="si">%s</span><span class="s2"> has parents and, thus, requires a ConditionalStochasticModel, &quot;</span>
+            <span class="s2">&quot;but a </span><span class="si">%s</span><span class="s2"> was found!&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">target_node</span><span class="p">,</span> <span class="n">causal_model</span><span class="p">)</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="validate_local_structure"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.graph.validate_local_structure">[docs]</a><span class="k">def</span> <span class="nf">validate_local_structure</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">:</span> <span class="n">DirectedGraph</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">PARENTS_DURING_FIT</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">causal_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> \
-            <span class="ow">or</span> <span class="n">causal_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="n">PARENTS_DURING_FIT</span><span class="p">]</span> \
-            <span class="o">!=</span> <span class="n">get_ordered_predecessors</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;The causal mechanism of node </span><span class="si">%s</span><span class="s1"> is not fitted to the graphical structure! Fit all&#39;</span>
-                           <span class="s1">&#39;causal models in the graph first. If the mechanism is already fitted based on the causal&#39;</span>
-                           <span class="s1">&#39;parents, consider to update the persisted parents for that node manually.&#39;</span> <span class="o">%</span> <span class="n">node</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="n">PARENTS_DURING_FIT</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">causal_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="ow">or</span> <span class="n">causal_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="p">][</span>
+        <span class="n">PARENTS_DURING_FIT</span>
+    <span class="p">]</span> <span class="o">!=</span> <span class="n">get_ordered_predecessors</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s2">&quot;The causal mechanism of node </span><span class="si">%s</span><span class="s2"> is not fitted to the graphical structure! Fit all&quot;</span>
+            <span class="s2">&quot;causal models in the graph first. If the mechanism is already fitted based on the causal&quot;</span>
+            <span class="s2">&quot;parents, consider to update the persisted parents for that node manually.&quot;</span> <span class="o">%</span> <span class="n">node</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="validate_node_has_causal_model"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.graph.validate_node_has_causal_model">[docs]</a><span class="k">def</span> <span class="nf">validate_node_has_causal_model</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">:</span> <span class="n">HasNodes</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>

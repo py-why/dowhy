@@ -214,38 +214,44 @@
 
 <span class="kn">from</span> <span class="nn">dowhy.graph_learner</span> <span class="kn">import</span> <span class="n">GraphLearner</span>
 
-<div class="viewcode-block" id="get_discovery_class_object"><a class="viewcode-back" href="../../dowhy.graph_learners.html#dowhy.graph_learners.get_discovery_class_object">[docs]</a><span class="k">def</span> <span class="nf">get_discovery_class_object</span><span class="p">(</span><span class="n">method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-	<span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">	Import class from graph_learners.</span>
-<span class="sd">	</span>
-<span class="sd">	&#39;&#39;&#39;</span>
-	<span class="c1"># from https://www.bnmetrics.com/blog/factory-pattern-in-python3-simple-version</span>
-	<span class="k">try</span><span class="p">:</span>
-		<span class="n">module_name</span> <span class="o">=</span> <span class="n">method_name</span>
-		<span class="n">class_name</span> <span class="o">=</span> <span class="n">module_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-		
-		<span class="n">discovery_module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">package</span><span class="o">=</span><span class="s2">&quot;dowhy.graph_learners&quot;</span><span class="p">)</span>
-		<span class="n">discovery_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">discovery_module</span><span class="p">,</span> <span class="n">class_name</span><span class="p">)</span>
-		<span class="k">assert</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">discovery_class</span><span class="p">,</span> <span class="n">GraphLearner</span><span class="p">)</span>
 
-	<span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">,</span> <span class="ne">ImportError</span><span class="p">):</span>
-		<span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> is not an existing causal discovery method.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">method_name</span><span class="p">))</span>
-	<span class="k">return</span> <span class="n">discovery_class</span></div>
+<div class="viewcode-block" id="get_discovery_class_object"><a class="viewcode-back" href="../../dowhy.graph_learners.html#dowhy.graph_learners.get_discovery_class_object">[docs]</a><span class="k">def</span> <span class="nf">get_discovery_class_object</span><span class="p">(</span><span class="n">method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Import class from graph_learners.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># from https://www.bnmetrics.com/blog/factory-pattern-in-python3-simple-version</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">module_name</span> <span class="o">=</span> <span class="n">method_name</span>
+        <span class="n">class_name</span> <span class="o">=</span> <span class="n">module_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+        <span class="n">discovery_module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">package</span><span class="o">=</span><span class="s2">&quot;dowhy.graph_learners&quot;</span><span class="p">)</span>
+        <span class="n">discovery_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">discovery_module</span><span class="p">,</span> <span class="n">class_name</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">discovery_class</span><span class="p">,</span> <span class="n">GraphLearner</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">,</span> <span class="ne">ImportError</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> is not an existing causal discovery method.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">method_name</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">discovery_class</span></div>
+
 
 <div class="viewcode-block" id="get_library_class_object"><a class="viewcode-back" href="../../dowhy.graph_learners.html#dowhy.graph_learners.get_library_class_object">[docs]</a><span class="k">def</span> <span class="nf">get_library_class_object</span><span class="p">(</span><span class="n">module_method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-	<span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">	Import library for causal inference.</span>
-<span class="sd">	</span>
-<span class="sd">	&#39;&#39;&#39;</span>
-	<span class="c1"># from https://www.bnmetrics.com/blog/factory-pattern-in-python3-simple-version</span>
-	<span class="k">try</span><span class="p">:</span>
-		<span class="p">(</span><span class="n">module_name</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">class_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">module_method_name</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
-		<span class="n">discovery_module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
-		<span class="n">discovery_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">discovery_module</span><span class="p">,</span> <span class="n">class_name</span><span class="p">)</span>
-		
-	<span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">,</span> <span class="ne">ImportError</span><span class="p">):</span>
-		<span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Error loading </span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1">. Double-check the method name and ensure that all library dependencies are installed.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">module_name</span><span class="p">,</span> <span class="n">class_name</span><span class="p">))</span>
-	<span class="k">return</span> <span class="n">discovery_class</span></div>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Import library for causal inference.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># from https://www.bnmetrics.com/blog/factory-pattern-in-python3-simple-version</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="p">(</span><span class="n">module_name</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">class_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">module_method_name</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">discovery_module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+        <span class="n">discovery_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">discovery_module</span><span class="p">,</span> <span class="n">class_name</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">,</span> <span class="ne">ImportError</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+            <span class="s2">&quot;Error loading </span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">. Double-check the method name and ensure that all library dependencies are installed.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">module_name</span><span class="p">,</span> <span class="n">class_name</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">discovery_class</span></div>
 </pre></div>
 
               </article>

@@ -216,18 +216,18 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span><span class="p">,</span> <span class="n">ABC</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">dowhy.gcm.graph</span> <span class="kn">import</span> <span class="n">StochasticModel</span><span class="p">,</span> <span class="n">FunctionalCausalModel</span><span class="p">,</span> <span class="n">InvertibleFunctionalCausalModel</span>
-<span class="kn">from</span> <span class="nn">dowhy.gcm.util.general</span> <span class="kn">import</span> <span class="n">shape_into_2d</span><span class="p">,</span> <span class="n">is_categorical</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.graph</span> <span class="kn">import</span> <span class="n">FunctionalCausalModel</span><span class="p">,</span> <span class="n">InvertibleFunctionalCausalModel</span><span class="p">,</span> <span class="n">StochasticModel</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.util.general</span> <span class="kn">import</span> <span class="n">is_categorical</span><span class="p">,</span> <span class="n">shape_into_2d</span>
 
 
 <div class="viewcode-block" id="PredictionModel"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fcms.PredictionModel">[docs]</a><span class="k">class</span> <span class="nc">PredictionModel</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Represents general prediction model implementations. Each prediction model should provide a fit and a predict</span>
-<span class="sd">        method. &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Represents general prediction model implementations. Each prediction model should provide a fit and a predict</span>
+<span class="sd">    method.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="PredictionModel.fit"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fcms.PredictionModel.fit">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -248,7 +248,6 @@
 
 
 <div class="viewcode-block" id="ClassificationModel"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fcms.ClassificationModel">[docs]</a><span class="k">class</span> <span class="nc">ClassificationModel</span><span class="p">(</span><span class="n">PredictionModel</span><span class="p">):</span>
-
 <div class="viewcode-block" id="ClassificationModel.predict_probabilities"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fcms.ClassificationModel.predict_probabilities">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">predict_probabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
@@ -260,30 +259,28 @@
 
 
 <div class="viewcode-block" id="InvertibleFunction"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fcms.InvertibleFunction">[docs]</a><span class="k">class</span> <span class="nc">InvertibleFunction</span><span class="p">:</span>
-
 <div class="viewcode-block" id="InvertibleFunction.evaluate"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fcms.InvertibleFunction.evaluate">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Applies the function on the input. &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Applies the function on the input.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 <div class="viewcode-block" id="InvertibleFunction.evaluate_inverse"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fcms.InvertibleFunction.evaluate_inverse">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">evaluate_inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Returns the outcome of applying the inverse of the function on the inputs. &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Returns the outcome of applying the inverse of the function on the inputs.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
 
 
 <div class="viewcode-block" id="PostNonlinearModel"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fcms.PostNonlinearModel">[docs]</a><span class="k">class</span> <span class="nc">PostNonlinearModel</span><span class="p">(</span><span class="n">InvertibleFunctionalCausalModel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Represents an post nonlinear FCM, i.e. models of the form:</span>
-<span class="sd">            Y = g(f(X) + N),</span>
-<span class="sd">        where X are parent nodes of the target node Y, f an arbitrary prediction model expecting inputs from the</span>
-<span class="sd">        parents X, N a noise variable and g an invertible function.</span>
+<span class="sd">    Represents an post nonlinear FCM, i.e. models of the form:</span>
+<span class="sd">        Y = g(f(X) + N),</span>
+<span class="sd">    where X are parent nodes of the target node Y, f an arbitrary prediction model expecting inputs from the</span>
+<span class="sd">    parents X, N a noise variable and g an invertible function.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">prediction_model</span><span class="p">:</span> <span class="n">PredictionModel</span><span class="p">,</span>
-                 <span class="n">noise_model</span><span class="p">:</span> <span class="n">StochasticModel</span><span class="p">,</span>
-                 <span class="n">invertible_function</span><span class="p">:</span> <span class="n">InvertibleFunction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">prediction_model</span><span class="p">:</span> <span class="n">PredictionModel</span><span class="p">,</span> <span class="n">noise_model</span><span class="p">:</span> <span class="n">StochasticModel</span><span class="p">,</span> <span class="n">invertible_function</span><span class="p">:</span> <span class="n">InvertibleFunction</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param prediction_model: The prediction model f.</span>
 <span class="sd">        :param invertible_function: The invertible function g.</span>
@@ -312,9 +309,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_invertible_function</span><span class="o">.</span><span class="n">evaluate_inverse</span><span class="p">(</span><span class="n">Y</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_noise_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">estimate_noise</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">X</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="PostNonlinearModel.estimate_noise"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fcms.PostNonlinearModel.estimate_noise">[docs]</a>    <span class="k">def</span> <span class="nf">estimate_noise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                       <span class="n">target_samples</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-                       <span class="n">parent_samples</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<div class="viewcode-block" id="PostNonlinearModel.estimate_noise"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fcms.PostNonlinearModel.estimate_noise">[docs]</a>    <span class="k">def</span> <span class="nf">estimate_noise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_samples</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">parent_samples</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Reconstruct the noise given samples from (X, Y). This is done by:</span>
 
 <span class="sd">            1. Transform Y via the inverse of g: g^-1(Y) = f(X) + N</span>
@@ -327,7 +322,8 @@
         <span class="n">target_samples</span><span class="p">,</span> <span class="n">parent_samples</span> <span class="o">=</span> <span class="n">shape_into_2d</span><span class="p">(</span><span class="n">target_samples</span><span class="p">,</span> <span class="n">parent_samples</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_invertible_function</span><span class="o">.</span><span class="n">evaluate_inverse</span><span class="p">(</span><span class="n">target_samples</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
-            <span class="n">parent_samples</span><span class="p">)</span></div>
+            <span class="n">parent_samples</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="PostNonlinearModel.draw_noise_samples"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fcms.PostNonlinearModel.draw_noise_samples">[docs]</a>    <span class="k">def</span> <span class="nf">draw_noise_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Draws samples from the noise distribution N.</span>
@@ -354,14 +350,18 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_invertible_function</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">predictions</span> <span class="o">+</span> <span class="n">noise_samples</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1"> and an </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
-                                         <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_model</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
-                                         <span class="bp">self</span><span class="o">.</span><span class="n">_invertible_function</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> with </span><span class="si">%s</span><span class="s2"> and an </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_model</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_invertible_function</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="PostNonlinearModel.clone"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fcms.PostNonlinearModel.clone">[docs]</a>    <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">PostNonlinearModel</span><span class="p">(</span><span class="n">prediction_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_prediction_model</span><span class="o">.</span><span class="n">clone</span><span class="p">(),</span>
-                                  <span class="n">noise_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_noise_model</span><span class="o">.</span><span class="n">clone</span><span class="p">(),</span>
-                                  <span class="n">invertible_function</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_invertible_function</span><span class="p">))</span></div>
+        <span class="k">return</span> <span class="n">PostNonlinearModel</span><span class="p">(</span>
+            <span class="n">prediction_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_prediction_model</span><span class="o">.</span><span class="n">clone</span><span class="p">(),</span>
+            <span class="n">noise_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_noise_model</span><span class="o">.</span><span class="n">clone</span><span class="p">(),</span>
+            <span class="n">invertible_function</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_invertible_function</span><span class="p">),</span>
+        <span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">prediction_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PredictionModel</span><span class="p">:</span>
@@ -387,21 +387,20 @@
 <span class="sd">    regression) and then reconstruct N by N = Y - f(X), i.e. using the residual.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">prediction_model</span><span class="p">:</span> <span class="n">PredictionModel</span><span class="p">,</span>
-                 <span class="n">noise_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StochasticModel</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction_model</span><span class="p">:</span> <span class="n">PredictionModel</span><span class="p">,</span> <span class="n">noise_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StochasticModel</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">noise_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">dowhy.gcm.stochastic_models</span> <span class="kn">import</span> <span class="n">EmpiricalDistribution</span>
+
             <span class="n">noise_model</span> <span class="o">=</span> <span class="n">EmpiricalDistribution</span><span class="p">()</span>
 
         <span class="kn">from</span> <span class="nn">dowhy.gcm.ml.regression</span> <span class="kn">import</span> <span class="n">InvertibleIdentityFunction</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">AdditiveNoiseModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">prediction_model</span><span class="o">=</span><span class="n">prediction_model</span><span class="p">,</span>
-                                                 <span class="n">noise_model</span><span class="o">=</span><span class="n">noise_model</span><span class="p">,</span>
-                                                 <span class="n">invertible_function</span><span class="o">=</span><span class="n">InvertibleIdentityFunction</span><span class="p">())</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">AdditiveNoiseModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">prediction_model</span><span class="o">=</span><span class="n">prediction_model</span><span class="p">,</span> <span class="n">noise_model</span><span class="o">=</span><span class="n">noise_model</span><span class="p">,</span> <span class="n">invertible_function</span><span class="o">=</span><span class="n">InvertibleIdentityFunction</span><span class="p">()</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="AdditiveNoiseModel.clone"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fcms.AdditiveNoiseModel.clone">[docs]</a>    <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">prediction_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prediction_model</span><span class="o">.</span><span class="n">clone</span><span class="p">(),</span>
-                                  <span class="n">noise_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">noise_model</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span></div></div>
+        <span class="k">return</span> <span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">prediction_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prediction_model</span><span class="o">.</span><span class="n">clone</span><span class="p">(),</span> <span class="n">noise_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">noise_model</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span></div></div>
 
 
 <div class="viewcode-block" id="ProbabilityEstimatorModel"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fcms.ProbabilityEstimatorModel">[docs]</a><span class="k">class</span> <span class="nc">ProbabilityEstimatorModel</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
@@ -425,6 +424,7 @@
 
         <span class="k">if</span> <span class="n">classifier_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">dowhy.gcm.ml.classification</span> <span class="kn">import</span> <span class="n">create_hist_gradient_boost_classifier</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">_classifier_model</span> <span class="o">=</span> <span class="n">create_hist_gradient_boost_classifier</span><span class="p">()</span>
 
 <div class="viewcode-block" id="ClassifierFCM.draw_noise_samples"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.fcms.ClassifierFCM.draw_noise_samples">[docs]</a>    <span class="k">def</span> <span class="nf">draw_noise_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>

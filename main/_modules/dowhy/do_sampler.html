@@ -210,6 +210,7 @@
                 
   <h1>Source code for dowhy.do_sampler</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">logging</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
@@ -217,13 +218,11 @@
 
 
 <div class="viewcode-block" id="DoSampler"><a class="viewcode-back" href="../../dowhy.html#dowhy.do_sampler.DoSampler">[docs]</a><span class="k">class</span> <span class="nc">DoSampler</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Base class for a sampler from the interventional distribution.</span>
+    <span class="sd">&quot;&quot;&quot;Base class for a sampler from the interventional distribution.&quot;&quot;&quot;</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span>
-                 <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">variable_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">num_cores</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">causal_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keep_original_treatment</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">variable_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_cores</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">causal_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keep_original_treatment</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes a do sampler with data and names of relevant variables.</span>
 
@@ -283,8 +282,9 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variable_types</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_infer_variable_types</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dep_type</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_variable_types</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outcome_names</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">indep_type</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_variable_types</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span>
-                           <span class="bp">self</span><span class="o">.</span><span class="n">_treatment_names</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">get_backdoor_variables</span><span class="p">()]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indep_type</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_variable_types</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_treatment_names</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">get_backdoor_variables</span><span class="p">()</span>
+        <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">density_types</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_variable_types</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">get_backdoor_variables</span><span class="p">()]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">outcome_lower_support</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_names</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
@@ -327,17 +327,22 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 <div class="viewcode-block" id="DoSampler.point_sample"><a class="viewcode-back" href="../../dowhy.html#dowhy.do_sampler.DoSampler.point_sample">[docs]</a>    <span class="k">def</span> <span class="nf">point_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_cores</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">sampled_outcomes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_names</span> <span class="o">+</span>
-                                            <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">get_backdoor_variables</span><span class="p">()]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sample_point</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Pool</span>
-                <span class="n">p</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cores</span><span class="p">)</span>
-                <span class="n">sampled_outcomes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">sample_point</span><span class="p">,</span>
-                                            <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_names</span> <span class="o">+</span>
-                                                     <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">get_backdoor_variables</span><span class="p">()]</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
-                <span class="n">sampled_outcomes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">sampled_outcomes</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_names</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_names</span><span class="p">]</span> <span class="o">=</span> <span class="n">sampled_outcomes</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_cores</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">sampled_outcomes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_names</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">get_backdoor_variables</span><span class="p">()]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sample_point</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Pool</span>
+
+            <span class="n">p</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cores</span><span class="p">)</span>
+            <span class="n">sampled_outcomes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">sample_point</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_names</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">get_backdoor_variables</span><span class="p">()]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">sampled_outcomes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">sampled_outcomes</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_names</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_names</span><span class="p">]</span> <span class="o">=</span> <span class="n">sampled_outcomes</span></div>
 
 <div class="viewcode-block" id="DoSampler.sample"><a class="viewcode-back" href="../../dowhy.html#dowhy.do_sampler.DoSampler.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -345,8 +350,9 @@
 <span class="sd">        Override this method if you want to use a different approach to sampling.</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">sampled_outcomes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_names</span> <span class="o">+</span>
-                                                        <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">get_backdoor_variables</span><span class="p">()]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">sampled_outcomes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_names</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="o">.</span><span class="n">get_backdoor_variables</span><span class="p">()]</span><span class="o">.</span><span class="n">values</span>
+        <span class="p">)</span>
         <span class="n">sampled_outcomes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">sampled_outcomes</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_names</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outcome_names</span><span class="p">]</span> <span class="o">=</span> <span class="n">sampled_outcomes</span></div>
 
@@ -361,7 +367,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span></div>
 
     <span class="k">def</span> <span class="nf">_infer_variable_types</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Variable type inference not implemented. Use the variable_types kwarg.&#39;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Variable type inference not implemented. Use the variable_types kwarg.&quot;</span><span class="p">)</span></div>
 </pre></div>
 
               </article>

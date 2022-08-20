@@ -210,8 +210,9 @@
                 
   <h1>Source code for dowhy.api.causal_data_frame</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">dowhy.causal_model</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+
 <span class="kn">import</span> <span class="nn">dowhy.do_samplers</span> <span class="k">as</span> <span class="nn">do_samplers</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_model</span> <span class="kn">import</span> <span class="n">CausalModel</span>
 <span class="kn">from</span> <span class="nn">dowhy.utils.api</span> <span class="kn">import</span> <span class="n">parse_state</span>
 
 
@@ -240,8 +241,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_sampler</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_method</span> <span class="o">=</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="CausalAccessor.do"><a class="viewcode-back" href="../../../dowhy.api.html#dowhy.api.causal_data_frame.CausalAccessor.do">[docs]</a>    <span class="k">def</span> <span class="nf">do</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;weighting&#39;</span><span class="p">,</span> <span class="n">num_cores</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">variable_types</span><span class="o">=</span><span class="p">{},</span> <span class="n">outcome</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dot_graph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-           <span class="n">common_causes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">estimand_type</span><span class="o">=</span><span class="s1">&#39;nonparametric-ate&#39;</span><span class="p">,</span> <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stateful</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="CausalAccessor.do"><a class="viewcode-back" href="../../../dowhy.api.html#dowhy.api.causal_data_frame.CausalAccessor.do">[docs]</a>    <span class="k">def</span> <span class="nf">do</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;weighting&quot;</span><span class="p">,</span>
+        <span class="n">num_cores</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">variable_types</span><span class="o">=</span><span class="p">{},</span>
+        <span class="n">outcome</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dot_graph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">common_causes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">estimand_type</span><span class="o">=</span><span class="s2">&quot;nonparametric-ate&quot;</span><span class="p">,</span>
+        <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">stateful</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The do-operation implemented with sampling. This will return a pandas.DataFrame with the outcome</span>
 <span class="sd">        variable(s) replaced with samples from P(Y|do(X=x)).</span>
@@ -291,20 +304,24 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">stateful</span> <span class="ow">or</span> <span class="n">method</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_method</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_causal_model</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_causal_model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span>
-                                             <span class="p">[</span><span class="n">xi</span> <span class="k">for</span> <span class="n">xi</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">keys</span><span class="p">()],</span>
-                                             <span class="n">outcome</span><span class="p">,</span>
-                                             <span class="n">graph</span><span class="o">=</span><span class="n">dot_graph</span><span class="p">,</span>
-                                             <span class="n">common_causes</span><span class="o">=</span><span class="n">common_causes</span><span class="p">,</span>
-                                             <span class="n">instruments</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                             <span class="n">estimand_type</span><span class="o">=</span><span class="n">estimand_type</span><span class="p">,</span>
-                                             <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="n">proceed_when_unidentifiable</span><span class="p">)</span>
-        <span class="c1">#self._identified_estimand = self._causal_model.identify_effect()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_causal_model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span>
+                <span class="p">[</span><span class="n">xi</span> <span class="k">for</span> <span class="n">xi</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">keys</span><span class="p">()],</span>
+                <span class="n">outcome</span><span class="p">,</span>
+                <span class="n">graph</span><span class="o">=</span><span class="n">dot_graph</span><span class="p">,</span>
+                <span class="n">common_causes</span><span class="o">=</span><span class="n">common_causes</span><span class="p">,</span>
+                <span class="n">instruments</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">estimand_type</span><span class="o">=</span><span class="n">estimand_type</span><span class="p">,</span>
+                <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="n">proceed_when_unidentifiable</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="c1"># self._identified_estimand = self._causal_model.identify_effect()</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">variable_types</span><span class="p">):</span> <span class="c1">#check if the variables dictionary is empty</span>
-            <span class="n">variable_types</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtypes</span><span class="p">)</span> <span class="c1">#Convert the series containing data types to a dictionary</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">variable_types</span><span class="p">):</span>  <span class="c1"># check if the variables dictionary is empty</span>
+            <span class="n">variable_types</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtypes</span><span class="p">)</span>  <span class="c1"># Convert the series containing data types to a dictionary</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">variable_types</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">variable_types</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_to_custom_type</span><span class="p">(</span><span class="n">variable_types</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="c1">#Obtain the custom type corrosponding to each data type</span>
+                <span class="n">variable_types</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_to_custom_type</span><span class="p">(</span>
+                    <span class="n">variable_types</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+                <span class="p">)</span>  <span class="c1"># Obtain the custom type corrosponding to each data type</span>
 
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">variable_types</span><span class="p">):</span>
             <span class="n">all_variables</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtypes</span><span class="p">)</span>
@@ -313,20 +330,22 @@
                     <span class="n">variable_types</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_to_custom_type</span><span class="p">(</span><span class="n">all_variables</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">variable_types</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Number of variables in the DataFrame is lesser than the variable_types dict&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Number of variables in the DataFrame is lesser than the variable_types dict&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sampler</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_method</span> <span class="o">=</span> <span class="n">method</span>
             <span class="n">do_sampler_class</span> <span class="o">=</span> <span class="n">do_samplers</span><span class="o">.</span><span class="n">get_class_object</span><span class="p">(</span><span class="n">method</span> <span class="o">+</span> <span class="s2">&quot;_sampler&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_sampler</span> <span class="o">=</span> <span class="n">do_sampler_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span>
-                                             <span class="c1">#self._identified_estimand,</span>
-                                             <span class="c1">#self._causal_model._treatment,</span>
-                                             <span class="c1">#self._causal_model._outcome,</span>
-                                             <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
-                                             <span class="n">variable_types</span><span class="o">=</span><span class="n">variable_types</span><span class="p">,</span>
-                                             <span class="n">num_cores</span><span class="o">=</span><span class="n">num_cores</span><span class="p">,</span>
-                                             <span class="n">causal_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_causal_model</span><span class="p">,</span>
-                                             <span class="n">keep_original_treatment</span><span class="o">=</span><span class="n">keep_original_treatment</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sampler</span> <span class="o">=</span> <span class="n">do_sampler_class</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span>
+                <span class="c1"># self._identified_estimand,</span>
+                <span class="c1"># self._causal_model._treatment,</span>
+                <span class="c1"># self._causal_model._outcome,</span>
+                <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+                <span class="n">variable_types</span><span class="o">=</span><span class="n">variable_types</span><span class="p">,</span>
+                <span class="n">num_cores</span><span class="o">=</span><span class="n">num_cores</span><span class="p">,</span>
+                <span class="n">causal_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_causal_model</span><span class="p">,</span>
+                <span class="n">keep_original_treatment</span><span class="o">=</span><span class="n">keep_original_treatment</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sampler</span><span class="o">.</span><span class="n">do_sample</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">stateful</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
@@ -343,16 +362,16 @@
 <span class="sd">        Currently we have not added support for time.</span>
 <span class="sd">        :param input_type: str: The datatype of a column within a DataFrame</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="s1">&#39;int&#39;</span> <span class="ow">in</span> <span class="n">input_type</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s1">&#39;c&#39;</span>
-        <span class="k">elif</span> <span class="s1">&#39;float&#39;</span> <span class="ow">in</span> <span class="n">input_type</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s1">&#39;c&#39;</span>
-        <span class="k">elif</span> <span class="s1">&#39;bool&#39;</span> <span class="ow">in</span> <span class="n">input_type</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s1">&#39;b&#39;</span>
-        <span class="k">elif</span> <span class="s1">&#39;category&#39;</span> <span class="ow">in</span> <span class="n">input_type</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s1">&#39;d&#39;</span>
+        <span class="k">if</span> <span class="s2">&quot;int&quot;</span> <span class="ow">in</span> <span class="n">input_type</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;c&quot;</span>
+        <span class="k">elif</span> <span class="s2">&quot;float&quot;</span> <span class="ow">in</span> <span class="n">input_type</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;c&quot;</span>
+        <span class="k">elif</span> <span class="s2">&quot;bool&quot;</span> <span class="ow">in</span> <span class="n">input_type</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;b&quot;</span>
+        <span class="k">elif</span> <span class="s2">&quot;category&quot;</span> <span class="ow">in</span> <span class="n">input_type</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;d&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> format is not supported&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_type</span><span class="p">))</span></div>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> format is not supported&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_type</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="CausalAccessor.parse_x"><a class="viewcode-back" href="../../../dowhy.api.html#dowhy.api.causal_data_frame.CausalAccessor.parse_x">[docs]</a>    <span class="k">def</span> <span class="nf">parse_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
@@ -361,8 +380,7 @@
             <span class="k">return</span> <span class="p">{</span><span class="n">xi</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">xi</span> <span class="ow">in</span> <span class="n">x</span><span class="p">},</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="kc">False</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;x format not recognized: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span></div></div>
-
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;x format not recognized: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span></div></div>
 </pre></div>
 
               </article>

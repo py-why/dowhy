@@ -229,8 +229,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">rd_variable_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">rd_threshold_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rd_bandwidth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">rd_variable_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rd_threshold_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rd_bandwidth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param rd_variable_name: Name of the variable on which the</span>
 <span class="sd">            discontinuity occurs. This is the instrument.</span>
@@ -242,8 +241,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Required to ensure that self.method_params contains all the information</span>
         <span class="c1"># to create an object of this class</span>
-        <span class="n">args_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                     <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_STD_INIT_ARGS</span><span class="p">}</span>
+        <span class="n">args_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_STD_INIT_ARGS</span><span class="p">}</span>
         <span class="n">args_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">args_dict</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using Regression Discontinuity Estimator&quot;</span><span class="p">)</span>
@@ -260,21 +258,25 @@
         <span class="n">lower_limit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd_threshold_value</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd_bandwidth</span>
         <span class="n">rows_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">s_</span><span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">rd_variable</span> <span class="o">&gt;=</span> <span class="n">lower_limit</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rd_variable</span> <span class="o">&lt;=</span> <span class="n">upper_limit</span><span class="p">)]</span>
         <span class="n">local_rd_variable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd_variable</span><span class="p">[</span><span class="n">rows_filter</span><span class="p">]</span>
-        <span class="n">local_treatment_variable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">rows_filter</span><span class="p">]</span> <span class="c1"># indexing by treatment name again since this method assumes a single-dimensional treatment</span>
+        <span class="n">local_treatment_variable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span>
+            <span class="n">rows_filter</span>
+        <span class="p">]</span>  <span class="c1"># indexing by treatment name again since this method assumes a single-dimensional treatment</span>
         <span class="n">local_outcome_variable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">[</span><span class="n">rows_filter</span><span class="p">]</span>
-        <span class="n">local_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span>
-            <span class="s1">&#39;local_rd_variable&#39;</span><span class="p">:</span> <span class="n">local_rd_variable</span><span class="p">,</span>
-            <span class="s1">&#39;local_treatment&#39;</span><span class="p">:</span> <span class="n">local_treatment_variable</span><span class="p">,</span>
-            <span class="s1">&#39;local_outcome&#39;</span><span class="p">:</span> <span class="n">local_outcome_variable</span>
-        <span class="p">})</span>
+        <span class="n">local_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;local_rd_variable&quot;</span><span class="p">:</span> <span class="n">local_rd_variable</span><span class="p">,</span>
+                <span class="s2">&quot;local_treatment&quot;</span><span class="p">:</span> <span class="n">local_treatment_variable</span><span class="p">,</span>
+                <span class="s2">&quot;local_outcome&quot;</span><span class="p">:</span> <span class="n">local_outcome_variable</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">local_df</span><span class="p">)</span>
         <span class="n">iv_estimator</span> <span class="o">=</span> <span class="n">InstrumentalVariableEstimator</span><span class="p">(</span>
             <span class="n">local_df</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_target_estimand</span><span class="p">,</span>
-            <span class="p">[</span><span class="s1">&#39;local_treatment&#39;</span><span class="p">],</span>
-            <span class="p">[</span><span class="s1">&#39;local_outcome&#39;</span><span class="p">],</span>
+            <span class="p">[</span><span class="s2">&quot;local_treatment&quot;</span><span class="p">],</span>
+            <span class="p">[</span><span class="s2">&quot;local_outcome&quot;</span><span class="p">],</span>
             <span class="n">test_significance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_significance_test</span><span class="p">,</span>
-            <span class="n">iv_instrument_name</span><span class="o">=</span><span class="s1">&#39;local_rd_variable&#39;</span>
+            <span class="n">iv_instrument_name</span><span class="o">=</span><span class="s2">&quot;local_rd_variable&quot;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">est</span> <span class="o">=</span> <span class="n">iv_estimator</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">est</span>

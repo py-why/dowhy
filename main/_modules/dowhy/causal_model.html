@@ -213,37 +213,43 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span>
 
 <span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">init_printing</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span>
-<span class="kn">import</span> <span class="nn">dowhy.graph_learners</span> <span class="k">as</span> <span class="nn">graph_learners</span>
+
 <span class="kn">import</span> <span class="nn">dowhy.causal_estimators</span> <span class="k">as</span> <span class="nn">causal_estimators</span>
 <span class="kn">import</span> <span class="nn">dowhy.causal_refuters</span> <span class="k">as</span> <span class="nn">causal_refuters</span>
+<span class="kn">import</span> <span class="nn">dowhy.graph_learners</span> <span class="k">as</span> <span class="nn">graph_learners</span>
 <span class="kn">import</span> <span class="nn">dowhy.utils.cli_helpers</span> <span class="k">as</span> <span class="nn">cli</span>
 <span class="kn">from</span> <span class="nn">dowhy.causal_estimator</span> <span class="kn">import</span> <span class="n">CausalEstimate</span>
 <span class="kn">from</span> <span class="nn">dowhy.causal_graph</span> <span class="kn">import</span> <span class="n">CausalGraph</span>
 <span class="kn">from</span> <span class="nn">dowhy.causal_identifier</span> <span class="kn">import</span> <span class="n">CausalIdentifier</span>
 <span class="kn">from</span> <span class="nn">dowhy.causal_identifiers.id_identifier</span> <span class="kn">import</span> <span class="n">IDIdentifier</span>
-<span class="kn">from</span> <span class="nn">dowhy.utils.api</span> <span class="kn">import</span> <span class="n">parse_state</span>
 <span class="kn">from</span> <span class="nn">dowhy.causal_refuters.graph_refuter</span> <span class="kn">import</span> <span class="n">GraphRefuter</span>
+<span class="kn">from</span> <span class="nn">dowhy.utils.api</span> <span class="kn">import</span> <span class="n">parse_state</span>
 
 <span class="n">init_printing</span><span class="p">()</span>  <span class="c1"># To display symbolic math symbols</span>
 
 
 <div class="viewcode-block" id="CausalModel"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_model.CausalModel">[docs]</a><span class="k">class</span> <span class="nc">CausalModel</span><span class="p">:</span>
 
-    <span class="sd">&quot;&quot;&quot;Main class for storing the causal model state.</span>
+    <span class="sd">&quot;&quot;&quot;Main class for storing the causal model state.&quot;&quot;&quot;</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">treatment</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">common_causes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">instruments</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">effect_modifiers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">estimand_type</span><span class="o">=</span><span class="s2">&quot;nonparametric-ate&quot;</span><span class="p">,</span>
-                 <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                 <span class="n">missing_nodes_as_confounders</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                 <span class="n">identify_vars</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">,</span>
+        <span class="n">treatment</span><span class="p">,</span>
+        <span class="n">outcome</span><span class="p">,</span>
+        <span class="n">graph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">common_causes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">instruments</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">effect_modifiers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">estimand_type</span><span class="o">=</span><span class="s2">&quot;nonparametric-ate&quot;</span><span class="p">,</span>
+        <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">missing_nodes_as_confounders</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">identify_vars</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize data and create a causal graph instance.</span>
 
 <span class="sd">        Assigns treatment and outcome variables.</span>
@@ -290,31 +296,33 @@
                     <span class="n">common_cause_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_common_causes</span><span class="p">,</span>
                     <span class="n">instrument_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_instruments</span><span class="p">,</span>
                     <span class="n">effect_modifier_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifiers</span><span class="p">,</span>
-                    <span class="n">observed_node_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                    <span class="n">observed_node_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">common_causes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="n">CausalGraph</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">,</span>
                     <span class="n">common_cause_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_common_causes</span><span class="p">,</span>
-                    <span class="n">effect_modifier_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifiers</span><span class="p">,</span>
-                    <span class="n">observed_node_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                    <span class="n">effect_modifier_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifiers</span><span class="p">,</span>
+                    <span class="n">observed_node_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">instruments</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="n">CausalGraph</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">,</span>
                     <span class="n">instrument_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_instruments</span><span class="p">,</span>
-                    <span class="n">effect_modifier_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifiers</span><span class="p">,</span>
-                    <span class="n">observed_node_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                    <span class="n">effect_modifier_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifiers</span><span class="p">,</span>
+                    <span class="n">observed_node_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Relevant variables to build causal graph not provided. You may want to use the learn_graph() function to construct the causal graph.&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;Relevant variables to build causal graph not provided. You may want to use the learn_graph() function to construct the causal graph.&quot;</span>
+                <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="n">CausalGraph</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">,</span>
-                    <span class="n">effect_modifier_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifiers</span><span class="p">,</span>
-                    <span class="n">observed_node_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                    <span class="n">effect_modifier_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifiers</span><span class="p">,</span>
+                    <span class="n">observed_node_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
                 <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">init_graph</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span> <span class="n">identify_vars</span><span class="o">=</span><span class="n">identify_vars</span><span class="p">)</span>
@@ -323,10 +331,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
 
 <div class="viewcode-block" id="CausalModel.init_graph"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_model.CausalModel.init_graph">[docs]</a>    <span class="k">def</span> <span class="nf">init_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">identify_vars</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize self._graph using graph provided by the user.</span>
 
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Create causal graph object</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="n">CausalGraph</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">,</span>
@@ -334,13 +342,12 @@
             <span class="n">graph</span><span class="p">,</span>
             <span class="n">effect_modifier_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifiers</span><span class="p">,</span>
             <span class="n">observed_node_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
-            <span class="n">missing_nodes_as_confounders</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_missing_nodes_as_confounders</span>
+            <span class="n">missing_nodes_as_confounders</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_missing_nodes_as_confounders</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">identify_vars</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_common_causes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_common_causes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_instruments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_instruments</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">,</span>
-                                                            <span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_instruments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_instruments</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">)</span>
             <span class="c1"># Sometimes, effect modifiers from the graph may not match those provided by the user.</span>
             <span class="c1"># (Because some effect modifiers may also be common causes)</span>
             <span class="c1"># In such cases, the user-provided modifiers are used.</span>
@@ -361,14 +368,14 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifiers</span></div>
 
 <div class="viewcode-block" id="CausalModel.learn_graph"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_model.CausalModel.learn_graph">[docs]</a>    <span class="k">def</span> <span class="nf">learn_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;cdt.causality.graph.LiNGAM&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Learn causal graph from the data. This function takes the method name as input and initializes the</span>
 <span class="sd">        causal graph object using the learnt graph.</span>
 
 <span class="sd">        :param self: instance of the CausalModel class (or its subclass)</span>
 <span class="sd">        :param method_name: Exact method name of the object to be imported from the concerned library.</span>
 <span class="sd">        :returns: an instance of the CausalGraph class initialized with the learned graph.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Import causal discovery class</span>
         <span class="n">str_arr</span> <span class="o">=</span> <span class="n">method_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">library_name</span> <span class="o">=</span> <span class="n">str_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -382,8 +389,9 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span></div>
 
-<div class="viewcode-block" id="CausalModel.identify_effect"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_model.CausalModel.identify_effect">[docs]</a>    <span class="k">def</span> <span class="nf">identify_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimand_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">optimize_backdoor</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="CausalModel.identify_effect"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_model.CausalModel.identify_effect">[docs]</a>    <span class="k">def</span> <span class="nf">identify_effect</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">estimand_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">optimize_backdoor</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Identify the causal effect to be estimated, using properties of the causal graph.</span>
 
 <span class="sd">        :param method_name: Method name for identification algorithm. (&quot;id-algorithm&quot; or &quot;default&quot;)</span>
@@ -397,28 +405,32 @@
             <span class="n">estimand_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimand_type</span>
 
         <span class="k">if</span> <span class="n">method_name</span> <span class="o">==</span> <span class="s2">&quot;id-algorithm&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">IDIdentifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span>
-                                           <span class="n">estimand_type</span><span class="p">,</span>
-                                           <span class="n">method_name</span><span class="p">,</span>
-                                           <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="n">proceed_when_unidentifiable</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">IDIdentifier</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span> <span class="n">estimand_type</span><span class="p">,</span> <span class="n">method_name</span><span class="p">,</span> <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="n">proceed_when_unidentifiable</span>
+            <span class="p">)</span>
             <span class="n">identified_estimand</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">CausalIdentifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span>
-                                               <span class="n">estimand_type</span><span class="p">,</span>
-                                               <span class="n">method_name</span><span class="p">,</span>
-                                               <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="n">proceed_when_unidentifiable</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">CausalIdentifier</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span> <span class="n">estimand_type</span><span class="p">,</span> <span class="n">method_name</span><span class="p">,</span> <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="n">proceed_when_unidentifiable</span>
+            <span class="p">)</span>
             <span class="n">identified_estimand</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">optimize_backdoor</span><span class="o">=</span><span class="n">optimize_backdoor</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">identified_estimand</span></div>
 
-<div class="viewcode-block" id="CausalModel.estimate_effect"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_model.CausalModel.estimate_effect">[docs]</a>    <span class="k">def</span> <span class="nf">estimate_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identified_estimand</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                        <span class="n">control_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                        <span class="n">treatment_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                        <span class="n">test_significance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">evaluate_effect_strength</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;ate&quot;</span><span class="p">,</span> <span class="n">effect_modifiers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                        <span class="n">fit_estimator</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                        <span class="n">method_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="CausalModel.estimate_effect"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_model.CausalModel.estimate_effect">[docs]</a>    <span class="k">def</span> <span class="nf">estimate_effect</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">control_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">treatment_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">test_significance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">evaluate_effect_strength</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;ate&quot;</span><span class="p">,</span>
+        <span class="n">effect_modifiers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fit_estimator</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">method_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Estimate the identified causal effect.</span>
 
 <span class="sd">        Currently requires an explicit method name to be specified. Method names follow the convention of identification method followed by the specific estimation method: &quot;[backdoor/iv].estimation_method_name&quot;. Following methods are supported.</span>
@@ -458,7 +470,7 @@
                 <span class="n">effect_modifiers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_effect_modifiers</span>
         <span class="k">if</span> <span class="n">fit_estimator</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">method_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="c1">#TODO add propensity score as default backdoor method, iv as default iv method, add an informational message to show which method has been selected.</span>
+                <span class="c1"># TODO add propensity score as default backdoor method, iv as default iv method, add an informational message to show which method has been selected.</span>
                 <span class="k">pass</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># TODO add dowhy as a prefix to all dowhy estimators</span>
@@ -469,37 +481,37 @@
                 <span class="n">identified_estimand</span><span class="o">.</span><span class="n">set_identifier_method</span><span class="p">(</span><span class="n">identifier_name</span><span class="p">)</span>
                 <span class="c1"># This is done as all dowhy estimators have two parts and external ones have two or more parts</span>
                 <span class="k">if</span> <span class="n">num_components</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">estimator_package</span> <span class="o">=</span>  <span class="n">estimator_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="n">estimator_package</span> <span class="o">==</span> <span class="s1">&#39;dowhy&#39;</span><span class="p">:</span> <span class="c1"># For updated dowhy methods</span>
-                        <span class="n">estimator_method</span> <span class="o">=</span> <span class="n">estimator_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span><span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># discard dowhy from the full package name</span>
+                    <span class="n">estimator_package</span> <span class="o">=</span> <span class="n">estimator_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">estimator_package</span> <span class="o">==</span> <span class="s2">&quot;dowhy&quot;</span><span class="p">:</span>  <span class="c1"># For updated dowhy methods</span>
+                        <span class="n">estimator_method</span> <span class="o">=</span> <span class="n">estimator_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span>
+                            <span class="mi">1</span>
+                        <span class="p">]</span>  <span class="c1"># discard dowhy from the full package name</span>
                         <span class="n">causal_estimator_class</span> <span class="o">=</span> <span class="n">causal_estimators</span><span class="o">.</span><span class="n">get_class_object</span><span class="p">(</span><span class="n">estimator_method</span> <span class="o">+</span> <span class="s2">&quot;_estimator&quot;</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">third_party_estimator_package</span> <span class="o">=</span> <span class="n">estimator_package</span>
-                        <span class="n">causal_estimator_class</span> <span class="o">=</span> <span class="n">causal_estimators</span><span class="o">.</span><span class="n">get_class_object</span><span class="p">(</span><span class="n">third_party_estimator_package</span><span class="p">,</span> <span class="n">estimator_name</span><span class="p">)</span>
+                        <span class="n">causal_estimator_class</span> <span class="o">=</span> <span class="n">causal_estimators</span><span class="o">.</span><span class="n">get_class_object</span><span class="p">(</span>
+                            <span class="n">third_party_estimator_package</span><span class="p">,</span> <span class="n">estimator_name</span>
+                        <span class="p">)</span>
                         <span class="k">if</span> <span class="n">method_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                             <span class="n">method_params</span> <span class="o">=</span> <span class="p">{}</span>
                         <span class="c1"># Define the third-party estimation method to be used</span>
                         <span class="n">method_params</span><span class="p">[</span><span class="n">third_party_estimator_package</span> <span class="o">+</span> <span class="s2">&quot;_methodname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">estimator_name</span>
-                <span class="k">else</span><span class="p">:</span> <span class="c1"># For older dowhy methods</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># For older dowhy methods</span>
                     <span class="nb">print</span><span class="p">(</span><span class="n">estimator_name</span><span class="p">)</span>
                     <span class="c1"># Process the dowhy estimators</span>
                     <span class="n">causal_estimator_class</span> <span class="o">=</span> <span class="n">causal_estimators</span><span class="o">.</span><span class="n">get_class_object</span><span class="p">(</span><span class="n">estimator_name</span> <span class="o">+</span> <span class="s2">&quot;_estimator&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">identified_estimand</span><span class="o">.</span><span class="n">no_directed_path</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No directed path from </span><span class="si">{0}</span><span class="s2"> to </span><span class="si">{1}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">))</span>
-                <span class="k">return</span> <span class="n">CausalEstimate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">identified_estimand</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="n">control_value</span><span class="o">=</span><span class="n">control_value</span><span class="p">,</span>
-                    <span class="n">treatment_value</span><span class="o">=</span><span class="n">treatment_value</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No directed path from </span><span class="si">{0}</span><span class="s2"> to </span><span class="si">{1}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">))</span>
+                <span class="k">return</span> <span class="n">CausalEstimate</span><span class="p">(</span>
+                    <span class="mi">0</span><span class="p">,</span> <span class="n">identified_estimand</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">control_value</span><span class="o">=</span><span class="n">control_value</span><span class="p">,</span> <span class="n">treatment_value</span><span class="o">=</span><span class="n">treatment_value</span>
+                <span class="p">)</span>
             <span class="c1"># Check if estimator&#39;s target estimand is identified</span>
             <span class="k">elif</span> <span class="n">identified_estimand</span><span class="o">.</span><span class="n">estimands</span><span class="p">[</span><span class="n">identifier_name</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No valid identified estimand available.&quot;</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">CausalEstimate</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>
-                                      <span class="n">control_value</span><span class="o">=</span><span class="n">control_value</span><span class="p">,</span>
-                                      <span class="n">treatment_value</span><span class="o">=</span><span class="n">treatment_value</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">CausalEstimate</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">control_value</span><span class="o">=</span><span class="n">control_value</span><span class="p">,</span> <span class="n">treatment_value</span><span class="o">=</span><span class="n">treatment_value</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
 
-                <span class="k">if</span> <span class="n">method_params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">num_components</span> <span class="o">&lt;=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">estimator_package</span> <span class="o">==</span> <span class="s1">&#39;dowhy&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">method_params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">num_components</span> <span class="o">&lt;=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">estimator_package</span> <span class="o">==</span> <span class="s2">&quot;dowhy&quot;</span><span class="p">):</span>
                     <span class="n">extra_args</span> <span class="o">=</span> <span class="n">method_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;init_params&quot;</span><span class="p">,</span> <span class="p">{})</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">extra_args</span> <span class="o">=</span> <span class="p">{}</span>
@@ -508,22 +520,23 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">causal_estimator</span> <span class="o">=</span> <span class="n">causal_estimator_class</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
                     <span class="n">identified_estimand</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">,</span> <span class="c1">#names of treatment and outcome</span>
-                    <span class="n">control_value</span> <span class="o">=</span> <span class="n">control_value</span><span class="p">,</span>
-                    <span class="n">treatment_value</span> <span class="o">=</span> <span class="n">treatment_value</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">,</span>  <span class="c1"># names of treatment and outcome</span>
+                    <span class="n">control_value</span><span class="o">=</span><span class="n">control_value</span><span class="p">,</span>
+                    <span class="n">treatment_value</span><span class="o">=</span><span class="n">treatment_value</span><span class="p">,</span>
                     <span class="n">test_significance</span><span class="o">=</span><span class="n">test_significance</span><span class="p">,</span>
                     <span class="n">evaluate_effect_strength</span><span class="o">=</span><span class="n">evaluate_effect_strength</span><span class="p">,</span>
-                    <span class="n">confidence_intervals</span> <span class="o">=</span> <span class="n">confidence_intervals</span><span class="p">,</span>
-                    <span class="n">target_units</span> <span class="o">=</span> <span class="n">target_units</span><span class="p">,</span>
-                    <span class="n">effect_modifiers</span> <span class="o">=</span> <span class="n">effect_modifiers</span><span class="p">,</span>
+                    <span class="n">confidence_intervals</span><span class="o">=</span><span class="n">confidence_intervals</span><span class="p">,</span>
+                    <span class="n">target_units</span><span class="o">=</span><span class="n">target_units</span><span class="p">,</span>
+                    <span class="n">effect_modifiers</span><span class="o">=</span><span class="n">effect_modifiers</span><span class="p">,</span>
                     <span class="o">**</span><span class="n">method_params</span><span class="p">,</span>
-                    <span class="o">**</span><span class="n">extra_args</span><span class="p">)</span>
+                    <span class="o">**</span><span class="n">extra_args</span><span class="p">,</span>
+                <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Estimator had been computed in a previous call</span>
             <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">causal_estimator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="n">causal_estimator_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">causal_estimator</span><span class="o">.</span><span class="vm">__class__</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">causal_estimator</span><span class="o">.</span><span class="n">update_input</span><span class="p">(</span><span class="n">treatment_value</span><span class="p">,</span> <span class="n">control_value</span><span class="p">,</span>
-                    <span class="n">target_units</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">causal_estimator</span><span class="o">.</span><span class="n">update_input</span><span class="p">(</span><span class="n">treatment_value</span><span class="p">,</span> <span class="n">control_value</span><span class="p">,</span> <span class="n">target_units</span><span class="p">)</span>
 
         <span class="n">estimate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">causal_estimator</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">()</span>
         <span class="c1"># Store parameters inside estimate object for refutation methods</span>
@@ -537,12 +550,11 @@
             <span class="n">confidence_intervals</span><span class="o">=</span><span class="n">confidence_intervals</span><span class="p">,</span>
             <span class="n">target_units</span><span class="o">=</span><span class="n">target_units</span><span class="p">,</span>
             <span class="n">effect_modifiers</span><span class="o">=</span><span class="n">effect_modifiers</span><span class="p">,</span>
-            <span class="n">method_params</span><span class="o">=</span><span class="n">method_params</span>
+            <span class="n">method_params</span><span class="o">=</span><span class="n">method_params</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">estimate</span></div>
 
-<div class="viewcode-block" id="CausalModel.do"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_model.CausalModel.do">[docs]</a>    <span class="k">def</span> <span class="nf">do</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">identified_estimand</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-           <span class="n">fit_estimator</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">method_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="CausalModel.do"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_model.CausalModel.do">[docs]</a>    <span class="k">def</span> <span class="nf">do</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">identified_estimand</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fit_estimator</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">method_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Do operator for estimating values of the outcome after intervening on treatment.</span>
 
 <span class="sd">        :param x: interventional value of the treatment variable</span>
@@ -584,9 +596,10 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">causal_estimator</span> <span class="o">=</span> <span class="n">causal_estimator_class</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
                     <span class="n">identified_estimand</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">,</span>
                     <span class="n">test_significance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                    <span class="o">**</span><span class="n">method_params</span>
+                    <span class="o">**</span><span class="n">method_params</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Estimator had been computed in a previous call</span>
@@ -594,7 +607,7 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">estimate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">causal_estimator</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">NotImplementedError</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Do Operation not implemented or not supported for this estimator.&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Do Operation not implemented or not supported for this estimator.&quot;</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="ne">NotImplementedError</span>
         <span class="k">return</span> <span class="n">estimate</span></div>
 
@@ -624,12 +637,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">refuter_class</span> <span class="o">=</span> <span class="n">causal_refuters</span><span class="o">.</span><span class="n">get_class_object</span><span class="p">(</span><span class="n">method_name</span><span class="p">)</span>
 
-        <span class="n">refuter</span> <span class="o">=</span> <span class="n">refuter_class</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
-            <span class="n">identified_estimand</span><span class="o">=</span><span class="n">estimand</span><span class="p">,</span>
-            <span class="n">estimate</span><span class="o">=</span><span class="n">estimate</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span>
-        <span class="p">)</span>
+        <span class="n">refuter</span> <span class="o">=</span> <span class="n">refuter_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">identified_estimand</span><span class="o">=</span><span class="n">estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="o">=</span><span class="n">estimate</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">res</span> <span class="o">=</span> <span class="n">refuter</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">show_progress_bar</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span></div>
 
@@ -662,6 +670,7 @@
 
         <span class="n">method_name_arr</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="n">method_name</span><span class="p">)</span>
         <span class="kn">import</span> <span class="nn">dowhy.interpreters</span> <span class="k">as</span> <span class="nn">interpreters</span>
+
         <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">method_name_arr</span><span class="p">:</span>
             <span class="n">interpreter</span> <span class="o">=</span> <span class="n">interpreters</span><span class="o">.</span><span class="n">get_class_object</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
             <span class="n">interpreter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">interpret</span><span class="p">()</span></div>
@@ -672,13 +681,15 @@
 <span class="sd">        :returns: a string containining the summary</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">summary_text</span> <span class="o">=</span> <span class="s2">&quot;Model to find the causal effect of treatment </span><span class="si">{0}</span><span class="s2"> on outcome </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">)</span>
+        <span class="n">summary_text</span> <span class="o">=</span> <span class="s2">&quot;Model to find the causal effect of treatment </span><span class="si">{0}</span><span class="s2"> on outcome </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_treatment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">summary_text</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">print_to_stdout</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">summary_text</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">summary_text</span></div>
 
-<div class="viewcode-block" id="CausalModel.refute_graph"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_model.CausalModel.refute_graph">[docs]</a>    <span class="k">def</span> <span class="nf">refute_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">independence_test</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">,</span>  <span class="n">independence_constraints</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
+<div class="viewcode-block" id="CausalModel.refute_graph"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_model.CausalModel.refute_graph">[docs]</a>    <span class="k">def</span> <span class="nf">refute_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">independence_test</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">independence_constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if the dependencies in input graph matches with the dataset -</span>
 <span class="sd">        ( X ⫫ Y ) | Z</span>
@@ -693,47 +704,46 @@
 <span class="sd">        : returns: an instance of GraphRefuter class</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">independence_test</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">test_for_continuous</span> <span class="o">=</span> <span class="n">independence_test</span><span class="p">[</span><span class="s1">&#39;test_for_continuous&#39;</span><span class="p">]</span>
-            <span class="n">test_for_discrete</span> <span class="o">=</span> <span class="n">independence_test</span><span class="p">[</span><span class="s1">&#39;test_for_discrete&#39;</span><span class="p">]</span>
-            <span class="n">refuter</span> <span class="o">=</span> <span class="n">GraphRefuter</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">method_name_continuous</span><span class="o">=</span> <span class="n">test_for_continuous</span><span class="p">,</span> <span class="n">method_name_discrete</span> <span class="o">=</span> <span class="n">test_for_discrete</span><span class="p">)</span>
+            <span class="n">test_for_continuous</span> <span class="o">=</span> <span class="n">independence_test</span><span class="p">[</span><span class="s2">&quot;test_for_continuous&quot;</span><span class="p">]</span>
+            <span class="n">test_for_discrete</span> <span class="o">=</span> <span class="n">independence_test</span><span class="p">[</span><span class="s2">&quot;test_for_discrete&quot;</span><span class="p">]</span>
+            <span class="n">refuter</span> <span class="o">=</span> <span class="n">GraphRefuter</span><span class="p">(</span>
+                <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">method_name_continuous</span><span class="o">=</span><span class="n">test_for_continuous</span><span class="p">,</span> <span class="n">method_name_discrete</span><span class="o">=</span><span class="n">test_for_discrete</span>
+            <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">refuter</span> <span class="o">=</span> <span class="n">GraphRefuter</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+            <span class="n">refuter</span> <span class="o">=</span> <span class="n">GraphRefuter</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">independence_constraints</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">all_nodes</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_all_nodes</span><span class="p">(</span><span class="n">include_unobserved</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+            <span class="n">all_nodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_all_nodes</span><span class="p">(</span><span class="n">include_unobserved</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
             <span class="n">num_nodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_nodes</span><span class="p">)</span>
-            <span class="n">array_indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">num_nodes</span><span class="p">))</span>
-            <span class="n">all_possible_combinations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">combinations</span><span class="p">(</span><span class="n">array_indices</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1">#Generating sets of indices of size 2 for different x and y</span>
-            <span class="n">conditional_independences</span><span class="o">=</span><span class="p">[]</span>
+            <span class="n">array_indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">))</span>
+            <span class="n">all_possible_combinations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="n">combinations</span><span class="p">(</span><span class="n">array_indices</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="p">)</span>  <span class="c1"># Generating sets of indices of size 2 for different x and y</span>
+            <span class="n">conditional_independences</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;The followed conditional independences are true for the input graph&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">combination</span> <span class="ow">in</span> <span class="n">all_possible_combinations</span><span class="p">:</span>  <span class="c1">#Iterate over the unique 2-sized sets [x,y]</span>
-                <span class="n">i</span><span class="o">=</span><span class="n">combination</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">j</span><span class="o">=</span><span class="n">combination</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">a</span><span class="o">=</span><span class="n">all_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                <span class="n">b</span><span class="o">=</span><span class="n">all_nodes</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
-                <span class="k">if</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span> <span class="p">):</span>
-                    <span class="n">temp_arr</span> <span class="o">=</span> <span class="n">all_nodes</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">all_nodes</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">j</span><span class="p">]</span><span class="o">+</span> <span class="n">all_nodes</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="k">for</span> <span class="n">combination</span> <span class="ow">in</span> <span class="n">all_possible_combinations</span><span class="p">:</span>  <span class="c1"># Iterate over the unique 2-sized sets [x,y]</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">combination</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">combination</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">all_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">all_nodes</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span><span class="p">:</span>
+                    <span class="n">temp_arr</span> <span class="o">=</span> <span class="n">all_nodes</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">all_nodes</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">all_nodes</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">temp_arr</span> <span class="o">=</span> <span class="n">all_nodes</span><span class="p">[:</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">all_nodes</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">i</span><span class="p">]</span><span class="o">+</span> <span class="n">all_nodes</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
-                <span class="n">k_sized_lists</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">combinations</span><span class="p">(</span><span class="n">temp_arr</span><span class="p">,</span><span class="n">k</span><span class="p">))</span>
+                    <span class="n">temp_arr</span> <span class="o">=</span> <span class="n">all_nodes</span><span class="p">[:</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">all_nodes</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">all_nodes</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
+                <span class="n">k_sized_lists</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">combinations</span><span class="p">(</span><span class="n">temp_arr</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">k_list</span> <span class="ow">in</span> <span class="n">k_sized_lists</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">check_dseparation</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)],</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">b</span><span class="p">)],</span> <span class="n">k_list</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span> <span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">check_dseparation</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)],</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">b</span><span class="p">)],</span> <span class="n">k_list</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2"> are CI given </span><span class="si">%s</span><span class="s2"> &quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">k_list</span><span class="p">)</span>
                         <span class="n">conditional_independences</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">k_list</span><span class="p">])</span>
 
             <span class="n">independence_constraints</span> <span class="o">=</span> <span class="n">conditional_independences</span>
 
-        <span class="n">res</span> <span class="o">=</span> <span class="n">refuter</span><span class="o">.</span><span class="n">refute_model</span><span class="p">(</span><span class="n">independence_constraints</span> <span class="o">=</span> <span class="n">independence_constraints</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">refuter</span><span class="o">.</span><span class="n">refute_model</span><span class="p">(</span><span class="n">independence_constraints</span><span class="o">=</span><span class="n">independence_constraints</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">refuter</span><span class="o">.</span><span class="n">_refutation_passed</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">res</span></div></div>
-
-
-
-
-
 </pre></div>
 
               </article>

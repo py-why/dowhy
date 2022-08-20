@@ -217,7 +217,7 @@
 
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy</span>
@@ -245,20 +245,23 @@
 <span class="sd">                 hyperparameters, this can be potentially faster than the early stopping approach due to a better</span>
 <span class="sd">                 utilization of the parallelization.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">AUTO</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">EXACT</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="n">EXACT_FAST</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="n">EARLY_STOPPING</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
-    <span class="n">PERMUTATION</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+
+    <span class="n">AUTO</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)</span>
+    <span class="n">EXACT</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span>
+    <span class="n">EXACT_FAST</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,)</span>
+    <span class="n">EARLY_STOPPING</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,)</span>
+    <span class="n">PERMUTATION</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,)</span>
     <span class="n">SUBSET_SAMPLING</span> <span class="o">=</span> <span class="mi">5</span></div>
 
 
 <div class="viewcode-block" id="ShapleyConfig"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.shapley.ShapleyConfig">[docs]</a><span class="k">class</span> <span class="nc">ShapleyConfig</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">approximation_method</span><span class="p">:</span> <span class="n">ShapleyApproximationMethods</span> <span class="o">=</span> <span class="n">ShapleyApproximationMethods</span><span class="o">.</span><span class="n">AUTO</span><span class="p">,</span>
-                 <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
-                 <span class="n">min_percentage_change_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
-                 <span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">approximation_method</span><span class="p">:</span> <span class="n">ShapleyApproximationMethods</span> <span class="o">=</span> <span class="n">ShapleyApproximationMethods</span><span class="o">.</span><span class="n">AUTO</span><span class="p">,</span>
+        <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
+        <span class="n">min_percentage_change_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Config for estimating Shapley values.</span>
 
 <span class="sd">        :param approximation_method: Type of approximation methods (see :py:class:`ShapleyApproximationMethods &lt;dowhy.gcm.shapley.ShapleyApproximationMethods&gt;`).</span>
@@ -280,9 +283,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">default_n_jobs</span> <span class="k">if</span> <span class="n">n_jobs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">n_jobs</span></div>
 
 
-<div class="viewcode-block" id="estimate_shapley_values"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.shapley.estimate_shapley_values">[docs]</a><span class="k">def</span> <span class="nf">estimate_shapley_values</span><span class="p">(</span><span class="n">set_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
-                            <span class="n">num_players</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                            <span class="n">shapley_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ShapleyConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<div class="viewcode-block" id="estimate_shapley_values"><a class="viewcode-back" href="../../../dowhy.gcm.html#dowhy.gcm.shapley.estimate_shapley_values">[docs]</a><span class="k">def</span> <span class="nf">estimate_shapley_values</span><span class="p">(</span>
+    <span class="n">set_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+    <span class="n">num_players</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">shapley_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ShapleyConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Estimates the Shapley values based on the provided set function. A set function here is defined by taking a</span>
 <span class="sd">    (subset) of players and returning a certain utility value. This is in the context of attributing the</span>
 <span class="sd">    value of the i-th player to a subset of players S by evaluating v(S u {i}) - v(S), where v is the</span>
@@ -317,47 +322,49 @@
             <span class="n">approximation_method</span> <span class="o">=</span> <span class="n">ShapleyApproximationMethods</span><span class="o">.</span><span class="n">EARLY_STOPPING</span>
 
     <span class="k">if</span> <span class="n">approximation_method</span> <span class="o">==</span> <span class="n">ShapleyApproximationMethods</span><span class="o">.</span><span class="n">EXACT</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">_estimate_shapley_values_exact</span><span class="p">(</span><span class="n">set_func</span><span class="o">=</span><span class="n">set_func</span><span class="p">,</span>
-                                              <span class="n">num_players</span><span class="o">=</span><span class="n">num_players</span><span class="p">,</span>
-                                              <span class="n">n_jobs</span><span class="o">=</span><span class="n">shapley_config</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_estimate_shapley_values_exact</span><span class="p">(</span><span class="n">set_func</span><span class="o">=</span><span class="n">set_func</span><span class="p">,</span> <span class="n">num_players</span><span class="o">=</span><span class="n">num_players</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="n">shapley_config</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">approximation_method</span> <span class="o">==</span> <span class="n">ShapleyApproximationMethods</span><span class="o">.</span><span class="n">PERMUTATION</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_approximate_shapley_values_via_permutation_sampling</span><span class="p">(</span>
             <span class="n">set_func</span><span class="o">=</span><span class="n">set_func</span><span class="p">,</span>
             <span class="n">num_players</span><span class="o">=</span><span class="n">num_players</span><span class="p">,</span>
             <span class="n">num_permutations</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">shapley_config</span><span class="o">.</span><span class="n">num_samples</span> <span class="o">//</span> <span class="n">num_players</span><span class="p">),</span>
-            <span class="n">n_jobs</span><span class="o">=</span><span class="n">shapley_config</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">)</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="n">shapley_config</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="k">elif</span> <span class="n">approximation_method</span> <span class="o">==</span> <span class="n">ShapleyApproximationMethods</span><span class="o">.</span><span class="n">EARLY_STOPPING</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_approximate_shapley_values_via_early_stopping</span><span class="p">(</span>
             <span class="n">set_func</span><span class="o">=</span><span class="n">set_func</span><span class="p">,</span>
             <span class="n">num_players</span><span class="o">=</span><span class="n">num_players</span><span class="p">,</span>
             <span class="n">max_runs</span><span class="o">=</span><span class="n">shapley_config</span><span class="o">.</span><span class="n">num_samples</span><span class="p">,</span>
             <span class="n">min_percentage_change_threshold</span><span class="o">=</span><span class="n">shapley_config</span><span class="o">.</span><span class="n">min_percentage_change_threshold</span><span class="p">,</span>
-            <span class="n">n_jobs</span><span class="o">=</span><span class="n">shapley_config</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">)</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="n">shapley_config</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="k">elif</span> <span class="n">approximation_method</span> <span class="o">==</span> <span class="n">ShapleyApproximationMethods</span><span class="o">.</span><span class="n">SUBSET_SAMPLING</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_approximate_shapley_values_via_least_squares_regression</span><span class="p">(</span>
             <span class="n">set_func</span><span class="o">=</span><span class="n">set_func</span><span class="p">,</span>
             <span class="n">num_players</span><span class="o">=</span><span class="n">num_players</span><span class="p">,</span>
             <span class="n">use_subset_approximation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">num_samples_for_approximation</span><span class="o">=</span><span class="n">shapley_config</span><span class="o">.</span><span class="n">num_samples</span><span class="p">,</span>
-            <span class="n">n_jobs</span><span class="o">=</span><span class="n">shapley_config</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">)</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="n">shapley_config</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="k">elif</span> <span class="n">approximation_method</span> <span class="o">==</span> <span class="n">ShapleyApproximationMethods</span><span class="o">.</span><span class="n">EXACT_FAST</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_approximate_shapley_values_via_least_squares_regression</span><span class="p">(</span>
             <span class="n">set_func</span><span class="o">=</span><span class="n">set_func</span><span class="p">,</span>
             <span class="n">num_players</span><span class="o">=</span><span class="n">num_players</span><span class="p">,</span>
             <span class="n">use_subset_approximation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">num_samples_for_approximation</span><span class="o">=</span><span class="n">shapley_config</span><span class="o">.</span><span class="n">num_samples</span><span class="p">,</span>
-            <span class="n">n_jobs</span><span class="o">=</span><span class="n">shapley_config</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">)</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="n">shapley_config</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown method for Shapley approximation!&quot;</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">_estimate_shapley_values_exact</span><span class="p">(</span><span class="n">set_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
-                                   <span class="n">num_players</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                                   <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Following Eq. (2) in</span>
+<span class="k">def</span> <span class="nf">_estimate_shapley_values_exact</span><span class="p">(</span>
+    <span class="n">set_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">num_players</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Following Eq. (2) in</span>
 <span class="sd">    Janzing, D., Minorics, L., &amp; Bloebaum, P. (2020).</span>
 <span class="sd">    Feature relevance quantification in explainable AI: A causal problem.</span>
-<span class="sd">    In International Conference on Artificial Intelligence and Statistics (pp. 2907-2916). PMLR. &quot;&quot;&quot;</span>
+<span class="sd">    In International Conference on Artificial Intelligence and Statistics (pp. 2907-2916). PMLR.&quot;&quot;&quot;</span>
     <span class="n">all_subsets</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span> <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">repeat</span><span class="o">=</span><span class="n">num_players</span><span class="p">)]</span>
 
     <span class="k">with</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)</span> <span class="k">as</span> <span class="n">parallel</span><span class="p">:</span>
@@ -371,19 +378,21 @@
     <span class="n">shapley_values</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_players</span>
     <span class="n">subsets_missing_one_player</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">repeat</span><span class="o">=</span><span class="n">num_players</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
     <span class="k">for</span> <span class="n">player_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_players</span><span class="p">):</span>
-        <span class="n">subsets_with_player</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span>
-                               <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">subsets_missing_one_player</span><span class="p">,</span> <span class="n">player_index</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
-        <span class="n">subsets_without_player</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span>
-                                  <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">subsets_missing_one_player</span><span class="p">,</span> <span class="n">player_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="n">subsets_with_player</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span> <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">subsets_missing_one_player</span><span class="p">,</span> <span class="n">player_index</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">subsets_without_player</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span> <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">subsets_missing_one_player</span><span class="p">,</span> <span class="n">player_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="p">]</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">subsets_with_player</span><span class="p">)):</span>
             <span class="n">subset_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">subsets_without_player</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
             <span class="k">if</span> <span class="n">subset_length</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">subset_weight_cache</span><span class="p">:</span>
                 <span class="n">subset_weight_cache</span><span class="p">[</span><span class="n">subset_length</span><span class="p">]</span> <span class="o">=</span> <span class="n">compute_subset_weight</span><span class="p">(</span><span class="n">subset_length</span><span class="p">)</span>
 
-            <span class="n">weighted_diff</span> <span class="o">=</span> \
-                <span class="n">subset_weight_cache</span><span class="p">[</span><span class="n">subset_length</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">subset_to_result_map</span><span class="p">[</span><span class="n">subsets_with_player</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
-                                                      <span class="o">-</span> <span class="n">subset_to_result_map</span><span class="p">[</span><span class="n">subsets_without_player</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+            <span class="n">weighted_diff</span> <span class="o">=</span> <span class="n">subset_weight_cache</span><span class="p">[</span><span class="n">subset_length</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="n">subset_to_result_map</span><span class="p">[</span><span class="n">subsets_with_player</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">-</span> <span class="n">subset_to_result_map</span><span class="p">[</span><span class="n">subsets_without_player</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="p">)</span>
             <span class="c1"># For estimating Shapley values for multiple samples (e.g. in feature relevance) and the number of samples</span>
             <span class="c1"># is unknown beforehand.</span>
             <span class="k">if</span> <span class="n">shapley_values</span><span class="p">[</span><span class="n">player_index</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -394,25 +403,24 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shapley_values</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
 
-<span class="k">def</span> <span class="nf">_approximate_shapley_values_via_least_squares_regression</span><span class="p">(</span><span class="n">set_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-                                                                                <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
-                                                             <span class="n">num_players</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                                                             <span class="n">use_subset_approximation</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-                                                             <span class="n">num_samples_for_approximation</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                                                             <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                                                             <span class="n">full_and_empty_subset_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">20</span><span class="p">)</span> \
-        <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; For more details about this approximation, see Section 4.1.1 in</span>
+<span class="k">def</span> <span class="nf">_approximate_shapley_values_via_least_squares_regression</span><span class="p">(</span>
+    <span class="n">set_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+    <span class="n">num_players</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">use_subset_approximation</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">num_samples_for_approximation</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">full_and_empty_subset_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="mi">20</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;For more details about this approximation, see Section 4.1.1 in</span>
 <span class="sd">    Janzing, D., Minorics, L., &amp; Bloebaum, P. (2020).</span>
 <span class="sd">    Feature relevance quantification in explainable AI: A causal problem.</span>
-<span class="sd">    In International Conference on Artificial Intelligence and Statistics (pp. 2907-2916). PMLR. &quot;&quot;&quot;</span>
+<span class="sd">    In International Conference on Artificial Intelligence and Statistics (pp. 2907-2916). PMLR.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">use_subset_approximation</span><span class="p">:</span>
-        <span class="n">all_subsets</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">_create_subsets_and_weights_exact</span><span class="p">(</span><span class="n">num_players</span><span class="p">,</span>
-                                                                 <span class="n">full_and_empty_subset_weight</span><span class="p">)</span>
+        <span class="n">all_subsets</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">_create_subsets_and_weights_exact</span><span class="p">(</span><span class="n">num_players</span><span class="p">,</span> <span class="n">full_and_empty_subset_weight</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">all_subsets</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">_create_subsets_and_weights_approximation</span><span class="p">(</span><span class="n">num_players</span><span class="p">,</span>
-                                                                         <span class="n">full_and_empty_subset_weight</span><span class="p">,</span>
-                                                                         <span class="n">num_samples_for_approximation</span><span class="p">)</span>
+        <span class="n">all_subsets</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">_create_subsets_and_weights_approximation</span><span class="p">(</span>
+            <span class="n">num_players</span><span class="p">,</span> <span class="n">full_and_empty_subset_weight</span><span class="p">,</span> <span class="n">num_samples_for_approximation</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">parallel_job</span><span class="p">(</span><span class="n">subset</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">parallel_random_seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="n">set_random_seed</span><span class="p">(</span><span class="n">parallel_random_seed</span><span class="p">)</span>
@@ -421,24 +429,27 @@
 
     <span class="k">with</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)</span> <span class="k">as</span> <span class="n">parallel</span><span class="p">:</span>
         <span class="n">random_seeds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">all_subsets</span><span class="p">))</span>
-        <span class="n">set_function_results</span> <span class="o">=</span> <span class="n">parallel</span><span class="p">(</span><span class="n">delayed</span><span class="p">(</span><span class="n">parallel_job</span><span class="p">)(</span><span class="n">subset</span><span class="p">,</span> <span class="n">random_seed</span><span class="p">)</span>
-                                        <span class="k">for</span> <span class="n">subset</span><span class="p">,</span> <span class="n">random_seed</span> <span class="ow">in</span>
-                                        <span class="n">tqdm</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">all_subsets</span><span class="p">,</span> <span class="n">random_seeds</span><span class="p">),</span>
-                                             <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Estimate shapley values as least squares solution&quot;</span><span class="p">,</span>
-                                             <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">leave</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">show_progress_bars</span><span class="p">))</span>
+        <span class="n">set_function_results</span> <span class="o">=</span> <span class="n">parallel</span><span class="p">(</span>
+            <span class="n">delayed</span><span class="p">(</span><span class="n">parallel_job</span><span class="p">)(</span><span class="n">subset</span><span class="p">,</span> <span class="n">random_seed</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">subset</span><span class="p">,</span> <span class="n">random_seed</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span>
+                <span class="nb">zip</span><span class="p">(</span><span class="n">all_subsets</span><span class="p">,</span> <span class="n">random_seeds</span><span class="p">),</span>
+                <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Estimate shapley values as least squares solution&quot;</span><span class="p">,</span>
+                <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">leave</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">show_progress_bars</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">LinearRegression</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">all_subsets</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">set_function_results</span><span class="p">),</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">coef_</span>
 
 
 <span class="k">def</span> <span class="nf">_approximate_shapley_values_via_permutation_sampling</span><span class="p">(</span>
-        <span class="n">set_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
-        <span class="n">num_players</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">num_permutations</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; For more details about this approximation, see</span>
+    <span class="n">set_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">num_players</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_permutations</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;For more details about this approximation, see</span>
 <span class="sd">    Strumbelj, E., Kononenko, I. (2014).</span>
 <span class="sd">    Explaining prediction models and individual predictions with feature contributions.</span>
-<span class="sd">    In Knowledge and information systems, 41(3):647–665 &quot;&quot;&quot;</span>
+<span class="sd">    In Knowledge and information systems, 41(3):647–665&quot;&quot;&quot;</span>
     <span class="n">full_subset_result</span><span class="p">,</span> <span class="n">empty_subset_result</span> <span class="o">=</span> <span class="n">_estimate_full_and_emtpy_subset_results</span><span class="p">(</span><span class="n">set_func</span><span class="p">,</span> <span class="n">num_players</span><span class="p">)</span>
 
     <span class="n">subsets_to_evaluate</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -452,23 +463,26 @@
     <span class="k">with</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)</span> <span class="k">as</span> <span class="n">parallel</span><span class="p">:</span>
         <span class="n">evaluated_subsets</span> <span class="o">=</span> <span class="n">_evaluate_set_function</span><span class="p">(</span><span class="n">set_func</span><span class="p">,</span> <span class="n">subsets_to_evaluate</span><span class="p">,</span> <span class="n">parallel</span><span class="p">)</span>
 
-    <span class="n">shapley_values</span> <span class="o">=</span> <span class="n">_estimate_shapley_values_of_permutation</span><span class="p">(</span><span class="n">all_permutations</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">evaluated_subsets</span><span class="p">,</span>
-                                                             <span class="n">full_subset_result</span><span class="p">,</span> <span class="n">empty_subset_result</span><span class="p">)</span>
+    <span class="n">shapley_values</span> <span class="o">=</span> <span class="n">_estimate_shapley_values_of_permutation</span><span class="p">(</span>
+        <span class="n">all_permutations</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">evaluated_subsets</span><span class="p">,</span> <span class="n">full_subset_result</span><span class="p">,</span> <span class="n">empty_subset_result</span>
+    <span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_permutations</span><span class="p">)):</span>
-        <span class="n">shapley_values</span> <span class="o">+=</span> <span class="n">_estimate_shapley_values_of_permutation</span><span class="p">(</span><span class="n">all_permutations</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">evaluated_subsets</span><span class="p">,</span>
-                                                                  <span class="n">full_subset_result</span><span class="p">,</span> <span class="n">empty_subset_result</span><span class="p">)</span>
+        <span class="n">shapley_values</span> <span class="o">+=</span> <span class="n">_estimate_shapley_values_of_permutation</span><span class="p">(</span>
+            <span class="n">all_permutations</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">evaluated_subsets</span><span class="p">,</span> <span class="n">full_subset_result</span><span class="p">,</span> <span class="n">empty_subset_result</span>
+        <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">shapley_values</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_permutations</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_approximate_shapley_values_via_early_stopping</span><span class="p">(</span>
-        <span class="n">set_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
-        <span class="n">num_players</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">max_runs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">min_percentage_change_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">num_permutations_per_run</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Combines the approximation method described in</span>
+    <span class="n">set_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+    <span class="n">num_players</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">max_runs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">min_percentage_change_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">num_permutations_per_run</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Combines the approximation method described in</span>
 
 <span class="sd">    Strumbelj, E., Kononenko, I. (2014).</span>
 <span class="sd">    Explaining prediction models and individual predictions with feature contributions.</span>
@@ -498,31 +512,35 @@
 
             <span class="c1"># In each run, we create one random permutation of players. For instance, given 4 players, a permutation</span>
             <span class="c1"># could be [3,1,4,2].</span>
-            <span class="n">permutations</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">num_players</span><span class="p">,</span> <span class="n">num_players</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_permutations_per_run</span><span class="p">)]</span>
+            <span class="n">permutations</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">num_players</span><span class="p">,</span> <span class="n">num_players</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_permutations_per_run</span><span class="p">)</span>
+            <span class="p">]</span>
             <span class="k">for</span> <span class="n">permutation</span> <span class="ow">in</span> <span class="n">permutations</span><span class="p">:</span>
                 <span class="n">num_generated_permutations</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="c1"># Create all subsets belonging to the generated permutation. This is, if we have [3,1,4,2], then the</span>
                 <span class="c1"># subsets are [3], [3,1], [3,1,4] [3,1,4,2].</span>
-                <span class="n">subsets_to_evaluate</span><span class="o">.</span><span class="n">update</span><span class="p">([</span><span class="n">subset_tuple</span> <span class="k">for</span> <span class="n">subset_tuple</span>
-                                            <span class="ow">in</span> <span class="n">_create_index_order_and_subset_tuples</span><span class="p">(</span><span class="n">permutation</span><span class="p">)</span>
-                                            <span class="k">if</span> <span class="n">subset_tuple</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">evaluated_subsets</span><span class="p">])</span>
+                <span class="n">subsets_to_evaluate</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">subset_tuple</span>
+                        <span class="k">for</span> <span class="n">subset_tuple</span> <span class="ow">in</span> <span class="n">_create_index_order_and_subset_tuples</span><span class="p">(</span><span class="n">permutation</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">subset_tuple</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">evaluated_subsets</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
 
             <span class="c1"># The result for each subset is cached such that if a subset that has already been evaluated appears again,</span>
             <span class="c1"># we can take this result directly.</span>
-            <span class="n">evaluated_subsets</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_evaluate_set_function</span><span class="p">(</span><span class="n">set_func</span><span class="p">,</span>
-                                                            <span class="n">subsets_to_evaluate</span><span class="p">,</span>
-                                                            <span class="n">parallel</span><span class="p">,</span>
-                                                            <span class="kc">False</span><span class="p">))</span>
+            <span class="n">evaluated_subsets</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_evaluate_set_function</span><span class="p">(</span><span class="n">set_func</span><span class="p">,</span> <span class="n">subsets_to_evaluate</span><span class="p">,</span> <span class="n">parallel</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
 
             <span class="k">for</span> <span class="n">permutation</span> <span class="ow">in</span> <span class="n">permutations</span><span class="p">:</span>
                 <span class="c1"># To improve the runtime, multiple permutations are evaluated in each run.</span>
                 <span class="k">if</span> <span class="n">shapley_values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">shapley_values</span> <span class="o">=</span> <span class="n">_estimate_shapley_values_of_permutation</span><span class="p">(</span><span class="n">permutation</span><span class="p">,</span> <span class="n">evaluated_subsets</span><span class="p">,</span>
-                                                                             <span class="n">full_subset_result</span><span class="p">,</span> <span class="n">empty_subset_result</span><span class="p">)</span>
+                    <span class="n">shapley_values</span> <span class="o">=</span> <span class="n">_estimate_shapley_values_of_permutation</span><span class="p">(</span>
+                        <span class="n">permutation</span><span class="p">,</span> <span class="n">evaluated_subsets</span><span class="p">,</span> <span class="n">full_subset_result</span><span class="p">,</span> <span class="n">empty_subset_result</span>
+                    <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">shapley_values</span> <span class="o">+=</span> <span class="n">_estimate_shapley_values_of_permutation</span><span class="p">(</span><span class="n">permutation</span><span class="p">,</span> <span class="n">evaluated_subsets</span><span class="p">,</span>
-                                                                              <span class="n">full_subset_result</span><span class="p">,</span> <span class="n">empty_subset_result</span><span class="p">)</span>
+                    <span class="n">shapley_values</span> <span class="o">+=</span> <span class="n">_estimate_shapley_values_of_permutation</span><span class="p">(</span>
+                        <span class="n">permutation</span><span class="p">,</span> <span class="n">evaluated_subsets</span><span class="p">,</span> <span class="n">full_subset_result</span><span class="p">,</span> <span class="n">empty_subset_result</span>
+                    <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">run_counter</span> <span class="o">&gt;</span> <span class="n">max_runs</span><span class="p">:</span>
                 <span class="k">break</span>
@@ -536,10 +554,12 @@
             <span class="k">if</span> <span class="n">run_counter</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">percentage_changes</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">new_shap_proxy</span> <span class="o">/</span> <span class="n">old_shap_proxy</span>
                 <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">show_progress_bars</span><span class="p">:</span>
-                    <span class="n">pbar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Estimating Shapley Values. &#39;</span>
-                                         <span class="sa">f</span><span class="s1">&#39;Average change of Shapley values in run </span><span class="si">{</span><span class="n">run_counter</span><span class="si">}</span><span class="s1"> &#39;</span>
-                                         <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">num_generated_permutations</span><span class="si">}</span><span class="s1"> evaluated permutations): &#39;</span>
-                                         <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">percentage_changes</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="si">}</span><span class="s1">%&#39;</span><span class="p">)</span>
+                    <span class="n">pbar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Estimating Shapley Values. &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;Average change of Shapley values in run </span><span class="si">{</span><span class="n">run_counter</span><span class="si">}</span><span class="s2"> &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">num_generated_permutations</span><span class="si">}</span><span class="s2"> evaluated permutations): &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">percentage_changes</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="si">}</span><span class="s2">%&quot;</span>
+                    <span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">percentage_changes</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">min_percentage_change_threshold</span><span class="p">:</span>
                     <span class="c1"># Here, the change between two runs is below the minimum threshold, but to reduce the likelihood</span>
@@ -580,15 +600,30 @@
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_iterations</span><span class="p">):</span>
         <span class="c1"># Create all (unique) subsets)</span>
-        <span class="n">all_subsets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">combs</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">num_players</span><span class="p">)</span> <span class="k">for</span> <span class="n">combs</span> <span class="ow">in</span>
-                                     <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_players</span><span class="p">),</span> <span class="n">i</span><span class="p">)]))</span>
+        <span class="n">all_subsets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">combs</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">num_players</span><span class="p">)</span> <span class="k">for</span> <span class="n">combs</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_players</span><span class="p">),</span> <span class="n">i</span><span class="p">)]</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
 
-        <span class="n">all_subsets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">combs</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">num_players</span><span class="p">)</span> <span class="k">for</span> <span class="n">combs</span> <span class="ow">in</span>
-                                     <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_players</span><span class="p">),</span> <span class="n">num_players</span> <span class="o">-</span> <span class="n">i</span><span class="p">)]))</span>
+        <span class="n">all_subsets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">combs</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">num_players</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">combs</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_players</span><span class="p">),</span> <span class="n">num_players</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">num_iterations</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">num_players</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">all_subsets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">combs</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">num_players</span><span class="p">)</span> <span class="k">for</span> <span class="n">combs</span> <span class="ow">in</span>
-                                         <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_players</span><span class="p">),</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]))</span>
+            <span class="n">all_subsets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">combs</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">num_players</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">combs</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_players</span><span class="p">),</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
     <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_subsets</span><span class="p">))</span>
 
@@ -601,15 +636,15 @@
             <span class="c1"># The weight for a subset with a specific length (see paper mentioned in the docstring for more</span>
             <span class="c1"># information).</span>
             <span class="n">weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">num_players</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
-                    <span class="n">scipy</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">binom</span><span class="p">(</span><span class="n">num_players</span><span class="p">,</span> <span class="n">subset_size</span><span class="p">)</span>
-                    <span class="o">*</span> <span class="n">subset_size</span>
-                    <span class="o">*</span> <span class="p">(</span><span class="n">num_players</span> <span class="o">-</span> <span class="n">subset_size</span><span class="p">))</span>
+                <span class="n">scipy</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">binom</span><span class="p">(</span><span class="n">num_players</span><span class="p">,</span> <span class="n">subset_size</span><span class="p">)</span> <span class="o">*</span> <span class="n">subset_size</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_players</span> <span class="o">-</span> <span class="n">subset_size</span><span class="p">)</span>
+            <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">all_subsets</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">),</span> <span class="n">weights</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_create_subsets_and_weights_approximation</span><span class="p">(</span><span class="n">num_players</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">high_weight</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                                              <span class="n">num_subset_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">_create_subsets_and_weights_approximation</span><span class="p">(</span>
+    <span class="n">num_players</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">high_weight</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">num_subset_samples</span><span class="p">:</span> <span class="nb">int</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Randomly samples subsets and weights them based on the number of how often they appear.</span>
 
 <span class="sd">    :param num_players: Total number of players.</span>
@@ -630,9 +665,11 @@
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_subset_samples</span><span class="p">):</span>
         <span class="n">subset_as_tuple</span> <span class="o">=</span> <span class="n">_convert_list_of_indices_to_binary_vector_as_tuple</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">num_players</span><span class="p">,</span>
-                             <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">num_players</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">probabilities_of_subset_length</span><span class="p">),</span>
-                             <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">num_players</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+                <span class="n">num_players</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">num_players</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">probabilities_of_subset_length</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">),</span>
+            <span class="n">num_players</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">subset_as_tuple</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">weights</span><span class="p">:</span>
             <span class="n">weights</span><span class="p">[</span><span class="n">subset_as_tuple</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
@@ -652,22 +689,28 @@
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_evaluate_set_function</span><span class="p">(</span><span class="n">set_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
-                           <span class="n">evaluation_subsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Set</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]],</span>
-                           <span class="n">parallel_context</span><span class="p">:</span> <span class="n">Parallel</span><span class="p">,</span>
-                           <span class="n">show_progressbar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+<span class="k">def</span> <span class="nf">_evaluate_set_function</span><span class="p">(</span>
+    <span class="n">set_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+    <span class="n">evaluation_subsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Set</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]],</span>
+    <span class="n">parallel_context</span><span class="p">:</span> <span class="n">Parallel</span><span class="p">,</span>
+    <span class="n">show_progressbar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
     <span class="k">def</span> <span class="nf">parallel_job</span><span class="p">(</span><span class="n">input_subset</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">parallel_random_seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
         <span class="n">set_random_seed</span><span class="p">(</span><span class="n">parallel_random_seed</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">set_func</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">input_subset</span><span class="p">))</span>
 
     <span class="n">random_seeds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">evaluation_subsets</span><span class="p">))</span>
-    <span class="n">subset_results</span> <span class="o">=</span> <span class="n">parallel_context</span><span class="p">(</span><span class="n">delayed</span><span class="p">(</span><span class="n">parallel_job</span><span class="p">)(</span><span class="n">subset_to_evaluate</span><span class="p">,</span> <span class="n">random_seed</span><span class="p">)</span>
-                                      <span class="k">for</span> <span class="n">subset_to_evaluate</span><span class="p">,</span> <span class="n">random_seed</span> <span class="ow">in</span>
-                                      <span class="n">tqdm</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">evaluation_subsets</span><span class="p">,</span> <span class="n">random_seeds</span><span class="p">),</span>
-                                           <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Evaluate set function&quot;</span><span class="p">,</span>
-                                           <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                           <span class="n">leave</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">show_progress_bars</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">show_progressbar</span><span class="p">))</span>
+    <span class="n">subset_results</span> <span class="o">=</span> <span class="n">parallel_context</span><span class="p">(</span>
+        <span class="n">delayed</span><span class="p">(</span><span class="n">parallel_job</span><span class="p">)(</span><span class="n">subset_to_evaluate</span><span class="p">,</span> <span class="n">random_seed</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">subset_to_evaluate</span><span class="p">,</span> <span class="n">random_seed</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span>
+            <span class="nb">zip</span><span class="p">(</span><span class="n">evaluation_subsets</span><span class="p">,</span> <span class="n">random_seeds</span><span class="p">),</span>
+            <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Evaluate set function&quot;</span><span class="p">,</span>
+            <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">leave</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">show_progress_bars</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">show_progressbar</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
 
     <span class="n">subset_to_result_map</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="p">(</span><span class="n">subset</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">evaluation_subsets</span><span class="p">,</span> <span class="n">subset_results</span><span class="p">):</span>
@@ -676,11 +719,10 @@
     <span class="k">return</span> <span class="n">subset_to_result_map</span>
 
 
-<span class="k">def</span> <span class="nf">_estimate_full_and_emtpy_subset_results</span><span class="p">(</span><span class="n">set_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
-                                            <span class="n">num_players</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> \
-        <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
-    <span class="k">return</span> <span class="n">set_func</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">num_players</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)),</span> \
-           <span class="n">set_func</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_players</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">_estimate_full_and_emtpy_subset_results</span><span class="p">(</span>
+    <span class="n">set_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">num_players</span><span class="p">:</span> <span class="nb">int</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+    <span class="k">return</span> <span class="n">set_func</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">num_players</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)),</span> <span class="n">set_func</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_players</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">))</span>
 
 
 <span class="k">def</span> <span class="nf">_create_index_order_and_subset_tuples</span><span class="p">(</span><span class="n">permutation</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
@@ -694,17 +736,20 @@
     <span class="k">return</span> <span class="n">index_tuples</span>
 
 
-<span class="k">def</span> <span class="nf">_estimate_shapley_values_of_permutation</span><span class="p">(</span><span class="n">permutation</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-                                            <span class="n">evaluated_subsets</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
-                                            <span class="n">full_subset_result</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-                                            <span class="n">empty_subset_result</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_estimate_shapley_values_of_permutation</span><span class="p">(</span>
+    <span class="n">permutation</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">evaluated_subsets</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+    <span class="n">full_subset_result</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">empty_subset_result</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="n">current_variable_set</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">shapley_values</span> <span class="o">=</span> <span class="p">[[]]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">permutation</span><span class="p">)</span>
     <span class="n">previous_result</span> <span class="o">=</span> <span class="n">empty_subset_result</span>
     <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">permutation</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
         <span class="n">current_variable_set</span> <span class="o">+=</span> <span class="p">[</span><span class="n">permutation</span><span class="p">[</span><span class="n">n</span><span class="p">]]</span>
         <span class="n">current_result</span> <span class="o">=</span> <span class="n">evaluated_subsets</span><span class="p">[</span>
-            <span class="n">_convert_list_of_indices_to_binary_vector_as_tuple</span><span class="p">(</span><span class="n">current_variable_set</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">permutation</span><span class="p">))]</span>
+            <span class="n">_convert_list_of_indices_to_binary_vector_as_tuple</span><span class="p">(</span><span class="n">current_variable_set</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">permutation</span><span class="p">))</span>
+        <span class="p">]</span>
 
         <span class="n">shapley_values</span><span class="p">[</span><span class="n">permutation</span><span class="p">[</span><span class="n">n</span><span class="p">]]</span> <span class="o">=</span> <span class="n">current_result</span> <span class="o">-</span> <span class="n">previous_result</span>
         <span class="n">previous_result</span> <span class="o">=</span> <span class="n">current_result</span>
