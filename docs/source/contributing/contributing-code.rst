@@ -62,14 +62,13 @@ Pull request checklist
 
    .. code:: shell
 
-     poetry run poe format
+     poetry run poe format_check
 
    You can use following commands to fix formatting automatically
 
    .. code:: shell
 
-     poetry run black
-     poetry run isort
+     poetry run poe format
 
 #. Add tests for your new code and execute the unittests to make sure
    you did not introduce any breaking changes or bugs.
