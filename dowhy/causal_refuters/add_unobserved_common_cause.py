@@ -22,26 +22,11 @@ class AddUnobservedCommonCause(CausalRefuter):
     """Add an unobserved confounder for refutation.
     
     AddUnobservedCommonCause class supports three methods:
-        1) Simulation based
-        2) Linear partial R2 based : Sensitivity Analysis for linear models.
-        3) Non-Parametric partial R2 based : Sensitivity Analyis for non-parametric models. Two important quantities used to estimate the bias are alpha and g
-         g := E[Y | T, W, Z] denotes the long regression function
-         g_s := E[Y | T, W] denotes the short regression function
-         α := (T - E[T | W, Z] ) / (E(T - E[T | W, Z]) ^ 2) denotes long reisz representer
-         α_s := (T - E[T | W] ) / (E(T - E[T | W]) ^ 2) denotes short reisz representer
-         Bias = E(g_s - g)(α_s - α) for partially linear models
-         Thus, The bound is the product of additional variations that omitted confounders generate in the regression function and in the reisz representer for partially linear models.
-         Whereas for non parametric models, Bias = S * Cg * Calpha 
-         where Cg and Calpha are explanatory powers of the confounder and S^2 = E(Y - g_s) ^ 2 * E(α_s ^ 2)
+        1) Simulation of an unobserved confounder
+        2) Linear partial R2 : Sensitivity Analysis for linear models.
+        3) Non-Parametric partial R2 based : Sensitivity Analyis for non-parametric models. 
 
     Supports additional parameters that can be specified in the refute_estimate() method.
-
-    - 'confounders_effect_on_treatment': how the simulated confounder affects the value of treatment. This can be linear (for continuous treatment) or binary_flip (for binary treatment)
-    - 'confounders_effect_on_outcome': how the simulated confounder affects the value of outcome. This can be linear (for continuous outcome) or binary_flip (for binary outcome)
-    - 'effect_strength_on_treatment': parameter for the strength of the effect of simulated confounder on treatment. For linear effect, it is the regression coeffient. For binary_flip, it is the probability that simulated confounder's effect flips the value of treatment from 0 to 1 (or vice-versa).
-    - 'effect_strength_on_outcome': parameter for the strength of the effect of simulated confounder on outcome. For linear effect, it is the regression coeffient. For binary_flip, it is the probability that simulated confounder's effect flips the value of outcome from 0 to 1 (or vice-versa).
-
-    TODO: Needs an interpretation module
     """
 
     def __init__(self, *args, **kwargs):
@@ -238,9 +223,7 @@ class AddUnobservedCommonCause(CausalRefuter):
 
         
         if self.simulated_method_name == "non-parametric-partial-R2":
-
             #If the estimator used is LinearDML, partially linear sensitivity analysis will be automatically chosen
-            
             if(isinstance(self._estimate.estimator, dowhy.causal_estimators.econml.Econml)):
                 if (self._estimate.estimator._econml_methodname == "econml.dml.LinearDML"):
                     analyzer = PartialLinearSensitivityAnalyzer(estimator = self._estimate._estimator_object, observed_common_causes = self._estimate.estimator._observed_common_causes, 

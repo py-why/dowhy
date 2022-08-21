@@ -10,29 +10,35 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.compose import ColumnTransformer, make_column_selector
 from dowhy.utils.util import get_numeric_features
-from dowhy.causal_refuters.reisz import ReiszRegressor, ReiszRepresenter, generate_moment_function, get_alpha_estimator, get_generic_regressor, create_polynomial_function
+from dowhy.causal_refuters.reisz import get_generic_regressor, create_polynomial_function
 
 
 class PartialLinearSensitivityAnalyzer:
     """
-    Class to perform sensitivity analysis for partially linear model
-        :param estimator: estimator of the causal model
-        :param num_splits: number of splits for cross validation. (default = 5)
-        :param shuffle_data : shuffle data or not before splitting into folds (default = False)
-        :param shuffle_random_seed: seed for randomly shuffling data
-        :param r2yu_tw: proportion of residual variance in the outcome explained by confounders
-        :param r2tu_w: proportion of residual variance in the treatment explained by confounders
-        :param benchmark_common_causes: names of variables for bounding strength of confounders
-        :param significance_level: confidence interval for statistical inference(default = 0.05)
-        :param frac_strength_treatment: strength of association between unobserved confounder and treatment compared to benchmark covariate
-        :param frac_strength_outcome: strength of association between unobserved confounder and outcome compared to benchmark covariate
-        :param alpha_s_param_dict: dictionary with parameters for finding alpha_s 
-        :param g_s_estimator_list: list of estimator objects for finding g_s. These objects should have fit() and predict() functions.
-        :param g_s_estimator_param_list: list of dictionaries with parameters for tuning respective estimators in "g_s_estimator_list". 
-                                         The order of the dictionaries in the list should be consistent with the estimator objects order in "g_s_estimator_list"
-        :param observed_common_causes: common causes dataframe
-        :param outcome: outcome dataframe
-        :param treatment: treatment dataframe
+    Class to perform sensitivity analysis for partially linear model.
+
+    An efficient version of the non parametric sensitivity analyzer that works for estimators that return residuals of regression from confounders on treatment and outcome, such as the DML method. For all other methods (or when the partially linear assumption is not guaranteed to be satisfied), use the non-parametric sensitivity analysis.
+
+    Based on this work:
+        Chernozhukov, Victor, Carlos Cinelli, Whitney Newey, Amit Sharma, and Vasilis Syrgkanis. Long Story Short: Omitted Variable Bias in Causal Machine Learning. No. w30302. National Bureau of Economic Research, 2022.
+
+    :param estimator: estimator of the causal model
+    :param num_splits: number of splits for cross validation. (default = 5)
+    :param shuffle_data : shuffle data or not before splitting into folds (default = False)
+    :param shuffle_random_seed: seed for randomly shuffling data
+    :param r2yu_tw: proportion of residual variance in the outcome explained by confounders
+    :param r2tu_w: proportion of residual variance in the treatment explained by confounders
+    :param benchmark_common_causes: names of variables for bounding strength of confounders
+    :param significance_level: confidence interval for statistical inference(default = 0.05)
+    :param frac_strength_treatment: strength of association between unobserved confounder and treatment compared to benchmark covariate
+    :param frac_strength_outcome: strength of association between unobserved confounder and outcome compared to benchmark covariate
+    :param alpha_s_param_dict: dictionary with parameters for finding alpha_s 
+    :param g_s_estimator_list: list of estimator objects for finding g_s. These objects should have fit() and predict() functions.
+    :param g_s_estimator_param_list: list of dictionaries with parameters for tuning respective estimators in "g_s_estimator_list". 
+                                     The order of the dictionaries in the list should be consistent with the estimator objects order in "g_s_estimator_list"
+    :param observed_common_causes: common causes dataframe
+    :param outcome: outcome dataframe
+    :param treatment: treatment dataframe
     """
 
     def __init__(self, estimator=None, num_splits=5, shuffle_data=False,
@@ -93,9 +99,9 @@ class PartialLinearSensitivityAnalyzer:
 
         return phi_lower, phi_upper
 
-    def get_confidence_levels(self, r2yu_tw, r2tu_w, significance_level):
+    def get_confidence_levels(self, r2yu_tw, r2tu_w, significance_level, is_partial_linear):
         """
-        Returns lower and upper bounds for different explanatory powers of unobserved confounders
+        Returns lower and upper bounds for the effect estimate, given different explanatory powers of unobserved confounders. It uses the following definitions. 
 
         Y_residual  = Y - E[Y | X, T] (residualized outcome)
         T_residual  = T - E[T | X] (residualized treatment)
@@ -109,6 +115,7 @@ class PartialLinearSensitivityAnalyzer:
         :param r2yu_tw: proportion of residual variance in the outcome explained by confounders
         :param r2tu_w: proportion of residual variance in the treatment explained by confounders
         :param significance_level: confidence interval for statistical inference(default = 0.05)
+        :param is_partial_linear: whether the data-generating process is assumed to be partially linear
 
         :returns lower_confidence_bound: lower limit of confidence bound of the estimate
         :returns upper_confidence_bound: upper limit of confidence bound of the estimate
@@ -118,28 +125,30 @@ class PartialLinearSensitivityAnalyzer:
         Cg2 = r2yu_tw  # Strength of confounding that omitted variables generate in outcome regression
         Cg = np.sqrt(Cg2)
         # Strength of confounding that omitted variables generate in treatment regression
-        Calpha2 = r2tu_w / (1 - r2tu_w)
+        if is_partial_linear:
+            Calpha2 = r2tu_w / (1 - r2tu_w)
+        else: # this corresponds to non-parametric partial R2
+            Calpha2 = r2tu_w # Here r2tu_w denotes R2(alpha~alpha_s)
         Calpha = np.sqrt(Calpha2)
         self.S = np.sqrt(self.S2)
-
+        
+        # computing the point estimate for the bounds
         bound = self.S2 * Cg2 * Calpha2
         bias = np.sqrt(bound)
-
-        phi_lower, phi_upper = self.get_phi_lower_upper(Cg = Cg, Calpha = Calpha)
-
-        expected_phi_lower = np.mean(phi_lower * phi_lower)
-        expected_phi_upper = np.mean(phi_upper * phi_upper)
-
-        n1 = phi_lower.shape[0]
-        n2 = phi_upper.shape[0]
-
-        stddev_lower = np.sqrt(expected_phi_lower / n1)
-        stddev_upper = np.sqrt(expected_phi_upper / n2)
-
         theta_lower = self.theta_s - bias
         theta_upper = self.theta_s + bias
 
         if significance_level is not None:
+            phi_lower, phi_upper = self.get_phi_lower_upper(Cg = Cg, Calpha = Calpha)
+
+            expected_phi_lower = np.mean(phi_lower * phi_lower)
+            expected_phi_upper = np.mean(phi_upper * phi_upper)
+
+            n1 = phi_lower.shape[0]
+            n2 = phi_upper.shape[0]
+
+            stddev_lower = np.sqrt(expected_phi_lower / n1)
+            stddev_upper = np.sqrt(expected_phi_upper / n2)
             probability = scipy.stats.norm.ppf(1 - significance_level)
             lower_confidence_bound = theta_lower - probability * \
                 np.sqrt(np.mean(stddev_lower * stddev_lower) +
@@ -168,18 +177,24 @@ class PartialLinearSensitivityAnalyzer:
                 return t_val
         return t_val
 
-    def perform_benchmarking(self, r2yu_tw, r2tu_w):
+    def perform_benchmarking(self, r2yu_tw, r2tu_w, significance_level,
+            is_partial_linear=True):
         """
         :param r2yu_tw: proportion of residual variance in the outcome explained by confounders
         :param r2tu_w: proportion of residual variance in the treatment explained by confounders
+        :param significance_level: the desired significance level for the bounds
+        :param is_partial_linear: whether we assume a partially linear data-generating process
+
 
         :returns: python dictionary storing values of r2tu_w, r2yu_tw, short estimate, bias, lower_ate_bound,upper_ate_bound, lower_confidence_bound, upper_confidence_bound
         """
 
         lower_confidence_bound, upper_confidence_bound, bias = self.get_confidence_levels(
-            r2yu_tw=r2yu_tw, r2tu_w=r2tu_w, significance_level=0.05)
+            r2yu_tw=r2yu_tw, r2tu_w=r2tu_w, 
+            significance_level=significance_level, is_partial_linear=is_partial_linear)
         lower_ate_bound, upper_ate_bound, bias = self.get_confidence_levels(
-            r2yu_tw=r2yu_tw, r2tu_w=r2tu_w, significance_level=None)
+            r2yu_tw=r2yu_tw, r2tu_w=r2tu_w, 
+            significance_level=None, is_partial_linear=is_partial_linear)
 
         benchmarking_results = {
             'r2tu_w': r2tu_w,
@@ -194,7 +209,8 @@ class PartialLinearSensitivityAnalyzer:
 
         return benchmarking_results
 
-    def get_regression_partial_r2(self, X, Y, numeric_features, split_indices):
+    def get_regression_r2(self, X, Y, numeric_features, split_indices,
+            regression_model=None):
         """
         Calculates the pearson non parametric partial R^2 from a regression function.
 
@@ -205,12 +221,12 @@ class PartialLinearSensitivityAnalyzer:
 
         :returns: partial R^2 value
         """
-
-        regression_model = get_generic_regressor(cv=split_indices,
-        X=X, Y=Y, max_degree=self.reisz_polynomial_max_degree,
-        estimator_list=self.g_s_estimator_list, 
-        estimator_param_list=self.g_s_estimator_param_list,
-        numeric_features=numeric_features) 
+        if regression_model is None:
+            regression_model = get_generic_regressor(cv=split_indices,
+                X=X, Y=Y, max_degree=self.reisz_polynomial_max_degree,
+                estimator_list=self.g_s_estimator_list, 
+                estimator_param_list=self.g_s_estimator_param_list,
+                numeric_features=numeric_features) 
 
         num_samples = X.shape[0]
         regression_pred = np.zeros(num_samples) 
@@ -218,42 +234,49 @@ class PartialLinearSensitivityAnalyzer:
             reg_fn_fit = regression_model.fit(X[train], Y[train])
             regression_pred[test] = reg_fn_fit.predict(X[test])
 
-        partial_r2 = np.var(regression_pred) / np.var(Y)
+        r2 = np.var(regression_pred) / np.var(Y)
 
-        return partial_r2
+        return r2
 
-    def compute_bounds(self, split_indices=None, second_stage_linear = False):
+    def compute_r2diff_benchmarking_covariates(self, treatment_df, 
+            features, T, Y, W,
+            benchmark_common_causes, 
+            split_indices=None, 
+            second_stage_linear=False,
+            is_partial_linear = True):
         """
         Computes the change in partial R^2 due to presence of unobserved confounders
         :param split_indices: training and testing data indices obtained after cross folding
         :param second_stage_linear: True if second stage regression is linear else False (default = False)
+        :param is_partial_linear: True if the data-generating process is assumed to be partially linear
 
         :returns delta_r2_y_wj: observed additive gains in explanatory power with outcome when including benchmark covariate  on regression equation
         :returns delta_r2t_wj: observed additive gains in explanatory power with treatment when including benchmark covariate  on regression equation
         """
-        features = self.observed_common_causes.copy()
-        treatment_df = self.treatment.copy()
-        T = treatment_df.values.ravel()
-        W = features.to_numpy()
-        Y = self.outcome.copy()
-        Y = Y.values.ravel()
+        T = T.ravel()
+        Y = Y.ravel()
         num_samples = W.shape[0]
 
         # common causes after removing the benchmark causes
-        W_j_df = features.drop(self.benchmark_common_causes, axis=1)
+        W_j_df = features.drop(benchmark_common_causes, axis=1)
         numeric_features = get_numeric_features(X=W_j_df)
         W_j = W_j_df.to_numpy()
-
-        # Partial R^2 of treatment with observed common causes removing benchmark causes
-        r2t_w_j = self.get_regression_partial_r2(X = W_j, Y = T, numeric_features = numeric_features, split_indices = split_indices)
-
-        delta_r2t_wj = (self.r2t_w - r2t_w_j)
-
         # dataframe with treatment and observed common causes after removing benchmark causes
         T_W_j_df = pd.concat([treatment_df, W_j_df], axis=1)
-        numeric_features = get_numeric_features(X=T_W_j_df)
+        numeric_features_t = get_numeric_features(X=T_W_j_df)
         T_W_j = T_W_j_df.to_numpy()
 
+        # R^2 of treatment with observed common causes removing benchmark causes
+        if is_partial_linear:
+            r2t_w_j = self.get_regression_r2(X = W_j, Y = T, numeric_features = numeric_features, split_indices = split_indices)
+            delta_r2t_wj = (self.r2t_w - r2t_w_j)
+        else: # non parametric DGP
+            # return the variance of alpha_s 
+            var_alpha_wj = self.get_alpharegression_var(X=T_W_j, 
+                    split_indices=split_indices)
+            delta_r2t_wj = var_alpha_wj
+
+        reg_function = None
         if second_stage_linear is True:
             reg_function = get_generic_regressor(cv = split_indices, 
                            X = T_W_j, Y = Y, max_degree = self.reisz_polynomial_max_degree, 
@@ -274,26 +297,11 @@ class PartialLinearSensitivityAnalyzer:
                            ], 
                            numeric_features = numeric_features
                            )  # Regressing over observed common causes removing benchmark causes and treatment
-        
-        else: 
-            reg_function = get_generic_regressor(cv=split_indices,
-                           X=T_W_j, Y=Y, max_degree=self.reisz_polynomial_max_degree,
-                           estimator_list=self.g_s_estimator_list,
-                           estimator_param_list=self.g_s_estimator_param_list,
-                           numeric_features=numeric_features,
-                           )  # Regressing over observed common causes removing benchmark causes and treatment
-
-        reisz_function = get_alpha_estimator(cv=split_indices, X=T_W_j,
-                                             max_degree=self.reisz_polynomial_max_degree, param_grid_dict=self.alpha_s_param_dict)
-
-        for train, test in split_indices:
-            reg_fn_fit = reg_function.fit(T_W_j[train], Y[train])
-            self.g_s_j[test] = reg_fn_fit.predict(T_W_j[test])
-            reisz_fn_fit = reisz_function.fit(T_W_j[train])
-            self.alpha_s_j[test] = reisz_fn_fit.predict(T_W_j[test])
-
-        # Partial R^2 of outcome with observed common causes and treatment after removing benchmark causes
-        r2y_tw_j = np.var(self.g_s_j) / np.var(Y)
+        # R^2 of outcome with observed common causes and treatment after removing benchmark causes
+        r2y_tw_j = self.get_regression_r2(X=T_W_j, Y=Y, 
+                numeric_features=numeric_features_t,
+                split_indices=split_indices,
+                regression_model = reg_function)
         delta_r2_y_wj = (self.r2y_tw - r2y_tw_j)
 
         return delta_r2_y_wj, delta_r2t_wj
@@ -301,26 +309,19 @@ class PartialLinearSensitivityAnalyzer:
     def check_sensitivity(self, plot=True):
         """
         Function to perform sensitivity analysis. 
-        Yres = Y - E[Y|W]
-        E[Y|W] = f(x) + theta_s * E[T|W]
-        Yres = Y - f(x) - theta_s * E[T|W]
-        g(s) = theta_s * T + f(x)
-        g(s) = theta_s * (T - E[T|W]) + f(x) + theta_s * E[T|W]
-        g(s) = theta_s * Tres +f(x) + theta_s * E[T|W]
-        Y - g(s) = Y - [theta_s * Tres + f(x) + theta_s * E[T|W] )
-        Y - g(s) = ( Y - f(x) -  theta_s * E[T|W]) - theta_s * Tres
-        Y - g(s) = Yres - theta_s * Tres
-        g(s) = Y - Yres + theta_s * Tres
+        
         :param plot: plot = True generates a plot of lower confidence bound of the estimate for different variations of unobserved confounding.
                      plot = False overrides the setting
 
         :returns: instance of PartialLinearSensitivityAnalyzer class
         """
 
+        # Obtaining theta_s (the obtained estimate)
         self.point_estimate = self.estimator.intercept__inference().point_estimate
         self.standard_error = self.estimator.intercept__inference().stderr
         self.theta_s = self.point_estimate[0]
 
+        # Creating numpy arrays
         features = self.observed_common_causes.copy()
         treatment_df = self.treatment.copy()
         X_df = pd.concat([treatment_df, features], axis=1)
@@ -331,15 +332,15 @@ class PartialLinearSensitivityAnalyzer:
         Y = self.outcome.copy()
         Y = Y.to_numpy()
 
+        # Setting up cross-validation parameters
         cv = KFold(n_splits=self.num_splits, shuffle=self.shuffle_data,
                    random_state=self.shuffle_random_seed)
         num_samples = X.shape[0]
         split_indices = list(cv.split(X))
         indices = np.arange(0, num_samples, 1)
 
-        # tuple of residuals from first stage estimation, features and confounders
+        # tuple of residuals from first stage estimation [0,1], and the confounders [2]
         residuals = self.estimator.residuals_
-
         residualized_outcome = residuals[0] # T-E[T|W]
         residualized_treatment = residuals[1] # Y - E[Y|W]
         W = residuals[3]
@@ -349,52 +350,57 @@ class PartialLinearSensitivityAnalyzer:
 
         residualized_outcome = residualized_outcome[indices]  
         residualized_treatment = residualized_treatment[indices]
-        residualized_outcome_second_stage = residualized_outcome - self.theta_s * residualized_treatment
 
+        # We need to estimate, sigma^2 = (Y-g_s)^2. We use the following derivation.
+        # Yres = Y - E[Y|W]
+        # E[Y|W] = f(x) + theta_s * E[T|W]
+        # Yres = Y - f(x) - theta_s * E[T|W]
+        # g(s) = theta_s * T + f(x)
+        # g(s) = theta_s * (T - E[T|W]) + f(x) + theta_s * E[T|W]
+        # g(s) = theta_s * Tres +f(x) + theta_s * E[T|W]
+        # Y - g(s) = Y - [theta_s * Tres + f(x) + theta_s * E[T|W] )
+        # Y - g(s) = ( Y - f(x) -  theta_s * E[T|W]) - theta_s * Tres
+        # Y - g(s) = Yres - theta_s * Tres
+        residualized_outcome_second_stage = residualized_outcome - self.theta_s * residualized_treatment
         self.sigma_2 = np.mean(residualized_outcome_second_stage ** 2)
+        # nu_2 is E[alpha_s^2]
         self.nu_2 = np.mean(residualized_treatment ** 2)
 
         self.S2 = self.sigma_2 / self.nu_2
-
+        
+        # Now computing scores for finding the (1-a) confidence interval
         self.neyman_orthogonal_score_outcome = residualized_outcome_second_stage * residualized_outcome_second_stage - self.sigma_2
         self.neyman_orthogonal_score_treatment = residualized_treatment * residualized_treatment - self.nu_2
         self.neyman_orthogonal_score_theta = (residualized_outcome_second_stage) * residualized_treatment / self.nu_2
 
-        # Partial R^2 of treatment with observed common causes
+        # R^2 of treatment with observed common causes
         reg_function_fit = self.estimator.models_t[0][0]  #First Stage treatment model
-        treatment_model = np.zeros(num_samples)
         treatment_model = reg_function_fit.predict(W) 
         self.r2t_w = np.var(treatment_model) / np.var(T)
  
-        # Partial R^2 of outcome with treatment and observed common causes
+        # R^2 of outcome with treatment and observed common causes
         self.g_s = Y - residualized_outcome_second_stage
         self.r2y_tw = np.var(self.g_s) / np.var(Y)
 
         self.g_s_j = np.zeros(num_samples)
-        self.alpha_s_j = np.zeros(num_samples)
 
-        delta_r2_y_wj, delta_r2t_wj = self.compute_bounds(
-            split_indices=split_indices, second_stage_linear=True)
+        delta_r2_y_wj, delta_r2t_wj = self.compute_r2diff_benchmarking_covariates(
+                treatment_df, features, T, Y, W, self.benchmark_common_causes,
+                split_indices=split_indices, second_stage_linear=False,
+                is_partial_linear=True)
 
         # Partial R^2 of outcome after regressing over unobserved confounder, observed common causes and treatment
-        r2y_uwt = self.frac_strength_outcome * delta_r2_y_wj + self.r2y_tw
+        delta_r2y_u = self.frac_strength_outcome * delta_r2_y_wj 
         # Partial R^2 of treatment after regressing over unobserved confounder and observed common causes
-        r2t_uw = self.frac_strength_treatment * delta_r2t_wj + self.r2t_w
-        if r2y_uwt >=1:
-            r2y_uwt = 0.9999
-            self.logger.warning("r2y_uwt can not be >= 1. Try a lower effect_fraction_on_outcome value. setting to 1")
-        if r2t_uw >= 1:
-            r2t_uw = 0.9999
-            self.logger.warning("r2t_uw can not be >= 1. Try a lower effect_fraction_on_treatment value. setting to 1")
-
-        self.r2yu_tw = ((r2y_uwt - self.r2y_tw) / (1 - self.r2y_tw))
-        self.r2tu_w = ((r2t_uw - self.r2t_w) / (1 - self.r2t_w))
+        delta_r2t_u = self.frac_strength_treatment * delta_r2t_wj 
+        self.r2yu_tw = (delta_r2y_u / (1 - self.r2y_tw))
+        self.r2tu_w = (delta_r2t_u / (1 - self.r2t_w))
 
         if self.r2yu_tw >= 1:
             self.r2yu_tw = 1
             self.logger.warning("Warning: r2yu_tw can not be > 1. Try a lower effect_fraction_on_outcome. Setting r2yu_tw to 1")
         if self.r2tu_w >= 1:
-            self.r2tu_w = 0.9999
+            self.r2tu_w = 1
             self.logger.warning("Warning: r2tu_w can not be > 1. Try a lower effect_fraction_on_treatment. Setting r2tu_w to 1")
         if self.r2yu_tw < 0:
             self.r2yu_tw = 0
@@ -402,7 +408,8 @@ class PartialLinearSensitivityAnalyzer:
             self.r2tu_w = 0
 
         benchmarking_results = self.perform_benchmarking(
-            r2yu_tw=self.r2yu_tw, r2tu_w=self.r2tu_w)
+            r2yu_tw=self.r2yu_tw, r2tu_w=self.r2tu_w, 
+            significance_level=self.significance_level)
         self.results = pd.DataFrame(benchmarking_results, index=[0])
 
         self.RV = self.calculate_robustness_value(alpha=None)
@@ -444,7 +451,7 @@ class PartialLinearSensitivityAnalyzer:
         :param critical_label_color: color of threshold line label (default = red)
         :param unadjusted_estimate_marker: marker type for unadjusted estimate in the plot (default = 'D')
                                         See: https://matplotlib.org/stable/api/markers_api.html 
-        :parm unadjusted_estimate_color: marker color for unadjusted estimate in the plot (default = "black")
+        :param unadjusted_estimate_color: marker color for unadjusted estimate in the plot (default = "black")
         :param adjusted_estimate_marker: marker type for bias adjusted estimates in the plot (default = '^')
         :parm adjusted_estimate_color: marker color for bias adjusted estimates in the plot (default = "red")
         :param legend_position:tuple denoting the position of the legend (default = (1.6, 0.6))
@@ -474,7 +481,7 @@ class PartialLinearSensitivityAnalyzer:
             for j in range(len(r2tu_w)):
                 x = r2tu_w[j]
                 benchmarking_results = self.perform_benchmarking(
-                    r2yu_tw=y, r2tu_w=x)
+                    r2yu_tw=y, r2tu_w=x, significance_level=self.significance_level)
                 contour_values[i][j] = benchmarking_results[plot_type]
 
         contour_plot = ax.contour(r2tu_w, r2yu_tw, contour_values, colors=contours_color,

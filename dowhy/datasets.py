@@ -546,7 +546,10 @@ def dataset_from_random_graph(num_vars, num_samples=1000, prob_edge=0.3, random_
     }
     return ret_dict
 
-def partially_linear_dataset(beta, num_common_causes, num_samples=500,
+def partially_linear_dataset(beta, num_common_causes, 
+                             num_unobserved_common_causes=0,
+                             strength_unobserved_confounding=1,
+                             num_samples=500,
                              num_treatments=1,
                              treatment_is_binary=True,
                              treatment_is_category=False,
@@ -559,19 +562,13 @@ def partially_linear_dataset(beta, num_common_causes, num_samples=500,
                              training_sample_size=10,
                              random_state=0):
     assert not (treatment_is_binary and treatment_is_category)
+    num_outcomes = 1 
     beta = float(beta)
     # Making beta an array
     if type(beta) not in [list, np.ndarray]:
         beta = np.repeat(beta, num_treatments)
 
     num_cont_common_causes = num_common_causes-num_discrete_common_causes
-
-    hidden_layer_arch = (50, 50, 50)
-    neural_network = MLPRegressor(
-        random_state=random_state, hidden_layer_sizes=hidden_layer_arch)
-    x = np.random.randn(training_sample_size, num_common_causes)
-    y = np.random.randn(training_sample_size, num_treatments)
-    neural_network.fit(x, y)
 
     if num_common_causes > 0:
         range_c1 = 0.5 + max(abs(beta)) * 0.5
@@ -581,20 +578,52 @@ def partially_linear_dataset(beta, num_common_causes, num_samples=500,
         W_with_dummy = convert_to_categorical(W, num_common_causes, num_discrete_common_causes,
                 quantiles=[0.25, 0.5, 0.75], one_hot_encode=one_hot_encode)
         c1 = np.random.uniform(0, range_c1, (W_with_dummy.shape[1], num_treatments))
+        # assuming that all unobserved common causes are numerical and are not affected by one hot encoding
+        if num_unobserved_common_causes > 0:
+            c1[:num_unobserved_common_causes] = c1[:num_unobserved_common_causes] * strength_unobserved_confounding
+            for i in range(num_unobserved_common_causes, W_with_dummy.shape[1]):
+                c1[i] = c1[i] * strength_unobserved_confounding / (2**i) 
+
+    # Creating a NN to simulate the nuisance function
+    hidden_layer_arch = (50, 50, 50)
+    neural_network = MLPRegressor(
+        random_state=random_state, hidden_layer_sizes=hidden_layer_arch)
+    x = np.random.randn(training_sample_size, W_with_dummy.shape[1])
+    y = np.random.randn(training_sample_size, num_outcomes)
+    neural_network.fit(x, np.ravel(y))
 
     T = np.random.normal(0, stddev_treatment_noise, (num_samples, num_treatments))
     T += W_with_dummy @ c1
     if treatment_is_binary:
         T = np.vectorize(convert_to_binary)(x = T)
-    f_x = neural_network.predict(W)
-    Y = np.random.normal(0,stddev_outcome_noise, num_samples)
-    Y += T @ beta
-    Y += f_x
-    if outcome_is_binary:
-            Y = np.vectorize(convert_to_binary)(Y,stochastic_discretization)
+
+    # strength of unobserved confounding
+    strength_vec = np.ones(W_with_dummy.shape[1])
+    strength_vec[:num_unobserved_common_causes] = strength_vec[:num_unobserved_common_causes] * strength_unobserved_confounding
+    for i in range(num_unobserved_common_causes, W_with_dummy.shape[1]):
+        strength_vec[i] = strength_vec[i] * strength_unobserved_confounding / (2**i)
+
+    def _compute_y(T, W, beta, nn, stddev_outcome_noise):
+        f_x = nn.predict(W)
+        y = np.random.normal(0,stddev_outcome_noise, num_samples)
+        y += T @ beta
+        y += f_x
+        if outcome_is_binary:
+            y = np.vectorize(convert_to_binary)(y,stochastic_discretization)
+        return y
+    Y = _compute_y(T, W_with_dummy * strength_vec, beta, neural_network, stddev_outcome_noise)
+
     data = np.column_stack((T, Y))
     if num_common_causes > 0:
         data = np.column_stack((W_with_dummy, data))
+
+    # Computing ATE
+    T1 = np.ones((num_samples, num_treatments))
+    T0 = np.zeros((num_samples, num_treatments))
+    ate = np.mean(
+            _compute_y(T1, W_with_dummy, beta, neural_network, stddev_outcome_noise) -
+            _compute_y(T0, W_with_dummy, beta, neural_network, stddev_outcome_noise))
+
     treatments = [("v" + str(i)) for i in range(0, num_treatments)]
     outcome = "y"
     common_causes = construct_col_names("W", num_common_causes, num_discrete_common_causes,
@@ -621,6 +650,7 @@ def partially_linear_dataset(beta, num_common_causes, num_samples=500,
         "common_causes_names": common_causes,
         "dot_graph": dot_graph,
         "gml_graph": gml_graph,
+        "ate": ate
     }
     return ret_dict
 

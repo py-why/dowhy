@@ -132,7 +132,7 @@ def generate_moment_function(W, g):
     shape = (W.shape[0], 1)
     ones = np.ones(shape)
     zeros = np.zeros(shape)
-    non_treatment_data = W[:, 1:]
+    non_treatment_data = W[:, 1:] # assume that treatment is one-dimensional. 
     data_0 = np.hstack([zeros, non_treatment_data])  # data with treatment = 1
     data_1 = np.hstack([ones, non_treatment_data])  # data with treatment = 0
     return g(data_1) - g(data_0)
