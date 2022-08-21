@@ -118,3 +118,11 @@ Pull request checklist
    .. code:: shell
 
       git rebase --signoff HEAD^^^
+
+#. (advanced) Poetry fixes its dependecies and their version with a poetry.lock file. Poetry's dependencies should be updated regularly by maintainers via
+
+   .. code:: shell
+
+     poetry update
+
+   For most PRs, this is unnecessary. If a PR necessitates a lockfile change, we request that you provide a justification as to why a dependency update was necessary.
