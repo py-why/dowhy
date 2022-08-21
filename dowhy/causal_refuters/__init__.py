@@ -10,11 +10,10 @@ def get_class_object(method_name, *args, **kwargs):
         module_name = method_name
         class_name = string.capwords(method_name, "_").replace("_", "")
 
-        refuter_module = import_module('.' + module_name,
-                                       package="dowhy.causal_refuters")
+        refuter_module = import_module("." + module_name, package="dowhy.causal_refuters")
         refuter_class = getattr(refuter_module, class_name)
         assert issubclass(refuter_class, CausalRefuter)
 
     except (AttributeError, AssertionError, ImportError):
-        raise ImportError('{} is not an existing causal refuter.'.format(method_name))
+        raise ImportError("{} is not an existing causal refuter.".format(method_name))
     return refuter_class

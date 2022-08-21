@@ -1,4 +1,4 @@
-from typing import Callable, Optional, Any, Union, Dict
+from typing import Any, Callable, Dict, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -6,21 +6,23 @@ from numpy.matlib import repmat
 from tqdm import tqdm
 
 from dowhy.gcm import config
-from dowhy.gcm._noise import compute_noise_from_data, noise_samples_of_ancestors, get_noise_dependent_function
+from dowhy.gcm._noise import compute_noise_from_data, get_noise_dependent_function, noise_samples_of_ancestors
 from dowhy.gcm.anomaly_scorer import AnomalyScorer
 from dowhy.gcm.anomaly_scorers import MedianCDFQuantileScorer, RescaledMedianCDFQuantileScorer
-from dowhy.gcm.cms import ProbabilisticCausalModel, InvertibleStructuralCausalModel
+from dowhy.gcm.cms import InvertibleStructuralCausalModel, ProbabilisticCausalModel
 from dowhy.gcm.graph import ConditionalStochasticModel, get_ordered_predecessors, is_root_node, validate_causal_dag
 from dowhy.gcm.shapley import ShapleyConfig, estimate_shapley_values
 from dowhy.gcm.stats import permute_features
 from dowhy.gcm.util.general import shape_into_2d
 
 
-def conditional_anomaly_scores(parent_samples: np.ndarray,
-                               target_samples: np.ndarray,
-                               causal_mechanism: ConditionalStochasticModel,
-                               anomaly_scorer_factory: Callable[[], AnomalyScorer] = MedianCDFQuantileScorer,
-                               num_samples_conditional: int = 10000) -> np.ndarray:
+def conditional_anomaly_scores(
+    parent_samples: np.ndarray,
+    target_samples: np.ndarray,
+    causal_mechanism: ConditionalStochasticModel,
+    anomaly_scorer_factory: Callable[[], AnomalyScorer] = MedianCDFQuantileScorer,
+    num_samples_conditional: int = 10000,
+) -> np.ndarray:
     """Estimates the conditional anomaly scores based on the expected outcomes of the causal model.
 
     :param parent_samples: Samples from all parents of the target node.
@@ -45,20 +47,26 @@ def conditional_anomaly_scores(parent_samples: np.ndarray,
     return result
 
 
-def anomaly_scores(causal_model: ProbabilisticCausalModel,
-                   anomaly_data: pd.DataFrame,
-                   num_samples_conditional: int = 10000,
-                   num_samples_unconditional: int = 10000,
-                   anomaly_scorer_factory: Callable[[], AnomalyScorer] = RescaledMedianCDFQuantileScorer) \
-        -> Dict[Any, np.ndarray]:
+def anomaly_scores(
+    causal_model: ProbabilisticCausalModel,
+    anomaly_data: pd.DataFrame,
+    num_samples_conditional: int = 10000,
+    num_samples_unconditional: int = 10000,
+    anomaly_scorer_factory: Callable[[], AnomalyScorer] = RescaledMedianCDFQuantileScorer,
+) -> Dict[Any, np.ndarray]:
     if isinstance(anomaly_data, pd.Series):
         anomaly_data = pd.DataFrame([anomaly_data])
 
     validate_causal_dag(causal_model.graph)
 
     results = {}
-    for node in tqdm(causal_model.graph.nodes, desc='Estimating conditional anomaly scores', position=0, leave=True,
-                     disable=not config.show_progress_bars):
+    for node in tqdm(
+        causal_model.graph.nodes,
+        desc="Estimating conditional anomaly scores",
+        position=0,
+        leave=True,
+        disable=not config.show_progress_bars,
+    ):
 
         if is_root_node(causal_model.graph, node):
             anomaly_scorer = anomaly_scorer_factory()
@@ -67,22 +75,26 @@ def anomaly_scores(causal_model: ProbabilisticCausalModel,
         else:
             tmp_anomaly_parent_samples = anomaly_data[get_ordered_predecessors(causal_model.graph, node)].to_numpy()
             tmp_anomaly_target_samples = anomaly_data[node].to_numpy()
-            results[node] = conditional_anomaly_scores(tmp_anomaly_parent_samples,
-                                                       tmp_anomaly_target_samples,
-                                                       causal_model.causal_mechanism(node),
-                                                       anomaly_scorer_factory,
-                                                       num_samples_conditional)
+            results[node] = conditional_anomaly_scores(
+                tmp_anomaly_parent_samples,
+                tmp_anomaly_target_samples,
+                causal_model.causal_mechanism(node),
+                anomaly_scorer_factory,
+                num_samples_conditional,
+            )
 
     return results
 
 
-def attribute_anomalies(causal_model: InvertibleStructuralCausalModel,
-                        target_node: Any,
-                        anomaly_samples: pd.DataFrame,
-                        anomaly_scorer: Optional[AnomalyScorer] = None,
-                        attribute_mean_deviation: bool = False,
-                        num_distribution_samples: int = 5000,
-                        shapley_config: Optional[ShapleyConfig] = None) -> Dict[Any, np.ndarray]:
+def attribute_anomalies(
+    causal_model: InvertibleStructuralCausalModel,
+    target_node: Any,
+    anomaly_samples: pd.DataFrame,
+    anomaly_scorer: Optional[AnomalyScorer] = None,
+    attribute_mean_deviation: bool = False,
+    num_distribution_samples: int = 5000,
+    shapley_config: Optional[ShapleyConfig] = None,
+) -> Dict[Any, np.ndarray]:
     """Estimates the contributions of upstream nodes to the anomaly score of the target_node for each sample in
     anomaly_samples. By default, the anomaly score is based on the information theoretic (IT) score
     -log(P(g(X) >= g(x))), where g is the anomaly_scorer, X samples from the marginal
@@ -121,26 +133,28 @@ def attribute_anomalies(causal_model: InvertibleStructuralCausalModel,
         anomaly_scorer = MedianCDFQuantileScorer()
 
     noise_of_anomaly_samples = compute_noise_from_data(causal_model, anomaly_samples)
-    node_samples, noise_samples = noise_samples_of_ancestors(causal_model,
-                                                             target_node,
-                                                             num_distribution_samples)
+    node_samples, noise_samples = noise_samples_of_ancestors(causal_model, target_node, num_distribution_samples)
     noise_dependent_function, nodes_order = get_noise_dependent_function(causal_model, target_node)
     anomaly_scorer.fit(node_samples[target_node].to_numpy())
 
-    attributions = attribute_anomaly_scores(noise_of_anomaly_samples[nodes_order].to_numpy(),
-                                            noise_samples[nodes_order].to_numpy(),
-                                            lambda x: anomaly_scorer.score(noise_dependent_function(x)),
-                                            attribute_mean_deviation,
-                                            shapley_config)
+    attributions = attribute_anomaly_scores(
+        noise_of_anomaly_samples[nodes_order].to_numpy(),
+        noise_samples[nodes_order].to_numpy(),
+        lambda x: anomaly_scorer.score(noise_dependent_function(x)),
+        attribute_mean_deviation,
+        shapley_config,
+    )
 
     return {node: attributions[:, i] for i, node in enumerate(nodes_order)}
 
 
-def attribute_anomaly_scores(anomaly_samples: np.ndarray,
-                             distribution_samples: np.ndarray,
-                             anomaly_scoring_func: Callable[[np.ndarray], np.ndarray],
-                             attribute_mean_deviation: bool,
-                             shapley_config: Optional[ShapleyConfig] = None) -> np.ndarray:
+def attribute_anomaly_scores(
+    anomaly_samples: np.ndarray,
+    distribution_samples: np.ndarray,
+    anomaly_scoring_func: Callable[[np.ndarray], np.ndarray],
+    attribute_mean_deviation: bool,
+    shapley_config: Optional[ShapleyConfig] = None,
+) -> np.ndarray:
     """Estimates the contributions of the features for each sample in anomaly_samples to the anomaly score obtained
     by the anomaly_scoring_func. If attribute_mean_deviation is set to False, the anomaly score is based on the
     information theoretic (IT) score -log(P(g(X) >= g(x))), where g is the anomaly_scoring_func, X samples from the
@@ -185,8 +199,7 @@ def attribute_anomaly_scores(anomaly_samples: np.ndarray,
                 # Usual feature relevance using the mean deviation as set function, i.e. g(x) - E[g(X)]
                 result[i] = np.mean(anomaly_scoring_func(feature_samples)) - expectation_of_score
             else:
-                result[i] = np.log(_relative_frequency(anomaly_scoring_func(feature_samples)
-                                                       >= anomaly_scores[i]))
+                result[i] = np.log(_relative_frequency(anomaly_scoring_func(feature_samples) >= anomaly_scores[i]))
 
         return result
 

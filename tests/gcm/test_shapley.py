@@ -5,7 +5,7 @@ import pytest
 from flaky import flaky
 from pytest import approx
 
-from dowhy.gcm.shapley import estimate_shapley_values, ShapleyApproximationMethods, ShapleyConfig
+from dowhy.gcm.shapley import ShapleyApproximationMethods, ShapleyConfig, estimate_shapley_values
 from dowhy.gcm.stats import permute_features
 from dowhy.gcm.util.general import means_difference
 
@@ -22,12 +22,14 @@ def preserve_random_generator_state():
 def test_given_few_features_when_estimate_shapley_values_with_auto_approx_then_returns_correct_result():
     X, coefficients = _generate_data(4)
 
-    def model(x): return np.sum(coefficients * x, axis=1)
+    def model(x):
+        return np.sum(coefficients * x, axis=1)
 
     shapley_values = estimate_shapley_values(
         lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
         X.shape[1],
-        ShapleyConfig(approximation_method=ShapleyApproximationMethods.AUTO, n_jobs=1))
+        ShapleyConfig(approximation_method=ShapleyApproximationMethods.AUTO, n_jobs=1),
+    )
 
     assert coefficients * (X[0, :] - np.mean(X, axis=0)) == approx(shapley_values, abs=0.001)
 
@@ -35,12 +37,14 @@ def test_given_few_features_when_estimate_shapley_values_with_auto_approx_then_r
 def test_given_many_features_when_estimate_shapley_values_with_auto_approx_then_returns_correct_result():
     X, coefficients = _generate_data(15)
 
-    def model(x): return np.sum(coefficients * x, axis=1)
+    def model(x):
+        return np.sum(coefficients * x, axis=1)
 
     shapley_values = estimate_shapley_values(
         lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
         X.shape[1],
-        ShapleyConfig(approximation_method=ShapleyApproximationMethods.AUTO, n_jobs=1))
+        ShapleyConfig(approximation_method=ShapleyApproximationMethods.AUTO, n_jobs=1),
+    )
 
     assert coefficients * (X[0, :] - np.mean(X, axis=0)) == approx(shapley_values, abs=0.001)
 
@@ -48,12 +52,14 @@ def test_given_many_features_when_estimate_shapley_values_with_auto_approx_then_
 def test_estimate_shapley_values_symmetry_exact():
     X, coefficients = _generate_data(15)
 
-    def model(x): return np.sum(coefficients * x, axis=1)
+    def model(x):
+        return np.sum(coefficients * x, axis=1)
 
     shapley_values = estimate_shapley_values(
         lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
         X.shape[1],
-        ShapleyConfig(approximation_method=ShapleyApproximationMethods.EXACT, n_jobs=1))
+        ShapleyConfig(approximation_method=ShapleyApproximationMethods.EXACT, n_jobs=1),
+    )
 
     assert coefficients * (X[0, :] - np.mean(X, axis=0)) == approx(shapley_values, abs=0.001)
 
@@ -61,12 +67,14 @@ def test_estimate_shapley_values_symmetry_exact():
 def test_estimate_shapley_values_symmetry_exact_fast():
     X, coefficients = _generate_data(15)
 
-    def model(x): return np.sum(coefficients * x, axis=1)
+    def model(x):
+        return np.sum(coefficients * x, axis=1)
 
     shapley_values = estimate_shapley_values(
         lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
         X.shape[1],
-        ShapleyConfig(approximation_method=ShapleyApproximationMethods.EXACT_FAST, n_jobs=1))
+        ShapleyConfig(approximation_method=ShapleyApproximationMethods.EXACT_FAST, n_jobs=1),
+    )
 
     assert coefficients * (X[0, :] - np.mean(X, axis=0)) == approx(shapley_values, abs=0.001)
 
@@ -74,12 +82,14 @@ def test_estimate_shapley_values_symmetry_exact_fast():
 def test_estimate_shapley_values_symmetry_approximation_via_subset():
     X, coefficients = _generate_data(15)
 
-    def model(x): return np.sum(coefficients * x, axis=1)
+    def model(x):
+        return np.sum(coefficients * x, axis=1)
 
     shapley_values = estimate_shapley_values(
         lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
         X.shape[1],
-        ShapleyConfig(approximation_method=ShapleyApproximationMethods.SUBSET_SAMPLING))
+        ShapleyConfig(approximation_method=ShapleyApproximationMethods.SUBSET_SAMPLING),
+    )
 
     assert coefficients * (X[0, :] - np.mean(X, axis=0)) == approx(shapley_values, abs=0.001)
 
@@ -87,12 +97,14 @@ def test_estimate_shapley_values_symmetry_approximation_via_subset():
 def test_evaluate_set_function_via_shapley_symmetry_approximation_via_permutation():
     X, coefficients = _generate_data(15)
 
-    def model(x): return np.sum(coefficients * x, axis=1)
+    def model(x):
+        return np.sum(coefficients * x, axis=1)
 
     shapley_values = estimate_shapley_values(
         lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
         X.shape[1],
-        ShapleyConfig(approximation_method=ShapleyApproximationMethods.PERMUTATION))
+        ShapleyConfig(approximation_method=ShapleyApproximationMethods.PERMUTATION),
+    )
 
     assert coefficients * (X[0, :] - np.mean(X, axis=0)) == approx(shapley_values, abs=0.001)
 
@@ -100,12 +112,14 @@ def test_evaluate_set_function_via_shapley_symmetry_approximation_via_permutatio
 def test_estimate_shapley_values_symmetry_approximation_via_early_stopping():
     X, coefficients = _generate_data(15)
 
-    def model(x): return np.sum(coefficients * x, axis=1)
+    def model(x):
+        return np.sum(coefficients * x, axis=1)
 
     shapley_values = estimate_shapley_values(
         lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
         X.shape[1],
-        ShapleyConfig(approximation_method=ShapleyApproximationMethods.EARLY_STOPPING))
+        ShapleyConfig(approximation_method=ShapleyApproximationMethods.EARLY_STOPPING),
+    )
 
     assert coefficients * (X[0, :] - np.mean(X, axis=0)) == approx(shapley_values, abs=0.001)
 
@@ -113,88 +127,94 @@ def test_estimate_shapley_values_symmetry_approximation_via_early_stopping():
 def test_estimate_shapley_values_symmetry_approximation_via_subset_with_random_seed(preserve_random_generator_state):
     X, coefficients = _generate_data(15)
 
-    def model(x): return np.sum(coefficients * x, axis=1)
+    def model(x):
+        return np.sum(coefficients * x, axis=1)
 
     shapley_config = ShapleyConfig(approximation_method=ShapleyApproximationMethods.SUBSET_SAMPLING)
     assert estimate_shapley_values(
-        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
-        X.shape[1],
-        shapley_config) != approx(estimate_shapley_values(
-        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
-        X.shape[1],
-        shapley_config), abs=0)
+        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model), X.shape[1], shapley_config
+    ) != approx(
+        estimate_shapley_values(
+            lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
+            X.shape[1],
+            shapley_config,
+        ),
+        abs=0,
+    )
 
     np.random.seed(0)
     shapley_values_1 = estimate_shapley_values(
-        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
-        X.shape[1],
-        shapley_config)
+        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model), X.shape[1], shapley_config
+    )
     np.random.seed(0)
     shapley_values_2 = estimate_shapley_values(
-        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
-        X.shape[1],
-        shapley_config)
+        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model), X.shape[1], shapley_config
+    )
 
     assert shapley_values_1 == approx(shapley_values_2, abs=0)
 
 
 @flaky(max_runs=2)
 def test_estimate_shapley_values_symmetry_approximation_via_permutation_with_random_seed(
-        preserve_random_generator_state):
+    preserve_random_generator_state,
+):
     X, coefficients = _generate_data(15)
 
-    def model(x): return np.sum(coefficients * x, axis=1)
+    def model(x):
+        return np.sum(coefficients * x, axis=1)
 
     shapley_config = ShapleyConfig(approximation_method=ShapleyApproximationMethods.PERMUTATION)
     assert estimate_shapley_values(
-        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
-        X.shape[1],
-        shapley_config) != approx(
+        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model), X.shape[1], shapley_config
+    ) != approx(
         estimate_shapley_values(
             lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
             X.shape[1],
-            shapley_config), abs=0)
+            shapley_config,
+        ),
+        abs=0,
+    )
 
     np.random.seed(0)
     shapley_values_1 = estimate_shapley_values(
-        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
-        X.shape[1],
-        shapley_config)
+        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model), X.shape[1], shapley_config
+    )
     np.random.seed(0)
     shapley_values_2 = estimate_shapley_values(
-        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
-        X.shape[1],
-        shapley_config)
+        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model), X.shape[1], shapley_config
+    )
 
     assert shapley_values_1 == approx(shapley_values_2, abs=0)
 
 
 def test_estimate_shapley_values_symmetry_approximation_via_early_stopping_with_random_seed(
-        preserve_random_generator_state):
+    preserve_random_generator_state,
+):
     X, coefficients = _generate_data(15)
 
-    def model(x): return np.sum(coefficients * x, axis=1)
+    def model(x):
+        return np.sum(coefficients * x, axis=1)
 
     shapley_config = ShapleyConfig(approximation_method=ShapleyApproximationMethods.EARLY_STOPPING)
     assert estimate_shapley_values(
-        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
-        X.shape[1],
-        shapley_config) != approx(
+        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model), X.shape[1], shapley_config
+    ) != approx(
         estimate_shapley_values(
             lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
             X.shape[1],
-            shapley_config), abs=0)
+            shapley_config,
+        ),
+        abs=0,
+    )
 
     np.random.seed(0)
     shapley_values_1 = estimate_shapley_values(
-        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
-        X.shape[1],
-        shapley_config)
+        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model), X.shape[1], shapley_config
+    )
     np.random.seed(0)
     shapley_values_2 = estimate_shapley_values(
-        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model),
-        X.shape[1],
-        shapley_config)
+        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model), X.shape[1], shapley_config
+    )
 
     assert shapley_values_1 == approx(shapley_values_2, abs=0)
 

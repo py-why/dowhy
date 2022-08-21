@@ -18,8 +18,7 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
 
     """
 
-    def __init__(self, *args, rd_variable_name=None,
-            rd_threshold_value=None, rd_bandwidth=None, **kwargs):
+    def __init__(self, *args, rd_variable_name=None, rd_threshold_value=None, rd_bandwidth=None, **kwargs):
         """
         :param rd_variable_name: Name of the variable on which the
             discontinuity occurs. This is the instrument.
@@ -31,8 +30,7 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
         """
         # Required to ensure that self.method_params contains all the information
         # to create an object of this class
-        args_dict = {k: v for k, v in locals().items()
-                     if k not in type(self)._STD_INIT_ARGS}
+        args_dict = {k: v for k, v in locals().items() if k not in type(self)._STD_INIT_ARGS}
         args_dict.update(kwargs)
         super().__init__(*args, **args_dict)
         self.logger.info("Using Regression Discontinuity Estimator")
@@ -49,21 +47,25 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
         lower_limit = self.rd_threshold_value - self.rd_bandwidth
         rows_filter = np.s_[(self.rd_variable >= lower_limit) & (self.rd_variable <= upper_limit)]
         local_rd_variable = self.rd_variable[rows_filter]
-        local_treatment_variable = self._treatment[self._treatment_name[0]][rows_filter] # indexing by treatment name again since this method assumes a single-dimensional treatment
+        local_treatment_variable = self._treatment[self._treatment_name[0]][
+            rows_filter
+        ]  # indexing by treatment name again since this method assumes a single-dimensional treatment
         local_outcome_variable = self._outcome[rows_filter]
-        local_df = pd.DataFrame(data={
-            'local_rd_variable': local_rd_variable,
-            'local_treatment': local_treatment_variable,
-            'local_outcome': local_outcome_variable
-        })
+        local_df = pd.DataFrame(
+            data={
+                "local_rd_variable": local_rd_variable,
+                "local_treatment": local_treatment_variable,
+                "local_outcome": local_outcome_variable,
+            }
+        )
         print(local_df)
         iv_estimator = InstrumentalVariableEstimator(
             local_df,
             self._target_estimand,
-            ['local_treatment'],
-            ['local_outcome'],
+            ["local_treatment"],
+            ["local_outcome"],
             test_significance=self._significance_test,
-            iv_instrument_name='local_rd_variable'
+            iv_instrument_name="local_rd_variable",
         )
         est = iv_estimator.estimate_effect()
         return est

@@ -1,4 +1,4 @@
-from .kernel import kernel_based, approx_kernel_based
+from .kernel import approx_kernel_based, kernel_based
 from .regression import regression_based
 
 

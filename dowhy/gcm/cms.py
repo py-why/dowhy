@@ -3,12 +3,19 @@
 Classes in this module should be considered experimental, meaning there might be breaking API changes in the future.
 """
 
-from typing import Optional, Any, Union, Callable
+from typing import Any, Callable, Optional, Union
 
 import networkx as nx
 
-from dowhy.gcm.graph import DirectedGraph, StochasticModel, ConditionalStochasticModel, FunctionalCausalModel, \
-    CAUSAL_MECHANISM, InvertibleFunctionalCausalModel, clone_causal_models
+from dowhy.gcm.graph import (
+    CAUSAL_MECHANISM,
+    ConditionalStochasticModel,
+    DirectedGraph,
+    FunctionalCausalModel,
+    InvertibleFunctionalCausalModel,
+    StochasticModel,
+    clone_causal_models,
+)
 
 
 class ProbabilisticCausalModel:
@@ -16,9 +23,9 @@ class ProbabilisticCausalModel:
     causal relationships and corresponding causal mechanism for each node describing the data generation process. The
     causal mechanisms can be any general stochastic models."""
 
-    def __init__(self,
-                 graph: Optional[DirectedGraph] = None,
-                 graph_copier: Callable[[DirectedGraph], DirectedGraph] = nx.DiGraph):
+    def __init__(
+        self, graph: Optional[DirectedGraph] = None, graph_copier: Callable[[DirectedGraph], DirectedGraph] = nx.DiGraph
+    ):
         """
         :param graph: Optional graph object to be used as causal graph.
         :param graph_copier: Optional function that can copy a causal graph. Defaults to a networkx.DiGraph
@@ -79,8 +86,9 @@ class InvertibleStructuralCausalModel(StructuralCausalModel):
     such as :class:`~dowhy.gcm.fcms.PostNonlinearModel`.
     """
 
-    def set_causal_mechanism(self, target_node: Any,
-                             mechanism: Union[StochasticModel, InvertibleFunctionalCausalModel]) -> None:
+    def set_causal_mechanism(
+        self, target_node: Any, mechanism: Union[StochasticModel, InvertibleFunctionalCausalModel]
+    ) -> None:
         super().set_causal_mechanism(target_node, mechanism)
 
     def causal_mechanism(self, node: Any) -> Union[StochasticModel, InvertibleFunctionalCausalModel]:

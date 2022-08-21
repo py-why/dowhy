@@ -7,4 +7,4 @@ def parse_state(state):
         return [xi for xi in state.keys()]
     if not state:
         return []
-    raise Exception('Input format for {} not recognized: {}'.format(state, type(state)))
+    raise Exception("Input format for {} not recognized: {}".format(state, type(state)))

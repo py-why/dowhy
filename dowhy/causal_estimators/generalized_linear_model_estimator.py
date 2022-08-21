@@ -1,5 +1,6 @@
-import statsmodels.api as sm
 import itertools
+
+import statsmodels.api as sm
 
 from dowhy.causal_estimators.regression_estimator import RegressionEstimator
 
@@ -25,19 +26,20 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
         """
         # Required to ensure that self.method_params contains all the
         # parameters needed to create an object of this class
-        args_dict = {k: v for k, v in locals().items()
-                     if k not in type(self)._STD_INIT_ARGS}
+        args_dict = {k: v for k, v in locals().items() if k not in type(self)._STD_INIT_ARGS}
         args_dict.update(kwargs)
         super().__init__(*args, **args_dict)
         self.logger.info("INFO: Using Generalized Linear Model Estimator")
         if glm_family is not None:
             self.family = glm_family
         else:
-            raise ValueError("Need to specify the family for the generalized linear model. Provide a 'glm_family' parameter in method_params, such as statsmodels.api.families.Binomial() for logistic regression.")
+            raise ValueError(
+                "Need to specify the family for the generalized linear model. Provide a 'glm_family' parameter in method_params, such as statsmodels.api.families.Binomial() for logistic regression."
+            )
         self.predict_score = predict_score
         # Checking if Y is binary
         outcome_values = self._data[self._outcome_name].astype(int).unique()
-        self.outcome_is_binary = all([v in [0,1] for v in outcome_values])
+        self.outcome_is_binary = all([v in [0, 1] for v in outcome_values])
 
     def _build_model(self):
         features = self._build_features()
@@ -58,7 +60,10 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
         var_list = estimand.treatment_variable + estimand.get_backdoor_variables()
         expr += "+".join(var_list)
         if self._effect_modifier_names:
-            interaction_terms = ["{0}*{1}".format(x[0], x[1]) for x in itertools.product(estimand.treatment_variable, self._effect_modifier_names)]
+            interaction_terms = [
+                "{0}*{1}".format(x[0], x[1])
+                for x in itertools.product(estimand.treatment_variable, self._effect_modifier_names)
+            ]
             expr += "+" + "+".join(interaction_terms)
         expr += ")"
         return expr
