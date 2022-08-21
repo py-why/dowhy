@@ -57,6 +57,20 @@ Pull request checklist
 
      poetry run poe lint
 
+#. Make sure the newly added code complies with the format requirements of `black <https://black.readthedocs.io/en/stable/>`_ and
+   `isort <https://pycqa.github.io/isort/>`_.
+
+   .. code:: shell
+
+     poetry run poe format
+
+   You can use following commands to fix formatting automatically
+
+   .. code:: shell
+
+     poetry run black
+     poetry run isort
+
 #. Add tests for your new code and execute the unittests to make sure
    you did not introduce any breaking changes or bugs.
 
