@@ -14,6 +14,7 @@ from dowhy.causal_refuter import CausalRefutation
 from dowhy.causal_refuter import CausalRefuter
 from dowhy.causal_estimator import CausalEstimator
 from dowhy.causal_refuters.linear_sensitivity_analyzer import LinearSensitivityAnalyzer
+from dowhy.causal_refuters.evalue_sensitivity_analyzer import EValueSensitivityAnalyzer
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 
 class AddUnobservedCommonCause(CausalRefuter):
@@ -206,6 +207,15 @@ class AddUnobservedCommonCause(CausalRefuter):
             
             analyzer.check_sensitivity(plot = self.plot_estimate)
             return analyzer
+
+        if self.simulated_method_name == "e-value":
+            analyzer = EValueSensitivityAnalyzer(
+                estimate=self._estimate,
+                outcome_var=self._data[self._outcome_name[0]]
+            )
+            analyzer.check_sensitivity()
+            return analyzer
+
         if self.kappa_t is None:
             self.kappa_t = self.infer_default_kappa_t()
         if self.kappa_y is None:

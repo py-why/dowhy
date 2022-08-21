@@ -3,6 +3,7 @@ import numpy as np
 from unittest.mock import patch
 import dowhy.datasets
 from dowhy import CausalModel
+from dowhy.causal_refuters.evalue_sensitivity_analyzer import EValueSensitivityAnalyzer
 from .base import TestRefuter
 
 @pytest.mark.usefixtures("fixed_seed")
@@ -207,3 +208,108 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert refute2.stats['robustness_value'] >= rvalue_threshold and refute2.stats['robustness_value'] <= 1 
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
     
+    def test_evalue(self):
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=5,
+            num_samples=1000,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"]
+        )
+        identified_estimand = model.identify_effect()
+        estimate = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.linear_regression"
+        ) 
+        outcome_vals = data["df"][data["outcome_name"]]
+        analyzer = EValueSensitivityAnalyzer(estimate, outcome_vals)
+
+        # comparing test examples from R E-Value package
+        analyzer._evalue_OLS(0.293, 0.196, 17.405)
+        assert analyzer.stats["converted_estimate"].round(3) == 1.015
+        assert analyzer.stats["converted_lower_ci"].round(3) == 0.995
+        assert analyzer.stats["converted_upper_ci"].round(3) == 1.036
+        assert analyzer.stats["evalue_estimate"].round(3) == 1.141
+        assert analyzer.stats["evalue_lower_ci"].round(3) == 1.000
+        assert analyzer.stats["evalue_upper_ci"] is None
+
+        analyzer._evalue_MD(0.5, 0.25)
+        assert analyzer.stats["converted_estimate"].round(3) == 1.576
+        assert analyzer.stats["converted_lower_ci"].round(3) == 1.010
+        assert analyzer.stats["converted_upper_ci"].round(3) == 2.460
+        assert analyzer.stats["evalue_estimate"].round(3) == 2.529
+        assert analyzer.stats["evalue_lower_ci"].round(3) == 1.111
+        assert analyzer.stats["evalue_upper_ci"] is None
+
+        analyzer._evalue_HR(0.56, 0.46, 0.69, rare = False)
+        assert analyzer.stats["converted_estimate"].round(3) == 0.670
+        assert analyzer.stats["converted_lower_ci"].round(3) == 0.586
+        assert analyzer.stats["converted_upper_ci"].round(3) == 0.774
+        assert analyzer.stats["evalue_estimate"].round(3) == 2.350
+        assert analyzer.stats["evalue_lower_ci"] == None
+        assert analyzer.stats["evalue_upper_ci"].round(3) == 1.908
+
+        analyzer._evalue_OR(0.86, 0.75, 0.99, rare = False)
+        assert analyzer.stats["converted_estimate"].round(3) == 0.927
+        assert analyzer.stats["converted_lower_ci"].round(3) == 0.866
+        assert analyzer.stats["converted_upper_ci"].round(3) == 0.995
+        assert analyzer.stats["evalue_estimate"].round(3) == 1.369
+        assert analyzer.stats["evalue_lower_ci"] == None
+        assert analyzer.stats["evalue_upper_ci"].round(3) == 1.076
+
+        analyzer._evalue_RR(0.8, 0.71, 0.91)
+        assert analyzer.stats["converted_estimate"] == 0.8
+        assert analyzer.stats["converted_lower_ci"] == 0.71
+        assert analyzer.stats["converted_upper_ci"] == 0.91
+        assert analyzer.stats["evalue_estimate"].round(3) == 1.809
+        assert analyzer.stats["evalue_lower_ci"] == None
+        assert analyzer.stats["evalue_upper_ci"].round(3) == 1.429
+    
+    @pytest.mark.parametrize("estimator_method", [
+        ("backdoor.linear_regression"), 
+        ("backdoor.propensity_score_matching"),
+        ("backdoor.propensity_score_weighting"),
+        ("backdoor.distance_matching")
+    ])
+    def test_evalue_sensitivity_analyzer(self, estimator_method):
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=5,
+            num_samples=1000,
+            treatment_is_binary=True,
+            stddev_outcome_noise=5
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"]
+        )
+        identified_estimand = model.identify_effect()
+        estimate = model.estimate_effect(
+            identified_estimand,
+            method_name=estimator_method
+        ) 
+        refute = model.refute_estimate(
+            identified_estimand,
+            estimate,
+            method_name="add_unobserved_common_cause",
+            simulated_method_name="e-value"
+        )
+
+        if estimate.value > 0:
+            assert refute.stats["evalue_upper_ci"] is None
+            assert refute.stats["evalue_lower_ci"] < refute.stats["evalue_estimate"]
+        if estimate.value < 0:
+            assert refute.stats["evalue_lower_ci"] is None
+            assert refute.stats["evalue_upper_ci"] > refute.stats["evalue_estimate"]
+
+
+        
+
+            
