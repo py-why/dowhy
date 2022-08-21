@@ -75,7 +75,7 @@ class InstrumentalVariableEstimator(CausalEstimator):
             est_outcome = self._outcome.astype(np.float32)
             ivmodel = IV2SLS(est_outcome, est_treatment, self._estimating_instruments)
             reg_results = ivmodel.fit()
-            print(reg_results.summary())
+            self.logger.debug(reg_results.summary())
             iv_est = sum(
                 reg_results.params
             )  # the effect is the same for any treatment value (assume treatment goes from 0 to 1)

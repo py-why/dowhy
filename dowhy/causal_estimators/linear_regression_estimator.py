@@ -23,8 +23,8 @@ class LinearRegressionEstimator(RegressionEstimator):
         # parameters to create an object of this class
         args_dict = {k: v for k, v in locals().items() if k not in type(self)._STD_INIT_ARGS}
         args_dict.update(kwargs)
-        print(args_dict)
         super().__init__(*args, **args_dict)
+        self.logger.debug(args_dict)
         self.logger.info("INFO: Using Linear Regression Estimator")
         self._linear_model = self.model
 

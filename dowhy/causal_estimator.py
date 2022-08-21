@@ -620,7 +620,7 @@ class CausalEstimator:
             raise NotImplementedError("This method is not supported for evaluating effect strength")
         if method == "fraction-effect":
             naive_obs_estimate = self.estimate_effect_naive()
-            print(estimate.value, naive_obs_estimate.value)
+            self.logger.debug(estimate.value, naive_obs_estimate.value)
             fraction_effect_explained = estimate.value / naive_obs_estimate.value
             return fraction_effect_explained
         # elif method == "r-squared":
