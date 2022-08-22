@@ -237,16 +237,18 @@ class AddUnobservedCommonCause(CausalRefuter):
                     analyzer.check_sensitivity(plot = self.plot_estimate)
                     return analyzer
             
-            analyzer = NonParametricSensitivityAnalyzer(estimator = self._estimate.estimator,
-            observed_common_causes = self._estimate.estimator._observed_common_causes, 
-            treatment = self._estimate.estimator._treatment, outcome = self._estimate.estimator._outcome, 
-            alpha_s_param_dict = self.alpha_s_param_dict,
-            g_s_estimator_list = self.g_s_estimator_list,
-            g_s_estimator_param_list = self.g_s_estimator_param_list,
-            benchmark_common_causes= self.benchmark_common_causes,
-            frac_strength_treatment = self.frac_strength_treatment, 
-            frac_strength_outcome = self.frac_strength_outcome,
-            theta_s = self._estimate.value
+            analyzer = NonParametricSensitivityAnalyzer(
+                estimator=self._estimate.estimator,
+                observed_common_causes = self._estimate.estimator._observed_common_causes, 
+                treatment = self._estimate.estimator._treatment, outcome = self._estimate.estimator._outcome, 
+                alpha_s_param_dict = self.alpha_s_param_dict,
+                g_s_estimator_list = self.g_s_estimator_list,
+                g_s_estimator_param_list = self.g_s_estimator_param_list,
+                benchmark_common_causes= self.benchmark_common_causes,
+                frac_strength_treatment = self.frac_strength_treatment, 
+                frac_strength_outcome = self.frac_strength_outcome,
+                theta_s = self._estimate.value,
+                max_frac_inc_reisz=0.99 # TODO make this consistent with effect_strength_treatment
             )
             analyzer.check_sensitivity(plot = self.plot_estimate)
             return analyzer

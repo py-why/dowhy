@@ -26,8 +26,6 @@ class PartialLinearSensitivityAnalyzer:
     :param num_splits: number of splits for cross validation. (default = 5)
     :param shuffle_data : shuffle data or not before splitting into folds (default = False)
     :param shuffle_random_seed: seed for randomly shuffling data
-    :param r2yu_tw: proportion of residual variance in the outcome explained by confounders
-    :param r2tu_w: proportion of residual variance in the treatment explained by confounders
     :param benchmark_common_causes: names of variables for bounding strength of confounders
     :param significance_level: confidence interval for statistical inference(default = 0.05)
     :param frac_strength_treatment: strength of association between unobserved confounder and treatment compared to benchmark covariate
@@ -43,7 +41,7 @@ class PartialLinearSensitivityAnalyzer:
 
     def __init__(self, estimator=None, num_splits=5, shuffle_data=False,
                  shuffle_random_seed=None,  reisz_polynomial_max_degree=3,
-                 r2yu_tw=0.04, r2tu_w=0.03, significance_level=0.05, benchmark_common_causes=None,
+                 significance_level=0.05, benchmark_common_causes=None,
                  frac_strength_treatment=None, frac_strength_outcome=None,
                  observed_common_causes=None, treatment=None, outcome=None,
                  g_s_estimator_list=None, alpha_s_param_dict=None, g_s_estimator_param_list=None , **kwargs):
@@ -55,8 +53,6 @@ class PartialLinearSensitivityAnalyzer:
         self.g_s_estimator_list = g_s_estimator_list
         self.g_s_estimator_param_list = g_s_estimator_param_list
         self.alpha_s_param_dict = alpha_s_param_dict
-        self.r2yu_tw = r2yu_tw
-        self.r2tu_w = r2tu_w
         self.significance_level = significance_level
         self.observed_common_causes = observed_common_causes
         self.treatment = treatment
@@ -64,6 +60,9 @@ class PartialLinearSensitivityAnalyzer:
         self.benchmark_common_causes = benchmark_common_causes
         self.frac_strength_outcome = frac_strength_outcome
         self.frac_strength_treatment = frac_strength_treatment
+
+        # whether the DGP is assumed to be partially linear
+        self.is_partial_linear = True
 
         self.RV = None
         self.RV_alpha = None
@@ -163,7 +162,7 @@ class PartialLinearSensitivityAnalyzer:
 
         return lower_confidence_bound, upper_confidence_bound, bias
 
-    def calculate_robustness_value(self, alpha):
+    def calculate_robustness_value(self, alpha, is_partial_linear):
         """
         Function to compute the robustness value of estimate against the confounders
         :param alpha: confidence interval for statistical inference
@@ -172,7 +171,8 @@ class PartialLinearSensitivityAnalyzer:
         """
         for t_val in np.arange(0, 1, 0.01):
             lower_confidence_bound, _, _ = self.get_confidence_levels(
-                r2yu_tw=t_val, r2tu_w=t_val, significance_level=alpha)
+                r2yu_tw=t_val, r2tu_w=t_val, significance_level=alpha, 
+                is_partial_linear=is_partial_linear)
             if lower_confidence_bound <= 0:
                 return t_val
         return t_val
@@ -387,7 +387,7 @@ class PartialLinearSensitivityAnalyzer:
         delta_r2_y_wj, delta_r2t_wj = self.compute_r2diff_benchmarking_covariates(
                 treatment_df, features, T, Y, W, self.benchmark_common_causes,
                 split_indices=split_indices, second_stage_linear=False,
-                is_partial_linear=True)
+                is_partial_linear=self.is_partial_linear)
 
         # Partial R^2 of outcome after regressing over unobserved confounder, observed common causes and treatment
         delta_r2y_u = self.frac_strength_outcome * delta_r2_y_wj 
@@ -409,19 +409,22 @@ class PartialLinearSensitivityAnalyzer:
 
         benchmarking_results = self.perform_benchmarking(
             r2yu_tw=self.r2yu_tw, r2tu_w=self.r2tu_w, 
-            significance_level=self.significance_level)
+            significance_level=self.significance_level,
+            is_partial_linear=self.is_partial_linear)
         self.results = pd.DataFrame(benchmarking_results, index=[0])
 
-        self.RV = self.calculate_robustness_value(alpha=None)
+        self.RV = self.calculate_robustness_value(
+                alpha=None, is_partial_linear=self.is_partial_linear)
         self.RV_alpha = self.calculate_robustness_value(
-            alpha=self.significance_level)
+            alpha=self.significance_level,
+            is_partial_linear=self.is_partial_linear)
 
         if plot == True:
-            self.plot()
+            self.plot(x_limit=0.99) # because Calpha2 contains a partial R2 bounded by 1
 
         return self
 
-    def plot(self, plot_type="lower_confidence_bound", x_limit=0.8, y_limit=0.8,
+    def plot(self, plot_type="lower_confidence_bound", x_limit=0.99, y_limit=0.99,
              num_points_per_contour=30, plot_size=(7, 7), contours_color="blue", critical_contour_color="red",
              label_fontsize=9, contour_linewidths=0.75, contour_linestyles="solid",
              contours_label_color="black", critical_label_color="red",
@@ -436,8 +439,8 @@ class PartialLinearSensitivityAnalyzer:
         We also plot bounds on the partial R^2 of the unobserved confounders obtained from observed covariates
 
         :param plot_type: possible values are 'bias','lower_ate_bound','upper_ate_bound','lower_confidence_bound','upper_confidence_bound'
-        :param x_limit: plot's maximum x_axis value (default = 0.8)
-        :param y_limit: plot's minimum y_axis value (default = 0.8)
+        :param x_limit: plot's maximum x_axis value (default = 0.99)
+        :param y_limit: plot's minimum y_axis value (default = 0.99)
         :param num_points_per_contour: number of points to calculate and plot each contour line (default = 200)
         :param plot_size: tuple denoting the size of the plot (default = (7,7))
         :param contours_color: color of contour line (default = blue)
@@ -463,9 +466,6 @@ class PartialLinearSensitivityAnalyzer:
         ax.set_xlabel("Partial R^2 of confounder with treatment")
         ax.set_ylabel("Partial R^2 of confounder with outcome")
 
-        if(self.r2tu_w > 0.8 or self.r2yu_tw > 0.8):
-            x_limit = 0.99
-            y_limit = 0.99
 
         ax.set_xlim(-x_limit/20, x_limit)
         ax.set_ylim(-y_limit/20, y_limit)
@@ -481,7 +481,8 @@ class PartialLinearSensitivityAnalyzer:
             for j in range(len(r2tu_w)):
                 x = r2tu_w[j]
                 benchmarking_results = self.perform_benchmarking(
-                    r2yu_tw=y, r2tu_w=x, significance_level=self.significance_level)
+                    r2yu_tw=y, r2tu_w=x, significance_level=self.significance_level,
+                    is_partial_linear=self.is_partial_linear)
                 contour_values[i][j] = benchmarking_results[plot_type]
 
         contour_plot = ax.contour(r2tu_w, r2yu_tw, contour_values, colors=contours_color,
@@ -518,13 +519,10 @@ class PartialLinearSensitivityAnalyzer:
     
     def __str__(self):
         s = "Sensitivity Analysis to Unobserved Confounding using R^2 paramterization\n\n"
-        s += "Coefficient Estimate : {0}\n".format(self.theta_s)
-        s += "Sensitivity Statistics : \n"
-        s += "Partial R2 of outcome regressing over treatment and observed common causes : {0}\n".format(self.r2y_tw)
+        s += "Original Effect Estimate : {0}\n".format(self.theta_s)
         s += "Robustness Value : {0}\n\n".format(self.RV)
+        s += "Robustness Value (alpha={0}) : {1}\n\n".format(self.significance_level, self.RV_alpha)
         s += "Interpretation of results :\n"
         s += "Any confounder explaining less than {0}% percent of the residual variance of both the treatment and the outcome would not be strong enough to explain away the observed effect i.e bring down the estimate to 0 \n\n".format(round(self.RV* 100, 2))
         s += "For a significance level of {0}%, any confounder explaining more than {1}% percent of the residual variance of both the treatment and the outcome would be strong enough to make the estimated effect not 'statistically significant'\n\n".format(self.significance_level*100,round(self.RV_alpha * 100, 2))
-        s += "Proportion of residual variance in the outcome explained by confounders is {0}% percent\n".format(round(self.r2yu_tw* 100, 2))
-        s += "Proportion of residual variance in the treatment explained by confounders is {0}% percent\n".format(round(self.r2tu_w* 100, 2))
         return s

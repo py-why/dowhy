@@ -38,8 +38,7 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
     :param num_splits: number of splits for cross validation. (default = 5)
     :param shuffle_data : shuffle data or not before splitting into folds (default = False)
     :param shuffle_random_seed: seed for randomly shuffling data
-    :param r2yu_tw: proportion of residual variance in the outcome explained by confounders
-    :param r2tu_w: proportion of residual variance in the treatment explained by confounders
+    :param max_frac_inc_reisz: proportion of residual variance in the treatment explained by confounders
     :param benchmark_common_causes: names of variables for bounding strength of confounders
     :param significance_level: confidence interval for statistical inference(default = 0.05)
     :param frac_strength_treatment: strength of association between unobserved confounder and treatment compared to benchmark covariate
@@ -55,9 +54,14 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
     
     """
 
-    def __init__(self, *args, theta_s, **kwargs):
+    def __init__(self, *args, theta_s, 
+            max_frac_inc_reisz = 0.99, **kwargs):
         super().__init__(*args, **kwargs)
         self.theta_s = theta_s
+        self.max_frac_inc_reisz = max_frac_inc_reisz
+        
+        # whether the DGP is assumed to be partially linear
+        self.is_partial_linear = False
 
         self.moment_function = None    
         self.alpha_s = None
@@ -154,16 +158,12 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
 
         delta_r2_y_wj, var_alpha_wj = self.compute_r2diff_benchmarking_covariates(
             treatment_df, features, T, Y, W, self.benchmark_common_causes,
-            split_indices=split_indices, is_partial_linear=False)
+            split_indices=split_indices, is_partial_linear=self.is_partial_linear)
 
         # Partial R^2 of outcome after regressing over unobserved confounder, observed common causes and treatment
         delta_r2y_u = self.frac_strength_outcome * delta_r2_y_wj
         # The difference in R2 is the same for wj and new unobserved confounder 
-        c_alpha = self.frac_strength_treatment * (np.var(self.alpha_s)/var_alpha_wj - 1)#self.frac_strength_treatment * delta_r2t_wj
-        
-
-        if r2y_uwt >=1:
-            raise ValueError("r2y_uwt can not be >= 1. Try a lower effect_fraction_on_outcome value")
+        c2_alpha = self.frac_strength_treatment * (np.var(self.alpha_s)/var_alpha_wj - 1)#self.frac_strength_treatment * delta_r2t_wj
 
         self.r2yu_tw = abs(delta_r2y_u / (1 - self.r2y_tw))
         self.r2tu_w = c2_alpha
@@ -174,15 +174,15 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
         benchmarking_results = self.perform_benchmarking(
             r2yu_tw=self.r2yu_tw, r2tu_w=self.r2tu_w,
             significance_level=self.significance_level,
-            is_partial_linear=False)
+            is_partial_linear=self.is_partial_linear)
         self.results = pd.DataFrame(benchmarking_results, index=[0])
 
-        self.RV = self.calculate_robustness_value(alpha=None)
+        self.RV = self.calculate_robustness_value(alpha=None, is_partial_linear=self.is_partial_linear)
         self.RV_alpha = self.calculate_robustness_value(
-            alpha=self.significance_level)
-
+            alpha=self.significance_level,
+            is_partial_linear=self.is_partial_linear)
         if plot == True:
-            self.plot()
+            self.plot(x_limit=self.max_frac_inc_reisz)
 
         return self
 
