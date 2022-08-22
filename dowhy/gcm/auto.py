@@ -1,60 +1,84 @@
 import warnings
 from enum import Enum, auto
 from functools import partial
-from typing import Union, List, Callable, Optional
+from typing import Callable, List, Optional, Union
 
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
 from sklearn import metrics
 from sklearn.exceptions import ConvergenceWarning
-from sklearn.linear_model import LogisticRegression, LinearRegression
-from sklearn.model_selection import train_test_split, KFold
+from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.model_selection import KFold, train_test_split
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from dowhy.gcm.cms import ProbabilisticCausalModel
-from dowhy.gcm.fcms import ClassificationModel, PredictionModel, ClassifierFCM, AdditiveNoiseModel
-from dowhy.gcm.graph import is_root_node, get_ordered_predecessors, validate_causal_model_assignment, \
-    CAUSAL_MECHANISM
-from dowhy.gcm.ml import create_logistic_regression_classifier, create_hist_gradient_boost_classifier, \
-    create_linear_regressor, create_hist_gradient_boost_regressor, create_ridge_regressor, create_lasso_regressor, \
-    create_elastic_net_regressor, create_support_vector_regressor, create_random_forest_regressor
-from dowhy.gcm.ml.classification import create_extra_trees_classifier, create_random_forest_classifier, \
-    create_support_vector_classifier, create_knn_classifier, create_gaussian_nb_classifier, create_ada_boost_classifier
-from dowhy.gcm.ml.regression import create_extra_trees_regressor, create_knn_regressor, create_ada_boost_regressor
+from dowhy.gcm.fcms import AdditiveNoiseModel, ClassificationModel, ClassifierFCM, PredictionModel
+from dowhy.gcm.graph import CAUSAL_MECHANISM, get_ordered_predecessors, is_root_node, validate_causal_model_assignment
+from dowhy.gcm.ml import (
+    create_elastic_net_regressor,
+    create_hist_gradient_boost_classifier,
+    create_hist_gradient_boost_regressor,
+    create_lasso_regressor,
+    create_linear_regressor,
+    create_logistic_regression_classifier,
+    create_random_forest_regressor,
+    create_ridge_regressor,
+    create_support_vector_regressor,
+)
+from dowhy.gcm.ml.classification import (
+    create_ada_boost_classifier,
+    create_extra_trees_classifier,
+    create_gaussian_nb_classifier,
+    create_knn_classifier,
+    create_random_forest_classifier,
+    create_support_vector_classifier,
+)
+from dowhy.gcm.ml.regression import create_ada_boost_regressor, create_extra_trees_regressor, create_knn_regressor
 from dowhy.gcm.stochastic_models import EmpiricalDistribution
-from dowhy.gcm.util.general import is_categorical, shape_into_2d, fit_one_hot_encoders, apply_one_hot_encoding, \
-    set_random_seed
+from dowhy.gcm.util.general import (
+    apply_one_hot_encoding,
+    fit_one_hot_encoders,
+    is_categorical,
+    set_random_seed,
+    shape_into_2d,
+)
 
-_LIST_OF_POTENTIAL_CLASSIFIERS = [partial(create_logistic_regression_classifier, max_iter=1000),
-                                  create_random_forest_classifier,
-                                  create_hist_gradient_boost_classifier,
-                                  create_extra_trees_classifier,
-                                  create_support_vector_classifier,
-                                  create_knn_classifier,
-                                  create_gaussian_nb_classifier,
-                                  create_ada_boost_classifier]
-_LIST_OF_POTENTIAL_REGRESSORS = [create_linear_regressor,
-                                 create_ridge_regressor,
-                                 partial(create_lasso_regressor, max_iter=5000),
-                                 partial(create_elastic_net_regressor, max_iter=5000),
-                                 create_random_forest_regressor,
-                                 create_hist_gradient_boost_regressor,
-                                 create_support_vector_regressor,
-                                 create_extra_trees_regressor,
-                                 create_knn_regressor,
-                                 create_ada_boost_regressor]
+_LIST_OF_POTENTIAL_CLASSIFIERS = [
+    partial(create_logistic_regression_classifier, max_iter=1000),
+    create_random_forest_classifier,
+    create_hist_gradient_boost_classifier,
+    create_extra_trees_classifier,
+    create_support_vector_classifier,
+    create_knn_classifier,
+    create_gaussian_nb_classifier,
+    create_ada_boost_classifier,
+]
+_LIST_OF_POTENTIAL_REGRESSORS = [
+    create_linear_regressor,
+    create_ridge_regressor,
+    partial(create_lasso_regressor, max_iter=5000),
+    partial(create_elastic_net_regressor, max_iter=5000),
+    create_random_forest_regressor,
+    create_hist_gradient_boost_regressor,
+    create_support_vector_regressor,
+    create_extra_trees_regressor,
+    create_knn_regressor,
+    create_ada_boost_regressor,
+]
 
 
 class AssignmentQuality(Enum):
-    GOOD = auto(),
+    GOOD = (auto(),)
     BETTER = auto()
 
 
-def assign_causal_mechanisms(causal_model: ProbabilisticCausalModel,
-                             based_on: pd.DataFrame,
-                             quality: AssignmentQuality = AssignmentQuality.GOOD,
-                             override_models: bool = False) -> None:
+def assign_causal_mechanisms(
+    causal_model: ProbabilisticCausalModel,
+    based_on: pd.DataFrame,
+    quality: AssignmentQuality = AssignmentQuality.GOOD,
+    override_models: bool = False,
+) -> None:
     """Automatically assigns appropriate causal models. If causal models are already assigned to nodes and
     override_models is set to False, this function only validates the assignments with respect to the graph structure.
     Here, the validation checks whether root nodes have StochasticModels and non-root ConditionalStochasticModels
@@ -93,10 +117,11 @@ def assign_causal_mechanisms(causal_model: ProbabilisticCausalModel,
         if is_root_node(causal_model.graph, node):
             causal_model.set_causal_mechanism(node, EmpiricalDistribution())
         else:
-            prediction_model = \
-                select_model(based_on[get_ordered_predecessors(causal_model.graph, node)].to_numpy(),
-                             based_on[node].to_numpy(),
-                             quality)
+            prediction_model = select_model(
+                based_on[get_ordered_predecessors(causal_model.graph, node)].to_numpy(),
+                based_on[node].to_numpy(),
+                quality,
+            )
 
             if isinstance(prediction_model, ClassificationModel):
                 causal_model.set_causal_mechanism(node, ClassifierFCM(prediction_model))
@@ -104,8 +129,9 @@ def assign_causal_mechanisms(causal_model: ProbabilisticCausalModel,
                 causal_model.set_causal_mechanism(node, AdditiveNoiseModel(prediction_model))
 
 
-def select_model(X: np.ndarray, Y: np.ndarray, model_selection_quality: AssignmentQuality) \
-        -> Union[PredictionModel, ClassificationModel]:
+def select_model(
+    X: np.ndarray, Y: np.ndarray, model_selection_quality: AssignmentQuality
+) -> Union[PredictionModel, ClassificationModel]:
     target_is_categorical = is_categorical(Y)
 
     if model_selection_quality == AssignmentQuality.GOOD:
@@ -128,9 +154,7 @@ def select_model(X: np.ndarray, Y: np.ndarray, model_selection_quality: Assignme
             return find_best_model(_LIST_OF_POTENTIAL_REGRESSORS, X, Y)()
 
 
-def has_linear_relationship(X: np.ndarray,
-                            Y: np.ndarray,
-                            max_num_samples: int = 3000) -> bool:
+def has_linear_relationship(X: np.ndarray, Y: np.ndarray, max_num_samples: int = 3000) -> bool:
     X, Y = shape_into_2d(X, Y)
 
     target_is_categorical = is_categorical(Y)
@@ -146,12 +170,14 @@ def has_linear_relationship(X: np.ndarray,
                 X = np.row_stack([X, X[indices[i], :]])
                 Y = np.row_stack([Y, Y[indices[i], :]])
 
-        x_train, x_test, y_train, y_test = \
-            train_test_split(X, Y, train_size=num_trainings_samples, test_size=num_test_samples, stratify=Y)
+        x_train, x_test, y_train, y_test = train_test_split(
+            X, Y, train_size=num_trainings_samples, test_size=num_test_samples, stratify=Y
+        )
 
     else:
-        x_train, x_test, y_train, y_test = \
-            train_test_split(X, Y, train_size=num_trainings_samples, test_size=num_test_samples)
+        x_train, x_test, y_train, y_test = train_test_split(
+            X, Y, train_size=num_trainings_samples, test_size=num_test_samples
+        )
 
     one_hot_encoder = fit_one_hot_encoders(np.row_stack([x_train, x_test]))
     x_train = apply_one_hot_encoding(x_train, one_hot_encoder)
@@ -164,33 +190,38 @@ def has_linear_relationship(X: np.ndarray,
         nonlinear_mdl.fit(x_train, y_train.squeeze())
 
         # Compare number of correct classifications.
-        return np.sum(shape_into_2d(linear_mdl.predict(x_test)) == y_test) \
-               >= np.sum(shape_into_2d(nonlinear_mdl.predict(x_test)) == y_test)
+        return np.sum(shape_into_2d(linear_mdl.predict(x_test)) == y_test) >= np.sum(
+            shape_into_2d(nonlinear_mdl.predict(x_test)) == y_test
+        )
     else:
         linear_mdl = LinearRegression()
         nonlinear_mdl = create_hist_gradient_boost_regressor()
         linear_mdl.fit(x_train, y_train.squeeze())
         nonlinear_mdl.fit(x_train, y_train.squeeze())
 
-        return np.mean((y_test - shape_into_2d(linear_mdl.predict(x_test))) ** 2) \
-               <= np.mean((y_test - shape_into_2d(nonlinear_mdl.predict(x_test))) ** 2)
+        return np.mean((y_test - shape_into_2d(linear_mdl.predict(x_test))) ** 2) <= np.mean(
+            (y_test - shape_into_2d(nonlinear_mdl.predict(x_test))) ** 2
+        )
 
 
-def find_best_model(prediction_model_factories: List[Callable[[], PredictionModel]],
-                    X: np.ndarray,
-                    Y: np.ndarray,
-                    metric: Optional[Callable[[np.ndarray, np.ndarray], float]] = None,
-                    max_samples_per_split: int = 10000,
-                    model_selection_splits: int = 5,
-                    n_jobs: int = -1) -> Callable[[], PredictionModel]:
+def find_best_model(
+    prediction_model_factories: List[Callable[[], PredictionModel]],
+    X: np.ndarray,
+    Y: np.ndarray,
+    metric: Optional[Callable[[np.ndarray, np.ndarray], float]] = None,
+    max_samples_per_split: int = 10000,
+    model_selection_splits: int = 5,
+    n_jobs: int = -1,
+) -> Callable[[], PredictionModel]:
     X, Y = shape_into_2d(X, Y)
 
     is_classification_problem = isinstance(prediction_model_factories[0](), ClassificationModel)
 
     if metric is None:
         if is_classification_problem:
-            metric = lambda y_true, y_preds: \
-                -metrics.f1_score(y_true, y_preds, average='macro', zero_division=0)  # Higher score is better
+            metric = lambda y_true, y_preds: -metrics.f1_score(
+                y_true, y_preds, average="macro", zero_division=0
+            )  # Higher score is better
         else:
             metric = metrics.mean_squared_error
 
@@ -225,7 +256,7 @@ def find_best_model(prediction_model_factories: List[Callable[[], PredictionMode
     random_seeds = np.random.randint(np.iinfo(np.int32).max, size=len(prediction_model_factories))
     average_metric_scores = Parallel(n_jobs=n_jobs)(
         delayed(estimate_average_score)(prediction_model_factory, random_seed)
-        for prediction_model_factory, random_seed
-        in zip(prediction_model_factories, random_seeds))
+        for prediction_model_factory, random_seed in zip(prediction_model_factories, random_seeds)
+    )
 
     return sorted(zip(prediction_model_factories, average_metric_scores), key=lambda x: x[1])[0][0]

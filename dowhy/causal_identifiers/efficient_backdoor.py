@@ -1,7 +1,6 @@
 import networkx as nx
 import numpy as np
 
-
 EXCEPTION_NO_ADJ = "An adjustment set formed by observable variables does not exist"
 EXCEPTION_COND_NO_OPT = "Conditions to guarantee the existence of an optimal adjustment set are not satisfied"
 
@@ -38,11 +37,7 @@ class EfficientBackdoor:
         assert all([tup["cost"] > 0 for _, tup in costs]), "All costs must be positive"
         self.graph._graph.add_nodes_from(costs)
         self.observed_nodes = set(
-            [
-                node
-                for node in self.graph._graph.nodes
-                if self.graph._graph.nodes[node]["observed"] == "yes"
-            ]
+            [node for node in self.graph._graph.nodes if self.graph._graph.nodes[node]["observed"] == "yes"]
         )
         if conditional_node_names is None:
             conditional_node_names = []
@@ -82,9 +77,7 @@ class EfficientBackdoor:
         """
         Gbd = G.copy()
 
-        for path in nx.all_simple_edge_paths(
-            G, self.graph.treatment_name[0], self.graph.outcome_name[0]
-        ):
+        for path in nx.all_simple_edge_paths(G, self.graph.treatment_name[0], self.graph.outcome_name[0]):
             first_edge = path[0]
             Gbd.remove_edge(first_edge[0], first_edge[1])
 
@@ -124,9 +117,7 @@ class EfficientBackdoor:
         forbidden = set()
 
         for node in self.causal_vertices():
-            forbidden = forbidden.union(
-                nx.descendants(self.graph._graph, node).union(node)
-            )
+            forbidden = forbidden.union(nx.descendants(self.graph._graph, node).union(node))
 
         return forbidden.union(self.graph.treatment_name[0])
 
@@ -141,10 +132,7 @@ class EfficientBackdoor:
             The set of ignorable vertices.
         """
         set1 = set(
-            self.ancestors_all(
-                self.conditional_node_names
-                + [self.graph.treatment_name[0], self.graph.outcome_name[0]]
-            )
+            self.ancestors_all(self.conditional_node_names + [self.graph.treatment_name[0], self.graph.outcome_name[0]])
         )
         set1.remove(self.graph.treatment_name[0])
         set1.remove(self.graph.outcome_name[0])
@@ -186,8 +174,7 @@ class EfficientBackdoor:
         """
         # restriction to ancestors
         anc = self.ancestors_all(
-            self.conditional_node_names
-            + [self.graph.treatment_name[0], self.graph.outcome_name[0]]
+            self.conditional_node_names + [self.graph.treatment_name[0], self.graph.outcome_name[0]]
         )
         G2 = self.graph._graph.subgraph(anc)
 
@@ -325,13 +312,8 @@ class EfficientBackdoor:
         H1 = self.build_H1()
         if self.graph.treatment_name[0] in H1.neighbors(self.graph.outcome_name[0]):
             raise ValueError(EXCEPTION_NO_ADJ)
-        elif self.observed_nodes == set(
-            self.graph._graph.nodes()
-        ) or self.observed_nodes.issubset(
-            self.ancestors_all(
-                self.conditional_node_names
-                + [self.graph.treatment_name[0], self.graph.outcome_name[0]]
-            )
+        elif self.observed_nodes == set(self.graph._graph.nodes()) or self.observed_nodes.issubset(
+            self.ancestors_all(self.conditional_node_names + [self.graph.treatment_name[0], self.graph.outcome_name[0]])
         ):
             optimal = nx.node_boundary(H1, {self.graph.outcome_name[0]})
             return optimal
@@ -351,9 +333,7 @@ class EfficientBackdoor:
         if self.graph.treatment_name[0] in H1.neighbors(self.graph.outcome_name[0]):
             raise ValueError(EXCEPTION_NO_ADJ)
         else:
-            optimal_minimal = self.unblocked(
-                H1, nx.node_boundary(H1, [self.graph.outcome_name[0]])
-            )
+            optimal_minimal = self.unblocked(H1, nx.node_boundary(H1, [self.graph.outcome_name[0]]))
             return optimal_minimal
 
     def optimal_mincost_adj_set(self):

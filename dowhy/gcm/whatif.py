@@ -3,24 +3,32 @@
 Functions in this module should be considered experimental, meaning there might be breaking API changes in the future.
 """
 
-from typing import Any, Dict, Callable, Iterable, List, Union, Optional
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 import networkx as nx
 import numpy as np
 import pandas as pd
 
 from dowhy.gcm._noise import compute_noise_from_data
-from dowhy.gcm.cms import ProbabilisticCausalModel, InvertibleStructuralCausalModel, StructuralCausalModel
+from dowhy.gcm.cms import InvertibleStructuralCausalModel, ProbabilisticCausalModel, StructuralCausalModel
 from dowhy.gcm.fcms import ClassifierFCM
 from dowhy.gcm.fitting_sampling import draw_samples
-from dowhy.gcm.graph import get_ordered_predecessors, is_root_node, DirectedGraph, validate_causal_dag, \
-    validate_node_in_graph, node_connected_subgraph_view
+from dowhy.gcm.graph import (
+    DirectedGraph,
+    get_ordered_predecessors,
+    is_root_node,
+    node_connected_subgraph_view,
+    validate_causal_dag,
+    validate_node_in_graph,
+)
 
 
-def interventional_samples(causal_model: ProbabilisticCausalModel,
-                           interventions: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
-                           observed_data: Optional[pd.DataFrame] = None,
-                           num_samples_to_draw: Optional[int] = None) -> pd.DataFrame:
+def interventional_samples(
+    causal_model: ProbabilisticCausalModel,
+    interventions: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
+    observed_data: Optional[pd.DataFrame] = None,
+    num_samples_to_draw: Optional[int] = None,
+) -> pd.DataFrame:
     """Performs intervention on nodes in the causal graph.
 
     :param causal_model: The probabilistic causal model we perform this intervention on .
@@ -48,9 +56,11 @@ def interventional_samples(causal_model: ProbabilisticCausalModel,
     return _interventional_samples(causal_model, observed_data, interventions)
 
 
-def _interventional_samples(pcm: ProbabilisticCausalModel,
-                            observed_data: pd.DataFrame,
-                            interventions: Dict[Any, Callable[[np.ndarray], np.ndarray]]) -> pd.DataFrame:
+def _interventional_samples(
+    pcm: ProbabilisticCausalModel,
+    observed_data: pd.DataFrame,
+    interventions: Dict[Any, Callable[[np.ndarray], np.ndarray]],
+) -> pd.DataFrame:
     samples = observed_data.copy()
 
     affected_nodes = _get_nodes_affected_by_intervention(pcm.graph, interventions.keys())
@@ -91,10 +101,12 @@ def _get_nodes_affected_by_intervention(causal_graph: DirectedGraph, target_node
     return result
 
 
-def counterfactual_samples(causal_model: Union[StructuralCausalModel, InvertibleStructuralCausalModel],
-                           interventions: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
-                           observed_data: Optional[pd.DataFrame] = None,
-                           noise_data: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+def counterfactual_samples(
+    causal_model: Union[StructuralCausalModel, InvertibleStructuralCausalModel],
+    interventions: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
+    observed_data: Optional[pd.DataFrame] = None,
+    noise_data: Optional[pd.DataFrame] = None,
+) -> pd.DataFrame:
     """Estimates counterfactual data for observed data if we were to perform specified interventions. This function
     implements the 3-step process for computing counterfactuals by Pearl (see https://ftp.cs.ucla.edu/pub/stat_ser/r485.pdf).
 
@@ -122,8 +134,10 @@ def counterfactual_samples(causal_model: Union[StructuralCausalModel, Invertible
 
     if noise_data is None and observed_data is not None:
         if not isinstance(causal_model, InvertibleStructuralCausalModel):
-            raise ValueError("Since no noise_data is given, this has to be estimated from the given "
-                             "observed_data. This can only be done with InvertibleStructuralCausalModel.")
+            raise ValueError(
+                "Since no noise_data is given, this has to be estimated from the given "
+                "observed_data. This can only be done with InvertibleStructuralCausalModel."
+            )
         # Abduction: For invertible SCMs, we recover exact noise values from data.
         noise_data = compute_noise_from_data(causal_model, observed_data)
 
@@ -131,28 +145,32 @@ def counterfactual_samples(causal_model: Union[StructuralCausalModel, Invertible
     return _counterfactual_samples(causal_model, interventions, noise_data)
 
 
-def _counterfactual_samples(scm: StructuralCausalModel,
-                            interventions: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
-                            noise_data: pd.DataFrame) -> pd.DataFrame:
+def _counterfactual_samples(
+    scm: StructuralCausalModel,
+    interventions: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
+    noise_data: pd.DataFrame,
+) -> pd.DataFrame:
     topologically_sorted_nodes = list(nx.topological_sort(scm.graph))
-    samples = pd.DataFrame(np.empty((noise_data.shape[0], len(topologically_sorted_nodes))),
-                           columns=topologically_sorted_nodes)
+    samples = pd.DataFrame(
+        np.empty((noise_data.shape[0], len(topologically_sorted_nodes))), columns=topologically_sorted_nodes
+    )
 
     for node in topologically_sorted_nodes:
         if is_root_node(scm.graph, node):
             node_data = noise_data[node].to_numpy()
         else:
-            node_data = scm.causal_mechanism(node).evaluate(_parent_samples_of(node, scm, samples),
-                                                            noise_data[node].to_numpy())
+            node_data = scm.causal_mechanism(node).evaluate(
+                _parent_samples_of(node, scm, samples), noise_data[node].to_numpy()
+            )
 
         samples[node] = _evaluate_intervention(node, interventions, node_data.reshape(-1))
 
     return samples
 
 
-def _evaluate_intervention(node: Any,
-                           interventions: Dict[Any, Callable[[np.ndarray], np.ndarray]],
-                           pre_intervention_data: np.ndarray) -> np.ndarray:
+def _evaluate_intervention(
+    node: Any, interventions: Dict[Any, Callable[[np.ndarray], np.ndarray]], pre_intervention_data: np.ndarray
+) -> np.ndarray:
     # Check if we need to apply an intervention on the given node.
     if node in interventions:
         # Apply intervention function to the data of the node.
@@ -161,21 +179,24 @@ def _evaluate_intervention(node: Any,
         # Check if the intervention function changes the shape of the data.
         if pre_intervention_data.shape != post_intervention_data.shape:
             raise RuntimeError(
-                'Dimension of data corresponding to the node `%s` after intervention is different than before '
-                'intervention.' % node)
+                "Dimension of data corresponding to the node `%s` after intervention is different than before "
+                "intervention." % node
+            )
 
         return post_intervention_data
     else:
         return pre_intervention_data
 
 
-def average_causal_effect(causal_model: ProbabilisticCausalModel,
-                          target_node: Any,
-                          interventions_alternative: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
-                          interventions_reference: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
-                          observed_data: Optional[pd.DataFrame] = None,
-                          num_samples_to_draw: Optional[int] = None) -> float:
-    """ Estimates the average causal effect (ACE) on the target of two different sets of interventions.
+def average_causal_effect(
+    causal_model: ProbabilisticCausalModel,
+    target_node: Any,
+    interventions_alternative: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
+    interventions_reference: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
+    observed_data: Optional[pd.DataFrame] = None,
+    num_samples_to_draw: Optional[int] = None,
+) -> float:
+    """Estimates the average causal effect (ACE) on the target of two different sets of interventions.
     The interventions can be specified through the parameters `interventions_alternative` and `interventions_reference`.
     For example, if the alternative intervention is do(T := 1) and the reference intervention
     is do(T := 0), then the average causal effect is given by ACE = E[Y | do(T := 1)] - E[Y | do(T := 0)]:
@@ -222,9 +243,11 @@ def average_causal_effect(causal_model: ProbabilisticCausalModel,
         observed_data = draw_samples(causal_model, num_samples_to_draw)
 
     samples_from_target_alt = _interventional_samples(causal_model, observed_data, interventions_alternative)[
-        target_node].to_numpy()
+        target_node
+    ].to_numpy()
     samples_from_target_ref = _interventional_samples(causal_model, observed_data, interventions_reference)[
-        target_node].to_numpy()
+        target_node
+    ].to_numpy()
 
     target_causal_model = causal_model.causal_mechanism(target_node)
     if isinstance(target_causal_model, ClassifierFCM):
@@ -232,7 +255,8 @@ def average_causal_effect(causal_model: ProbabilisticCausalModel,
         # (i.e. binary).
         if observed_data[target_node].nunique() > 2:
             raise ValueError(
-                "Cannot estimate average treatment effect of categorical data with more than 2 categories!")
+                "Cannot estimate average treatment effect of categorical data with more than 2 categories!"
+            )
 
         class_names = target_causal_model.get_class_names(np.array([0, 1]))
         samples_from_target_alt[samples_from_target_alt == class_names[0]] = 0

@@ -54,8 +54,8 @@ News
   We have started adding support for graphical causal model-based inference (or in short GCM-based). At the moment,
   this includes support for interventions, counterfactuals, and attributing distribution changes. As part of this,
   we also added features for Shapley value estimation and independence tests. We're still in the process of fleshing
-  everything out, including `documentation <https://py-why.github.io/dowhy/gcm/>`_. Some of it is already on `main
-  <https://github.com/py-why/dowhy>`_, other parts are on feature branches (prefixed with ``gcm-``) with open
+  everything out, including `documentation <https://py-why.github.io/dowhy/main/user_guide/gcm_based_inference/index.html>`_. Some of it is already on `main
+  <https://py-why.github.io/dowhy/main/user_guide/gcm_based_inference/index.html>`_, other parts are on feature branches (prefixed with ``gcm-``) with open
   pull-requests, other parts will appear as new pull-requests in the next couple of weeks. Be sure to watch this space
   here as we quickly expand functionality and documentation.
 
@@ -204,7 +204,7 @@ GCM-based inference (experimental)
 ----------------------------------
 
 Graphical causal model-based inference, or GCM-based inference for short, is an experimental addition to DoWhy. For
-details, check out the `documentation for the gcm sub-package <https://py-why.github.io/dowhy/gcm>`_. The basic
+details, check out the `documentation for the gcm sub-package <https://py-why.github.io/dowhy/main/user_guide/gcm_based_inference/index.html>`_. The basic
 recipe for this API works as follows:
 
 .. code:: python
@@ -222,7 +222,7 @@ recipe for this API works as follows:
     # 3. Answering a causal query based on the SCM:
     results = gcm.<causal_query>(scm, ...)
 
-Where <causal_query> can be one of multiple functions explained in `Answering Causal Questions <https://py-why.github.io/dowhy/gcm/user_guide/answering_causal_questions/index.html>`_.
+Where <causal_query> can be one of multiple functions explained in `Answering Causal Questions <https://py-why.github.io/dowhy/main/user_guide/gcm_based_inference/answering_causal_questions/index.html>`_.
 
 
 A high-level Pandas API
