@@ -1,6 +1,7 @@
 import pandas as pd
-from dowhy.causal_model import CausalModel
+
 import dowhy.do_samplers as do_samplers
+from dowhy.causal_model import CausalModel
 from dowhy.utils.api import parse_state
 
 
@@ -29,8 +30,20 @@ class CausalAccessor(object):
         self._sampler = None
         self._method = None
 
-    def do(self, x, method='weighting', num_cores=1, variable_types={}, outcome=None, params=None, dot_graph=None,
-           common_causes=None, estimand_type='nonparametric-ate', proceed_when_unidentifiable=False, stateful=False):
+    def do(
+        self,
+        x,
+        method="weighting",
+        num_cores=1,
+        variable_types={},
+        outcome=None,
+        params=None,
+        dot_graph=None,
+        common_causes=None,
+        estimand_type="nonparametric-ate",
+        proceed_when_unidentifiable=False,
+        stateful=False,
+    ):
         """
         The do-operation implemented with sampling. This will return a pandas.DataFrame with the outcome
         variable(s) replaced with samples from P(Y|do(X=x)).
@@ -80,20 +93,24 @@ class CausalAccessor(object):
         if not stateful or method != self._method:
             self.reset()
         if not self._causal_model:
-            self._causal_model = CausalModel(self._obj,
-                                             [xi for xi in x.keys()],
-                                             outcome,
-                                             graph=dot_graph,
-                                             common_causes=common_causes,
-                                             instruments=None,
-                                             estimand_type=estimand_type,
-                                             proceed_when_unidentifiable=proceed_when_unidentifiable)
-        #self._identified_estimand = self._causal_model.identify_effect()
+            self._causal_model = CausalModel(
+                self._obj,
+                [xi for xi in x.keys()],
+                outcome,
+                graph=dot_graph,
+                common_causes=common_causes,
+                instruments=None,
+                estimand_type=estimand_type,
+                proceed_when_unidentifiable=proceed_when_unidentifiable,
+            )
+        # self._identified_estimand = self._causal_model.identify_effect()
 
-        if not bool(variable_types): #check if the variables dictionary is empty
-            variable_types = dict(self._obj.dtypes) #Convert the series containing data types to a dictionary
+        if not bool(variable_types):  # check if the variables dictionary is empty
+            variable_types = dict(self._obj.dtypes)  # Convert the series containing data types to a dictionary
             for key in variable_types.keys():
-                variable_types[key] = self.convert_to_custom_type(variable_types[key].name) #Obtain the custom type corrosponding to each data type
+                variable_types[key] = self.convert_to_custom_type(
+                    variable_types[key].name
+                )  # Obtain the custom type corrosponding to each data type
 
         elif len(self._obj.columns) > len(variable_types):
             all_variables = dict(self._obj.dtypes)
@@ -102,20 +119,22 @@ class CausalAccessor(object):
                     variable_types[key] = self.convert_to_custom_type(all_variables[key].name)
 
         elif len(self._obj.columns) < len(variable_types):
-            raise Exception('Number of variables in the DataFrame is lesser than the variable_types dict')
+            raise Exception("Number of variables in the DataFrame is lesser than the variable_types dict")
 
         if not self._sampler:
             self._method = method
             do_sampler_class = do_samplers.get_class_object(method + "_sampler")
-            self._sampler = do_sampler_class(self._obj,
-                                             #self._identified_estimand,
-                                             #self._causal_model._treatment,
-                                             #self._causal_model._outcome,
-                                             params=params,
-                                             variable_types=variable_types,
-                                             num_cores=num_cores,
-                                             causal_model=self._causal_model,
-                                             keep_original_treatment=keep_original_treatment)
+            self._sampler = do_sampler_class(
+                self._obj,
+                # self._identified_estimand,
+                # self._causal_model._treatment,
+                # self._causal_model._outcome,
+                params=params,
+                variable_types=variable_types,
+                num_cores=num_cores,
+                causal_model=self._causal_model,
+                keep_original_treatment=keep_original_treatment,
+            )
         result = self._sampler.do_sample(x)
         if not stateful:
             self.reset()
@@ -132,16 +151,16 @@ class CausalAccessor(object):
         Currently we have not added support for time.
         :param input_type: str: The datatype of a column within a DataFrame
         """
-        if 'int' in input_type:
-            return 'c'
-        elif 'float' in input_type:
-            return 'c'
-        elif 'bool' in input_type:
-            return 'b'
-        elif 'category' in input_type:
-            return 'd'
+        if "int" in input_type:
+            return "c"
+        elif "float" in input_type:
+            return "c"
+        elif "bool" in input_type:
+            return "b"
+        elif "category" in input_type:
+            return "d"
         else:
-            raise Exception('{} format is not supported'.format(input_type))
+            raise Exception("{} format is not supported".format(input_type))
 
     def parse_x(self, x):
         if type(x) == str:
@@ -150,5 +169,4 @@ class CausalAccessor(object):
             return {xi: None for xi in x}, True
         if type(x) == dict:
             return x, False
-        raise Exception('x format not recognized: {}'.format(type(x)))
-
+        raise Exception("x format not recognized: {}".format(type(x)))

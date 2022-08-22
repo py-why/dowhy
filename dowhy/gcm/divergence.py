@@ -6,7 +6,7 @@ from scipy.stats import entropy
 from sklearn.neighbors import NearestNeighbors
 
 from dowhy.gcm.constant import EPS
-from dowhy.gcm.util.general import shape_into_2d, is_categorical
+from dowhy.gcm.util.general import is_categorical, shape_into_2d
 
 
 def auto_estimate_kl_divergence(X: np.ndarray, Y: np.ndarray) -> float:
@@ -32,8 +32,10 @@ def estimate_kl_divergence_continuous(X: np.ndarray, Y: np.ndarray) -> float:
     X, Y = shape_into_2d(X, Y)
 
     if X.shape[1] != Y.shape[1]:
-        raise RuntimeError('Samples from X and Y need to have the same dimension, but X has dimension %d and Y has ' \
-                           'dimension %d.' % (X.shape[1], Y.shape[1]))
+        raise RuntimeError(
+            "Samples from X and Y need to have the same dimension, but X has dimension %d and Y has "
+            "dimension %d." % (X.shape[1], Y.shape[1])
+        )
 
     n, m = X.shape[0], Y.shape[0]
     d = float(X.shape[1])
@@ -61,8 +63,10 @@ def estimate_kl_divergence_categorical(X: np.ndarray, Y: np.ndarray) -> float:
     X, Y = shape_into_2d(X, Y)
 
     if X.shape[1] != Y.shape[1]:
-        raise RuntimeError('Samples from X and Y need to have the same dimension, but X has dimension %d and Y has ' \
-                           'dimension %d.' % (X.shape[1], Y.shape[1]))
+        raise RuntimeError(
+            "Samples from X and Y need to have the same dimension, but X has dimension %d and Y has "
+            "dimension %d." % (X.shape[1], Y.shape[1])
+        )
 
     all_uniques = np.unique(np.vstack([X, Y]))
 
@@ -73,13 +77,15 @@ def estimate_kl_divergence_categorical(X: np.ndarray, Y: np.ndarray) -> float:
 
 
 def estimate_kl_divergence_of_probabilities(X: np.ndarray, Y: np.ndarray) -> float:
-    """ Estimates the Kullback-Leibler divergence between each pair of probability vectors (row wise) in X and Y
-    separately and returns the mean over all results. """
+    """Estimates the Kullback-Leibler divergence between each pair of probability vectors (row wise) in X and Y
+    separately and returns the mean over all results."""
     X, Y = shape_into_2d(X, Y)
 
     if X.shape[1] != Y.shape[1]:
-        raise RuntimeError('Samples from X and Y need to have the same dimension, but X has dimension %d and Y has ' \
-                           'dimension %d.' % (X.shape[1], Y.shape[1]))
+        raise RuntimeError(
+            "Samples from X and Y need to have the same dimension, but X has dimension %d and Y has "
+            "dimension %d." % (X.shape[1], Y.shape[1])
+        )
 
     return float(np.mean(entropy(X + EPS, Y + EPS, axis=1)))
 

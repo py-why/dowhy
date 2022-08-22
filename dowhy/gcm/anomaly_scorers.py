@@ -43,7 +43,7 @@ class MedianCDFQuantileScorer(AnomalyScorer):
 
     def fit(self, X: np.ndarray) -> None:
         if (X.ndim == 2 and X.shape[1] > 1) or X.ndim > 2:
-            raise ValueError('The MedianCDFQuantileScorer currently only supports one-dimensional data!')
+            raise ValueError("The MedianCDFQuantileScorer currently only supports one-dimensional data!")
 
         self._distribution_samples = X.reshape(-1)
 
@@ -57,8 +57,9 @@ class MedianCDFQuantileScorer(AnomalyScorer):
         greater_samples = np.sum(X > self._distribution_samples, axis=1) + equal_samples / 2
         smaller_samples = np.sum(X < self._distribution_samples, axis=1) + equal_samples / 2
 
-        return 1 - 2 * np.amin(np.vstack([greater_samples, smaller_samples]), axis=0) \
-               / self._distribution_samples.shape[0]
+        return (
+            1 - 2 * np.amin(np.vstack([greater_samples, smaller_samples]), axis=0) / self._distribution_samples.shape[0]
+        )
 
 
 class RescaledMedianCDFQuantileScorer(AnomalyScorer):
@@ -121,8 +122,10 @@ class ITAnomalyScorer(AnomalyScorer):
     def score(self, X: np.ndarray) -> np.ndarray:
         X = shape_into_2d(X)
         scores_of_samples_to_score = self._anomaly_scorer.score(X).reshape(-1, 1)
-        return -np.log((np.sum(self._scores_of_distribution_samples >= scores_of_samples_to_score, axis=1) + 0.5)
-                       / (self._scores_of_distribution_samples.shape[0] + 0.5))
+        return -np.log(
+            (np.sum(self._scores_of_distribution_samples >= scores_of_samples_to_score, axis=1) + 0.5)
+            / (self._scores_of_distribution_samples.shape[0] + 0.5)
+        )
 
 
 class MeanDeviationScorer(AnomalyScorer):
@@ -188,6 +191,7 @@ class InverseDensityScorer(AnomalyScorer):
     def __init__(self, density_estimator: Optional[DensityEstimator] = None):
         if density_estimator is None:
             from dowhy.gcm.density_estimators import GaussianMixtureDensityEstimator
+
             density_estimator = GaussianMixtureDensityEstimator()
         self._density_estimator = density_estimator
         self._fitted = False

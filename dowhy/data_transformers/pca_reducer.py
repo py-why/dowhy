@@ -5,7 +5,6 @@ from dowhy.data_transformer import DimensionalityReducer
 
 
 class PCAReducer(DimensionalityReducer):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._do_standardize = True

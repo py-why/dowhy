@@ -11,20 +11,24 @@ from packaging import version
 if version.parse(sklearn.__version__) < version.parse("1.0"):
     from sklearn.experimental import enable_hist_gradient_boosting  # noqa
 
-from sklearn.ensemble import RandomForestRegressor, HistGradientBoostingRegressor, ExtraTreesRegressor, \
-    AdaBoostRegressor
+from sklearn.ensemble import (
+    AdaBoostRegressor,
+    ExtraTreesRegressor,
+    HistGradientBoostingRegressor,
+    RandomForestRegressor,
+)
 from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.linear_model import LinearRegression, RidgeCV, LassoCV, LassoLarsIC, ElasticNetCV
+from sklearn.linear_model import ElasticNetCV, LassoCV, LassoLarsIC, LinearRegression, RidgeCV
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import SVR
 
 from dowhy.gcm.fcms import InvertibleFunction, PredictionModel
-from dowhy.gcm.util.general import shape_into_2d, fit_one_hot_encoders, apply_one_hot_encoding
+from dowhy.gcm.util.general import apply_one_hot_encoding, fit_one_hot_encoders, shape_into_2d
 
 
 class SklearnRegressionModel(PredictionModel):
     """
-        General wrapper class for sklearn models.
+    General wrapper class for sklearn models.
     """
 
     def __init__(self, sklearn_mdl: Any) -> None:
@@ -38,8 +42,7 @@ class SklearnRegressionModel(PredictionModel):
         self._sklearn_mdl.fit(X=X, y=Y.squeeze())
 
     def predict(self, X: np.array) -> np.ndarray:
-        return shape_into_2d(
-            self._sklearn_mdl.predict(apply_one_hot_encoding(X, self._one_hot_encoders)))
+        return shape_into_2d(self._sklearn_mdl.predict(apply_one_hot_encoding(X, self._one_hot_encoders)))
 
     @property
     def sklearn_model(self) -> Any:
@@ -54,9 +57,9 @@ class SklearnRegressionModel(PredictionModel):
         return SklearnRegressionModel(sklearn_mdl=sklearn.clone(self._sklearn_mdl))
 
 
-def create_linear_regressor_with_given_parameters(coefficients: np.ndarray,
-                                                  intercept: float = 0,
-                                                  **kwargs) -> SklearnRegressionModel:
+def create_linear_regressor_with_given_parameters(
+    coefficients: np.ndarray, intercept: float = 0, **kwargs
+) -> SklearnRegressionModel:
     linear_model = LinearRegression(**kwargs)
     linear_model.coef_ = coefficients
     linear_model.intercept_ = intercept
@@ -121,7 +124,6 @@ class InvertibleIdentityFunction(InvertibleFunction):
 
 
 class InvertibleExponentialFunction(InvertibleFunction):
-
     def evaluate(self, X: np.ndarray) -> np.ndarray:
         return np.exp(X)
 
