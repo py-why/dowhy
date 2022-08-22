@@ -3,9 +3,9 @@ Estimate causal effect based on the identified estimand
 
 DoWhy supports methods based on both back-door criterion and instrumental
 variables. It also provides a non-parametric confidence intervals and a permutation test for testing
-the statistical significance of obtained estimate. 
+the statistical significance of obtained estimate.
 
-Supported estimation methods 
+Supported estimation methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * Methods based on estimating the treatment assignment
@@ -26,8 +26,8 @@ Supported estimation methods
     * Two-stage linear regression
 
 Examples of using these methods are in the `Estimation methods
-<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_estimation_methods.ipynb>`_
-notebook. 
+<https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_estimation_methods.ipynb>`_
+notebook.
 
 Using EconML and CausalML estimation methods in DoWhy
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -37,7 +37,7 @@ of estimating conditional treatment effects using EconML's double machine
 learning estimator.
 
 .. code:: python
-	
+
 	from sklearn.preprocessing import PolynomialFeatures
 	from sklearn.linear_model import LassoCV
 	from sklearn.ensemble import GradientBoostingRegressor
@@ -49,13 +49,13 @@ learning estimator.
                         method_params={
                             "init_params":{'model_y':GradientBoostingRegressor(),
                                            'model_t': GradientBoostingRegressor(),
-                                           'model_final':LassoCV(), 
+                                           'model_final':LassoCV(),
                                            'featurizer':PolynomialFeatures(degree=1, include_bias=True)},
                             "fit_params":{}}
 						)
 
 
 More examples are in the `Conditional Treatment Effects with DoWhy
-<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_ notebook. 
+<https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_ notebook.
 
 
