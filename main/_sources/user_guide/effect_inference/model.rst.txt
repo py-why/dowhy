@@ -7,7 +7,7 @@ knowledge about some of the variables. DoWhy automatically considers the rest
 of the variables as potential confounders.
 
 Currently, DoWhy supports two formats for graph input: `gml <https://github.com/GunterMueller/UNI_PASSAU_FMI_Graph_Drawing>`_ (preferred) and
-`dot <http://www.graphviz.org/documentation/>`_. We strongly suggest to use gml as the input format, as it works well with networkx. You can provide the graph either as a .gml file or as a string. If you prefer to use dot format, you will need to install additional packages (pydot or pygraphviz, see the installation section above). Both .dot files and string format are supported. 
+`dot <http://www.graphviz.org/documentation/>`_. We strongly suggest to use gml as the input format, as it works well with networkx. You can provide the graph either as a .gml file or as a string. If you prefer to use dot format, you will need to install additional packages (pydot or pygraphviz, see the installation section above). Both .dot files and string format are supported.
 
 While not recommended, you can also specify common causes and/or instruments directly
 instead of providing a graph.
@@ -22,6 +22,6 @@ Supported formats for specifying causal assumptions
   modifiers, frontdoor variables, etc.
 
 Examples of how to instantiate a causal model are in the `Getting Started
-<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_
+<https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_
 notebook.
 
