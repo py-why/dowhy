@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-19-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-20-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Contributors ✨
@@ -35,6 +35,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="http://astoeffelbauer.github.io"><img src="https://avatars.githubusercontent.com/u/54737457?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Andreas Stöffelbauer</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=astoeffelbauer" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/esmucler"><img src="https://avatars.githubusercontent.com/u/14080095?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ezequiel Smucler</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=esmucler" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/yemaedahrav"><img src="https://avatars.githubusercontent.com/u/50958687?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Amey Varhade</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=yemaedahrav" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/bkowshik"><img src="https://avatars.githubusercontent.com/u/2899501?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Bhargav Kowshik</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=bkowshik" title="Code">💻</a></td>
   </tr>
 </table>
 
