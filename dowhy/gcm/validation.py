@@ -4,7 +4,7 @@ Classes and functions in this module should be considered experimental, meaning 
 the future.
 """
 from enum import Enum, auto
-from typing import Any, Callable, Dict, Tuple, Union, Optional, Set
+from typing import Any, Callable, Dict, Optional, Set, Tuple, Union
 
 import networkx as nx
 import numpy as np
@@ -12,24 +12,23 @@ import pandas as pd
 from statsmodels.stats.multitest import multipletests
 
 from dowhy.gcm.cms import InvertibleStructuralCausalModel
-from dowhy.gcm.graph import DirectedGraph, get_ordered_predecessors, validate_causal_graph, is_root_node
+from dowhy.gcm.graph import DirectedGraph, get_ordered_predecessors, is_root_node, validate_causal_graph
 from dowhy.gcm.independence_test import kernel_based
 
 
 class RejectionResult(Enum):
     REJECTED = auto()
-    NOT_REJECTED = auto(),
+    NOT_REJECTED = (auto(),)
 
 
-def refute_causal_structure(causal_graph: DirectedGraph,
-                            data: pd.DataFrame,
-                            independence_test: Callable[[np.ndarray, np.ndarray], float] = kernel_based,
-                            conditional_independence_test: Callable[
-                                [np.ndarray, np.ndarray, np.ndarray], float]
-                            = kernel_based,
-                            significance_level: float = 0.05,
-                            fdr_control_method: Optional[str] = 'fdr_bh') \
-        -> Tuple[RejectionResult, Dict[str, Dict[str, Dict[str, Union[bool, float, Dict[str, Union[bool, float]]]]]]]:
+def refute_causal_structure(
+    causal_graph: DirectedGraph,
+    data: pd.DataFrame,
+    independence_test: Callable[[np.ndarray, np.ndarray], float] = kernel_based,
+    conditional_independence_test: Callable[[np.ndarray, np.ndarray, np.ndarray], float] = kernel_based,
+    significance_level: float = 0.05,
+    fdr_control_method: Optional[str] = "fdr_bh",
+) -> Tuple[RejectionResult, Dict[str, Dict[str, Dict[str, Union[bool, float, Dict[str, Union[bool, float]]]]]]]:
     """Validates the assumptions in a causal graph against data. To this end, at each node, we test if the node is dependent on each of its parents, and test the local Markov condition.
     Note that valid local Markov conditions also imply a valid global Markov condition.
 
@@ -58,24 +57,21 @@ def refute_causal_structure(causal_graph: DirectedGraph,
 
         lmc_test_result = dict()
         if parents and non_descendants:
-            # test local Markov condition, nullhypothesis: conditional independence
-            lmc_p_value = conditional_independence_test(data[node].values,
-                                                        data[non_descendants].values,
-                                                        data[parents].values)
+            # test local Markov condition, null hypothesis: conditional independence
+            lmc_p_value = conditional_independence_test(
+                data[node].values, data[non_descendants].values, data[parents].values
+            )
             lmc_test_result = dict(p_value=lmc_p_value)
             all_p_values.append(lmc_p_value)
 
-        # test edge dependence, nullhypothesis: independence
+        # test edge dependence, null hypothesis: independence
         edge_dependence_result = dict()
         for parent in parents:
             edge_p_value = independence_test(data[parent].values, data[node].values)
             edge_dependence_result[parent] = dict(p_value=edge_p_value)
             all_p_values.append(edge_p_value)
 
-        validation_summary[node] = dict(
-            local_markov_test=lmc_test_result,
-            edge_dependence_test=edge_dependence_result
-        )
+        validation_summary[node] = dict(local_markov_test=lmc_test_result, edge_dependence_test=edge_dependence_result)
 
     if fdr_control_method is None:
         successes = np.array(all_p_values) <= significance_level
@@ -89,19 +85,15 @@ def refute_causal_structure(causal_graph: DirectedGraph,
     # The order of the p-values added to the list is deterministic.
     index = 0
     for node in causal_graph.nodes:
-        if 'p_value' in validation_summary[node]['local_markov_test']:
-            validation_summary[node]['local_markov_test']['fdr_adjusted_p_value'] \
-                = adjusted_p_values[index]
-            validation_summary[node]['local_markov_test']['success'] \
-                = not successes[index]
+        if "p_value" in validation_summary[node]["local_markov_test"]:
+            validation_summary[node]["local_markov_test"]["fdr_adjusted_p_value"] = adjusted_p_values[index]
+            validation_summary[node]["local_markov_test"]["success"] = not successes[index]
             is_dag_valid &= not successes[index]
             index += 1
 
         for parent in get_ordered_predecessors(causal_graph, node):
-            validation_summary[node]['edge_dependence_test'][parent]['fdr_adjusted_p_value'] \
-                = adjusted_p_values[index]
-            validation_summary[node]['edge_dependence_test'][parent]['success'] \
-                = successes[index]
+            validation_summary[node]["edge_dependence_test"][parent]["fdr_adjusted_p_value"] = adjusted_p_values[index]
+            validation_summary[node]["edge_dependence_test"][parent]["success"] = successes[index]
             is_dag_valid &= successes[index]
             index += 1
     if is_dag_valid:
@@ -110,11 +102,13 @@ def refute_causal_structure(causal_graph: DirectedGraph,
         return RejectionResult.REJECTED, validation_summary
 
 
-def refute_invertible_model(causal_model: InvertibleStructuralCausalModel,
-                            data: pd.DataFrame,
-                            independence_test: Callable[[np.ndarray, np.ndarray], float] = kernel_based,
-                            significance_level: float = 0.05,
-                            fdr_control_method: Optional[str] = None) -> RejectionResult:
+def refute_invertible_model(
+    causal_model: InvertibleStructuralCausalModel,
+    data: pd.DataFrame,
+    independence_test: Callable[[np.ndarray, np.ndarray], float] = kernel_based,
+    significance_level: float = 0.05,
+    fdr_control_method: Optional[str] = None,
+) -> RejectionResult:
     """Validate the assumption that the structural causal models can be represented by a
     :py:class:`InvertibleFunctionalCausalModel <dowhy.gcm.graph.InvertibleFunctionalCausalModel>` (e.g. the causal mechanisms are
     :py:class:`AdditiveNoiseModels <dowhy.gcm.AdditiveNoiseModel>` and/or :py:class:`PostNonlinearModels <dowhy.gcm.PostNonlinearModel>`).
@@ -153,12 +147,17 @@ def refute_invertible_model(causal_model: InvertibleStructuralCausalModel,
             all_p_values.append(independence_test(parents_samples, residuals))
 
     if fdr_control_method is None or len(all_p_values) == 0:
-        return RejectionResult.NOT_REJECTED if np.all(np.array(all_p_values) > significance_level) \
+        return (
+            RejectionResult.NOT_REJECTED
+            if np.all(np.array(all_p_values) > significance_level)
             else RejectionResult.REJECTED
+        )
     else:
-        return RejectionResult.REJECTED \
-            if np.any(multipletests(all_p_values, significance_level, method=fdr_control_method)[0]) \
+        return (
+            RejectionResult.REJECTED
+            if np.any(multipletests(all_p_values, significance_level, method=fdr_control_method)[0])
             else RejectionResult.NOT_REJECTED
+        )
 
 
 def _get_non_descendants(causal_graph: DirectedGraph, node: Any, exclude_parents: bool = False) -> Set[Any]:

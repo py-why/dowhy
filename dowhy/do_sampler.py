@@ -1,4 +1,5 @@
 import logging
+
 import numpy as np
 import pandas as pd
 
@@ -6,13 +7,11 @@ from dowhy.utils.api import parse_state
 
 
 class DoSampler:
-    """Base class for a sampler from the interventional distribution.
+    """Base class for a sampler from the interventional distribution."""
 
-    """
-
-    def __init__(self, data,
-                 params=None, variable_types=None,
-                 num_cores=1, causal_model=None, keep_original_treatment=False):
+    def __init__(
+        self, data, params=None, variable_types=None, num_cores=1, causal_model=None, keep_original_treatment=False
+    ):
         """
         Initializes a do sampler with data and names of relevant variables.
 
@@ -72,8 +71,9 @@ class DoSampler:
         if not self._variable_types:
             self._infer_variable_types()
         self.dep_type = [self._variable_types[var] for var in self._outcome_names]
-        self.indep_type = [self._variable_types[var] for var in
-                           self._treatment_names + self._target_estimand.get_backdoor_variables()]
+        self.indep_type = [
+            self._variable_types[var] for var in self._treatment_names + self._target_estimand.get_backdoor_variables()
+        ]
         self.density_types = [self._variable_types[var] for var in self._target_estimand.get_backdoor_variables()]
 
         self.outcome_lower_support = self._data[self._outcome_names].min().values
@@ -116,17 +116,22 @@ class DoSampler:
         raise NotImplementedError
 
     def point_sample(self):
-            if self.num_cores == 1:
-                sampled_outcomes = self._df[self._treatment_names +
-                                            self._target_estimand.get_backdoor_variables()].apply(self._sample_point, axis=1)
-            else:
-                from multiprocessing import Pool
-                p = Pool(self.num_cores)
-                sampled_outcomes = np.array(p.map(self.sampler.sample_point,
-                                            self._df[self._treatment_names +
-                                                     self._target_estimand.get_backdoor_variables()].values))
-                sampled_outcomes = pd.DataFrame(sampled_outcomes, columns=self._outcome_names)
-            self._df[self._outcome_names] = sampled_outcomes
+        if self.num_cores == 1:
+            sampled_outcomes = self._df[self._treatment_names + self._target_estimand.get_backdoor_variables()].apply(
+                self._sample_point, axis=1
+            )
+        else:
+            from multiprocessing import Pool
+
+            p = Pool(self.num_cores)
+            sampled_outcomes = np.array(
+                p.map(
+                    self.sampler.sample_point,
+                    self._df[self._treatment_names + self._target_estimand.get_backdoor_variables()].values,
+                )
+            )
+            sampled_outcomes = pd.DataFrame(sampled_outcomes, columns=self._outcome_names)
+        self._df[self._outcome_names] = sampled_outcomes
 
     def sample(self):
         """
@@ -134,8 +139,9 @@ class DoSampler:
         Override this method if you want to use a different approach to sampling.
         :return:
         """
-        sampled_outcomes = self.sampler.sample(self._df[self._treatment_names +
-                                                        self._target_estimand.get_backdoor_variables()].values)
+        sampled_outcomes = self.sampler.sample(
+            self._df[self._treatment_names + self._target_estimand.get_backdoor_variables()].values
+        )
         sampled_outcomes = pd.DataFrame(sampled_outcomes, columns=self._outcome_names)
         self._df[self._outcome_names] = sampled_outcomes
 
@@ -150,4 +156,4 @@ class DoSampler:
         return self._df
 
     def _infer_variable_types(self):
-        raise NotImplementedError('Variable type inference not implemented. Use the variable_types kwarg.')
+        raise NotImplementedError("Variable type inference not implemented. Use the variable_types kwarg.")

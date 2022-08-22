@@ -1,64 +1,84 @@
-from dowhy.causal_refuter import CausalRefuter, CausalRefutation
-from dowhy.causal_estimator import CausalEstimator
-import numpy as np
 import logging
+
+import numpy as np
+from joblib import Parallel, delayed
+from tqdm.auto import tqdm
+
+from dowhy.causal_estimator import CausalEstimator
+from dowhy.causal_refuter import CausalRefutation, CausalRefuter
+
 
 class DataSubsetRefuter(CausalRefuter):
     """Refute an estimate by rerunning it on a random subset of the original data.
 
-    Supports additional parameters that can be specified in the refute_estimate() method.
+    Supports additional parameters that can be specified in the refute_estimate() method. For joblib-related parameters (n_jobs, verbose), please refer to the joblib documentation for more details (https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html).
 
-    :param subset_fraction: Fraction of the data to be used for re-estimation, which is ``DataSubsetRefuter.DEFAULT_SUBSET_FRACTION`` by default. 
-    :type  subset_fraction: float, optional 
-    
+    :param subset_fraction: Fraction of the data to be used for re-estimation, which is ``DataSubsetRefuter.DEFAULT_SUBSET_FRACTION`` by default.
+    :type  subset_fraction: float, optional
+
     :param num_simulations: The number of simulations to be run, which is ``CausalRefuter.DEFAULT_NUM_SIMULATIONS`` by default
-    :type num_simulations: int, optional    
-    
+    :type num_simulations: int, optional
+
     :param random_state: The seed value to be added if we wish to repeat the same random behavior. If we with to repeat the same behavior we push the same seed in the psuedo-random generator
-    :type random_state: int, RandomState, optional    
+    :type random_state: int, RandomState, optional
+
+    :param n_jobs: The maximum number of concurrently running jobs. If -1 all CPUs are used. If 1 is given, no parallel computing code is used at all (this is the default).
+    :type n_jobs: int, optional
+
+    :param verbose: The verbosity level: if non zero, progress messages are printed. Above 50, the output is sent to stdout. The frequency of the messages increases with the verbosity level. If it more than 10, all iterations are reported. The default is 0.
+    :type verbose: int, optional
     """
+
     # The default subset of the data to be used
     DEFAULT_SUBSET_FRACTION = 0.8
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._subset_fraction = kwargs.pop("subset_fraction", 0.8)
-        self._num_simulations = kwargs.pop("num_simulations", CausalRefuter.DEFAULT_NUM_SIMULATIONS )
-        self._random_state = kwargs.pop("random_state",None)
+        self._num_simulations = kwargs.pop("num_simulations", CausalRefuter.DEFAULT_NUM_SIMULATIONS)
+        self._random_state = kwargs.pop("random_state", None)
 
         self.logger = logging.getLogger(__name__)
 
-    def refute_estimate(self):
+    def refute_estimate(self, show_progress_bar=False):
 
         sample_estimates = np.zeros(self._num_simulations)
-        self.logger.info("Refutation over {} simulated datasets of size {} each"
-                         .format(self._subset_fraction
-                         ,self._subset_fraction*len(self._data.index) )
-                        )
+        self.logger.info(
+            "Refutation over {} simulated datasets of size {} each".format(
+                self._subset_fraction, self._subset_fraction * len(self._data.index)
+            )
+        )
 
-        for index in range(self._num_simulations):
+        def refute_once():
             if self._random_state is None:
                 new_data = self._data.sample(frac=self._subset_fraction)
             else:
-                new_data = self._data.sample(frac=self._subset_fraction,
-                                            random_state=self._random_state)
-                                            
+                new_data = self._data.sample(frac=self._subset_fraction, random_state=self._random_state)
+
             new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
             new_effect = new_estimator.estimate_effect()
-            sample_estimates[index] = new_effect.value
+            return new_effect.value
+
+        # Run refutation in parallel
+        sample_estimates = Parallel(n_jobs=self._n_jobs, verbose=self._verbose)(
+            delayed(refute_once)()
+            for _ in tqdm(
+                range(self._num_simulations),
+                colour=CausalRefuter.PROGRESS_BAR_COLOR,
+                disable=not show_progress_bar,
+                desc="Refuting Estimates: ",
+            )
+        )
+        sample_estimates = np.array(sample_estimates)
 
         refute = CausalRefutation(
-            self._estimate.value,
-            np.mean(sample_estimates),
-            refutation_type="Refute: Use a subset of data"
+            self._estimate.value, np.mean(sample_estimates), refutation_type="Refute: Use a subset of data"
         )
 
         # We want to see if the estimate falls in the same distribution as the one generated by the refuter
         # Ideally that should be the case as choosing a subset should not have a significant effect on the ability
         # of the treatment to affect the outcome
-        refute.add_significance_test_results(
-            self.test_significance(self._estimate, sample_estimates)
-        )
+        refute.add_significance_test_results(self.test_significance(self._estimate, sample_estimates))
 
         refute.add_refuter(self)
         return refute

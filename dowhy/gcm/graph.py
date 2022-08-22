@@ -4,7 +4,7 @@ Classes and functions in this module should be considered experimental, meaning 
 the future.
 """
 
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from typing import Any, List
 
 import networkx as nx
@@ -13,15 +13,16 @@ from networkx.algorithms.dag import has_cycle
 from typing_extensions import Protocol
 
 # This constant is used as key when storing/accessing models as causal mechanisms in graph node attributes
-CAUSAL_MECHANISM = 'causal_mechanism'
+CAUSAL_MECHANISM = "causal_mechanism"
 
 # This constant is used as key when storing the parents of a node during fitting. It's used for validation purposes
 # afterwards.
-PARENTS_DURING_FIT = 'parents_during_fit'
+PARENTS_DURING_FIT = "parents_during_fit"
 
 
 class HasNodes(Protocol):
     """This protocol defines a trait for classes having nodes."""
+
     @property
     @abstractmethod
     def nodes(self):
@@ -31,6 +32,7 @@ class HasNodes(Protocol):
 
 class HasEdges(Protocol):
     """This protocol defines a trait for classes having edges."""
+
     @property
     @abstractmethod
     def edges(self):
@@ -45,6 +47,7 @@ class DirectedGraph(HasNodes, HasEdges, Protocol):
     compatible with DirectedGraph. While in most cases a networkx.DiGraph is the class of choice when constructing
     a causal graph, anyone can choose to provide their own implementation of the DirectGraph interface.
     """
+
     @abstractmethod
     def predecessors(self, node):
         raise NotImplementedError
@@ -139,7 +142,7 @@ def clone_causal_models(source: HasNodes, destination: HasNodes):
 
 def validate_acyclic(causal_graph: DirectedGraph) -> None:
     if has_cycle(causal_graph):
-        raise RuntimeError('The graph contains a cycle, but an acyclic graph is expected!')
+        raise RuntimeError("The graph contains a cycle, but an acyclic graph is expected!")
 
 
 def validate_causal_dag(causal_graph: DirectedGraph) -> None:
@@ -164,20 +167,26 @@ def validate_causal_model_assignment(causal_graph: DirectedGraph, target_node: A
 
     if is_root_node(causal_graph, target_node):
         if not isinstance(causal_model, StochasticModel):
-            raise RuntimeError('Node %s is a root node and, thus, requires a StochasticModel, '
-                               'but a %s was found!' % (target_node, causal_model))
+            raise RuntimeError(
+                "Node %s is a root node and, thus, requires a StochasticModel, "
+                "but a %s was found!" % (target_node, causal_model)
+            )
     elif not isinstance(causal_model, ConditionalStochasticModel):
-        raise RuntimeError('Node %s has parents and, thus, requires a ConditionalStochasticModel, '
-                           'but a %s was found!' % (target_node, causal_model))
+        raise RuntimeError(
+            "Node %s has parents and, thus, requires a ConditionalStochasticModel, "
+            "but a %s was found!" % (target_node, causal_model)
+        )
 
 
 def validate_local_structure(causal_graph: DirectedGraph, node: Any) -> None:
-    if PARENTS_DURING_FIT not in causal_graph.nodes[node] \
-            or causal_graph.nodes[node][PARENTS_DURING_FIT] \
-            != get_ordered_predecessors(causal_graph, node):
-        raise RuntimeError('The causal mechanism of node %s is not fitted to the graphical structure! Fit all'
-                           'causal models in the graph first. If the mechanism is already fitted based on the causal'
-                           'parents, consider to update the persisted parents for that node manually.' % node)
+    if PARENTS_DURING_FIT not in causal_graph.nodes[node] or causal_graph.nodes[node][
+        PARENTS_DURING_FIT
+    ] != get_ordered_predecessors(causal_graph, node):
+        raise RuntimeError(
+            "The causal mechanism of node %s is not fitted to the graphical structure! Fit all"
+            "causal models in the graph first. If the mechanism is already fitted based on the causal"
+            "parents, consider to update the persisted parents for that node manually." % node
+        )
 
 
 def validate_node_has_causal_model(causal_graph: HasNodes, node: Any) -> None:

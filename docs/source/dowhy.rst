@@ -1,4 +1,4 @@
-dowhy package
+API reference
 =============
 
 Subpackages
