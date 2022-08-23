@@ -96,7 +96,7 @@ class Causalml(CausalEstimator):
 
         arg_names = inspect.getfullargspec(self.estimator.estimate_ate)[0]
         matched_args = {arg: func_args[arg] for arg in func_args.keys() if arg in arg_names}
-        print(matched_args)
+        self.logger.debug(matched_args)
         value_tuple = self.estimator.estimate_ate(**matched_args)
 
         # For CATEs

@@ -136,7 +136,7 @@ class GraphRefuter(CausalRefuter):
                 variable_types_c = []
                 for var in c:
                     variable_types_c.append(variable_type[var])
-                print(
+                self.logger.warning(
                     "The following setting with {0} as {1}, {2} as {3}, {4} as {5} not supported".format(
                         a, variable_type[a], b, variable_type[b], c, variable_types_c
                     )
