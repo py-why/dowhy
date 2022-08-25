@@ -2,6 +2,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 from flaky import flaky
+from pytest import mark
 
 from dowhy.gcm import (
     InvertibleStructuralCausalModel,
@@ -171,8 +172,8 @@ def test_given_non_linear_data_and_correct_dag_when_refute_invertible_model_then
         )
         == RejectionResult.NOT_REJECTED
     )
-
-
+    
+@mark.advanced
 @flaky(max_runs=2)
 def test_given_non_linear_data_and_incorrect_dag_when_refute_invertible_model_then_reject_model():
     data = _generate_simple_non_linear_data()
@@ -198,7 +199,7 @@ def test_given_non_linear_data_and_incorrect_dag_when_refute_invertible_model_th
         == RejectionResult.REJECTED
     )
 
-
+@mark.advanced
 @flaky(max_runs=3)
 def test_given_non_linear_data_and_incorrect_dag_with_collider_when_refute_invertible_model_then_reject_model():
     data = _generate_simple_non_linear_data()
