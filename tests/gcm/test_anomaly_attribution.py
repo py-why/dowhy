@@ -119,6 +119,7 @@ def test_given_simple_gaussian_data_when_attribute_anomaly_scores_with_feature_r
         anomaly_scorer.score(anomaly_samples[2].reshape(1, -1)) - expectation_of_score
     )
 
+
 @mark.advanced
 @flaky(max_runs=3)
 def test_given_simple_causal_chain_with_linear_relationships_when_attribute_anomaly_scores_with_it_score_then_returns_qualitatively_correct_results():

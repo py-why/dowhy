@@ -12,6 +12,7 @@ from dowhy.gcm.ml import create_hist_gradient_boost_classifier
 from dowhy.gcm.uncertainty import estimate_entropy_of_probabilities, estimate_variance
 from dowhy.gcm.util.general import apply_one_hot_encoding, fit_one_hot_encoders
 
+
 @mark.advanced
 @flaky(max_runs=3)
 def test_intrinsic_causal_influence_variance_linear():
@@ -39,6 +40,7 @@ def test_intrinsic_causal_influence_variance_linear():
     assert iccs["X2"] == approx(4, abs=0.5)
     assert iccs["X3"] == approx(1, abs=0.25)
     assert np.sum([iccs[key] for key in iccs]) == approx(estimate_variance(X3), abs=0.5)
+
 
 @mark.advanced
 @flaky(max_runs=3)
@@ -82,6 +84,7 @@ def test_intrinsic_causal_influence_categorical():
     assert iccs["X3"] == approx(0.12, abs=0.05)
 
     assert np.sum([iccs[key] for key in iccs]) == approx(-expected_output_empty_subset, abs=0.05)
+
 
 @mark.advanced
 @flaky(max_runs=3)
@@ -137,6 +140,7 @@ def test_intrinsic_causal_influence_categorical_2():
     assert iccs["X3"] == approx(0.5, abs=0.05)
 
     assert np.sum([iccs[key] for key in iccs]) == approx(-expected_output_empty_subset, abs=0.05)
+
 
 @mark.advanced
 @flaky(max_runs=3)

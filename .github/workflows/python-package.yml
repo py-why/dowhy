@@ -44,15 +44,18 @@ jobs:
         poetry install -E plotting -E causalml
 
     - name: Lint
+      if: ${{ matrix.test-group }} == 1
       run: poetry run poe lint
 
     - name: Check Formatting
+      if: ${{ matrix.test-group }} == 1
       run: poetry run poe format_check
 
     - name: Test
-      run: poetry run poe test --splits 4 --group ${{ matrix.test-group}}
+      run: poetry run poe test --splits 4 --group ${{ matrix.test-group }}
 
     - name: Check package consistency
+      if: ${{ matrix.test-group }} == 1
       run: |
         poetry build
         poetry run poe verifyPackage

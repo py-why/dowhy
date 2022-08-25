@@ -96,6 +96,7 @@ def test_marginal_expectation_returns_reduced_results():
     assert results.shape[0] == 1000
     assert results.shape[1] == 1
 
+
 @mark.advanced
 @flaky(max_runs=5)
 def test_marginal_expectation_independent_continuous_linear():

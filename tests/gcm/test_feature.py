@@ -43,6 +43,7 @@ def test_when_using_parent_relevance_with_continous_data_then_returns_correct_re
     assert relevance[("X1", "X2")] == approx(1, abs=0.3)
     assert noise == approx(0, abs=0.5)
 
+
 @mark.advanced
 @flaky(max_runs=5)
 def test_when_using_parent_relevance_with_categorical_data_then_returns_correct_results():
