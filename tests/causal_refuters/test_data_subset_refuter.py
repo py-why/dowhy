@@ -11,6 +11,7 @@ class TestDataSubsetRefuter(object):
         refuter_tester = TestRefuter(error_tolerance, estimator_method, "data_subset_refuter")
         refuter_tester.continuous_treatment_testsuite()  # Run both
 
+    @pytest.mark.advanced
     @pytest.mark.parametrize(["error_tolerance", "estimator_method"], [(0.01, "backdoor.propensity_score_matching")])
     def test_refutation_data_subset_refuter_binary(self, error_tolerance, estimator_method):
         refuter_tester = TestRefuter(error_tolerance, estimator_method, "data_subset_refuter")
