@@ -83,9 +83,11 @@ class AddUnobservedCommonCause(CausalRefuter):
         self.num_splits = kwargs["num_splits"] if "num_splits" in kwargs else 5
         self.shuffle_data = kwargs["shuffle_data"] if "shuffle_data" in kwargs else False
         self.shuffle_random_seed = kwargs["shuffle_random_seed"] if "shuffle_random_seed" in kwargs else None
-        self.alpha_s_param_dict = kwargs["alpha_s_param_dict"] if "alpha_s_param_dict" in kwargs else None
+        self.alpha_s_estimator_param_list = kwargs["alpha_s_estimator_param_list"] if "alpha_s_estimator_param_list" in kwargs else None
+        self.alpha_s_estimator_list = kwargs["alpha_s_estimator_list"] if "alpha_s_estimator_list" in kwargs else None
         self.g_s_estimator_list = kwargs["g_s_estimator_list"] if "g_s_estimator_list" in kwargs else None
         self.g_s_estimator_param_list = kwargs["g_s_estimator_param_list"] if "g_s_estimator_param_list" in kwargs else None
+        self.plugin_reisz = kwargs["plugin_reisz"] if "plugin_reisz" in kwargs else False
         self.logger = logging.getLogger(__name__)
 
 
@@ -241,14 +243,16 @@ class AddUnobservedCommonCause(CausalRefuter):
                 estimator=self._estimate.estimator,
                 observed_common_causes = self._estimate.estimator._observed_common_causes, 
                 treatment = self._estimate.estimator._treatment, outcome = self._estimate.estimator._outcome, 
-                alpha_s_param_dict = self.alpha_s_param_dict,
+                alpha_s_estimator_list = self.alpha_s_estimator_list,
+                alpha_s_estimator_param_list = self.alpha_s_estimator_param_list,
                 g_s_estimator_list = self.g_s_estimator_list,
                 g_s_estimator_param_list = self.g_s_estimator_param_list,
                 benchmark_common_causes= self.benchmark_common_causes,
                 frac_strength_treatment = self.frac_strength_treatment, 
                 frac_strength_outcome = self.frac_strength_outcome,
                 theta_s = self._estimate.value,
-                max_frac_inc_reisz=0.99 # TODO make this consistent with effect_strength_treatment
+                max_frac_inc_reisz=0.99, # TODO make this consistent with effect_strength_treatment
+                plugin_reisz=self.plugin_reisz
             )
             analyzer.check_sensitivity(plot = self.plot_estimate)
             return analyzer

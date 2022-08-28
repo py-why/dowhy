@@ -9,8 +9,7 @@ from sklearn.linear_model import LinearRegression, Lasso, SGDRegressor, Ridge, R
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.compose import ColumnTransformer, make_column_selector
-from dowhy.utils.util import get_numeric_features
-from dowhy.causal_refuters.reisz import get_generic_regressor, create_polynomial_function
+from dowhy.utils.util import get_numeric_features, get_generic_regressor
 
 
 class PartialLinearSensitivityAnalyzer:
@@ -30,9 +29,10 @@ class PartialLinearSensitivityAnalyzer:
     :param significance_level: confidence interval for statistical inference(default = 0.05)
     :param frac_strength_treatment: strength of association between unobserved confounder and treatment compared to benchmark covariate
     :param frac_strength_outcome: strength of association between unobserved confounder and outcome compared to benchmark covariate
-    :param alpha_s_param_dict: dictionary with parameters for finding alpha_s 
     :param g_s_estimator_list: list of estimator objects for finding g_s. These objects should have fit() and predict() functions.
     :param g_s_estimator_param_list: list of dictionaries with parameters for tuning respective estimators in "g_s_estimator_list". 
+    :param alpha_s_estimator_list: list of estimator objects for finding the treatment predictor which is used for alpha_s estimation. These objects should have fit() and predict_proba() functions.
+    :param alpha_s_estimator_param_list: list of dictionaries with parameters for tuning respective estimators in "alpha_s_estimator_list". 
                                      The order of the dictionaries in the list should be consistent with the estimator objects order in "g_s_estimator_list"
     :param observed_common_causes: common causes dataframe
     :param outcome: outcome dataframe
@@ -44,7 +44,7 @@ class PartialLinearSensitivityAnalyzer:
                  significance_level=0.05, benchmark_common_causes=None,
                  frac_strength_treatment=None, frac_strength_outcome=None,
                  observed_common_causes=None, treatment=None, outcome=None,
-                 g_s_estimator_list=None, alpha_s_param_dict=None, g_s_estimator_param_list=None , **kwargs):
+                 g_s_estimator_list=None, alpha_s_estimator_list=None, g_s_estimator_param_list=None , alpha_s_estimator_param_list=None, **kwargs):
         self.estimator = estimator
         self.num_splits = num_splits
         self.shuffle_data = shuffle_data
@@ -52,7 +52,8 @@ class PartialLinearSensitivityAnalyzer:
         self.reisz_polynomial_max_degree = reisz_polynomial_max_degree
         self.g_s_estimator_list = g_s_estimator_list
         self.g_s_estimator_param_list = g_s_estimator_param_list
-        self.alpha_s_param_dict = alpha_s_param_dict
+        self.alpha_s_estimator_list = alpha_s_estimator_list
+        self.alpha_s_estimator_param_list = alpha_s_estimator_param_list
         self.significance_level = significance_level
         self.observed_common_causes = observed_common_causes
         self.treatment = treatment
@@ -273,6 +274,7 @@ class PartialLinearSensitivityAnalyzer:
         else: # non parametric DGP
             # return the variance of alpha_s 
             var_alpha_wj = self.get_alpharegression_var(X=T_W_j, 
+                    numeric_features=numeric_features, # using numeric_features because the model only uses W
                     split_indices=split_indices)
             delta_r2t_wj = var_alpha_wj
 
@@ -430,7 +432,7 @@ class PartialLinearSensitivityAnalyzer:
              contours_label_color="black", critical_label_color="red",
              unadjusted_estimate_marker='D', unadjusted_estimate_color="black",
              adjusted_estimate_marker='^', adjusted_estimate_color="red",
-             legend_position=(1.6, 0.6)):
+             legend_position=(1.05, 1)):
         """
         Plots and summarizes the sensitivity bounds as a contour plot, as they vary with the partial R^2 of the unobserved confounder(s) with the treatment and the outcome
         Two types of plots can be generated, based on adjusted estimates or adjusted t-values
@@ -514,7 +516,7 @@ class PartialLinearSensitivityAnalyzer:
                    marker=adjusted_estimate_marker, label=label)
 
         plt.margins()
-        ax.legend(bbox_to_anchor=legend_position)
+        ax.legend(bbox_to_anchor=legend_position, loc="upper left")
         plt.show()
     
     def __str__(self):
