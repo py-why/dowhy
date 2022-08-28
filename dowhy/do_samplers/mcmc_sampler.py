@@ -1,20 +1,34 @@
-from dowhy.do_sampler import DoSampler
+import networkx as nx
 import numpy as np
 import pymc3 as pm
-import networkx as nx
+
+from dowhy.do_sampler import DoSampler
 
 
 class McmcSampler(DoSampler):
-    def __init__(self, data, *args, params=None, variable_types=None,
-                 num_cores=1, keep_original_treatment=False,
-                 causal_model=None,
-                 **kwargs):
+    def __init__(
+        self,
+        data,
+        *args,
+        params=None,
+        variable_types=None,
+        num_cores=1,
+        keep_original_treatment=False,
+        causal_model=None,
+        **kwargs,
+    ):
         """
         g, df, data_types
 
         """
-        super().__init__(data, params=params, variable_types=variable_types, causal_model=causal_model,
-                 num_cores=num_cores, keep_original_treatment=keep_original_treatment)
+        super().__init__(
+            data,
+            params=params,
+            variable_types=variable_types,
+            causal_model=causal_model,
+            num_cores=num_cores,
+            keep_original_treatment=keep_original_treatment,
+        )
 
         self.logger.info("Using McmcSampler for do sampling.")
         self.point_sampler = False
@@ -22,9 +36,7 @@ class McmcSampler(DoSampler):
 
         self.g = causal_model._graph.get_unconfounded_observed_subgraph()
         g_fit = nx.DiGraph(self.g)
-        _, self.fit_trace = self.fit_causal_model(g_fit,
-                                                  self._data,
-                                                  self._variable_types)
+        _, self.fit_trace = self.fit_causal_model(g_fit, self._data, self._variable_types)
 
     def apply_data_types(self, g, data_types):
         for node in nx.topological_sort(g):
@@ -49,8 +61,9 @@ class McmcSampler(DoSampler):
                     node_sd = initialization_trace["{}_sd".format(node)].mean()
                     mu = initialization_trace["beta_{}".format(node)].mean(axis=0)
                     sd = initialization_trace["beta_{}".format(node)].std(axis=0)
-                g.nodes()[node]["parameters"] = pm.Normal("beta_{}".format(node), mu=mu, sd=sd,
-                                                          shape=len(parent_names) + 1)
+                g.nodes()[node]["parameters"] = pm.Normal(
+                    "beta_{}".format(node), mu=mu, sd=sd, shape=len(parent_names) + 1
+                )
                 g.nodes()[node]["sd"] = pm.Exponential("{}_sd".format(node), lam=node_sd)
         return g
 
@@ -58,17 +71,12 @@ class McmcSampler(DoSampler):
         for node in nx.topological_sort(g):
             if g.nodes()[node]["parent_names"]:
                 mu = g.nodes()[node]["parameters"][0]  # intercept
-                mu += pm.math.dot(df[g.nodes()[node]["parent_names"]],
-                                  g.nodes()[node]["parameters"][1:])
-                if g.nodes()[node]["variable_type"] == 'c':
+                mu += pm.math.dot(df[g.nodes()[node]["parent_names"]], g.nodes()[node]["parameters"][1:])
+                if g.nodes()[node]["variable_type"] == "c":
                     sd = g.nodes()[node]["sd"]
-                    g.nodes()[node]["variable"] = pm.Normal("{}".format(node),
-                                                            mu=mu, sd=sd,
-                                                            observed=df[node])
-                elif g.nodes()[node]["variable_type"] == 'b':
-                    g.nodes()[node]["variable"] = pm.Bernoulli("{}".format(node),
-                                                               logit_p=mu,
-                                                               observed=df[node])
+                    g.nodes()[node]["variable"] = pm.Normal("{}".format(node), mu=mu, sd=sd, observed=df[node])
+                elif g.nodes()[node]["variable_type"] == "b":
+                    g.nodes()[node]["variable"] = pm.Bernoulli("{}".format(node), logit_p=mu, observed=df[node])
                 else:
                     raise Exception("Unrecognized variable type: {}".format(g.nodes()[node]["variable_type"]))
         return g
@@ -114,10 +122,9 @@ class McmcSampler(DoSampler):
         g_for_surgery = nx.DiGraph(self.g)
         g_modified = self.do_x_surgery(g_for_surgery, x)
         self._df = self.make_intervention_effective(x)
-        g_modified, trace = self.sample_prior_causal_model(g_modified,
-                                                           self._df,
-                                                           self._variable_types,
-                                                           initialization_trace=self.fit_trace)
+        g_modified, trace = self.sample_prior_causal_model(
+            g_modified, self._df, self._variable_types, initialization_trace=self.fit_trace
+        )
         for col in self._df:
             if col in trace and col not in self._treatment_names:
                 self._df[col] = trace[col]

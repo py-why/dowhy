@@ -4,9 +4,13 @@ from flaky import flaky
 from numpy.matlib import repmat
 from pytest import approx
 
-from dowhy.gcm.ml import create_hist_gradient_boost_classifier, create_hist_gradient_boost_regressor, \
-    create_logistic_regression_classifier, create_linear_regressor
-from dowhy.gcm.stats import quantile_based_fwer, marginal_expectation
+from dowhy.gcm.ml import (
+    create_hist_gradient_boost_classifier,
+    create_hist_gradient_boost_regressor,
+    create_linear_regressor,
+    create_logistic_regression_classifier,
+)
+from dowhy.gcm.stats import estimate_ftest_pvalue, marginal_expectation, quantile_based_fwer
 from dowhy.gcm.util.general import geometric_median
 
 
@@ -29,8 +33,10 @@ def test_quantile_based_fwer():
     assert quantile_based_fwer(p_values, quantile=0.25) == 0.0325 / 0.25
     assert quantile_based_fwer(p_values, quantile=0.75) == 0.0775 / 0.75
 
-    assert quantile_based_fwer(np.array([0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 1]),
-                               quantile=0.5) == 0.06 / 0.5
+    assert (
+        quantile_based_fwer(np.array([0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 1]), quantile=0.5)
+        == 0.06 / 0.5
+    )
     assert quantile_based_fwer(np.array([0.9, 0.95, 1]), quantile=0.5) == 1
     assert quantile_based_fwer(np.array([0, 0, 0]), quantile=0.5) == 0
     assert quantile_based_fwer(np.array([0.33]), quantile=0.5) == 0.33
@@ -113,63 +119,71 @@ def test_marginal_expectation_independent_continuous_linear():
     model_feature_01 = create_linear_regressor()
     model_feature_01.fit(X01, Y)
 
-    assert np.mean(np.abs(model_feature_0.predict(X0).reshape(-1, 1)
-                          - marginal_expectation(model_all_features.predict,
-                                                 X,
-                                                 X,
-                                                 [0],
-                                                 feature_perturbation='randomize_columns_independently'))) \
-           == approx(0.2, abs=1)
-    assert np.mean(np.abs(model_feature_1.predict(X1).reshape(-1, 1)
-                          - marginal_expectation(model_all_features.predict,
-                                                 X,
-                                                 X,
-                                                 [1],
-                                                 feature_perturbation='randomize_columns_independently'))) \
-           == approx(0.2, abs=1)
-    assert np.mean(np.abs(model_feature_2.predict(X2).reshape(-1, 1)
-                          - marginal_expectation(model_all_features.predict,
-                                                 X,
-                                                 X,
-                                                 [2],
-                                                 feature_perturbation='randomize_columns_independently'))) \
-           == approx(0.2, abs=1)
-    assert np.mean(np.abs(model_feature_01.predict(X01).reshape(-1, 1)
-                          - marginal_expectation(model_all_features.predict,
-                                                 X,
-                                                 X,
-                                                 [0, 1],
-                                                 feature_perturbation='randomize_columns_independently'))) \
-           == approx(0.2, abs=1)
+    assert np.mean(
+        np.abs(
+            model_feature_0.predict(X0).reshape(-1, 1)
+            - marginal_expectation(
+                model_all_features.predict, X, X, [0], feature_perturbation="randomize_columns_independently"
+            )
+        )
+    ) == approx(0.2, abs=1)
+    assert np.mean(
+        np.abs(
+            model_feature_1.predict(X1).reshape(-1, 1)
+            - marginal_expectation(
+                model_all_features.predict, X, X, [1], feature_perturbation="randomize_columns_independently"
+            )
+        )
+    ) == approx(0.2, abs=1)
+    assert np.mean(
+        np.abs(
+            model_feature_2.predict(X2).reshape(-1, 1)
+            - marginal_expectation(
+                model_all_features.predict, X, X, [2], feature_perturbation="randomize_columns_independently"
+            )
+        )
+    ) == approx(0.2, abs=1)
+    assert np.mean(
+        np.abs(
+            model_feature_01.predict(X01).reshape(-1, 1)
+            - marginal_expectation(
+                model_all_features.predict, X, X, [0, 1], feature_perturbation="randomize_columns_independently"
+            )
+        )
+    ) == approx(0.2, abs=1)
 
-    assert np.mean(np.abs(model_feature_0.predict(X0).reshape(-1, 1)
-                          - marginal_expectation(model_all_features.predict,
-                                                 X,
-                                                 X,
-                                                 [0],
-                                                 feature_perturbation='randomize_columns_jointly'))) \
-           == approx(0.2, abs=1)
-    assert np.mean(np.abs(model_feature_1.predict(X1).reshape(-1, 1)
-                          - marginal_expectation(model_all_features.predict,
-                                                 X,
-                                                 X,
-                                                 [1],
-                                                 feature_perturbation='randomize_columns_jointly'))) \
-           == approx(0.2, abs=1)
-    assert np.mean(np.abs(model_feature_2.predict(X2).reshape(-1, 1)
-                          - marginal_expectation(model_all_features.predict,
-                                                 X,
-                                                 X,
-                                                 [2],
-                                                 feature_perturbation='randomize_columns_jointly'))) \
-           == approx(0.2, abs=1)
-    assert np.mean(np.abs(model_feature_01.predict(X01).reshape(-1, 1)
-                          - marginal_expectation(model_all_features.predict,
-                                                 X,
-                                                 X,
-                                                 [0, 1],
-                                                 feature_perturbation='randomize_columns_jointly'))) \
-           == approx(0.2, abs=1)
+    assert np.mean(
+        np.abs(
+            model_feature_0.predict(X0).reshape(-1, 1)
+            - marginal_expectation(
+                model_all_features.predict, X, X, [0], feature_perturbation="randomize_columns_jointly"
+            )
+        )
+    ) == approx(0.2, abs=1)
+    assert np.mean(
+        np.abs(
+            model_feature_1.predict(X1).reshape(-1, 1)
+            - marginal_expectation(
+                model_all_features.predict, X, X, [1], feature_perturbation="randomize_columns_jointly"
+            )
+        )
+    ) == approx(0.2, abs=1)
+    assert np.mean(
+        np.abs(
+            model_feature_2.predict(X2).reshape(-1, 1)
+            - marginal_expectation(
+                model_all_features.predict, X, X, [2], feature_perturbation="randomize_columns_jointly"
+            )
+        )
+    ) == approx(0.2, abs=1)
+    assert np.mean(
+        np.abs(
+            model_feature_01.predict(X01).reshape(-1, 1)
+            - marginal_expectation(
+                model_all_features.predict, X, X, [0, 1], feature_perturbation="randomize_columns_jointly"
+            )
+        )
+    ) == approx(0.2, abs=1)
 
 
 @flaky(max_runs=5)
@@ -194,38 +208,66 @@ def test_marginal_expectation_independent_categorical_linear():
     model_feature_01 = create_logistic_regression_classifier()
     model_feature_01.fit(X01, Y)
 
-    assert np.sum(np.mean(np.abs(model_feature_0.predict_probabilities(X0)
-                                 - marginal_expectation(model_all_features.predict_probabilities,
-                                                        X,
-                                                        X,
-                                                        [0],
-                                                        feature_perturbation=
-                                                        'randomize_columns_independently')),
-                          axis=0)) == approx(0.2, abs=1)
-    assert np.sum(np.mean(np.abs(model_feature_1.predict_probabilities(X1)
-                                 - marginal_expectation(model_all_features.predict_probabilities,
-                                                        X,
-                                                        X,
-                                                        [1],
-                                                        feature_perturbation=
-                                                        'randomize_columns_independently')),
-                          axis=0)) == approx(0.2, abs=1)
-    assert np.sum(np.mean(np.abs(model_feature_2.predict_probabilities(X2)
-                                 - marginal_expectation(model_all_features.predict_probabilities,
-                                                        X,
-                                                        X,
-                                                        [2],
-                                                        feature_perturbation=
-                                                        'randomize_columns_independently')),
-                          axis=0)) == approx(0.2, abs=1)
-    assert np.sum(np.mean(np.abs(model_feature_01.predict_probabilities(X01)
-                                 - marginal_expectation(model_all_features.predict_probabilities,
-                                                        X,
-                                                        X,
-                                                        [0, 1],
-                                                        feature_perturbation=
-                                                        'randomize_columns_independently')),
-                          axis=0)) == approx(0.2, abs=1)
+    assert np.sum(
+        np.mean(
+            np.abs(
+                model_feature_0.predict_probabilities(X0)
+                - marginal_expectation(
+                    model_all_features.predict_probabilities,
+                    X,
+                    X,
+                    [0],
+                    feature_perturbation="randomize_columns_independently",
+                )
+            ),
+            axis=0,
+        )
+    ) == approx(0.2, abs=1)
+    assert np.sum(
+        np.mean(
+            np.abs(
+                model_feature_1.predict_probabilities(X1)
+                - marginal_expectation(
+                    model_all_features.predict_probabilities,
+                    X,
+                    X,
+                    [1],
+                    feature_perturbation="randomize_columns_independently",
+                )
+            ),
+            axis=0,
+        )
+    ) == approx(0.2, abs=1)
+    assert np.sum(
+        np.mean(
+            np.abs(
+                model_feature_2.predict_probabilities(X2)
+                - marginal_expectation(
+                    model_all_features.predict_probabilities,
+                    X,
+                    X,
+                    [2],
+                    feature_perturbation="randomize_columns_independently",
+                )
+            ),
+            axis=0,
+        )
+    ) == approx(0.2, abs=1)
+    assert np.sum(
+        np.mean(
+            np.abs(
+                model_feature_01.predict_probabilities(X01)
+                - marginal_expectation(
+                    model_all_features.predict_probabilities,
+                    X,
+                    X,
+                    [0, 1],
+                    feature_perturbation="randomize_columns_independently",
+                )
+            ),
+            axis=0,
+        )
+    ) == approx(0.2, abs=1)
 
 
 @flaky(max_runs=5)
@@ -250,34 +292,38 @@ def test_marginal_expectation_independent_continuous_nonlinear():
     model_feature_01 = create_hist_gradient_boost_regressor()
     model_feature_01.fit(X01, Y)
 
-    assert np.mean(np.abs(model_feature_0.predict(X0[:100]).reshape(-1, 1)
-                          - marginal_expectation(model_all_features.predict,
-                                                 X,
-                                                 X[:100],
-                                                 [0],
-                                                 feature_perturbation='randomize_columns_independently'))) \
-           == approx(0, abs=100)
-    assert np.mean(np.abs(model_feature_1.predict(X1[:100]).reshape(-1, 1)
-                          - marginal_expectation(model_all_features.predict,
-                                                 X,
-                                                 X[:100],
-                                                 [1],
-                                                 feature_perturbation='randomize_columns_independently'))) \
-           == approx(0, abs=100)
-    assert np.mean(np.abs(model_feature_2.predict(X2[:100]).reshape(-1, 1)
-                          - marginal_expectation(model_all_features.predict,
-                                                 X,
-                                                 X[:100],
-                                                 [2],
-                                                 feature_perturbation='randomize_columns_independently'))) \
-           == approx(0, abs=100)
-    assert np.mean(np.abs(model_feature_01.predict(X01[:100]).reshape(-1, 1)
-                          - marginal_expectation(model_all_features.predict,
-                                                 X,
-                                                 X[:100],
-                                                 [0, 1],
-                                                 feature_perturbation='randomize_columns_independently'))) \
-           == approx(0, abs=100)
+    assert np.mean(
+        np.abs(
+            model_feature_0.predict(X0[:100]).reshape(-1, 1)
+            - marginal_expectation(
+                model_all_features.predict, X, X[:100], [0], feature_perturbation="randomize_columns_independently"
+            )
+        )
+    ) == approx(0, abs=100)
+    assert np.mean(
+        np.abs(
+            model_feature_1.predict(X1[:100]).reshape(-1, 1)
+            - marginal_expectation(
+                model_all_features.predict, X, X[:100], [1], feature_perturbation="randomize_columns_independently"
+            )
+        )
+    ) == approx(0, abs=100)
+    assert np.mean(
+        np.abs(
+            model_feature_2.predict(X2[:100]).reshape(-1, 1)
+            - marginal_expectation(
+                model_all_features.predict, X, X[:100], [2], feature_perturbation="randomize_columns_independently"
+            )
+        )
+    ) == approx(0, abs=100)
+    assert np.mean(
+        np.abs(
+            model_feature_01.predict(X01[:100]).reshape(-1, 1)
+            - marginal_expectation(
+                model_all_features.predict, X, X[:100], [0, 1], feature_perturbation="randomize_columns_independently"
+            )
+        )
+    ) == approx(0, abs=100)
 
 
 @flaky(max_runs=5)
@@ -302,71 +348,155 @@ def test_marginal_expectation_independent_categorical_nonlinear():
     model_feature_01 = create_hist_gradient_boost_classifier()
     model_feature_01.fit(X01, Y)
 
-    assert np.sum(np.mean(np.abs(model_feature_0.predict_probabilities(X0[:100])
-                                 - marginal_expectation(model_all_features.predict_probabilities,
-                                                        X,
-                                                        X[:100],
-                                                        [0],
-                                                        feature_perturbation=
-                                                        'randomize_columns_independently')),
-                          axis=0)) == approx(0.2, abs=1)
-    assert np.sum(np.mean(np.abs(model_feature_1.predict_probabilities(X1[:100])
-                                 - marginal_expectation(model_all_features.predict_probabilities,
-                                                        X,
-                                                        X[:100],
-                                                        [1],
-                                                        feature_perturbation=
-                                                        'randomize_columns_independently')),
-                          axis=0)) == approx(0.2, abs=1)
-    assert np.sum(np.mean(np.abs(model_feature_2.predict_probabilities(X2[:100])
-                                 - marginal_expectation(model_all_features.predict_probabilities,
-                                                        X,
-                                                        X[:100],
-                                                        [2],
-                                                        feature_perturbation=
-                                                        'randomize_columns_independently')),
-                          axis=0)) == approx(0.2, abs=1)
-    assert np.sum(np.mean(np.abs(model_feature_01.predict_probabilities(X01[:100])
-                                 - marginal_expectation(model_all_features.predict_probabilities,
-                                                        X,
-                                                        X[:100],
-                                                        [0, 1],
-                                                        feature_perturbation=
-                                                        'randomize_columns_independently')),
-                          axis=0)) == approx(0.2, abs=1)
+    assert np.sum(
+        np.mean(
+            np.abs(
+                model_feature_0.predict_probabilities(X0[:100])
+                - marginal_expectation(
+                    model_all_features.predict_probabilities,
+                    X,
+                    X[:100],
+                    [0],
+                    feature_perturbation="randomize_columns_independently",
+                )
+            ),
+            axis=0,
+        )
+    ) == approx(0.2, abs=1)
+    assert np.sum(
+        np.mean(
+            np.abs(
+                model_feature_1.predict_probabilities(X1[:100])
+                - marginal_expectation(
+                    model_all_features.predict_probabilities,
+                    X,
+                    X[:100],
+                    [1],
+                    feature_perturbation="randomize_columns_independently",
+                )
+            ),
+            axis=0,
+        )
+    ) == approx(0.2, abs=1)
+    assert np.sum(
+        np.mean(
+            np.abs(
+                model_feature_2.predict_probabilities(X2[:100])
+                - marginal_expectation(
+                    model_all_features.predict_probabilities,
+                    X,
+                    X[:100],
+                    [2],
+                    feature_perturbation="randomize_columns_independently",
+                )
+            ),
+            axis=0,
+        )
+    ) == approx(0.2, abs=1)
+    assert np.sum(
+        np.mean(
+            np.abs(
+                model_feature_01.predict_probabilities(X01[:100])
+                - marginal_expectation(
+                    model_all_features.predict_probabilities,
+                    X,
+                    X[:100],
+                    [0, 1],
+                    feature_perturbation="randomize_columns_independently",
+                )
+            ),
+            axis=0,
+        )
+    ) == approx(0.2, abs=1)
 
 
 def test_given_different_batch_sizes_when_estimating_marginal_expectation_then_returns_expected_result():
     X = np.random.normal(0, 1, (34, 3))
-    background_samples = np.random.normal(0, 1, (123, 3))
-    expected_non_aggregated = np.array([repmat(X[i, :], background_samples.shape[0], 1) for i in range(X.shape[0])])
+    feature_samples = np.random.normal(0, 1, (123, 3))
+    expected_non_aggregated = np.array([repmat(X[i, :], feature_samples.shape[0], 1) for i in range(X.shape[0])])
 
     def my_pred_func(X: np.ndarray) -> np.ndarray:
         return X.copy()
 
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
-                                max_batch_size=1) == approx(X)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
-                                max_batch_size=10) == approx(X)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
-                                max_batch_size=100) == approx(X)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
-                                max_batch_size=1000) == approx(X)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
-                                max_batch_size=background_samples.shape[0]) == approx(X)
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2], max_batch_size=1) == approx(X)
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2], max_batch_size=10) == approx(X)
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2], max_batch_size=100) == approx(X)
+    assert marginal_expectation(my_pred_func, feature_samples, X, [0, 1, 2], max_batch_size=1000) == approx(X)
+    assert marginal_expectation(
+        my_pred_func, feature_samples, X, [0, 1, 2], max_batch_size=feature_samples.shape[0]
+    ) == approx(X)
 
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
-                                max_batch_size=1,
-                                return_averaged_results=False) == approx(expected_non_aggregated)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
-                                max_batch_size=10,
-                                return_averaged_results=False) == approx(expected_non_aggregated)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
-                                max_batch_size=100,
-                                return_averaged_results=False) == approx(expected_non_aggregated)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
-                                max_batch_size=1000,
-                                return_averaged_results=False) == approx(expected_non_aggregated)
-    assert marginal_expectation(my_pred_func, background_samples, X, [0, 1, 2],
-                                max_batch_size=background_samples.shape[0],
-                                return_averaged_results=False) == approx(expected_non_aggregated)
+    assert marginal_expectation(
+        my_pred_func, feature_samples, X, [0, 1, 2], max_batch_size=1, return_averaged_results=False
+    ) == approx(expected_non_aggregated)
+    assert marginal_expectation(
+        my_pred_func, feature_samples, X, [0, 1, 2], max_batch_size=10, return_averaged_results=False
+    ) == approx(expected_non_aggregated)
+    assert marginal_expectation(
+        my_pred_func, feature_samples, X, [0, 1, 2], max_batch_size=100, return_averaged_results=False
+    ) == approx(expected_non_aggregated)
+    assert marginal_expectation(
+        my_pred_func, feature_samples, X, [0, 1, 2], max_batch_size=1000, return_averaged_results=False
+    ) == approx(expected_non_aggregated)
+    assert marginal_expectation(
+        my_pred_func,
+        feature_samples,
+        X,
+        [0, 1, 2],
+        max_batch_size=feature_samples.shape[0],
+        return_averaged_results=False,
+    ) == approx(expected_non_aggregated)
+
+
+@flaky(max_runs=2)
+def test_given_linear_dependent_data_when_estimate_ftest_pvalue_then_returns_expected_result():
+    X_training = np.random.normal(0, 1, 1000)
+    Y_training = X_training + np.random.normal(0, 0.05, 1000)
+
+    X_test = np.random.normal(0, 1, 1000)
+    Y_test = X_test + np.random.normal(0, 0.05, 1000)
+
+    assert estimate_ftest_pvalue(X_training, np.array([]), Y_training, X_test, np.array([]), Y_test) < 0.05
+
+    Y_training = np.random.normal(0, 0.05, 1000)
+    Y_test = np.random.normal(0, 0.05, 1000)
+
+    assert estimate_ftest_pvalue(X_training, np.array([]), Y_training, X_test, np.array([]), Y_test) >= 0.05
+
+
+@flaky(max_runs=2)
+def test_given_multivariate_dependent_data_when_estimate_ftest_pvalue_then_returns_expected_result():
+    X1_training = np.random.normal(0, 1, 1000)
+    X2_training = np.random.normal(0, 1, 1000)
+    Y_training = X1_training + X2_training + np.random.normal(0, 0.05, 1000)
+
+    X1_test = np.random.normal(0, 1, 1000)
+    X2_test = np.random.normal(0, 1, 1000)
+    Y_test = X1_test + X2_test + np.random.normal(0, 0.05, 1000)
+
+    assert (
+        estimate_ftest_pvalue(
+            np.column_stack([X1_training, X2_training]),
+            X1_training,
+            Y_training,
+            np.column_stack([X1_test, X2_test]),
+            X1_test,
+            Y_test,
+        )
+        < 0.05
+    )
+
+    Y_training = X1_training + np.random.normal(0, 0.05, 1000)
+    Y_test = X1_test + np.random.normal(0, 0.05, 1000)
+
+    assert (
+        estimate_ftest_pvalue(
+            np.column_stack([X1_training, X2_training]),
+            X1_training,
+            Y_training,
+            np.column_stack([X1_test, X2_test]),
+            X1_test,
+            Y_test,
+        )
+        >= 0.05
+    )

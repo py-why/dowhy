@@ -19,22 +19,27 @@ def estimate_entropy_using_discretization(X: np.ndarray, bin_width: float = 1) -
     X = shape_into_2d(X)
 
     if X.shape[1] > 1:
-        raise RuntimeError('The discrete entropy estimator can only handle one dimensional data, but the input data is '
-                           '%d dimensional!' % X.shape[1])
+        raise RuntimeError(
+            "The discrete entropy estimator can only handle one dimensional data, but the input data is "
+            "%d dimensional!" % X.shape[1]
+        )
 
     max_value = np.max(X)
     min_value = np.min(X)
     number_of_bins = max(1, int((max_value - min_value) / bin_width))
     num_samples = X.shape[0]
-    return -np.sum([(i / num_samples * np.log(i / num_samples)) if i > 0 else 0
-                    for i in
-                    np.histogram(X, bins=np.linspace(min_value, max_value, number_of_bins).reshape(-1))[0]])
+    return -np.sum(
+        [
+            (i / num_samples * np.log(i / num_samples)) if i > 0 else 0
+            for i in np.histogram(X, bins=np.linspace(min_value, max_value, number_of_bins).reshape(-1))[0]
+        ]
+    )
 
 
 def estimate_entropy_kmeans(X: np.ndarray) -> float:
     """Related paper:
-           Kozachenko, L., & Leonenko, N. (1987). Sample estimate of the entropy of a random vector. Problemy Peredachi
-           Informatsii, 23(2), 9–16.
+    Kozachenko, L., & Leonenko, N. (1987). Sample estimate of the entropy of a random vector. Problemy Peredachi
+    Informatsii, 23(2), 9–16.
     """
     X = shape_into_2d(X)
 

@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-10-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-21-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Contributors ✨
@@ -24,6 +24,19 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="http://toppare.github.io/"><img src="https://avatars.githubusercontent.com/u/6221127?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Baran Toppare</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=toppare" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/EgorKraevTransferwise"><img src="https://avatars.githubusercontent.com/u/62890791?v=4?s=100" width="100px;" alt=""/><br /><sub><b>EgorKraevTransferwise</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=EgorKraevTransferwise" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/ryanrussell"><img src="https://avatars.githubusercontent.com/u/523300?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ryan Russell</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=ryanrussell" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/MichaelMarien"><img src="https://avatars.githubusercontent.com/u/13829139?v=4?s=100" width="100px;" alt=""/><br /><sub><b>MichaelMarien</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=MichaelMarien" title="Code">💻</a> <a href="https://github.com/py-why/dowhy/commits?author=MichaelMarien" title="Documentation">📖</a></td>
+    <td align="center"><a href="http://people.mpi-inf.mpg.de/~kbudhath/"><img src="https://avatars.githubusercontent.com/u/111277?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Kailashbuki</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=kailashbuki" title="Code">💻</a> <a href="https://github.com/py-why/dowhy/commits?author=kailashbuki" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/petergtz"><img src="https://avatars.githubusercontent.com/u/3618401?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Peter Götz</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=petergtz" title="Code">💻</a> <a href="https://github.com/py-why/dowhy/commits?author=petergtz" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/bloebp"><img src="https://avatars.githubusercontent.com/u/51325689?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Patrick Blöbaum</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=bloebp" title="Code">💻</a> <a href="https://github.com/py-why/dowhy/commits?author=bloebp" title="Documentation">📖</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/itsoum"><img src="https://avatars.githubusercontent.com/u/9675299?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ilias Tsoumas</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=itsoum" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/elikling"><img src="https://avatars.githubusercontent.com/u/8556526?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Eli Y. Kling</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=elikling" title="Documentation">📖</a></td>
+    <td align="center"><a href="http://astoeffelbauer.github.io"><img src="https://avatars.githubusercontent.com/u/54737457?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Andreas Stöffelbauer</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=astoeffelbauer" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/esmucler"><img src="https://avatars.githubusercontent.com/u/14080095?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ezequiel Smucler</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=esmucler" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/yemaedahrav"><img src="https://avatars.githubusercontent.com/u/50958687?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Amey Varhade</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=yemaedahrav" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/bkowshik"><img src="https://avatars.githubusercontent.com/u/2899501?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Bhargav Kowshik</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=bkowshik" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/darthtrevino"><img src="https://avatars.githubusercontent.com/u/113544?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Chris Trevino</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=darthtrevino" title="Code">💻</a></td>
   </tr>
 </table>
 
@@ -52,4 +65,4 @@ problems
 * Helping update the documentation for DoWhy
 
 If you would like to contribute, you can raise a pull request. If you have
-questions before contributing, you can start by opening an issue on Github. 
+questions before contributing, you can start by opening an issue on Github.

@@ -1,80 +1,125 @@
-import pytest
-import numpy as np
 from unittest.mock import patch
+
+import numpy as np
+import pytest
+
 import dowhy.datasets
 from dowhy import CausalModel
+
 from .base import TestRefuter
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LassoCV
 from sklearn.ensemble import GradientBoostingRegressor
 
+
 @pytest.mark.usefixtures("fixed_seed")
 class TestAddUnobservedCommonCauseRefuter(object):
-    @pytest.mark.parametrize(["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
-                             [(0.01, "backdoor.propensity_score_matching", 0.01, 0.02),])
-    def test_refutation_binary_treatment(self, error_tolerance, estimator_method,
-            effect_strength_on_t, effect_strength_on_y):
-        refuter_tester = TestRefuter(error_tolerance, estimator_method,
-                "add_unobserved_common_cause",
-                confounders_effect_on_t = "binary_flip",
-                confounders_effect_on_y = "linear",
-                effect_strength_on_t = effect_strength_on_t,
-                effect_strength_on_y = effect_strength_on_y)
+    @pytest.mark.parametrize(
+        ["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
+        [
+            (0.01, "backdoor.propensity_score_matching", 0.01, 0.02),
+        ],
+    )
+    def test_refutation_binary_treatment(
+        self, error_tolerance, estimator_method, effect_strength_on_t, effect_strength_on_y
+    ):
+        refuter_tester = TestRefuter(
+            error_tolerance,
+            estimator_method,
+            "add_unobserved_common_cause",
+            confounders_effect_on_t="binary_flip",
+            confounders_effect_on_y="linear",
+            effect_strength_on_t=effect_strength_on_t,
+            effect_strength_on_y=effect_strength_on_y,
+        )
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause")
 
-    @pytest.mark.parametrize(["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
-                             [(0.01, "iv.instrumental_variable", 0.01, 0.02),])
-    def test_refutation_continuous_treatment(self, error_tolerance, estimator_method,
-            effect_strength_on_t, effect_strength_on_y):
-        refuter_tester = TestRefuter(error_tolerance, estimator_method,
-                "add_unobserved_common_cause",
-                confounders_effect_on_t = "linear",
-                confounders_effect_on_y = "linear",
-                effect_strength_on_t = effect_strength_on_t,
-                effect_strength_on_y = effect_strength_on_y)
+    @pytest.mark.parametrize(
+        ["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
+        [
+            (0.01, "iv.instrumental_variable", 0.01, 0.02),
+        ],
+    )
+    def test_refutation_continuous_treatment(
+        self, error_tolerance, estimator_method, effect_strength_on_t, effect_strength_on_y
+    ):
+        refuter_tester = TestRefuter(
+            error_tolerance,
+            estimator_method,
+            "add_unobserved_common_cause",
+            confounders_effect_on_t="linear",
+            confounders_effect_on_y="linear",
+            effect_strength_on_t=effect_strength_on_t,
+            effect_strength_on_y=effect_strength_on_y,
+        )
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
 
-    @pytest.mark.parametrize(["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
-                             [(0.01, "iv.instrumental_variable", np.arange(0.01, 0.02, 0.001), np.arange(0.02, 0.03, 0.001)),])
+    @pytest.mark.parametrize(
+        ["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
+        [
+            (0.01, "iv.instrumental_variable", np.arange(0.01, 0.02, 0.001), np.arange(0.02, 0.03, 0.001)),
+        ],
+    )
     @patch("matplotlib.pyplot.figure")
-    def test_refutation_continuous_treatment_range_both_treatment_outcome(self, mock_fig, error_tolerance, estimator_method,
-            effect_strength_on_t, effect_strength_on_y):
-        refuter_tester = TestRefuter(error_tolerance, estimator_method,
-                "add_unobserved_common_cause",
-                confounders_effect_on_t = "linear",
-                confounders_effect_on_y = "linear",
-                effect_strength_on_t = effect_strength_on_t,
-                effect_strength_on_y = effect_strength_on_y)
+    def test_refutation_continuous_treatment_range_both_treatment_outcome(
+        self, mock_fig, error_tolerance, estimator_method, effect_strength_on_t, effect_strength_on_y
+    ):
+        refuter_tester = TestRefuter(
+            error_tolerance,
+            estimator_method,
+            "add_unobserved_common_cause",
+            confounders_effect_on_t="linear",
+            confounders_effect_on_y="linear",
+            effect_strength_on_t=effect_strength_on_t,
+            effect_strength_on_y=effect_strength_on_y,
+        )
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
-    @pytest.mark.parametrize(["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
-                             [(0.01, "iv.instrumental_variable", np.arange(0.01, 0.02, 0.001), 0.02),])
+    @pytest.mark.parametrize(
+        ["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
+        [
+            (0.01, "iv.instrumental_variable", np.arange(0.01, 0.02, 0.001), 0.02),
+        ],
+    )
     @patch("matplotlib.pyplot.figure")
-    def test_refutation_continuous_treatment_range_treatment(self, mock_fig, error_tolerance, estimator_method,
-            effect_strength_on_t, effect_strength_on_y):
-        refuter_tester = TestRefuter(error_tolerance, estimator_method,
-                "add_unobserved_common_cause",
-                confounders_effect_on_t = "linear",
-                confounders_effect_on_y = "linear",
-                effect_strength_on_t = effect_strength_on_t,
-                effect_strength_on_y = effect_strength_on_y)
+    def test_refutation_continuous_treatment_range_treatment(
+        self, mock_fig, error_tolerance, estimator_method, effect_strength_on_t, effect_strength_on_y
+    ):
+        refuter_tester = TestRefuter(
+            error_tolerance,
+            estimator_method,
+            "add_unobserved_common_cause",
+            confounders_effect_on_t="linear",
+            confounders_effect_on_y="linear",
+            effect_strength_on_t=effect_strength_on_t,
+            effect_strength_on_y=effect_strength_on_y,
+        )
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
-    @pytest.mark.parametrize(["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
-                             [(0.01, "iv.instrumental_variable", 0.01, np.arange(0.02, 0.03, 0.001)),])
+    @pytest.mark.parametrize(
+        ["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
+        [
+            (0.01, "iv.instrumental_variable", 0.01, np.arange(0.02, 0.03, 0.001)),
+        ],
+    )
     @patch("matplotlib.pyplot.figure")
-    def test_refutation_continuous_treatment_range_outcome(self, mock_fig, error_tolerance, estimator_method,
-            effect_strength_on_t, effect_strength_on_y):
-        refuter_tester = TestRefuter(error_tolerance, estimator_method,
-                "add_unobserved_common_cause",
-                confounders_effect_on_t = "linear",
-                confounders_effect_on_y = "linear",
-                effect_strength_on_t = effect_strength_on_t,
-                effect_strength_on_y = effect_strength_on_y)
+    def test_refutation_continuous_treatment_range_outcome(
+        self, mock_fig, error_tolerance, estimator_method, effect_strength_on_t, effect_strength_on_y
+    ):
+        refuter_tester = TestRefuter(
+            error_tolerance,
+            estimator_method,
+            "add_unobserved_common_cause",
+            confounders_effect_on_t="linear",
+            confounders_effect_on_y="linear",
+            effect_strength_on_t=effect_strength_on_t,
+            effect_strength_on_y=effect_strength_on_y,
+        )
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
+
 
     @pytest.mark.parametrize(["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulated_method_name"],
                              [("backdoor.linear_regression", [1,2,3], ["W3"], "linear-partial-R2"),])
@@ -101,26 +146,30 @@ class TestAddUnobservedCommonCauseRefuter(object):
         target_estimand = model.identify_effect(proceed_when_unidentifiable=True)
         estimate = model.estimate_effect(target_estimand,method_name=estimator_method)
         ate_estimate = data['ate']
-        refute = model.refute_estimate(target_estimand, estimate ,
-                               method_name = "add_unobserved_common_cause",
-                               simulated_method_name = simulated_method_name, 
-                               benchmark_common_causes = benchmark_common_causes,
-                               effect_fraction_on_treatment = effect_fraction_on_treatment)
-        
+        refute = model.refute_estimate(
+            target_estimand, 
+            estimate ,
+            method_name = "add_unobserved_common_cause",
+            simulated_method_name = simulated_method_name, 
+            benchmark_common_causes = benchmark_common_causes,
+            effect_fraction_on_treatment = effect_fraction_on_treatment)
         if refute.confounder_increases_estimate == True:
-                bias_adjusted_estimate = refute.benchmarking_results['bias_adjusted_estimate']
-                assert all(estimate <= refute.estimate for estimate in bias_adjusted_estimate) #if confounder_increases_estimate is True, adjusted estimate should be lower than original estimate
+            bias_adjusted_estimate = refute.benchmarking_results["bias_adjusted_estimate"]
+            assert all(
+                estimate <= refute.estimate for estimate in bias_adjusted_estimate
+            )  # if confounder_increases_estimate is True, adjusted estimate should be lower than original estimate
         else:
-                bias_adjusted_estimate = refute.benchmarking_results['bias_adjusted_estimate']
-                assert all(estimate >= refute.estimate for estimate in bias_adjusted_estimate)
+            bias_adjusted_estimate = refute.benchmarking_results["bias_adjusted_estimate"]
+            assert all(estimate >= refute.estimate for estimate in bias_adjusted_estimate)
 
-        #check if all partial R^2 values are between 0 and 1
-        assert all((val >= 0 and val <=1) for val in refute.benchmarking_results['r2tu_w']) 
-        assert all((val >= 0 and val <=1) for val in refute.benchmarking_results['r2yu_tw'])
-        assert  refute.stats['r2yt_w'] >= 0 and refute.stats['r2yt_w'] <= 1
+        # check if all partial R^2 values are between 0 and 1
+        assert all((val >= 0 and val <= 1) for val in refute.benchmarking_results["r2tu_w"])
+        assert all((val >= 0 and val <= 1) for val in refute.benchmarking_results["r2yu_tw"])
+        assert refute.stats["r2yt_w"] >= 0 and refute.stats["r2yt_w"] <= 1
 
-        assert refute.stats['robustness_value'] >= 0 and refute.stats['robustness_value'] <= 1
+        assert refute.stats["robustness_value"] >= 0 and refute.stats["robustness_value"] <= 1
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
+
 
     @pytest.mark.parametrize(["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulated_method_name"],
                              [("backdoor.linear_regression", [1,2,3], ["W3"], "linear-partial-R2"),])
@@ -159,24 +208,43 @@ class TestAddUnobservedCommonCauseRefuter(object):
         estimate2 = bias_adjusted_terms['bias_adjusted_estimate'][1] #adjusted estimate for confounder u2 where r2tu_w = 0.2 and r2yu_tw = 0.3
         print(estimate1, estimate2)
         original_estimate = refute.estimate
-        #Test if hypothetical confounding by unobserved confounder u1 leads to an adjusted effect that is farther from the original estimate as compared to u2 
+        # Test if hypothetical confounding by unobserved confounder u1 leads to an adjusted effect that is farther from the original estimate as compared to u2
         assert abs(original_estimate - estimate1) > abs(original_estimate - estimate2)
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
-    @pytest.mark.parametrize(["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulated_method_name", "rvalue_threshold"],
-                             [("backdoor.linear_regression", [1,2,3], ["W3"], "linear-partial-R2", 0.95),])
+
+    @pytest.mark.parametrize(
+        [
+            "estimator_method",
+            "effect_fraction_on_treatment",
+            "benchmark_common_causes",
+            "simulated_method_name",
+            "rvalue_threshold",
+        ],
+        [
+            ("backdoor.linear_regression", [1, 2, 3], ["W3"], "linear-partial-R2", 0.95),
+        ],
+    )
     @patch("matplotlib.pyplot.figure")
-    def test_linear_sensitivity_dataset_without_confounders(self, mock_fig,estimator_method,
-            effect_fraction_on_treatment, benchmark_common_causes, simulated_method_name, rvalue_threshold):
-        np.random.seed(100) 
-        data = dowhy.datasets.linear_dataset( beta = 10,
-                                      num_common_causes = 7,
-                                      num_samples = 500,
-                                      num_treatments = 1,
-                                     stddev_treatment_noise =10,
-                                     stddev_outcome_noise = 1
-                                    )
-        #Creating a model with no unobserved confounders
+    def test_linear_sensitivity_dataset_without_confounders(
+        self,
+        mock_fig,
+        estimator_method,
+        effect_fraction_on_treatment,
+        benchmark_common_causes,
+        simulated_method_name,
+        rvalue_threshold,
+    ):
+        np.random.seed(100)
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=7,
+            num_samples=500,
+            num_treatments=1,
+            stddev_treatment_noise=10,
+            stddev_outcome_noise=1,
+        )
+        # Creating a model with no unobserved confounders
         model2 = CausalModel(
             data=data["df"],
             treatment=data["treatment_name"],
@@ -185,29 +253,34 @@ class TestAddUnobservedCommonCauseRefuter(object):
             test_significance=None,
         )
         target_estimand2 = model2.identify_effect(proceed_when_unidentifiable=True)
-        estimate2 = model2.estimate_effect(target_estimand2,method_name=estimator_method)
-        ate_estimate = data['ate']
-        refute2 = model2.refute_estimate(target_estimand2, estimate2 ,
-                               method_name = "add_unobserved_common_cause",
-                               simulated_method_name = simulated_method_name, 
-                               benchmark_common_causes = benchmark_common_causes,
-                               effect_fraction_on_treatment = effect_fraction_on_treatment)
-        
-        if refute2.confounder_increases_estimate == True:
-                bias_adjusted_estimate = refute2.benchmarking_results['bias_adjusted_estimate']
-                assert all(estimate <= refute2.estimate for estimate in bias_adjusted_estimate) #if confounder_increases_estimate is True, adjusted estimate should be lower than original estimate
-        else:
-                bias_adjusted_estimate = refute2.benchmarking_results['bias_adjusted_estimate']
-                assert all(estimate >= refute2.estimate for estimate in bias_adjusted_estimate)
+        estimate2 = model2.estimate_effect(target_estimand2, method_name=estimator_method)
+        ate_estimate = data["ate"]
+        refute2 = model2.refute_estimate(
+            target_estimand2,
+            estimate2,
+            method_name="add_unobserved_common_cause",
+            simulated_method_name=simulated_method_name,
+            benchmark_common_causes=benchmark_common_causes,
+            effect_fraction_on_treatment=effect_fraction_on_treatment,
+        )
 
-        #check if all partial R^2 values are between 0 and 1
-        assert all((val >= 0 and val <=1) for val in refute2.benchmarking_results['r2tu_w']) 
-        assert all((val >= 0 and val <=1) for val in refute2.benchmarking_results['r2yu_tw'])
-        assert  refute2.stats['r2yt_w'] >= 0 and refute2.stats['r2yt_w'] <= 1
-        
-        print(refute2.stats['robustness_value'])
-        #for a dataset with no confounders, the robustness value should be higher than a given threshold (0.95 in our case)
-        assert refute2.stats['robustness_value'] >= rvalue_threshold and refute2.stats['robustness_value'] <= 1 
+        if refute2.confounder_increases_estimate == True:
+            bias_adjusted_estimate = refute2.benchmarking_results["bias_adjusted_estimate"]
+            assert all(
+                estimate <= refute2.estimate for estimate in bias_adjusted_estimate
+            )  # if confounder_increases_estimate is True, adjusted estimate should be lower than original estimate
+        else:
+            bias_adjusted_estimate = refute2.benchmarking_results["bias_adjusted_estimate"]
+            assert all(estimate >= refute2.estimate for estimate in bias_adjusted_estimate)
+
+        # check if all partial R^2 values are between 0 and 1
+        assert all((val >= 0 and val <= 1) for val in refute2.benchmarking_results["r2tu_w"])
+        assert all((val >= 0 and val <= 1) for val in refute2.benchmarking_results["r2yu_tw"])
+        assert refute2.stats["r2yt_w"] >= 0 and refute2.stats["r2yt_w"] <= 1
+
+        print(refute2.stats["robustness_value"])
+        # for a dataset with no confounders, the robustness value should be higher than a given threshold (0.95 in our case)
+        assert refute2.stats["robustness_value"] >= rvalue_threshold and refute2.stats["robustness_value"] <= 1
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
     
