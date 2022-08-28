@@ -42,8 +42,8 @@ class AddUnobservedCommonCause(CausalRefuter):
         :param confounders_effect_on_outcome: str : The type of effect on the outcome due to the unobserved confounder. Possible values are ['binary_flip', 'linear']
         :param effect_strength_on_treatment: float, numpy.ndarray: This refers to the strength of the confounder on treatment. For a linear effect, it behaves like the regression coeffecient. For a binary flip it is the probability with which it can invert the value of the treatment.
         :param effect_strength_on_outcome: float, numpy.ndarray: This refers to the strength of the confounder on outcome. For a linear effect, it behaves like the regression coefficient. For a binary flip, it is the probability with which it can invert the value of the outcome.
-        :param effect_fraction_on_treatment: float: If effect_strength_on_treatment is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on treatment. Defaults to 1.
-        :param effect_fraction_on_outcome: float: If effect_strength_on_outcome is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on outcome. Defaults to 1.
+        :param frac_strength_treatment: float: If effect_strength_on_treatment is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on treatment. Defaults to 1.
+        :param frac_strength_outcome: float: If effect_strength_on_outcome is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on outcome. Defaults to 1.
         :param plotmethod: string: Type of plot to be shown. If None, no plot is generated. This parameter is used only only when more than one treatment confounder effect values or outcome confounder effect values are provided. Default is "colormesh". Supported values are "contour", "colormesh" when more than one value is provided for both confounder effect value parameters; "line" when provided for only one of them.
         :param simulated_method_name: method type to add unobserved common cause. 
                                       "linear-partial-R2" for linear sensitivity analysis.
@@ -233,6 +233,8 @@ class AddUnobservedCommonCause(CausalRefuter):
                     alpha_s_param_dict = self.alpha_s_param_dict,
                     g_s_estimator_list = self.g_s_estimator_list,
                     g_s_estimator_param_list = self.g_s_estimator_param_list,
+                    effect_strength_treatment = self.kappa_t,
+                    effect_strength_outcome = self.kappa_y,
                     benchmark_common_causes= self.benchmark_common_causes,
                     frac_strength_treatment = self.frac_strength_treatment, 
                     frac_strength_outcome = self.frac_strength_outcome)
@@ -247,11 +249,12 @@ class AddUnobservedCommonCause(CausalRefuter):
                 alpha_s_estimator_param_list = self.alpha_s_estimator_param_list,
                 g_s_estimator_list = self.g_s_estimator_list,
                 g_s_estimator_param_list = self.g_s_estimator_param_list,
+                effect_strength_treatment = self.kappa_t,
+                effect_strength_outcome = self.kappa_y,
                 benchmark_common_causes= self.benchmark_common_causes,
                 frac_strength_treatment = self.frac_strength_treatment, 
                 frac_strength_outcome = self.frac_strength_outcome,
                 theta_s = self._estimate.value,
-                max_frac_inc_reisz=0.99, # TODO make this consistent with effect_strength_treatment
                 plugin_reisz=self.plugin_reisz
             )
             analyzer.check_sensitivity(plot = self.plot_estimate)

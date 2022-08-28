@@ -39,7 +39,6 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
     :param num_splits: number of splits for cross validation. (default = 5)
     :param shuffle_data : shuffle data or not before splitting into folds (default = False)
     :param shuffle_random_seed: seed for randomly shuffling data
-    :param max_frac_inc_reisz: proportion of residual variance in the treatment explained by confounders
     :param benchmark_common_causes: names of variables for bounding strength of confounders
     :param significance_level: confidence interval for statistical inference(default = 0.05)
     :param frac_strength_treatment: strength of association between unobserved confounder and treatment compared to benchmark covariate
@@ -58,10 +57,9 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
     """
 
     def __init__(self, *args, theta_s, 
-            max_frac_inc_reisz = 0.99, plugin_reisz=False, **kwargs):
+            plugin_reisz=False, **kwargs):
         super().__init__(*args, **kwargs)
         self.theta_s = theta_s
-        self.max_frac_inc_reisz = max_frac_inc_reisz
         
         # whether the DGP is assumed to be partially linear
         self.is_partial_linear = False
@@ -192,7 +190,7 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
             alpha=self.significance_level,
             is_partial_linear=self.is_partial_linear)
         if plot == True:
-            self.plot(x_limit=self.max_frac_inc_reisz)
+            self.plot()
 
         return self
 

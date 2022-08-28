@@ -25,6 +25,8 @@ class PartialLinearSensitivityAnalyzer:
     :param num_splits: number of splits for cross validation. (default = 5)
     :param shuffle_data : shuffle data or not before splitting into folds (default = False)
     :param shuffle_random_seed: seed for randomly shuffling data
+    :param effect_strength_treatment: C^2_T, list of plausible sensitivity parameters for effect of confounder on treatment
+    :param effect_strength_outcome: C^2_Y, list of plausible sensitivity parameters for effect of confounder on outcome
     :param benchmark_common_causes: names of variables for bounding strength of confounders
     :param significance_level: confidence interval for statistical inference(default = 0.05)
     :param frac_strength_treatment: strength of association between unobserved confounder and treatment compared to benchmark covariate
@@ -41,7 +43,9 @@ class PartialLinearSensitivityAnalyzer:
 
     def __init__(self, estimator=None, num_splits=5, shuffle_data=False,
                  shuffle_random_seed=None,  reisz_polynomial_max_degree=3,
-                 significance_level=0.05, benchmark_common_causes=None,
+                 significance_level=0.05, 
+                 effect_strength_treatment=None, effect_strength_outcome=None, 
+                 benchmark_common_causes=None,
                  frac_strength_treatment=None, frac_strength_outcome=None,
                  observed_common_causes=None, treatment=None, outcome=None,
                  g_s_estimator_list=None, alpha_s_estimator_list=None, g_s_estimator_param_list=None , alpha_s_estimator_param_list=None, **kwargs):
@@ -50,6 +54,8 @@ class PartialLinearSensitivityAnalyzer:
         self.shuffle_data = shuffle_data
         self.shuffle_random_seed = shuffle_random_seed
         self.reisz_polynomial_max_degree = reisz_polynomial_max_degree
+        self.effect_strength_treatment = effect_strength_treatment
+        self.effect_strength_outcome = effect_strength_outcome
         self.g_s_estimator_list = g_s_estimator_list
         self.g_s_estimator_param_list = g_s_estimator_param_list
         self.alpha_s_estimator_list = alpha_s_estimator_list
@@ -81,6 +87,7 @@ class PartialLinearSensitivityAnalyzer:
         self.r2t_w = 0  # Partial R^2 of treatment with observed common causes
         self.r2y_tw = 0  # Partial R^2 of outcome with treatment and observed common causes
         self.results = None
+        self.num_points_per_contour = 30
         self.logger = logging.getLogger(__name__)
 
     def get_phi_lower_upper(self, Cg, Calpha):
@@ -426,8 +433,8 @@ class PartialLinearSensitivityAnalyzer:
 
         return self
 
-    def plot(self, plot_type="lower_confidence_bound", x_limit=0.99, y_limit=0.99,
-             num_points_per_contour=30, plot_size=(7, 7), contours_color="blue", critical_contour_color="red",
+    def plot(self, plot_type="lower_confidence_bound",
+             plot_size=(7, 7), contours_color="blue", critical_contour_color="red",
              label_fontsize=9, contour_linewidths=0.75, contour_linestyles="solid",
              contours_label_color="black", critical_label_color="red",
              unadjusted_estimate_marker='D', unadjusted_estimate_color="black",
@@ -441,9 +448,6 @@ class PartialLinearSensitivityAnalyzer:
         We also plot bounds on the partial R^2 of the unobserved confounders obtained from observed covariates
 
         :param plot_type: possible values are 'bias','lower_ate_bound','upper_ate_bound','lower_confidence_bound','upper_confidence_bound'
-        :param x_limit: plot's maximum x_axis value (default = 0.99)
-        :param y_limit: plot's minimum y_axis value (default = 0.99)
-        :param num_points_per_contour: number of points to calculate and plot each contour line (default = 200)
         :param plot_size: tuple denoting the size of the plot (default = (7,7))
         :param contours_color: color of contour line (default = blue)
                         String or array. If array, lines will be plotted with the specific color in ascending order.
@@ -468,12 +472,20 @@ class PartialLinearSensitivityAnalyzer:
         ax.set_xlabel("Partial R^2 of confounder with treatment")
         ax.set_ylabel("Partial R^2 of confounder with outcome")
 
-
+        if self.effect_strength_treatment is None:
+            x_limit = 0.99
+            r2tu_w = np.arange(0.0, x_limit, x_limit / self.num_points_per_contour)
+        else:
+            x_limit = self.effect_strength_treatment[-1]
+            r2tu_w = self.effect_strength_treatment
+        if self.effect_strength_outcome is None:
+            y_limit = 0.99
+            r2yu_tw = np.arange(0.0, y_limit, y_limit / self.num_points_per_contour)
+        else:
+            y_limit = self.effect_strength_outcome[-1]
+            r2yu_tw = self.effect_strength_outcome
         ax.set_xlim(-x_limit/20, x_limit)
         ax.set_ylim(-y_limit/20, y_limit)
-
-        r2tu_w = np.arange(0.0, x_limit, x_limit / num_points_per_contour)
-        r2yu_tw = np.arange(0.0, y_limit, y_limit / num_points_per_contour)
 
         undjusted_estimates = None
         contour_values = np.zeros((len(r2yu_tw), len(r2tu_w)))
