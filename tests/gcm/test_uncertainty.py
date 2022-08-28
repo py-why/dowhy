@@ -3,8 +3,14 @@ from flaky import flaky
 from pytest import approx
 from scipy.stats import entropy
 
-from dowhy.gcm.uncertainty import estimate_entropy_using_discretization, estimate_entropy_kmeans, \
-    estimate_gaussian_entropy, estimate_variance, estimate_entropy_of_probabilities, estimate_entropy_discrete
+from dowhy.gcm.uncertainty import (
+    estimate_entropy_discrete,
+    estimate_entropy_kmeans,
+    estimate_entropy_of_probabilities,
+    estimate_entropy_using_discretization,
+    estimate_gaussian_entropy,
+    estimate_variance,
+)
 
 
 def test_estimate_entropy_using_discretization():
@@ -50,12 +56,12 @@ def test_estimate_entropy_of_probabilities():
     assert estimate_entropy_of_probabilities(np.array([[0.25, 0.25, 0.25, 0.25]])) == approx(1.38, abs=0.05)
     assert estimate_entropy_of_probabilities(np.array([[1, 0, 0, 0]])) == approx(0, abs=0.05)
     assert estimate_entropy_of_probabilities(np.array([[0.5, 0, 0, 0.5]])) == approx(0.69, abs=0.05)
-    assert estimate_entropy_of_probabilities(np.array([[0, 0.5, 0.5, 0], [0.5, 0, 0, 0.5]])) \
-           == approx(0.69, abs=0.05)
+    assert estimate_entropy_of_probabilities(np.array([[0, 0.5, 0.5, 0], [0.5, 0, 0, 0.5]])) == approx(0.69, abs=0.05)
     assert estimate_entropy_of_probabilities(np.array([[1, 0, 0, 0], [1, 0, 0, 0]])) == approx(0, abs=0.05)
 
 
 def test_estimate_entropy_discrete():
     assert estimate_entropy_discrete(np.random.choice(2, (1000, 1), replace=True)) == approx(entropy([0.5, 0.5]), 0.05)
-    assert estimate_entropy_discrete(np.random.choice(2, (1000, 2), replace=True)) == \
-           approx(entropy([0.25, 0.25, 0.25, 0.25]), 0.05)
+    assert estimate_entropy_discrete(np.random.choice(2, (1000, 2), replace=True)) == approx(
+        entropy([0.25, 0.25, 0.25, 0.25]), 0.05
+    )

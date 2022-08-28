@@ -44,6 +44,14 @@ dowhy.causal\_refuters.graph\_refuter module
    :undoc-members:
    :show-inheritance:
 
+dowhy.causal\_refuters.linear\_sensitivity\_analyzer module
+-----------------------------------------------------------
+
+.. automodule:: dowhy.causal_refuters.linear_sensitivity_analyzer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.causal\_refuters.placebo\_treatment\_refuter module
 ---------------------------------------------------------
 

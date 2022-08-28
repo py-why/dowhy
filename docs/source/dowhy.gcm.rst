@@ -14,10 +14,58 @@ Subpackages
 Submodules
 ----------
 
+dowhy.gcm.anomaly module
+------------------------
+
+.. automodule:: dowhy.gcm.anomaly
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.gcm.anomaly\_scorer module
+--------------------------------
+
+.. automodule:: dowhy.gcm.anomaly_scorer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.gcm.anomaly\_scorers module
+---------------------------------
+
+.. automodule:: dowhy.gcm.anomaly_scorers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.gcm.auto module
+---------------------
+
+.. automodule:: dowhy.gcm.auto
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.gcm.cms module
 --------------------
 
 .. automodule:: dowhy.gcm.cms
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.gcm.confidence\_intervals module
+--------------------------------------
+
+.. automodule:: dowhy.gcm.confidence_intervals
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.gcm.confidence\_intervals\_cms module
+-------------------------------------------
+
+.. automodule:: dowhy.gcm.confidence_intervals_cms
    :members:
    :undoc-members:
    :show-inheritance:
@@ -34,6 +82,22 @@ dowhy.gcm.constant module
 -------------------------
 
 .. automodule:: dowhy.gcm.constant
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.gcm.density\_estimator module
+-----------------------------------
+
+.. automodule:: dowhy.gcm.density_estimator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.gcm.density\_estimators module
+------------------------------------
+
+.. automodule:: dowhy.gcm.density_estimators
    :members:
    :undoc-members:
    :show-inheritance:
@@ -62,6 +126,14 @@ dowhy.gcm.fcms module
    :undoc-members:
    :show-inheritance:
 
+dowhy.gcm.feature module
+------------------------
+
+.. automodule:: dowhy.gcm.feature
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.gcm.fitting\_sampling module
 ----------------------------------
 
@@ -74,6 +146,14 @@ dowhy.gcm.graph module
 ----------------------
 
 .. automodule:: dowhy.gcm.graph
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.gcm.influence module
+--------------------------
+
+.. automodule:: dowhy.gcm.influence
    :members:
    :undoc-members:
    :show-inheritance:
@@ -98,6 +178,22 @@ dowhy.gcm.stochastic\_models module
 -----------------------------------
 
 .. automodule:: dowhy.gcm.stochastic_models
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.gcm.uncertainty module
+----------------------------
+
+.. automodule:: dowhy.gcm.uncertainty
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.gcm.validation module
+---------------------------
+
+.. automodule:: dowhy.gcm.validation
    :members:
    :undoc-members:
    :show-inheritance:

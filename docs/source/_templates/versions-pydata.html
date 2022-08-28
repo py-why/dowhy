@@ -1,0 +1,39 @@
+{%- if current_version %}
+<div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        {{ current_version.name if current_version.name != "main" else "main-branch" }}
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            {%- if versions.tags %}
+            {%- for item in versions.tags %}
+            <dd><a href="{{ item.url }}">{{ item.name }}</a></dd>
+            {%- endfor %}
+            {%- endif %}
+            <!-- hard-coding the old versions, as no further old version will be added -->
+            <!-- It would be nice if this opened the same page in an older version, but that seems to be overkill
+                 right now. Therefore defaulting to the starting page (index). -->
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+            <dd><a href="/dowhy/v0.1-alpha/index.html">v0.1-alpha</a></dd>
+        </dl>
+        {%- if versions.branches %}
+        <dl>
+            <dt>Branches</dt>
+            {%- for item in versions.branches %}
+            <dd><a href="{{ item.url }}">{{ item.name }}</a></dd>
+            {%- endfor %}
+        </dl>
+        {%- endif %}
+    </div>
+</div>
+{%- endif %}

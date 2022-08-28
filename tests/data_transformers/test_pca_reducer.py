@@ -31,13 +31,9 @@ class TestPCAReducer:
             plt.scatter(X_pca[:, 0], X_pca[:, 1], alpha=0.5)
             plt.show()
 
-        dist_origin = (
-            np.square(feature_matrix[:, 0] - np.mean(feature_matrix[:, 0])) +
-            np.square(feature_matrix[:, 1] - np.mean(feature_matrix[:, 1]))
+        dist_origin = np.square(feature_matrix[:, 0] - np.mean(feature_matrix[:, 0])) + np.square(
+            feature_matrix[:, 1] - np.mean(feature_matrix[:, 1])
         )
-        dist_origin_pca = (
-            np.square(X_pca[:, 0] - np.mean(X_pca[:, 0])) +
-            np.square(X_pca[:, 1] - np.mean(X_pca[:, 1]))
-        )
+        dist_origin_pca = np.square(X_pca[:, 0] - np.mean(X_pca[:, 0])) + np.square(X_pca[:, 1] - np.mean(X_pca[:, 1]))
         print((dist_origin_pca - dist_origin) / dist_origin)
         assert all(abs(dist_origin_pca - dist_origin)) < 0.001

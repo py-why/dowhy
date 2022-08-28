@@ -11,8 +11,12 @@ from packaging import version
 if version.parse(sklearn.__version__) < version.parse("1.0"):
     from sklearn.experimental import enable_hist_gradient_boosting  # noqa
 
-from sklearn.ensemble import RandomForestClassifier, HistGradientBoostingClassifier, ExtraTreesClassifier, \
-    AdaBoostClassifier
+from sklearn.ensemble import (
+    AdaBoostClassifier,
+    ExtraTreesClassifier,
+    HistGradientBoostingClassifier,
+    RandomForestClassifier,
+)
 from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
@@ -21,15 +25,14 @@ from sklearn.svm import SVC
 
 from dowhy.gcm.fcms import ClassificationModel
 from dowhy.gcm.ml.regression import SklearnRegressionModel
-from dowhy.gcm.util.general import shape_into_2d, apply_one_hot_encoding
+from dowhy.gcm.util.general import apply_one_hot_encoding, shape_into_2d
 
 
 class SklearnClassificationModel(SklearnRegressionModel, ClassificationModel):
-
     def predict_probabilities(self, X: np.array) -> np.ndarray:
-        return shape_into_2d(
-            self._sklearn_mdl.predict_proba(apply_one_hot_encoding(X, self._one_hot_encoders)))
+        return shape_into_2d(self._sklearn_mdl.predict_proba(apply_one_hot_encoding(X, self._one_hot_encoders)))
 
+    @property
     def classes(self) -> List[str]:
         return self._sklearn_mdl.classes_
 

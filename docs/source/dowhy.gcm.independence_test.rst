@@ -20,6 +20,14 @@ dowhy.gcm.independence\_test.kernel\_operation module
    :undoc-members:
    :show-inheritance:
 
+dowhy.gcm.independence\_test.regression module
+----------------------------------------------
+
+.. automodule:: dowhy.gcm.independence_test.regression
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

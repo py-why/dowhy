@@ -1,12 +1,14 @@
 import numpy as np
 
-from dowhy.interpreters.visual_interpreter import VisualInterpreter
-from dowhy.causal_estimators.propensity_score_weighting_estimator import PropensityScoreWeightingEstimator
 from dowhy.causal_estimator import CausalEstimate
+from dowhy.causal_estimators.propensity_score_weighting_estimator import PropensityScoreWeightingEstimator
+from dowhy.interpreters.visual_interpreter import VisualInterpreter
 
 
 class ConfounderDistributionInterpreter(VisualInterpreter):
-    SUPPORTED_ESTIMATORS = [PropensityScoreWeightingEstimator, ]
+    SUPPORTED_ESTIMATORS = [
+        PropensityScoreWeightingEstimator,
+    ]
 
     def __init__(self, estimate, fig_size, font_size, var_name, var_type, **kwargs):
         """
@@ -23,7 +25,10 @@ class ConfounderDistributionInterpreter(VisualInterpreter):
             self.logger.error(error_msg)
             raise ValueError(error_msg)
         self.estimator = self.estimate.estimator
-        if not any(isinstance(self.estimator, est_class) for est_class in ConfounderDistributionInterpreter.SUPPORTED_ESTIMATORS):
+        if not any(
+            isinstance(self.estimator, est_class)
+            for est_class in ConfounderDistributionInterpreter.SUPPORTED_ESTIMATORS
+        ):
             error_msg = "The interpreter method only supports propensity score weighting estimator."
             self.logger.error(error_msg)
             raise ValueError(error_msg)
@@ -48,10 +53,10 @@ class ConfounderDistributionInterpreter(VisualInterpreter):
         Plot of the treated vs untreated.
         """
 
-        ax.bar(labels - width / 2, not_treated_counts, width, label='Untreated')
-        ax.bar(labels + width / 2, treated_counts, width, label='Treated')
+        ax.bar(labels - width / 2, not_treated_counts, width, label="Untreated")
+        ax.bar(labels + width / 2, treated_counts, width, label="Treated")
         ax.set_xlabel(var_name)
-        ax.set_ylabel('Count')
+        ax.set_ylabel("Count")
         ax.set_title(title, fontsize=font_size)
         ax.set_xticks(labels)
         ax.set_xticklabels(labels)
@@ -69,32 +74,36 @@ class ConfounderDistributionInterpreter(VisualInterpreter):
         propensity = self.estimate.propensity_scores
 
         # add weight column
-        df.loc[:,"weight"] = df.loc[:, treated] * (propensity) ** (-1) + (1 - df.loc[:, treated]) * (1 - propensity) ** (-1)
-        
+        df.loc[:, "weight"] = df.loc[:, treated] * (propensity) ** (-1) + (1 - df.loc[:, treated]) * (
+            1 - propensity
+        ) ** (-1)
+
         # before weights are applied we count number rows in each category
         # which is equivalent to summing over weight=1
         barplot_df_before = df.groupby([self.var_name, treated]).size().reset_index(name="count")
 
         # after weights are applied we need to sum over the given weights
-        barplot_df_after = df.groupby([self.var_name, treated]).agg({'weight': np.sum}).reset_index()
-        barplot_df_after.rename(columns={'weight': 'count'}, inplace=True)
+        barplot_df_after = df.groupby([self.var_name, treated]).agg({"weight": np.sum}).reset_index()
+        barplot_df_after.rename(columns={"weight": "count"}, inplace=True)
 
         title1 = "Distribution of " + self.var_name + " before applying the weights"
         title2 = "Distribution of " + self.var_name + " after applying the weights"
 
         import matplotlib.pyplot as plt
+
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=self.fig_size)
         iterable = zip([barplot_df_before, barplot_df_after], [ax1, ax2], [title1, title2])
         for plot_df, ax, title in iterable:
             aggregated_not_treated = plot_df[plot_df[treated] == False].reset_index()
             aggregated_treated = plot_df[plot_df[treated] == True].reset_index()
 
-            labels = aggregated_not_treated[self.var_name].astype('float')
-            not_treated_counts = aggregated_not_treated['count']
+            labels = aggregated_not_treated[self.var_name].astype("float")
+            not_treated_counts = aggregated_not_treated["count"]
 
-            treated_counts = aggregated_treated['count']
-            self.discrete_dist_plot(labels, not_treated_counts, treated_counts, ax, title,
-                                    self.var_name, self.font_size)
+            treated_counts = aggregated_treated["count"]
+            self.discrete_dist_plot(
+                labels, not_treated_counts, treated_counts, ax, title, self.var_name, self.font_size
+            )
 
         fig.tight_layout()
         plt.show()

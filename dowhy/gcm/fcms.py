@@ -5,18 +5,18 @@ Classes in this module should be considered experimental, meaning there might be
 """
 
 import copy
-from abc import abstractmethod, ABC
-from typing import Optional, List
+from abc import ABC, abstractmethod
+from typing import List, Optional
 
 import numpy as np
 
-from dowhy.gcm.graph import StochasticModel, FunctionalCausalModel, InvertibleFunctionalCausalModel
-from dowhy.gcm.util.general import shape_into_2d, is_categorical
+from dowhy.gcm.graph import FunctionalCausalModel, InvertibleFunctionalCausalModel, StochasticModel
+from dowhy.gcm.util.general import is_categorical, shape_into_2d
 
 
 class PredictionModel:
-    """ Represents general prediction model implementations. Each prediction model should provide a fit and a predict
-        method. """
+    """Represents general prediction model implementations. Each prediction model should provide a fit and a predict
+    method."""
 
     @abstractmethod
     def fit(self, X: np.ndarray, Y: np.ndarray) -> None:
@@ -37,41 +37,39 @@ class PredictionModel:
 
 
 class ClassificationModel(PredictionModel):
-
     @abstractmethod
     def predict_probabilities(self, X: np.array) -> np.ndarray:
         raise NotImplementedError
 
+    @property
     @abstractmethod
     def classes(self) -> List[str]:
         raise NotImplementedError
 
 
 class InvertibleFunction:
-
     @abstractmethod
     def evaluate(self, X: np.ndarray) -> np.ndarray:
-        """ Applies the function on the input. """
+        """Applies the function on the input."""
         raise NotImplementedError
 
     @abstractmethod
     def evaluate_inverse(self, X: np.ndarray) -> np.ndarray:
-        """ Returns the outcome of applying the inverse of the function on the inputs. """
+        """Returns the outcome of applying the inverse of the function on the inputs."""
         raise NotImplementedError
 
 
 class PostNonlinearModel(InvertibleFunctionalCausalModel):
     """
-        Represents an post nonlinear FCM, i.e. models of the form:
-            Y = g(f(X) + N),
-        where X are parent nodes of the target node Y, f an arbitrary prediction model expecting inputs from the
-        parents X, N a noise variable and g an invertible function.
+    Represents an post nonlinear FCM, i.e. models of the form:
+        Y = g(f(X) + N),
+    where X are parent nodes of the target node Y, f an arbitrary prediction model expecting inputs from the
+    parents X, N a noise variable and g an invertible function.
     """
 
-    def __init__(self,
-                 prediction_model: PredictionModel,
-                 noise_model: StochasticModel,
-                 invertible_function: InvertibleFunction) -> None:
+    def __init__(
+        self, prediction_model: PredictionModel, noise_model: StochasticModel, invertible_function: InvertibleFunction
+    ) -> None:
         """
         :param prediction_model: The prediction model f.
         :param invertible_function: The invertible function g.
@@ -100,9 +98,7 @@ class PostNonlinearModel(InvertibleFunctionalCausalModel):
         self._prediction_model.fit(X=X, Y=self._invertible_function.evaluate_inverse(Y))
         self._noise_model.fit(X=self.estimate_noise(Y, X))
 
-    def estimate_noise(self,
-                       target_samples: np.ndarray,
-                       parent_samples: np.ndarray) -> np.ndarray:
+    def estimate_noise(self, target_samples: np.ndarray, parent_samples: np.ndarray) -> np.ndarray:
         """Reconstruct the noise given samples from (X, Y). This is done by:
 
             1. Transform Y via the inverse of g: g^-1(Y) = f(X) + N
@@ -115,7 +111,8 @@ class PostNonlinearModel(InvertibleFunctionalCausalModel):
         target_samples, parent_samples = shape_into_2d(target_samples, parent_samples)
 
         return self._invertible_function.evaluate_inverse(target_samples) - self._prediction_model.predict(
-            parent_samples)
+            parent_samples
+        )
 
     def draw_noise_samples(self, num_samples: int) -> np.ndarray:
         """Draws samples from the noise distribution N.
@@ -142,14 +139,18 @@ class PostNonlinearModel(InvertibleFunctionalCausalModel):
         return self._invertible_function.evaluate(predictions + noise_samples)
 
     def __str__(self) -> str:
-        return '%s with %s and an %s' % (self.__class__.__name__,
-                                         self._prediction_model.__class__.__name__,
-                                         self._invertible_function.__class__.__name__)
+        return "%s with %s and an %s" % (
+            self.__class__.__name__,
+            self._prediction_model.__class__.__name__,
+            self._invertible_function.__class__.__name__,
+        )
 
     def clone(self):
-        return PostNonlinearModel(prediction_model=self._prediction_model.clone(),
-                                  noise_model=self._noise_model.clone(),
-                                  invertible_function=copy.deepcopy(self._invertible_function))
+        return PostNonlinearModel(
+            prediction_model=self._prediction_model.clone(),
+            noise_model=self._noise_model.clone(),
+            invertible_function=copy.deepcopy(self._invertible_function),
+        )
 
     @property
     def prediction_model(self) -> PredictionModel:
@@ -174,21 +175,21 @@ class AdditiveNoiseModel(PostNonlinearModel):
     Given joint samples from (X, Y), this model can be fitted by first training a model f (e.g. using least squares
     regression) and then reconstruct N by N = Y - f(X), i.e. using the residual.
     """
-    def __init__(self,
-                 prediction_model: PredictionModel,
-                 noise_model: Optional[StochasticModel] = None) -> None:
+
+    def __init__(self, prediction_model: PredictionModel, noise_model: Optional[StochasticModel] = None) -> None:
         if noise_model is None:
             from dowhy.gcm.stochastic_models import EmpiricalDistribution
+
             noise_model = EmpiricalDistribution()
 
         from dowhy.gcm.ml.regression import InvertibleIdentityFunction
-        super(AdditiveNoiseModel, self).__init__(prediction_model=prediction_model,
-                                                 noise_model=noise_model,
-                                                 invertible_function=InvertibleIdentityFunction())
+
+        super(AdditiveNoiseModel, self).__init__(
+            prediction_model=prediction_model, noise_model=noise_model, invertible_function=InvertibleIdentityFunction()
+        )
 
     def clone(self):
-        return AdditiveNoiseModel(prediction_model=self.prediction_model.clone(),
-                                  noise_model=self.noise_model.clone())
+        return AdditiveNoiseModel(prediction_model=self.prediction_model.clone(), noise_model=self.noise_model.clone())
 
 
 class ProbabilityEstimatorModel(ABC):
@@ -206,11 +207,13 @@ class ClassifierFCM(FunctionalCausalModel, ProbabilityEstimatorModel):
     the noise is used to make this sampling process deterministic by using the cumulative distribution functions defined
     by the given inputs.
     """
+
     def __init__(self, classifier_model: Optional[ClassificationModel] = None) -> None:
         self._classifier_model = classifier_model
 
         if classifier_model is None:
             from dowhy.gcm.ml.classification import create_hist_gradient_boost_classifier
+
             self._classifier_model = create_hist_gradient_boost_classifier()
 
     def draw_noise_samples(self, num_samples: int) -> np.ndarray:
@@ -267,7 +270,7 @@ class ClassifierFCM(FunctionalCausalModel, ProbabilityEstimatorModel):
         return ClassifierFCM(classifier_model=self._classifier_model.clone())
 
     def get_class_names(self, class_indices: np.ndarray) -> List[str]:
-        return [self._classifier_model.classes()[index] for index in class_indices]
+        return [self._classifier_model.classes[index] for index in class_indices]
 
     @property
     def classifier_model(self) -> ClassificationModel:

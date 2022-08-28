@@ -1,0 +1,27 @@
+{%- if current_version %}
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: {{ current_version.name if current_version.name != "main" else "main-branch" }}
+    <span class="fa fa-caret-down"></span>
+  </span>
+    <div class="rst-other-versions">
+        {%- if versions.tags %}
+        <dl>
+            <dt>Releases</dt>
+            {%- for item in versions.tags %}
+            <dd><a href="{{ item.url }}">{{ item.name }}</a></dd>
+            {%- endfor %}
+            <!-- TODO: add mechanism to add new version here. Probably just render them in from generate_docs.sh. -->
+        </dl>
+        {%- endif %}
+        <dl>
+            <dt>Branches</dt>
+            <!-- hard-coding the link to main -->
+            <!-- It would be nice if this opened the same page on main branch, but that seems to be overkill
+                 right now. Therefore defaulting to the starting page (index). -->
+            <dd><a href="/dowhy/main/index.html">main</a></dd>
+        </dl>
+    </div>
+</div>
+{%- endif %}
