@@ -5,7 +5,6 @@ from dowhy.causal_estimators.propensity_score_stratification_estimator import Pr
 from .base import TestEstimator
 
 
-@pytest.mark.advanced
 @pytest.mark.usefixtures("fixed_seed")
 class TestPropensityScoreStratificationEstimator(object):
     @pytest.mark.parametrize(
