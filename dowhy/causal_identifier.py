@@ -16,10 +16,15 @@ class CausalIdentifier:
     Currently supports backdoor and instrumental variable identification methods. The identification is based on the causal graph provided.
 
     """
-
+    # Average total effect
     NONPARAMETRIC_ATE = "nonparametric-ate"
+    # Natural direct effect
     NONPARAMETRIC_NDE = "nonparametric-nde"
+    # Natural indirect effect
     NONPARAMETRIC_NIE = "nonparametric-nie"
+    # Controlled direct effect
+    NONPARAMETRIC_CDE = "nonparametric-cde"
+
     MAX_BACKDOOR_ITERATIONS = 100000
 
     # Backdoor method names
@@ -95,10 +100,13 @@ class CausalIdentifier:
             return self.identify_nde_effect()
         elif self.estimand_type == CausalIdentifier.NONPARAMETRIC_NIE:
             return self.identify_nie_effect()
+        elif self.estimand_type == CausalIdentifier.NONPARAMETRIC_CDE:
+            return self.identify_cde_effect()
         else:
             raise ValueError(
                 "Estimand type is not supported. Use either {0}, {1}, or {2}.".format(
                     CausalIdentifier.NONPARAMETRIC_ATE,
+                    CausalIdentifier.NONPARAMETRIC_CDE,
                     CausalIdentifier.NONPARAMETRIC_NDE,
                     CausalIdentifier.NONPARAMETRIC_NIE,
                 )
@@ -181,6 +189,37 @@ class CausalIdentifier:
             frontdoor_variables=frontdoor_variables_names,
             mediation_first_stage_confounders=mediation_first_stage_confounders,
             mediation_second_stage_confounders=mediation_second_stage_confounders,
+            default_backdoor_id=default_backdoor_id,
+        )
+        return estimand
+
+    def identify_cde_effect(self):
+        estimands_dict = {}
+        # Pick algorithm to compute backdoor sets according to method chosen
+        backdoor_sets = self.identify_backdoor(self.treatment_name, self.outcome_name, direct_effect=True)
+        estimands_dict, backdoor_variables_dict = self.build_backdoor_estimands_dict(
+            self.treatment_name, self.outcome_name, backdoor_sets, estimands_dict
+        )
+        # Setting default "backdoor" identification adjustment set
+        default_backdoor_id = self.get_default_backdoor_set_id(backdoor_variables_dict)
+        if len(backdoor_variables_dict) > 0:
+            estimands_dict["backdoor"] = estimands_dict.get(str(default_backdoor_id), None)
+            backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
+        else:
+            estimands_dict["backdoor"] = None
+
+        # Finally returning the estimand object
+        estimand = IdentifiedEstimand(
+            self,
+            treatment_variable=self._graph.treatment_name,
+            outcome_variable=self._graph.outcome_name,
+            estimand_type=self.estimand_type,
+            estimands=estimands_dict,
+            backdoor_variables=backdoor_variables_dict,
+            instrumental_variables=None,
+            frontdoor_variables=None,
+            mediation_first_stage_confounders=None,
+            mediation_second_stage_confounders=None,
             default_backdoor_id=default_backdoor_id,
         )
         return estimand
@@ -297,6 +336,7 @@ class CausalIdentifier:
         outcome_name,
         include_unobserved=False,
         dseparation_algo="default",
+        direct_effect = False
     ):
         backdoor_sets = []
         backdoor_paths = None
@@ -304,7 +344,10 @@ class CausalIdentifier:
         if dseparation_algo == "naive":
             backdoor_paths = self._graph.get_backdoor_paths(treatment_name, outcome_name)
         elif dseparation_algo == "default":
-            bdoor_graph = self._graph.do_surgery(treatment_name, remove_outgoing_edges=True)
+            bdoor_graph = self._graph.do_surgery(treatment_name,
+                    target_node_names = outcome_name,
+                    remove_outgoing_edges=True,
+                    remove_only_direct_edges=direct_effect)
         else:
             raise ValueError(f"d-separation algorithm {dseparation_algo} is not supported")
         method_name = (
@@ -333,7 +376,13 @@ class CausalIdentifier:
         eligible_variables = (
             self._graph.get_all_nodes(include_unobserved=include_unobserved) - set(treatment_name) - set(outcome_name)
         )
-        eligible_variables -= self._graph.get_descendants(treatment_name)
+        if direct_effect:
+            # only remove descendants of Y
+            # also allow any causes of Y that are not caused by T (for lower variance)
+            eligible_variables -= self._graph.get_descendants(outcome_name)
+        else:
+            # remove descendants of T (mediators) and descendants of Y
+            eligible_variables -= self._graph.get_descendants(treatment_name)
         # If var is d-separated from both treatment or outcome, it cannot
         # be a part of the backdoor set
         filt_eligible_variables = set()

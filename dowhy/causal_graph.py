@@ -224,15 +224,20 @@ class CausalGraph:
         observed_nodes = [node for node in self._graph.nodes() if self._graph.nodes[node]["observed"] == "yes"]
         return self._graph.subgraph(observed_nodes)
 
-    def do_surgery(self, node_names, remove_outgoing_edges=False, remove_incoming_edges=False):
+    def do_surgery(self, node_names, remove_outgoing_edges=False, remove_incoming_edges=False,
+            remove_only_direct_edges=False, target_node_names=None):
         node_names = parse_state(node_names)
         new_graph = self._graph.copy()
         for node_name in node_names:
             if remove_outgoing_edges:
-                children = new_graph.successors(node_name)
-                edges_bunch = [(node_name, child) for child in children]
-                new_graph.remove_edges_from(edges_bunch)
+                if remove_only_direct_edges:
+                    new_graph.remove_edges_from([(node_name, v) for v in target_node_names])
+                else:
+                    children = new_graph.successors(node_name)
+                    edges_bunch = [(node_name, child) for child in children]
+                    new_graph.remove_edges_from(edges_bunch)
             if remove_incoming_edges:
+                # remove_only_direct_edges is not implemented for incoming edges
                 parents = new_graph.predecessors(node_name)
                 edges_bunch = [(parent, node_name) for parent in parents]
                 new_graph.remove_edges_from(edges_bunch)
