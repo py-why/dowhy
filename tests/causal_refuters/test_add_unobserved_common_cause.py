@@ -2,14 +2,14 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.linear_model import LassoCV
+from sklearn.preprocessing import PolynomialFeatures
 
 import dowhy.datasets
 from dowhy import CausalModel
 
 from .base import TestRefuter
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.linear_model import LassoCV
-from sklearn.ensemble import GradientBoostingRegressor
 
 
 @pytest.mark.usefixtures("fixed_seed")
@@ -120,21 +120,26 @@ class TestAddUnobservedCommonCauseRefuter(object):
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
-
-    @pytest.mark.parametrize(["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulated_method_name"],
-                             [("backdoor.linear_regression", [1,2,3], ["W3"], "linear-partial-R2"),])
+    @pytest.mark.parametrize(
+        ["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulated_method_name"],
+        [
+            ("backdoor.linear_regression", [1, 2, 3], ["W3"], "linear-partial-R2"),
+        ],
+    )
     @patch("matplotlib.pyplot.figure")
-    def test_linear_sensitivity_with_confounders(self, mock_fig,estimator_method,
-            effect_fraction_on_treatment, benchmark_common_causes, simulated_method_name):
-        np.random.seed(100) 
-        data = dowhy.datasets.linear_dataset( beta = 10,
-                                      num_common_causes = 7,
-                                      num_samples = 500,
-                                      num_treatments = 1,
-                                     stddev_treatment_noise =10,
-                                     stddev_outcome_noise = 1
-                                    )
-        data["df"] = data["df"].drop("W4", axis = 1)
+    def test_linear_sensitivity_with_confounders(
+        self, mock_fig, estimator_method, effect_fraction_on_treatment, benchmark_common_causes, simulated_method_name
+    ):
+        np.random.seed(100)
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=7,
+            num_samples=500,
+            num_treatments=1,
+            stddev_treatment_noise=10,
+            stddev_outcome_noise=1,
+        )
+        data["df"] = data["df"].drop("W4", axis=1)
         graph_str = 'graph[directed 1node[ id "y" label "y"]node[ id "W0" label "W0"] node[ id "W1" label "W1"] node[ id "W2" label "W2"] node[ id "W3" label "W3"]  node[ id "W5" label "W5"] node[ id "W6" label "W6"]node[ id "v0" label "v0"]edge[source "v0" target "y"]edge[ source "W0" target "v0"] edge[ source "W1" target "v0"] edge[ source "W2" target "v0"] edge[ source "W3" target "v0"] edge[ source "W5" target "v0"] edge[ source "W6" target "v0"]edge[ source "W0" target "y"] edge[ source "W1" target "y"] edge[ source "W2" target "y"] edge[ source "W3" target "y"] edge[ source "W5" target "y"] edge[ source "W6" target "y"]]'
         model = CausalModel(
             data=data["df"],
@@ -144,15 +149,16 @@ class TestAddUnobservedCommonCauseRefuter(object):
             test_significance=None,
         )
         target_estimand = model.identify_effect(proceed_when_unidentifiable=True)
-        estimate = model.estimate_effect(target_estimand,method_name=estimator_method)
-        ate_estimate = data['ate']
+        estimate = model.estimate_effect(target_estimand, method_name=estimator_method)
+        ate_estimate = data["ate"]
         refute = model.refute_estimate(
-            target_estimand, 
-            estimate ,
-            method_name = "add_unobserved_common_cause",
-            simulated_method_name = simulated_method_name, 
-            benchmark_common_causes = benchmark_common_causes,
-            effect_fraction_on_treatment = effect_fraction_on_treatment)
+            target_estimand,
+            estimate,
+            method_name="add_unobserved_common_cause",
+            simulated_method_name=simulated_method_name,
+            benchmark_common_causes=benchmark_common_causes,
+            effect_fraction_on_treatment=effect_fraction_on_treatment,
+        )
         if refute.confounder_increases_estimate == True:
             bias_adjusted_estimate = refute.benchmarking_results["bias_adjusted_estimate"]
             assert all(
@@ -170,21 +176,26 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert refute.stats["robustness_value"] >= 0 and refute.stats["robustness_value"] <= 1
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
-
-    @pytest.mark.parametrize(["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulated_method_name"],
-                             [("backdoor.linear_regression", [1,2,3], ["W3"], "linear-partial-R2"),])
+    @pytest.mark.parametrize(
+        ["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulated_method_name"],
+        [
+            ("backdoor.linear_regression", [1, 2, 3], ["W3"], "linear-partial-R2"),
+        ],
+    )
     @patch("matplotlib.pyplot.figure")
-    def test_linear_sensitivity_given_strength_of_confounding(self, mock_fig,estimator_method,
-            effect_fraction_on_treatment, benchmark_common_causes, simulated_method_name):
-        np.random.seed(100) 
-        data = dowhy.datasets.linear_dataset( beta = 10,
-                                      num_common_causes = 7,
-                                      num_samples = 500,
-                                      num_treatments = 1,
-                                     stddev_treatment_noise =10,
-                                     stddev_outcome_noise = 1
-                                    )
-        data["df"] = data["df"].drop("W4", axis = 1)
+    def test_linear_sensitivity_given_strength_of_confounding(
+        self, mock_fig, estimator_method, effect_fraction_on_treatment, benchmark_common_causes, simulated_method_name
+    ):
+        np.random.seed(100)
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=7,
+            num_samples=500,
+            num_treatments=1,
+            stddev_treatment_noise=10,
+            stddev_outcome_noise=1,
+        )
+        data["df"] = data["df"].drop("W4", axis=1)
         graph_str = 'graph[directed 1node[ id "y" label "y"]node[ id "W0" label "W0"] node[ id "W1" label "W1"] node[ id "W2" label "W2"] node[ id "W3" label "W3"]  node[ id "W5" label "W5"] node[ id "W6" label "W6"]node[ id "v0" label "v0"]edge[source "v0" target "y"]edge[ source "W0" target "v0"] edge[ source "W1" target "v0"] edge[ source "W2" target "v0"] edge[ source "W3" target "v0"] edge[ source "W5" target "v0"] edge[ source "W6" target "v0"]edge[ source "W0" target "y"] edge[ source "W1" target "y"] edge[ source "W2" target "y"] edge[ source "W3" target "y"] edge[ source "W5" target "y"] edge[ source "W6" target "y"]]'
         model = CausalModel(
             data=data["df"],
@@ -194,24 +205,30 @@ class TestAddUnobservedCommonCauseRefuter(object):
             test_significance=None,
         )
         target_estimand = model.identify_effect(proceed_when_unidentifiable=True)
-        estimate = model.estimate_effect(target_estimand,method_name=estimator_method)
-        ate_estimate = data['ate']
-        refute = model.refute_estimate(target_estimand, estimate ,
-                               method_name = "add_unobserved_common_cause",
-                               simulated_method_name = simulated_method_name, 
-                               benchmark_common_causes = benchmark_common_causes,
-                               effect_fraction_on_treatment = effect_fraction_on_treatment)
-        
-        # We calculate adjusted estimates for two sets of partial R^2 values. 
-        bias_adjusted_terms = refute.compute_bias_adjusted(r2tu_w = np.array([0.7, 0.2]) , r2yu_tw = np.array([0.9, 0.3]))
-        estimate1 = bias_adjusted_terms['bias_adjusted_estimate'][0] #adjusted estimate for confounder u1 where r2tu_w = 0.7 and r2yu_tw = 0.9
-        estimate2 = bias_adjusted_terms['bias_adjusted_estimate'][1] #adjusted estimate for confounder u2 where r2tu_w = 0.2 and r2yu_tw = 0.3
+        estimate = model.estimate_effect(target_estimand, method_name=estimator_method)
+        ate_estimate = data["ate"]
+        refute = model.refute_estimate(
+            target_estimand,
+            estimate,
+            method_name="add_unobserved_common_cause",
+            simulated_method_name=simulated_method_name,
+            benchmark_common_causes=benchmark_common_causes,
+            effect_fraction_on_treatment=effect_fraction_on_treatment,
+        )
+
+        # We calculate adjusted estimates for two sets of partial R^2 values.
+        bias_adjusted_terms = refute.compute_bias_adjusted(r2tu_w=np.array([0.7, 0.2]), r2yu_tw=np.array([0.9, 0.3]))
+        estimate1 = bias_adjusted_terms["bias_adjusted_estimate"][
+            0
+        ]  # adjusted estimate for confounder u1 where r2tu_w = 0.7 and r2yu_tw = 0.9
+        estimate2 = bias_adjusted_terms["bias_adjusted_estimate"][
+            1
+        ]  # adjusted estimate for confounder u2 where r2tu_w = 0.2 and r2yu_tw = 0.3
         print(estimate1, estimate2)
         original_estimate = refute.estimate
         # Test if hypothetical confounding by unobserved confounder u1 leads to an adjusted effect that is farther from the original estimate as compared to u2
         assert abs(original_estimate - estimate1) > abs(original_estimate - estimate2)
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
-
 
     @pytest.mark.parametrize(
         [
@@ -283,20 +300,25 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert refute2.stats["robustness_value"] >= rvalue_threshold and refute2.stats["robustness_value"] <= 1
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
-    
-    @pytest.mark.parametrize(["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulated_method_name"],
-                                 [("backdoor.econml.dml.KernelDML", 2 , ["W3"], "non-parametric-partial-R2"), ])
+    @pytest.mark.parametrize(
+        ["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulated_method_name"],
+        [
+            ("backdoor.econml.dml.KernelDML", 2, ["W3"], "non-parametric-partial-R2"),
+        ],
+    )
     @patch("matplotlib.pyplot.figure")
-    def test_non_parametric_sensitivity_given_strength_of_confounding(self, mock_fig, estimator_method,
-                                                              effect_fraction_on_treatment, benchmark_common_causes, simulated_method_name):
+    def test_non_parametric_sensitivity_given_strength_of_confounding(
+        self, mock_fig, estimator_method, effect_fraction_on_treatment, benchmark_common_causes, simulated_method_name
+    ):
         np.random.seed(100)
-        data = dowhy.datasets.linear_dataset(beta=10,
-                                             num_common_causes=7,
-                                             num_samples=500,
-                                             num_treatments=1,
-                                             stddev_treatment_noise=5,
-                                             stddev_outcome_noise=5
-                                             )
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=7,
+            num_samples=500,
+            num_treatments=1,
+            stddev_treatment_noise=5,
+            stddev_outcome_noise=5,
+        )
         data["df"] = data["df"].drop("W4", axis=1)
         graph_str = 'graph[directed 1node[ id "y" label "y"]node[ id "W0" label "W0"] node[ id "W1" label "W1"] node[ id "W2" label "W2"] node[ id "W3" label "W3"]  node[ id "W5" label "W5"] node[ id "W6" label "W6"]node[ id "v0" label "v0"]edge[source "v0" target "y"]edge[ source "W0" target "v0"] edge[ source "W1" target "v0"] edge[ source "W2" target "v0"] edge[ source "W3" target "v0"] edge[ source "W5" target "v0"] edge[ source "W6" target "v0"]edge[ source "W0" target "y"] edge[ source "W1" target "y"] edge[ source "W2" target "y"] edge[ source "W3" target "y"] edge[ source "W5" target "y"] edge[ source "W6" target "y"]]'
         model = CausalModel(
@@ -307,48 +329,55 @@ class TestAddUnobservedCommonCauseRefuter(object):
             test_significance=None,
         )
         target_estimand = model.identify_effect(proceed_when_unidentifiable=True)
-        #Non Parametric estimator
+        # Non Parametric estimator
         estimate = model.estimate_effect(
-            target_estimand, method_name=estimator_method,
+            target_estimand,
+            method_name=estimator_method,
             method_params={
-                                        'init_params': {'model_y':GradientBoostingRegressor(),
-                                                        'model_t': GradientBoostingRegressor(),
-                                                       },
-                                        'fit_params': {'cache_values': True,}
-                                     }
-            )
-        ate_estimate = data['ate']
-        refute = model.refute_estimate(target_estimand, estimate,
-                                       method_name="add_unobserved_common_cause",
-                                       simulated_method_name=simulated_method_name,
-                                       benchmark_common_causes=benchmark_common_causes,
-                                       effect_fraction_on_treatment=effect_fraction_on_treatment)
+                "init_params": {
+                    "model_y": GradientBoostingRegressor(),
+                    "model_t": GradientBoostingRegressor(),
+                },
+                "fit_params": {
+                    "cache_values": True,
+                },
+            },
+        )
+        ate_estimate = data["ate"]
+        refute = model.refute_estimate(
+            target_estimand,
+            estimate,
+            method_name="add_unobserved_common_cause",
+            simulated_method_name=simulated_method_name,
+            benchmark_common_causes=benchmark_common_causes,
+            effect_fraction_on_treatment=effect_fraction_on_treatment,
+        )
 
         assert refute.r2yu_tw >= 0 and refute.r2yu_tw <= 1
         assert refute.r2tu_w >= 0 and refute.r2tu_w <= 1
 
         # We calculate adjusted estimates for two sets of partial R^2 values.
-        benchmarking_results_u1 = refute.perform_benchmarking(r2yu_tw = 0.9 , r2tu_w = 0.7)
-        benchmarking_results_u2 = refute.perform_benchmarking(r2yu_tw = 0.3 , r2tu_w = 0.2)
+        benchmarking_results_u1 = refute.perform_benchmarking(r2yu_tw=0.9, r2tu_w=0.7)
+        benchmarking_results_u2 = refute.perform_benchmarking(r2yu_tw=0.3, r2tu_w=0.2)
         # adjusted lower ate bound for confounder u1 where r2tu_w = 0.7 and r2yu_tw = 0.9
-        lower_ate_bound_u1 = benchmarking_results_u1['lower_ate_bound']
+        lower_ate_bound_u1 = benchmarking_results_u1["lower_ate_bound"]
         # adjusted lower ate bound for confounder u2 where r2tu_w = 0.2 and r2yu_tw = 0.3
-        lower_ate_bound_u2 = benchmarking_results_u2['lower_ate_bound']
+        lower_ate_bound_u2 = benchmarking_results_u2["lower_ate_bound"]
 
         # adjusted upper ate bound for confounder u1 where r2tu_w = 0.7 and r2yu_tw = 0.9
-        upper_ate_bound_u1 = benchmarking_results_u1['upper_ate_bound']
+        upper_ate_bound_u1 = benchmarking_results_u1["upper_ate_bound"]
         # adjusted upper ate bound for confounder u2 where r2tu_w = 0.2 and r2yu_tw = 0.3
-        upper_ate_bound_u2 = benchmarking_results_u2['upper_ate_bound']
+        upper_ate_bound_u2 = benchmarking_results_u2["upper_ate_bound"]
 
         # adjusted lower confidence bound for confounder u1 where r2tu_w = 0.7 and r2yu_tw = 0.9
-        lower_confidence_bound_u1 = benchmarking_results_u1['lower_confidence_bound']
+        lower_confidence_bound_u1 = benchmarking_results_u1["lower_confidence_bound"]
         # adjusted lower confidence bound for confounder u2 where r2tu_w = 0.2 and r2yu_tw = 0.3
-        lower_confidence_bound_u2 = benchmarking_results_u2['lower_confidence_bound']
+        lower_confidence_bound_u2 = benchmarking_results_u2["lower_confidence_bound"]
 
         # adjusted upper confidence bound for confounder u1 where r2tu_w = 0.7 and r2yu_tw = 0.9
-        upper_confidence_bound_u1 = benchmarking_results_u1['upper_confidence_bound']
+        upper_confidence_bound_u1 = benchmarking_results_u1["upper_confidence_bound"]
         # adjusted upper confidence bound for confounder u2 where r2tu_w = 0.2 and r2yu_tw = 0.3
-        upper_confidence_bound_u2 = benchmarking_results_u2['upper_confidence_bound']
+        upper_confidence_bound_u2 = benchmarking_results_u2["upper_confidence_bound"]
 
         original_estimate = refute.theta_s
         # Test if hypothetical confounding by unobserved confounder u1 leads to an adjusted effect that is farther from the original estimate as compared to u2
@@ -357,21 +386,27 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert abs(original_estimate - lower_confidence_bound_u1) > abs(original_estimate - lower_confidence_bound_u2)
         assert abs(original_estimate - upper_confidence_bound_u1) > abs(original_estimate - upper_confidence_bound_u2)
         # we patched figure plotting call to avoid drawing plots during tests
-        assert mock_fig.call_count > 0    
-    
-    @pytest.mark.parametrize(["estimator_method", "effect_fraction_on_outcome", "benchmark_common_causes", "simulated_method_name"],
-                                 [("backdoor.econml.dml.LinearDML", 2 , ["W3"], "non-parametric-partial-R2"), ])
+        assert mock_fig.call_count > 0
+
+    @pytest.mark.parametrize(
+        ["estimator_method", "effect_fraction_on_outcome", "benchmark_common_causes", "simulated_method_name"],
+        [
+            ("backdoor.econml.dml.LinearDML", 2, ["W3"], "non-parametric-partial-R2"),
+        ],
+    )
     @patch("matplotlib.pyplot.figure")
-    def test_partially_linear_sensitivity_given_strength_of_confounding(self, mock_fig, estimator_method,
-                                                              effect_fraction_on_outcome, benchmark_common_causes, simulated_method_name):
+    def test_partially_linear_sensitivity_given_strength_of_confounding(
+        self, mock_fig, estimator_method, effect_fraction_on_outcome, benchmark_common_causes, simulated_method_name
+    ):
         np.random.seed(100)
-        data = dowhy.datasets.linear_dataset(beta=10,
-                                             num_common_causes=7,
-                                             num_samples=500,
-                                             num_treatments=1,
-                                             stddev_treatment_noise=5,
-                                             stddev_outcome_noise=5
-                                             )
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=7,
+            num_samples=500,
+            num_treatments=1,
+            stddev_treatment_noise=5,
+            stddev_outcome_noise=5,
+        )
         data["df"] = data["df"].drop("W4", axis=1)
         graph_str = 'graph[directed 1node[ id "y" label "y"]node[ id "W0" label "W0"] node[ id "W1" label "W1"] node[ id "W2" label "W2"] node[ id "W3" label "W3"]  node[ id "W5" label "W5"] node[ id "W6" label "W6"]node[ id "v0" label "v0"]edge[source "v0" target "y"]edge[ source "W0" target "v0"] edge[ source "W1" target "v0"] edge[ source "W2" target "v0"] edge[ source "W3" target "v0"] edge[ source "W5" target "v0"] edge[ source "W6" target "v0"]edge[ source "W0" target "y"] edge[ source "W1" target "y"] edge[ source "W2" target "y"] edge[ source "W3" target "y"] edge[ source "W5" target "y"] edge[ source "W6" target "y"]]'
         model = CausalModel(
@@ -381,49 +416,56 @@ class TestAddUnobservedCommonCauseRefuter(object):
             graph=graph_str,
             test_significance=None,
         )
-        target_estimand = model.identify_effect(
-            proceed_when_unidentifiable=True)
+        target_estimand = model.identify_effect(proceed_when_unidentifiable=True)
         estimate = model.estimate_effect(
-            target_estimand, method_name=estimator_method, 
+            target_estimand,
+            method_name=estimator_method,
             method_params={
-                                        'init_params': {'model_y':GradientBoostingRegressor(),
-                                                        'model_t': GradientBoostingRegressor(),
-                                                        'linear_first_stages': False
-                                                       },
-                                        'fit_params': {'cache_values': True,}
-                        })
-        ate_estimate = data['ate']
-        refute = model.refute_estimate(target_estimand, estimate,
-                                       method_name="add_unobserved_common_cause",
-                                       simulated_method_name=simulated_method_name,
-                                       benchmark_common_causes=benchmark_common_causes,
-                                       effect_fraction_on_outcome=effect_fraction_on_outcome)
-        
+                "init_params": {
+                    "model_y": GradientBoostingRegressor(),
+                    "model_t": GradientBoostingRegressor(),
+                    "linear_first_stages": False,
+                },
+                "fit_params": {
+                    "cache_values": True,
+                },
+            },
+        )
+        ate_estimate = data["ate"]
+        refute = model.refute_estimate(
+            target_estimand,
+            estimate,
+            method_name="add_unobserved_common_cause",
+            simulated_method_name=simulated_method_name,
+            benchmark_common_causes=benchmark_common_causes,
+            effect_fraction_on_outcome=effect_fraction_on_outcome,
+        )
+
         assert refute.r2yu_tw >= 0 and refute.r2yu_tw <= 1
         assert refute.r2tu_w >= 0 and refute.r2tu_w <= 1
 
         # We calculate adjusted estimates for two sets of partial R^2 values.
-        benchmarking_results_u1 = refute.perform_benchmarking(r2yu_tw = 0.9 , r2tu_w = 0.7)
-        benchmarking_results_u2 = refute.perform_benchmarking(r2yu_tw = 0.3 , r2tu_w = 0.2)
+        benchmarking_results_u1 = refute.perform_benchmarking(r2yu_tw=0.9, r2tu_w=0.7)
+        benchmarking_results_u2 = refute.perform_benchmarking(r2yu_tw=0.3, r2tu_w=0.2)
         # adjusted lower ate bound for confounder u1 where r2tu_w = 0.7 and r2yu_tw = 0.9
-        lower_ate_bound_u1 = benchmarking_results_u1['lower_ate_bound']
+        lower_ate_bound_u1 = benchmarking_results_u1["lower_ate_bound"]
         # adjusted lower ate bound for confounder u2 where r2tu_w = 0.2 and r2yu_tw = 0.3
-        lower_ate_bound_u2 = benchmarking_results_u2['lower_ate_bound']
+        lower_ate_bound_u2 = benchmarking_results_u2["lower_ate_bound"]
 
         # adjusted upper ate bound for confounder u1 where r2tu_w = 0.7 and r2yu_tw = 0.9
-        upper_ate_bound_u1 = benchmarking_results_u1['upper_ate_bound']
+        upper_ate_bound_u1 = benchmarking_results_u1["upper_ate_bound"]
         # adjusted upper ate bound for confounder u2 where r2tu_w = 0.2 and r2yu_tw = 0.3
-        upper_ate_bound_u2 = benchmarking_results_u2['upper_ate_bound']
+        upper_ate_bound_u2 = benchmarking_results_u2["upper_ate_bound"]
 
         # adjusted lower confidence bound for confounder u1 where r2tu_w = 0.7 and r2yu_tw = 0.9
-        lower_confidence_bound_u1 = benchmarking_results_u1['lower_confidence_bound']
+        lower_confidence_bound_u1 = benchmarking_results_u1["lower_confidence_bound"]
         # adjusted lower confidence bound for confounder u2 where r2tu_w = 0.2 and r2yu_tw = 0.3
-        lower_confidence_bound_u2 = benchmarking_results_u2['lower_confidence_bound']
+        lower_confidence_bound_u2 = benchmarking_results_u2["lower_confidence_bound"]
 
         # adjusted upper confidence bound for confounder u1 where r2tu_w = 0.7 and r2yu_tw = 0.9
-        upper_confidence_bound_u1 = benchmarking_results_u1['upper_confidence_bound']
+        upper_confidence_bound_u1 = benchmarking_results_u1["upper_confidence_bound"]
         # adjusted upper confidence bound for confounder u2 where r2tu_w = 0.2 and r2yu_tw = 0.3
-        upper_confidence_bound_u2 = benchmarking_results_u2['upper_confidence_bound']
+        upper_confidence_bound_u2 = benchmarking_results_u2["upper_confidence_bound"]
 
         original_estimate = refute.theta_s
         # Test if hypothetical confounding by unobserved confounder u1 leads to an adjusted effect that is farther from the original estimate as compared to u2
@@ -432,4 +474,4 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert abs(original_estimate - lower_confidence_bound_u1) > abs(original_estimate - lower_confidence_bound_u2)
         assert abs(original_estimate - upper_confidence_bound_u1) > abs(original_estimate - upper_confidence_bound_u2)
         # we patched figure plotting call to avoid drawing plots during tests
-        assert mock_fig.call_count > 0    
+        assert mock_fig.call_count > 0

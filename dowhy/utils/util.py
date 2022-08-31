@@ -1,10 +1,11 @@
 import numpy as np
 from econml.sklearn_extensions.model_selection import GridSearchCVList
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.linear_model import Lasso
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.compose import ColumnTransformer
+
 
 def get_numeric_features(X):
     """
@@ -14,14 +15,17 @@ def get_numeric_features(X):
 
     returns: list of indices of numeric features
     """
-    numeric_features_names = list(X.select_dtypes('number'))
+    numeric_features_names = list(X.select_dtypes("number"))
     numeric_features = []
     for col_name in numeric_features_names:
         col_index = X.columns.get_loc(col_name)
         numeric_features.append(col_index)
     return numeric_features
 
-def get_generic_regressor(cv, X, Y, max_degree = 3, estimator_list = None, estimator_param_list = None, numeric_features = None):
+
+def get_generic_regressor(
+    cv, X, Y, max_degree=3, estimator_list=None, estimator_param_list=None, numeric_features=None
+):
     """
     Finds the best estimator for regression function (g_s)
 
@@ -36,39 +40,33 @@ def get_generic_regressor(cv, X, Y, max_degree = 3, estimator_list = None, estim
     :returns: estimator for Reisz Regression function
     """
     if estimator_list is not None:
-        estimator = GridSearchCVList(estimator_list,
-                                     estimator_param_list,
-                                     cv=cv,
-                                     scoring='neg_mean_squared_error',
-                                     n_jobs=-1
-                                     ).fit(X, Y)
+        estimator = GridSearchCVList(
+            estimator_list, estimator_param_list, cv=cv, scoring="neg_mean_squared_error", n_jobs=-1
+        ).fit(X, Y)
         return estimator.best_estimator_
     else:
-        estimator = GridSearchCVList([
-            RandomForestRegressor(n_estimators=100, random_state=120),
-
-            Pipeline([('scale', ColumnTransformer([('num', StandardScaler(), numeric_features)],
-                                                  remainder='passthrough')),
-                      ('lasso_model', Lasso())]),
-
-            GradientBoostingRegressor()
-        ],
+        estimator = GridSearchCVList(
+            [
+                RandomForestRegressor(n_estimators=100, random_state=120),
+                Pipeline(
+                    [
+                        (
+                            "scale",
+                            ColumnTransformer([("num", StandardScaler(), numeric_features)], remainder="passthrough"),
+                        ),
+                        ("lasso_model", Lasso()),
+                    ]
+                ),
+                GradientBoostingRegressor(),
+            ],
             param_grid_list=[
-                {'n_estimators': [50],
-                 'max_depth': [3, 4, 5],
-                 'min_samples_leaf': [10, 50]
-                 },
-
-                {'lasso_model__alpha': [0.01, 0.001, 1e-4, 1e-5, 1e-6]},
-
-                {
-                     'learning_rate' : [0.01, 0.001],
-                     'n_estimators' : [50,200]
-                }
-        ],
+                {"n_estimators": [50], "max_depth": [3, 4, 5], "min_samples_leaf": [10, 50]},
+                {"lasso_model__alpha": [0.01, 0.001, 1e-4, 1e-5, 1e-6]},
+                {"learning_rate": [0.01, 0.001], "n_estimators": [50, 200]},
+            ],
             cv=cv,
-            scoring='neg_mean_squared_error',
-            n_jobs=-1
+            scoring="neg_mean_squared_error",
+            n_jobs=-1,
         ).fit(X, Y)
         return estimator.best_estimator_
 
@@ -81,7 +79,7 @@ def generate_moment_function(W, g):
     shape = (W.shape[0], 1)
     ones = np.ones(shape)
     zeros = np.zeros(shape)
-    non_treatment_data = W[:, 1:] # assume that treatment is one-dimensional. 
+    non_treatment_data = W[:, 1:]  # assume that treatment is one-dimensional.
     data_0 = np.hstack([zeros, non_treatment_data])  # data with treatment = 1
     data_1 = np.hstack([ones, non_treatment_data])  # data with treatment = 0
     return g(data_1) - g(data_0)
@@ -96,7 +94,10 @@ def create_polynomial_function(max_degree):
     :returns: list of lambda functions
     """
     polynomial_function = []
-    for degree in range(max_degree+1):
-        def poly_term(x): return x[:, [0]] ** degree
+    for degree in range(max_degree + 1):
+
+        def poly_term(x):
+            return x[:, [0]] ** degree
+
         polynomial_function.append(poly_term)
     return polynomial_function

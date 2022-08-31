@@ -329,8 +329,8 @@ class LinearSensitivityAnalyzer:
             y = r2yu_tw[i]
             for j in range(len(r2tu_w)):
                 x = r2tu_w[j]
-                benchmarking_results = self.compute_bias_adjusted(r2tu_w = x, r2yu_tw = y)
-                estimate = benchmarking_results['bias_adjusted_estimate']
+                benchmarking_results = self.compute_bias_adjusted(r2tu_w=x, r2yu_tw=y)
+                estimate = benchmarking_results["bias_adjusted_estimate"]
                 contour_values[i][j] = estimate
 
         estimate_bounds = self.benchmarking_results["bias_adjusted_estimate"]
