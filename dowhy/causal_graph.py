@@ -224,8 +224,14 @@ class CausalGraph:
         observed_nodes = [node for node in self._graph.nodes() if self._graph.nodes[node]["observed"] == "yes"]
         return self._graph.subgraph(observed_nodes)
 
-    def do_surgery(self, node_names, remove_outgoing_edges=False, remove_incoming_edges=False,
-            remove_only_direct_edges=False, target_node_names=None):
+    def do_surgery(
+        self,
+        node_names,
+        remove_outgoing_edges=False,
+        remove_incoming_edges=False,
+        remove_only_direct_edges=False,
+        target_node_names=None,
+    ):
         node_names = parse_state(node_names)
         new_graph = self._graph.copy()
         for node_name in node_names:

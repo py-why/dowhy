@@ -16,6 +16,7 @@ class CausalIdentifier:
     Currently supports backdoor and instrumental variable identification methods. The identification is based on the causal graph provided.
 
     """
+
     # Average total effect
     NONPARAMETRIC_ATE = "nonparametric-ate"
     # Natural direct effect
@@ -331,12 +332,7 @@ class CausalIdentifier:
         return estimand
 
     def identify_backdoor(
-        self,
-        treatment_name,
-        outcome_name,
-        include_unobserved=False,
-        dseparation_algo="default",
-        direct_effect = False
+        self, treatment_name, outcome_name, include_unobserved=False, dseparation_algo="default", direct_effect=False
     ):
         backdoor_sets = []
         backdoor_paths = None
@@ -344,10 +340,12 @@ class CausalIdentifier:
         if dseparation_algo == "naive":
             backdoor_paths = self._graph.get_backdoor_paths(treatment_name, outcome_name)
         elif dseparation_algo == "default":
-            bdoor_graph = self._graph.do_surgery(treatment_name,
-                    target_node_names = outcome_name,
-                    remove_outgoing_edges=True,
-                    remove_only_direct_edges=direct_effect)
+            bdoor_graph = self._graph.do_surgery(
+                treatment_name,
+                target_node_names=outcome_name,
+                remove_outgoing_edges=True,
+                remove_only_direct_edges=direct_effect,
+            )
         else:
             raise ValueError(f"d-separation algorithm {dseparation_algo} is not supported")
         method_name = (

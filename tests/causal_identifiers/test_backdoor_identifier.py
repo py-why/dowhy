@@ -45,7 +45,10 @@ class TestBackdoorIdentification(object):
         graph = example_graph_solution.graph
         expected_sets = example_graph_solution.minimal_adjustment_sets
         identifier = CausalIdentifier(
-            graph, estimand_type="nonparametric-ate", method_name="minimal-adjustment", proceed_when_unidentifiable=False
+            graph,
+            estimand_type="nonparametric-ate",
+            method_name="minimal-adjustment",
+            proceed_when_unidentifiable=False,
         )
 
         backdoor_results = identifier.identify_backdoor("X", "Y", include_unobserved=False)
@@ -61,7 +64,10 @@ class TestBackdoorIdentification(object):
         graph = example_graph_solution.graph
         expected_sets = example_graph_solution.maximal_adjustment_sets
         identifier = CausalIdentifier(
-            graph, estimand_type="nonparametric-ate", method_name="maximal-adjustment", proceed_when_unidentifiable=False
+            graph,
+            estimand_type="nonparametric-ate",
+            method_name="maximal-adjustment",
+            proceed_when_unidentifiable=False,
         )
 
         backdoor_results = identifier.identify_backdoor("X", "Y", include_unobserved=False)
@@ -78,7 +84,10 @@ class TestBackdoorIdentification(object):
         graph = example_graph_solution.graph
         expected_sets = example_graph_solution.direct_maximal_adjustment_sets
         identifier = CausalIdentifier(
-            graph, estimand_type="nonparametric-cde", method_name="maximal-adjustment", proceed_when_unidentifiable=False
+            graph,
+            estimand_type="nonparametric-cde",
+            method_name="maximal-adjustment",
+            proceed_when_unidentifiable=False,
         )
 
         backdoor_results = identifier.identify_backdoor("X", "Y", direct_effect=True)
