@@ -1,15 +1,16 @@
 import numpy as np
 import pandas as pd
 import pytest
+from pytest import mark
 from sklearn.linear_model import LinearRegression
 
 import dowhy.api
 import dowhy.datasets
 
 
-@pytest.mark.usefixtures("fixed_seed")
+@mark.usefixtures("fixed_seed")
 class TestPandasDoAPI(object):
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["N", "error_tolerance"],
         [
             (10000, 0.1),
@@ -51,7 +52,7 @@ class TestPandasDoAPI(object):
         )
         assert res
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["N", "error_tolerance"],
         [
             (10000, 0.1),
@@ -94,7 +95,7 @@ class TestPandasDoAPI(object):
         )
         assert res
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["N", "error_tolerance"],
         [
             (10000, 0.1),
@@ -137,7 +138,7 @@ class TestPandasDoAPI(object):
         )
         assert res
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["N", "error_tolerance"],
         [
             (10000, 0.1),
@@ -186,7 +187,7 @@ class TestPandasDoAPI(object):
     when it belives that the behavior of the function is wrong.
     """
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["N", "variable_types"],
         [
             (10000, {"v0": "b", "y": "c", "W0": "c"}),
@@ -202,7 +203,7 @@ class TestPandasDoAPI(object):
         ).groupby("v0").mean()
         assert True
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["N", "variable_types"],
         [
             (10000, {"v0": "b", "W0": "c"}),
@@ -218,7 +219,7 @@ class TestPandasDoAPI(object):
         ).groupby("v0").mean()
         assert True
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["N", "variable_types"],
         [
             (10000, {}),
@@ -234,7 +235,7 @@ class TestPandasDoAPI(object):
         ).groupby("v0").mean()
         assert True
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["N", "variable_types"],
         [
             (1, {"v0": "b", "W0": "c"}),

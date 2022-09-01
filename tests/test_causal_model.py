@@ -1,5 +1,6 @@
 import pandas as pd
 import pytest
+from pytest import mark
 from sklearn import linear_model
 
 import dowhy
@@ -8,7 +9,7 @@ from dowhy import CausalModel
 
 
 class TestCausalModel(object):
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["beta", "num_samples", "num_treatments"],
         [
             (10, 100, 1),
@@ -47,7 +48,7 @@ class TestCausalModel(object):
 
         assert estimate.estimator.propensity_score_model.max_iter == 1000
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["beta", "num_instruments", "num_samples", "num_treatments"],
         [
             (10, 1, 100, 1),
@@ -89,7 +90,7 @@ class TestCausalModel(object):
         common_causes = model.get_common_causes()
         assert all(node_name in common_causes for node_name in ["X1", "X2"])
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["beta", "num_instruments", "num_samples", "num_treatments"],
         [
             (10, 1, 100, 1),
@@ -199,7 +200,7 @@ class TestCausalModel(object):
         common_causes = model.get_common_causes()
         assert all(node_name in common_causes for node_name in ["X1", "X2"])
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["beta", "num_instruments", "num_samples", "num_treatments"],
         [
             (10, 1, 100, 1),
@@ -263,7 +264,7 @@ class TestCausalModel(object):
         all_nodes = model._graph.get_all_nodes(include_unobserved=False)
         assert "Unobserved Confounders" not in all_nodes
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["beta", "num_instruments", "num_samples", "num_treatments"],
         [
             (10, 1, 100, 1),
@@ -309,7 +310,7 @@ class TestCausalModel(object):
         all_nodes = model._graph.get_all_nodes(include_unobserved=False)
         assert "Unobserved Confounders" not in all_nodes
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["num_variables", "num_samples"],
         [
             (10, 5000),
@@ -333,7 +334,7 @@ class TestCausalModel(object):
         )
         assert graph_refutation_object.refutation_result == True
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["num_variables", "num_samples"],
         [
             (10, 5000),

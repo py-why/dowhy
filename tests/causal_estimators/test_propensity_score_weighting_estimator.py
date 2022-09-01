@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from pytest import mark
 from sklearn.linear_model import LinearRegression
 
 import dowhy.api
@@ -8,9 +9,9 @@ from dowhy.causal_estimators.propensity_score_weighting_estimator import Propens
 from .base import TestEstimator
 
 
-@pytest.mark.usefixtures("fixed_seed")
+@mark.usefixtures("fixed_seed")
 class TestPropensityScoreWeightingEstimator(object):
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         [
             "error_tolerance",
             "Estimator",
