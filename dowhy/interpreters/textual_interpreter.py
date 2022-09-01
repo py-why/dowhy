@@ -8,7 +8,7 @@ class TextualInterpreter(Interpreter):
         super().__init__(instance, **kwargs)
 
     def show(self, interpret_text):
-        """Display the intepretation.
+        """Display the interpretation.
 
         :param interpret_text: String containing the interpretation
 

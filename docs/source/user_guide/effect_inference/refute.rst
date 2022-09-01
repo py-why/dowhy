@@ -26,9 +26,9 @@ Supported refutation methods
 * **Data Subsets Validation**: Does the estimated effect change significantly when
   we replace the given dataset with a randomly selected subset? (*Hint: It
   should not*)
-* **Bootstrap Validation**: Does the estimated effect change significantly when we 
+* **Bootstrap Validation**: Does the estimated effect change significantly when we
   replace the given dataset with bootstrapped samples from the same dataset? (*Hint: It should not*)
 
-Examples of using refutation methods are in the `Refutations <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_refuter_notebook.ipynb>`_ notebook. For an advanced refutation that uses a simulated dataset based on user-provided or learnt data-generating processes, check out the `Dummy Outcome Refuter <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_demo_dummy_outcome_refuter.ipynb>`_ notebook. 
-As a practical example, `this notebook <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_refutation_testing.ipynb>`_ shows an application of refutation methods on evaluating effect estimators for the Infant Health and Development Program (IHDP) and Lalonde datasets. 
+Examples of using refutation methods are in the `Refutations <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_refuter_notebook.ipynb>`_ notebook. For an advanced refutation that uses a simulated dataset based on user-provided or learnt data-generating processes, check out the `Dummy Outcome Refuter <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_demo_dummy_outcome_refuter.ipynb>`_ notebook.
+As a practical example, `this notebook <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_refutation_testing.ipynb>`_ shows an application of refutation methods on evaluating effect estimators for the Infant Health and Development Program (IHDP) and Lalonde datasets.
 

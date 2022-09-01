@@ -2,16 +2,16 @@ Example notebooks
 =================
 
 These examples are also available on `GitHub <https://github
-.com/py-why/dowhy/tree/master/docs/source/example_notebooks>`_. You can `run them locally <https://docs.jupyter
+.com/py-why/dowhy/tree/main/docs/source/example_notebooks>`_. You can `run them locally <https://docs.jupyter
 .org/en/latest/running.html>`_ after cloning `DoWhy <https://github.com/py-why/dowhy>`_ and `installing Jupyter
 <https://jupyter.org/install>`_. Or you can run them directly in a web browser using the
-`Binder environment <https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F>`_. 
+`Binder environment <https://mybinder.org/v2/gh/microsoft/dowhy/main?filepath=docs%2Fsource%2F>`_.
 
 
 .. toctree::
    :maxdepth: 1
    :caption: Getting started
-   
+
    dowhy_simple_example
    dowhy_confounder_example
    dowhy_estimation_methods
@@ -28,7 +28,7 @@ These examples are also available on `GitHub <https://github
 .. toctree::
    :maxdepth: 1
    :caption: Using benchmark datasets
-   
+
    dowhy_ihdp_data_example
    dowhy_twins_example
    dowhy_lalonde_example
@@ -36,7 +36,7 @@ These examples are also available on `GitHub <https://github
    lalonde_pandas_api
 
 .. Advanced notebooks
-   
+
 .. toctree::
    :maxdepth: 1
    :caption: Advanced
