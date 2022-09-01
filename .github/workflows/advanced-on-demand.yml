@@ -8,6 +8,12 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9]
+        poetry-version: [1.1.14]
+        test-group: [1, 2, 3, 4]
+
     if: ${{ github.event.comment.body == 'test advanced'}}
     steps:
       - name: Message Initiating
@@ -62,7 +68,7 @@ jobs:
           poetry install -E plotting -E causalml
 
       - name: Run Advanced Tests
-        run: poetry run poe test_advanced
+        run: poetry run poe test_advanced  --splits 4 --group ${{ matrix.test-group }}
 
       - name: Message success
         if: ${{ success() }}
