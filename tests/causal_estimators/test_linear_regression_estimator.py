@@ -1,13 +1,14 @@
 import pytest
+from pytest import mark
 
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 
 from .base import TestEstimator
 
 
-@pytest.mark.usefixtures("fixed_seed")
+@mark.usefixtures("fixed_seed")
 class TestLinearRegressionEstimator(object):
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         [
             "error_tolerance",
             "Estimator",

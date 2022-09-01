@@ -2,6 +2,7 @@ import subprocess
 import sys
 
 import pytest
+from pytest import mark
 
 from dowhy import CausalModel
 from dowhy.datasets import linear_dataset
@@ -25,7 +26,7 @@ def init_data():
     return data
 
 
-@pytest.mark.use_fixtures("init_data")
+@mark.use_fixtures("init_data")
 class TestCausalmlEstimator:
     """
     To test the basic functionality of the CausalML estimators

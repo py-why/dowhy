@@ -4,6 +4,7 @@ import tempfile
 
 import nbformat
 import pytest
+from pytest import mark
 
 NOTEBOOKS_PATH = "docs/source/example_notebooks/"
 notebooks_list = [f.name for f in os.scandir(NOTEBOOKS_PATH) if f.name.endswith(".ipynb")]
@@ -86,13 +87,13 @@ def test_confounder_notebook():
 parameter_list = []
 for nb in notebooks_list:
     if nb in advanced_notebooks:
-        param = pytest.param(nb, marks=[pytest.mark.advanced, pytest.mark.notebook], id=nb)
+        param = pytest.param(nb, marks=[mark.advanced, mark.notebook], id=nb)
     else:
-        param = pytest.param(nb, marks=[pytest.mark.notebook], id=nb)
+        param = pytest.param(nb, marks=[mark.notebook], id=nb)
     parameter_list.append(param)
 
 
-@pytest.mark.parametrize("notebook_filename", parameter_list)
+@mark.parametrize("notebook_filename", parameter_list)
 def test_notebook(notebook_filename):
     nb, errors = _notebook_run(NOTEBOOKS_PATH + notebook_filename)
     assert errors == []
