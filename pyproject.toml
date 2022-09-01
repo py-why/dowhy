@@ -7,14 +7,12 @@ name = "dowhy"
 #
 version = "0.0.0"
 description = "DoWhy is a Python library for causal inference that supports explicit modeling and testing of causal assumptions"
-authors = [
-    "PyWhy Community <amshar@microsoft.com>"
-]
+authors = ["PyWhy Community <amshar@microsoft.com>"]
 maintainers = []
 license = "MIT"
 documentation = "https://py-why.github.io/dowhy"
 repository = "https://github.com/pywhy/dowhy"
-classifiers = [  
+classifiers = [
     'Development Status :: 4 - Beta',
     'License :: OSI Approved :: MIT License',
     'Programming Language :: Python :: 3.8',
@@ -25,7 +23,7 @@ keywords = [
     'machine-learning',
     'causal-inference',
     'statistics',
-    'graphical-model'
+    'graphical-model',
 ]
 include = ['docs', 'tests', 'CONTRIBUTING.md', 'LICENSE']
 readme = 'README.rst'
@@ -55,25 +53,28 @@ sympy = "^1.10.1"
 scikit-learn = "1.0.2"
 pydot = "^1.4.2"
 joblib = "^1.1.0"
-pygraphviz = {version = "^1.9", optional = true}
-matplotlib = {version = "^3.5.3", optional = true}
-econml = {version = "*", optional = true}
+pygraphviz = { version = "^1.9", optional = true }
+econml = { version = "*", optional = true }
 tqdm = "^4.64.0"
 
-#
+[tool.poetry.group.causalml]
+optional = true
+
+[tool.poetry.group.causalml.dependencies]
 # CausalML Extra (causalml is wired to use llvmlite 0.36)
-#
-causalml = {version = "^0.12.3", optional = true}
-llvmlite = {version = "^0.36.0", optional = true}
+causalml = "^0.12.3"
+llvmlite = "^0.36.0"
 
-[tool.poetry.extras]
-plotting = ["matplotlib"]
-causalml = ["causalml", "llvmlite"]
+[tool.poetry.group.plotting]
+optional = true
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.plotting.dependencies]
+matplotlib = "^3.5.3"
+
+[tool.poetry.group.dev.dependencies]
 poethepoet = "^0.16.0"
 flake8 = "^4.0.1"
-black = {version = "^22.6.0", extras = ["jupyter"]}
+black = { version = "^22.6.0", extras = ["jupyter"] }
 isort = "^5.10.1"
 pytest = "^7.1.2"
 twine = "^4.0.1"
@@ -87,12 +88,16 @@ mypy = "^0.971"
 econml = "*"
 pygraphviz = "^1.9"
 
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
 #
 # Dependencies for Documentation Generation
 #
 rpy2 = "^3.5.2"
-sphinx-multiversion = { git = "https://github.com/petergtz/sphinx-multiversion.git", branch = "override-version-with-refname"}
-sphinxcontrib-googleanalytics = { git = "https://github.com/petergtz/googleanalytics.git", branch = "master"}
+sphinx-multiversion = { git = "https://github.com/petergtz/sphinx-multiversion.git", branch = "override-version-with-refname" }
+sphinxcontrib-googleanalytics = { git = "https://github.com/petergtz/googleanalytics.git", branch = "master" }
 nbsphinx = "^0.8.9"
 sphinx-rtd-theme = "^1.0.0"
 pydata-sphinx-theme = "^0.9.0"
@@ -103,7 +108,7 @@ ipykernel = "^6.15.1"
 # Versions defined for security reasons
 #
 # https://github.com/py-why/dowhy/security/dependabot/1 - CVE-2022-34749
-nbconvert = {version = "7.0.0rc3", allow-prereleases = true}
+nbconvert = { version = "7.0.0rc3", allow-prereleases = true }
 
 
 [build-system]
@@ -111,9 +116,7 @@ requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
-markers = [
-    "advanced: not be to run each time. only on package updates."
-]
+markers = ["advanced: not be to run each time. only on package updates."]
 
 [tool.poe.tasks]
 # stop the build if there are Python syntax errors or undefined names
