@@ -195,6 +195,15 @@ class CausalIdentifier:
         return estimand
 
     def identify_cde_effect(self):
+        """ Identify controlled direct effect. For a definition, see Vanderwheele (2011).
+        Controlled direct and mediated effects: definition, identification and bounds.
+        https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4193506/
+
+        Using do-calculus rules, identification yields a adjustment set.
+        It is based on the principle that under a graph where the direct edge from treatment
+        to outcome is removed, conditioning on the adjustment set should d-separate
+        treatment and outcome.
+        """
         estimands_dict = {}
         # Pick algorithm to compute backdoor sets according to method chosen
         backdoor_sets = self.identify_backdoor(self.treatment_name, self.outcome_name, direct_effect=True)
@@ -344,7 +353,7 @@ class CausalIdentifier:
                 treatment_name,
                 target_node_names=outcome_name,
                 remove_outgoing_edges=True,
-                remove_only_direct_edges=direct_effect,
+                remove_only_direct_edges_to_target=direct_effect,
             )
         else:
             raise ValueError(f"d-separation algorithm {dseparation_algo} is not supported")

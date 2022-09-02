@@ -229,21 +229,32 @@ class CausalGraph:
         node_names,
         remove_outgoing_edges=False,
         remove_incoming_edges=False,
-        remove_only_direct_edges=False,
         target_node_names=None,
+        remove_only_direct_edges_to_target=False
     ):
+        """Method to create a new graph based on the concept of do-surgery.
+
+        :param node_names: focal nodes for the surgery
+        :param remove_outgoing_edges: whether to remove outgoing edges from the focal nodes
+        :param remove_incoming_edges: whether to remove incoming edges to the focal nodes
+        :param target_node_names: target nodes (optional) for the surgery, only used when remove_only_direct_edges_to_target is True
+        :param remove_only_direct_edges_to_target: whether to remove only the direct edges from focal nodes to the target nodes
+
+        :returns: a new networkx graph after the specified removal of edges
+        """
+
         node_names = parse_state(node_names)
         new_graph = self._graph.copy()
         for node_name in node_names:
             if remove_outgoing_edges:
-                if remove_only_direct_edges:
+                if remove_only_direct_edges_to_target:
                     new_graph.remove_edges_from([(node_name, v) for v in target_node_names])
                 else:
                     children = new_graph.successors(node_name)
                     edges_bunch = [(node_name, child) for child in children]
                     new_graph.remove_edges_from(edges_bunch)
             if remove_incoming_edges:
-                # remove_only_direct_edges is not implemented for incoming edges
+                # removal of only direct edges wrt a target is not implemented for incoming edges
                 parents = new_graph.predecessors(node_name)
                 edges_bunch = [(parent, node_name) for parent in parents]
                 new_graph.remove_edges_from(edges_bunch)
