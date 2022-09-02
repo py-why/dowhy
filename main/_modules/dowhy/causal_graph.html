@@ -435,15 +435,37 @@
         <span class="n">observed_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s2">&quot;observed&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;yes&quot;</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">subgraph</span><span class="p">(</span><span class="n">observed_nodes</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CausalGraph.do_surgery"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_graph.CausalGraph.do_surgery">[docs]</a>    <span class="k">def</span> <span class="nf">do_surgery</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_names</span><span class="p">,</span> <span class="n">remove_outgoing_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">remove_incoming_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="CausalGraph.do_surgery"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_graph.CausalGraph.do_surgery">[docs]</a>    <span class="k">def</span> <span class="nf">do_surgery</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">node_names</span><span class="p">,</span>
+        <span class="n">remove_outgoing_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">remove_incoming_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">target_node_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">remove_only_direct_edges_to_target</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Method to create a new graph based on the concept of do-surgery.</span>
+
+<span class="sd">        :param node_names: focal nodes for the surgery</span>
+<span class="sd">        :param remove_outgoing_edges: whether to remove outgoing edges from the focal nodes</span>
+<span class="sd">        :param remove_incoming_edges: whether to remove incoming edges to the focal nodes</span>
+<span class="sd">        :param target_node_names: target nodes (optional) for the surgery, only used when remove_only_direct_edges_to_target is True</span>
+<span class="sd">        :param remove_only_direct_edges_to_target: whether to remove only the direct edges from focal nodes to the target nodes</span>
+
+<span class="sd">        :returns: a new networkx graph after the specified removal of edges</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">node_names</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="n">node_names</span><span class="p">)</span>
         <span class="n">new_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">node_name</span> <span class="ow">in</span> <span class="n">node_names</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">remove_outgoing_edges</span><span class="p">:</span>
-                <span class="n">children</span> <span class="o">=</span> <span class="n">new_graph</span><span class="o">.</span><span class="n">successors</span><span class="p">(</span><span class="n">node_name</span><span class="p">)</span>
-                <span class="n">edges_bunch</span> <span class="o">=</span> <span class="p">[(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span> <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span><span class="p">]</span>
-                <span class="n">new_graph</span><span class="o">.</span><span class="n">remove_edges_from</span><span class="p">(</span><span class="n">edges_bunch</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">remove_only_direct_edges_to_target</span><span class="p">:</span>
+                    <span class="n">new_graph</span><span class="o">.</span><span class="n">remove_edges_from</span><span class="p">([(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">target_node_names</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">children</span> <span class="o">=</span> <span class="n">new_graph</span><span class="o">.</span><span class="n">successors</span><span class="p">(</span><span class="n">node_name</span><span class="p">)</span>
+                    <span class="n">edges_bunch</span> <span class="o">=</span> <span class="p">[(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span> <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span><span class="p">]</span>
+                    <span class="n">new_graph</span><span class="o">.</span><span class="n">remove_edges_from</span><span class="p">(</span><span class="n">edges_bunch</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">remove_incoming_edges</span><span class="p">:</span>
+                <span class="c1"># removal of only direct edges wrt a target is not implemented for incoming edges</span>
                 <span class="n">parents</span> <span class="o">=</span> <span class="n">new_graph</span><span class="o">.</span><span class="n">predecessors</span><span class="p">(</span><span class="n">node_name</span><span class="p">)</span>
                 <span class="n">edges_bunch</span> <span class="o">=</span> <span class="p">[(</span><span class="n">parent</span><span class="p">,</span> <span class="n">node_name</span><span class="p">)</span> <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">parents</span><span class="p">]</span>
                 <span class="n">new_graph</span><span class="o">.</span><span class="n">remove_edges_from</span><span class="p">(</span><span class="n">edges_bunch</span><span class="p">)</span>

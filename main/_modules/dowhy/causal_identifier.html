@@ -228,9 +228,15 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="c1"># Average total effect</span>
     <span class="n">NONPARAMETRIC_ATE</span> <span class="o">=</span> <span class="s2">&quot;nonparametric-ate&quot;</span>
+    <span class="c1"># Natural direct effect</span>
     <span class="n">NONPARAMETRIC_NDE</span> <span class="o">=</span> <span class="s2">&quot;nonparametric-nde&quot;</span>
+    <span class="c1"># Natural indirect effect</span>
     <span class="n">NONPARAMETRIC_NIE</span> <span class="o">=</span> <span class="s2">&quot;nonparametric-nie&quot;</span>
+    <span class="c1"># Controlled direct effect</span>
+    <span class="n">NONPARAMETRIC_CDE</span> <span class="o">=</span> <span class="s2">&quot;nonparametric-cde&quot;</span>
+
     <span class="n">MAX_BACKDOOR_ITERATIONS</span> <span class="o">=</span> <span class="mi">100000</span>
 
     <span class="c1"># Backdoor method names</span>
@@ -306,10 +312,13 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">identify_nde_effect</span><span class="p">()</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimand_type</span> <span class="o">==</span> <span class="n">CausalIdentifier</span><span class="o">.</span><span class="n">NONPARAMETRIC_NIE</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">identify_nie_effect</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimand_type</span> <span class="o">==</span> <span class="n">CausalIdentifier</span><span class="o">.</span><span class="n">NONPARAMETRIC_CDE</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">identify_cde_effect</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;Estimand type is not supported. Use either </span><span class="si">{0}</span><span class="s2">, </span><span class="si">{1}</span><span class="s2">, or </span><span class="si">{2}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="n">CausalIdentifier</span><span class="o">.</span><span class="n">NONPARAMETRIC_ATE</span><span class="p">,</span>
+                    <span class="n">CausalIdentifier</span><span class="o">.</span><span class="n">NONPARAMETRIC_CDE</span><span class="p">,</span>
                     <span class="n">CausalIdentifier</span><span class="o">.</span><span class="n">NONPARAMETRIC_NDE</span><span class="p">,</span>
                     <span class="n">CausalIdentifier</span><span class="o">.</span><span class="n">NONPARAMETRIC_NIE</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -392,6 +401,46 @@
             <span class="n">frontdoor_variables</span><span class="o">=</span><span class="n">frontdoor_variables_names</span><span class="p">,</span>
             <span class="n">mediation_first_stage_confounders</span><span class="o">=</span><span class="n">mediation_first_stage_confounders</span><span class="p">,</span>
             <span class="n">mediation_second_stage_confounders</span><span class="o">=</span><span class="n">mediation_second_stage_confounders</span><span class="p">,</span>
+            <span class="n">default_backdoor_id</span><span class="o">=</span><span class="n">default_backdoor_id</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">estimand</span></div>
+
+<div class="viewcode-block" id="CausalIdentifier.identify_cde_effect"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_identifier.CausalIdentifier.identify_cde_effect">[docs]</a>    <span class="k">def</span> <span class="nf">identify_cde_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Identify controlled direct effect. For a definition, see Vanderwheele (2011).</span>
+<span class="sd">        Controlled direct and mediated effects: definition, identification and bounds.</span>
+<span class="sd">        https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4193506/</span>
+
+<span class="sd">        Using do-calculus rules, identification yields a adjustment set.</span>
+<span class="sd">        It is based on the principle that under a graph where the direct edge from treatment</span>
+<span class="sd">        to outcome is removed, conditioning on the adjustment set should d-separate</span>
+<span class="sd">        treatment and outcome.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">estimands_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Pick algorithm to compute backdoor sets according to method chosen</span>
+        <span class="n">backdoor_sets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">identify_backdoor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">direct_effect</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">estimands_dict</span><span class="p">,</span> <span class="n">backdoor_variables_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_backdoor_estimands_dict</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">backdoor_sets</span><span class="p">,</span> <span class="n">estimands_dict</span>
+        <span class="p">)</span>
+        <span class="c1"># Setting default &quot;backdoor&quot; identification adjustment set</span>
+        <span class="n">default_backdoor_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_default_backdoor_set_id</span><span class="p">(</span><span class="n">backdoor_variables_dict</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">backdoor_variables_dict</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">estimands_dict</span><span class="p">[</span><span class="s2">&quot;backdoor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">estimands_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">default_backdoor_id</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">backdoor_variables_dict</span><span class="p">[</span><span class="s2">&quot;backdoor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">backdoor_variables_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">default_backdoor_id</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">estimands_dict</span><span class="p">[</span><span class="s2">&quot;backdoor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Finally returning the estimand object</span>
+        <span class="n">estimand</span> <span class="o">=</span> <span class="n">IdentifiedEstimand</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">treatment_variable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">treatment_name</span><span class="p">,</span>
+            <span class="n">outcome_variable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">outcome_name</span><span class="p">,</span>
+            <span class="n">estimand_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">estimand_type</span><span class="p">,</span>
+            <span class="n">estimands</span><span class="o">=</span><span class="n">estimands_dict</span><span class="p">,</span>
+            <span class="n">backdoor_variables</span><span class="o">=</span><span class="n">backdoor_variables_dict</span><span class="p">,</span>
+            <span class="n">instrumental_variables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">frontdoor_variables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">mediation_first_stage_confounders</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">mediation_second_stage_confounders</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">default_backdoor_id</span><span class="o">=</span><span class="n">default_backdoor_id</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">estimand</span></div>
@@ -503,11 +552,7 @@
         <span class="k">return</span> <span class="n">estimand</span></div>
 
 <div class="viewcode-block" id="CausalIdentifier.identify_backdoor"><a class="viewcode-back" href="../../dowhy.html#dowhy.causal_identifier.CausalIdentifier.identify_backdoor">[docs]</a>    <span class="k">def</span> <span class="nf">identify_backdoor</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">treatment_name</span><span class="p">,</span>
-        <span class="n">outcome_name</span><span class="p">,</span>
-        <span class="n">include_unobserved</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">dseparation_algo</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="p">,</span> <span class="n">include_unobserved</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dseparation_algo</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="n">direct_effect</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
         <span class="n">backdoor_sets</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">backdoor_paths</span> <span class="o">=</span> <span class="kc">None</span>
@@ -515,7 +560,12 @@
         <span class="k">if</span> <span class="n">dseparation_algo</span> <span class="o">==</span> <span class="s2">&quot;naive&quot;</span><span class="p">:</span>
             <span class="n">backdoor_paths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_backdoor_paths</span><span class="p">(</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">dseparation_algo</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span><span class="p">:</span>
-            <span class="n">bdoor_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">do_surgery</span><span class="p">(</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">remove_outgoing_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">bdoor_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">do_surgery</span><span class="p">(</span>
+                <span class="n">treatment_name</span><span class="p">,</span>
+                <span class="n">target_node_names</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span>
+                <span class="n">remove_outgoing_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">remove_only_direct_edges_to_target</span><span class="o">=</span><span class="n">direct_effect</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;d-separation algorithm </span><span class="si">{</span><span class="n">dseparation_algo</span><span class="si">}</span><span class="s2"> is not supported&quot;</span><span class="p">)</span>
         <span class="n">method_name</span> <span class="o">=</span> <span class="p">(</span>
@@ -544,7 +594,13 @@
         <span class="n">eligible_variables</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_all_nodes</span><span class="p">(</span><span class="n">include_unobserved</span><span class="o">=</span><span class="n">include_unobserved</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">treatment_name</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">outcome_name</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">eligible_variables</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_descendants</span><span class="p">(</span><span class="n">treatment_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">direct_effect</span><span class="p">:</span>
+            <span class="c1"># only remove descendants of Y</span>
+            <span class="c1"># also allow any causes of Y that are not caused by T (for lower variance)</span>
+            <span class="n">eligible_variables</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_descendants</span><span class="p">(</span><span class="n">outcome_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># remove descendants of T (mediators) and descendants of Y</span>
+            <span class="n">eligible_variables</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_descendants</span><span class="p">(</span><span class="n">treatment_name</span><span class="p">)</span>
         <span class="c1"># If var is d-separated from both treatment or outcome, it cannot</span>
         <span class="c1"># be a part of the backdoor set</span>
         <span class="n">filt_eligible_variables</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
