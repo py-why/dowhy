@@ -230,7 +230,7 @@ class CausalGraph:
         remove_outgoing_edges=False,
         remove_incoming_edges=False,
         target_node_names=None,
-        remove_only_direct_edges_to_target=False
+        remove_only_direct_edges_to_target=False,
     ):
         """Method to create a new graph based on the concept of do-surgery.
 

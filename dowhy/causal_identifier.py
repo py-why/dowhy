@@ -195,7 +195,7 @@ class CausalIdentifier:
         return estimand
 
     def identify_cde_effect(self):
-        """ Identify controlled direct effect. For a definition, see Vanderwheele (2011).
+        """Identify controlled direct effect. For a definition, see Vanderwheele (2011).
         Controlled direct and mediated effects: definition, identification and bounds.
         https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4193506/
 
