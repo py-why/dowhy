@@ -104,7 +104,21 @@ class PartialLinearSensitivityAnalyzer:
         self.r2y_tw = 0  # Partial R^2 of outcome with treatment and observed common causes
         self.results = None
         self.num_points_per_contour = 30
+
+        self.benchmarking = self.is_benchmarking_needed()
         self.logger = logging.getLogger(__name__)
+
+    def is_benchmarking_needed(self):
+        if self.effect_strength_treatment is not None:
+            if self.effect_strength_outcome is not None:
+                return False
+            else:
+                raise ValueError("Need to specify both effect_strength_on_treatment and effect_strength_on_outcome.")
+        else:
+            if self.effect_strength_outcome is None:
+                return True
+            else:
+                raise ValueError("Need to specify both effect_strength_on_treatment and effect_strength_on_outcome.")
 
     def get_phi_lower_upper(self, Cg, Calpha):
         """
@@ -215,17 +229,18 @@ class PartialLinearSensitivityAnalyzer:
 
         :returns: python dictionary storing values of r2tu_w, r2yu_tw, short estimate, bias, lower_ate_bound,upper_ate_bound, lower_confidence_bound, upper_confidence_bound
         """
-
+        max_r2yu_tw = max(r2yu_tw) if  np.ndim(r2yu_tw) != 0 else r2yu_tw
+        max_r2tu_w = max(r2tu_w) if np.ndim(r2yu_tw) != 0 else r2tu_w
         lower_confidence_bound, upper_confidence_bound, bias = self.get_confidence_levels(
-            r2yu_tw=r2yu_tw, r2tu_w=r2tu_w, significance_level=significance_level, is_partial_linear=is_partial_linear
+            r2yu_tw=max_r2yu_tw, r2tu_w=max_r2tu_w, significance_level=significance_level, is_partial_linear=is_partial_linear
         )
         lower_ate_bound, upper_ate_bound, bias = self.get_confidence_levels(
-            r2yu_tw=r2yu_tw, r2tu_w=r2tu_w, significance_level=None, is_partial_linear=is_partial_linear
+            r2yu_tw=max_r2yu_tw, r2tu_w=max_r2tu_w, significance_level=None, is_partial_linear=is_partial_linear
         )
 
         benchmarking_results = {
-            "r2tu_w": r2tu_w,
-            "r2yu_tw": r2yu_tw,
+            "r2tu_w": max_r2tu_w,
+            "r2yu_tw": max_r2yu_tw,
             "short estimate": self.theta_s,
             "bias": bias,
             "lower_ate_bound": lower_ate_bound,
@@ -438,40 +453,42 @@ class PartialLinearSensitivityAnalyzer:
         self.r2y_tw = np.var(self.g_s) / np.var(Y)
 
         self.g_s_j = np.zeros(num_samples)
-
-        delta_r2_y_wj, delta_r2t_wj = self.compute_r2diff_benchmarking_covariates(
-            treatment_df,
-            features,
-            T,
-            Y,
-            W,
-            self.benchmark_common_causes,
-            split_indices=split_indices,
-            second_stage_linear=False,
-            is_partial_linear=self.is_partial_linear,
-        )
-
-        # Partial R^2 of outcome after regressing over unobserved confounder, observed common causes and treatment
-        delta_r2y_u = self.frac_strength_outcome * delta_r2_y_wj
-        # Partial R^2 of treatment after regressing over unobserved confounder and observed common causes
-        delta_r2t_u = self.frac_strength_treatment * delta_r2t_wj
-        self.r2yu_tw = delta_r2y_u / (1 - self.r2y_tw)
-        self.r2tu_w = delta_r2t_u / (1 - self.r2t_w)
-
-        if self.r2yu_tw >= 1:
-            self.r2yu_tw = 1
-            self.logger.warning(
-                "Warning: r2yu_tw can not be > 1. Try a lower effect_fraction_on_outcome. Setting r2yu_tw to 1"
+        if self.benchmarking:
+            delta_r2_y_wj, delta_r2t_wj = self.compute_r2diff_benchmarking_covariates(
+                treatment_df,
+                features,
+                T,
+                Y,
+                W,
+                self.benchmark_common_causes,
+                split_indices=split_indices,
+                second_stage_linear=False,
+                is_partial_linear=self.is_partial_linear,
             )
-        if self.r2tu_w >= 1:
-            self.r2tu_w = 1
-            self.logger.warning(
-                "Warning: r2tu_w can not be > 1. Try a lower effect_fraction_on_treatment. Setting r2tu_w to 1"
-            )
-        if self.r2yu_tw < 0:
-            self.r2yu_tw = 0
-        if self.r2tu_w < 0:
-            self.r2tu_w = 0
+
+            # Partial R^2 of outcome after regressing over unobserved confounder, observed common causes and treatment
+            delta_r2y_u = self.frac_strength_outcome * delta_r2_y_wj
+            # Partial R^2 of treatment after regressing over unobserved confounder and observed common causes
+            delta_r2t_u = self.frac_strength_treatment * delta_r2t_wj
+            self.r2yu_tw = delta_r2y_u / (1 - self.r2y_tw)
+            self.r2tu_w = delta_r2t_u / (1 - self.r2t_w)
+            if self.r2yu_tw >= 1:
+                self.r2yu_tw = 1
+                self.logger.warning(
+                    "Warning: r2yu_tw can not be > 1. Try a lower effect_fraction_on_outcome. Setting r2yu_tw to 1"
+                )
+            if self.r2tu_w >= 1:
+                self.r2tu_w = 1
+                self.logger.warning(
+                    "Warning: r2tu_w can not be > 1. Try a lower effect_fraction_on_treatment. Setting r2tu_w to 1"
+                )
+            if self.r2yu_tw < 0:
+                self.r2yu_tw = 0
+            if self.r2tu_w < 0:
+                self.r2tu_w = 0
+        else:
+            self.r2yu_tw = self.effect_strength_outcome
+            self.r2tu_w = self.effect_strength_treatment
 
         benchmarking_results = self.perform_benchmarking(
             r2yu_tw=self.r2yu_tw,
@@ -487,7 +504,7 @@ class PartialLinearSensitivityAnalyzer:
         )
 
         if plot == True:
-            self.plot(x_limit=0.99)  # because Calpha2 contains a partial R2 bounded by 1
+            self.plot()
 
         return self
 
@@ -544,14 +561,14 @@ class PartialLinearSensitivityAnalyzer:
             x_limit = 0.99
             r2tu_w = np.arange(0.0, x_limit, x_limit / self.num_points_per_contour)
         else:
-            x_limit = self.effect_strength_treatment[-1]
-            r2tu_w = self.effect_strength_treatment
+            x_limit = max(self.r2tu_w)
+            r2tu_w = self.r2tu_w
         if self.effect_strength_outcome is None:
             y_limit = 0.99
             r2yu_tw = np.arange(0.0, y_limit, y_limit / self.num_points_per_contour)
         else:
-            y_limit = self.effect_strength_outcome[-1]
-            r2yu_tw = self.effect_strength_outcome
+            y_limit = self.r2yu_tw[-1]
+            r2yu_tw = self.r2yu_tw
         ax.set_xlim(-x_limit / 20, x_limit)
         ax.set_ylim(-y_limit / 20, y_limit)
 

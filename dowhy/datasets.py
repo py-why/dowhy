@@ -686,9 +686,9 @@ def partially_linear_dataset(
     if num_discrete_common_causes > 0 and not one_hot_encode:
         data = data.astype({wname: "int64" for wname in common_causes[num_cont_common_causes:]}, copy=False)
         data = data.astype({wname: "category" for wname in common_causes[num_cont_common_causes:]}, copy=False)
-    dot_graph = create_dot_graph(treatments, outcome, common_causes)
+    dot_graph = create_dot_graph(treatments, outcome, common_causes, instruments=[])
     # Now writing the gml graph
-    gml_graph = create_gml_graph(treatments, outcome, common_causes)
+    gml_graph = create_gml_graph(treatments, outcome, common_causes, instruments=[])
     ret_dict = {
         "df": data,
         "treatment_name": treatments,

@@ -61,7 +61,7 @@ class AddUnobservedCommonCause(CausalRefuter):
         :param num_splits: number of splits for cross validation. (default = 5). (relevant only for Non Parametric Sensitivity Analysis, ignore for rest)
         :param shuffle_data : shuffle data or not before splitting into folds (default = False). (relevant only for Non Parametric Sensitivity Analysis, ignore for rest)
         :param shuffle_random_seed: seed for randomly shuffling data. (relevant only for Non Parametric Sensitivity Analysis, ignore for rest)
-        :param alpha_s_param_dict: dictionary with parameters for finding alpha_s. (relevant only for Non Parametric Sensitivity Analysis, ignore for rest)
+        :param alpha_s_estimator_param_list: list of dictionaries with parameters for finding alpha_s. (relevant only for Non Parametric Sensitivity Analysis, ignore for rest)
         :param g_s_estimator_list: list of estimator objects for finding g_s. These objects should have fit() and predict() functions implemented. (relevant only for Non Parametric Sensitivity Analysis, ignore for rest)
         :param g_s_estimator_param_list: list of dictionaries with parameters for tuning respective estimators in "g_s_estimator_list".
                                          The order of the dictionaries in the list should be consistent with the estimator objects order in "g_s_estimator_list". (relevant only for Non Parametric Sensitivity Analysis, ignore for rest)
@@ -109,6 +109,9 @@ class AddUnobservedCommonCause(CausalRefuter):
         )
         self.plugin_reisz = kwargs["plugin_reisz"] if "plugin_reisz" in kwargs else False
         self.logger = logging.getLogger(__name__)
+
+        self.benchmarking = self.is_benchmarking_needed()
+
 
     def infer_default_kappa_t(self, len_kappa_t=10):
         """Infer default effect strength of simulated confounder on treatment."""
@@ -258,7 +261,7 @@ class AddUnobservedCommonCause(CausalRefuter):
                         observed_common_causes=self._estimate.estimator._observed_common_causes,
                         treatment=self._estimate.estimator._treatment,
                         outcome=self._estimate.estimator._outcome,
-                        alpha_s_param_dict=self.alpha_s_param_dict,
+                        alpha_s_estimator_param_list=self.alpha_s_estimator_param_list,
                         g_s_estimator_list=self.g_s_estimator_list,
                         g_s_estimator_param_list=self.g_s_estimator_param_list,
                         effect_strength_treatment=self.kappa_t,
