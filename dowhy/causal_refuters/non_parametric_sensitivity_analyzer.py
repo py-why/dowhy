@@ -168,32 +168,36 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
         self.r2t_w = self.get_regression_r2(
             X=W, Y=T, numeric_features=numeric_features_alpha, split_indices=split_indices
         )
-
-        delta_r2_y_wj, var_alpha_wj = self.compute_r2diff_benchmarking_covariates(
-            treatment_df,
-            features,
-            T,
-            Y,
-            W,
-            self.benchmark_common_causes,
-            split_indices=split_indices,
-            is_partial_linear=self.is_partial_linear,
-        )
-
-        # Partial R^2 of outcome after regressing over unobserved confounder, observed common causes and treatment
-        delta_r2y_u = self.frac_strength_outcome * delta_r2_y_wj
-        # The difference in R2 is the same for wj and new unobserved confounder
-        c2_alpha = self.frac_strength_treatment * (
-            self.var_alpha_s / var_alpha_wj - 1
-        )  # self.frac_strength_treatment * delta_r2t_wj
-
-        self.r2yu_tw = abs(delta_r2y_u / (1 - self.r2y_tw))
-        self.r2tu_w = c2_alpha
-        if self.r2yu_tw >= 1:
-            self.r2yu_tw = 1
-            self.logger.warning(
-                "Warning: r2yu_tw can not be > 1. Try a lower effect_fraction_on_outcome. Setting r2yu_tw to 1"
+        if self.benchmarking:
+            delta_r2_y_wj, var_alpha_wj = self.compute_r2diff_benchmarking_covariates(
+                treatment_df,
+                features,
+                T,
+                Y,
+                W,
+                self.benchmark_common_causes,
+                split_indices=split_indices,
+                is_partial_linear=self.is_partial_linear,
             )
+
+            # Partial R^2 of outcome after regressing over unobserved confounder, observed common causes and treatment
+            # Assuming that the difference in R2 is the same for wj and new unobserved confounder
+            delta_r2y_u = self.frac_strength_outcome * delta_r2_y_wj
+            self.r2yu_tw = delta_r2y_u / (1 - self.r2y_tw) # partial R2 for outcome
+            # for treatment,  Calpha is not a function of the partial R2. So we need a different assumption.
+            # Assuming that the ratio of variance of alpha^2 is the same for wj and new unobserved confounder
+            ratio_var_alpha_wj = var_alpha_wj / self.var_alpha_s 
+            # (1-ratio_var_alpha_wj) is the numerator of Calpha2, similar to the partial R2 for treatment
+            # wrt unobserved confounders in partial-linear models
+            self.r2tu_w = self.frac_strength_treatment * (1 - ratio_var_alpha_wj)
+            if self.r2yu_tw >= 1:
+                self.r2yu_tw = 1
+                self.logger.warning(
+                    "Warning: r2yu_tw can not be > 1. Try a lower effect_fraction_on_outcome. Setting r2yu_tw to 1"
+                )
+        else:
+            self.r2yu_tw = self.effect_strength_outcome
+            self.r2tu_w = self.effect_strength_treatment
 
         benchmarking_results = self.perform_benchmarking(
             r2yu_tw=self.r2yu_tw,

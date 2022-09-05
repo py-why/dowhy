@@ -40,16 +40,14 @@ class AddUnobservedCommonCause(CausalRefuter):
         minimum and maximum effect strength of observed confounders on treatment
         and outcome respectively.
 
+        :param simulation_method: The method to use for simulating effect of unobserved confounder. Possible values are ["direct-simulation", "linear-partial-r2", "non-parametric-partial-r2"].
         :param confounders_effect_on_treatment: str : The type of effect on the treatment due to the unobserved confounder. Possible values are ['binary_flip', 'linear']
         :param confounders_effect_on_outcome: str : The type of effect on the outcome due to the unobserved confounder. Possible values are ['binary_flip', 'linear']
-        :param effect_strength_on_treatment: float, numpy.ndarray: This refers to the strength of the confounder on treatment. For a linear effect, it behaves like the regression coeffecient. For a binary flip it is the probability with which it can invert the value of the treatment.
-        :param effect_strength_on_outcome: float, numpy.ndarray: This refers to the strength of the confounder on outcome. For a linear effect, it behaves like the regression coefficient. For a binary flip, it is the probability with which it can invert the value of the outcome.
+        :param effect_strength_on_treatment: float, numpy.ndarray: This refers to the strength of the confounder on treatment. Its interpretation depends on confounders_effect_on_treatment and the simulation_method. When simulation_method is direct-simulation, for a linear effect it behaves like the regression coefficient and for a binary flip, it is the probability with which effect of unobserved confounder can invert the value of the treatment. When simulation_method is linear-partial-r2 and non-parametric-partial-r2 (under a partial-linear DGP assumption), it refers to the partial R2 of the unobserved confounder wrt the treatment conditioned on the observed confounders. Only in the case of general non-parametric-partial-r2, it is (1-r), where r is the ratio of variance of reisz representer, alpha^2, based on observed confounders and that based on all confounders.
+        :param effect_strength_on_outcome: float, numpy.ndarray: This refers to the strength of the confounder on outcome. Its interpretation depends on confounders_effect_on_outcome and the simulation_method. When simulation_method is direct-simulation, for a linear effect it behaves like the regression coefficient and for a binary flip, it is the probability with which it can invert the value of the outcome. When simulation_method is linear-partial-r2 and non-parametric-partial-r2, it refers to the partial R2 of the unobserved confounder wrt the outcome conditioned on the treatment and observed confounders. 
         :param frac_strength_treatment: float: If effect_strength_on_treatment is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on treatment. Defaults to 1.
         :param frac_strength_outcome: float: If effect_strength_on_outcome is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on outcome. Defaults to 1.
         :param plotmethod: string: Type of plot to be shown. If None, no plot is generated. This parameter is used only only when more than one treatment confounder effect values or outcome confounder effect values are provided. Default is "colormesh". Supported values are "contour", "colormesh" when more than one value is provided for both confounder effect value parameters; "line" when provided for only one of them.
-        :param simulated_method_name: method type to add unobserved common cause.
-                                      "linear-partial-R2" for linear sensitivity analysis.
-                                      "non-parametric-partial-R2" for non parametric sensitivity analysis.
         :param percent_change_estimate: It is the percentage of reduction of treatment estimate that could alter the results (default = 1).
                                         if percent_change_estimate = 1, the robustness value describes the strength of association of confounders with treatment and outcome in order to reduce the estimate by 100% i.e bring it down to 0. (relevant only for Linear Sensitivity Analysis, ignore for rest)
         :param confounder_increases_estimate: True implies that confounder increases the absolute value of estimate and vice versa. (Default = False). (relevant only for Linear Sensitivity Analysis, ignore for rest)
@@ -82,8 +80,8 @@ class AddUnobservedCommonCause(CausalRefuter):
         self.frac_strength_outcome = (
             kwargs["effect_fraction_on_outcome"] if "effect_fraction_on_outcome" in kwargs else 1
         )
-        self.simulated_method_name = (
-            kwargs["simulated_method_name"] if "simulated_method_name" in kwargs else "linear_based"
+        self.simulation_method = (
+            kwargs["simulation_method"] if "simulation_method" in kwargs else "direct-simulation"
         )
         self.plotmethod = kwargs["plotmethod"] if "plotmethod" in kwargs else "colormesh"
         self.percent_change_estimate = kwargs["percent_change_estimate"] if "percent_change_estimate" in kwargs else 1.0
@@ -109,8 +107,6 @@ class AddUnobservedCommonCause(CausalRefuter):
         )
         self.plugin_reisz = kwargs["plugin_reisz"] if "plugin_reisz" in kwargs else False
         self.logger = logging.getLogger(__name__)
-
-        self.benchmarking = self.is_benchmarking_needed()
 
 
     def infer_default_kappa_t(self, len_kappa_t=10):
@@ -224,7 +220,7 @@ class AddUnobservedCommonCause(CausalRefuter):
 
         :return: CausalRefuter: An object that contains the estimated effect and a new effect and the name of the refutation used.
         """
-        if self.simulated_method_name == "linear-partial-R2":
+        if self.simulation_method == "linear-partial-R2":
             if not (isinstance(self._estimate.estimator, LinearRegressionEstimator)):
                 raise NotImplementedError(
                     "Currently only LinearRegressionEstimator is supported for Sensitivity Analysis"
@@ -252,7 +248,7 @@ class AddUnobservedCommonCause(CausalRefuter):
             analyzer.check_sensitivity(plot=self.plot_estimate)
             return analyzer
 
-        if self.simulated_method_name == "non-parametric-partial-R2":
+        if self.simulation_method == "non-parametric-partial-R2":
             # If the estimator used is LinearDML, partially linear sensitivity analysis will be automatically chosen
             if isinstance(self._estimate.estimator, dowhy.causal_estimators.econml.Econml):
                 if self._estimate.estimator._econml_methodname == "econml.dml.LinearDML":

@@ -109,16 +109,20 @@ class PartialLinearSensitivityAnalyzer:
         self.logger = logging.getLogger(__name__)
 
     def is_benchmarking_needed(self):
+        # can change this to allow default values that are same as the other parameter
         if self.effect_strength_treatment is not None:
-            if self.effect_strength_outcome is not None:
-                return False
-            else:
+            if self.effect_strength_outcome is None:
                 raise ValueError("Need to specify both effect_strength_on_treatment and effect_strength_on_outcome.")
         else:
-            if self.effect_strength_outcome is None:
+            if self.effect_strength_outcome is not None:
+                raise ValueError("Need to specify both effect_strength_on_treatment and effect_strength_on_outcome.")
+        if self.benchmark_common_causes is not None:
+            if self.frac_strength_outcome is not None or self.frac_strength_treatment is not None:
                 return True
             else:
-                raise ValueError("Need to specify both effect_strength_on_treatment and effect_strength_on_outcome.")
+                raise ValueError("Need to specify at least one of effect_fraction_on_treatment or effect_fraction_on_outcome.")
+        else:
+            return False
 
     def get_phi_lower_upper(self, Cg, Calpha):
         """
@@ -164,12 +168,10 @@ class PartialLinearSensitivityAnalyzer:
         """
 
         Cg2 = r2yu_tw  # Strength of confounding that omitted variables generate in outcome regression
-        Cg = np.sqrt(Cg2)
+        
         # Strength of confounding that omitted variables generate in treatment regression
-        if is_partial_linear:
-            Calpha2 = r2tu_w / (1 - r2tu_w)
-        else:  # this corresponds to non-parametric partial R2
-            Calpha2 = r2tu_w  # Here r2tu_w denotes R2(alpha~alpha_s)
+        Calpha2 = r2tu_w / (1 - r2tu_w)
+        Cg = np.sqrt(Cg2)
         Calpha = np.sqrt(Calpha2)
         self.S = np.sqrt(self.S2)
 
@@ -556,15 +558,16 @@ class PartialLinearSensitivityAnalyzer:
         ax.set_title("Sensitivity contour plot of %s" % plot_type)
         ax.set_xlabel("Partial R^2 of confounder with treatment")
         ax.set_ylabel("Partial R^2 of confounder with outcome")
-
         if self.effect_strength_treatment is None:
-            x_limit = 0.99
+            # adding 1.1 as plotting margin  ensure that the benchmarked part is shown fully in plot
+            x_limit = (1.1 * self.r2tu_w) if self.benchmarking else 0.99
             r2tu_w = np.arange(0.0, x_limit, x_limit / self.num_points_per_contour)
         else:
             x_limit = max(self.r2tu_w)
             r2tu_w = self.r2tu_w
         if self.effect_strength_outcome is None:
-            y_limit = 0.99
+            # adding 1.1 as plotting margin  ensure that the benchmarked part is shown fully in plot
+            y_limit = (1.1 * self.r2yu_tw) if self.benchmarking else 0.99
             r2yu_tw = np.arange(0.0, y_limit, y_limit / self.num_points_per_contour)
         else:
             y_limit = self.r2yu_tw[-1]
@@ -624,21 +627,22 @@ class PartialLinearSensitivityAnalyzer:
             )
 
         # Adding bounds to partial R^2 values for given strength of confounders
-        if self.frac_strength_treatment == self.frac_strength_outcome:
-            signs = str(round(self.frac_strength_treatment, 2))
-        else:
-            signs = str(round(self.frac_strength_treatment, 2)) + "/" + str(round(self.frac_strength_outcome, 2))
-        label = signs + " X " + str(self.benchmark_common_causes) + " ({:1.2f}) ".format(self.results[plot_type][0])
-        ax.scatter(
-            self.r2tu_w, self.r2yu_tw, color=adjusted_estimate_color, marker=adjusted_estimate_marker, label=label
-        )
+        if self.benchmarking:
+            if self.frac_strength_treatment == self.frac_strength_outcome:
+                signs = str(round(self.frac_strength_treatment, 2))
+            else:
+                signs = str(round(self.frac_strength_treatment, 2)) + "/" + str(round(self.frac_strength_outcome, 2))
+            label = signs + " X " + str(self.benchmark_common_causes) + " ({:1.2f}) ".format(self.results[plot_type][0])
+            ax.scatter(
+                self.r2tu_w, self.r2yu_tw, color=adjusted_estimate_color, marker=adjusted_estimate_marker, label=label
+            )
 
         plt.margins()
         ax.legend(bbox_to_anchor=legend_position, loc="upper left")
         plt.show()
 
     def __str__(self):
-        s = "Sensitivity Analysis to Unobserved Confounding using R^2 paramterization\n\n"
+        s = "Sensitivity Analysis to Unobserved Confounding using partial R^2 parameterization\n\n"
         s += "Original Effect Estimate : {0}\n".format(self.theta_s)
         s += "Robustness Value : {0}\n\n".format(self.RV)
         s += "Robustness Value (alpha={0}) : {1}\n\n".format(self.significance_level, self.RV_alpha)
