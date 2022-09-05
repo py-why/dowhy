@@ -47,11 +47,11 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 ## Contributing Guide
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. This Project welcomes contributions, suggestions, and feedback. All contributions, suggestions, and feedback you submitted are accepted under the [Project's license](./LICENSE.md). You represent that if you do not own copyright in the code that you have the authority to submit it under the [Project's license](./LICENSE.md). All feedback, suggestions, or contributions are not confidential.
 
-There are multiple ways to contribute to DoWhy. 
+There are multiple ways to contribute to DoWhy.
 
-You can help us make DoWhy better, 
+You can help us make DoWhy better,
 * Adding a Jupyter notebook that describes the use of DoWhy for solving causal
 problems
 
@@ -59,10 +59,16 @@ problems
   model, identify, estimate, refute
 
 * Integrating DoWhy's API with external implementations for any of the four steps, so that external libraries can be called seamlessly from the `identify_effect`, `estimate_effect` or `refute_estimate` methods.
- 
-* Helping extend the DoWhy API so that we can support new functionality like interpretability of the estimate, counterfactual prediction and more. 
+
+* Helping extend the DoWhy API so that we can support new functionality like interpretability of the estimate, counterfactual prediction and more.
 
 * Helping update the documentation for DoWhy
 
 If you would like to contribute, you can raise a pull request. If you have
 questions before contributing, you can start by opening an issue on Github.
+
+The Project abides by PyWhy's [code of conduct](https://github.com/py-why/governance/blob/main/CODE-OF-CONDUCT.md) and [trademark policy](https://github.com/py-why/governance/blob/main/TRADEMARKS.md).
+
+---
+Part of MVG-0.1-beta.
+Made with love by GitHub. Licensed under the [CC-BY 4.0 License](https://creativecommons.org/licenses/by-sa/4.0/).
