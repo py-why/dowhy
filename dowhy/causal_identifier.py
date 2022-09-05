@@ -26,8 +26,6 @@ class CausalIdentifier:
     # Controlled direct effect
     NONPARAMETRIC_CDE = "nonparametric-cde"
 
-    MAX_BACKDOOR_ITERATIONS = 100000
-
     # Backdoor method names
     BACKDOOR_DEFAULT = "default"
     BACKDOOR_EXHAUSTIVE = "exhaustive-search"
@@ -56,6 +54,7 @@ class CausalIdentifier:
         self,
         graph,
         estimand_type,
+        max_backdoor_iterations,
         method_name="default",
         proceed_when_unidentifiable=False,
     ):
@@ -66,6 +65,7 @@ class CausalIdentifier:
         self.method_name = method_name
         self._proceed_when_unidentifiable = proceed_when_unidentifiable
         self.logger = logging.getLogger(__name__)
+        self.max_backdoor_iterations=max_backdoor_iterations
 
     def identify_effect(self, optimize_backdoor=False, costs=None, conditional_node_names=None):
         """Main method that returns an identified estimand (if one exists).
@@ -408,7 +408,7 @@ class CausalIdentifier:
                 backdoor_sets,
                 filt_eligible_variables,
                 method_name=method_name,
-                max_iterations=CausalIdentifier.MAX_BACKDOOR_ITERATIONS,
+                max_iterations=self.max_backdoor_iterations,
             )
             if method_name == CausalIdentifier.BACKDOOR_DEFAULT and found_valid_adjustment_set:
                 # repeat the above search with BACKDOOR_MIN
@@ -421,7 +421,7 @@ class CausalIdentifier:
                     backdoor_sets,
                     filt_eligible_variables,
                     method_name=CausalIdentifier.BACKDOOR_MIN,
-                    max_iterations=CausalIdentifier.MAX_BACKDOOR_ITERATIONS,
+                    max_iterations=self.max_backdoor_iterations,
                 )
         else:
             raise ValueError(
@@ -500,6 +500,7 @@ class CausalIdentifier:
         max_iterations,
     ):
         num_iterations = 0
+        is_max_iterated=False
         found_valid_adjustment_set = False
         all_nodes_observed = self._graph.all_observed(self._graph.get_all_nodes())
         # If `minimal-adjustment` method is specified, start the search from the set with minimum size. Otherwise, start from the largest.
@@ -510,6 +511,10 @@ class CausalIdentifier:
         )
         for size_candidate_set in set_sizes:
             for candidate_set in itertools.combinations(filt_eligible_variables, size_candidate_set):
+                num_iterations += 1
+                if num_iterations > max_iterations:
+                    is_max_iterated=True
+                    break
                 check = self._graph.check_valid_backdoor_set(
                     treatment_name,
                     outcome_name,
@@ -524,9 +529,8 @@ class CausalIdentifier:
                 if check["is_dseparated"]:
                     backdoor_sets.append({"backdoor_set": candidate_set})
                     found_valid_adjustment_set = True
-                num_iterations += 1
                 if method_name == CausalIdentifier.BACKDOOR_EXHAUSTIVE and num_iterations > max_iterations:
-                    self.logger.warning(f"Max number of iterations {max_iterations} reached.")
+                    is_max_iterated=True
                     break
             # If the backdoor method is `maximal-adjustment` or `minimal-adjustment`, return the first found adjustment set.
             if (
@@ -543,7 +547,7 @@ class CausalIdentifier:
             # does not satisfy backdoor, then none of its subsets will.
             if method_name in {CausalIdentifier.BACKDOOR_DEFAULT, CausalIdentifier.BACKDOOR_MAX} and all_nodes_observed:
                 break
-            if num_iterations > max_iterations:
+            if is_max_iterated:
                 self.logger.warning(
                     f"Max number of iterations {max_iterations} reached. Could not find a valid backdoor set."
                 )
