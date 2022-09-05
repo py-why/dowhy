@@ -512,7 +512,7 @@ class CausalIdentifier:
         for size_candidate_set in set_sizes:
             for candidate_set in itertools.combinations(filt_eligible_variables, size_candidate_set):
                 num_iterations += 1
-                if num_iterations > max_iterations:
+                if ((method_name == CausalIdentifier.BACKDOOR_EXHAUSTIVE) or (method_name == CausalIdentifier.BACKDOOR_EXHAUSTIVE)) and num_iterations > max_iterations:
                     is_max_iterated=True
                     break
                 check = self._graph.check_valid_backdoor_set(
@@ -529,9 +529,6 @@ class CausalIdentifier:
                 if check["is_dseparated"]:
                     backdoor_sets.append({"backdoor_set": candidate_set})
                     found_valid_adjustment_set = True
-                if method_name == CausalIdentifier.BACKDOOR_EXHAUSTIVE and num_iterations > max_iterations:
-                    is_max_iterated=True
-                    break
             # If the backdoor method is `maximal-adjustment` or `minimal-adjustment`, return the first found adjustment set.
             if (
                 method_name
