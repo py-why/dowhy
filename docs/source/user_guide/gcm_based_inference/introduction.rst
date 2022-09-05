@@ -10,17 +10,6 @@ The ``dowhy.gcm`` package provides a variety of ways to answer causal questions 
 section :doc:`answering_causal_questions/index`. However, before diving into them, let's understand
 the basic building blocks and usage patterns it is built upon.
 
-If you find the gcm package useful for your work, please cite us as follows:
-
-Bibtex::
-
-    @article{dowhy_gcm,
-      author = {Bl{\"o}baum, Patrick and G{\"o}tz, Peter and Budhathoki, Kailash and Mastakouri, Atalanti A. and Janzing, Dominik},
-      title = {DoWhy-GCM: An extension of DoWhy for causal inference in graphical causal models},
-      journal={arXiv preprint arXiv:2206.06821},
-      year={2022}
-    }
-
 The basic building blocks
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
