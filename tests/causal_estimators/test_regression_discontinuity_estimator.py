@@ -20,27 +20,7 @@ class TestRegressionDiscontinuityEstimator(object):
             "outcome_is_binary",
             "identifier_method",
         ],
-        [
-            (
-                0.2,
-                RegressionDiscontinuityEstimator,
-                [1],
-                [
-                    1,
-                ],
-                [0],
-                [
-                    1,
-                ],
-                [
-                    True,
-                ],
-                [
-                    False,
-                ],
-                "iv",
-            ),
-        ],
+        [(0.2, RegressionDiscontinuityEstimator, [1], [1,], [0], [1,], [True,], [False,], "iv",),],
     )
     def test_average_treatment_effect(
         self,

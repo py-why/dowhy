@@ -48,11 +48,7 @@ TEST_GRAPH_SOLUTIONS = {
                     edge[source "Y" target "Z1"]]
                     """,
         observed_variables=["Z1", "X", "Y"],
-        biased_sets=[
-            {
-                "Z1",
-            }
-        ],
+        biased_sets=[{"Z1",}],
         minimal_adjustment_sets=[{}],
         maximal_adjustment_sets=[{}],
     ),
@@ -66,11 +62,7 @@ TEST_GRAPH_SOLUTIONS = {
         observed_variables=["Z1", "X", "Y"],
         biased_sets=[],
         minimal_adjustment_sets=[{}],
-        maximal_adjustment_sets=[
-            {
-                "Z1",
-            }
-        ],
+        maximal_adjustment_sets=[{"Z1",}],
     ),
     # The following simpsons paradox examples are taken from Pearl, J {2013}. "Understanding Simpson’s Paradox" - http://ftp.cs.ucla.edu/pub/stat_ser/r414.pdf
     "pearl_simpsons_paradox_1c": dict(
@@ -86,11 +78,7 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "L2" target "Y"]]
                 """,
         observed_variables=["Z", "X", "Y"],
-        biased_sets=[
-            {
-                "Z",
-            }
-        ],
+        biased_sets=[{"Z",}],
         minimal_adjustment_sets=[{}],
         maximal_adjustment_sets=[{}],
     ),
@@ -106,16 +94,8 @@ TEST_GRAPH_SOLUTIONS = {
                 """,
         observed_variables=["Z", "X", "Y"],
         biased_sets=[],
-        minimal_adjustment_sets=[
-            {
-                "Z",
-            }
-        ],
-        maximal_adjustment_sets=[
-            {
-                "Z",
-            }
-        ],
+        minimal_adjustment_sets=[{"Z",}],
+        maximal_adjustment_sets=[{"Z",}],
     ),
     "pearl_simpsons_paradox_2a": dict(
         graph_str="""graph[directed 1 node[id "Z" label "Z"]
@@ -128,11 +108,7 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "L" target "Y"]]
                 """,
         observed_variables=["Z", "X", "Y"],
-        biased_sets=[
-            {
-                "Z",
-            }
-        ],
+        biased_sets=[{"Z",}],
         minimal_adjustment_sets=[{}],
         maximal_adjustment_sets=[{}],
     ),
@@ -179,12 +155,7 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "Z3" target "Y"]]
                 """,
         observed_variables=["Z1", "Z2", "Z3", "X", "Y"],
-        biased_sets=[
-            {
-                "Z2",
-            },
-            {"Z1", "Z2"},
-        ],
+        biased_sets=[{"Z2",}, {"Z1", "Z2"},],
         minimal_adjustment_sets=[{}],
         maximal_adjustment_sets=[{"Z1", "Z2", "Z3"}],
     ),
@@ -206,15 +177,7 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "E" target "Y"]]
                 """,
         observed_variables=["A", "B", "C", "D", "E", "X", "Y"],
-        biased_sets=[
-            {
-                "B",
-            },
-            {
-                "C",
-            },
-            {"B", "C"},
-        ],
+        biased_sets=[{"B",}, {"C",}, {"B", "C"},],
         minimal_adjustment_sets=[{}],
         maximal_adjustment_sets=[{"A", "B", "C", "D"}],
         direct_maximal_adjustment_sets=[{"A", "B", "C", "D", "E"}],
@@ -233,11 +196,7 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "X" target "Y"]]
                 """,
         observed_variables=["A", "B", "C", "X", "Y"],
-        biased_sets=[
-            {
-                "B",
-            }
-        ],
+        biased_sets=[{"B",}],
         minimal_adjustment_sets=[{"C"}],
         maximal_adjustment_sets=[{"A", "B", "C"}],
     ),
@@ -255,11 +214,7 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "X" target "Y"]]
                 """,
         observed_variables=["A", "B", "X", "Y"],
-        biased_sets=[
-            {
-                "B",
-            }
-        ],
+        biased_sets=[{"B",}],
         minimal_adjustment_sets=[{"A", "B"}],
         maximal_adjustment_sets=[{"A", "B"}],
     ),

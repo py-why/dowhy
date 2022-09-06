@@ -63,18 +63,10 @@ class LinearDataGeneratingProcess(DataGeneratingProcess):
     def generation_process(self):
         self.weights["confounder=>treatment"] = self.generate_weights((len(self.confounder), len(self.treatment)))
         self.weights["confounder=>treatment"][0,] = (
-            self.weights["confounder=>treatment"][
-                0,
-            ]
-            + 100
+            self.weights["confounder=>treatment"][0,] + 100
         )  # increasing weight of the first confounder
         self.weights["confounder=>outcome"] = self.generate_weights((len(self.confounder), len(self.outcome)))
-        self.weights["confounder=>outcome"][0,] = (
-            self.weights["confounder=>outcome"][
-                0,
-            ]
-            + 100
-        )
+        self.weights["confounder=>outcome"][0,] = self.weights["confounder=>outcome"][0,] + 100
         self.weights["effect_modifier=>outcome"] = self.generate_weights((len(self.effect_modifier), len(self.outcome)))
         self.weights["treatment=>outcome"] = self.generate_weights((len(self.treatment), len(self.outcome)))
 

@@ -19,7 +19,7 @@ def __generate_linear_regression_data():
 
 def __generate_non_linear_regression_data():
     X = np.random.normal(0, 1, (1000, 5))
-    Y = np.sum(X**2, axis=1)
+    Y = np.sum(X ** 2, axis=1)
 
     return X, Y
 

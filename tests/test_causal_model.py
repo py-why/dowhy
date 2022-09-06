@@ -10,10 +10,7 @@ from dowhy import CausalModel
 
 class TestCausalModel(object):
     @mark.parametrize(
-        ["beta", "num_samples", "num_treatments"],
-        [
-            (10, 100, 1),
-        ],
+        ["beta", "num_samples", "num_treatments"], [(10, 100, 1),],
     )
     def test_external_estimator(self, beta, num_samples, num_treatments):
         num_common_causes = 5
@@ -49,10 +46,7 @@ class TestCausalModel(object):
         assert estimate.estimator.propensity_score_model.max_iter == 1000
 
     @mark.parametrize(
-        ["beta", "num_instruments", "num_samples", "num_treatments"],
-        [
-            (10, 1, 100, 1),
-        ],
+        ["beta", "num_instruments", "num_samples", "num_treatments"], [(10, 1, 100, 1),],
     )
     def test_graph_input(self, beta, num_instruments, num_samples, num_treatments):
         num_common_causes = 5
@@ -91,10 +85,7 @@ class TestCausalModel(object):
         assert all(node_name in common_causes for node_name in ["X1", "X2"])
 
     @mark.parametrize(
-        ["beta", "num_instruments", "num_samples", "num_treatments"],
-        [
-            (10, 1, 100, 1),
-        ],
+        ["beta", "num_instruments", "num_samples", "num_treatments"], [(10, 1, 100, 1),],
     )
     def test_graph_input2(self, beta, num_instruments, num_samples, num_treatments):
         num_common_causes = 5
@@ -201,10 +192,7 @@ class TestCausalModel(object):
         assert all(node_name in common_causes for node_name in ["X1", "X2"])
 
     @mark.parametrize(
-        ["beta", "num_instruments", "num_samples", "num_treatments"],
-        [
-            (10, 1, 100, 1),
-        ],
+        ["beta", "num_instruments", "num_samples", "num_treatments"], [(10, 1, 100, 1),],
     )
     def test_graph_input3(self, beta, num_instruments, num_samples, num_treatments):
         num_common_causes = 5
@@ -265,10 +253,7 @@ class TestCausalModel(object):
         assert "Unobserved Confounders" not in all_nodes
 
     @mark.parametrize(
-        ["beta", "num_instruments", "num_samples", "num_treatments"],
-        [
-            (10, 1, 100, 1),
-        ],
+        ["beta", "num_instruments", "num_samples", "num_treatments"], [(10, 1, 100, 1),],
     )
     def test_graph_input4(self, beta, num_instruments, num_samples, num_treatments):
         num_common_causes = 5
@@ -311,19 +296,13 @@ class TestCausalModel(object):
         assert "Unobserved Confounders" not in all_nodes
 
     @mark.parametrize(
-        ["num_variables", "num_samples"],
-        [
-            (10, 5000),
-        ],
+        ["num_variables", "num_samples"], [(10, 5000),],
     )
     def test_graph_refutation(self, num_variables, num_samples):
         data = dowhy.datasets.dataset_from_random_graph(num_vars=num_variables, num_samples=num_samples)
         df = data["df"]
         model = CausalModel(
-            data=df,
-            treatment=data["treatment_name"],
-            outcome=data["outcome_name"],
-            graph=data["gml_graph"],
+            data=df, treatment=data["treatment_name"], outcome=data["outcome_name"], graph=data["gml_graph"],
         )
         graph_refutation_object = model.refute_graph(
             k=1,
@@ -335,10 +314,7 @@ class TestCausalModel(object):
         assert graph_refutation_object.refutation_result == True
 
     @mark.parametrize(
-        ["num_variables", "num_samples"],
-        [
-            (10, 5000),
-        ],
+        ["num_variables", "num_samples"], [(10, 5000),],
     )
     def test_graph_refutation2(self, num_variables, num_samples):
         data = dowhy.datasets.dataset_from_random_graph(num_vars=num_variables, num_samples=num_samples)
@@ -420,12 +396,7 @@ class TestCausalModel(object):
         ]
         ]
         """
-        model = CausalModel(
-            data=df,
-            treatment=data["treatment_name"],
-            outcome=data["outcome_name"],
-            graph=gml_str,
-        )
+        model = CausalModel(data=df, treatment=data["treatment_name"], outcome=data["outcome_name"], graph=gml_str,)
         graph_refutation_object = model.refute_graph(
             k=2,
             independence_test={

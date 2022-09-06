@@ -364,13 +364,7 @@ class CausalGraph:
             parents_2 = self.get_parents(node)
             for parent in parents_2:
                 if parent not in nodes1:
-                    causes_2 = causes_2.union(
-                        set(
-                            [
-                                parent,
-                            ]
-                        )
-                    )
+                    causes_2 = causes_2.union(set([parent,]))
                     causes_2 = causes_2.union(self.get_ancestors(parent))
         return list(causes_1.intersection(causes_2))
 

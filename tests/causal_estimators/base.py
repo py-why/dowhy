@@ -103,33 +103,15 @@ class TestEstimator(object):
         self,
         tests_to_run="all",
         num_common_causes=[2, 3],
-        num_instruments=[
-            1,
-        ],
-        num_effect_modifiers=[
-            0,
-        ],
-        num_treatments=[
-            1,
-        ],
-        num_frontdoor_variables=[
-            0,
-        ],
-        treatment_is_binary=[
-            True,
-        ],
-        treatment_is_category=[
-            False,
-        ],
-        outcome_is_binary=[
-            False,
-        ],
-        confidence_intervals=[
-            False,
-        ],
-        test_significance=[
-            False,
-        ],
+        num_instruments=[1,],
+        num_effect_modifiers=[0,],
+        num_treatments=[1,],
+        num_frontdoor_variables=[0,],
+        treatment_is_binary=[True,],
+        treatment_is_category=[False,],
+        outcome_is_binary=[False,],
+        confidence_intervals=[False,],
+        test_significance=[False,],
         dataset="linear",
         method_params=None,
     ):

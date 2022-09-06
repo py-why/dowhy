@@ -21,13 +21,11 @@ def test_identify_efficient_backdoor_algorithms():
             if example[method_name_results] is None:
                 with pytest.raises(ValueError):
                     ident_eff.identify_effect(
-                        costs=example["costs"],
-                        conditional_node_names=example["conditional_node_names"],
+                        costs=example["costs"], conditional_node_names=example["conditional_node_names"],
                     )
             else:
                 results_eff = ident_eff.identify_effect(
-                    costs=example["costs"],
-                    conditional_node_names=example["conditional_node_names"],
+                    costs=example["costs"], conditional_node_names=example["conditional_node_names"],
                 )
                 assert set(results_eff.get_backdoor_variables()) == example[method_name_results]
 
@@ -41,16 +39,13 @@ def test_fail_negative_costs_efficient_backdoor_algorithms():
         observed_node_names=example["observed_node_names"],
     )
     ident_eff = CausalIdentifier(
-        graph=G,
-        estimand_type="nonparametric-ate",
-        method_name="efficient-mincost-adjustment",
+        graph=G, estimand_type="nonparametric-ate", method_name="efficient-mincost-adjustment",
     )
     mod_costs = copy.deepcopy(example["costs"])
     mod_costs[0][1]["cost"] = 0
     with pytest.raises(Exception):
         ident_eff.identify_effect(
-            costs=mod_costs,
-            conditional_node_names=example["conditional_node_names"],
+            costs=mod_costs, conditional_node_names=example["conditional_node_names"],
         )
 
 
@@ -63,16 +58,13 @@ def test_fail_unobserved_cond_vars_efficient_backdoor_algorithms():
         observed_node_names=example["observed_node_names"],
     )
     ident_eff = CausalIdentifier(
-        graph=G,
-        estimand_type="nonparametric-ate",
-        method_name="efficient-mincost-adjustment",
+        graph=G, estimand_type="nonparametric-ate", method_name="efficient-mincost-adjustment",
     )
     mod_cond_names = copy.deepcopy(example["conditional_node_names"])
     mod_cond_names.append("U")
     with pytest.raises(Exception):
         ident_eff.identify_effect(
-            costs=example["costs"],
-            conditional_node_names=mod_cond_names,
+            costs=example["costs"], conditional_node_names=mod_cond_names,
         )
 
 
@@ -85,14 +77,11 @@ def test_fail_multivar_treat_efficient_backdoor_algorithms():
         observed_node_names=example["observed_node_names"],
     )
     ident_eff = CausalIdentifier(
-        graph=G,
-        estimand_type="nonparametric-ate",
-        method_name="efficient-mincost-adjustment",
+        graph=G, estimand_type="nonparametric-ate", method_name="efficient-mincost-adjustment",
     )
     with pytest.raises(Exception):
         ident_eff.identify_effect(
-            costs=example["costs"],
-            conditional_node_names=example["conditional_node_names"],
+            costs=example["costs"], conditional_node_names=example["conditional_node_names"],
         )
 
 
@@ -105,12 +94,9 @@ def test_fail_multivar_outcome_efficient_backdoor_algorithms():
         observed_node_names=example["observed_node_names"],
     )
     ident_eff = CausalIdentifier(
-        graph=G,
-        estimand_type="nonparametric-ate",
-        method_name="efficient-mincost-adjustment",
+        graph=G, estimand_type="nonparametric-ate", method_name="efficient-mincost-adjustment",
     )
     with pytest.raises(Exception):
         ident_eff.identify_effect(
-            costs=example["costs"],
-            conditional_node_names=example["conditional_node_names"],
+            costs=example["costs"], conditional_node_names=example["conditional_node_names"],
         )

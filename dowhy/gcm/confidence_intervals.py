@@ -108,14 +108,18 @@ def confidence_intervals(
 
         summary_result = bootstrap_results_summary_func(np.column_stack([v for v in tmp_dict.values()]))
 
-        return {key: summary_result[i] for i, key in enumerate(tmp_dict)}, {
-            key: _estimate_percentile_bounds(np.array(tmp_dict[key]).squeeze(), confidence_level) for key in tmp_dict
-        }
+        return (
+            {key: summary_result[i] for i, key in enumerate(tmp_dict)},
+            {key: _estimate_percentile_bounds(np.array(tmp_dict[key]).squeeze(), confidence_level) for key in tmp_dict},
+        )
     else:
         all_results: np.ndarray = shape_into_2d(np.array(all_results))
 
-        return bootstrap_results_summary_func(all_results), np.array(
-            [_estimate_percentile_bounds(all_results[:, i], confidence_level) for i in range(all_results.shape[1])]
+        return (
+            bootstrap_results_summary_func(all_results),
+            np.array(
+                [_estimate_percentile_bounds(all_results[:, i], confidence_level) for i in range(all_results.shape[1])]
+            ),
         )
 
 

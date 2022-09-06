@@ -198,7 +198,7 @@ def _approximate_shapley_values_via_least_squares_regression(
     use_subset_approximation: bool,
     num_samples_for_approximation: int,
     n_jobs: int,
-    full_and_empty_subset_weight: float = 10**20,
+    full_and_empty_subset_weight: float = 10 ** 20,
 ) -> np.ndarray:
     """For more details about this approximation, see Section 4.1.1 in
     Janzing, D., Minorics, L., & Bloebaum, P. (2020).

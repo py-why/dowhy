@@ -17,7 +17,7 @@ from dowhy.gcm import (
 
 def _generate_simple_non_linear_data() -> pd.DataFrame:
     X = np.random.normal(loc=0, scale=1, size=5000)
-    Y = X**2 + np.random.normal(loc=0, scale=1, size=5000)
+    Y = X ** 2 + np.random.normal(loc=0, scale=1, size=5000)
     Z = np.exp(-Y) + np.random.normal(loc=0, scale=1, size=5000)
 
     return pd.DataFrame(data=dict(X=X, Y=Y, Z=Z))
