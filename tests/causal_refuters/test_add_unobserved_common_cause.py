@@ -358,8 +358,8 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert refute.r2tu_w >= 0 and refute.r2tu_w <= 1
 
         # We calculate adjusted estimates for two sets of partial R^2 values.
-        benchmarking_results_u1 = refute.perform_benchmarking(r2yu_tw=0.9, r2tu_w=0.7)
-        benchmarking_results_u2 = refute.perform_benchmarking(r2yu_tw=0.3, r2tu_w=0.2)
+        benchmarking_results_u1 = refute.perform_benchmarking(r2yu_tw=0.9, r2tu_w=0.7, significance_level=0.05)
+        benchmarking_results_u2 = refute.perform_benchmarking(r2yu_tw=0.3, r2tu_w=0.2, significance_level=0.05)
         # adjusted lower ate bound for confounder u1 where r2tu_w = 0.7 and r2yu_tw = 0.9
         lower_ate_bound_u1 = benchmarking_results_u1["lower_ate_bound"]
         # adjusted lower ate bound for confounder u2 where r2tu_w = 0.2 and r2yu_tw = 0.3
@@ -446,8 +446,8 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert refute.r2tu_w >= 0 and refute.r2tu_w <= 1
 
         # We calculate adjusted estimates for two sets of partial R^2 values.
-        benchmarking_results_u1 = refute.perform_benchmarking(r2yu_tw=0.9, r2tu_w=0.7)
-        benchmarking_results_u2 = refute.perform_benchmarking(r2yu_tw=0.3, r2tu_w=0.2)
+        benchmarking_results_u1 = refute.perform_benchmarking(r2yu_tw=0.9, r2tu_w=0.7, significance_level=0.05)
+        benchmarking_results_u2 = refute.perform_benchmarking(r2yu_tw=0.3, r2tu_w=0.2, significance_level=0.05)
         # adjusted lower ate bound for confounder u1 where r2tu_w = 0.7 and r2yu_tw = 0.9
         lower_ate_bound_u1 = benchmarking_results_u1["lower_ate_bound"]
         # adjusted lower ate bound for confounder u2 where r2tu_w = 0.2 and r2yu_tw = 0.3
