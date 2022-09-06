@@ -1,13 +1,14 @@
 import pytest
+from pytest import mark
 
 from dowhy.causal_estimators.regression_discontinuity_estimator import RegressionDiscontinuityEstimator
 
 from .base import TestEstimator
 
 
-@pytest.mark.usefixtures("fixed_seed")
+@mark.usefixtures("fixed_seed")
 class TestRegressionDiscontinuityEstimator(object):
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         [
             "error_tolerance",
             "Estimator",

@@ -5,6 +5,7 @@ import pytest
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.linear_model import LassoCV
 from sklearn.preprocessing import PolynomialFeatures
+from pytest import mark
 
 import dowhy.datasets
 from dowhy import CausalModel
@@ -12,9 +13,9 @@ from dowhy import CausalModel
 from .base import TestRefuter
 
 
-@pytest.mark.usefixtures("fixed_seed")
+@mark.usefixtures("fixed_seed")
 class TestAddUnobservedCommonCauseRefuter(object):
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
         [
             (0.01, "backdoor.propensity_score_matching", 0.01, 0.02),
@@ -34,7 +35,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
         )
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause")
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
         [
             (0.01, "iv.instrumental_variable", 0.01, 0.02),
@@ -54,7 +55,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
         )
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
         [
             (0.01, "iv.instrumental_variable", np.arange(0.01, 0.02, 0.001), np.arange(0.02, 0.03, 0.001)),
@@ -76,7 +77,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
         [
             (0.01, "iv.instrumental_variable", np.arange(0.01, 0.02, 0.001), 0.02),
@@ -98,7 +99,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
         [
             (0.01, "iv.instrumental_variable", 0.01, np.arange(0.02, 0.03, 0.001)),
@@ -121,7 +122,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
     @pytest.mark.parametrize(
-        ["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulated_method_name"],
+        ["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulation_method"],
         [
             ("backdoor.linear_regression", [1, 2, 3], ["W3"], "linear-partial-R2"),
         ],
@@ -176,8 +177,9 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert refute.stats["robustness_value"] >= 0 and refute.stats["robustness_value"] <= 1
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
+
     @pytest.mark.parametrize(
-        ["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulated_method_name"],
+        ["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulation_method"],
         [
             ("backdoor.linear_regression", [1, 2, 3], ["W3"], "linear-partial-R2"),
         ],
@@ -230,7 +232,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert abs(original_estimate - estimate1) > abs(original_estimate - estimate2)
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         [
             "estimator_method",
             "effect_fraction_on_treatment",

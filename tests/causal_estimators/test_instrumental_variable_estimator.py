@@ -1,15 +1,16 @@
 import itertools
 
 import pytest
+from pytest import mark
 
 from dowhy.causal_estimators.instrumental_variable_estimator import InstrumentalVariableEstimator
 
 from .base import TestEstimator
 
 
-@pytest.mark.usefixtures("fixed_seed")
+@mark.usefixtures("fixed_seed")
 class TestInstrumentalVariableEstimator(object):
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         [
             "error_tolerance",
             "Estimator",
