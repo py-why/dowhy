@@ -139,7 +139,8 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
         for train, test in split_indices:
             reisz_fn_fit = reisz_function.fit(X[train])
             self.alpha_s[test] = reisz_fn_fit.predict(X[test])
-            propensities[test] = reisz_fn_fit.propensity(X[test])
+            if self.plugin_reisz:
+                propensities[test] = reisz_fn_fit.propensity(X[test])
             self.m_alpha[test] = self.moment_function(X[test], reisz_fn_fit.predict)
 
             reg_fn_fit = reg_function.fit(X[train], Y[train])
@@ -183,10 +184,10 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
             # Partial R^2 of outcome after regressing over unobserved confounder, observed common causes and treatment
             # Assuming that the difference in R2 is the same for wj and new unobserved confounder
             delta_r2y_u = self.frac_strength_outcome * delta_r2_y_wj
-            self.r2yu_tw = delta_r2y_u / (1 - self.r2y_tw) # partial R2 for outcome
+            self.r2yu_tw = delta_r2y_u / (1 - self.r2y_tw)  # partial R2 for outcome
             # for treatment,  Calpha is not a function of the partial R2. So we need a different assumption.
             # Assuming that the ratio of variance of alpha^2 is the same for wj and new unobserved confounder
-            ratio_var_alpha_wj = var_alpha_wj / self.var_alpha_s 
+            ratio_var_alpha_wj = var_alpha_wj / self.var_alpha_s
             # (1-ratio_var_alpha_wj) is the numerator of Calpha2, similar to the partial R2 for treatment
             # wrt unobserved confounders in partial-linear models
             self.r2tu_w = self.frac_strength_treatment * (1 - ratio_var_alpha_wj)

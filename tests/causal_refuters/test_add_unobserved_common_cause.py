@@ -2,10 +2,10 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
+from pytest import mark
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.linear_model import LassoCV
 from sklearn.preprocessing import PolynomialFeatures
-from pytest import mark
 
 import dowhy.datasets
 from dowhy import CausalModel
@@ -129,7 +129,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
     )
     @patch("matplotlib.pyplot.figure")
     def test_linear_sensitivity_with_confounders(
-        self, mock_fig, estimator_method, effect_fraction_on_treatment, benchmark_common_causes, simulated_method_name
+        self, mock_fig, estimator_method, effect_fraction_on_treatment, benchmark_common_causes, simulation_method
     ):
         np.random.seed(100)
         data = dowhy.datasets.linear_dataset(
@@ -156,7 +156,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
             target_estimand,
             estimate,
             method_name="add_unobserved_common_cause",
-            simulated_method_name=simulated_method_name,
+            simulation_method=simulation_method,
             benchmark_common_causes=benchmark_common_causes,
             effect_fraction_on_treatment=effect_fraction_on_treatment,
         )
@@ -177,7 +177,6 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert refute.stats["robustness_value"] >= 0 and refute.stats["robustness_value"] <= 1
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
-
     @pytest.mark.parametrize(
         ["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulation_method"],
         [
@@ -186,7 +185,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
     )
     @patch("matplotlib.pyplot.figure")
     def test_linear_sensitivity_given_strength_of_confounding(
-        self, mock_fig, estimator_method, effect_fraction_on_treatment, benchmark_common_causes, simulated_method_name
+        self, mock_fig, estimator_method, effect_fraction_on_treatment, benchmark_common_causes, simulation_method
     ):
         np.random.seed(100)
         data = dowhy.datasets.linear_dataset(
@@ -213,7 +212,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
             target_estimand,
             estimate,
             method_name="add_unobserved_common_cause",
-            simulated_method_name=simulated_method_name,
+            simulation_method=simulation_method,
             benchmark_common_causes=benchmark_common_causes,
             effect_fraction_on_treatment=effect_fraction_on_treatment,
         )
@@ -237,7 +236,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
             "estimator_method",
             "effect_fraction_on_treatment",
             "benchmark_common_causes",
-            "simulated_method_name",
+            "simulation_method",
             "rvalue_threshold",
         ],
         [
@@ -251,7 +250,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
         estimator_method,
         effect_fraction_on_treatment,
         benchmark_common_causes,
-        simulated_method_name,
+        simulation_method,
         rvalue_threshold,
     ):
         np.random.seed(100)
@@ -278,7 +277,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
             target_estimand2,
             estimate2,
             method_name="add_unobserved_common_cause",
-            simulated_method_name=simulated_method_name,
+            simulation_method=simulation_method,
             benchmark_common_causes=benchmark_common_causes,
             effect_fraction_on_treatment=effect_fraction_on_treatment,
         )
@@ -303,14 +302,14 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
     @pytest.mark.parametrize(
-        ["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulated_method_name"],
+        ["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulation_method"],
         [
             ("backdoor.econml.dml.KernelDML", 2, ["W3"], "non-parametric-partial-R2"),
         ],
     )
     @patch("matplotlib.pyplot.figure")
     def test_non_parametric_sensitivity_given_strength_of_confounding(
-        self, mock_fig, estimator_method, effect_fraction_on_treatment, benchmark_common_causes, simulated_method_name
+        self, mock_fig, estimator_method, effect_fraction_on_treatment, benchmark_common_causes, simulation_method
     ):
         np.random.seed(100)
         data = dowhy.datasets.linear_dataset(
@@ -350,7 +349,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
             target_estimand,
             estimate,
             method_name="add_unobserved_common_cause",
-            simulated_method_name=simulated_method_name,
+            simulation_method=simulation_method,
             benchmark_common_causes=benchmark_common_causes,
             effect_fraction_on_treatment=effect_fraction_on_treatment,
         )
@@ -391,14 +390,14 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert mock_fig.call_count > 0
 
     @pytest.mark.parametrize(
-        ["estimator_method", "effect_fraction_on_outcome", "benchmark_common_causes", "simulated_method_name"],
+        ["estimator_method", "effect_fraction_on_outcome", "benchmark_common_causes", "simulation_method"],
         [
             ("backdoor.econml.dml.LinearDML", 2, ["W3"], "non-parametric-partial-R2"),
         ],
     )
     @patch("matplotlib.pyplot.figure")
     def test_partially_linear_sensitivity_given_strength_of_confounding(
-        self, mock_fig, estimator_method, effect_fraction_on_outcome, benchmark_common_causes, simulated_method_name
+        self, mock_fig, estimator_method, effect_fraction_on_outcome, benchmark_common_causes, simulation_method
     ):
         np.random.seed(100)
         data = dowhy.datasets.linear_dataset(
@@ -438,7 +437,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
             target_estimand,
             estimate,
             method_name="add_unobserved_common_cause",
-            simulated_method_name=simulated_method_name,
+            simulation_method=simulation_method,
             benchmark_common_causes=benchmark_common_causes,
             effect_fraction_on_outcome=effect_fraction_on_outcome,
         )

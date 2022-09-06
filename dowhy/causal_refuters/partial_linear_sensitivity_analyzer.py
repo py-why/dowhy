@@ -120,7 +120,9 @@ class PartialLinearSensitivityAnalyzer:
             if self.frac_strength_outcome is not None or self.frac_strength_treatment is not None:
                 return True
             else:
-                raise ValueError("Need to specify at least one of effect_fraction_on_treatment or effect_fraction_on_outcome.")
+                raise ValueError(
+                    "Need to specify at least one of effect_fraction_on_treatment or effect_fraction_on_outcome."
+                )
         else:
             return False
 
@@ -168,7 +170,7 @@ class PartialLinearSensitivityAnalyzer:
         """
 
         Cg2 = r2yu_tw  # Strength of confounding that omitted variables generate in outcome regression
-        
+
         # Strength of confounding that omitted variables generate in treatment regression
         Calpha2 = r2tu_w / (1 - r2tu_w)
         Cg = np.sqrt(Cg2)
@@ -231,10 +233,13 @@ class PartialLinearSensitivityAnalyzer:
 
         :returns: python dictionary storing values of r2tu_w, r2yu_tw, short estimate, bias, lower_ate_bound,upper_ate_bound, lower_confidence_bound, upper_confidence_bound
         """
-        max_r2yu_tw = max(r2yu_tw) if  np.ndim(r2yu_tw) != 0 else r2yu_tw
+        max_r2yu_tw = max(r2yu_tw) if np.ndim(r2yu_tw) != 0 else r2yu_tw
         max_r2tu_w = max(r2tu_w) if np.ndim(r2yu_tw) != 0 else r2tu_w
         lower_confidence_bound, upper_confidence_bound, bias = self.get_confidence_levels(
-            r2yu_tw=max_r2yu_tw, r2tu_w=max_r2tu_w, significance_level=significance_level, is_partial_linear=is_partial_linear
+            r2yu_tw=max_r2yu_tw,
+            r2tu_w=max_r2tu_w,
+            significance_level=significance_level,
+            is_partial_linear=is_partial_linear,
         )
         lower_ate_bound, upper_ate_bound, bias = self.get_confidence_levels(
             r2yu_tw=max_r2yu_tw, r2tu_w=max_r2tu_w, significance_level=None, is_partial_linear=is_partial_linear
@@ -556,8 +561,11 @@ class PartialLinearSensitivityAnalyzer:
 
         fig, ax = plt.subplots(1, 1, figsize=plot_size)
         ax.set_title("Sensitivity contour plot of %s" % plot_type)
-        ax.set_xlabel("Partial R^2 of confounder with treatment")
-        ax.set_ylabel("Partial R^2 of confounder with outcome")
+        if self.is_partial_linear:
+            ax.set_xlabel("Partial R^2 of unobserved confounder with treatment")
+        else:
+            ax.set_xlabel("Fraction of the variance in Reisz function explained by unobserved confounder")
+        ax.set_ylabel("Partial R^2 of unobserved confounder with outcome")
         if self.effect_strength_treatment is None:
             # adding 1.1 as plotting margin  ensure that the benchmarked part is shown fully in plot
             x_limit = (1.1 * self.r2tu_w) if self.benchmarking else 0.99

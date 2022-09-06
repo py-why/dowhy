@@ -44,7 +44,7 @@ class AddUnobservedCommonCause(CausalRefuter):
         :param confounders_effect_on_treatment: str : The type of effect on the treatment due to the unobserved confounder. Possible values are ['binary_flip', 'linear']
         :param confounders_effect_on_outcome: str : The type of effect on the outcome due to the unobserved confounder. Possible values are ['binary_flip', 'linear']
         :param effect_strength_on_treatment: float, numpy.ndarray: This refers to the strength of the confounder on treatment. Its interpretation depends on confounders_effect_on_treatment and the simulation_method. When simulation_method is direct-simulation, for a linear effect it behaves like the regression coefficient and for a binary flip, it is the probability with which effect of unobserved confounder can invert the value of the treatment. When simulation_method is linear-partial-r2 and non-parametric-partial-r2 (under a partial-linear DGP assumption), it refers to the partial R2 of the unobserved confounder wrt the treatment conditioned on the observed confounders. Only in the case of general non-parametric-partial-r2, it is (1-r), where r is the ratio of variance of reisz representer, alpha^2, based on observed confounders and that based on all confounders.
-        :param effect_strength_on_outcome: float, numpy.ndarray: This refers to the strength of the confounder on outcome. Its interpretation depends on confounders_effect_on_outcome and the simulation_method. When simulation_method is direct-simulation, for a linear effect it behaves like the regression coefficient and for a binary flip, it is the probability with which it can invert the value of the outcome. When simulation_method is linear-partial-r2 and non-parametric-partial-r2, it refers to the partial R2 of the unobserved confounder wrt the outcome conditioned on the treatment and observed confounders. 
+        :param effect_strength_on_outcome: float, numpy.ndarray: This refers to the strength of the confounder on outcome. Its interpretation depends on confounders_effect_on_outcome and the simulation_method. When simulation_method is direct-simulation, for a linear effect it behaves like the regression coefficient and for a binary flip, it is the probability with which it can invert the value of the outcome. When simulation_method is linear-partial-r2 and non-parametric-partial-r2, it refers to the partial R2 of the unobserved confounder wrt the outcome conditioned on the treatment and observed confounders.
         :param frac_strength_treatment: float: If effect_strength_on_treatment is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on treatment. Defaults to 1.
         :param frac_strength_outcome: float: If effect_strength_on_outcome is not provided, this parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on outcome. Defaults to 1.
         :param plotmethod: string: Type of plot to be shown. If None, no plot is generated. This parameter is used only only when more than one treatment confounder effect values or outcome confounder effect values are provided. Default is "colormesh". Supported values are "contour", "colormesh" when more than one value is provided for both confounder effect value parameters; "line" when provided for only one of them.
@@ -80,9 +80,7 @@ class AddUnobservedCommonCause(CausalRefuter):
         self.frac_strength_outcome = (
             kwargs["effect_fraction_on_outcome"] if "effect_fraction_on_outcome" in kwargs else 1
         )
-        self.simulation_method = (
-            kwargs["simulation_method"] if "simulation_method" in kwargs else "direct-simulation"
-        )
+        self.simulation_method = kwargs["simulation_method"] if "simulation_method" in kwargs else "direct-simulation"
         self.plotmethod = kwargs["plotmethod"] if "plotmethod" in kwargs else "colormesh"
         self.percent_change_estimate = kwargs["percent_change_estimate"] if "percent_change_estimate" in kwargs else 1.0
         self.significance_level = kwargs["significance_level"] if "significance_level" in kwargs else 0.05
@@ -107,7 +105,6 @@ class AddUnobservedCommonCause(CausalRefuter):
         )
         self.plugin_reisz = kwargs["plugin_reisz"] if "plugin_reisz" in kwargs else False
         self.logger = logging.getLogger(__name__)
-
 
     def infer_default_kappa_t(self, len_kappa_t=10):
         """Infer default effect strength of simulated confounder on treatment."""
