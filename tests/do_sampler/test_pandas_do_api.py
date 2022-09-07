@@ -11,10 +11,7 @@ import dowhy.datasets
 @mark.usefixtures("fixed_seed")
 class TestPandasDoAPI(object):
     @mark.parametrize(
-        ["N", "error_tolerance"],
-        [
-            (10000, 0.1),
-        ],
+        ["N", "error_tolerance"], [(10000, 0.1),],
     )
     def test_pandas_api_discrete_cause_continuous_confounder(self, N, error_tolerance):
         data = dowhy.datasets.linear_dataset(
@@ -53,10 +50,7 @@ class TestPandasDoAPI(object):
         assert res
 
     @mark.parametrize(
-        ["N", "error_tolerance"],
-        [
-            (10000, 0.1),
-        ],
+        ["N", "error_tolerance"], [(10000, 0.1),],
     )
     def test_pandas_api_discrete_cause_discrete_confounder(self, N, error_tolerance):
         data = dowhy.datasets.linear_dataset(
@@ -96,10 +90,7 @@ class TestPandasDoAPI(object):
         assert res
 
     @mark.parametrize(
-        ["N", "error_tolerance"],
-        [
-            (10000, 0.1),
-        ],
+        ["N", "error_tolerance"], [(10000, 0.1),],
     )
     def test_pandas_api_continuous_cause_discrete_confounder(self, N, error_tolerance):
         data = dowhy.datasets.linear_dataset(
@@ -139,10 +130,7 @@ class TestPandasDoAPI(object):
         assert res
 
     @mark.parametrize(
-        ["N", "error_tolerance"],
-        [
-            (10000, 0.1),
-        ],
+        ["N", "error_tolerance"], [(10000, 0.1),],
     )
     def test_pandas_api_continuous_cause_continuous_confounder(self, N, error_tolerance):
         data = dowhy.datasets.linear_dataset(
@@ -188,10 +176,7 @@ class TestPandasDoAPI(object):
     """
 
     @mark.parametrize(
-        ["N", "variable_types"],
-        [
-            (10000, {"v0": "b", "y": "c", "W0": "c"}),
-        ],
+        ["N", "variable_types"], [(10000, {"v0": "b", "y": "c", "W0": "c"}),],
     )
     def test_pandas_api_with_full_specification_of_type(self, N, variable_types):
         data = dowhy.datasets.linear_dataset(
@@ -204,10 +189,7 @@ class TestPandasDoAPI(object):
         assert True
 
     @mark.parametrize(
-        ["N", "variable_types"],
-        [
-            (10000, {"v0": "b", "W0": "c"}),
-        ],
+        ["N", "variable_types"], [(10000, {"v0": "b", "W0": "c"}),],
     )
     def test_pandas_api_with_partial_specification_of_type(self, N, variable_types):
         data = dowhy.datasets.linear_dataset(
@@ -220,10 +202,7 @@ class TestPandasDoAPI(object):
         assert True
 
     @mark.parametrize(
-        ["N", "variable_types"],
-        [
-            (10000, {}),
-        ],
+        ["N", "variable_types"], [(10000, {}),],
     )
     def test_pandas_api_with_no_specification_of_type(self, N, variable_types):
         data = dowhy.datasets.linear_dataset(
@@ -236,10 +215,7 @@ class TestPandasDoAPI(object):
         assert True
 
     @mark.parametrize(
-        ["N", "variable_types"],
-        [
-            (1, {"v0": "b", "W0": "c"}),
-        ],
+        ["N", "variable_types"], [(1, {"v0": "b", "W0": "c"}),],
     )
     def test_pandas_api_with_dummy_data(self, N, variable_types):
         df = pd.DataFrame({"x": [0, 0.5, 1], "y": [1, 0.5, 0], "a": [0, 0.5, 0], "b": [0.25, 0, 0]})

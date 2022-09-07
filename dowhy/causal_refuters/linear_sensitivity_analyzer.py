@@ -130,7 +130,7 @@ class LinearSensitivityAnalyzer:
 
         if np.isscalar(estimate):  # for single covariate
             t_stats = estimator_model.tvalues[treatment]
-            return t_stats**2 / (t_stats**2 + degree_of_freedom)
+            return t_stats ** 2 / (t_stats ** 2 + degree_of_freedom)
 
         else:  # compute for a group of covariates
             covariance_matrix = estimator_model.cov_params().loc[treatment, :][treatment]
@@ -166,10 +166,10 @@ class LinearSensitivityAnalyzer:
         if f_adjusted < 0:
             r_value = 0
         else:
-            r_value = 0.5 * (np.sqrt(f_adjusted**4 + (4 * f_adjusted**2)) - f_adjusted**2)
+            r_value = 0.5 * (np.sqrt(f_adjusted ** 4 + (4 * f_adjusted ** 2)) - f_adjusted ** 2)
 
         if f_adjusted > 0 and f_q > 1 / f_critical:
-            r_value = (f_q**2 - f_critical**2) / (1 + f_q**2)
+            r_value = (f_q ** 2 - f_critical ** 2) / (1 + f_q ** 2)
 
         return r_value
 
@@ -199,8 +199,8 @@ class LinearSensitivityAnalyzer:
 
         bias_adjusted_t = (bias_adjusted_estimate - self.null_hypothesis_effect) / bias_adjusted_se
 
-        bias_adjusted_partial_r2 = bias_adjusted_t**2 / (
-            bias_adjusted_t**2 + (self.degree_of_freedom - 1)
+        bias_adjusted_partial_r2 = bias_adjusted_t ** 2 / (
+            bias_adjusted_t ** 2 + (self.degree_of_freedom - 1)
         )  # partial r2 formula used with new t value and dof - 1
 
         num_se = t.ppf(
@@ -247,7 +247,7 @@ class LinearSensitivityAnalyzer:
             self.null_hypothesis_effect = self.estimate * (1 + self.percent_change_estimate)
 
         self.t_stats = (self.estimate - self.null_hypothesis_effect) / self.standard_error
-        self.partial_f2 = self.t_stats**2 / self.degree_of_freedom
+        self.partial_f2 = self.t_stats ** 2 / self.degree_of_freedom
 
         # build a new regression model by considering treatment variables as outcome
         treatment_linear_model = self.treatment_regression()
@@ -272,7 +272,7 @@ class LinearSensitivityAnalyzer:
 
             r2uwj_wt = (
                 self.frac_strength_treatment
-                * (r2twj_w**2)
+                * (r2twj_w ** 2)
                 / ((1 - self.frac_strength_treatment * r2twj_w) * (1 - r2twj_w))
             )
             if any(val >= 1 for val in r2uwj_wt):

@@ -22,26 +22,7 @@ class TestPropensityScoreWeightingEstimator(object):
             "treatment_is_binary",
             "outcome_is_binary",
         ],
-        [
-            (
-                0.4,
-                PropensityScoreWeightingEstimator,
-                [1, 2],
-                [0],
-                [
-                    0,
-                ],
-                [
-                    1,
-                ],
-                [
-                    True,
-                ],
-                [
-                    False,
-                ],
-            ),
-        ],
+        [(0.4, PropensityScoreWeightingEstimator, [1, 2], [0], [0,], [1,], [True,], [False,],),],
     )
     def test_average_treatment_effect(
         self,
@@ -62,11 +43,7 @@ class TestPropensityScoreWeightingEstimator(object):
             num_treatments=num_treatments,
             treatment_is_binary=treatment_is_binary,
             outcome_is_binary=outcome_is_binary,
-            confidence_intervals=[
-                True,
-            ],
-            test_significance=[
-                True,
-            ],
+            confidence_intervals=[True,],
+            test_significance=[True,],
             method_params={"num_simulations": 1, "num_null_simulations": 1},
         )

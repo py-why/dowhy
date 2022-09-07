@@ -235,7 +235,7 @@ def _kci(
     Z: np.ndarray,
     kernel: Callable[[np.ndarray], np.ndarray],
     scale_data: bool,
-    regularization_param: float = 10**-3,
+    regularization_param: float = 10 ** -3,
 ) -> float:
     """
     Tests the null hypothesis that X and Y are independent given Z using the kernel conditional independence test.
@@ -330,7 +330,7 @@ def _fast_centering(k: np.ndarray) -> np.ndarray:
         k
         - 1 / n * np.outer(np.ones(n), np.sum(k, axis=0))
         - 1 / n * np.outer(np.sum(k, axis=1), np.ones(n))
-        + 1 / n**2 * np.sum(k) * np.ones((n, n))
+        + 1 / n ** 2 * np.sum(k) * np.ones((n, n))
     )
     return k_c
 
@@ -379,7 +379,7 @@ def _hsic(
         * (
             np.sum(k_mat * l_mat)
             - 2 / n * np.sum(k_mat, axis=0) @ np.sum(l_mat, axis=1)
-            + 1 / n**2 * np.sum(k_mat) * np.sum(l_mat)
+            + 1 / n ** 2 * np.sum(k_mat) * np.sum(l_mat)
         )
     )
 
@@ -401,7 +401,7 @@ def _hsic(
     if test_statistic <= cut_off_value:
         test_statistic = 0
 
-    al = m_hsic**2 / var_hsic
+    al = m_hsic ** 2 / var_hsic
     bet = var_hsic * n / m_hsic
 
     p_value = 1 - gamma.cdf(test_statistic, al, scale=bet)
@@ -410,7 +410,7 @@ def _hsic(
 
 
 def _filter_out_small_eigen_values_and_vectors(
-    eigen_values: np.ndarray, eigen_vectors: np.ndarray, relative_tolerance: float = (10**-5)
+    eigen_values: np.ndarray, eigen_vectors: np.ndarray, relative_tolerance: float = (10 ** -5)
 ) -> Tuple[np.ndarray, np.ndarray]:
     filtered_indices_xz_z = np.where(eigen_values[eigen_values > max(eigen_values) * relative_tolerance])
 
@@ -422,7 +422,7 @@ def _estimate_p_value(ww_prod: np.ndarray, statistic: np.ndarray) -> float:
     mean_approx = np.trace(ww_prod)
     variance_approx = 2 * np.trace(ww_prod @ ww_prod)
 
-    alpha_approx = mean_approx**2 / variance_approx
+    alpha_approx = mean_approx ** 2 / variance_approx
     beta_approx = variance_approx / mean_approx
 
     return 1 - gamma.cdf(statistic, alpha_approx, scale=beta_approx)
@@ -540,7 +540,7 @@ def _rcit(
 
         cov_zz = _estimate_column_wise_covariances(random_features_z, random_features_z)
         inverse_cov_zz = scipy.linalg.cho_solve(
-            scipy.linalg.cho_factor(cov_zz + np.eye(cov_zz.shape[0]) * 10**-10, lower=True), np.eye(cov_zz.shape[0])
+            scipy.linalg.cho_factor(cov_zz + np.eye(cov_zz.shape[0]) * 10 ** -10, lower=True), np.eye(cov_zz.shape[0])
         )
         cov_xz = _estimate_column_wise_covariances(random_features_x, random_features_z)
         cov_zy = _estimate_column_wise_covariances(random_features_z, random_features_y)

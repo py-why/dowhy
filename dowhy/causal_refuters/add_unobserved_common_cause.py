@@ -670,9 +670,7 @@ class AddUnobservedCommonCause(CausalRefuter):
         U = np.array(U)
         model = sm.OLS(U, X)
         results = model.fit()
-        U = U.reshape(
-            -1,
-        )
+        U = U.reshape(-1,)
         final_U = U - results.fittedvalues.values
         final_U = pd.Series(U)
 

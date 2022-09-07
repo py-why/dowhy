@@ -97,7 +97,7 @@ def partial_corr(data=None, x=None, y=None, z=None, method="pearson"):
 
     # Finding p-value using student T test
     dof = n - k - 2  # Degree of freedom for multivariate analysis
-    tval = r * np.sqrt(dof / (1 - r**2))  # Test statistic
+    tval = r * np.sqrt(dof / (1 - r ** 2))  # Test statistic
     pval = 2 * t.sf(np.abs(tval), dof)  # Calculate p-value corresponding to the test statistic and degree of freedom
 
     ci = compute_ci(r=r, nx=(n - k), ny=(n - k))  # Finding Confidence Interval

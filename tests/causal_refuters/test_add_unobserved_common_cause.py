@@ -14,9 +14,7 @@ from .base import TestRefuter
 class TestAddUnobservedCommonCauseRefuter(object):
     @mark.parametrize(
         ["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
-        [
-            (0.01, "backdoor.propensity_score_matching", 0.01, 0.02),
-        ],
+        [(0.01, "backdoor.propensity_score_matching", 0.01, 0.02),],
     )
     def test_refutation_binary_treatment(
         self, error_tolerance, estimator_method, effect_strength_on_t, effect_strength_on_y
@@ -34,9 +32,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
 
     @mark.parametrize(
         ["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
-        [
-            (0.01, "iv.instrumental_variable", 0.01, 0.02),
-        ],
+        [(0.01, "iv.instrumental_variable", 0.01, 0.02),],
     )
     def test_refutation_continuous_treatment(
         self, error_tolerance, estimator_method, effect_strength_on_t, effect_strength_on_y
@@ -54,9 +50,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
 
     @mark.parametrize(
         ["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
-        [
-            (0.01, "iv.instrumental_variable", np.arange(0.01, 0.02, 0.001), np.arange(0.02, 0.03, 0.001)),
-        ],
+        [(0.01, "iv.instrumental_variable", np.arange(0.01, 0.02, 0.001), np.arange(0.02, 0.03, 0.001)),],
     )
     @patch("matplotlib.pyplot.figure")
     def test_refutation_continuous_treatment_range_both_treatment_outcome(
@@ -76,9 +70,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
 
     @mark.parametrize(
         ["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
-        [
-            (0.01, "iv.instrumental_variable", np.arange(0.01, 0.02, 0.001), 0.02),
-        ],
+        [(0.01, "iv.instrumental_variable", np.arange(0.01, 0.02, 0.001), 0.02),],
     )
     @patch("matplotlib.pyplot.figure")
     def test_refutation_continuous_treatment_range_treatment(
@@ -98,9 +90,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
 
     @mark.parametrize(
         ["error_tolerance", "estimator_method", "effect_strength_on_t", "effect_strength_on_y"],
-        [
-            (0.01, "iv.instrumental_variable", 0.01, np.arange(0.02, 0.03, 0.001)),
-        ],
+        [(0.01, "iv.instrumental_variable", 0.01, np.arange(0.02, 0.03, 0.001)),],
     )
     @patch("matplotlib.pyplot.figure")
     def test_refutation_continuous_treatment_range_outcome(
@@ -120,9 +110,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
 
     @mark.parametrize(
         ["estimator_method", "effect_strength_on_t", "benchmark_common_causes", "simulated_method_name"],
-        [
-            ("backdoor.linear_regression", [1, 2, 3], ["W3"], "linear-partial-R2"),
-        ],
+        [("backdoor.linear_regression", [1, 2, 3], ["W3"], "linear-partial-R2"),],
     )
     @patch("matplotlib.pyplot.figure")
     def test_linear_sensitivity_with_confounders(
@@ -177,9 +165,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
 
     @mark.parametrize(
         ["estimator_method", "effect_strength_on_t", "benchmark_common_causes", "simulated_method_name"],
-        [
-            ("backdoor.linear_regression", [1, 2, 3], ["W3"], "linear-partial-R2"),
-        ],
+        [("backdoor.linear_regression", [1, 2, 3], ["W3"], "linear-partial-R2"),],
     )
     @patch("matplotlib.pyplot.figure")
     def test_linear_sensitivity_given_strength_of_confounding(
@@ -237,9 +223,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
             "simulated_method_name",
             "rvalue_threshold",
         ],
-        [
-            ("backdoor.linear_regression", [1, 2, 3], ["W3"], "linear-partial-R2", 0.95),
-        ],
+        [("backdoor.linear_regression", [1, 2, 3], ["W3"], "linear-partial-R2", 0.95),],
     )
     @patch("matplotlib.pyplot.figure")
     def test_linear_sensitivity_dataset_without_confounders(

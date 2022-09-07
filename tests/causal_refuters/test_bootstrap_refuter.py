@@ -35,10 +35,7 @@ class TestDataSubsetRefuter(object):
         self, error_tolerance, estimator_method, num_common_causes, required_variables, num_samples
     ):
         refuter_tester = TestRefuter(
-            error_tolerance,
-            estimator_method,
-            "bootstrap_refuter",
-            required_variables=required_variables,
+            error_tolerance, estimator_method, "bootstrap_refuter", required_variables=required_variables,
         )
         refuter_tester.continuous_treatment_testsuite(
             num_samples=num_samples, num_common_causes=num_common_causes, tests_to_run="atleast-one-common-cause"

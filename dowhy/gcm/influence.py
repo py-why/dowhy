@@ -40,7 +40,7 @@ def arrow_strength(
     parent_samples: Optional[pd.DataFrame] = None,
     num_samples_conditional: int = 1000,
     max_num_runs: int = 5000,
-    tolerance: float = 10**-4,
+    tolerance: float = 10 ** -4,
     n_jobs: int = 1,
     difference_estimation_func: Optional[Callable[[np.ndarray, np.ndarray], Union[np.ndarray, float]]] = None,
 ) -> Dict[Tuple[Any, Any], float]:
@@ -103,7 +103,7 @@ def arrow_strength_of_model(
     input_samples: np.ndarray,
     num_samples_from_conditional: int = 1000,
     max_num_runs: int = 5000,
-    tolerance: float = 10**-4,
+    tolerance: float = 10 ** -4,
     n_jobs: int = 1,
     difference_estimation_func: Optional[Callable[[np.ndarray, np.ndarray], Union[np.ndarray, float]]] = None,
     input_subsets: Optional[List[List[int]]] = None,

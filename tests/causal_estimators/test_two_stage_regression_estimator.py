@@ -20,27 +20,7 @@ class TestTwoStageRegressionEstimator(object):
             "treatment_is_binary",
             "outcome_is_binary",
         ],
-        [
-            (
-                0.1,
-                TwoStageRegressionEstimator,
-                [0],
-                [0],
-                [
-                    0,
-                ],
-                [
-                    1,
-                ],
-                [
-                    1,
-                ],
-                [False],
-                [
-                    False,
-                ],
-            ),
-        ],
+        [(0.1, TwoStageRegressionEstimator, [0], [0], [0,], [1,], [1,], [False], [False,],),],
     )
     def test_average_treatment_effect(
         self,
@@ -63,11 +43,7 @@ class TestTwoStageRegressionEstimator(object):
             num_frontdoor_variables=num_frontdoor_variables,
             treatment_is_binary=treatment_is_binary,
             outcome_is_binary=outcome_is_binary,
-            confidence_intervals=[
-                True,
-            ],
-            test_significance=[
-                False,
-            ],
+            confidence_intervals=[True,],
+            test_significance=[False,],
             method_params={"num_simulations": 10, "num_null_simulations": 10},
         )

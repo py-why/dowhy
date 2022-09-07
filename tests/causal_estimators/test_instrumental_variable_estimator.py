@@ -22,23 +22,7 @@ class TestInstrumentalVariableEstimator(object):
             "outcome_is_binary",
             "identifier_method",
         ],
-        [
-            (
-                0.4,
-                InstrumentalVariableEstimator,
-                [0, 1],
-                [1, 2],
-                [
-                    0,
-                ],
-                [1, 2],
-                [False, True],
-                [
-                    False,
-                ],
-                "iv",
-            ),
-        ],
+        [(0.4, InstrumentalVariableEstimator, [0, 1], [1, 2], [0,], [1, 2], [False, True], [False,], "iv",),],
     )
     def test_average_treatment_effect(
         self,

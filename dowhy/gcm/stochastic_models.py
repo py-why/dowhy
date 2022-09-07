@@ -94,7 +94,7 @@ class ScipyDistribution(StochasticModel):
 
     @staticmethod
     def find_suitable_continuous_distribution(
-        distribution_samples: np.ndarray, divergence_threshold: float = 10**-2
+        distribution_samples: np.ndarray, divergence_threshold: float = 10 ** -2
     ) -> Tuple[rv_continuous, Dict[str, float]]:
         """Tries to find the best fitting continuous parametric distribution of given samples. This is done by fitting
         different parametric models and selecting the one with the smallest KL divergence between observed and generated
@@ -139,8 +139,11 @@ class ScipyDistribution(StochasticModel):
                     currently_best_parameters = params
                     currently_smallest_divergence = divergence
 
-        return currently_best_distribution, ScipyDistribution.map_scipy_distribution_parameters_to_names(
-            currently_best_distribution, currently_best_parameters
+        return (
+            currently_best_distribution,
+            ScipyDistribution.map_scipy_distribution_parameters_to_names(
+                currently_best_distribution, currently_best_parameters
+            ),
         )
 
     @staticmethod
