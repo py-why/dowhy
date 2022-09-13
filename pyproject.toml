@@ -44,6 +44,7 @@ files = ["dowhy/__init__.py"]
 #
 [tool.poetry.dependencies]
 python = ">=3.8,<3.10"
+cython = "^0.29.32"
 scipy = "^1.8.1"
 statsmodels = "^0.13.2"
 numpy = "^1.23.1"
@@ -57,20 +58,18 @@ pygraphviz = { version = "^1.9", optional = true }
 econml = { version = "*", optional = true }
 tqdm = "^4.64.0"
 
-[tool.poetry.group.causalml]
-optional = true
-
-[tool.poetry.group.causalml.dependencies]
 # CausalML Extra (causalml is wired to use llvmlite 0.36)
-causalml = "^0.12.3"
-llvmlite = "^0.36.0"
-cython = "^0.29.32"
+causalml = { version = "^0.12.3", optional = true }
+llvmlite = { version = "^0.36.0", optional = true }
 
-[tool.poetry.group.plotting]
-optional = true
+#Plotting Extra
+matplotlib = { version = "^3.5.3", optional = true }
 
-[tool.poetry.group.plotting.dependencies]
-matplotlib = "^3.5.3"
+[tool.poetry.extras]
+plotting = ["matplotlib"]
+causalml = ["causalml", "llvmlite", "cython"]
+
+
 
 [tool.poetry.group.dev.dependencies]
 poethepoet = "^0.16.0"
