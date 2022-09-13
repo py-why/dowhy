@@ -103,17 +103,19 @@ nbsphinx = "^0.8.9"
 sphinx-rtd-theme = "^1.0.0"
 pydata-sphinx-theme = "^0.9.0"
 ipykernel = "^6.15.1"
+sphinx-copybutton = "0.5.0"
 
 #
 # Versions defined for security reasons
 #
 # https://github.com/py-why/dowhy/security/dependabot/1 - CVE-2022-34749
 nbconvert = { version = "7.0.0rc3", allow-prereleases = true }
-
+pytest-cov = "^3.0.0"
+pytest-split = "^0.8.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
-build-backend = "poetry.core.masonry.api"
+build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.pytest.ini_options]
 markers = ["advanced: not be to run each time. only on package updates."]
@@ -129,6 +131,8 @@ _isort_check = 'isort --check .'
 
 # testing tasks
 test = "pytest -v -m 'not advanced' --durations=0 --durations-min=60.0"
+test_durations = "poetry run poe test --store-durations"
+test_advanced = "pytest -v"
 test_focused = "pytest -v -m 'focused'"
 verifyPackage = "twine check dist/*"
 # TODO: replace with `poetry publish`

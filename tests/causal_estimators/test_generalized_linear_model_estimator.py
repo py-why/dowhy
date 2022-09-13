@@ -1,14 +1,15 @@
 import pytest
 import statsmodels.api as sm
+from pytest import mark
 
 from dowhy.causal_estimators.generalized_linear_model_estimator import GeneralizedLinearModelEstimator
 
 from .base import TestEstimator
 
 
-@pytest.mark.usefixtures("fixed_seed")
+@mark.usefixtures("fixed_seed")
 class TestGeneralizedLinearModelEstimator(object):
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         [
             "error_tolerance",
             "Estimator",

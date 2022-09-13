@@ -2,6 +2,7 @@ import pdb
 
 import numpy as np
 import pytest
+from pytest import mark
 
 from .base import TestRefuter
 
@@ -12,14 +13,14 @@ def simple_linear_outcome_model(X_train, output_train):
     return lambda X_train: X_train[:, 0] + 2 * X_train[:, 1] + 3
 
 
-@pytest.mark.usefixtures("fixed_seed")
+@mark.usefixtures("fixed_seed")
 class TestDummyOutcomeRefuter(object):
-    @pytest.mark.parametrize(["error_tolerence", "estimator_method"], [(0.03, "iv.instrumental_variable")])
+    @mark.parametrize(["error_tolerence", "estimator_method"], [(0.03, "iv.instrumental_variable")])
     def test_refutation_dummy_outcome_refuter_default_continuous_treatment(self, error_tolerence, estimator_method):
         refuter_tester = TestRefuter(error_tolerence, estimator_method, "dummy_outcome_refuter")
         refuter_tester.continuous_treatment_testsuite(num_dummyoutcome_simulations=100)
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerence", "estimator_method", "num_samples"], [(0.1, "backdoor.propensity_score_matching", 1000)]
     )
     def test_refutation_dummy_outcome_refuter_default_binary_treatment(
@@ -28,7 +29,7 @@ class TestDummyOutcomeRefuter(object):
         refuter_tester = TestRefuter(error_tolerence, estimator_method, "dummy_outcome_refuter")
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerence", "estimator_method", "transformations"],
         [(0.05, "iv.instrumental_variable", [("zero", ""), ("noise", {"std_dev": 1})])],
     )
@@ -41,7 +42,7 @@ class TestDummyOutcomeRefuter(object):
 
         refuter_tester.continuous_treatment_testsuite()
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerence", "estimator_method", "transformations", "num_samples"],
         [(0.05, "backdoor.propensity_score_matching", [("zero", ""), ("noise", {"std_dev": 1})], 1000)],
     )
@@ -54,7 +55,7 @@ class TestDummyOutcomeRefuter(object):
 
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerence", "estimator_method", "transformations"],
         [(0.03, "iv.instrumental_variable", [("permute", {"permute_fraction": 1})])],
     )
@@ -67,7 +68,7 @@ class TestDummyOutcomeRefuter(object):
 
         refuter_tester.continuous_treatment_testsuite()
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerence", "estimator_method", "transformations", "num_samples"],
         [(0.1, "backdoor.linear_regression", [("permute", {"permute_fraction": 1})], 1000)],
     )
@@ -80,7 +81,7 @@ class TestDummyOutcomeRefuter(object):
 
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerence", "estimator_method", "transformations"],
         [(0.2, "iv.instrumental_variable", [(simple_linear_outcome_model, {}), ("noise", {"std_dev": 1})])],
     )
@@ -92,8 +93,8 @@ class TestDummyOutcomeRefuter(object):
         )
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
 
-    @pytest.mark.xfail
-    @pytest.mark.parametrize(
+    @mark.xfail
+    @mark.parametrize(
         ["error_tolerence", "estimator_method", "transformations", "num_samples"],
         [(0.2, "backdoor.linear_regression", [(simple_linear_outcome_model, {}), ("noise", {"std_dev": 1})], 1000)],
     )
@@ -105,7 +106,7 @@ class TestDummyOutcomeRefuter(object):
         )
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerence", "estimator_method", "transformations"],
         [
             (
@@ -123,8 +124,8 @@ class TestDummyOutcomeRefuter(object):
         )
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
 
-    @pytest.mark.xfail
-    @pytest.mark.parametrize(
+    @mark.xfail
+    @mark.parametrize(
         ["error_tolerence", "estimator_method", "transformations", "num_samples"],
         [
             (
@@ -143,7 +144,7 @@ class TestDummyOutcomeRefuter(object):
         )
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerence", "estimator_method", "transformations"],
         [(0.01, "iv.instrumental_variable", [("linear_regression", {}), ("zero", ""), ("noise", {"std_dev": 1})])],
     )
@@ -155,7 +156,7 @@ class TestDummyOutcomeRefuter(object):
         )
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerence", "estimator_method", "transformations", "num_samples"],
         [
             (
@@ -174,7 +175,7 @@ class TestDummyOutcomeRefuter(object):
         )
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerence", "estimator_method", "transformations"],
         [(0.2, "iv.instrumental_variable", [("knn", {"n_neighbors": 5}), ("zero", ""), ("noise", {"std_dev": 1})])],
     )
@@ -186,7 +187,7 @@ class TestDummyOutcomeRefuter(object):
         )
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerence", "estimator_method", "transformations", "num_samples"],
         [
             (
@@ -205,7 +206,7 @@ class TestDummyOutcomeRefuter(object):
         )
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerence", "estimator_method", "transformations", "num_samples"],
         [
             (
@@ -224,7 +225,7 @@ class TestDummyOutcomeRefuter(object):
         )
         refuter_tester.continuous_treatment_testsuite(num_samples=num_samples, tests_to_run="atleast-one-common-cause")
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerence", "estimator_method", "transformations", "num_samples"],
         [
             (
@@ -243,7 +244,7 @@ class TestDummyOutcomeRefuter(object):
         )
         refuter_tester.binary_treatment_testsuite(num_samples=num_samples, tests_to_run="atleast-one-common-cause")
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerence", "estimator_method", "transformations", "num_samples"],
         [
             (
@@ -262,7 +263,7 @@ class TestDummyOutcomeRefuter(object):
         )
         refuter_tester.continuous_treatment_testsuite(num_samples, tests_to_run="atleast-one-common-cause")
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerence", "estimator_method", "transformations", "num_samples"],
         [
             (
@@ -282,7 +283,7 @@ class TestDummyOutcomeRefuter(object):
         refuter_tester.binary_treatment_testsuite(num_samples, tests_to_run="atleast-one-common-cause")
 
     # As we run with only one common cause and one instrument variable we run with (?, 2)
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerence", "estimator_method", "transformations"],
         [
             (
@@ -304,7 +305,7 @@ class TestDummyOutcomeRefuter(object):
         )
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         ["error_tolerence", "estimator_method", "transformations", "num_samples"],
         [
             (

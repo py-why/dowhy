@@ -4,9 +4,9 @@ name: DoWhy CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
@@ -14,7 +14,8 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8, 3.9]
-        poetry-version: [1.1.14]
+        poetry-version: [1.2.0]
+        test-group: [1, 2, 3, 4]
 
     steps:
     - uses: actions/checkout@v2
@@ -30,7 +31,7 @@ jobs:
         poetry-version: ${{ matrix.poetry-version }}
 
     - name: Install Poetry Dynamic Versioning Plugin
-      run: pip install poetry-dynamic-versioning
+      run: poetry self add "poetry-dynamic-versioning[plugin]"
 
     - name: Install graphviz
       run: |
@@ -49,8 +50,8 @@ jobs:
       run: poetry run poe format_check
 
     - name: Test
-      run: poetry run poe test
-    
+      run: poetry run poe test --splits 4 --group ${{ matrix.test-group }}
+
     - name: Check package consistency
       run: |
         poetry build

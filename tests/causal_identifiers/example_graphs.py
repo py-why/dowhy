@@ -37,6 +37,7 @@ TEST_GRAPH_SOLUTIONS = {
         biased_sets=[{"Z4"}, {"Z6"}, {"Z5"}, {"Z2"}, {"Z1"}, {"Z3"}, {"Z1", "Z3"}, {"Z2", "Z5"}, {"Z1", "Z2"}],
         minimal_adjustment_sets=[{"Z1", "Z4"}, {"Z2", "Z4"}, {"Z3", "Z4"}, {"Z5", "Z4"}],
         maximal_adjustment_sets=[{"Z1", "Z2", "Z3", "Z4", "Z5"}],
+        direct_maximal_adjustment_sets=[{"Z1", "Z2", "Z3", "Z4", "Z5", "Z6"}],
     ),
     "simple_selection_bias_graph": dict(
         graph_str="""graph[directed 1 node[id "Z1" label "Z1"]
@@ -216,6 +217,7 @@ TEST_GRAPH_SOLUTIONS = {
         ],
         minimal_adjustment_sets=[{}],
         maximal_adjustment_sets=[{"A", "B", "C", "D"}],
+        direct_maximal_adjustment_sets=[{"A", "B", "C", "D", "E"}],
     ),
     "book_of_why_game5": dict(
         graph_str="""graph[directed 1 node[id "A" label "A"]
@@ -275,6 +277,7 @@ TEST_GRAPH_SOLUTIONS = {
         biased_sets=[],
         minimal_adjustment_sets=[{}],
         maximal_adjustment_sets=[{"Z2"}],
+        direct_maximal_adjustment_sets=[{"Z2", "Z1"}],
     ),
     "common_cause_of_mediator1": dict(
         graph_str="""graph[directed 1 node[id "X" label "X"]
@@ -292,6 +295,7 @@ TEST_GRAPH_SOLUTIONS = {
         biased_sets=[],
         minimal_adjustment_sets=[{"Z"}],
         maximal_adjustment_sets=[{"Z"}],
+        direct_maximal_adjustment_sets=[{"Z", "M"}],
     ),
     "common_cause_of_mediator2": dict(
         graph_str="""graph[directed 1 node[id "X" label "X"]
@@ -309,6 +313,7 @@ TEST_GRAPH_SOLUTIONS = {
         biased_sets=[],
         minimal_adjustment_sets=[{"Z"}],
         maximal_adjustment_sets=[{"Z"}],
+        direct_maximal_adjustment_sets=[{"Z", "M"}],
     ),
     "mbias_with_unobserved": dict(
         graph_str="""graph[directed 1 node[id "X" label "X"]
@@ -343,5 +348,42 @@ TEST_GRAPH_SOLUTIONS = {
         biased_sets=[{"Z"}],
         minimal_adjustment_sets=[],
         maximal_adjustment_sets=[],
+    ),
+    "mediator": dict(
+        graph_str="""graph[directed 1 node[id "X" label "X"]
+                node[id "Y" label "Y"]
+                node[id "M" label "M"]
+                node[id "W" label "W"]
+                edge[source "X" target "Y"]
+                edge[source "W" target "X"]
+                edge[source "W" target "Y"]
+                edge[source "X" target "M"]
+                edge[source "M" target "Y"]]
+                """,
+        observed_variables=["X", "Y", "M", "W"],
+        biased_sets=[{"M"}],
+        minimal_adjustment_sets=[{"W"}],
+        maximal_adjustment_sets=[{"W"}],
+        direct_maximal_adjustment_sets=[{"W", "M"}],
+    ),
+    "mediator-with-conf": dict(
+        graph_str="""graph[directed 1 node[id "X" label "X"]
+                node[id "Y" label "Y"]
+                node[id "M" label "M"]
+                node[id "W1" label "W1"]
+                node[id "W2" label "W2"]
+                edge[source "X" target "Y"]
+                edge[source "W1" target "X"]
+                edge[source "W1" target "Y"]
+                edge[source "W2" target "M"]
+                edge[source "W2" target "Y"]
+                edge[source "X" target "M"]
+                edge[source "M" target "Y"]]
+                """,
+        observed_variables=["X", "Y", "M", "W1", "W2"],
+        biased_sets=[{"M"}, {"M", "W1"}],
+        minimal_adjustment_sets=[{"W1"}],
+        maximal_adjustment_sets=[{"W1", "W2"}],
+        direct_maximal_adjustment_sets=[{"W1", "M", "W2"}],
     ),
 }

@@ -4,6 +4,7 @@ import tempfile
 
 import nbformat
 import pytest
+from pytest import mark
 
 NOTEBOOKS_PATH = "docs/source/example_notebooks/"
 notebooks_list = [f.name for f in os.scandir(NOTEBOOKS_PATH) if f.name.endswith(".ipynb")]
@@ -16,14 +17,22 @@ advanced_notebooks = [
     "lalonde_pandas_api.ipynb",
     # requires Rpy2 for causal discovery
     "dowhy_causal_discovery_example.ipynb",
-    # very slow
-    "dowhy-conditional-treatment-effects.ipynb",
-    "dowhy_refuter_notebook.ipynb",
-    "DoWhy-The Causal Story Behind Hotel Booking Cancellations.ipynb",  # needs xgboost too
     # will be removed
     "dowhy_optimize_backdoor_example.ipynb",
     # applied notebook, not necessary to test each time
     "dowhy_ranking_methods.ipynb",
+    #
+    # Slow Notebooks
+    #
+    "tutorial-causalinference-machinelearning-using-dowhy-econml.ipynb",
+    "dowhy-conditional-treatment-effects.ipynb",
+    "dowhy_refuter_notebook.ipynb",
+    "DoWhy-The Causal Story Behind Hotel Booking Cancellations.ipynb",  # needs xgboost too
+    "dowhy_twins_example.ipynb",
+    "gcm_rca_microservice_architecture.ipynb",
+    "gcm_supply_chain_dist_change.ipynb",
+    "dowhy_simple_example.ipynb",
+    "gcm_401k_analysis.ipynb",
 ]
 
 # Adding the dowhy root folder to the python path so that jupyter notebooks
@@ -78,13 +87,13 @@ def test_confounder_notebook():
 parameter_list = []
 for nb in notebooks_list:
     if nb in advanced_notebooks:
-        param = pytest.param(nb, marks=[pytest.mark.advanced, pytest.mark.notebook], id=nb)
+        param = pytest.param(nb, marks=[mark.advanced, mark.notebook], id=nb)
     else:
-        param = pytest.param(nb, marks=[pytest.mark.notebook], id=nb)
+        param = pytest.param(nb, marks=[mark.notebook], id=nb)
     parameter_list.append(param)
 
 
-@pytest.mark.parametrize("notebook_filename", parameter_list)
+@mark.parametrize("notebook_filename", parameter_list)
 def test_notebook(notebook_filename):
     nb, errors = _notebook_run(NOTEBOOKS_PATH + notebook_filename)
     assert errors == []

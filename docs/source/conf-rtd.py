@@ -41,9 +41,11 @@ extensions = [
     "sphinx_rtd_theme",
     "sphinx_multiversion",
     "sphinxcontrib.googleanalytics",
+    "sphinx_copybutton",
 ]
 
 googleanalytics_id = "G-B139P18WHM"
+copybutton_prompt_text = ">>> "
 
 autodoc_mock_imports = ["matplotlib", "causalml", "pymc3", "econml"]
 

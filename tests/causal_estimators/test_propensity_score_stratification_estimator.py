@@ -1,13 +1,14 @@
 import pytest
+from pytest import mark
 
 from dowhy.causal_estimators.propensity_score_stratification_estimator import PropensityScoreStratificationEstimator
 
 from .base import TestEstimator
 
 
-@pytest.mark.usefixtures("fixed_seed")
+@mark.usefixtures("fixed_seed")
 class TestPropensityScoreStratificationEstimator(object):
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         [
             "error_tolerance",
             "Estimator",
