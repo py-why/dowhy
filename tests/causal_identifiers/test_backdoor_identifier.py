@@ -1,7 +1,8 @@
 import pytest
 
 from dowhy.causal_graph import CausalGraph
-from dowhy.causal_identifier import CausalIdentifier
+from dowhy.causal_identifier.causal_identifier import CausalIdentifierEstimandType
+from dowhy.causal_identifier import BackdoorIdentifier, BackdoorAdjustmentMethod
 
 from .base import IdentificationTestGraphSolution, example_graph_solution
 
@@ -10,9 +11,12 @@ class TestBackdoorIdentification(object):
     def test_identify_backdoor_no_biased_sets(self, example_graph_solution: IdentificationTestGraphSolution):
         graph = example_graph_solution.graph
         biased_sets = example_graph_solution.biased_sets
-        identifier = CausalIdentifier(graph, estimand_type="nonparametric-ate", method_name="exhaustive-search")
+        identifier = BackdoorIdentifier(
+            estimand_type=CausalIdentifierEstimandType.NONPARAMETRIC_ATE,
+            backdoor_adjustment=BackdoorAdjustmentMethod.BACKDOOR_EXHAUSTIVE,
+        )
 
-        backdoor_results = identifier.identify_backdoor("X", "Y", include_unobserved=False)
+        backdoor_results = identifier.identify_backdoor(graph, "X", "Y", include_unobserved=False)
         backdoor_sets = [
             set(backdoor_result_dict["backdoor_set"])
             for backdoor_result_dict in backdoor_results
@@ -28,9 +32,12 @@ class TestBackdoorIdentification(object):
     ):
         graph = example_graph_solution.graph
         observed_variables = example_graph_solution.observed_variables
-        identifier = CausalIdentifier(graph, estimand_type="nonparametric-ate", method_name="exhaustive-search")
+        identifier = BackdoorIdentifier(
+            estimand_type=CausalIdentifierEstimandType.NONPARAMETRIC_ATE,
+            backdoor_adjustment=BackdoorAdjustmentMethod.BACKDOOR_EXHAUSTIVE,
+        )
 
-        backdoor_results = identifier.identify_backdoor("X", "Y", include_unobserved=False)
+        backdoor_results = identifier.identify_backdoor(graph, "X", "Y", include_unobserved=False)
         backdoor_sets = [
             set(backdoor_result_dict["backdoor_set"])
             for backdoor_result_dict in backdoor_results
@@ -44,14 +51,13 @@ class TestBackdoorIdentification(object):
     def test_identify_backdoor_minimal_adjustment(self, example_graph_solution: IdentificationTestGraphSolution):
         graph = example_graph_solution.graph
         expected_sets = example_graph_solution.minimal_adjustment_sets
-        identifier = CausalIdentifier(
-            graph,
-            estimand_type="nonparametric-ate",
-            method_name="minimal-adjustment",
+        identifier = BackdoorIdentifier(
+            estimand_type=CausalIdentifierEstimandType.NONPARAMETRIC_ATE,
+            backdoor_adjustment=BackdoorAdjustmentMethod.BACKDOOR_MIN,
             proceed_when_unidentifiable=False,
         )
 
-        backdoor_results = identifier.identify_backdoor("X", "Y", include_unobserved=False)
+        backdoor_results = identifier.identify_backdoor(graph, "X", "Y", include_unobserved=False)
         backdoor_sets = [set(backdoor_result_dict["backdoor_set"]) for backdoor_result_dict in backdoor_results]
 
         assert (
@@ -63,14 +69,13 @@ class TestBackdoorIdentification(object):
     def test_identify_backdoor_maximal_adjustment(self, example_graph_solution: IdentificationTestGraphSolution):
         graph = example_graph_solution.graph
         expected_sets = example_graph_solution.maximal_adjustment_sets
-        identifier = CausalIdentifier(
-            graph,
-            estimand_type="nonparametric-ate",
-            method_name="maximal-adjustment",
+        identifier = BackdoorIdentifier(
+            estimand_type=CausalIdentifierEstimandType.NONPARAMETRIC_ATE,
+            backdoor_adjustment=BackdoorAdjustmentMethod.BACKDOOR_MAX,
             proceed_when_unidentifiable=False,
         )
 
-        backdoor_results = identifier.identify_backdoor("X", "Y", include_unobserved=False)
+        backdoor_results = identifier.identify_backdoor(graph, "X", "Y", include_unobserved=False)
 
         backdoor_sets = [set(backdoor_result_dict["backdoor_set"]) for backdoor_result_dict in backdoor_results]
         print(backdoor_sets, expected_sets, example_graph_solution.graph_str)
@@ -83,14 +88,13 @@ class TestBackdoorIdentification(object):
     def test_identify_backdoor_maximal_direct_effect(self, example_graph_solution: IdentificationTestGraphSolution):
         graph = example_graph_solution.graph
         expected_sets = example_graph_solution.direct_maximal_adjustment_sets
-        identifier = CausalIdentifier(
-            graph,
-            estimand_type="nonparametric-cde",
-            method_name="maximal-adjustment",
+        identifier = BackdoorIdentifier(
+            estimand_type=CausalIdentifierEstimandType.NONPARAMETRIC_CDE,
+            backdoor_adjustment=BackdoorAdjustmentMethod.BACKDOOR_MAX,
             proceed_when_unidentifiable=False,
         )
 
-        backdoor_results = identifier.identify_backdoor("X", "Y", direct_effect=True)
+        backdoor_results = identifier.identify_backdoor(graph, "X", "Y", direct_effect=True)
 
         backdoor_sets = [set(backdoor_result_dict["backdoor_set"]) for backdoor_result_dict in backdoor_results]
         print(backdoor_sets, expected_sets, example_graph_solution.graph_str)

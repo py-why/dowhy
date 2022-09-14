@@ -3,17 +3,18 @@
 """
 import logging
 from itertools import combinations
+from typing import List, Type
 
 from sympy import init_printing
 
 import dowhy.causal_estimators as causal_estimators
+from dowhy.causal_identifier import BackdoorIdentifier, IDIdentifier, BackdoorAdjustmentMethod
 import dowhy.causal_refuters as causal_refuters
 import dowhy.graph_learners as graph_learners
 import dowhy.utils.cli_helpers as cli
 from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_graph import CausalGraph
-from dowhy.causal_identifier import CausalIdentifier
-from dowhy.causal_identifiers.id_identifier import IDIdentifier
+from dowhy.causal_identifier.causal_identifier import CausalIdentifier, CausalIdentifierEstimandType
 from dowhy.causal_refuters.graph_refuter import GraphRefuter
 from dowhy.utils.api import parse_state
 
@@ -193,16 +194,25 @@ class CausalModel:
         if estimand_type is None:
             estimand_type = self._estimand_type
 
+        estimand_type = CausalIdentifierEstimandType(estimand_type)
+
         if method_name == "id-algorithm":
-            self.identifier = IDIdentifier(
-                self._graph, estimand_type, method_name, proceed_when_unidentifiable=proceed_when_unidentifiable
-            )
-            identified_estimand = self.identifier.identify_effect()
+            identifier_class = IDIdentifier
         else:
-            self.identifier = CausalIdentifier(
-                self._graph, estimand_type, method_name, proceed_when_unidentifiable=proceed_when_unidentifiable
-            )
-            identified_estimand = self.identifier.identify_effect(optimize_backdoor=optimize_backdoor)
+            identifier_class = BackdoorIdentifier
+
+        identifier, identified_estimand = identify_effect(
+            graph=self._graph,
+            treatment=self._treatment,
+            outcome=self._outcome,
+            estimand_type=estimand_type,
+            method=identifier_class,
+            proceed_when_unidentifiable=proceed_when_unidentifiable,
+            optimize_backdoor=optimize_backdoor,
+            backdoor_adjustment=BackdoorAdjustmentMethod(method_name) if method_name != "id-algorithm" else None,
+        )
+
+        self.identifier = identifier
 
         return identified_estimand
 
@@ -533,3 +543,35 @@ class CausalModel:
         self.logger.info(refuter._refutation_passed)
 
         return res
+
+
+def identify_effect(
+    graph: CausalGraph,
+    treatment: List[str],
+    outcome: List[str],
+    estimand_type: CausalIdentifierEstimandType,
+    method: Type[CausalIdentifier],
+    proceed_when_unidentifiable: bool = False,
+    optimize_backdoor: bool = False,
+    backdoor_adjustment: BackdoorAdjustmentMethod = BackdoorAdjustmentMethod.BACKDOOR_DEFAULT,
+):
+    """
+    Identify the causal effect to be estimated, using properties of the causal graph.
+    :param graph: the causal graph to use for identification
+    :param treatment: treatment variable
+    :param outcome: outcome variable
+    :param estimand_type: the type of estimand requested (one of CausalIdentifierEstimandType)
+    :param backdoor_adjustment: method name for identification algorithm (one of CausalIdentifierMethodName)
+    :param proceed_when_unidentifiable: does the identification proceed by ignoring potential unobserved confounders. Binary flag.
+    :param optimize_backdoor: if True, uses an optimised algorithm to compute the backdoor sets (Ignored for method_name = ID_ALGORITHM)
+    """
+    identifier = method(
+        estimand_type=estimand_type,
+        proceed_when_unidentifiable=proceed_when_unidentifiable,
+        optimize_backdoor=optimize_backdoor,
+        backdoor_adjustment=backdoor_adjustment,
+    )
+
+    identified_estimand = identifier.identify_effect(graph, treatment, outcome)
+
+    return identifier, identified_estimand
