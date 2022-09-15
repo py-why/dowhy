@@ -13,7 +13,7 @@ from sklearn.preprocessing import StandardScaler
 
 from dowhy.causal_refuters.partial_linear_sensitivity_analyzer import PartialLinearSensitivityAnalyzer
 from dowhy.causal_refuters.reisz import get_alpha_estimator
-from dowhy.utils.util import generate_moment_function, get_generic_regressor, get_numeric_features
+from dowhy.utils.regression import generate_moment_function, get_generic_regressor, get_numeric_features
 
 
 class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):

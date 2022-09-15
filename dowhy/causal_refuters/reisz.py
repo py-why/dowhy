@@ -14,7 +14,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from dowhy.utils.util import create_polynomial_function, generate_moment_function, get_generic_regressor
+from dowhy.utils.regression import create_polynomial_function, generate_moment_function, get_generic_regressor
 
 
 def get_alpha_estimator(

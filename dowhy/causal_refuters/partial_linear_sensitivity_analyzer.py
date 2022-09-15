@@ -11,7 +11,7 @@ from sklearn.model_selection import KFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from dowhy.utils.util import get_generic_regressor, get_numeric_features
+from dowhy.utils.regression import get_generic_regressor, get_numeric_features
 
 
 class PartialLinearSensitivityAnalyzer:
