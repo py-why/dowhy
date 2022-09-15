@@ -40,13 +40,13 @@ class AddUnobservedCommonCause(CausalRefuter):
         minimum and maximum effect strength of observed confounders on treatment
         and outcome respectively.
 
-        :param simulation_method: The method to use for simulating effect of unobserved confounder. Possible values are ["direct-simulation", "linear-partial-r2", "non-parametric-partial-r2"].
+        :param simulation_method: The method to use for simulating effect of unobserved confounder. Possible values are ["direct-simulation", "linear-partial-R2", "non-parametric-partial-R2"].
         :param confounders_effect_on_treatment: str : The type of effect on the treatment due to the unobserved confounder. Possible values are ['binary_flip', 'linear']
         :param confounders_effect_on_outcome: str : The type of effect on the outcome due to the unobserved confounder. Possible values are ['binary_flip', 'linear']
         :param effect_strength_on_treatment: float, numpy.ndarray: [Used when simulation_method="direct-simulation"] Strength of the confounder's effect on treatment. When confounders_effect_on_treatment is linear,  it is the regression coefficient. When the confounders_effect_on_treatment is binary flip, it is the probability with which effect of unobserved confounder can invert the value of the treatment.
         :param effect_strength_on_outcome: float, numpy.ndarray: Strength of the confounder's effect on outcome. Its interpretation depends on confounders_effect_on_outcome and the simulation_method. When simulation_method is direct-simulation, for a linear effect it behaves like the regression coefficient and for a binary flip, it is the probability with which it can invert the value of the outcome.
-        :param partial_r2_confounder_treatment: float, numpy.ndarray: [Used when simulation_method is linear-partial-r2 or non-parametric-partial-r2] Partial R2 of the unobserved confounder wrt the treatment conditioned on the observed confounders. Only in the case of general non-parametric-partial-r2, it is the fraction of variance in the reisz representer that is explained by the unobserved confounder; specifically  (1-r), where r is the ratio of variance of reisz representer, alpha^2, based on observed confounders and that based on all confounders.
-        :param partial_r2_confounder_outcome: float, numpy.ndarray: [Used when simulation_method is linear-partial-r2 or non-parametric-partial-r2] Partial R2 of the unobserved confounder wrt the outcome conditioned on the treatment and observed confounders.
+        :param partial_r2_confounder_treatment: float, numpy.ndarray: [Used when simulation_method is linear-partial-R2 or non-parametric-partial-R2] Partial R2 of the unobserved confounder wrt the treatment conditioned on the observed confounders. Only in the case of general non-parametric-partial-R2, it is the fraction of variance in the reisz representer that is explained by the unobserved confounder; specifically  (1-r), where r is the ratio of variance of reisz representer, alpha^2, based on observed confounders and that based on all confounders.
+        :param partial_r2_confounder_outcome: float, numpy.ndarray: [Used when simulation_method is linear-partial-R2 or non-parametric-partial-R2] Partial R2 of the unobserved confounder wrt the outcome conditioned on the treatment and observed confounders.
         :param frac_strength_treatment: float: This parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on treatment. Defaults to 1.
         :param frac_strength_outcome: float: This parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on outcome. Defaults to 1.
         :param plotmethod: string: Type of plot to be shown. If None, no plot is generated. This parameter is used only only when more than one treatment confounder effect values or outcome confounder effect values are provided. Default is "colormesh". Supported values are "contour", "colormesh" when more than one value is provided for both confounder effect value parameters; "line" when provided for only one of them.
@@ -55,15 +55,15 @@ class AddUnobservedCommonCause(CausalRefuter):
         :param confounder_increases_estimate: True implies that confounder increases the absolute value of estimate and vice versa. (Default = False). (relevant only for Linear Sensitivity Analysis, ignore for rest)
         :param benchmark_common_causes: names of variables for bounding strength of confounders. (relevant only for partial-r2 based simulation methods)
         :param significance_level: confidence interval for statistical inference(default = 0.05). (relevant only for partial-r2 based simulation methods)
-        :param null_hypothesis_effect: assumed effect under the null hypothesis. (relevant only for linear-partial-r2, ignore for rest)
+        :param null_hypothesis_effect: assumed effect under the null hypothesis. (relevant only for linear-partial-R2, ignore for rest)
         :param plot_estimate: Generate contour plot for estimate while performing sensitivity analysis. (default = True).
                               (relevant only for partial-r2 based simulation methods)
-        :param num_splits: number of splits for cross validation. (default = 5). (relevant only for non-parametric-partial-r2 simulation method)
-        :param shuffle_data : shuffle data or not before splitting into folds (default = False). (relevant only for non-parametric-partial-r2 simulation method)
-        :param shuffle_random_seed: seed for randomly shuffling data. (relevant only for non-parametric-partial-r2 simulation method)
-        :param alpha_s_estimator_param_list: list of dictionaries with parameters for finding alpha_s. (relevant only for non-parametric-partial-r2 simulation method)
-        :param g_s_estimator_list: list of estimator objects for finding g_s. These objects should have fit() and predict() functions implemented. (relevant only for non-parametric-partial-r2 simulation method)
-        :param g_s_estimator_param_list: list of dictionaries with parameters for tuning respective estimators in "g_s_estimator_list". The order of the dictionaries in the list should be consistent with the estimator objects order in "g_s_estimator_list". (relevant only for non-parametric-partial-r2 simulation method)
+        :param num_splits: number of splits for cross validation. (default = 5). (relevant only for non-parametric-partial-R2 simulation method)
+        :param shuffle_data : shuffle data or not before splitting into folds (default = False). (relevant only for non-parametric-partial-R2 simulation method)
+        :param shuffle_random_seed: seed for randomly shuffling data. (relevant only for non-parametric-partial-R2 simulation method)
+        :param alpha_s_estimator_param_list: list of dictionaries with parameters for finding alpha_s. (relevant only for non-parametric-partial-R2 simulation method)
+        :param g_s_estimator_list: list of estimator objects for finding g_s. These objects should have fit() and predict() functions implemented. (relevant only for non-parametric-partial-R2 simulation method)
+        :param g_s_estimator_param_list: list of dictionaries with parameters for tuning respective estimators in "g_s_estimator_list". The order of the dictionaries in the list should be consistent with the estimator objects order in "g_s_estimator_list". (relevant only for non-parametric-partial-R2 simulation method)
         """
         super().__init__(*args, **kwargs)
         self.simulation_method = kwargs["simulation_method"] if "simulation_method" in kwargs else "direct-simulation"
@@ -76,7 +76,7 @@ class AddUnobservedCommonCause(CausalRefuter):
         if self.simulation_method == "direct-simulation":
             self.kappa_t = kwargs["effect_strength_on_treatment"] if "effect_strength_on_treatment" in kwargs else None
             self.kappa_y = kwargs["effect_strength_on_outcome"] if "effect_strength_on_outcome" in kwargs else None
-        elif self.simulation_method in ["linear-partial-r2", "non-parametric-partial-r2"]:
+        elif self.simulation_method in ["linear-partial-R2", "non-parametric-partial-R2"]:
             self.kappa_t = (
                 kwargs["partial_r2_confounder_treatment"] if "partial_r2_confounder_treatment" in kwargs else None
             )
@@ -85,7 +85,7 @@ class AddUnobservedCommonCause(CausalRefuter):
             )
         else:
             raise ValueError(
-                "simulation method is not supported. Try direct-simulation, linear-partial-r2 or non-parametric-partial-r2"
+                "simulation method is not supported. Try direct-simulation, linear-partial-R2 or non-parametric-partial-R2"
             )
         self.frac_strength_treatment = (
             kwargs["effect_fraction_on_treatment"] if "effect_fraction_on_treatment" in kwargs else 1
