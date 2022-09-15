@@ -6,6 +6,7 @@ This document lists the Maintainers of the Project. Maintainers may be added onc
 | --- | --- |
 | Emre Kıcıman | Microsoft |
 | Amit Sharma | Microsoft |
+| Chris Trevino | Microsoft |
 | Peter Götz | Amazon Web Services |
 | Patrick Blöbaum | Amazon Web Services |
 
