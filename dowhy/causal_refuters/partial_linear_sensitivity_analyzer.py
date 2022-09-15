@@ -112,10 +112,10 @@ class PartialLinearSensitivityAnalyzer:
         # can change this to allow default values that are same as the other parameter
         if self.effect_strength_treatment is not None:
             if self.effect_strength_outcome is None:
-                raise ValueError("Need to specify both effect_strength_on_treatment and effect_strength_on_outcome.")
+                raise ValueError("Need to specify both partial_r2_confounder_treatment and partial_r2_confounder_outcome.")
         else:
             if self.effect_strength_outcome is not None:
-                raise ValueError("Need to specify both effect_strength_on_treatment and effect_strength_on_outcome.")
+                raise ValueError("Need to specify both partial_r2_confounder_treatment and partial_r2_confounder_outcome.")
         if self.benchmark_common_causes is not None:
             if self.frac_strength_outcome is not None or self.frac_strength_treatment is not None:
                 return True
