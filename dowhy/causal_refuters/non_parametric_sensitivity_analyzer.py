@@ -20,10 +20,6 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
     """
     Non-parametric sensitivity analysis for causal estimators.
 
-    Currently works only for single-dimensional treatment and binary treatment because it uses a plugin estimate of reisz function.
-
-    TODO: Extend to general treatments by implementing the loss-based reisz representer.
-
     Two important quantities used to estimate the bias are alpha and g.
          g := E[Y | T, W, Z] denotes the long regression function
          g_s := E[Y | T, W] denotes the short regression function
@@ -35,7 +31,7 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
     where Cg and Calpha are explanatory powers of the confounder and S^2 = E(Y - g_s) ^ 2 * E(α_s ^ 2)
 
     Based on this work:
-        Chernozhukov, Victor, Carlos Cinelli, Whitney Newey, Amit Sharma, and Vasilis Syrgkanis. Long Story Short: Omitted Variable Bias in Causal Machine Learning. No. w30302. National Bureau of Economic Research, 2022.
+        Chernozhukov, V., Cinelli, C., Newey, W., Sharma, A., & Syrgkanis, V. (2022). Long Story Short: Omitted Variable Bias in Causal Machine Learning (No. w30302). National Bureau of Economic Research.
 
     :param estimator: estimator of the causal model
     :param num_splits: number of splits for cross validation. (default = 5)
@@ -54,7 +50,7 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
     :param outcome: outcome dataframe
     :param treatment: treatment dataframe
     :param theta_s: point estimate for the estimator
-    :param plugin_reisz: whether to use plugin reisz estimator. False by default.
+    :param plugin_reisz: whether to use plugin reisz estimator. False by default. The plugin estimator works only for single-dimensional, binary treatment.
 
     """
 

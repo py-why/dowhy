@@ -21,7 +21,7 @@ class PartialLinearSensitivityAnalyzer:
     An efficient version of the non parametric sensitivity analyzer that works for estimators that return residuals of regression from confounders on treatment and outcome, such as the DML method. For all other methods (or when the partially linear assumption is not guaranteed to be satisfied), use the non-parametric sensitivity analysis.
 
     Based on this work:
-        Chernozhukov, Victor, Carlos Cinelli, Whitney Newey, Amit Sharma, and Vasilis Syrgkanis. Long Story Short: Omitted Variable Bias in Causal Machine Learning. No. w30302. National Bureau of Economic Research, 2022.
+        Chernozhukov, V., Cinelli, C., Newey, W., Sharma, A., & Syrgkanis, V. (2022). Long Story Short: Omitted Variable Bias in Causal Machine Learning (No. w30302). National Bureau of Economic Research.
 
     :param estimator: estimator of the causal model
     :param num_splits: number of splits for cross validation. (default = 5)
