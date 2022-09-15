@@ -44,9 +44,9 @@ class AddUnobservedCommonCause(CausalRefuter):
         :param confounders_effect_on_treatment: str : The type of effect on the treatment due to the unobserved confounder. Possible values are ['binary_flip', 'linear']
         :param confounders_effect_on_outcome: str : The type of effect on the outcome due to the unobserved confounder. Possible values are ['binary_flip', 'linear']
         :param effect_strength_on_treatment: float, numpy.ndarray: [Used when simulation_method="direct-simulation"] Strength of the confounder's effect on treatment. When confounders_effect_on_treatment is linear,  it is the regression coefficient. When the confounders_effect_on_treatment is binary flip, it is the probability with which effect of unobserved confounder can invert the value of the treatment.
-        :param effect_strength_on_outcome: float, numpy.ndarray: Strength of the confounder's effect on outcome. Its interpretation depends on confounders_effect_on_outcome and the simulation_method. When simulation_method is direct-simulation, for a linear effect it behaves like the regression coefficient and for a binary flip, it is the probability with which it can invert the value of the outcome. 
+        :param effect_strength_on_outcome: float, numpy.ndarray: Strength of the confounder's effect on outcome. Its interpretation depends on confounders_effect_on_outcome and the simulation_method. When simulation_method is direct-simulation, for a linear effect it behaves like the regression coefficient and for a binary flip, it is the probability with which it can invert the value of the outcome.
         :param partial_r2_confounder_treatment: float, numpy.ndarray: [Used when simulation_method is linear-partial-r2 or non-parametric-partial-r2] Partial R2 of the unobserved confounder wrt the treatment conditioned on the observed confounders. Only in the case of general non-parametric-partial-r2, it is the fraction of variance in the reisz representer that is explained by the unobserved confounder; specifically  (1-r), where r is the ratio of variance of reisz representer, alpha^2, based on observed confounders and that based on all confounders.
-        :param partial_r2_confounder_outcome: float, numpy.ndarray: [Used when simulation_method is linear-partial-r2 or non-parametric-partial-r2] Partial R2 of the unobserved confounder wrt the outcome conditioned on the treatment and observed confounders. 
+        :param partial_r2_confounder_outcome: float, numpy.ndarray: [Used when simulation_method is linear-partial-r2 or non-parametric-partial-r2] Partial R2 of the unobserved confounder wrt the outcome conditioned on the treatment and observed confounders.
         :param frac_strength_treatment: float: This parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on treatment. Defaults to 1.
         :param frac_strength_outcome: float: This parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on outcome. Defaults to 1.
         :param plotmethod: string: Type of plot to be shown. If None, no plot is generated. This parameter is used only only when more than one treatment confounder effect values or outcome confounder effect values are provided. Default is "colormesh". Supported values are "contour", "colormesh" when more than one value is provided for both confounder effect value parameters; "line" when provided for only one of them.
@@ -73,21 +73,27 @@ class AddUnobservedCommonCause(CausalRefuter):
         self.effect_on_y = (
             kwargs["confounders_effect_on_outcome"] if "confounders_effect_on_outcome" in kwargs else "linear"
         )
-        if self.simulation_method=="direct-simulation":
+        if self.simulation_method == "direct-simulation":
             self.kappa_t = kwargs["effect_strength_on_treatment"] if "effect_strength_on_treatment" in kwargs else None
             self.kappa_y = kwargs["effect_strength_on_outcome"] if "effect_strength_on_outcome" in kwargs else None
-        elif self.simulation_method in ["linear-partial-r2","non-parametric-partial-r2"]:
-            self.kappa_t = kwargs["partial_r2_confounder_treatment"] if "partial_r2_confounder_treatment" in kwargs else None
-            self.kappa_y = kwargs["partial_r2_confounder_outcome"] if "partial_r2_confounder_outcome" in kwargs else None
+        elif self.simulation_method in ["linear-partial-r2", "non-parametric-partial-r2"]:
+            self.kappa_t = (
+                kwargs["partial_r2_confounder_treatment"] if "partial_r2_confounder_treatment" in kwargs else None
+            )
+            self.kappa_y = (
+                kwargs["partial_r2_confounder_outcome"] if "partial_r2_confounder_outcome" in kwargs else None
+            )
         else:
-            raise ValueError("simulation method is not supported. Try direct-simulation, linear-partial-r2 or non-parametric-partial-r2")
+            raise ValueError(
+                "simulation method is not supported. Try direct-simulation, linear-partial-r2 or non-parametric-partial-r2"
+            )
         self.frac_strength_treatment = (
             kwargs["effect_fraction_on_treatment"] if "effect_fraction_on_treatment" in kwargs else 1
         )
         self.frac_strength_outcome = (
             kwargs["effect_fraction_on_outcome"] if "effect_fraction_on_outcome" in kwargs else 1
         )
-        
+
         self.plotmethod = kwargs["plotmethod"] if "plotmethod" in kwargs else "colormesh"
         self.percent_change_estimate = kwargs["percent_change_estimate"] if "percent_change_estimate" in kwargs else 1.0
         self.significance_level = kwargs["significance_level"] if "significance_level" in kwargs else 0.05
