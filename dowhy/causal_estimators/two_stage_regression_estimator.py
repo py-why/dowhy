@@ -6,7 +6,7 @@ import pandas as pd
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
-from dowhy.causal_identifier.causal_identifier import CausalIdentifierEstimandType
+from dowhy.causal_identifier.identify_effect import CausalIdentifierEstimandType
 from dowhy.utils.api import parse_state
 
 

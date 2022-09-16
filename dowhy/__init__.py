@@ -1,6 +1,6 @@
 import logging
 
-from dowhy.causal_model import CausalModel, identify_effect
+from dowhy.causal_model import CausalModel
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 

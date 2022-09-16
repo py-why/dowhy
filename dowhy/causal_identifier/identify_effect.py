@@ -20,9 +20,7 @@ class CausalIdentifierEstimandType(Enum):
 
 
 class CausalIdentifier(Protocol):
-    def identify_effect(
-        graph: CausalGraph, treatment_name: List[str], outcome_name: List[str], conditional_node_names: List[str] = None
-    ):
+    def identify_effect(self, graph: CausalGraph, treatment_name: List[str], outcome_name: List[str], **kwargs):
         ...
 
 
@@ -151,3 +149,28 @@ class IdentifiedEstimand:
                     j += 1
             i += 1
         return s
+
+
+def identify_effect(
+    graph: CausalGraph,
+    treatment: List[str],
+    outcome: List[str],
+    method: CausalIdentifier,
+    node_names=None,
+    conditional_node_names=None,
+):
+    """Identify the causal effect to be estimated based on a CausalGraph
+
+    :param graph: CausalGraph to be analyzed
+    :param treatment: name of the treatment
+    :param outcome: name of the outcome
+    :param method: CausalIdentifier instance to use to identify effects
+    :param node_names: OrderedSet comprising names of all nodes in the graph (Used for IDIdentifier only)
+    :param conditional_node_names: variables that are used to determine treatment. If none are
+    provided, it is assumed that the intervention is static (Used for BackdoorIdentifier only).
+    :returns: a probability expression (estimand) for the causal effect if identified, else NULL
+    """
+    identified_estimand = method.identify_effect(
+        graph, treatment, outcome, node_names=node_names, conditional_node_names=conditional_node_names
+    )
+    return identified_estimand

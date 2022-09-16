@@ -7,7 +7,7 @@ import sympy as sp
 import sympy.stats as spstats
 
 from dowhy.causal_graph import CausalGraph
-from dowhy.causal_identifier.causal_identifier import CausalIdentifierEstimandType, IdentifiedEstimand
+from dowhy.causal_identifier.identify_effect import CausalIdentifierEstimandType, IdentifiedEstimand
 from dowhy.causal_identifier.efficient_backdoor import EfficientBackdoor
 from dowhy.utils.api import parse_state
 
@@ -56,7 +56,6 @@ class BackdoorIdentifier:
         proceed_when_unidentifiable: bool = False,
         optimize_backdoor: bool = False,
         costs: Optional[List] = None,
-        **kwargs,
     ):
         self.estimand_type = estimand_type
         self.backdoor_adjustment = backdoor_adjustment
@@ -71,6 +70,7 @@ class BackdoorIdentifier:
         treatment_name: Union[str, List[str]],
         outcome_name: Union[str, List[str]],
         conditional_node_names: List[str] = None,
+        **kwargs,
     ):
         """Main method that returns an identified estimand (if one exists).
 

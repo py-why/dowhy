@@ -1,7 +1,7 @@
 import networkx as nx
 from dowhy.causal_graph import CausalGraph
 
-from dowhy.causal_identifier.causal_identifier import CausalIdentifierEstimandType
+from dowhy.causal_identifier.identify_effect import CausalIdentifierEstimandType
 from dowhy.utils.api import parse_state
 from dowhy.utils.graph_operations import find_ancestor, find_c_components, induced_graph
 from dowhy.utils.ordered_set import OrderedSet
@@ -87,11 +87,7 @@ class IDExpression:
 
 
 class IDIdentifier:
-    def __init__(
-        self,
-        estimand_type=CausalIdentifierEstimandType.NONPARAMETRIC_ATE,
-        **kwargs,
-    ):
+    def __init__(self, estimand_type=CausalIdentifierEstimandType.NONPARAMETRIC_ATE):
         """
         Class to perform identification using the ID algorithm.
 
@@ -103,14 +99,7 @@ class IDIdentifier:
         if estimand_type != CausalIdentifierEstimandType.NONPARAMETRIC_ATE:
             raise Exception("The estimand type should be 'non-parametric ate' for the ID method type.")
 
-    #
-    def identify_effect(
-        self,
-        graph: CausalGraph,
-        treatment_name,
-        outcome_name,
-        conditional_node_names=None,
-    ):
+    def identify_effect(self, graph: CausalGraph, treatment_name, outcome_name, node_names=None, **kwargs):
         """
         Implementation of the ID algorithm.
         Link - https://ftp.cs.ucla.edu/pub/stat_ser/shpitser-thesis.pdf
@@ -118,14 +107,13 @@ class IDIdentifier:
 
         :param treatment_names: OrderedSet comprising names of treatment variables.
         :param outcome_names:OrderedSet comprising names of outcome variables.
-        :param adjacency_matrix: Graph adjacency matrix.
         :param node_names: OrderedSet comprising names of all nodes in the graph
 
         :returns: target estimand, an instance of the IDExpression class.
         """
 
-        if conditional_node_names is None:
-            conditional_node_names = OrderedSet(graph._graph.nodes)
+        if node_names is None:
+            node_names = OrderedSet(graph._graph.nodes)
 
         adjacency_matrix = graph.get_adjacency_matrix()
 
@@ -139,7 +127,7 @@ class IDIdentifier:
             OrderedSet(parse_state(treatment_name)),
             OrderedSet(parse_state(outcome_name)),
             tsort_node_names,
-            conditional_node_names,
+            node_names,
         )
 
     def _adjacency_matrix_identify_effect(
@@ -148,10 +136,10 @@ class IDIdentifier:
         treatment_name,
         outcome_name,
         tsort_node_names,
-        conditional_node_names=None,
+        node_names=None,
     ):
 
-        node2idx, idx2node = self.__idx_node_mapping(conditional_node_names)
+        node2idx, idx2node = self.__idx_node_mapping(node_names)
 
         # Estimators list for returning after identification
         estimators = IDExpression()
@@ -161,31 +149,29 @@ class IDIdentifier:
         if len(treatment_name) == 0:
             identifier = IDExpression()
             estimator = {}
-            estimator["outcome_vars"] = conditional_node_names
+            estimator["outcome_vars"] = node_names
             estimator["condition_vars"] = OrderedSet()
             identifier.add_product(estimator)
-            identifier.add_sum(conditional_node_names.difference(outcome_name))
+            identifier.add_sum(node_names.difference(outcome_name))
             estimators.add_product(identifier)
             return estimators
 
         # Line 2
         # If we are interested in the effect on Y, it is sufficient to restrict our attention on the parts of the model ancestral to Y.
-        ancestors = find_ancestor(outcome_name, conditional_node_names, adjacency_matrix, node2idx, idx2node)
+        ancestors = find_ancestor(outcome_name, node_names, adjacency_matrix, node2idx, idx2node)
         if (
-            len(conditional_node_names.difference(ancestors)) != 0
+            len(node_names.difference(ancestors)) != 0
         ):  # If there are elements which are not the ancestor of the outcome variables
             # Modify list of valid nodes
             treatment_name = treatment_name.intersection(ancestors)
-            conditional_node_names = conditional_node_names.intersection(ancestors)
-            adjacency_matrix = induced_graph(
-                node_set=conditional_node_names, adjacency_matrix=adjacency_matrix, node2idx=node2idx
-            )
+            node_names = node_names.intersection(ancestors)
+            adjacency_matrix = induced_graph(node_set=node_names, adjacency_matrix=adjacency_matrix, node2idx=node2idx)
             return self._adjacency_matrix_identify_effect(
                 treatment_name=treatment_name,
                 outcome_name=outcome_name,
                 adjacency_matrix=adjacency_matrix,
                 tsort_node_names=tsort_node_names,
-                conditional_node_names=conditional_node_names,
+                node_names=node_names,
             )
 
         # Line 3 - forces an action on any node where such an action would have no effect on Y – assuming we already acted on X.
@@ -193,23 +179,23 @@ class IDIdentifier:
         adjacency_matrix_do_x = adjacency_matrix.copy()
         for x in treatment_name:
             x_idx = node2idx[x]
-            for i in range(len(conditional_node_names)):
+            for i in range(len(node_names)):
                 adjacency_matrix_do_x[i, x_idx] = 0
-        ancestors = find_ancestor(outcome_name, conditional_node_names, adjacency_matrix_do_x, node2idx, idx2node)
-        W = conditional_node_names.difference(treatment_name).difference(ancestors)
+        ancestors = find_ancestor(outcome_name, node_names, adjacency_matrix_do_x, node2idx, idx2node)
+        W = node_names.difference(treatment_name).difference(ancestors)
         if len(W) != 0:
             return self._adjacency_matrix_identify_effect(
                 treatment_name=treatment_name.union(W),
                 outcome_name=outcome_name,
                 adjacency_matrix=adjacency_matrix,
                 tsort_node_names=tsort_node_names,
-                conditional_node_names=conditional_node_names,
+                node_names=node_names,
             )
 
         # Line 4 - Decomposes the problem into a set of smaller problems using the key property of C-component factorization of causal models.
         # If the entire graph is a single C-component already, further problem decomposition is impossible, and we must provide base cases.
         # Modify adjacency matrix to remove treatment variables
-        node_names_minus_x = conditional_node_names.difference(treatment_name)
+        node_names_minus_x = node_names.difference(treatment_name)
         node2idx_minus_x, idx2node_minus_x = self.__idx_node_mapping(node_names_minus_x)
         adjacency_matrix_minus_x = induced_graph(
             node_set=node_names_minus_x, adjacency_matrix=adjacency_matrix, node2idx=node2idx
@@ -219,14 +205,14 @@ class IDIdentifier:
         )
         if len(c_components) > 1:
             identifier = IDExpression()
-            sum_over_set = conditional_node_names.difference(outcome_name.union(treatment_name))
+            sum_over_set = node_names.difference(outcome_name.union(treatment_name))
             for component in c_components:
                 expressions = self._adjacency_matrix_identify_effect(
-                    treatment_name=conditional_node_names.difference(component),
+                    treatment_name=node_names.difference(component),
                     outcome_name=OrderedSet(list(component)),
                     adjacency_matrix=adjacency_matrix,
                     tsort_node_names=tsort_node_names,
-                    conditional_node_names=conditional_node_names,
+                    node_names=node_names,
                 )
                 for expression in expressions.get_val(return_type="prod"):
                     identifier.add_product(expression)
@@ -236,10 +222,8 @@ class IDIdentifier:
 
         # Line 5 - The algorithms fails due to the presence of a hedge - the graph G, and a subgraph S that does not contain any X nodes.
         S = c_components[0]
-        c_components_G = find_c_components(
-            adjacency_matrix=adjacency_matrix, node_set=conditional_node_names, idx2node=idx2node
-        )
-        if len(c_components_G) == 1 and c_components_G[0] == conditional_node_names:
+        c_components_G = find_c_components(adjacency_matrix=adjacency_matrix, node_set=node_names, idx2node=idx2node)
+        if len(c_components_G) == 1 and c_components_G[0] == node_names:
             return None
 
         # Line 6 - If there are no bidirected arcs from X to the other nodes in the current subproblem under consideration, then we can replace acting on X by conditioning, and thus solve the subproblem.
@@ -269,7 +253,7 @@ class IDIdentifier:
                         node_set=component, adjacency_matrix=adjacency_matrix, node2idx=node2idx
                     ),
                     tsort_node_names=tsort_node_names,
-                    conditional_node_names=conditional_node_names,
+                    node_names=node_names,
                 )
 
     def __idx_node_mapping(self, node_names):
