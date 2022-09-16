@@ -1,6 +1,6 @@
 import networkx as nx
-from dowhy.causal_graph import CausalGraph
 
+from dowhy.causal_graph import CausalGraph
 from dowhy.causal_identifier.identify_effect import CausalIdentifierEstimandType
 from dowhy.utils.api import parse_state
 from dowhy.utils.graph_operations import find_ancestor, find_c_components, induced_graph

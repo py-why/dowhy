@@ -1,8 +1,8 @@
 import pytest
 
 from dowhy.causal_graph import CausalGraph
+from dowhy.causal_identifier import BackdoorAdjustmentMethod, BackdoorIdentifier
 from dowhy.causal_identifier.identify_effect import CausalIdentifierEstimandType
-from dowhy.causal_identifier import BackdoorIdentifier, BackdoorAdjustmentMethod
 
 from .base import IdentificationTestGraphSolution, example_graph_solution
 

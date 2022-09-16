@@ -3,8 +3,8 @@ import copy
 import pytest
 
 from dowhy.causal_graph import CausalGraph
+from dowhy.causal_identifier import BackdoorAdjustmentMethod, BackdoorIdentifier
 from dowhy.causal_identifier.identify_effect import CausalIdentifierEstimandType
-from dowhy.causal_identifier import BackdoorIdentifier, BackdoorAdjustmentMethod
 from tests.causal_identifiers.example_graphs_efficient import TEST_EFFICIENT_BD_SOLUTIONS
 
 

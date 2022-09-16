@@ -7,13 +7,12 @@ from itertools import combinations
 from sympy import init_printing
 
 import dowhy.causal_estimators as causal_estimators
-from dowhy.causal_identifier import BackdoorIdentifier, IDIdentifier, BackdoorAdjustmentMethod
-from dowhy.causal_identifier import identify_effect
 import dowhy.causal_refuters as causal_refuters
 import dowhy.graph_learners as graph_learners
 import dowhy.utils.cli_helpers as cli
 from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_graph import CausalGraph
+from dowhy.causal_identifier import BackdoorAdjustmentMethod, BackdoorIdentifier, IDIdentifier, identify_effect
 from dowhy.causal_identifier.identify_effect import CausalIdentifier, CausalIdentifierEstimandType
 from dowhy.causal_refuters.graph_refuter import GraphRefuter
 from dowhy.utils.api import parse_state
