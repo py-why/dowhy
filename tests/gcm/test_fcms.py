@@ -17,8 +17,10 @@ from dowhy.gcm import (
     ProbabilisticCausalModel,
     ScipyDistribution,
     StructuralCausalModel,
+    draw_samples,
     fit,
 )
+from dowhy.gcm.divergence import estimate_kl_divergence_continuous
 from dowhy.gcm.ml import (
     SklearnRegressionModel,
     create_linear_regressor,
@@ -32,87 +34,79 @@ from dowhy.gcm.ml.regression import (
 )
 
 
-def test_fit_causal_graph_using_post_nonlinear_models():
+def test_given_linear_data_when_fit_causal_graph_with_linear_anm_then_learns_correct_coefficients():
     scm = ProbabilisticCausalModel(nx.DiGraph([("X0", "X1")]))
     scm.set_causal_mechanism("X0", ScipyDistribution(stats.norm, loc=0, scale=1))
     scm.set_causal_mechanism("X1", AdditiveNoiseModel(prediction_model=create_linear_regressor()))
 
     X0 = scm.causal_mechanism("X0").draw_samples(1000).squeeze()
-
     test_data = pd.DataFrame({"X0": X0, "X1": X0 * 2 + 2 + np.random.normal(0, 0.1, 1000)})
-
     fit(scm, test_data)
 
-    test_parent_samples = np.array([[1], [2]])
-    target_values = test_parent_samples * 2 + 2
+    assert scm.causal_mechanism("X1").prediction_model.sklearn_model.coef_ == approx(np.array([2]), abs=0.02)
+    assert scm.causal_mechanism("X1").prediction_model.sklearn_model.intercept_ == approx(2, abs=0.02)
 
-    mean_samples = np.zeros(target_values.shape)
-    for i in range(100):
-        mean_samples += scm.causal_mechanism("X1").draw_samples(test_parent_samples)
-    mean_samples /= 100
 
-    assert mean_samples == approx(target_values, abs=0.2)
+def test_given_linear_data_when_draw_samples_from_fitted_anm_then_generates_correct_marginal_distribution():
+    scm = ProbabilisticCausalModel(nx.DiGraph([("X0", "X1")]))
+    scm.set_causal_mechanism("X0", ScipyDistribution(stats.norm, loc=0, scale=1))
+    scm.set_causal_mechanism("X1", AdditiveNoiseModel(prediction_model=create_linear_regressor()))
+
+    X0 = scm.causal_mechanism("X0").draw_samples(1000).squeeze()
+    test_data = pd.DataFrame({"X0": X0, "X1": X0 * 2 + 2 + np.random.normal(0, 0.1, 1000)})
+    fit(scm, test_data)
+
+    generated_samples = scm.causal_mechanism("X1").draw_samples(np.array([1] * 1000))
+    assert np.mean(generated_samples) == approx(4, abs=0.02)
+    assert np.std(generated_samples) == approx(0.1, abs=0.05)
+
+    generated_samples = scm.causal_mechanism("X1").draw_samples(np.array([2] * 1000))
+    assert np.mean(generated_samples) == approx(6, abs=0.02)
+    assert np.std(generated_samples) == approx(0.1, abs=0.05)
+    assert estimate_kl_divergence_continuous(
+        test_data["X1"].to_numpy(), draw_samples(scm, 1000)["X1"].to_numpy()
+    ) == approx(0, abs=0.05)
 
 
 @flaky(max_runs=5)
-def test_fit_causal_graph_using_post_nonlinear_models_with_categorical_features():
+def test_given_categorical_input_data_when_fit_causal_graph_with_linear_anm_then_learns_correct_coefficients():
     scm = StructuralCausalModel(nx.DiGraph([("X0", "X2"), ("X1", "X2")]))
     scm.set_causal_mechanism("X0", ScipyDistribution(stats.norm, loc=0, scale=1))
     scm.set_causal_mechanism("X1", EmpiricalDistribution())
     scm.set_causal_mechanism("X2", AdditiveNoiseModel(prediction_model=create_linear_regressor()))
 
-    X0 = np.random.normal(0, 1, 1000)
-    X1 = np.random.choice(3, 1000).astype(str)
-    X2 = []
+    training_data = _generate_data_with_categorical_input()
+    fit(scm, data=training_data)
 
-    for i in range(1000):
-        tmp_value = 2 * X0[i]
+    # Mean from the categorical part is: (-5 + 5+ 10) / 3 = 10/3
+    assert scm.causal_mechanism("X2").prediction_model.sklearn_model.coef_ == approx(
+        np.array([2, -5 - 10 / 3, 10 - 10 / 3, 5 - 10 / 3]), abs=0.02
+    )
+    assert scm.causal_mechanism("X2").prediction_model.sklearn_model.intercept_ == approx(10 / 3, abs=0.02)
 
-        if X1[i] == "0":
-            tmp_value -= 5
-        elif X1[i] == "1":
-            tmp_value += 10
-        else:
-            tmp_value += 5
 
-        X2.append(tmp_value)
+def test_given_categorical_input_data_when_draw_from_fitted_causal_graph_with_linear_anm_then_generates_correct_marginal_distribution():
+    scm = StructuralCausalModel(nx.DiGraph([("X0", "X2"), ("X1", "X2")]))
+    scm.set_causal_mechanism("X0", ScipyDistribution(stats.norm, loc=0, scale=1))
+    scm.set_causal_mechanism("X1", EmpiricalDistribution())
+    scm.set_causal_mechanism("X2", AdditiveNoiseModel(prediction_model=create_linear_regressor()))
 
-    training_data = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2})
-
+    training_data = _generate_data_with_categorical_input()
     fit(scm, data=training_data)
 
     assert scm.causal_mechanism("X2").evaluate(np.array([[2, "1"]], dtype=object), np.array([0])) == approx(14)
 
     test_data = training_data.to_numpy()
-
     assert scm.causal_mechanism("X2").evaluate(test_data[:, :2], np.array([0] * 1)) == approx(
         test_data[:, 2].astype(float).reshape(-1, 1)
     )
 
-
-def test_fit_causal_graph_using_additive_noise_model():
-    scm = StructuralCausalModel(nx.DiGraph([("X0", "X1")]))
-    scm.set_causal_mechanism("X0", ScipyDistribution(stats.norm, loc=0, scale=1))
-    scm.set_causal_mechanism("X1", AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-
-    X0 = scm.causal_mechanism("X0").draw_samples(1000).squeeze()
-
-    test_data = pd.DataFrame({"X0": X0, "X1": X0 * 2 + 2 + np.random.normal(0, 0.1, 1000)})
-
-    fit(scm, test_data)
-
-    test_parent_samples = np.array([[1], [2]])
-    target_values = test_parent_samples * 2 + 2
-
-    mean_samples = np.zeros(target_values.shape)
-    for i in range(100):
-        mean_samples += scm.causal_mechanism("X1").draw_samples(test_parent_samples)
-    mean_samples /= 100
-
-    assert mean_samples == approx(target_values, abs=0.2)
+    assert estimate_kl_divergence_continuous(test_data[:, 2], draw_samples(scm, 1000)["X2"].to_numpy()) == approx(
+        0, abs=0.05
+    )
 
 
-def test_classifier_sem_throws_error_when_non_string_targets():
+def test_given_non_string_data_when_try_to_fit_classifier_fcm_then_throws_error():
     scm = StructuralCausalModel(nx.DiGraph([("X0", "X1")]))
     scm.set_causal_mechanism("X0", ScipyDistribution(stats.norm, loc=0, scale=1))
     scm.set_causal_mechanism("X1", ClassifierFCM(classifier_model=create_logistic_regression_classifier()))
@@ -124,7 +118,7 @@ def test_classifier_sem_throws_error_when_non_string_targets():
         fit(scm, data=(pd.DataFrame({"X0": X0, "X1": X1})))
 
 
-def test_classifier_sem_produces_strings():
+def test_when_draw_from_classifier_fcm_then_returns_string_samples():
     scm = StructuralCausalModel(nx.DiGraph([("X0", "X1")]))
     scm.set_causal_mechanism("X0", ScipyDistribution(stats.norm, loc=0, scale=1))
     scm.set_causal_mechanism("X1", ClassifierFCM(classifier_model=create_logistic_regression_classifier()))
@@ -141,32 +135,15 @@ def test_classifier_sem_produces_strings():
 
 
 @flaky(max_runs=5)
-def test_classifier_sem_with_categorical_inputs():
+def test_when_fit_classifier_fcm_with_categorical_inputs_then_returns_expected_results():
     scm = StructuralCausalModel(nx.DiGraph([("X0", "X2"), ("X1", "X2")]))
     scm.set_causal_mechanism("X0", ScipyDistribution(stats.norm, loc=0, scale=1))
     scm.set_causal_mechanism("X1", EmpiricalDistribution())
     scm.set_causal_mechanism("X2", ClassifierFCM(classifier_model=create_logistic_regression_classifier()))
 
-    X0 = np.random.normal(0, 1, 1000)
-    X1 = np.random.choice(3, 1000).astype(str)
-    X2 = []
-
-    for i in range(1000):
-        tmp_value = 2 * X0[i]
-
-        if X1[i] == "0":
-            tmp_value -= 5
-        elif X1[i] == "1":
-            tmp_value += 10
-        else:
-            tmp_value += 5
-
-        X2.append(tmp_value)
-
-    X2 = (X2 > np.median(X2)).astype(str)
-
-    training_data = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2})
-
+    training_data = _generate_data_with_categorical_input()
+    X2 = training_data["X2"].to_numpy()
+    training_data["X2"] = (X2 > np.median(X2)).astype(str)
     fit(scm, training_data)
 
     x2_fcm = cast(ClassifierFCM, scm.causal_mechanism("X2"))
@@ -181,7 +158,7 @@ def test_classifier_sem_with_categorical_inputs():
     assert counts / 1000 == approx(np.array([0.5, 0.5]), abs=0.05)
 
 
-def test_clone_sem_model_with_scipy_distribution():
+def test_when_clone_additive_noise_models_with_scipy_distribution_then_clone_has_correct_models():
     org_model = AdditiveNoiseModel(create_linear_regressor(), ScipyDistribution(norm))
     clone_1 = org_model.clone()
     clone_2 = org_model.clone()
@@ -198,7 +175,7 @@ def test_clone_sem_model_with_scipy_distribution():
     assert isinstance(clone_2.noise_model, ScipyDistribution)
 
 
-def test_post_non_linear_sem_with_invertible_identity():
+def test_given_simple_linear_data_when_fit_post_non_linear_sem_with_invertible_identity_then_returns_expected_results():
     X = np.random.normal(0, 1, 1000)
     N = np.random.normal(0, 0.1, 1000)
     Y = 2 * X + N
@@ -220,7 +197,7 @@ def test_post_non_linear_sem_with_invertible_identity():
     assert np.mean(sem_fitted.draw_samples(np.array([2] * 1000))) == approx(4, abs=0.05)
 
 
-def test_post_non_linear_sem_with_invertible_exponential():
+def test_given_exponential_data_when_fit_post_non_linear_sem_with_invertible_exponential_function_then_returns_expected_results():
     X = np.random.normal(0, 1, 1000)
     N = np.random.normal(0, 0.1, 1000)
     Y = np.exp(2 * X + N)
@@ -241,7 +218,7 @@ def test_post_non_linear_sem_with_invertible_exponential():
     assert sem_fitted.prediction_model.sklearn_model.coef_ == approx(np.array([2]), abs=0.05)
 
 
-def test_post_non_linear_sem_with_invertible_logarithmic():
+def test_given_logarithmic_data_when_fit_post_non_linear_sem_with_invertible_logarithmic_function_then_returns_expected_results():
     X = abs(np.random.normal(0, 1, 1000))
     N = abs(np.random.normal(0, 0.1, 1000))
     Y = np.log(2 * X + N)
@@ -260,3 +237,23 @@ def test_post_non_linear_sem_with_invertible_logarithmic():
     sem_fitted.fit(X, Y)
 
     assert sem_fitted.prediction_model.sklearn_model.coef_ == approx(np.array([2]), abs=0.05)
+
+
+def _generate_data_with_categorical_input():
+    X0 = np.random.normal(0, 1, 1000)
+    X1 = np.random.choice(3, 1000).astype(str)
+    X2 = []
+
+    for i in range(1000):
+        tmp_value = 2 * X0[i]
+
+        if X1[i] == "0":
+            tmp_value -= 5
+        elif X1[i] == "1":
+            tmp_value += 10
+        else:
+            tmp_value += 5
+
+        X2.append(tmp_value)
+
+    return pd.DataFrame({"X0": X0, "X1": X1, "X2": X2})
