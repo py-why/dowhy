@@ -9,6 +9,7 @@ import dowhy.utils.cli_helpers as cli
 from dowhy.causal_identifiers.efficient_backdoor import EfficientBackdoor
 from dowhy.utils.api import parse_state
 
+import dowhy.panel_models.SyntheticControlGraph as SyntheticControlGraph
 
 class CausalIdentifier:
     """Class that implements different identification methods.
@@ -82,7 +83,25 @@ class CausalIdentifier:
         provided, it is assumed that the intervention is static.
         :returns:  target estimand, an instance of the IdentifiedEstimand class
         """
-        # First, check if there is a directed path from action to outcome
+
+        # Check if there are any identification overrides
+        # Check for Synthetic Control graph override
+        if self._graph.identification_override == SyntheticControlGraph.SYNTHETIC_CONTROL:
+            self.logger.warn("Using synthetic control identification by override")
+
+            # assert that treatment_name equals self._graph.treatment
+            assert self.treatment_name == self._graph.treatment, "treatment_name must be the same as the treatment in the graph"
+            # assert that outcome_name is contained in self._graph.outcomes
+            assert self.outcome_name in self._graph.outcomes, "outcome_name must be in the outcomes in the graph"
+
+            return IdentifiedEstimand(
+                self,
+                treatment_variable=self.treatment_name,
+                outcome_variable=self.outcome_name
+            )
+
+
+        # Check if there is a directed path from action to outcome
         if not self._graph.has_directed_path(self.treatment_name, self.outcome_name):
             self.logger.warn("No directed path from treatment to outcome. Causal Effect is zero.")
             return IdentifiedEstimand(
