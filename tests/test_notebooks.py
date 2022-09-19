@@ -16,7 +16,9 @@ advanced_notebooks = [
     "dowhy_lalonde_example.ipynb",
     "lalonde_pandas_api.ipynb",
     # requires Rpy2 for causal discovery
-    "dowhy_causal_discovery_example.ipynb",
+    # daily tests of dowhy_causal_discovery_example.ipynb are failing due to cdt/rpy2 config.  
+    # comment out, since we are switching causal discovery implementations
+    # "dowhy_causal_discovery_example.ipynb",
     # will be removed
     "dowhy_optimize_backdoor_example.ipynb",
     # applied notebook, not necessary to test each time
