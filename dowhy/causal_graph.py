@@ -36,6 +36,7 @@ class CausalGraph:
         effect_modifier_names = parse_state(effect_modifier_names)
         mediator_names = parse_state(mediator_names)
         self.logger = logging.getLogger(__name__)
+        self.identification_override = None
 
         # re.sub only takes string parameter so the first if is to avoid error
         # if the input is a text file, convert the contained data into string
@@ -49,6 +50,9 @@ class CausalGraph:
 
         if isinstance(graph, str):
             graph = graph.replace("\n", " ")
+
+        if isinstance(graph, nx.DiGraph):
+            self._graph = graph
 
         if graph is None:
             self._graph = nx.DiGraph()
