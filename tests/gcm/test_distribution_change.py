@@ -17,18 +17,8 @@ from dowhy.gcm.shapley import ShapleyConfig
 
 
 @flaky(max_runs=5)
-def test_distribution_change():
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
-    original_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
-
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X2 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 3 * X2 + np.random.normal(0, 0.1, 1000)
-    outlier_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
+def test_given_two_data_sets_with_different_mechanisms_when_evaluate_distribution_change_then_returns_expected_result():
+    original_observations, outlier_observations = _generate_data()
 
     causal_model = ProbabilisticCausalModel(nx.DiGraph([("X0", "X1"), ("X0", "X2"), ("X2", "X3")]))
     _assign_causal_mechanisms(causal_model)
@@ -44,18 +34,8 @@ def test_distribution_change():
 
 
 @flaky(max_runs=5)
-def test_distribution_change_of_graphs():
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
-    original_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
-
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X2 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 3 * X2 + np.random.normal(0, 0.1, 1000)
-    outlier_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
+def test_given_two_graphs_fitted_on_data_sets_with_different_mechanisms_when_evaluate_distribution_change_of_graphs_then_returns_expected_result():
+    original_observations, outlier_observations = _generate_data()
 
     causal_model_old = ProbabilisticCausalModel(nx.DiGraph([("X0", "X1"), ("X0", "X2"), ("X2", "X3")]))
     _assign_causal_mechanisms(causal_model_old)
@@ -74,17 +54,7 @@ def test_distribution_change_of_graphs():
 
 @flaky(max_runs=5)
 def test_when_using_distribution_change_without_fdrc_then_returns_valid_results():
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
-    original_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
-
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X2 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 3 * X2 + np.random.normal(0, 0.1, 1000)
-    outlier_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
+    original_observations, outlier_observations = _generate_data()
 
     causal_model = ProbabilisticCausalModel(nx.DiGraph([("X0", "X1"), ("X0", "X2"), ("X2", "X3")]))
     _assign_causal_mechanisms(causal_model)
@@ -99,18 +69,7 @@ def test_when_using_distribution_change_without_fdrc_then_returns_valid_results(
 
 @flaky(max_runs=5)
 def test_when_using_distribution_change_with_return_additional_info_then_returns_additional_info():
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
-
-    original_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
-
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X2 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 3 * X2 + np.random.normal(0, 0.1, 1000)
-    outlier_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
+    original_observations, outlier_observations = _generate_data()
 
     causal_model = ProbabilisticCausalModel(nx.DiGraph([("X0", "X1"), ("X0", "X2"), ("X2", "X3")]))
     _assign_causal_mechanisms(causal_model)
@@ -145,3 +104,19 @@ def _assign_causal_mechanisms(causal_model):
     causal_model.set_causal_mechanism("X1", AdditiveNoiseModel(create_linear_regressor()))
     causal_model.set_causal_mechanism("X2", AdditiveNoiseModel(create_linear_regressor()))
     causal_model.set_causal_mechanism("X3", AdditiveNoiseModel(create_linear_regressor()))
+
+
+def _generate_data():
+    X0 = np.random.uniform(-1, 1, 1000)
+    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
+    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
+    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
+    original_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
+
+    X0 = np.random.uniform(-1, 1, 1000)
+    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
+    X2 = 2 * X0 + np.random.normal(0, 0.1, 1000)
+    X3 = 3 * X2 + np.random.normal(0, 0.1, 1000)
+    outlier_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
+
+    return original_observations, outlier_observations
