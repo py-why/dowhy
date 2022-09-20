@@ -1,7 +1,7 @@
 import pytest
 
 from dowhy.causal_graph import CausalGraph
-from dowhy.causal_identifier import BackdoorAdjustmentMethod, BackdoorIdentifier
+from dowhy.causal_identifier import BackdoorAdjustment, DefaultIdentifier
 from dowhy.causal_identifier.identify_effect import CausalIdentifierEstimandType
 
 from .base import IdentificationTestGraphSolution, example_graph_solution
@@ -11,9 +11,9 @@ class TestBackdoorIdentification(object):
     def test_identify_backdoor_no_biased_sets(self, example_graph_solution: IdentificationTestGraphSolution):
         graph = example_graph_solution.graph
         biased_sets = example_graph_solution.biased_sets
-        identifier = BackdoorIdentifier(
+        identifier = DefaultIdentifier(
             estimand_type=CausalIdentifierEstimandType.NONPARAMETRIC_ATE,
-            backdoor_adjustment=BackdoorAdjustmentMethod.BACKDOOR_EXHAUSTIVE,
+            backdoor_adjustment=BackdoorAdjustment.BACKDOOR_EXHAUSTIVE,
         )
 
         backdoor_results = identifier.identify_backdoor(graph, "X", "Y", include_unobserved=False)
@@ -32,9 +32,9 @@ class TestBackdoorIdentification(object):
     ):
         graph = example_graph_solution.graph
         observed_variables = example_graph_solution.observed_variables
-        identifier = BackdoorIdentifier(
+        identifier = DefaultIdentifier(
             estimand_type=CausalIdentifierEstimandType.NONPARAMETRIC_ATE,
-            backdoor_adjustment=BackdoorAdjustmentMethod.BACKDOOR_EXHAUSTIVE,
+            backdoor_adjustment=BackdoorAdjustment.BACKDOOR_EXHAUSTIVE,
         )
 
         backdoor_results = identifier.identify_backdoor(graph, "X", "Y", include_unobserved=False)
@@ -51,9 +51,9 @@ class TestBackdoorIdentification(object):
     def test_identify_backdoor_minimal_adjustment(self, example_graph_solution: IdentificationTestGraphSolution):
         graph = example_graph_solution.graph
         expected_sets = example_graph_solution.minimal_adjustment_sets
-        identifier = BackdoorIdentifier(
+        identifier = DefaultIdentifier(
             estimand_type=CausalIdentifierEstimandType.NONPARAMETRIC_ATE,
-            backdoor_adjustment=BackdoorAdjustmentMethod.BACKDOOR_MIN,
+            backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MIN,
             proceed_when_unidentifiable=False,
         )
 
@@ -69,9 +69,9 @@ class TestBackdoorIdentification(object):
     def test_identify_backdoor_maximal_adjustment(self, example_graph_solution: IdentificationTestGraphSolution):
         graph = example_graph_solution.graph
         expected_sets = example_graph_solution.maximal_adjustment_sets
-        identifier = BackdoorIdentifier(
+        identifier = DefaultIdentifier(
             estimand_type=CausalIdentifierEstimandType.NONPARAMETRIC_ATE,
-            backdoor_adjustment=BackdoorAdjustmentMethod.BACKDOOR_MAX,
+            backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MAX,
             proceed_when_unidentifiable=False,
         )
 
@@ -88,9 +88,9 @@ class TestBackdoorIdentification(object):
     def test_identify_backdoor_maximal_direct_effect(self, example_graph_solution: IdentificationTestGraphSolution):
         graph = example_graph_solution.graph
         expected_sets = example_graph_solution.direct_maximal_adjustment_sets
-        identifier = BackdoorIdentifier(
+        identifier = DefaultIdentifier(
             estimand_type=CausalIdentifierEstimandType.NONPARAMETRIC_CDE,
-            backdoor_adjustment=BackdoorAdjustmentMethod.BACKDOOR_MAX,
+            backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MAX,
             proceed_when_unidentifiable=False,
         )
 

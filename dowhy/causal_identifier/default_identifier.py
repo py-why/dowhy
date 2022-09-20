@@ -12,7 +12,7 @@ from dowhy.causal_identifier.identify_effect import CausalIdentifierEstimandType
 from dowhy.utils.api import parse_state
 
 
-class BackdoorAdjustmentMethod(Enum):
+class BackdoorAdjustment(Enum):
 
     # Backdoor method names
     BACKDOOR_DEFAULT = "default"
@@ -24,7 +24,7 @@ class BackdoorAdjustmentMethod(Enum):
     BACKDOOR_MINCOST_EFFICIENT = "efficient-mincost-adjustment"
 
 
-class BackdoorIdentifier:
+class DefaultIdentifier:
     """Class that implements different identification methods.
 
     Currently supports backdoor and instrumental variable identification methods. The identification is based on the causal graph provided.
@@ -34,25 +34,25 @@ class BackdoorIdentifier:
     MAX_BACKDOOR_ITERATIONS = 100000
 
     METHOD_NAMES = {
-        BackdoorAdjustmentMethod.BACKDOOR_DEFAULT,
-        BackdoorAdjustmentMethod.BACKDOOR_EXHAUSTIVE,
-        BackdoorAdjustmentMethod.BACKDOOR_MIN,
-        BackdoorAdjustmentMethod.BACKDOOR_MAX,
-        BackdoorAdjustmentMethod.BACKDOOR_EFFICIENT,
-        BackdoorAdjustmentMethod.BACKDOOR_MIN_EFFICIENT,
-        BackdoorAdjustmentMethod.BACKDOOR_MINCOST_EFFICIENT,
+        BackdoorAdjustment.BACKDOOR_DEFAULT,
+        BackdoorAdjustment.BACKDOOR_EXHAUSTIVE,
+        BackdoorAdjustment.BACKDOOR_MIN,
+        BackdoorAdjustment.BACKDOOR_MAX,
+        BackdoorAdjustment.BACKDOOR_EFFICIENT,
+        BackdoorAdjustment.BACKDOOR_MIN_EFFICIENT,
+        BackdoorAdjustment.BACKDOOR_MINCOST_EFFICIENT,
     }
     EFFICIENT_METHODS = {
-        BackdoorAdjustmentMethod.BACKDOOR_EFFICIENT,
-        BackdoorAdjustmentMethod.BACKDOOR_MIN_EFFICIENT,
-        BackdoorAdjustmentMethod.BACKDOOR_MINCOST_EFFICIENT,
+        BackdoorAdjustment.BACKDOOR_EFFICIENT,
+        BackdoorAdjustment.BACKDOOR_MIN_EFFICIENT,
+        BackdoorAdjustment.BACKDOOR_MINCOST_EFFICIENT,
     }
-    DEFAULT_BACKDOOR_METHOD = BackdoorAdjustmentMethod.BACKDOOR_DEFAULT
+    DEFAULT_BACKDOOR_METHOD = BackdoorAdjustment.BACKDOOR_DEFAULT
 
     def __init__(
         self,
         estimand_type: CausalIdentifierEstimandType,
-        backdoor_adjustment: BackdoorAdjustmentMethod = BackdoorAdjustmentMethod.BACKDOOR_DEFAULT,
+        backdoor_adjustment: BackdoorAdjustment = BackdoorAdjustment.BACKDOOR_DEFAULT,
         proceed_when_unidentifiable: bool = False,
         optimize_backdoor: bool = False,
         costs: Optional[List] = None,
@@ -144,7 +144,7 @@ class BackdoorIdentifier:
         mediation_second_stage_confounders = None
         ### 1. BACKDOOR IDENTIFICATION
         # Pick algorithm to compute backdoor sets according to method chosen
-        if self.backdoor_adjustment not in BackdoorIdentifier.EFFICIENT_METHODS:
+        if self.backdoor_adjustment not in DefaultIdentifier.EFFICIENT_METHODS:
             # First, checking if there are any valid backdoor adjustment sets
             if self.optimize_backdoor == False:
                 backdoor_sets = self.identify_backdoor(graph, treatment_name, outcome_name)
@@ -153,7 +153,7 @@ class BackdoorIdentifier:
 
                 path = Backdoor(graph._graph, treatment_name, outcome_name)
                 backdoor_sets = path.get_backdoor_vars()
-        elif self.backdoor_adjustment in BackdoorIdentifier.EFFICIENT_METHODS:
+        elif self.backdoor_adjustment in DefaultIdentifier.EFFICIENT_METHODS:
             backdoor_sets = self.identify_efficient_backdoor(graph, conditional_node_names=conditional_node_names)
         estimands_dict, backdoor_variables_dict = self.build_backdoor_estimands_dict(
             graph, treatment_name, outcome_name, backdoor_sets, estimands_dict
@@ -404,8 +404,8 @@ class BackdoorIdentifier:
             raise ValueError(f"d-separation algorithm {dseparation_algo} is not supported")
         backdoor_adjustment = (
             self.backdoor_adjustment
-            if self.backdoor_adjustment != BackdoorAdjustmentMethod.BACKDOOR_DEFAULT
-            else BackdoorIdentifier.DEFAULT_BACKDOOR_METHOD
+            if self.backdoor_adjustment != BackdoorAdjustment.BACKDOOR_DEFAULT
+            else DefaultIdentifier.DEFAULT_BACKDOOR_METHOD
         )
 
         # First, checking if empty set is a valid backdoor set
@@ -421,7 +421,7 @@ class BackdoorIdentifier:
         if check["is_dseparated"]:
             backdoor_sets.append({"backdoor_set": empty_set})
             # If the method is `minimal-adjustment`, return the empty set right away.
-            if backdoor_adjustment == BackdoorAdjustmentMethod.BACKDOOR_MIN:
+            if backdoor_adjustment == BackdoorAdjustment.BACKDOOR_MIN:
                 return backdoor_sets
 
         # Second, checking for all other sets of variables. If include_unobserved is false, then only observed variables are eligible.
@@ -443,7 +443,7 @@ class BackdoorIdentifier:
             dsep_outcome_var = graph.check_dseparation(outcome_name, parse_state(var), set())
             if not dsep_outcome_var or not dsep_treat_var:
                 filt_eligible_variables.add(var)
-        if backdoor_adjustment in BackdoorIdentifier.METHOD_NAMES:
+        if backdoor_adjustment in DefaultIdentifier.METHOD_NAMES:
             backdoor_sets, found_valid_adjustment_set = self.find_valid_adjustment_sets(
                 graph,
                 treatment_name,
@@ -454,9 +454,9 @@ class BackdoorIdentifier:
                 backdoor_sets,
                 filt_eligible_variables,
                 backdoor_adjustment=backdoor_adjustment,
-                max_iterations=BackdoorIdentifier.MAX_BACKDOOR_ITERATIONS,
+                max_iterations=DefaultIdentifier.MAX_BACKDOOR_ITERATIONS,
             )
-            if backdoor_adjustment == BackdoorAdjustmentMethod.BACKDOOR_DEFAULT and found_valid_adjustment_set:
+            if backdoor_adjustment == BackdoorAdjustment.BACKDOOR_DEFAULT and found_valid_adjustment_set:
                 # repeat the above search with BACKDOOR_MIN
                 backdoor_sets, _ = self.find_valid_adjustment_sets(
                     graph,
@@ -467,12 +467,12 @@ class BackdoorIdentifier:
                     dseparation_algo,
                     backdoor_sets,
                     filt_eligible_variables,
-                    backdoor_adjustment=BackdoorAdjustmentMethod.BACKDOOR_MIN,
-                    max_iterations=BackdoorIdentifier.MAX_BACKDOOR_ITERATIONS,
+                    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MIN,
+                    max_iterations=DefaultIdentifier.MAX_BACKDOOR_ITERATIONS,
                 )
         else:
             raise ValueError(
-                f"Identifier method {backdoor_adjustment} not supported. Try one of the following: {BackdoorIdentifier.METHOD_NAMES}"
+                f"Identifier method {backdoor_adjustment} not supported. Try one of the following: {DefaultIdentifier.METHOD_NAMES}"
             )
         return backdoor_sets
 
@@ -523,13 +523,13 @@ class BackdoorIdentifier:
             conditional_node_names=conditional_node_names,
             costs=self.costs,
         )
-        if self.backdoor_adjustment == BackdoorAdjustmentMethod.BACKDOOR_EFFICIENT:
+        if self.backdoor_adjustment == BackdoorAdjustment.BACKDOOR_EFFICIENT:
             backdoor_set = efficient_bd.optimal_adj_set()
             backdoor_sets = [{"backdoor_set": tuple(backdoor_set)}]
-        elif self.backdoor_adjustment == BackdoorAdjustmentMethod.BACKDOOR_MIN_EFFICIENT:
+        elif self.backdoor_adjustment == BackdoorAdjustment.BACKDOOR_MIN_EFFICIENT:
             backdoor_set = efficient_bd.optimal_minimal_adj_set()
             backdoor_sets = [{"backdoor_set": tuple(backdoor_set)}]
-        elif self.backdoor_adjustment == BackdoorAdjustmentMethod.BACKDOOR_MINCOST_EFFICIENT:
+        elif self.backdoor_adjustment == BackdoorAdjustment.BACKDOOR_MINCOST_EFFICIENT:
             backdoor_set = efficient_bd.optimal_mincost_adj_set()
             backdoor_sets = [{"backdoor_set": tuple(backdoor_set)}]
         return backdoor_sets
@@ -553,7 +553,7 @@ class BackdoorIdentifier:
         # If `minimal-adjustment` method is specified, start the search from the set with minimum size. Otherwise, start from the largest.
         set_sizes = (
             range(1, len(filt_eligible_variables) + 1, 1)
-            if backdoor_adjustment == BackdoorAdjustmentMethod.BACKDOOR_MIN
+            if backdoor_adjustment == BackdoorAdjustment.BACKDOOR_MIN
             else range(len(filt_eligible_variables), 0, -1)
         )
         for size_candidate_set in set_sizes:
@@ -573,19 +573,16 @@ class BackdoorIdentifier:
                     backdoor_sets.append({"backdoor_set": candidate_set})
                     found_valid_adjustment_set = True
                 num_iterations += 1
-                if (
-                    backdoor_adjustment == BackdoorAdjustmentMethod.BACKDOOR_EXHAUSTIVE
-                    and num_iterations > max_iterations
-                ):
+                if backdoor_adjustment == BackdoorAdjustment.BACKDOOR_EXHAUSTIVE and num_iterations > max_iterations:
                     self.logger.warning(f"Max number of iterations {max_iterations} reached.")
                     break
             # If the backdoor method is `maximal-adjustment` or `minimal-adjustment`, return the first found adjustment set.
             if (
                 backdoor_adjustment
                 in {
-                    BackdoorAdjustmentMethod.BACKDOOR_DEFAULT,
-                    BackdoorAdjustmentMethod.BACKDOOR_MAX,
-                    BackdoorAdjustmentMethod.BACKDOOR_MIN,
+                    BackdoorAdjustment.BACKDOOR_DEFAULT,
+                    BackdoorAdjustment.BACKDOOR_MAX,
+                    BackdoorAdjustment.BACKDOOR_MIN,
                 }
                 and found_valid_adjustment_set
             ):
@@ -593,8 +590,7 @@ class BackdoorIdentifier:
             # If all variables are observed, and the biggest eligible set
             # does not satisfy backdoor, then none of its subsets will.
             if (
-                backdoor_adjustment
-                in {BackdoorAdjustmentMethod.BACKDOOR_DEFAULT, BackdoorAdjustmentMethod.BACKDOOR_MAX}
+                backdoor_adjustment in {BackdoorAdjustment.BACKDOOR_DEFAULT, BackdoorAdjustment.BACKDOOR_MAX}
                 and all_nodes_observed
             ):
                 break

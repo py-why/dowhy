@@ -1,3 +1,5 @@
+from typing import List, Optional, Union
+
 import networkx as nx
 
 from dowhy.causal_graph import CausalGraph
@@ -99,7 +101,14 @@ class IDIdentifier:
         if estimand_type != CausalIdentifierEstimandType.NONPARAMETRIC_ATE:
             raise Exception("The estimand type should be 'non-parametric ate' for the ID method type.")
 
-    def identify_effect(self, graph: CausalGraph, treatment_name, outcome_name, node_names=None, **kwargs):
+    def identify_effect(
+        self,
+        graph: CausalGraph,
+        treatment_name: Union[str, List[str]],
+        outcome_name: Union[str, List[str]],
+        node_names: Optional[Union[str, List[str]]] = None,
+        **kwargs,
+    ):
         """
         Implementation of the ID algorithm.
         Link - https://ftp.cs.ucla.edu/pub/stat_ser/shpitser-thesis.pdf

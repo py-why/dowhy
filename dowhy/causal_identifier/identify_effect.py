@@ -1,6 +1,6 @@
 import copy
 from enum import Enum
-from typing import List, Protocol
+from typing import List, Protocol, Union
 
 import sympy as sp
 
@@ -20,7 +20,21 @@ class CausalIdentifierEstimandType(Enum):
 
 
 class CausalIdentifier(Protocol):
-    def identify_effect(self, graph: CausalGraph, treatment_name: List[str], outcome_name: List[str], **kwargs):
+    """
+    Protocol to define a CausalIdentifier, all CausalIdentifiers must conform to at least this list of methods.
+    """
+
+    def identify_effect(
+        self, graph: CausalGraph, treatment_name: Union[str, List[str]], outcome_name: Union[str, List[str]], **kwargs
+    ):
+        """Identify the causal effect to be estimated based on a CausalGraph
+        :param graph: CausalGraph to be analyzed
+        :param treatment_name: name of the treatment
+        :param outcome_name: name of the outcome
+        :param **kwargs: Additional parameters required by the identify_effect of a specific CausalIdentifier
+        for example: conditional_node_names in DefaultIdentifier or node_names in IDIdentifier
+        :returns: a probability expression (estimand) for the causal effect if identified, else NULL
+        """
         ...
 
 
@@ -153,8 +167,8 @@ class IdentifiedEstimand:
 
 def identify_effect(
     graph: CausalGraph,
-    treatment: List[str],
-    outcome: List[str],
+    treatment: Union[str, List[str]],
+    outcome: Union[str, List[str]],
     method: CausalIdentifier,
     node_names=None,
     conditional_node_names=None,
@@ -167,7 +181,7 @@ def identify_effect(
     :param method: CausalIdentifier instance to use to identify effects
     :param node_names: OrderedSet comprising names of all nodes in the graph (Used for IDIdentifier only)
     :param conditional_node_names: variables that are used to determine treatment. If none are
-    provided, it is assumed that the intervention is static (Used for BackdoorIdentifier only).
+    provided, it is assumed that the intervention is static (Used for DefaultIdentifier only).
     :returns: a probability expression (estimand) for the causal effect if identified, else NULL
     """
     identified_estimand = method.identify_effect(
