@@ -89,7 +89,7 @@ def test_regression_based_pairwise_independence_test_categorical_dependent():
             y.append(1)
     y = np.array(y).astype(str)
 
-    assert regression_based(x, y) < 0.05
+    assert regression_based(x, y, num_components_all_inputs=10) < 0.05
 
 
 def test_regression_based_conditional_independence_parallelization(preserve_random_generator_state):
