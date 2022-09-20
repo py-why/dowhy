@@ -14,7 +14,7 @@ Each example graph is contained of the following values:
 TEST_GRAPH_SOLUTIONS = {
     # Example is selected from Pearl J. "Causality" 2nd Edition, from chapter 3.3.1 on backoor criterion.
     "pearl_backdoor_example_graph": dict(
-        graph_str = """graph[directed 1 node[id "Z1" label "Z1"]
+        graph_str="""graph[directed 1 node[id "Z1" label "Z1"]
                         node[id "Z2" label "Z2"]
                         node[id "Z3" label "Z3"]
                         node[id "Z4" label "Z4"]
@@ -33,39 +33,48 @@ TEST_GRAPH_SOLUTIONS = {
                         edge[source "Z6" target "Y"]
                         edge[source "X" target "Z6"]]
                     """,
-        observed_variables = ["Z1", "Z2", "Z3", "Z4", "Z5", "Z6", "X", "Y"],
-        biased_sets = [{"Z4"}, {"Z6"}, {"Z5"}, {"Z2"}, {"Z1"}, {"Z3"}, {"Z1", "Z3"}, {"Z2", "Z5"}, {"Z1", "Z2"}],
-        minimal_adjustment_sets = [{"Z1", "Z4"}, {"Z2", "Z4"}, {"Z3", "Z4"}, {"Z5", "Z4"}],
-        maximal_adjustment_sets = [{"Z1", "Z2", "Z3", "Z4", "Z5"}]
+        observed_variables=["Z1", "Z2", "Z3", "Z4", "Z5", "Z6", "X", "Y"],
+        biased_sets=[{"Z4"}, {"Z6"}, {"Z5"}, {"Z2"}, {"Z1"}, {"Z3"}, {"Z1", "Z3"}, {"Z2", "Z5"}, {"Z1", "Z2"}],
+        minimal_adjustment_sets=[{"Z1", "Z4"}, {"Z2", "Z4"}, {"Z3", "Z4"}, {"Z5", "Z4"}],
+        maximal_adjustment_sets=[{"Z1", "Z2", "Z3", "Z4", "Z5"}],
+        direct_maximal_adjustment_sets=[{"Z1", "Z2", "Z3", "Z4", "Z5", "Z6"}],
     ),
     "simple_selection_bias_graph": dict(
-        graph_str = """graph[directed 1 node[id "Z1" label "Z1"]
+        graph_str="""graph[directed 1 node[id "Z1" label "Z1"]
                     node[id "X" label "X"]
                     node[id "Y" label "Y"]
                     edge[source "X" target "Y"]
                     edge[source "X" target "Z1"]
                     edge[source "Y" target "Z1"]]
                     """,
-        observed_variables = ["Z1", "X", "Y"],
-        biased_sets = [{"Z1",}],
-        minimal_adjustment_sets = [{}],
-        maximal_adjustment_sets = [{}]
+        observed_variables=["Z1", "X", "Y"],
+        biased_sets=[
+            {
+                "Z1",
+            }
+        ],
+        minimal_adjustment_sets=[{}],
+        maximal_adjustment_sets=[{}],
     ),
     "simple_no_confounder_graph": dict(
-        graph_str = """graph[directed 1 node[id "Z1" label "Z1"]
+        graph_str="""graph[directed 1 node[id "Z1" label "Z1"]
                 node[id "X" label "X"]
                 node[id "Y" label "Y"]
                 edge[source "X" target "Y"]
                 edge[source "Z1" target "X"]]
                 """,
         observed_variables=["Z1", "X", "Y"],
-        biased_sets = [],
-        minimal_adjustment_sets = [{}],
-        maximal_adjustment_sets = [{"Z1",}]
+        biased_sets=[],
+        minimal_adjustment_sets=[{}],
+        maximal_adjustment_sets=[
+            {
+                "Z1",
+            }
+        ],
     ),
     # The following simpsons paradox examples are taken from Pearl, J {2013}. "Understanding Simpson’s Paradox" - http://ftp.cs.ucla.edu/pub/stat_ser/r414.pdf
     "pearl_simpsons_paradox_1c": dict(
-        graph_str = """graph[directed 1 node[id "Z" label "Z"]
+        graph_str="""graph[directed 1 node[id "Z" label "Z"]
                 node[id "X" label "X"]
                 node[id "Y" label "Y"]
                 node[id "L1" label "L1"]
@@ -77,12 +86,16 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "L2" target "Y"]]
                 """,
         observed_variables=["Z", "X", "Y"],
-        biased_sets = [{"Z",}],
-        minimal_adjustment_sets = [{}],
-        maximal_adjustment_sets = [{}]
+        biased_sets=[
+            {
+                "Z",
+            }
+        ],
+        minimal_adjustment_sets=[{}],
+        maximal_adjustment_sets=[{}],
     ),
     "pearl_simpsons_paradox_1d": dict(
-        graph_str = """graph[directed 1 node[id "Z" label "Z"]
+        graph_str="""graph[directed 1 node[id "Z" label "Z"]
                 node[id "X" label "X"]
                 node[id "Y" label "Y"]
                 node[id "L1" label "L1"]
@@ -91,13 +104,21 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "L1" target "Z"]
                 edge[source "Z" target "Y"]]
                 """,
-        observed_variables = ["Z", "X", "Y"],
-        biased_sets = [],
-        minimal_adjustment_sets = [{"Z",}],
-        maximal_adjustment_sets = [{"Z",}]
+        observed_variables=["Z", "X", "Y"],
+        biased_sets=[],
+        minimal_adjustment_sets=[
+            {
+                "Z",
+            }
+        ],
+        maximal_adjustment_sets=[
+            {
+                "Z",
+            }
+        ],
     ),
     "pearl_simpsons_paradox_2a": dict(
-        graph_str = """graph[directed 1 node[id "Z" label "Z"]
+        graph_str="""graph[directed 1 node[id "Z" label "Z"]
                 node[id "X" label "X"]
                 node[id "Y" label "Y"]
                 node[id "L" label "L"]
@@ -106,13 +127,17 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "L" target "Z"]
                 edge[source "L" target "Y"]]
                 """,
-        observed_variables = ["Z", "X", "Y"],
-        biased_sets = [{"Z", }],
-        minimal_adjustment_sets = [{}],
-        maximal_adjustment_sets = [{}]
+        observed_variables=["Z", "X", "Y"],
+        biased_sets=[
+            {
+                "Z",
+            }
+        ],
+        minimal_adjustment_sets=[{}],
+        maximal_adjustment_sets=[{}],
     ),
     "pearl_simpsons_paradox_2b": dict(
-        graph_str = """graph[directed 1 node[id "Z" label "Z"]
+        graph_str="""graph[directed 1 node[id "Z" label "Z"]
                 node[id "X" label "X"]
                 node[id "Y" label "Y"]
                 node[id "L" label "L"]
@@ -120,13 +145,13 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "Z" target "X"]
                 edge[source "L" target "X"]
                 edge[source "L" target "Y"]]""",
-        observed_variables = ["Z", "X", "Y"],
-        biased_sets = [],
-        minimal_adjustment_sets = [],
-        maximal_adjustment_sets = [] # Should this be {"Z"}?
+        observed_variables=["Z", "X", "Y"],
+        biased_sets=[],
+        minimal_adjustment_sets=[],
+        maximal_adjustment_sets=[],  # Should this be {"Z"}?
     ),
     "pearl_simpsons_paradox_2b_L_observed": dict(
-        graph_str = """graph[directed 1 node[id "Z" label "Z"]
+        graph_str="""graph[directed 1 node[id "Z" label "Z"]
                 node[id "X" label "X"]
                 node[id "Y" label "Y"]
                 node[id "L" label "L"]
@@ -134,13 +159,13 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "Z" target "X"]
                 edge[source "L" target "X"]
                 edge[source "L" target "Y"]]""",
-        observed_variables = ["Z", "X", "Y", "L"],
-        biased_sets = [],
-        minimal_adjustment_sets = [{"L"}],
-        maximal_adjustment_sets = [{"L", "Z"}]
+        observed_variables=["Z", "X", "Y", "L"],
+        biased_sets=[],
+        minimal_adjustment_sets=[{"L"}],
+        maximal_adjustment_sets=[{"L", "Z"}],
     ),
     "pearl_simpsons_machine_lvl1": dict(
-        graph_str = """graph[directed 1 node[id "Z1" label "Z1"]
+        graph_str="""graph[directed 1 node[id "Z1" label "Z1"]
                 node[id "Z2" label "Z2"]
                 node[id "Z3" label "Z3"]
                 node[id "L" label "L"]
@@ -154,13 +179,18 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "Z3" target "Y"]]
                 """,
         observed_variables=["Z1", "Z2", "Z3", "X", "Y"],
-        biased_sets = [{"Z2",}, {"Z1", "Z2"}],
-        minimal_adjustment_sets = [{}],
-        maximal_adjustment_sets = [{"Z1", "Z2", "Z3"}]
+        biased_sets=[
+            {
+                "Z2",
+            },
+            {"Z1", "Z2"},
+        ],
+        minimal_adjustment_sets=[{}],
+        maximal_adjustment_sets=[{"Z1", "Z2", "Z3"}],
     ),
     # The following are examples given in the "Book of Why" by Judea Pearl, chapter "The Do-operator and the Back-Door Criterion"
     "book_of_why_game2": dict(
-        graph_str = """graph[directed 1 node[id "A" label "A"]
+        graph_str="""graph[directed 1 node[id "A" label "A"]
                 node[id "B" label "B"]
                 node[id "C" label "C"]
                 node[id "D" label "D"]
@@ -175,13 +205,22 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "X" target "E"]
                 edge[source "E" target "Y"]]
                 """,
-        observed_variables = ["A", "B", "C", "D", "E", "X", "Y"],
-        biased_sets = [{"B",}, {"C",}, {"B", "C"}],
-        minimal_adjustment_sets = [{}],
-        maximal_adjustment_sets = [{"A", "B", "C", "D"}]
+        observed_variables=["A", "B", "C", "D", "E", "X", "Y"],
+        biased_sets=[
+            {
+                "B",
+            },
+            {
+                "C",
+            },
+            {"B", "C"},
+        ],
+        minimal_adjustment_sets=[{}],
+        maximal_adjustment_sets=[{"A", "B", "C", "D"}],
+        direct_maximal_adjustment_sets=[{"A", "B", "C", "D", "E"}],
     ),
     "book_of_why_game5": dict(
-        graph_str = """graph[directed 1 node[id "A" label "A"]
+        graph_str="""graph[directed 1 node[id "A" label "A"]
                 node[id "B" label "B"]
                 node[id "C" label "C"]
                 node[id "X" label "X"]
@@ -193,13 +232,17 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "C" target "Y"]
                 edge[source "X" target "Y"]]
                 """,
-        observed_variables = ["A", "B", "C", "X", "Y"],
-        biased_sets = [{"B",}],
-        minimal_adjustment_sets = [{"C"}],
-        maximal_adjustment_sets = [{"A", "B", "C"}]
+        observed_variables=["A", "B", "C", "X", "Y"],
+        biased_sets=[
+            {
+                "B",
+            }
+        ],
+        minimal_adjustment_sets=[{"C"}],
+        maximal_adjustment_sets=[{"A", "B", "C"}],
     ),
     "book_of_why_game5_C_is_unobserved": dict(
-        graph_str = """graph[directed 1 node[id "A" label "A"]
+        graph_str="""graph[directed 1 node[id "A" label "A"]
                 node[id "B" label "B"]
                 node[id "C" label "C"]
                 node[id "X" label "X"]
@@ -211,13 +254,17 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "C" target "Y"]
                 edge[source "X" target "Y"]]
                 """,
-        observed_variables = ["A", "B", "X", "Y"],
-        biased_sets = [{"B",}],
-        minimal_adjustment_sets = [{"A", "B"}],
-        maximal_adjustment_sets = [{"A", "B"}]
+        observed_variables=["A", "B", "X", "Y"],
+        biased_sets=[
+            {
+                "B",
+            }
+        ],
+        minimal_adjustment_sets=[{"A", "B"}],
+        maximal_adjustment_sets=[{"A", "B"}],
     ),
     "no_treatment_but_valid_maximal_set": dict(
-        graph_str = """graph[directed 1 node[id "X" label "X"]
+        graph_str="""graph[directed 1 node[id "X" label "X"]
                 node[id "Y" label "Y"]
                 node[id "Z1" label "Z1"]
                 node[id "Z2" label "Z2"]
@@ -226,13 +273,14 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "Z1" target "Y"]
                 edge[source "Z2" target "Z1"]]
                 """,
-        observed_variables = ["Z1", "Z2", "X", "Y"],
-        biased_sets = [],
-        minimal_adjustment_sets = [{}],
-        maximal_adjustment_sets = [{"Z2"}]
+        observed_variables=["Z1", "Z2", "X", "Y"],
+        biased_sets=[],
+        minimal_adjustment_sets=[{}],
+        maximal_adjustment_sets=[{"Z2"}],
+        direct_maximal_adjustment_sets=[{"Z2", "Z1"}],
     ),
     "common_cause_of_mediator1": dict(
-        graph_str = """graph[directed 1 node[id "X" label "X"]
+        graph_str="""graph[directed 1 node[id "X" label "X"]
                 node[id "Y" label "Y"]
                 node[id "U" label "U"]
                 node[id "Z" label "Z"]
@@ -243,13 +291,14 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "U" target "Z"]
                 edge[source "Z" target "M"]]
                 """,
-        observed_variables = ["X", "Y", "Z", "M"],
-        biased_sets = [],
-        minimal_adjustment_sets = [{"Z"}],
-        maximal_adjustment_sets = [{"Z"}]
+        observed_variables=["X", "Y", "Z", "M"],
+        biased_sets=[],
+        minimal_adjustment_sets=[{"Z"}],
+        maximal_adjustment_sets=[{"Z"}],
+        direct_maximal_adjustment_sets=[{"Z", "M"}],
     ),
     "common_cause_of_mediator2": dict(
-        graph_str = """graph[directed 1 node[id "X" label "X"]
+        graph_str="""graph[directed 1 node[id "X" label "X"]
                 node[id "Y" label "Y"]
                 node[id "U" label "U"]
                 node[id "Z" label "Z"]
@@ -260,14 +309,14 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "U" target "M"]
                 edge[source "Z" target "X"]]
                 """,
-        observed_variables = ["X", "Y", "Z", "M"],
-        biased_sets = [],
-        minimal_adjustment_sets = [{"Z"}],
-        maximal_adjustment_sets = [{"Z"}]
+        observed_variables=["X", "Y", "Z", "M"],
+        biased_sets=[],
+        minimal_adjustment_sets=[{"Z"}],
+        maximal_adjustment_sets=[{"Z"}],
+        direct_maximal_adjustment_sets=[{"Z", "M"}],
     ),
-
     "mbias_with_unobserved": dict(
-        graph_str = """graph[directed 1 node[id "X" label "X"]
+        graph_str="""graph[directed 1 node[id "X" label "X"]
                 node[id "Y" label "Y"]
                 node[id "U1" label "U1"]
                 node[id "U2" label "U2"]
@@ -280,14 +329,13 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "U2" target "Y"]
                 edge[source "Z" target "X"]]
                 """,
-        observed_variables = ["X", "Y", "Z", "M"],
-        biased_sets = [{"Z", "M"}, {"M"}],
-        minimal_adjustment_sets = [{}],
-        maximal_adjustment_sets = [{"Z"}]
+        observed_variables=["X", "Y", "Z", "M"],
+        biased_sets=[{"Z", "M"}, {"M"}],
+        minimal_adjustment_sets=[{}],
+        maximal_adjustment_sets=[{"Z"}],
     ),
-
     "iv": dict(
-        graph_str = """graph[directed 1 node[id "X" label "X"]
+        graph_str="""graph[directed 1 node[id "X" label "X"]
                 node[id "Y" label "Y"]
                 node[id "U" label "U"]
                 node[id "Z" label "Z"]
@@ -296,17 +344,46 @@ TEST_GRAPH_SOLUTIONS = {
                 edge[source "U" target "Y"]
                 edge[source "Z" target "X"]]
                 """,
-        observed_variables = ["X", "Y", "Z"],
-        biased_sets = [{"Z"}],
-        minimal_adjustment_sets = [],
-        maximal_adjustment_sets = []
-    )
+        observed_variables=["X", "Y", "Z"],
+        biased_sets=[{"Z"}],
+        minimal_adjustment_sets=[],
+        maximal_adjustment_sets=[],
+    ),
+    "mediator": dict(
+        graph_str="""graph[directed 1 node[id "X" label "X"]
+                node[id "Y" label "Y"]
+                node[id "M" label "M"]
+                node[id "W" label "W"]
+                edge[source "X" target "Y"]
+                edge[source "W" target "X"]
+                edge[source "W" target "Y"]
+                edge[source "X" target "M"]
+                edge[source "M" target "Y"]]
+                """,
+        observed_variables=["X", "Y", "M", "W"],
+        biased_sets=[{"M"}],
+        minimal_adjustment_sets=[{"W"}],
+        maximal_adjustment_sets=[{"W"}],
+        direct_maximal_adjustment_sets=[{"W", "M"}],
+    ),
+    "mediator-with-conf": dict(
+        graph_str="""graph[directed 1 node[id "X" label "X"]
+                node[id "Y" label "Y"]
+                node[id "M" label "M"]
+                node[id "W1" label "W1"]
+                node[id "W2" label "W2"]
+                edge[source "X" target "Y"]
+                edge[source "W1" target "X"]
+                edge[source "W1" target "Y"]
+                edge[source "W2" target "M"]
+                edge[source "W2" target "Y"]
+                edge[source "X" target "M"]
+                edge[source "M" target "Y"]]
+                """,
+        observed_variables=["X", "Y", "M", "W1", "W2"],
+        biased_sets=[{"M"}, {"M", "W1"}],
+        minimal_adjustment_sets=[{"W1"}],
+        maximal_adjustment_sets=[{"W1", "W2"}],
+        direct_maximal_adjustment_sets=[{"W1", "M", "W2"}],
+    ),
 }
-
-
-
-
-
-
-
-

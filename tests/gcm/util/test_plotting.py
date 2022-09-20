@@ -6,13 +6,13 @@ from dowhy.gcm.util import plot, plot_adjacency_matrix
 
 
 def test_when_plot_does_not_raise_exception():
-    plot(nx.DiGraph([('X', 'Y'), ('Y', 'Z')]))
+    plot(nx.DiGraph([("X", "Y"), ("Y", "Z")]))
 
 
 def test_plot_adjacency_matrix():
-    causal_graph = pd.DataFrame(np.array([[0, 1, 0], [0, 0, 1], [0, 0, 0]]),
-                                columns=['X', 'Y', 'Z'],
-                                index=['X', 'Y', 'Z'])
+    causal_graph = pd.DataFrame(
+        np.array([[0, 1, 0], [0, 0, 1], [0, 0, 0]]), columns=["X", "Y", "Z"], index=["X", "Y", "Z"]
+    )
 
     # Check if calling the method causes some import or runtime errors
     plot_adjacency_matrix(causal_graph, is_directed=True)

@@ -1,11 +1,12 @@
 import pandas as pd
+
 from dowhy import CausalModel
 from dowhy.causal_identifier import CausalIdentifier
-from dowhy.utils.api import parse_state
 from dowhy.causal_identifiers.backdoor import Backdoor
+from dowhy.utils.api import parse_state
+
 
 class TestOptimizeBackdoorIdentifier(object):
-
     def test_1(self):
         treatment = "T"
         outcome = "Y"
@@ -22,10 +23,9 @@ class TestOptimizeBackdoorIdentifier(object):
         causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
 
         # Causal identifier identification
-        identifier = CausalIdentifier(causal_model._graph,
-                                    estimand_type=None,
-                                    method_name="default",
-                                    proceed_when_unidentifiable=None)
+        identifier = CausalIdentifier(
+            causal_model._graph, estimand_type=None, method_name="default", proceed_when_unidentifiable=None
+        )
 
         # Obtain backdoor sets
         path = Backdoor(identifier._graph._graph, treatment_name, outcome_name)
@@ -33,11 +33,10 @@ class TestOptimizeBackdoorIdentifier(object):
         print(backdoor_sets)
         # Check if backdoor sets are valid i.e. if they block all paths between the treatment and the outcome
         backdoor_paths = identifier._graph.get_backdoor_paths(treatment_name, outcome_name)
-        check_set = set(backdoor_sets[0]['backdoor_set'])
+        check_set = set(backdoor_sets[0]["backdoor_set"])
         check = identifier._graph.check_valid_backdoor_set(
-                        treatment_name, outcome_name, check_set,
-                        backdoor_paths=backdoor_paths,
-                        dseparation_algo="naive")
+            treatment_name, outcome_name, check_set, backdoor_paths=backdoor_paths, dseparation_algo="naive"
+        )
         print(check)
         assert check["is_dseparated"]
 
@@ -57,10 +56,9 @@ class TestOptimizeBackdoorIdentifier(object):
         causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
 
         # Causal identifier identification
-        identifier = CausalIdentifier(causal_model._graph,
-                                    estimand_type=None,
-                                    method_name="default",
-                                    proceed_when_unidentifiable=None)
+        identifier = CausalIdentifier(
+            causal_model._graph, estimand_type=None, method_name="default", proceed_when_unidentifiable=None
+        )
 
         # Obtain backdoor sets
         path = Backdoor(identifier._graph._graph, treatment_name, outcome_name)
@@ -84,10 +82,9 @@ class TestOptimizeBackdoorIdentifier(object):
         causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
 
         # Causal identifier identification
-        identifier = CausalIdentifier(causal_model._graph,
-                                    estimand_type=None,
-                                    method_name="default",
-                                    proceed_when_unidentifiable=None)
+        identifier = CausalIdentifier(
+            causal_model._graph, estimand_type=None, method_name="default", proceed_when_unidentifiable=None
+        )
 
         # Obtain backdoor sets
         path = Backdoor(identifier._graph._graph, treatment_name, outcome_name)
@@ -95,8 +92,10 @@ class TestOptimizeBackdoorIdentifier(object):
 
         # Check if backdoor sets are valid i.e. if they block all paths between the treatment and the outcome
         backdoor_paths = identifier._graph.get_backdoor_paths(treatment_name, outcome_name)
-        check_set = set(backdoor_sets[0]['backdoor_set'])
-        check = identifier._graph.check_valid_backdoor_set(treatment_name, outcome_name, check_set, backdoor_paths=backdoor_paths)
+        check_set = set(backdoor_sets[0]["backdoor_set"])
+        check = identifier._graph.check_valid_backdoor_set(
+            treatment_name, outcome_name, check_set, backdoor_paths=backdoor_paths
+        )
 
         assert check["is_dseparated"]
 
@@ -116,10 +115,9 @@ class TestOptimizeBackdoorIdentifier(object):
         causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
 
         # Causal identifier identification
-        identifier = CausalIdentifier(causal_model._graph,
-                                    estimand_type=None,
-                                    method_name="default",
-                                    proceed_when_unidentifiable=None)
+        identifier = CausalIdentifier(
+            causal_model._graph, estimand_type=None, method_name="default", proceed_when_unidentifiable=None
+        )
 
         # Obtain backdoor sets
         path = Backdoor(identifier._graph._graph, treatment_name, outcome_name)
@@ -127,8 +125,10 @@ class TestOptimizeBackdoorIdentifier(object):
 
         # Check if backdoor sets are valid i.e. if they block all paths between the treatment and the outcome
         backdoor_paths = identifier._graph.get_backdoor_paths(treatment_name, outcome_name)
-        check_set = set(backdoor_sets[0]['backdoor_set'])
-        check = identifier._graph.check_valid_backdoor_set(treatment_name, outcome_name, check_set, backdoor_paths=backdoor_paths)
+        check_set = set(backdoor_sets[0]["backdoor_set"])
+        check = identifier._graph.check_valid_backdoor_set(
+            treatment_name, outcome_name, check_set, backdoor_paths=backdoor_paths
+        )
 
         assert check["is_dseparated"]
 
@@ -148,10 +148,9 @@ class TestOptimizeBackdoorIdentifier(object):
         causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
 
         # Causal identifier identification
-        identifier = CausalIdentifier(causal_model._graph,
-                                    estimand_type=None,
-                                    method_name="default",
-                                    proceed_when_unidentifiable=None)
+        identifier = CausalIdentifier(
+            causal_model._graph, estimand_type=None, method_name="default", proceed_when_unidentifiable=None
+        )
 
         # Obtain backdoor sets
         path = Backdoor(identifier._graph._graph, treatment_name, outcome_name)
@@ -159,8 +158,10 @@ class TestOptimizeBackdoorIdentifier(object):
 
         # Check if backdoor sets are valid i.e. if they block all paths between the treatment and the outcome
         backdoor_paths = identifier._graph.get_backdoor_paths(treatment_name, outcome_name)
-        check_set = set(backdoor_sets[0]['backdoor_set'])
-        check = identifier._graph.check_valid_backdoor_set(treatment_name, outcome_name, check_set, backdoor_paths=backdoor_paths)
+        check_set = set(backdoor_sets[0]["backdoor_set"])
+        check = identifier._graph.check_valid_backdoor_set(
+            treatment_name, outcome_name, check_set, backdoor_paths=backdoor_paths
+        )
 
         assert check["is_dseparated"]
 
@@ -180,10 +181,9 @@ class TestOptimizeBackdoorIdentifier(object):
         causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
 
         # Causal identifier identification
-        identifier = CausalIdentifier(causal_model._graph,
-                                    estimand_type=None,
-                                    method_name="default",
-                                    proceed_when_unidentifiable=None)
+        identifier = CausalIdentifier(
+            causal_model._graph, estimand_type=None, method_name="default", proceed_when_unidentifiable=None
+        )
 
         # Obtain backdoor sets
         path = Backdoor(identifier._graph._graph, treatment_name, outcome_name)
@@ -191,7 +191,9 @@ class TestOptimizeBackdoorIdentifier(object):
 
         # Check if backdoor sets are valid i.e. if they block all paths between the treatment and the outcome
         backdoor_paths = identifier._graph.get_backdoor_paths(treatment_name, outcome_name)
-        check_set = set(backdoor_sets[0]['backdoor_set'])
-        check = identifier._graph.check_valid_backdoor_set(treatment_name, outcome_name, check_set, backdoor_paths=backdoor_paths)
+        check_set = set(backdoor_sets[0]["backdoor_set"])
+        check = identifier._graph.check_valid_backdoor_set(
+            treatment_name, outcome_name, check_set, backdoor_paths=backdoor_paths
+        )
 
         assert check["is_dseparated"]

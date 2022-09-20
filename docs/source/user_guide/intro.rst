@@ -27,7 +27,7 @@ for causal inference, it is hard to compare their assumptions and robustness of 
 
 To see DoWhy in action, check out how it can be applied to estimate the effect
 of a subscription or rewards program for customers [`Rewards notebook
-<https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb>`_] and for implementing and evaluating causal inference methods on benchmark datasets like the `Infant Health and Development Program (IHDP) <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_ihdp_data_example.ipynb>`_ dataset, `Infant Mortality (Twins) <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_twins_example.ipynb>`_ dataset, and the `Lalonde Jobs <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_lalonde_example.ipynb>`_ dataset.
+<https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb>`_] and for implementing and evaluating causal inference methods on benchmark datasets like the `Infant Health and Development Program (IHDP) <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_ihdp_data_example.ipynb>`_ dataset, `Infant Mortality (Twins) <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_twins_example.ipynb>`_ dataset, and the `Lalonde Jobs <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_lalonde_example.ipynb>`_ dataset.
 
 
 Sample causal inference analysis in DoWhy
@@ -76,9 +76,9 @@ DoWhy stresses on the interpretability of its output. At any point in the analys
 you can inspect the untested assumptions, identified estimands (if any) and the
 estimate (if any). Here's a sample output of the linear regression estimator.
 
-.. image:: https://raw.githubusercontent.com/microsoft/dowhy/master/docs/images/regression_output.png
+.. image:: https://raw.githubusercontent.com/microsoft/dowhy/main/docs/images/regression_output.png
 
-For a full code example, check out the `Getting Started with DoWhy <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_ notebook. You can also use Conditional Average Treatment Effect (CATE) estimation methods from other libraries such as EconML and CausalML, as shown in the `Conditional Treatment Effects <https://github.com/microsoft/dowhy/blob/master/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_ notebook. For more examples of using DoWhy, check out the Jupyter notebooks in `docs/source/example_notebooks <https://github.com/microsoft/dowhy/tree/master/docs/source/example_notebooks/>`_ or try them online at `Binder <https://mybinder.org/v2/gh/microsoft/dowhy/master?filepath=docs%2Fsource%2F>`_. 
+For a full code example, check out the `Getting Started with DoWhy <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_ notebook. You can also use Conditional Average Treatment Effect (CATE) estimation methods from other libraries such as EconML and CausalML, as shown in the `Conditional Treatment Effects <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_ notebook. For more examples of using DoWhy, check out the Jupyter notebooks in `docs/source/example_notebooks <https://github.com/microsoft/dowhy/tree/main/docs/source/example_notebooks/>`_ or try them online at `Binder <https://mybinder.org/v2/gh/microsoft/dowhy/main?filepath=docs%2Fsource%2F>`_.
 
 
 GCM-based inference (experimental)
