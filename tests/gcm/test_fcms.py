@@ -144,6 +144,7 @@ def test_when_fit_classifier_fcm_with_categorical_inputs_then_returns_expected_r
     training_data = _generate_data_with_categorical_input()
     X2 = training_data["X2"].to_numpy()
     training_data["X2"] = (X2 > np.median(X2)).astype(str)
+    X2 = training_data["X2"].to_numpy()
     fit(scm, training_data)
 
     x2_fcm = cast(ClassifierFCM, scm.causal_mechanism("X2"))
