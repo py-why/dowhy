@@ -6,7 +6,7 @@ import pandas as pd
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
-from dowhy.causal_identifier.identify_effect import CausalIdentifierEstimandType
+from dowhy.causal_identifier.identify_effect import EstimandType
 from dowhy.utils.api import parse_state
 
 
@@ -147,9 +147,9 @@ class TwoStageRegressionEstimator(CausalEstimator):
         self.symbolic_estimator = self.construct_symbolic_estimator(
             first_stage_estimate.realized_estimand_expr,
             second_stage_estimate.realized_estimand_expr,
-            estimand_type=CausalIdentifierEstimandType.NONPARAMETRIC_NIE,
+            estimand_type=EstimandType.NONPARAMETRIC_NIE,
         )
-        if self._target_estimand.estimand_type == CausalIdentifierEstimandType.NONPARAMETRIC_NDE:
+        if self._target_estimand.estimand_type == EstimandType.NONPARAMETRIC_NDE:
             # Total  effect of treatment
             modified_target_estimand = copy.deepcopy(self._target_estimand)
             modified_target_estimand.identifier_method = "backdoor"
@@ -220,7 +220,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         self, first_stage_symbolic, second_stage_symbolic, total_effect_symbolic=None, estimand_type=None
     ):
         nie_symbolic = "(" + first_stage_symbolic + ")*(" + second_stage_symbolic + ")"
-        if estimand_type == CausalIdentifierEstimandType.NONPARAMETRIC_NIE:
+        if estimand_type == EstimandType.NONPARAMETRIC_NIE:
             return nie_symbolic
-        elif estimand_type == CausalIdentifierEstimandType.NONPARAMETRIC_NDE:
+        elif estimand_type == EstimandType.NONPARAMETRIC_NDE:
             return "(" + total_effect_symbolic + ") - (" + nie_symbolic + ")"

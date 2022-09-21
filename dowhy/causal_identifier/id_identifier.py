@@ -3,7 +3,7 @@ from typing import List, Optional, Union
 import networkx as nx
 
 from dowhy.causal_graph import CausalGraph
-from dowhy.causal_identifier.identify_effect import CausalIdentifierEstimandType
+from dowhy.causal_identifier.identify_effect import EstimandType
 from dowhy.utils.api import parse_state
 from dowhy.utils.graph_operations import find_ancestor, find_c_components, induced_graph
 from dowhy.utils.ordered_set import OrderedSet
@@ -89,7 +89,7 @@ class IDExpression:
 
 
 class IDIdentifier:
-    def __init__(self, estimand_type=CausalIdentifierEstimandType.NONPARAMETRIC_ATE):
+    def __init__(self, estimand_type=EstimandType.NONPARAMETRIC_ATE):
         """
         Class to perform identification using the ID algorithm.
 
@@ -98,7 +98,7 @@ class IDIdentifier:
         :param method_name: Identification method ("id-algorithm" in this case).
         :param proceed_when_unidentifiable: If True, proceed with identification even in the presence of unobserved/missing variables.
         """
-        if estimand_type != CausalIdentifierEstimandType.NONPARAMETRIC_ATE:
+        if estimand_type != EstimandType.NONPARAMETRIC_ATE:
             raise Exception("The estimand type should be 'non-parametric ate' for the ID method type.")
 
     def identify_effect(

@@ -8,7 +8,7 @@ import sympy.stats as spstats
 
 from dowhy.causal_graph import CausalGraph
 from dowhy.causal_identifier.efficient_backdoor import EfficientBackdoor
-from dowhy.causal_identifier.identify_effect import CausalIdentifierEstimandType, IdentifiedEstimand
+from dowhy.causal_identifier.identify_effect import EstimandType, IdentifiedEstimand
 from dowhy.utils.api import parse_state
 
 
@@ -24,7 +24,7 @@ class BackdoorAdjustment(Enum):
     BACKDOOR_MINCOST_EFFICIENT = "efficient-mincost-adjustment"
 
 
-class DefaultIdentifier:
+class AutoIdentifier:
     """Class that implements different identification methods.
 
     Currently supports backdoor and instrumental variable identification methods. The identification is based on the causal graph provided.
@@ -51,7 +51,7 @@ class DefaultIdentifier:
 
     def __init__(
         self,
-        estimand_type: CausalIdentifierEstimandType,
+        estimand_type: EstimandType,
         backdoor_adjustment: BackdoorAdjustment = BackdoorAdjustment.BACKDOOR_DEFAULT,
         proceed_when_unidentifiable: bool = False,
         optimize_backdoor: bool = False,
@@ -98,28 +98,28 @@ class DefaultIdentifier:
                 outcome_variable=outcome_name,
                 no_directed_path=True,
             )
-        if self.estimand_type == CausalIdentifierEstimandType.NONPARAMETRIC_ATE:
+        if self.estimand_type == EstimandType.NONPARAMETRIC_ATE:
             return self.identify_ate_effect(
                 graph,
                 treatment_name,
                 outcome_name,
                 conditional_node_names,
             )
-        elif self.estimand_type == CausalIdentifierEstimandType.NONPARAMETRIC_NDE:
+        elif self.estimand_type == EstimandType.NONPARAMETRIC_NDE:
             return self.identify_nde_effect(
                 graph,
                 treatment_name,
                 outcome_name,
                 conditional_node_names,
             )
-        elif self.estimand_type == CausalIdentifierEstimandType.NONPARAMETRIC_NIE:
+        elif self.estimand_type == EstimandType.NONPARAMETRIC_NIE:
             return self.identify_nie_effect(
                 graph,
                 treatment_name,
                 outcome_name,
                 conditional_node_names,
             )
-        elif self.estimand_type == CausalIdentifierEstimandType.NONPARAMETRIC_CDE:
+        elif self.estimand_type == EstimandType.NONPARAMETRIC_CDE:
             return self.identify_cde_effect(
                 graph,
                 treatment_name,
@@ -129,10 +129,10 @@ class DefaultIdentifier:
         else:
             raise ValueError(
                 "Estimand type is not supported. Use either {0}, {1}, or {2}.".format(
-                    CausalIdentifierEstimandType.NONPARAMETRIC_ATE,
-                    CausalIdentifierEstimandType.NONPARAMETRIC_CDE,
-                    CausalIdentifierEstimandType.NONPARAMETRIC_NDE,
-                    CausalIdentifierEstimandType.NONPARAMETRIC_NIE,
+                    EstimandType.NONPARAMETRIC_ATE,
+                    EstimandType.NONPARAMETRIC_CDE,
+                    EstimandType.NONPARAMETRIC_NDE,
+                    EstimandType.NONPARAMETRIC_NIE,
                 )
             )
 
@@ -144,7 +144,7 @@ class DefaultIdentifier:
         mediation_second_stage_confounders = None
         ### 1. BACKDOOR IDENTIFICATION
         # Pick algorithm to compute backdoor sets according to method chosen
-        if self.backdoor_adjustment not in DefaultIdentifier.EFFICIENT_METHODS:
+        if self.backdoor_adjustment not in AutoIdentifier.EFFICIENT_METHODS:
             # First, checking if there are any valid backdoor adjustment sets
             if self.optimize_backdoor == False:
                 backdoor_sets = self.identify_backdoor(graph, treatment_name, outcome_name)
@@ -153,7 +153,7 @@ class DefaultIdentifier:
 
                 path = Backdoor(graph._graph, treatment_name, outcome_name)
                 backdoor_sets = path.get_backdoor_vars()
-        elif self.backdoor_adjustment in DefaultIdentifier.EFFICIENT_METHODS:
+        elif self.backdoor_adjustment in AutoIdentifier.EFFICIENT_METHODS:
             backdoor_sets = self.identify_efficient_backdoor(graph, conditional_node_names=conditional_node_names)
         estimands_dict, backdoor_variables_dict = self.build_backdoor_estimands_dict(
             graph, treatment_name, outcome_name, backdoor_sets, estimands_dict
@@ -405,7 +405,7 @@ class DefaultIdentifier:
         backdoor_adjustment = (
             self.backdoor_adjustment
             if self.backdoor_adjustment != BackdoorAdjustment.BACKDOOR_DEFAULT
-            else DefaultIdentifier.DEFAULT_BACKDOOR_METHOD
+            else AutoIdentifier.DEFAULT_BACKDOOR_METHOD
         )
 
         # First, checking if empty set is a valid backdoor set
@@ -443,7 +443,7 @@ class DefaultIdentifier:
             dsep_outcome_var = graph.check_dseparation(outcome_name, parse_state(var), set())
             if not dsep_outcome_var or not dsep_treat_var:
                 filt_eligible_variables.add(var)
-        if backdoor_adjustment in DefaultIdentifier.METHOD_NAMES:
+        if backdoor_adjustment in AutoIdentifier.METHOD_NAMES:
             backdoor_sets, found_valid_adjustment_set = self.find_valid_adjustment_sets(
                 graph,
                 treatment_name,
@@ -454,7 +454,7 @@ class DefaultIdentifier:
                 backdoor_sets,
                 filt_eligible_variables,
                 backdoor_adjustment=backdoor_adjustment,
-                max_iterations=DefaultIdentifier.MAX_BACKDOOR_ITERATIONS,
+                max_iterations=AutoIdentifier.MAX_BACKDOOR_ITERATIONS,
             )
             if backdoor_adjustment == BackdoorAdjustment.BACKDOOR_DEFAULT and found_valid_adjustment_set:
                 # repeat the above search with BACKDOOR_MIN
@@ -468,11 +468,11 @@ class DefaultIdentifier:
                     backdoor_sets,
                     filt_eligible_variables,
                     backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MIN,
-                    max_iterations=DefaultIdentifier.MAX_BACKDOOR_ITERATIONS,
+                    max_iterations=AutoIdentifier.MAX_BACKDOOR_ITERATIONS,
                 )
         else:
             raise ValueError(
-                f"Identifier method {backdoor_adjustment} not supported. Try one of the following: {DefaultIdentifier.METHOD_NAMES}"
+                f"Identifier method {backdoor_adjustment} not supported. Try one of the following: {AutoIdentifier.METHOD_NAMES}"
             )
         return backdoor_sets
 
@@ -874,8 +874,8 @@ class DefaultIdentifier:
         # TODO: support multivariate treatments better.
         expr = None
         if estimand_type in (
-            CausalIdentifierEstimandType.NONPARAMETRIC_NDE,
-            CausalIdentifierEstimandType.NONPARAMETRIC_NIE,
+            EstimandType.NONPARAMETRIC_NDE,
+            EstimandType.NONPARAMETRIC_NIE,
         ):
             outcome_name = outcome_name[0]
             sym_outcome = spstats.Normal(outcome_name, 0, 1)
@@ -893,9 +893,9 @@ class DefaultIdentifier:
             sym_sigma = sp.Symbol("sigma", positive=True)
             sym_conditional_outcome = spstats.Normal(num_expr_str, sym_mu, sym_sigma)
             sym_directeffect_derivative = sp.Derivative(sym_conditional_outcome, sym_treatment)
-            if estimand_type == CausalIdentifierEstimandType.NONPARAMETRIC_NIE:
+            if estimand_type == EstimandType.NONPARAMETRIC_NIE:
                 sym_effect = spstats.Expectation(sym_treatment_derivative * sym_outcome_derivative)
-            elif estimand_type == CausalIdentifierEstimandType.NONPARAMETRIC_NDE:
+            elif estimand_type == EstimandType.NONPARAMETRIC_NDE:
                 sym_effect = spstats.Expectation(sym_directeffect_derivative)
             sym_assumptions = {
                 "Mediation": (
@@ -916,8 +916,8 @@ class DefaultIdentifier:
         else:
             raise ValueError(
                 "Estimand type not supported. Supported estimand types are {0} or {1}'.".format(
-                    CausalIdentifierEstimandType.NONPARAMETRIC_NDE,
-                    CausalIdentifierEstimandType.NONPARAMETRIC_NIE,
+                    EstimandType.NONPARAMETRIC_NDE,
+                    EstimandType.NONPARAMETRIC_NIE,
                 )
             )
 

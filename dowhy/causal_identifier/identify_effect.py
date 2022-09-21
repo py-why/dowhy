@@ -8,7 +8,7 @@ from dowhy.causal_graph import CausalGraph
 from dowhy.utils.api import parse_state
 
 
-class CausalIdentifierEstimandType(Enum):
+class EstimandType(Enum):
     # Average total effect
     NONPARAMETRIC_ATE = "nonparametric-ate"
     # Natural direct effect
@@ -32,7 +32,7 @@ class CausalIdentifier(Protocol):
         :param treatment_name: name of the treatment
         :param outcome_name: name of the outcome
         :param **kwargs: Additional parameters required by the identify_effect of a specific CausalIdentifier
-        for example: conditional_node_names in DefaultIdentifier or node_names in IDIdentifier
+        for example: conditional_node_names in AutoIdentifier or node_names in IDIdentifier
         :returns: a probability expression (estimand) for the causal effect if identified, else NULL
         """
         ...
@@ -181,7 +181,7 @@ def identify_effect(
     :param method: CausalIdentifier instance to use to identify effects
     :param node_names: OrderedSet comprising names of all nodes in the graph (Used for IDIdentifier only)
     :param conditional_node_names: variables that are used to determine treatment. If none are
-    provided, it is assumed that the intervention is static (Used for DefaultIdentifier only).
+    provided, it is assumed that the intervention is static (Used for AutoIdentifier only).
     :returns: a probability expression (estimand) for the causal effect if identified, else NULL
     """
     identified_estimand = method.identify_effect(

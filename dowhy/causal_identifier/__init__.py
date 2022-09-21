@@ -1,11 +1,11 @@
-from dowhy.causal_identifier.default_identifier import BackdoorAdjustment, DefaultIdentifier
+from dowhy.causal_identifier.auto_identifier import AutoIdentifier, BackdoorAdjustment
 from dowhy.causal_identifier.id_identifier import IDIdentifier
-from dowhy.causal_identifier.identify_effect import CausalIdentifierEstimandType, IdentifiedEstimand, identify_effect
+from dowhy.causal_identifier.identify_effect import EstimandType, IdentifiedEstimand, identify_effect
 
 __all__ = [
-    "DefaultIdentifier",
+    "AutoIdentifier",
     "BackdoorAdjustment",
-    "CausalIdentifierEstimandType",
+    "EstimandType",
     "IdentifiedEstimand",
     "IDIdentifier",
     "identify_effect",
