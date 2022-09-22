@@ -3,7 +3,7 @@ import pytest
 from flaky import flaky
 
 from dowhy.causal_estimator import CausalEstimate
-from dowhy.causal_identifier.identify_effect import IdentifiedEstimand
+from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 from dowhy.causal_refuter import CausalRefuter
 
 

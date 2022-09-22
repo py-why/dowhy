@@ -12,8 +12,8 @@ import dowhy.graph_learners as graph_learners
 import dowhy.utils.cli_helpers as cli
 from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_graph import CausalGraph
-from dowhy.causal_identifier import AutoIdentifier, BackdoorAdjustment, IDIdentifier, identify_effect
-from dowhy.causal_identifier.identify_effect import CausalIdentifier, EstimandType
+from dowhy.causal_identifier import AutoIdentifier, BackdoorAdjustment, IDIdentifier
+from dowhy.causal_identifier.identify_effect import EstimandType
 from dowhy.causal_refuters.graph_refuter import GraphRefuter
 from dowhy.utils.api import parse_state
 
@@ -196,7 +196,7 @@ class CausalModel:
         estimand_type = EstimandType(estimand_type)
 
         if method_name == "id-algorithm":
-            identifier = IDIdentifier(estimand_type=estimand_type)
+            identifier = IDIdentifier()
         else:
             identifier = AutoIdentifier(
                 estimand_type=estimand_type,
@@ -205,11 +205,8 @@ class CausalModel:
                 optimize_backdoor=optimize_backdoor,
             )
 
-        identified_estimand = identify_effect(
-            graph=self._graph,
-            treatment=self._treatment,
-            outcome=self._outcome,
-            method=identifier,
+        identified_estimand = identifier.identify_effect(
+            graph=self._graph, treatment_name=self._treatment, outcome_name=self._outcome
         )
 
         self.identifier = identifier
