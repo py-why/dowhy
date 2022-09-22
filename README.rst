@@ -107,7 +107,7 @@ Install the latest `release <https://anaconda.org/conda-forge/dowhy>`__ using co
 
    conda install -c conda-forge dowhy
 
-If you face "Solving environment" problems with conda, then try :code:`conda update --all` and then install dowhy. If that does not work, then use :code:`conda config --set channel_priority false` and try to install again. If the problem persists, please add your issue `here <https://github.com/microsoft/dowhy/issues/197>`_.
+If you face "Solving environment" problems with conda, then try :code:`conda update --all` and then install dowhy. If that does not work, then use :code:`conda config --set channel_priority false` and try to install again. If the problem persists, please `add your issue here <https://github.com/microsoft/dowhy/issues/197>`_.
 
 **Development Version**
 
@@ -540,7 +540,7 @@ The `projects <https://github.com/microsoft/dowhy/projects>`_ page lists the nex
 Contributing
 ============
 
-This project welcomes contributions and suggestions. For a guide to contributing and a list of all contributors, check out `CONTRIBUTING.md <https://github.com/microsoft/dowhy/blob/main/CONTRIBUTING.md>`_ and our `docs for contributing code <https://github.com/py-why/dowhy/blob/main/docs/source/contributing/contributing-code.rst>`_. Our contributor code of conduct is available `here <https://github.com/py-why/governance/blob/main/CODE-OF-CONDUCT.md>`_. You can also join the DoWhy development channel on Discord: |discord|_
+This project welcomes contributions and suggestions. For a guide to contributing and a list of all contributors, check out `CONTRIBUTING.md <https://github.com/microsoft/dowhy/blob/main/CONTRIBUTING.md>`_ and our `docs for contributing code <https://github.com/py-why/dowhy/blob/main/docs/source/contributing/contributing-code.rst>`_. Our `contributor code of conduct is available here <https://github.com/py-why/governance/blob/main/CODE-OF-CONDUCT.md>`_. You can also join the DoWhy development channel on Discord: |discord|_
 
 .. |discord| image:: https://img.shields.io/discord/818456847551168542
 .. _discord: https://discord.gg/cSBGb3vsZb
