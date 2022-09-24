@@ -12,9 +12,10 @@ from tqdm.auto import tqdm
 
 from dowhy.causal_estimator import CausalEstimator
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
+from dowhy.causal_estimators.regression_estimator import RegressionEstimator
 from dowhy.causal_refuter import CausalRefutation, CausalRefuter
-from dowhy.causal_refuters.linear_sensitivity_analyzer import LinearSensitivityAnalyzer
 from dowhy.causal_refuters.evalue_sensitivity_analyzer import EValueSensitivityAnalyzer
+from dowhy.causal_refuters.linear_sensitivity_analyzer import LinearSensitivityAnalyzer
 
 
 class AddUnobservedCommonCause(CausalRefuter):
@@ -229,11 +230,23 @@ class AddUnobservedCommonCause(CausalRefuter):
             return analyzer
 
         if self.simulated_method_name == "e-value":
+
+            if not isinstance(self._estimate.estimator, RegressionEstimator):
+                raise NotImplementedError(
+                    "E-Value sensitivity analysis is currently only implemented RegressionEstimator."
+                )
+
+            if len(self._estimate.estimator._effect_modifier_names) > 0:
+                raise NotImplementedError("The current implementation does not support effect modifiers")
+
             analyzer = EValueSensitivityAnalyzer(
                 estimate=self._estimate,
-                outcome_var=self._data[self._outcome_name[0]]
+                estimand=self._target_estimand,
+                data=self._data,
+                treatment_name=self._treatment_name[0],
+                outcome_name=self._outcome_name[0],
             )
-            analyzer.check_sensitivity()
+            analyzer.check_sensitivity(plot=self.plot_estimate)
             return analyzer
 
         if self.kappa_t is None:
