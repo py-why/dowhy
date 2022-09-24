@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8, 3.9]
-        poetry-version: [1.1.14]
+        poetry-version: [1.2.0]
         test-group: [1, 2, 3, 4]
 
     steps:
@@ -29,9 +29,6 @@ jobs:
       uses: abatilo/actions-poetry@v2.0.0
       with:
         poetry-version: ${{ matrix.poetry-version }}
-
-    - name: Install Poetry Dynamic Versioning Plugin
-      run: pip install poetry-dynamic-versioning
 
     - name: Install graphviz
       run: |
@@ -51,8 +48,3 @@ jobs:
 
     - name: Test
       run: poetry run poe test --splits 4 --group ${{ matrix.test-group }}
-
-    - name: Check package consistency
-      run: |
-        poetry build
-        poetry run poe verifyPackage
