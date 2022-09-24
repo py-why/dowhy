@@ -57,11 +57,11 @@ def test_given_linear_data_when_draw_samples_from_fitted_anm_then_generates_corr
     fit(scm, test_data)
 
     generated_samples = scm.causal_mechanism("X1").draw_samples(np.array([1] * 1000))
-    assert np.mean(generated_samples) == approx(4, abs=0.02)
+    assert np.mean(generated_samples) == approx(4, abs=0.05)
     assert np.std(generated_samples) == approx(0.1, abs=0.05)
 
     generated_samples = scm.causal_mechanism("X1").draw_samples(np.array([2] * 1000))
-    assert np.mean(generated_samples) == approx(6, abs=0.02)
+    assert np.mean(generated_samples) == approx(6, abs=0.05)
     assert np.std(generated_samples) == approx(0.1, abs=0.05)
     assert estimate_kl_divergence_continuous(
         test_data["X1"].to_numpy(), draw_samples(scm, 1000)["X1"].to_numpy()
