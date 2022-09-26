@@ -1,7 +1,7 @@
 import itertools
 import logging
 from enum import Enum
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import sympy as sp
 import sympy.stats as spstats
@@ -111,9 +111,9 @@ class AutoIdentifier:
         graph: CausalGraph,
         treatment_name: List[str],
         outcome_name: str,
-        include_unobserved=False,
-        dseparation_algo="default",
-        direct_effect=False,
+        include_unobserved: bool = False,
+        dseparation_algo: str = "default",
+        direct_effect: bool = False,
     ):
         return identify_backdoor(
             graph,
@@ -229,7 +229,7 @@ def identify_ate_effect(
             graph, backdoor_adjustment, costs, conditional_node_names=conditional_node_names
         )
     estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
-        graph, treatment_name, outcome_name, backdoor_sets, estimands_dict, estimand_type, proceed_when_unidentifiable
+        graph, treatment_name, outcome_name, backdoor_sets, estimands_dict
     )
     # Setting default "backdoor" identification adjustment set
     default_backdoor_id = get_default_backdoor_set_id(graph, treatment_name, outcome_name, backdoor_variables_dict)
@@ -244,7 +244,6 @@ def identify_ate_effect(
     logger.info("Instrumental variables for treatment and outcome:" + str(instrument_names))
     if len(instrument_names) > 0:
         iv_estimand_expr = construct_iv_estimand(
-            estimand_type,
             treatment_name,
             outcome_name,
             instrument_names,
@@ -260,7 +259,6 @@ def identify_ate_effect(
     logger.info("Frontdoor variables for treatment and outcome:" + str(frontdoor_variables_names))
     if len(frontdoor_variables_names) > 0:
         frontdoor_estimand_expr = construct_frontdoor_estimand(
-            estimand_type,
             treatment_name,
             outcome_name,
             frontdoor_variables_names,
@@ -268,10 +266,10 @@ def identify_ate_effect(
         logger.debug("Identified expression = " + str(frontdoor_estimand_expr))
         estimands_dict["frontdoor"] = frontdoor_estimand_expr
         mediation_first_stage_confounders = identify_mediation_first_stage_confounders(
-            graph, treatment_name, outcome_name, frontdoor_variables_names, backdoor_adjustment, estimand_type
+            graph, treatment_name, outcome_name, frontdoor_variables_names, backdoor_adjustment
         )
         mediation_second_stage_confounders = identify_mediation_second_stage_confounders(
-            graph, treatment_name, frontdoor_variables_names, outcome_name, backdoor_adjustment, estimand_type
+            graph, treatment_name, frontdoor_variables_names, outcome_name, backdoor_adjustment
         )
     else:
         estimands_dict["frontdoor"] = None
@@ -314,7 +312,7 @@ def identify_cde_effect(
     # Pick algorithm to compute backdoor sets according to method chosen
     backdoor_sets = identify_backdoor(graph, treatment_name, outcome_name, backdoor_adjustment, direct_effect=True)
     estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
-        graph, treatment_name, outcome_name, backdoor_sets, estimands_dict, estimand_type, proceed_when_unidentifiable
+        graph, treatment_name, outcome_name, backdoor_sets, estimands_dict
     )
     # Setting default "backdoor" identification adjustment set
     default_backdoor_id = get_default_backdoor_set_id(graph, treatment_name, outcome_name, backdoor_variables_dict)
@@ -354,7 +352,7 @@ def identify_nie_effect(
     # First, checking if there are any valid backdoor adjustment sets
     backdoor_sets = identify_backdoor(graph, treatment_name, outcome_name, backdoor_adjustment)
     estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
-        graph, treatment_name, outcome_name, backdoor_sets, estimands_dict, estimand_type, proceed_when_unidentifiable
+        graph, treatment_name, outcome_name, backdoor_sets, estimands_dict
     )
     # Setting default "backdoor" identification adjustment set
     default_backdoor_id = get_default_backdoor_set_id(graph, treatment_name, outcome_name, backdoor_variables_dict)
@@ -377,10 +375,10 @@ def identify_nie_effect(
         logger.debug("Identified expression = " + str(mediation_estimand_expr))
         estimands_dict["mediation"] = mediation_estimand_expr
         mediation_first_stage_confounders = identify_mediation_first_stage_confounders(
-            graph, treatment_name, outcome_name, mediators_names, backdoor_adjustment, estimand_type
+            graph, treatment_name, outcome_name, mediators_names, backdoor_adjustment
         )
         mediation_second_stage_confounders = identify_mediation_second_stage_confounders(
-            graph, treatment_name, mediators_names, outcome_name, backdoor_adjustment, estimand_type
+            graph, treatment_name, mediators_names, outcome_name, backdoor_adjustment
         )
     else:
         estimands_dict["mediation"] = None
@@ -415,7 +413,7 @@ def identify_nde_effect(
     # First, checking if there are any valid backdoor adjustment sets
     backdoor_sets = identify_backdoor(graph, treatment_name, outcome_name, backdoor_adjustment)
     estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
-        graph, treatment_name, outcome_name, backdoor_sets, estimands_dict, estimand_type, proceed_when_unidentifiable
+        graph, treatment_name, outcome_name, backdoor_sets, estimands_dict
     )
     # Setting default "backdoor" identification adjustment set
     default_backdoor_id = get_default_backdoor_set_id(graph, treatment_name, outcome_name, backdoor_variables_dict)
@@ -438,10 +436,10 @@ def identify_nde_effect(
         logger.debug("Identified expression = " + str(mediation_estimand_expr))
         estimands_dict["mediation"] = mediation_estimand_expr
         mediation_first_stage_confounders = identify_mediation_first_stage_confounders(
-            graph, treatment_name, outcome_name, mediators_names, backdoor_adjustment, estimand_type
+            graph, treatment_name, outcome_name, mediators_names, backdoor_adjustment
         )
         mediation_second_stage_confounders = identify_mediation_second_stage_confounders(
-            graph, treatment_name, mediators_names, outcome_name, backdoor_adjustment, estimand_type
+            graph, treatment_name, mediators_names, outcome_name, backdoor_adjustment
         )
     else:
         estimands_dict["mediation"] = None
@@ -468,9 +466,9 @@ def identify_backdoor(
     treatment_name: List[str],
     outcome_name: str,
     backdoor_adjustment: BackdoorAdjustment,
-    include_unobserved=False,
-    dseparation_algo="default",
-    direct_effect=False,
+    include_unobserved: bool = False,
+    dseparation_algo: str = "default",
+    direct_effect: bool = False,
 ):
     backdoor_sets = []
     backdoor_paths = None
@@ -624,16 +622,16 @@ def identify_efficient_backdoor(
 
 
 def find_valid_adjustment_sets(
-    graph,
-    treatment_name,
-    outcome_name,
-    backdoor_paths,
-    bdoor_graph,
-    dseparation_algo,
-    backdoor_sets,
-    filt_eligible_variables,
-    backdoor_adjustment,
-    max_iterations,
+    graph: CausalGraph,
+    treatment_name: List,
+    outcome_name: List,
+    backdoor_paths: List,
+    bdoor_graph: CausalGraph,
+    dseparation_algo: str,
+    backdoor_sets: List,
+    filt_eligible_variables: List,
+    backdoor_adjustment: BackdoorAdjustment,
+    max_iterations: int,
 ):
     num_iterations = 0
     found_valid_adjustment_set = False
@@ -688,7 +686,9 @@ def find_valid_adjustment_sets(
     return backdoor_sets, found_valid_adjustment_set
 
 
-def get_default_backdoor_set_id(graph, treatment_name, outcome_name, backdoor_sets_dict):
+def get_default_backdoor_set_id(
+    graph: CausalGraph, treatment_name: List[str], outcome_name: List[str], backdoor_sets_dict: Dict
+):
     # Adding a None estimand if no backdoor set found
     if len(backdoor_sets_dict) == 0:
         return None
@@ -713,18 +713,14 @@ def get_default_backdoor_set_id(graph, treatment_name, outcome_name, backdoor_se
 
 
 def build_backdoor_estimands_dict(
-    graph,
-    treatment_name,
-    outcome_name,
-    backdoor_sets,
-    estimands_dict,
-    estimand_type,
-    proceed_when_unidentifiable=None,
+    graph: CausalGraph,
+    treatment_name: List[str],
+    outcome_name: List[str],
+    backdoor_sets: List[str],
+    estimands_dict: Dict,
 ):
     """Build the final dict for backdoor sets by filtering unobserved variables if needed."""
     backdoor_variables_dict = {}
-    if proceed_when_unidentifiable is None:
-        proceed_when_unidentifiable = proceed_when_unidentifiable
     is_identified = [graph.all_observed(bset["backdoor_set"]) for bset in backdoor_sets]
 
     if any(is_identified):
@@ -737,16 +733,16 @@ def build_backdoor_estimands_dict(
         backdoor_sets_arr = []
 
     for i in range(len(backdoor_sets_arr)):
-        backdoor_estimand_expr = construct_backdoor_estimand(
-            estimand_type, treatment_name, outcome_name, backdoor_sets_arr[i]
-        )
+        backdoor_estimand_expr = construct_backdoor_estimand(treatment_name, outcome_name, backdoor_sets_arr[i])
         logger.debug("Identified expression = " + str(backdoor_estimand_expr))
         estimands_dict["backdoor" + str(i + 1)] = backdoor_estimand_expr
         backdoor_variables_dict["backdoor" + str(i + 1)] = backdoor_sets_arr[i]
     return estimands_dict, backdoor_variables_dict
 
 
-def identify_frontdoor(graph, treatment_name, outcome_name, dseparation_algo="default"):
+def identify_frontdoor(
+    graph: CausalGraph, treatment_name: List[str], outcome_name: List[str], dseparation_algo: str = "default"
+):
     """Find a valid frontdoor variable if it exists.
 
     Currently only supports a single variable frontdoor set.
@@ -807,7 +803,7 @@ def identify_frontdoor(graph, treatment_name, outcome_name, dseparation_algo="de
     return parse_state(frontdoor_var)
 
 
-def identify_mediation(graph, treatment_name, outcome_name):
+def identify_mediation(graph: CausalGraph, treatment_name: List[str], outcome_name: List[str]):
     """Find a valid mediator if it exists.
 
     Currently only supports a single variable mediator set.
@@ -831,7 +827,11 @@ def identify_mediation(graph, treatment_name, outcome_name):
 
 
 def identify_mediation_first_stage_confounders(
-    graph, treatment_name, outcome_name, mediators_names, backdoor_adjustment, estimand_type
+    graph: CausalGraph,
+    treatment_name: List[str],
+    outcome_name: List[str],
+    mediators_names: List[str],
+    backdoor_adjustment: BackdoorAdjustment,
 ):
     # Create estimands dict as per the API for backdoor, but do not return it
     estimands_dict = {}
@@ -842,8 +842,6 @@ def identify_mediation_first_stage_confounders(
         mediators_names,
         backdoor_sets,
         estimands_dict,
-        estimand_type,
-        proceed_when_unidentifiable=True,
     )
     # Setting default "backdoor" identification adjustment set
     default_backdoor_id = get_default_backdoor_set_id(graph, treatment_name, outcome_name, backdoor_variables_dict)
@@ -853,7 +851,11 @@ def identify_mediation_first_stage_confounders(
 
 
 def identify_mediation_second_stage_confounders(
-    graph, treatment_name, mediators_names, outcome_name, backdoor_adjustment, estimand_type
+    graph: CausalGraph,
+    treatment_name: List[str],
+    mediators_names: List[str],
+    outcome_name: List[str],
+    backdoor_adjustment: BackdoorAdjustment,
 ):
     # Create estimands dict as per the API for backdoor, but do not return it
     estimands_dict = {}
@@ -864,8 +866,6 @@ def identify_mediation_second_stage_confounders(
         outcome_name,
         backdoor_sets,
         estimands_dict,
-        estimand_type,
-        proceed_when_unidentifiable=True,
     )
     # Setting default "backdoor" identification adjustment set
     default_backdoor_id = get_default_backdoor_set_id(graph, treatment_name, outcome_name, backdoor_variables_dict)
@@ -874,7 +874,7 @@ def identify_mediation_second_stage_confounders(
     return backdoor_variables_dict
 
 
-def construct_backdoor_estimand(estimand_type, treatment_name, outcome_name, common_causes):
+def construct_backdoor_estimand(treatment_name: List[str], outcome_name: List[str], common_causes: List[str]):
     # TODO: outputs string for now, but ideally should do symbolic
     # expressions Mon 19 Feb 2018 04:54:17 PM DST
     # TODO Better support for multivariate treatments
@@ -903,7 +903,7 @@ def construct_backdoor_estimand(estimand_type, treatment_name, outcome_name, com
     return estimand
 
 
-def construct_iv_estimand(estimand_type, treatment_name, outcome_name, instrument_names):
+def construct_iv_estimand(treatment_name: List[str], outcome_name: List[str], instrument_names: List[str]):
     # TODO: support multivariate treatments better.
     expr = None
     outcome_name = outcome_name[0]
@@ -929,7 +929,9 @@ def construct_iv_estimand(estimand_type, treatment_name, outcome_name, instrumen
     return estimand
 
 
-def construct_frontdoor_estimand(estimand_type, treatment_name, outcome_name, frontdoor_variables_names):
+def construct_frontdoor_estimand(
+    treatment_name: List[str], outcome_name: List[str], frontdoor_variables_names: List[str]
+):
     # TODO: support multivariate treatments better.
     expr = None
     outcome_name = outcome_name[0]
@@ -963,7 +965,9 @@ def construct_frontdoor_estimand(estimand_type, treatment_name, outcome_name, fr
     return estimand
 
 
-def construct_mediation_estimand(estimand_type, treatment_name, outcome_name, mediators_names):
+def construct_mediation_estimand(
+    estimand_type: EstimandType, treatment_name: List[str], outcome_name: List[str], mediators_names: List[str]
+):
     # TODO: support multivariate treatments better.
     expr = None
     if estimand_type in (

@@ -1,4 +1,5 @@
 import copy
+from typing import List, Optional
 
 import sympy as sp
 
@@ -41,10 +42,10 @@ class IdentifiedEstimand:
         self.identifier_method = identifier_method
         self.no_directed_path = no_directed_path
 
-    def set_identifier_method(self, identifier_name):
+    def set_identifier_method(self, identifier_name: str):
         self.identifier_method = identifier_name
 
-    def get_backdoor_variables(self, key=None):
+    def get_backdoor_variables(self, key: Optional[str] = None):
         """Return a list containing the backdoor variables.
 
         If the calling estimator method is a backdoor method, return the
@@ -61,7 +62,7 @@ class IdentifiedEstimand:
         else:
             return self.backdoor_variables[key]
 
-    def set_backdoor_variables(self, bdoor_variables_arr, key=None):
+    def set_backdoor_variables(self, bdoor_variables_arr: List, key: Optional[str] = None):
         if key is None:
             key = self.identifier_method
         self.backdoor_variables[key] = bdoor_variables_arr
@@ -93,7 +94,7 @@ class IdentifiedEstimand:
             identifier_method=copy.deepcopy(self.identifier_method),
         )
 
-    def __str__(self, only_target_estimand=False, show_all_backdoor_sets=False):
+    def __str__(self, only_target_estimand: bool = False, show_all_backdoor_sets: bool = False):
         if self.no_directed_path:
             s = "No directed path from {0} to {1} in the causal graph.".format(
                 self.treatment_variable, self.outcome_variable

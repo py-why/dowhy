@@ -1,9 +1,9 @@
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Set, Union
 
 import networkx as nx
+import numpy as np
 
 from dowhy.causal_graph import CausalGraph
-from dowhy.causal_identifier.identify_effect import EstimandType
 from dowhy.utils.api import parse_state
 from dowhy.utils.graph_operations import find_ancestor, find_c_components, induced_graph
 from dowhy.utils.ordered_set import OrderedSet
@@ -19,7 +19,7 @@ class IDExpression:
         self._product = []
         self._sum = []
 
-    def add_product(self, element):
+    def add_product(self, element: Union[Dict, "IDExpression"]):
         """
         Add an estimator to the list of product.
 
@@ -27,7 +27,7 @@ class IDExpression:
         """
         self._product.append(element)
 
-    def add_sum(self, element):
+    def add_sum(self, element: Set):
         """
         Add variables to the list.
 
@@ -36,7 +36,7 @@ class IDExpression:
         for el in element:
             self._sum.append(el)
 
-    def get_val(self, return_type):
+    def get_val(self, return_type: str):
         """
         Get either the list of estimators (for product) or list of variables (for the marginalization).
 
@@ -49,7 +49,7 @@ class IDExpression:
         else:
             raise Exception("Provide correct return type.")
 
-    def _print_estimator(self, prefix, estimator=None, start=False):
+    def _print_estimator(self, prefix, estimator: Union[Dict, "IDExpression"] = None, start: bool = False):
         """
         Print the IDExpression object.
         """
@@ -144,11 +144,11 @@ def id_identify_effect(
 
 
 def __adjacency_matrix_identify_effect(
-    adjacency_matrix,
-    treatment_name,
-    outcome_name,
-    tsort_node_names,
-    node_names=None,
+    adjacency_matrix: np.matrix,
+    treatment_name: OrderedSet,
+    outcome_name: OrderedSet,
+    tsort_node_names: OrderedSet,
+    node_names: OrderedSet = None,
 ):
 
     node2idx, idx2node = __idx_node_mapping(node_names)
@@ -269,7 +269,7 @@ def __adjacency_matrix_identify_effect(
             )
 
 
-def __idx_node_mapping(node_names):
+def __idx_node_mapping(node_names: OrderedSet):
     """
     Obtain the node name to index and index to node name mappings.
 
