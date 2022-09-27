@@ -59,8 +59,6 @@ If you face "Solving environment" problems with conda, then try :code:`conda upd
 Installing on Azure Machine Learning
 ------------------------------------
 
-Eli Y. Kling {https://www.linkedin.com/in/elikling/}
-
 In Azure Machine Learning it is not that straight forward to identify in the terminal window the python (Conda) envornoments used by the notebook. Thus, it is easier to run shell commands from within the notebook. The secret is NOT to use the ! magic but the %.
 
 **Getting the latest release**

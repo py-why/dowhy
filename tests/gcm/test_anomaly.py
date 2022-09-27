@@ -253,7 +253,7 @@ def test_given_data_with_change_in_mechanism_when_estimate_distribution_change_s
     assert max(scores.items(), key=operator.itemgetter(1))[0] == "X2"
 
 
-@flaky(max_runs=5)
+@flaky(max_runs=3)
 def test_given_multivariate_inputs_when_estimate_anomaly_scores_then_does_not_raise_error():
     """This test verifies that estimate_anomaly_scores correctly handles multivariate input features, which
     caused problems in an earlier version."""
@@ -272,11 +272,11 @@ def test_given_multivariate_inputs_when_estimate_anomaly_scores_then_does_not_ra
     )
     data_anomaly = pd.DataFrame(
         {
-            "X0": data.iloc[0:1, 0] * 10 + data.iloc[0:1, 1] + data.iloc[0:1, 2] + data.iloc[0:1, 3],
-            "X1": data.iloc[0:1, 0] * 10,
-            "X2": data.iloc[0:1, 1],
-            "X3": data.iloc[0:1, 2],
-            "X4": data.iloc[0:1, 3],
+            "X0": [13],  # X1 + X2 + X3 + X4
+            "X1": [10],
+            "X2": [1],
+            "X3": [1],
+            "X4": [1],
         }
     )
 

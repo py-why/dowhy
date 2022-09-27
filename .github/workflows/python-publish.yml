@@ -20,10 +20,10 @@ jobs:
       with:
         python-version: '3.8'
     
-    - name: Install Poetry 1.1.14
+    - name: Install Poetry 1.2.0
       uses: abatilo/actions-poetry@v2.0.0
       with:
-        poetry-version: '1.1.14'
+        poetry-version: '1.2.0'
 
     - name: Install Poetry Dynamic Versioning Plugin
       run: pip install poetry-dynamic-versioning
@@ -32,10 +32,7 @@ jobs:
       run: poetry install
         
     - name: Build and publish
-      env:
-        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
         poetry-dynamic-versioning
         poetry build
-        poetry run poe uploadPackage
+        poetry publish --username ${{ secrets.PYPI_USERNAME }} --password ${{ secrets.PYPI_PASSWORD }}

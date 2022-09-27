@@ -326,9 +326,9 @@ class LinearSensitivityAnalyzer:
         critical_estimate = self.null_hypothesis_effect
         contour_values = np.zeros((len(r2yu_tw), len(r2tu_w)))
         for i in range(len(r2yu_tw)):
-            y = r2tu_w[i]
+            y = r2yu_tw[i]
             for j in range(len(r2tu_w)):
-                x = r2yu_tw[j]
+                x = r2tu_w[j]
                 benchmarking_results = self.compute_bias_adjusted(r2tu_w=x, r2yu_tw=y)
                 estimate = benchmarking_results["bias_adjusted_estimate"]
                 contour_values[i][j] = estimate
