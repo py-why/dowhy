@@ -1,5 +1,7 @@
 import copy
 import logging
+from enum import Enum
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -7,8 +9,26 @@ from joblib import Parallel, delayed
 from tqdm.auto import tqdm
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
-from dowhy.causal_refuter import CausalRefutation, CausalRefuter
+from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
+from dowhy.causal_refuter import CausalRefutation, CausalRefuter, test_significance
 from dowhy.utils.api import parse_state
+
+logger = logging.getLogger(__name__)
+
+
+# Default value of the p value taken for the distribution
+DEFAULT_PROBABILITY_OF_BINOMIAL = 0.5
+# Number of Trials: Number of cointosses to understand if a sample gets the treatment
+DEFAULT_NUMBER_OF_TRIALS = 1
+# Mean of the Normal Distribution
+DEFAULT_MEAN_OF_NORMAL = 0
+# Standard Deviation of the Normal Distribution
+DEFAULT_STD_DEV_OF_NORMAL = 0
+
+
+class PlaceboType(Enum):
+    DEFAULT = "Random Data"
+    PERMUTE = "permute"
 
 
 class PlaceboTreatmentRefuter(CausalRefuter):
@@ -32,15 +52,6 @@ class PlaceboTreatmentRefuter(CausalRefuter):
     :type verbose: int, optional
     """
 
-    # Default value of the p value taken for the distribution
-    DEFAULT_PROBABILITY_OF_BINOMIAL = 0.5
-    # Number of Trials: Number of cointosses to understand if a sample gets the treatment
-    DEFAULT_NUMBER_OF_TRIALS = 1
-    # Mean of the Normal Distribution
-    DEFAULT_MEAN_OF_NORMAL = 0
-    # Standard Deviation of the Normal Distribution
-    DEFAULT_STD_DEV_OF_NORMAL = 0
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._placebo_type = kwargs.pop("placebo_type", None)
@@ -52,159 +63,171 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         self.logger = logging.getLogger(__name__)
 
     def refute_estimate(self, show_progress_bar=False):
-        # only permute is supported for iv methods
-        if self._target_estimand.identifier_method.startswith("iv"):
-            if self._placebo_type != "permute":
-                self.logger.error(
-                    "Only placebo_type=''permute'' is supported for creating placebo for instrumental variable estimation methods"
-                )
-                raise ValueError(
-                    "Only placebo_type=''permute'' is supported for creating placebo for instrumental variable estimation methods."
-                )
-
-        # We need to change the identified estimand
-        # We make a copy as a safety measure, we don't want to change the
-        # original DataFrame
-        identified_estimand = copy.deepcopy(self._target_estimand)
-        identified_estimand.treatment_variable = ["placebo"]
-        if self._target_estimand.identifier_method.startswith("iv"):
-            identified_estimand.instrumental_variables = [
-                "placebo_" + s for s in identified_estimand.instrumental_variables
-            ]
-            # For IV methods, the estimating_instrument_names should also be
-            # changed. So we change it inside the estimate and then restore it
-            # back at the end of this method.
-            if (
-                self._estimate.params["method_params"] is not None
-                and "iv_instrument_name" in self._estimate.params["method_params"]
-            ):
-                self._estimate.params["method_params"]["iv_instrument_name"] = [
-                    "placebo_" + s for s in parse_state(self._estimate.params["method_params"]["iv_instrument_name"])
-                ]
-
-        self.logger.info(
-            "Refutation over {} simulated datasets of {} treatment".format(self._num_simulations, self._placebo_type)
+        refute = refute_placebo_treatment(
+            data=self._data,
+            target_estimand=self._target_estimand,
+            estimate=self._estimate,
+            treatment_names=self._treatment_name,
+            num_simulations=self._num_simulations,
+            placebo_type=PlaceboType(self._placebo_type),
+            random_state=self._random_state,
+            show_progress_bar=show_progress_bar,
+            n_jobs=self._n_jobs,
+            verbose=self._verbose,
         )
 
-        num_rows = self._data.shape[0]
-        treatment_name = self._treatment_name[0]  # Extract the name of the treatment variable
-        type_dict = dict(self._data.dtypes)
-
-        def refute_once():
-            if self._placebo_type == "permute":
-                permuted_idx = None
-                if self._random_state is None:
-                    permuted_idx = np.random.choice(self._data.shape[0], size=self._data.shape[0], replace=False)
-
-                else:
-                    permuted_idx = self._random_state.choice(
-                        self._data.shape[0], size=self._data.shape[0], replace=False
-                    )
-                new_treatment = self._data[self._treatment_name].iloc[permuted_idx].values
-                if self._target_estimand.identifier_method.startswith("iv"):
-                    new_instruments_values = (
-                        self._data[self._estimate.estimator.estimating_instrument_names].iloc[permuted_idx].values
-                    )
-                    new_instruments_df = pd.DataFrame(
-                        new_instruments_values,
-                        columns=[
-                            "placebo_" + s
-                            for s in self._data[self._estimate.estimator.estimating_instrument_names].columns
-                        ],
-                    )
-            else:
-                if "float" in type_dict[treatment_name].name:
-                    self.logger.info(
-                        "Using a Normal Distribution with Mean:{} and Variance:{}".format(
-                            PlaceboTreatmentRefuter.DEFAULT_MEAN_OF_NORMAL,
-                            PlaceboTreatmentRefuter.DEFAULT_STD_DEV_OF_NORMAL,
-                        )
-                    )
-                    new_treatment = (
-                        np.random.randn(num_rows) * PlaceboTreatmentRefuter.DEFAULT_STD_DEV_OF_NORMAL
-                        + PlaceboTreatmentRefuter.DEFAULT_MEAN_OF_NORMAL
-                    )
-
-                elif "bool" in type_dict[treatment_name].name:
-                    self.logger.info(
-                        "Using a Binomial Distribution with {} trials and {} probability of success".format(
-                            PlaceboTreatmentRefuter.DEFAULT_NUMBER_OF_TRIALS,
-                            PlaceboTreatmentRefuter.DEFAULT_PROBABILITY_OF_BINOMIAL,
-                        )
-                    )
-                    new_treatment = np.random.binomial(
-                        PlaceboTreatmentRefuter.DEFAULT_NUMBER_OF_TRIALS,
-                        PlaceboTreatmentRefuter.DEFAULT_PROBABILITY_OF_BINOMIAL,
-                        num_rows,
-                    ).astype(bool)
-
-                elif "int" in type_dict[treatment_name].name:
-                    self.logger.info(
-                        "Using a Discrete Uniform Distribution lying between {} and {}".format(
-                            self._data[treatment_name].min(), self._data[treatment_name].max()
-                        )
-                    )
-                    new_treatment = np.random.randint(
-                        low=self._data[treatment_name].min(), high=self._data[treatment_name].max(), size=num_rows
-                    )
-
-                elif "category" in type_dict[treatment_name].name:
-                    categories = self._data[treatment_name].unique()
-                    self.logger.info(
-                        "Using a Discrete Uniform Distribution with the following categories:{}".format(categories)
-                    )
-                    sample = np.random.choice(categories, size=num_rows)
-                    new_treatment = pd.Series(sample, index=self._data.index).astype("category")
-
-            # Create a new column in the data by the name of placebo
-            new_data = self._data.assign(placebo=new_treatment)
-            if self._target_estimand.identifier_method.startswith("iv"):
-                new_data = pd.concat((new_data, new_instruments_df), axis=1)
-            # Sanity check the data
-            self.logger.debug(new_data[0:10])
-            new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, self._estimate)
-            new_effect = new_estimator.estimate_effect()
-            return new_effect.value
-
-        # Run refutation in parallel
-        sample_estimates = Parallel(n_jobs=self._n_jobs, verbose=self._verbose)(
-            delayed(refute_once)()
-            for _ in tqdm(
-                range(self._num_simulations),
-                disable=not show_progress_bar,
-                colour=CausalRefuter.PROGRESS_BAR_COLOR,
-                desc="Refuting Estimates: ",
-            )
-        )
-
-        # for _ in range(self._num_simulations))
-        sample_estimates = np.array(sample_estimates)
-
-        # Restoring the value of iv_instrument_name
-        if self._target_estimand.identifier_method.startswith("iv"):
-            if (
-                self._estimate.params["method_params"] is not None
-                and "iv_instrument_name" in self._estimate.params["method_params"]
-            ):
-                self._estimate.params["method_params"]["iv_instrument_name"] = [
-                    s.replace("placebo_", "", 1)
-                    for s in parse_state(self._estimate.params["method_params"]["iv_instrument_name"])
-                ]
-        refute = CausalRefutation(
-            self._estimate.value, np.mean(sample_estimates), refutation_type="Refute: Use a Placebo Treatment"
-        )
-
-        # Note: We hardcode the estimate value to ZERO as we want to check if it falls in the distribution of the refuter
-        # Ideally we should expect that ZERO should fall in the distribution of the effect estimates as we have severed any causal
-        # relationship between the treatment and the outcome.
-        dummy_estimator = CausalEstimate(
-            estimate=0,
-            control_value=self._estimate.control_value,
-            treatment_value=self._estimate.treatment_value,
-            target_estimand=self._estimate.target_estimand,
-            realized_estimand_expr=self._estimate.realized_estimand_expr,
-        )
-
-        refute.add_significance_test_results(self.test_significance(dummy_estimator, sample_estimates))
         refute.add_refuter(self)
+
         return refute
+
+
+def _refute_once(
+    data: pd.DataFrame,
+    target_estimand: IdentifiedEstimand,
+    estimate: CausalEstimate,
+    treatment_names: List[str],
+    type_dict: Dict,
+    placebo_type: PlaceboType = PlaceboType.DEFAULT,
+    random_state: Optional[Union[int, np.random.RandomState]] = None,
+):
+    if placebo_type == PlaceboType.PERMUTE:
+        permuted_idx = None
+        if random_state is None:
+            permuted_idx = np.random.choice(data.shape[0], size=data.shape[0], replace=False)
+
+        else:
+            permuted_idx = random_state.choice(data.shape[0], size=data.shape[0], replace=False)
+        new_treatment = data[treatment_names].iloc[permuted_idx].values
+        if target_estimand.identifier_method.startswith("iv"):
+            new_instruments_values = data[estimate.estimator.estimating_instrument_names].iloc[permuted_idx].values
+            new_instruments_df = pd.DataFrame(
+                new_instruments_values,
+                columns=["placebo_" + s for s in data[estimate.estimator.estimating_instrument_names].columns],
+            )
+    else:
+        if "float" in type_dict[treatment_names[0]].name:
+            logger.info(
+                "Using a Normal Distribution with Mean:{} and Variance:{}".format(
+                    DEFAULT_MEAN_OF_NORMAL,
+                    DEFAULT_STD_DEV_OF_NORMAL,
+                )
+            )
+            new_treatment = np.random.randn(data.shape[0]) * DEFAULT_STD_DEV_OF_NORMAL + DEFAULT_MEAN_OF_NORMAL
+
+        elif "bool" in type_dict[treatment_names[0]].name:
+            logger.info(
+                "Using a Binomial Distribution with {} trials and {} probability of success".format(
+                    DEFAULT_NUMBER_OF_TRIALS,
+                    DEFAULT_PROBABILITY_OF_BINOMIAL,
+                )
+            )
+            new_treatment = np.random.binomial(
+                DEFAULT_NUMBER_OF_TRIALS,
+                DEFAULT_PROBABILITY_OF_BINOMIAL,
+                data.shape[0],
+            ).astype(bool)
+
+        elif "int" in type_dict[treatment_names[0]].name:
+            logger.info(
+                "Using a Discrete Uniform Distribution lying between {} and {}".format(
+                    data[treatment_names[0]].min(), data[treatment_names[0]].max()
+                )
+            )
+            new_treatment = np.random.randint(
+                low=data[treatment_names[0]].min(), high=data[treatment_names[0]].max(), size=data.shape[0]
+            )
+
+        elif "category" in type_dict[treatment_names[0]].name:
+            categories = data[treatment_names[0]].unique()
+            logger.info("Using a Discrete Uniform Distribution with the following categories:{}".format(categories))
+            sample = np.random.choice(categories, size=data.shape[0])
+            new_treatment = pd.Series(sample, index=data.index).astype("category")
+
+    # Create a new column in the data by the name of placebo
+    new_data = data.assign(placebo=new_treatment)
+    if target_estimand.identifier_method.startswith("iv"):
+        new_data = pd.concat((new_data, new_instruments_df), axis=1)
+    # Sanity check the data
+    logger.debug(new_data[0:10])
+    new_estimator = CausalEstimator.get_estimator_object(new_data, target_estimand, estimate)
+    new_effect = new_estimator.estimate_effect()
+    return new_effect.value
+
+
+def refute_placebo_treatment(
+    data: pd.DataFrame,
+    target_estimand: IdentifiedEstimand,
+    estimate: CausalEstimate,
+    treatment_names: List,
+    num_simulations: int = 100,
+    placebo_type: PlaceboType = PlaceboType.DEFAULT,
+    random_state: Optional[Union[int, np.random.RandomState]] = None,
+    show_progress_bar: bool = False,
+    n_jobs: int = 1,
+    verbose: int = 0,
+) -> CausalRefutation:
+    # only permute is supported for iv methods
+    if target_estimand.identifier_method.startswith("iv"):
+        if placebo_type != PlaceboType.PERMUTE:
+            logger.error(
+                "Only placebo_type=''permute'' is supported for creating placebo for instrumental variable estimation methods"
+            )
+            raise ValueError(
+                "Only placebo_type=''permute'' is supported for creating placebo for instrumental variable estimation methods."
+            )
+
+    # We need to change the identified estimand
+    # We make a copy as a safety measure, we don't want to change the
+    # original DataFrame
+    identified_estimand = copy.deepcopy(target_estimand)
+    identified_estimand.treatment_variable = ["placebo"]
+
+    if target_estimand.identifier_method.startswith("iv"):
+        identified_estimand.instrumental_variables = [
+            "placebo_" + s for s in identified_estimand.instrumental_variables
+        ]
+        # For IV methods, the estimating_instrument_names should also be
+        # changed. Create a copy to avoid modifying original object
+        if estimate.params["method_params"] is not None and "iv_instrument_name" in estimate.params["method_params"]:
+            estimate = copy.deepcopy(estimate)
+            estimate.params["method_params"]["iv_instrument_name"] = [
+                "placebo_" + s for s in parse_state(estimate.params["method_params"]["iv_instrument_name"])
+            ]
+
+    logger.info("Refutation over {} simulated datasets of {} treatment".format(num_simulations, placebo_type))
+
+    type_dict = dict(data.dtypes)
+
+    # Run refutation in parallel
+    sample_estimates = Parallel(n_jobs=n_jobs, verbose=verbose)(
+        delayed(_refute_once)(
+            data, identified_estimand, estimate, treatment_names, type_dict, placebo_type, random_state
+        )
+        for _ in tqdm(
+            range(num_simulations),
+            disable=not show_progress_bar,
+            colour=CausalRefuter.PROGRESS_BAR_COLOR,
+            desc="Refuting Estimates: ",
+        )
+    )
+
+    sample_estimates = np.array(sample_estimates)
+
+    refute = CausalRefutation(
+        estimate.value, np.mean(sample_estimates), refutation_type="Refute: Use a Placebo Treatment"
+    )
+
+    # Note: We hardcode the estimate value to ZERO as we want to check if it falls in the distribution of the refuter
+    # Ideally we should expect that ZERO should fall in the distribution of the effect estimates as we have severed any causal
+    # relationship between the treatment and the outcome.
+    dummy_estimator = CausalEstimate(
+        estimate=0,
+        control_value=estimate.control_value,
+        treatment_value=estimate.treatment_value,
+        target_estimand=estimate.target_estimand,
+        realized_estimand_expr=estimate.realized_estimand_expr,
+    )
+
+    refute.add_significance_test_results(test_significance(dummy_estimator, sample_estimates))
+
+    return refute

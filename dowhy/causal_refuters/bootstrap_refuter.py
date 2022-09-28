@@ -1,11 +1,18 @@
 import logging
 import random
+from typing import List, Optional, Union
 
 import numpy as np
+import pandas as pd
+from joblib import Parallel, delayed
 from sklearn.utils import resample
+from tqdm.auto import tqdm
 
-from dowhy.causal_estimator import CausalEstimator
-from dowhy.causal_refuter import CausalRefutation, CausalRefuter
+from dowhy.causal_estimator import CausalEstimate, CausalEstimator
+from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
+from dowhy.causal_refuter import CausalRefutation, CausalRefuter, choose_variables, test_significance
+
+logger = logging.getLogger(__name__)
 
 
 class BootstrapRefuter(CausalRefuter):
@@ -58,87 +65,139 @@ class BootstrapRefuter(CausalRefuter):
         super().__init__(*args, **kwargs)
         self._num_simulations = kwargs.pop("num_simulations", CausalRefuter.DEFAULT_NUM_SIMULATIONS)
         self._sample_size = kwargs.pop("sample_size", len(self._data))
-        required_variables = kwargs.pop("required_variables", True)
+        self._required_variables = kwargs.pop("required_variables", True)
         self._noise = kwargs.pop("noise", BootstrapRefuter.DEFAULT_STD_DEV)
         self._probability_of_change = kwargs.pop("probability_of_change", None)
         self._random_state = kwargs.pop("random_state", None)
 
         self.logger = logging.getLogger(__name__)
 
-        self._chosen_variables = self.choose_variables(required_variables)
-
-        if self._chosen_variables is None:
-            self.logger.info("INFO: There are no chosen variables")
-        else:
-            self.logger.info("INFO: The chosen variables are: " + ",".join(self._chosen_variables))
-
-        if self._probability_of_change is None:
-            if self._noise > 1:
-                self.logger.error(
-                    "Error in using noise:{} for Binary Flip. The value is greater than 1".format(self._noise)
-                )
-                raise ValueError("The value for Binary Flip cannot be greater than 1")
-            else:
-                self._probability_of_change = self._noise
-        elif self._probability_of_change > 1:
-            self.logger.error(
-                "The probability of flip is: {}, However, this value cannot be greater than 1".format(
-                    self._probability_of_change
-                )
-            )
-            raise ValueError("Probability of Flip cannot be greater than 1")
-
-    def refute_estimate(self, *args, **kwargs):
-        if self._sample_size > len(self._data):
-            self.logger.warning("The sample size is larger than the population size")
-
-        sample_estimates = np.zeros(self._num_simulations)
-        self.logger.info(
-            "Refutation over {} simulated datasets of size {} each".format(self._num_simulations, self._sample_size)
+    def refute_estimate(self, show_progress_bar: bool = False, *args, **kwargs):
+        refute = refute_bootstrap(
+            data=self._data,
+            target_estimand=self._target_estimand,
+            estimate=self._estimate,
+            num_simulations=self._num_simulations,
+            random_state=self._random_state,
+            sample_size=self._sample_size,
+            required_variables=self._required_variables,
+            noise=self._noise,
+            probability_of_change=self._probability_of_change,
+            show_progress_bar=show_progress_bar,
+            n_jobs=self._n_jobs,
+            verbose=self._verbose,
         )
-
-        for index in range(self._num_simulations):
-            if self._random_state is None:
-                new_data = resample(self._data, n_samples=self._sample_size)
-            else:
-                new_data = resample(self._data, n_samples=self._sample_size, random_state=self._random_state)
-
-            if self._chosen_variables is not None:
-                for variable in self._chosen_variables:
-
-                    if ("float" or "int") in new_data[variable].dtype.name:
-                        scaling_factor = new_data[variable].std()
-                        new_data[variable] += np.random.normal(
-                            loc=0.0, scale=self._noise * scaling_factor, size=self._sample_size
-                        )
-
-                    elif "bool" in new_data[variable].dtype.name:
-                        probs = np.random.uniform(0, 1, self._sample_size)
-                        new_data[variable] = np.where(
-                            probs < self._probability_of_change, np.logical_not(new_data[variable]), new_data[variable]
-                        )
-
-                    elif "category" in new_data[variable].dtype.name:
-                        categories = new_data[variable].unique()
-                        # Find the set difference for each row
-                        changed_data = new_data[variable].apply(lambda row: list(set(categories) - set([row])))
-                        # Choose one out of the remaining
-                        changed_data = changed_data.apply(lambda row: random.choice(row))
-                        new_data[variable] = np.where(probs < self._probability_of_change, changed_data)
-                        new_data[variable].astype("category")
-
-            new_estimator = CausalEstimator.get_estimator_object(new_data, self._target_estimand, self._estimate)
-            new_effect = new_estimator.estimate_effect()
-            sample_estimates[index] = new_effect.value
-
-        refute = CausalRefutation(
-            self._estimate.value, np.mean(sample_estimates), refutation_type="Refute: Bootstrap Sample Dataset"
-        )
-
-        # We want to see if the estimate falls in the same distribution as the one generated by the refuter
-        # Ideally that should be the case as running bootstrap should not have a significant effect on the ability
-        # of the treatment to affect the outcome
-        refute.add_significance_test_results(self.test_significance(self._estimate, sample_estimates))
-
         refute.add_refuter(self)
         return refute
+
+
+def _refute_once(
+    data: pd.DataFrame,
+    target_estimand: IdentifiedEstimand,
+    estimate: CausalEstimate,
+    chosen_variables: Optional[List] = None,
+    random_state: Optional[Union[int, np.random.RandomState]] = None,
+    sample_size: Optional[int] = None,
+    noise: float = 0.1,
+    probability_of_change: Optional[float] = None,
+):
+    if random_state is None:
+        new_data = resample(data, n_samples=sample_size)
+    else:
+        new_data = resample(data, n_samples=sample_size, random_state=random_state)
+
+    if chosen_variables is not None:
+        for variable in chosen_variables:
+
+            if ("float" or "int") in new_data[variable].dtype.name:
+                scaling_factor = new_data[variable].std()
+                new_data[variable] += np.random.normal(loc=0.0, scale=noise * scaling_factor, size=sample_size)
+
+            elif "bool" in new_data[variable].dtype.name:
+                probs = np.random.uniform(0, 1, sample_size)
+                new_data[variable] = np.where(
+                    probs < probability_of_change, np.logical_not(new_data[variable]), new_data[variable]
+                )
+
+            elif "category" in new_data[variable].dtype.name:
+                categories = new_data[variable].unique()
+                # Find the set difference for each row
+                changed_data = new_data[variable].apply(lambda row: list(set(categories) - set([row])))
+                # Choose one out of the remaining
+                changed_data = changed_data.apply(lambda row: random.choice(row))
+                new_data[variable] = np.where(probs < probability_of_change, changed_data)
+                new_data[variable].astype("category")
+
+    new_estimator = CausalEstimator.get_estimator_object(new_data, target_estimand, estimate)
+    new_effect = new_estimator.estimate_effect()
+    return new_effect.value
+
+
+def refute_bootstrap(
+    data: pd.DataFrame,
+    target_estimand: IdentifiedEstimand,
+    estimate: CausalEstimate,
+    num_simulations: int = 100,
+    random_state: Optional[Union[int, np.random.RandomState]] = None,
+    sample_size: Optional[int] = None,
+    required_variables: bool = True,
+    noise: float = 0.1,
+    probability_of_change: Optional[float] = None,
+    show_progress_bar: bool = False,
+    n_jobs: int = 1,
+    verbose: int = 0,
+) -> CausalRefutation:
+    if sample_size is None:
+        sample_size = len(data)
+
+    chosen_variables = choose_variables(
+        required_variables,
+        target_estimand.get_backdoor_variables()
+        + target_estimand.instrumental_variables
+        + estimate.params["effect_modifiers"],
+    )
+
+    if chosen_variables is None:
+        logger.info("INFO: There are no chosen variables")
+    else:
+        logger.info("INFO: The chosen variables are: " + ",".join(chosen_variables))
+
+    if probability_of_change is None and noise > 1:
+        logger.error("Error in using noise:{} for Binary Flip. The value is greater than 1".format(noise))
+        raise ValueError("The value for Binary Flip cannot be greater than 1")
+    elif probability_of_change is None and noise <= 1:
+        probability_of_change = noise
+    elif probability_of_change > 1:
+        logger.error(
+            "The probability of flip is: {}, However, this value cannot be greater than 1".format(probability_of_change)
+        )
+        raise ValueError("Probability of Flip cannot be greater than 1")
+
+    if sample_size > len(data):
+        logger.warning("The sample size is larger than the population size")
+
+    logger.info("Refutation over {} simulated datasets of size {} each".format(num_simulations, sample_size))
+
+    sample_estimates = Parallel(n_jobs=n_jobs, verbose=verbose)(
+        delayed(_refute_once)(
+            data, target_estimand, estimate, chosen_variables, random_state, sample_size, noise, probability_of_change
+        )
+        for _ in tqdm(
+            range(num_simulations),
+            colour=CausalRefuter.PROGRESS_BAR_COLOR,
+            disable=not show_progress_bar,
+            desc="Refuting Estimates: ",
+        )
+    )
+    sample_estimates = np.array(sample_estimates)
+
+    refute = CausalRefutation(
+        estimate.value, np.mean(sample_estimates), refutation_type="Refute: Bootstrap Sample Dataset"
+    )
+
+    # We want to see if the estimate falls in the same distribution as the one generated by the refuter
+    # Ideally that should be the case as running bootstrap should not have a significant effect on the ability
+    # of the treatment to affect the outcome
+    refute.add_significance_test_results(test_significance(estimate, sample_estimates))
+
+    return refute

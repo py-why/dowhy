@@ -2,6 +2,7 @@ from typing import List, Protocol, Union
 
 from dowhy.causal_graph import CausalGraph
 from dowhy.causal_identifier.auto_identifier import BackdoorAdjustment, EstimandType, auto_identify_effect
+from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 
 
 class CausalIdentifier(Protocol):
@@ -31,7 +32,7 @@ def identify_effect(
     graph: CausalGraph,
     treatment_name: Union[str, List[str]],
     outcome_name: Union[str, List[str]],
-):
+) -> IdentifiedEstimand:
     """Identify the causal effect to be estimated based on a CausalGraph
 
     :param graph: CausalGraph to be analyzed

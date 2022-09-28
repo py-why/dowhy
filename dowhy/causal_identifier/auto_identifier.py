@@ -137,7 +137,7 @@ def auto_identify_effect(
     optimize_backdoor: bool = False,
     costs: Optional[List] = None,
     **kwargs,
-):
+) -> IdentifiedEstimand:
     """Main method that returns an identified estimand (if one exists).
 
     If estimand_type is non-parametric ATE, then  uses backdoor, instrumental variable and frontdoor identification methods,  to check if an identified estimand exists, based on the causal graph.

@@ -111,7 +111,7 @@ def id_identify_effect(
     outcome_name: Union[str, List[str]],
     node_names: Optional[Union[str, List[str]]] = None,
     **kwargs,
-):
+) -> IDExpression:
     """
     Implementation of the ID algorithm.
     Link - https://ftp.cs.ucla.edu/pub/stat_ser/shpitser-thesis.pdf
