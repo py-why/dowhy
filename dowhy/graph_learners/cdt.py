@@ -1,3 +1,5 @@
+"""The CDT graph learner module."""
+
 import networkx as nx
 import numpy as np
 
@@ -9,21 +11,20 @@ from . import get_library_class_object
 
 class CDT(GraphLearner):
     """
-    Causal discivery using the Causal Discovery Toolbox.
+    Causal discovery using the Causal Discovery Toolbox.
+
     Link: https://github.com/FenTechSolutions/CausalDiscoveryToolbox
     """
 
     def __init__(self, data, full_method_name, *args, **kwargs):
+        """Construct a new CDT graph-learning strategy."""
         super().__init__(data, full_method_name, *args, **kwargs)
 
         library_class = get_library_class_object(full_method_name)
         self._method = library_class(*args, **kwargs)
 
     def learn_graph(self, labels=None):
-        """
-        Discover causal graph and return the graph in DOT format.
-
-        """
+        """Discover causal graph and return the graph in DOT format."""
         graph = self._method.predict(self._data)
 
         # Get adjacency matrix

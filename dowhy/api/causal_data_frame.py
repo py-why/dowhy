@@ -1,3 +1,5 @@
+"""The causal_data_frame module."""
+
 import pandas as pd
 
 import dowhy.do_samplers as do_samplers
@@ -7,9 +9,11 @@ from dowhy.utils.api import parse_state
 
 @pd.api.extensions.register_dataframe_accessor("causal")
 class CausalAccessor(object):
+    """An accessor object for the pandas Dataframe under the 'causal' namespace."""
+
     def __init__(self, pandas_obj):
         """
-        An accessor for the pandas.DataFrame under the `causal` namespace.
+        Construct a new CausalAccessor.
 
         :param pandas_obj:
         """
@@ -45,8 +49,9 @@ class CausalAccessor(object):
         stateful=False,
     ):
         """
-        The do-operation implemented with sampling. This will return a pandas.DataFrame with the outcome
-        variable(s) replaced with samples from P(Y|do(X=x)).
+        Execute the do-operation with sampling.
+        
+        This will return a pandas.DataFrame with the outcome variable(s) replaced with samples from P(Y|do(X=x)).
 
         If the value of `x` is left unspecified (e.g. as a string or list), then the original values of `x` are left in
         the DataFrame, and Y is sampled from its respective P(Y|do(x)). If the value of `x` is specified (passed with a
@@ -88,7 +93,7 @@ class CausalAccessor(object):
 
         :return: pandas.DataFrame: A DataFrame containing the sampled outcome
         """
-        x, keep_original_treatment = self.parse_x(x)
+        x, keep_original_treatment = self._parse_x(x)
         outcome = parse_state(outcome)
         if not stateful or method != self._method:
             self.reset()
@@ -142,7 +147,8 @@ class CausalAccessor(object):
 
     def convert_to_custom_type(self, input_type):
         """
-        This function converts a DataFrame type to a custom type used within dowhy.
+        Convert a DataFrame type to a custom type used within dowhy.
+
         We make use of the following mapping
         int -> 'c'
         float -> 'c'
@@ -162,7 +168,7 @@ class CausalAccessor(object):
         else:
             raise Exception("{} format is not supported".format(input_type))
 
-    def parse_x(self, x):
+    def _parse_x(self, x):
         if type(x) == str:
             return {x: None}, True
         if type(x) == list:

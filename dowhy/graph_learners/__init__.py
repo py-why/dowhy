@@ -1,3 +1,5 @@
+"""The graph_learners package."""
+
 import string
 from importlib import import_module
 
@@ -5,10 +7,7 @@ from dowhy.graph_learner import GraphLearner
 
 
 def get_discovery_class_object(method_name, *args, **kwargs):
-    """
-    Import class from graph_learners.
-
-    """
+    """Import class from graph_learners."""
     # from https://www.bnmetrics.com/blog/factory-pattern-in-python3-simple-version
     try:
         module_name = method_name
@@ -24,10 +23,7 @@ def get_discovery_class_object(method_name, *args, **kwargs):
 
 
 def get_library_class_object(module_method_name, *args, **kwargs):
-    """
-    Import library for causal inference.
-
-    """
+    """Import library for causal inference."""
     # from https://www.bnmetrics.com/blog/factory-pattern-in-python3-simple-version
     try:
         (module_name, _, class_name) = module_method_name.rpartition(".")

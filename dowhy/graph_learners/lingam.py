@@ -1,3 +1,5 @@
+"""The LINGAM causal discovery package."""
+
 import networkx as nx
 import numpy as np
 
@@ -10,20 +12,19 @@ from . import get_library_class_object
 class LINGAM(GraphLearner):
     """
     Causal discovery using the lingam library.
+
     Link: https://github.com/cdt15/lingam
     """
 
     def __init__(self, data, full_method_name, *args, **kwargs):
+        """Construct a new LINGAM graph-learning strategy."""
         super().__init__(data, full_method_name, *args, **kwargs)
 
         library_class = get_library_class_object(full_method_name)
         self._method = library_class(*args, **kwargs)
 
     def learn_graph(self, labels=None):
-        """
-        Discover causal graph and return the graph in DOT format.
-
-        """
+        """Discover causal graph and return the graph in DOT format."""
         self._method.fit(self._data)
         self._adjacency_matrix = self._method.adjacency_matrix_
 
