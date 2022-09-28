@@ -7,14 +7,12 @@ name = "dowhy"
 #
 version = "0.0.0"
 description = "DoWhy is a Python library for causal inference that supports explicit modeling and testing of causal assumptions"
-authors = [
-    "PyWhy Community <amshar@microsoft.com>"
-]
+authors = ["PyWhy Community <amshar@microsoft.com>"]
 maintainers = []
 license = "MIT"
 documentation = "https://py-why.github.io/dowhy"
 repository = "https://github.com/pywhy/dowhy"
-classifiers = [  
+classifiers = [
     'Development Status :: 4 - Beta',
     'License :: OSI Approved :: MIT License',
     'Programming Language :: Python :: 3.8',
@@ -25,10 +23,14 @@ keywords = [
     'machine-learning',
     'causal-inference',
     'statistics',
-    'graphical-model'
+    'graphical-model',
 ]
 include = ['docs', 'tests', 'CONTRIBUTING.md', 'LICENSE']
 readme = 'README.rst'
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry-dynamic-versioning]
 enable = true
@@ -46,6 +48,7 @@ files = ["dowhy/__init__.py"]
 #
 [tool.poetry.dependencies]
 python = ">=3.8,<3.10"
+cython = "^0.29.32"
 scipy = "^1.8.1"
 statsmodels = "^0.13.2"
 numpy = "^1.23.1"
@@ -55,28 +58,29 @@ sympy = "^1.10.1"
 scikit-learn = "1.0.2"
 pydot = "^1.4.2"
 joblib = "^1.1.0"
-pygraphviz = {version = "^1.9", optional = true}
-matplotlib = {version = "^3.5.3", optional = true}
-econml = {version = "*", optional = true}
+pygraphviz = { version = "^1.9", optional = true }
+econml = { version = "*", optional = true }
 tqdm = "^4.64.0"
 
-#
 # CausalML Extra (causalml is wired to use llvmlite 0.36)
-#
-causalml = {version = "^0.12.3", optional = true}
-llvmlite = {version = "^0.36.0", optional = true}
+causalml = { git = "https://github.com/uber/causalml", branch="master", optional = true }
+llvmlite = { version = "^0.36.0", optional = true }
+
+#Plotting Extra
+matplotlib = { version = "^3.5.3", optional = true }
 
 [tool.poetry.extras]
 plotting = ["matplotlib"]
-causalml = ["causalml", "llvmlite"]
+causalml = ["causalml", "llvmlite", "cython"]
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 poethepoet = "^0.16.0"
 flake8 = "^4.0.1"
-black = {version = "^22.6.0", extras = ["jupyter"]}
+black = { version = "^22.6.0", extras = ["jupyter"] }
 isort = "^5.10.1"
 pytest = "^7.1.2"
-twine = "^4.0.1"
+pytest-cov = "^3.0.0"
+pytest-split = "^0.8.0"
 nbformat = "^5.4.0"
 jupyter = "^1.0.0"
 flaky = "^3.7.0"
@@ -87,16 +91,19 @@ mypy = "^0.971"
 econml = "*"
 pygraphviz = "^1.9"
 
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
 #
 # Dependencies for Documentation Generation
 #
 rpy2 = "^3.5.2"
-sphinx-multiversion = { git = "https://github.com/petergtz/sphinx-multiversion.git", branch = "override-version-with-refname"}
-sphinxcontrib-googleanalytics = { git = "https://github.com/petergtz/googleanalytics.git", branch = "master"}
+sphinx-multiversion = { git = "https://github.com/petergtz/sphinx-multiversion.git", branch = "override-version-with-refname" }
+sphinxcontrib-googleanalytics = { git = "https://github.com/petergtz/googleanalytics.git", branch = "master" }
 nbsphinx = "^0.8.9"
 sphinx-rtd-theme = "^1.0.0"
 pydata-sphinx-theme = "^0.9.0"
-pandoc = "^2.2"
 ipykernel = "^6.15.1"
 sphinx-copybutton = "0.5.0"
 
@@ -104,18 +111,10 @@ sphinx-copybutton = "0.5.0"
 # Versions defined for security reasons
 #
 # https://github.com/py-why/dowhy/security/dependabot/1 - CVE-2022-34749
-nbconvert = {version = "7.0.0rc3", allow-prereleases = true}
-pytest-cov = "^3.0.0"
-pytest-split = "^0.8.0"
-
-[build-system]
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
-build-backend = "poetry.core.masonry.api"
+nbconvert = { version = "7.0.0rc3", allow-prereleases = true }
 
 [tool.pytest.ini_options]
-markers = [
-    "advanced: not be to run each time. only on package updates."
-]
+markers = ["advanced: not be to run each time. only on package updates."]
 
 [tool.poe.tasks]
 # stop the build if there are Python syntax errors or undefined names
@@ -131,11 +130,7 @@ test = "pytest -v -m 'not advanced' --durations=0 --durations-min=60.0"
 test_durations = "poetry run poe test --store-durations"
 test_advanced = "pytest -v"
 test_focused = "pytest -v -m 'focused'"
-verifyPackage = "twine check dist/*"
-# TODO: replace with `poetry publish`
-uploadPackage = "twine upload dist/*"
 
-# TODO: add formatting to build process
 [tool.poe.tasks.format]
 sequence = ['_black', '_isort']
 ignore_fail = 'return_non_zero'

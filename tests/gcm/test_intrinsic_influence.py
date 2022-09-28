@@ -127,7 +127,7 @@ def test_intrinsic_causal_influence_categorical_2():
     assert iccs["X0"] == approx(0.05, abs=0.05)
     assert iccs["X1"] == approx(0.03, abs=0.05)
     assert iccs["X2"] == approx(0.1, abs=0.05)
-    assert iccs["X3"] == approx(0.5, abs=0.05)
+    assert iccs["X3"] == approx(0.5, abs=0.1)
 
     assert np.sum([iccs[key] for key in iccs]) == approx(
         expected_output_full_subset - expected_output_empty_subset, abs=0.05
@@ -137,7 +137,7 @@ def test_intrinsic_causal_influence_categorical_2():
     assert iccs["X0"] == approx(0.05, abs=0.05)
     assert iccs["X1"] == approx(0.03, abs=0.05)
     assert iccs["X2"] == approx(0.1, abs=0.05)
-    assert iccs["X3"] == approx(0.5, abs=0.05)
+    assert iccs["X3"] == approx(0.5, abs=0.1)
 
     assert np.sum([iccs[key] for key in iccs]) == approx(-expected_output_empty_subset, abs=0.05)
 
