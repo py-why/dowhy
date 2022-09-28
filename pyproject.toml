@@ -90,6 +90,7 @@ xgboost = "^1.6.1"
 mypy = "^0.971"
 econml = "*"
 pygraphviz = "^1.9"
+pydocstyle = "^6.1.1"
 
 [tool.poetry.group.docs]
 optional = true
@@ -124,6 +125,7 @@ _black = 'black .'
 _isort = 'isort .'
 _black_check = 'black --check .'
 _isort_check = 'isort --check .'
+_pydocstyle = 'pydocstyle .'
 
 # testing tasks
 test = "pytest -v -m 'not advanced' --durations=0 --durations-min=60.0"
@@ -140,7 +142,7 @@ sequence = ['_black_check', '_isort_check']
 ignore_fail = 'return_non_zero'
 
 [tool.poe.tasks.lint]
-sequence = ['_flake8Errors', '_flake8Warnings']
+sequence = ['_flake8Errors', '_flake8Warnings', '_pydocstyle']
 ignore_fail = 'return_non_zero'
 
 [tool.poe.tasks.verify]
@@ -167,3 +169,10 @@ profile = 'black'
 multi_line_output = 3
 line_length = 120
 py_version = 38
+
+[tool.pydocstyle]
+convention = 'numpy'
+ignore-decorators = '(copy_doc|property|.*setter|.*getter|pyqtSlot|Slot)'
+match = '^(?!setup|__init__|test_).*\.py'
+match-dir = '^dowhy.*'
+add_ignore = 'D100,D104,D107'
