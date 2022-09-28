@@ -15,8 +15,6 @@ advanced_notebooks = [
     "dowhy_refutation_testing.ipynb",
     "dowhy_lalonde_example.ipynb",
     "lalonde_pandas_api.ipynb",
-    # requires Rpy2 for causal discovery
-    "dowhy_causal_discovery_example.ipynb",
     # will be removed
     "dowhy_optimize_backdoor_example.ipynb",
     # applied notebook, not necessary to test each time
@@ -33,6 +31,13 @@ advanced_notebooks = [
     "gcm_supply_chain_dist_change.ipynb",
     "dowhy_simple_example.ipynb",
     "gcm_401k_analysis.ipynb",
+]
+
+ignore_notebooks = [
+    # requires Rpy2 for causal discovery
+    # daily tests of dowhy_causal_discovery_example.ipynb are failing due to cdt/rpy2 config.
+    # comment out, since we are switching causal discovery implementations
+    "dowhy_causal_discovery_example.ipynb"
 ]
 
 # Adding the dowhy root folder to the python path so that jupyter notebooks
@@ -86,7 +91,9 @@ def test_confounder_notebook():
 """
 parameter_list = []
 for nb in notebooks_list:
-    if nb in advanced_notebooks:
+    if nb in ignore_notebooks:
+        continue
+    elif nb in advanced_notebooks:
         param = pytest.param(nb, marks=[mark.advanced, mark.notebook], id=nb)
     else:
         param = pytest.param(nb, marks=[mark.notebook], id=nb)
