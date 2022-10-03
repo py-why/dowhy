@@ -147,6 +147,33 @@ def refute_bootstrap(
     n_jobs: int = 1,
     verbose: int = 0,
 ) -> CausalRefutation:
+    """Refute an estimate by running it on a random sample of the data containing measurement error in the
+    confounders. This allows us to find the ability of the estimator to find the effect of the
+    treatment on the outcome.
+
+    :param data: pd.DataFrame: Data to run the refutation
+    :param target_estimand: IdentifiedEstimand: Identified estimand to run the refutation
+    :param estimate: CausalEstimate: Estimate to run the refutation
+    :param num_simulations: The number of simulations to be run, ``CausalRefuter.DEFAULT_NUM_SIMULATIONS`` by default
+    :param random_state: The seed value to be added if we wish to repeat the same random behavior. For this purpose, we repeat the same seed in the psuedo-random generator.
+    :param sample_size: The size of each bootstrap sample and is the size of the original data by default
+    :param required_variables: The list of variables to be used as the input for ``y~f(W)``
+      This is ``True`` by default, which in turn selects all variables leaving the treatment and the outcome
+    1. An integer argument refers to how many variables will be used for estimating the value of the outcome
+    2. A list explicitly refers to which variables will be used to estimate the outcome
+       Furthermore, it gives the ability to explictly select or deselect the covariates present in the estimation of the
+       outcome. This is done by either adding or explicitly removing variables from the list as shown below:
+    .. note::
+            * We need to pass required_variables = ``[W0,W1]`` if we want ``W0`` and ``W1``.
+            * We need to pass required_variables = ``[-W0,-W1]`` if we want all variables excluding ``W0`` and ``W1``.
+    3. If the value is True, we wish to include all variables to estimate the value of the outcome.
+    .. warning:: A ``False`` value is ``INVALID`` and will result in an ``error``.
+    :param noise: The standard deviation of the noise to be added to the data and is ``BootstrapRefuter.DEFAULT_STD_DEV`` by default
+    :param probability_of_change: It specifies the probability with which we change the data for a boolean or categorical variable
+      It is ``noise`` by default, only if the value of ``noise`` is less than 1.
+    :param n_jobs: The maximum number of concurrently running jobs. If -1 all CPUs are used. If 1 is given, no parallel computing code is used at all (this is the default).
+    :param verbose: The verbosity level: if non zero, progress messages are printed. Above 50, the output is sent to stdout. The frequency of the messages increases with the verbosity level. If it more than 10, all iterations are reported. The default is 0.
+    """
     if sample_size is None:
         sample_size = len(data)
 

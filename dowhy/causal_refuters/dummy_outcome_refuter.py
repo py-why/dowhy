@@ -256,6 +256,163 @@ def refute_dummy_outcome(
     true_causal_effect: Callable = DEFAULT_TRUE_CAUSAL_EFFECT,
     show_progress_bar=False,
 ) -> List[CausalRefutation]:
+    """Refute an estimate by replacing the outcome with a simulated variable
+    for which the true causal effect is known.
+
+    In the simplest case, the dummy outcome is an independent, randomly
+    generated variable. By definition, the true causal effect should be zero.
+
+    More generally, the dummy outcome uses the observed relationship between
+    confounders and outcome (conditional on treatment) to create a more
+    realistic outcome for which the treatment effect is known to be zero. If
+    the goal is to simulate a dummy outcome with a non-zero true causal effect,
+    then we can add an arbitrary function h(t) to the dummy outcome's
+    generation process and then the causal effect becomes h(t=1)-h(t=0).
+
+    Note that this general procedure only works for the backdoor criterion.
+
+    1. We find f(W) for a each value of treatment. That is, keeping the treatment
+    constant, we fit a predictor to estimate the effect of confounders W on
+    outcome y. Note that since f(W) simply defines a new DGP for the simulated
+    outcome, it need not be the correct structural equation from W to y.
+    2. We obtain the value of dummy outcome as:
+    ``y_dummy = h(t) + f(W)``
+
+    To prevent overfitting, we fit f(W) for one value of T and then use it to
+    generate data for other values of t. Future support for identification
+    based on instrumental variable and mediation.
+
+    ::
+
+        If we originally started out with
+
+               W
+            /    \\
+            t --->y
+
+        On estimating the following with constant t,
+        y_dummy = f(W)
+
+               W
+            /     \\
+            t --|->y
+
+        This ensures that we try to capture as much of W--->Y as possible
+
+        On adding h(t)
+
+               W
+            /    \\
+            t --->y
+              h(t)
+
+    :param data: pd.DataFrame: Data to run the refutation
+    :param target_estimand: IdentifiedEstimand: Identified estimand to run the refutation
+    :param estimate: CausalEstimate: Estimate to run the refutation
+    :param treatment_name: str: Name of the treatment
+    :param num_simulations: The number of simulations to be run, which defaults to ``CausalRefuter.DEFAULT_NUM_SIMULATIONS``
+    :type num_simulations: int, optional
+    :param transformation_list: It is a list of actions to be performed to obtain the outcome, which defaults to ``DEFAULT_TRANSFORMATION``.
+      The default transformation is as follows:
+
+      ``[("zero",""),("noise", {'std_dev':1} )]``
+
+    :type transformation_list: list, optional
+    Each of the actions within a transformation is one of the following types:
+
+        * function argument: function ``pd.Dataframe -> np.ndarray``
+
+        It takes in a function that takes the input data frame as the input and outputs the outcome
+        variable. This allows us to create an output varable that only depends on the covariates and does not depend
+        on the treatment variable.
+
+        * string argument
+
+        * Currently it supports some common estimators like
+
+            1. Linear Regression
+            2. K Nearest Neighbours
+            3. Support Vector Machine
+            4. Neural Network
+            5. Random Forest
+
+        * Or functions such as:
+
+            1. Permute
+               This permutes the rows of the outcome, disassociating any effect of the treatment on the outcome.
+            2. Noise
+               This adds white noise to the outcome with white noise, reducing any causal relationship with the treatment.
+            3. Zero
+               It replaces all the values in the outcome by zero
+
+        Examples:
+            The ``transformation_list`` is of the following form:
+
+        * If the function ``pd.Dataframe -> np.ndarray`` is already defined.
+          ``[(func,func_params),('permute',{'permute_fraction':val}),('noise',{'std_dev':val})]``
+
+          Every function should be able to support a minimum of two arguments ``X_train`` and  ``outcome_train`` which correspond to the training data and the outcome that
+          we want  to predict, along with additional parameters such as the learning rate or the momentum constant can be set with the help of ``func_args``.
+
+          ``[(neural_network,{'alpha': 0.0001, 'beta': 0.9}),('permute',{'permute_fraction': 0.2}),('noise',{'std_dev': 0.1})]``
+
+          The neural network is invoked as ``neural_network(X_train, outcome_train, **args)``.
+
+        * If a function from the above list is used
+          ``[('knn',{'n_neighbors':5}), ('permute', {'permute_fraction': val} ), ('noise', {'std_dev': val} )]``
+
+    :param true_causal_effect: A function that is used to get the True Causal Effect for the modelled dummy outcome.
+      It defaults to ``DEFAULT_TRUE_CAUSAL_EFFECT``, which means that there is no relationship between the treatment and outcome in the
+      dummy data.
+    :type true_causal_effect: function
+
+        The equation for the dummy outcome is given by
+        ``y_hat = h(t) + f(W)``
+
+        where
+
+        * ``y_hat`` is the dummy outcome
+        * ``h(t)`` is the function that gives the true causal effect
+        * ``f(W)`` is the best estimate of ``y`` obtained keeping ``t`` constant. This ensures that the variation in output of function ``f(w)`` is not caused by ``t``.
+
+    .. note:: The true causal effect should take an input of the same shape as the treatment and the output should match the shape of the outcome
+
+    :param required_variables: The list of variables to be used as the input for ``y~f(W)``
+      This is ``True`` by default, which in turn selects all variables leaving the treatment and the outcome
+    :type required_variables: int, list, bool, optional
+
+        1. An integer argument refers to how many variables will be used for estimating the value of the outcome
+        2. A list explicitly refers to which variables will be used to estimate the outcome
+       Furthermore, it gives the ability to explictly select or deselect the covariates present in the estimation of the
+       outcome. This is done by either adding or explicitly removing variables from the list as shown below:
+
+    .. note::
+            * We need to pass required_variables = ``[W0,W1]`` if we want ``W0`` and ``W1``.
+            * We need to pass required_variables = ``[-W0,-W1]`` if we want all variables excluding ``W0`` and ``W1``.
+
+        3. If the value is True, we wish to include all variables to estimate the value of the outcome.
+
+    .. warning:: A ``False`` value is ``INVALID`` and will result in an ``error``.
+
+    .. note:: These inputs are fed to the function for estimating the outcome variable. The same set of required_variables is used for each
+        instance of an internal estimation function.
+
+    :param bucket_size_scale_factor: For continuous data, the scale factor helps us scale the size of the bucket used on the data.
+      The default scale factor is ``DEFAULT_BUCKET_SCALE_FACTOR``.
+    :type bucket_size_scale_factor: float, optional
+        ::
+
+            The number of buckets is given by:
+                (max value - min value)
+                ------------------------
+                (scale_factor * std_dev)
+
+    :param min_data_point_threshold: The minimum number of data points for an estimator to run.
+      This defaults to ``MIN_DATA_POINT_THRESHOLD``. If the number of data points is too few
+      for a certain category, we make use of the ``DEFAULT_TRANSFORMATION`` for generaring the dummy outcome
+    :type min_data_point_threshold: int, optional
+
+    """
 
     if required_variables is False:
         raise ValueError("The value of required_variables cannot be False")

@@ -81,6 +81,18 @@ def refute_random_common_cause(
     n_jobs: int = 1,
     verbose: int = 0,
 ) -> CausalRefutation:
+    """Refute an estimate by introducing a randomly generated confounder
+    (that may have been unobserved).
+
+    :param data: pd.DataFrame: Data to run the refutation
+    :param target_estimand: IdentifiedEstimand: Identified estimand to run the refutation
+    :param estimate: CausalEstimate: Estimate to run the refutation
+    :param num_simulations: The number of simulations to be run, which defaults to ``CausalRefuter.DEFAULT_NUM_SIMULATIONS``
+    :param random_state: The seed value to be added if we wish to repeat the same random behavior. If we want to repeat the same behavior we push the same seed in the psuedo-random generator.
+    :param n_jobs: The maximum number of concurrently running jobs. If -1 all CPUs are used. If 1 is given, no parallel computing code is used at all (this is the default).
+    :param verbose: The verbosity level: if non zero, progress messages are printed. Above 50, the output is sent to stdout. The frequency of the messages increases with the verbosity level. If it more than 10, all iterations are reported. The default is 0.
+
+    """
     logger.info("Refutation over {} simulated datasets, each with a random common cause added".format(num_simulations))
 
     new_backdoor_variables = target_estimand.get_backdoor_variables() + ["w_random"]

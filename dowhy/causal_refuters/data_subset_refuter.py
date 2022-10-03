@@ -88,6 +88,17 @@ def refute_data_subset(
     n_jobs: int = 1,
     verbose: int = 0,
 ) -> CausalRefutation:
+    """Refute an estimate by rerunning it on a random subset of the original data.
+
+    :param data: pd.DataFrame: Data to run the refutation
+    :param target_estimand: IdentifiedEstimand: Identified estimand to run the refutation
+    :param estimate: CausalEstimate: Estimate to run the refutation
+    :param subset_fraction: Fraction of the data to be used for re-estimation, which is ``DataSubsetRefuter.DEFAULT_SUBSET_FRACTION`` by default.
+    :param num_simulations: The number of simulations to be run, ``CausalRefuter.DEFAULT_NUM_SIMULATIONS`` by default
+    :param random_state: The seed value to be added if we wish to repeat the same random behavior. For this purpose, we repeat the same seed in the psuedo-random generator.
+    :param n_jobs: The maximum number of concurrently running jobs. If -1 all CPUs are used. If 1 is given, no parallel computing code is used at all (this is the default).
+    :param verbose: The verbosity level: if non zero, progress messages are printed. Above 50, the output is sent to stdout. The frequency of the messages increases with the verbosity level. If it more than 10, all iterations are reported. The default is 0.
+    """
 
     logger.info(
         "Refutation over {} simulated datasets of size {} each".format(

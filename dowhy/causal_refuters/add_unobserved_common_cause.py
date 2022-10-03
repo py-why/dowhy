@@ -584,6 +584,23 @@ def refute_sensitivity_linear_partial_r2(
     null_hypothesis_effect: Optional[float] = None,
     plot_estimate: bool = True,
 ) -> LinearSensitivityAnalyzer:
+    """Add an unobserved confounder for refutation using Linear partial R2 methond (Sensitivity Analysis for linear models).
+
+    :param data: pd.DataFrame: Data to run the refutation
+    :param estimate: CausalEstimate: Estimate to run the refutation
+    :param treatment_name: str: Name of the treatment
+    :param frac_strength_treatment: float: This parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on treatment. Defaults to 1.
+    :param frac_strength_outcome: float: This parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on outcome. Defaults to 1.
+    :param percent_change_estimate: It is the percentage of reduction of treatment estimate that could alter the results (default = 1).
+                                    if percent_change_estimate = 1, the robustness value describes the strength of association of confounders with treatment and outcome in order to reduce the estimate by 100% i.e bring it down to 0. (relevant only for Linear Sensitivity Analysis, ignore for rest)
+    :param benchmark_common_causes: names of variables for bounding strength of confounders. (relevant only for partial-r2 based simulation methods)
+    :param significance_level: confidence interval for statistical inference(default = 0.05). (relevant only for partial-r2 based simulation methods)
+    :param null_hypothesis_effect: assumed effect under the null hypothesis. (relevant only for linear-partial-R2, ignore for rest)
+    :param plot_estimate: Generate contour plot for estimate while performing sensitivity analysis. (default = True).
+                            (relevant only for partial-r2 based simulation methods)
+
+    """
+
     if not (isinstance(estimate.estimator, LinearRegressionEstimator)):
         raise NotImplementedError("Currently only LinearRegressionEstimator is supported for Sensitivity Analysis")
 
@@ -624,6 +641,23 @@ def refute_sensitivity_non_parametric_partial_r2(
     g_s_estimator_param_list: Optional[List[Dict]] = None,
     plugin_reisz: bool = False,
 ) -> Union[PartialLinearSensitivityAnalyzer, NonParametricSensitivityAnalyzer]:
+    """Add an unobserved confounder for refutation using Non-parametric partial R2 methond (Sensitivity Analysis for non-parametric models).
+
+    :param estimate: CausalEstimate: Estimate to run the refutation
+    :param kappa_t: float, numpy.ndarray: Partial R2 of the unobserved confounder wrt the treatment conditioned on the observed confounders. Only in the case of general non-parametric-partial-R2, it is the fraction of variance in the reisz representer that is explained by the unobserved confounder; specifically  (1-r), where r is the ratio of variance of reisz representer, alpha^2, based on observed confounders and that based on all confounders.
+    :param kappa_y: float, numpy.ndarray: Partial R2 of the unobserved confounder wrt the outcome conditioned on the treatment and observed confounders.
+    :param frac_strength_treatment: float: This parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on treatment. Defaults to 1.
+    :param frac_strength_outcome: float: This parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on outcome. Defaults to 1.
+    :param benchmark_common_causes: names of variables for bounding strength of confounders. (relevant only for partial-r2 based simulation methods)
+    :param plot_estimate: Generate contour plot for estimate while performing sensitivity analysis. (default = True).
+                            (relevant only for partial-r2 based simulation methods)
+    :param alpha_s_estimator_list: PENDING_PARAM_DOC
+    :param alpha_s_estimator_param_list: list of dictionaries with parameters for finding alpha_s. (relevant only for non-parametric-partial-R2 simulation method)
+    :param g_s_estimator_list: list of estimator objects for finding g_s. These objects should have fit() and predict() functions implemented. (relevant only for non-parametric-partial-R2 simulation method)
+    :param g_s_estimator_param_list: list of dictionaries with parameters for tuning respective estimators in "g_s_estimator_list". The order of the dictionaries in the list should be consistent with the estimator objects order in "g_s_estimator_list". (relevant only for non-parametric-partial-R2 simulation method)
+    :plugin_reisz: bool: PENDING_PARAM_DOC
+    """
+
     # If the estimator used is LinearDML, partially linear sensitivity analysis will be automatically chosen
     if isinstance(estimate.estimator, dowhy.causal_estimators.econml.Econml):
         if estimate.estimator._econml_methodname == "econml.dml.LinearDML":
@@ -673,8 +707,8 @@ def refute_add_unobserved_common_cause(
     outcome_name: str,
     kappa_t: Optional[Union[float, np.ndarray]] = None,
     kappa_y: Optional[Union[float, np.ndarray]] = None,
-    confounder_effect_on_treatment: str = "binary_flip",
-    confounder_effect_on_outcome: str = "linear",
+    confounders_effect_on_treatment: str = "binary_flip",
+    confounders_effect_on_outcome: str = "linear",
     frac_strength_treatment: float = 1.0,
     frac_strength_outcome: float = 1.0,
     plotmethod: Optional[str] = None,
@@ -685,15 +719,28 @@ def refute_add_unobserved_common_cause(
     and binary variables. This function can either take single valued inputs or a range of inputs. The function then looks at the data type of the input and then decides on the course of
     action.
 
+    :param data: pd.DataFrame: Data to run the refutation
+    :param target_estimand: IdentifiedEstimand: Identified estimand to run the refutation
+    :param estimate: CausalEstimate: Estimate to run the refutation
+    :param treatment_name: str: Name of the treatment
+    :param outcome_name: str: Name of the outcome
+    :param kappa_t: float, numpy.ndarray: Strength of the confounder's effect on treatment. When confounders_effect_on_treatment is linear,  it is the regression coefficient. When the confounders_effect_on_treatment is binary flip, it is the probability with which effect of unobserved confounder can invert the value of the treatment.
+    :param kappa_y: float, numpy.ndarray: Strength of the confounder's effect on outcome. Its interpretation depends on confounders_effect_on_outcome and the simulation_method. When simulation_method is direct-simulation, for a linear effect it behaves like the regression coefficient and for a binary flip, it is the probability with which it can invert the value of the outcome.
+    :param confounders_effect_on_treatment: str : The type of effect on the treatment due to the unobserved confounder. Possible values are ['binary_flip', 'linear']
+    :param confounders_effect_on_outcome: str : The type of effect on the outcome due to the unobserved confounder. Possible values are ['binary_flip', 'linear']
+    :param frac_strength_treatment: float: This parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on treatment. Defaults to 1.
+    :param frac_strength_outcome: float: This parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on outcome. Defaults to 1.
+    :param plotmethod: string: Type of plot to be shown. If None, no plot is generated. This parameter is used only only when more than one treatment confounder effect values or outcome confounder effect values are provided. Default is "colormesh". Supported values are "contour", "colormesh" when more than one value is provided for both confounder effect value parameters; "line" when provided for only one of them.
+
     :return: CausalRefuter: An object that contains the estimated effect and a new effect and the name of the refutation used.
     """
     if kappa_t is None:
         kappa_t = _infer_default_kappa_t(
-            data, target_estimand, treatment_name, confounder_effect_on_treatment, frac_strength_treatment
+            data, target_estimand, treatment_name, confounders_effect_on_treatment, frac_strength_treatment
         )
     if kappa_y is None:
         kappa_y = _infer_default_kappa_y(
-            data, target_estimand, outcome_name, confounder_effect_on_outcome, frac_strength_outcome
+            data, target_estimand, outcome_name, confounders_effect_on_outcome, frac_strength_outcome
         )
 
     if not isinstance(kappa_t, (list, np.ndarray)) and not isinstance(
@@ -703,10 +750,10 @@ def refute_add_unobserved_common_cause(
         new_data = _include_confounders_effect(
             data,
             new_data,
-            confounder_effect_on_treatment,
+            confounders_effect_on_treatment,
             treatment_name,
             kappa_t,
-            confounder_effect_on_outcome,
+            confounders_effect_on_outcome,
             outcome_name,
             kappa_y,
         )
@@ -741,10 +788,10 @@ def refute_add_unobserved_common_cause(
                     new_data = _include_confounders_effect(
                         data,
                         orig_data,
-                        confounder_effect_on_treatment,
+                        confounders_effect_on_treatment,
                         treatment_name,
                         kappa_t[i],
-                        confounder_effect_on_outcome,
+                        confounders_effect_on_outcome,
                         outcome_name,
                         kappa_y[j],
                     )
@@ -808,10 +855,10 @@ def refute_add_unobserved_common_cause(
                 new_data = _include_confounders_effect(
                     data,
                     orig_data,
-                    confounder_effect_on_treatment,
+                    confounders_effect_on_treatment,
                     treatment_name,
                     kappa_t[i],
-                    confounder_effect_on_outcome,
+                    confounders_effect_on_outcome,
                     outcome_name,
                     kappa_y,
                 )
@@ -857,10 +904,10 @@ def refute_add_unobserved_common_cause(
                 new_data = _include_confounders_effect(
                     data,
                     orig_data,
-                    confounder_effect_on_treatment,
+                    confounders_effect_on_treatment,
                     treatment_name,
                     kappa_t,
-                    confounder_effect_on_outcome,
+                    confounders_effect_on_outcome,
                     outcome_name,
                     kappa_y[i],
                 )
