@@ -713,6 +713,7 @@ def refute_add_unobserved_common_cause(
     frac_strength_outcome: float = 1.0,
     plotmethod: Optional[str] = None,
     show_progress_bar=False,
+    **_,
 ) -> CausalRefutation:
     """
     This function attempts to add an unobserved common cause to the outcome and the treatment. At present, we have implemented the behavior for one dimensional behaviors for continuous

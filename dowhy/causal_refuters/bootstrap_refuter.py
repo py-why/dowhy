@@ -146,6 +146,7 @@ def refute_bootstrap(
     show_progress_bar: bool = False,
     n_jobs: int = 1,
     verbose: int = 0,
+    **_,
 ) -> CausalRefutation:
     """Refute an estimate by running it on a random sample of the data containing measurement error in the
     confounders. This allows us to find the ability of the estimator to find the effect of the

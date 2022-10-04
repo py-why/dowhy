@@ -80,6 +80,7 @@ def refute_random_common_cause(
     show_progress_bar: bool = False,
     n_jobs: int = 1,
     verbose: int = 0,
+    **_,
 ) -> CausalRefutation:
     """Refute an estimate by introducing a randomly generated confounder
     (that may have been unobserved).

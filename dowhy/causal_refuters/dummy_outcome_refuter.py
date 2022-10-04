@@ -255,6 +255,7 @@ def refute_dummy_outcome(
     unobserved_confounder_values: Optional[List] = DEFAULT_NEW_DATA_WITH_UNOBSERVED_CONFOUNDING,
     true_causal_effect: Callable = DEFAULT_TRUE_CAUSAL_EFFECT,
     show_progress_bar=False,
+    **_,
 ) -> List[CausalRefutation]:
     """Refute an estimate by replacing the outcome with a simulated variable
     for which the true causal effect is known.

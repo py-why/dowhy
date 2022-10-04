@@ -165,6 +165,7 @@ def refute_placebo_treatment(
     show_progress_bar: bool = False,
     n_jobs: int = 1,
     verbose: int = 0,
+    **_,
 ) -> CausalRefutation:
     """Refute an estimate by replacing treatment with a randomly-generated placebo variable.
 

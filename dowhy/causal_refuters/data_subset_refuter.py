@@ -87,6 +87,7 @@ def refute_data_subset(
     show_progress_bar: bool = False,
     n_jobs: int = 1,
     verbose: int = 0,
+    **_,
 ) -> CausalRefutation:
     """Refute an estimate by rerunning it on a random subset of the original data.
 
