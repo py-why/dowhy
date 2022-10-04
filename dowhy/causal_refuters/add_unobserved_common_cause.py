@@ -358,6 +358,7 @@ def _include_confounders_effect(
 
 
 def include_simulated_confounder(
+    data: pd.DataFrame,
     treatment_name: str,
     outcome_name: str,
     kappa_t: float,
