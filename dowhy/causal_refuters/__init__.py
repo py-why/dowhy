@@ -4,9 +4,10 @@ from importlib import import_module
 from dowhy.causal_refuter import CausalRefuter
 from dowhy.causal_refuters.add_unobserved_common_cause import (
     AddUnobservedCommonCause,
-    refute_add_unobserved_common_cause,
-    refute_sensitivity_linear_partial_r2,
-    refute_sensitivity_non_parametric_partial_r2,
+    sensitivity_simulation,
+    sensitivity_linear_partial_r2,
+    sensitivity_non_parametric_partial_r2,
+    sensitivity_e_value,
 )
 from dowhy.causal_refuters.bootstrap_refuter import BootstrapRefuter, refute_bootstrap
 from dowhy.causal_refuters.data_subset_refuter import DataSubsetRefuter, refute_data_subset
@@ -42,9 +43,10 @@ __all__ = [
     "refute_data_subset",
     "refute_random_common_cause",
     "refute_placebo_treatment",
-    "refute_add_unobserved_common_cause",
-    "refute_sensitivity_linear_partial_r2",
-    "refute_sensitivity_non_parametric_partial_r2",
+    "sensitivity_simulation",
+    "sensitivity_linear_partial_r2",
+    "sensitivity_non_parametric_partial_r2",
+    "sensitivity_e_value",
     "refute_dummy_outcome",
     "refute_estimate",
 ]

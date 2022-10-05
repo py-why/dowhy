@@ -16,6 +16,9 @@ from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 from dowhy.causal_refuter import CausalRefutation, CausalRefuter, choose_variables
+from dowhy.causal_estimators.regression_estimator import RegressionEstimator
+from dowhy.causal_refuter import CausalRefutation, CausalRefuter
+from dowhy.causal_refuters.evalue_sensitivity_analyzer import EValueSensitivityAnalyzer
 from dowhy.causal_refuters.linear_sensitivity_analyzer import LinearSensitivityAnalyzer
 from dowhy.causal_refuters.non_parametric_sensitivity_analyzer import NonParametricSensitivityAnalyzer
 from dowhy.causal_refuters.partial_linear_sensitivity_analyzer import PartialLinearSensitivityAnalyzer
@@ -44,7 +47,7 @@ class AddUnobservedCommonCause(CausalRefuter):
         minimum and maximum effect strength of observed confounders on treatment
         and outcome respectively.
 
-        :param simulation_method: The method to use for simulating effect of unobserved confounder. Possible values are ["direct-simulation", "linear-partial-R2", "non-parametric-partial-R2"].
+        :param simulation_method: The method to use for simulating effect of unobserved confounder. Possible values are ["direct-simulation", "linear-partial-R2", "non-parametric-partial-R2", "e-value"].
         :param confounders_effect_on_treatment: str : The type of effect on the treatment due to the unobserved confounder. Possible values are ['binary_flip', 'linear']
         :param confounders_effect_on_outcome: str : The type of effect on the outcome due to the unobserved confounder. Possible values are ['binary_flip', 'linear']
         :param effect_strength_on_treatment: float, numpy.ndarray: [Used when simulation_method="direct-simulation"] Strength of the confounder's effect on treatment. When confounders_effect_on_treatment is linear,  it is the regression coefficient. When the confounders_effect_on_treatment is binary flip, it is the probability with which effect of unobserved confounder can invert the value of the treatment.
@@ -87,9 +90,11 @@ class AddUnobservedCommonCause(CausalRefuter):
             self.kappa_y = (
                 kwargs["partial_r2_confounder_outcome"] if "partial_r2_confounder_outcome" in kwargs else None
             )
+        elif self.simulation_method == "e-value":
+            pass
         else:
             raise ValueError(
-                "simulation method is not supported. Try direct-simulation, linear-partial-R2 or non-parametric-partial-R2"
+                "simulation method is not supported. Try direct-simulation, linear-partial-R2, non-parametric-partial-R2, or e-value"
             )
         self.frac_strength_treatment = (
             kwargs["effect_fraction_on_treatment"] if "effect_fraction_on_treatment" in kwargs else 1
@@ -125,7 +130,7 @@ class AddUnobservedCommonCause(CausalRefuter):
 
     def refute_estimate(self, show_progress_bar=False):
         if self.simulation_method == "linear-partial-R2":
-            return refute_sensitivity_linear_partial_r2(
+            return sensitivity_linear_partial_r2(
                 self._data,
                 self._estimate,
                 self._treatment_name,
@@ -138,7 +143,7 @@ class AddUnobservedCommonCause(CausalRefuter):
                 self.plot_estimate,
             )
         elif self.simulation_method == "non-parametric-partial-R2":
-            return refute_sensitivity_non_parametric_partial_r2(
+            return sensitivity_non_parametric_partial_r2(
                 self._estimate,
                 self.kappa_t,
                 self.kappa_y,
@@ -152,8 +157,17 @@ class AddUnobservedCommonCause(CausalRefuter):
                 self.g_s_estimator_param_list,
                 self.plugin_reisz,
             )
+        elif self.simulation_method == "e-value":
+            return sensitivity_e_value(
+                self._data,
+                self._target_estimand,
+                self._estimate,
+                self._treatment_name,
+                self._outcome_name,
+                self.plot_estimate,
+            )
         elif self.simulation_method == "direct-simulation":
-            refute = refute_add_unobserved_common_cause(
+            refute = sensitivity_simulation(
                 self._data,
                 self._target_estimand,
                 self._estimate,
@@ -228,7 +242,7 @@ def _infer_default_kappa_t(
         return np.arange(min_coeff, max_coeff, step)
 
 
-def _compute_min_max_coeff(min_coeff: float, max_coeff: float, effect_strength_fraction: float):
+def _compute_min_max_coeff(min_coeff: float, max_coeff: float, effect_strength_fraction: np.ndarray):
     max_coeff = effect_strength_fraction * max_coeff
     min_coeff = effect_strength_fraction * min_coeff
     return min_coeff, max_coeff
@@ -573,7 +587,7 @@ def _generate_confounder_from_residuals(c1, c2, d_y, d_t, X):
     return final_U
 
 
-def refute_sensitivity_linear_partial_r2(
+def sensitivity_linear_partial_r2(
     data: pd.DataFrame,
     estimate: CausalEstimate,
     treatment_name: str,
@@ -628,7 +642,7 @@ def refute_sensitivity_linear_partial_r2(
     return analyzer
 
 
-def refute_sensitivity_non_parametric_partial_r2(
+def sensitivity_non_parametric_partial_r2(
     estimate: CausalEstimate,
     kappa_t: Optional[Union[float, np.ndarray]] = None,
     kappa_y: Optional[Union[float, np.ndarray]] = None,
@@ -652,11 +666,11 @@ def refute_sensitivity_non_parametric_partial_r2(
     :param benchmark_common_causes: names of variables for bounding strength of confounders. (relevant only for partial-r2 based simulation methods)
     :param plot_estimate: Generate contour plot for estimate while performing sensitivity analysis. (default = True).
                             (relevant only for partial-r2 based simulation methods)
-    :param alpha_s_estimator_list: PENDING_PARAM_DOC
+    :param alpha_s_estimator_list: list of estimator objects for estimating alpha_s. These objects should have fit() and predict() methods (relevant only for non-parametric-partial-R2 method)
     :param alpha_s_estimator_param_list: list of dictionaries with parameters for finding alpha_s. (relevant only for non-parametric-partial-R2 simulation method)
     :param g_s_estimator_list: list of estimator objects for finding g_s. These objects should have fit() and predict() functions implemented. (relevant only for non-parametric-partial-R2 simulation method)
     :param g_s_estimator_param_list: list of dictionaries with parameters for tuning respective estimators in "g_s_estimator_list". The order of the dictionaries in the list should be consistent with the estimator objects order in "g_s_estimator_list". (relevant only for non-parametric-partial-R2 simulation method)
-    :plugin_reisz: bool: PENDING_PARAM_DOC
+    :plugin_reisz: bool: Flag on whether to use the plugin estimator or the nonparametric estimator for reisz representer function (alpha_s).
     """
 
     # If the estimator used is LinearDML, partially linear sensitivity analysis will be automatically chosen
@@ -700,7 +714,32 @@ def refute_sensitivity_non_parametric_partial_r2(
     return analyzer
 
 
-def refute_add_unobserved_common_cause(
+def sensitivity_e_value(
+    data: pd.DataFrame,
+    target_estimand: IdentifiedEstimand,
+    estimate: CausalEstimate,
+    treatment_name: List[str],
+    outcome_name: List[str],
+    plot_estimate: bool = True,
+) -> EValueSensitivityAnalyzer:
+    if not isinstance(estimate.estimator, RegressionEstimator):
+        raise NotImplementedError("E-Value sensitivity analysis is currently only implemented RegressionEstimator.")
+
+    if len(estimate.estimator._effect_modifier_names) > 0:
+        raise NotImplementedError("The current implementation does not support effect modifiers")
+
+    analyzer = EValueSensitivityAnalyzer(
+        estimate=estimate,
+        estimand=target_estimand,
+        data=data,
+        treatment_name=treatment_name[0],
+        outcome_name=outcome_name[0],
+    )
+    analyzer.check_sensitivity(plot=plot_estimate)
+    return analyzer
+
+
+def sensitivity_simulation(
     data: pd.DataFrame,
     target_estimand: IdentifiedEstimand,
     estimate: CausalEstimate,

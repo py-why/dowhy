@@ -12,7 +12,7 @@ from dowhy.utils.api import parse_state
 class SignificanceTestType(Enum):
 
     AUTO = "auto"
-    BOOTSTRAP = "boostrap"
+    BOOTSTRAP = "bootstrap"
     NORMAL = "normal_test"
 
 

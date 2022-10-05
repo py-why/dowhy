@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
+import statsmodels.api as sm
 from pytest import mark
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.linear_model import LassoCV
@@ -9,6 +10,7 @@ from sklearn.preprocessing import PolynomialFeatures
 
 import dowhy.datasets
 from dowhy import CausalModel
+from dowhy.causal_refuters.evalue_sensitivity_analyzer import EValueSensitivityAnalyzer
 
 from .base import TestRefuter
 
@@ -475,4 +477,115 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert abs(original_estimate - lower_confidence_bound_u1) > abs(original_estimate - lower_confidence_bound_u2)
         assert abs(original_estimate - upper_confidence_bound_u1) > abs(original_estimate - upper_confidence_bound_u2)
         # we patched figure plotting call to avoid drawing plots during tests
+        assert mock_fig.call_count > 0
+
+    def test_evalue(self):
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=5,
+            num_samples=1000,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"], treatment=data["treatment_name"], outcome=data["outcome_name"], graph=data["gml_graph"]
+        )
+        identified_estimand = model.identify_effect()
+        estimate = model.estimate_effect(identified_estimand, method_name="backdoor.linear_regression")
+        outcome_vals = data["df"][data["outcome_name"]]
+        analyzer = EValueSensitivityAnalyzer(
+            estimate, identified_estimand, data["df"], data["treatment_name"], data["outcome_name"]
+        )
+
+        # comparing test examples from R E-Value package
+        stats = analyzer._evalue_OLS(0.293, 0.196, 17.405)
+        assert stats["converted_estimate"].round(3) == 1.015
+        assert stats["converted_lower_ci"].round(3) == 0.995
+        assert stats["converted_upper_ci"].round(3) == 1.036
+        assert stats["evalue_estimate"].round(3) == 1.141
+        assert stats["evalue_lower_ci"].round(3) == 1.000
+        assert stats["evalue_upper_ci"] is None
+
+        stats = analyzer._evalue_MD(0.5, 0.25)
+        assert stats["converted_estimate"].round(3) == 1.576
+        assert stats["converted_lower_ci"].round(3) == 1.010
+        assert stats["converted_upper_ci"].round(3) == 2.460
+        assert stats["evalue_estimate"].round(3) == 2.529
+        assert stats["evalue_lower_ci"].round(3) == 1.111
+        assert stats["evalue_upper_ci"] is None
+
+        stats = analyzer._evalue_OR(0.86, 0.75, 0.99, rare=False)
+        assert stats["converted_estimate"].round(3) == 0.927
+        assert stats["converted_lower_ci"].round(3) == 0.866
+        assert stats["converted_upper_ci"].round(3) == 0.995
+        assert stats["evalue_estimate"].round(3) == 1.369
+        assert stats["evalue_lower_ci"] == None
+        assert stats["evalue_upper_ci"].round(3) == 1.076
+
+        stats = analyzer._evalue_RR(0.8, 0.71, 0.91)
+        assert stats["converted_estimate"] == 0.8
+        assert stats["converted_lower_ci"] == 0.71
+        assert stats["converted_upper_ci"] == 0.91
+        assert stats["evalue_estimate"].round(3) == 1.809
+        assert stats["evalue_lower_ci"] == None
+        assert stats["evalue_upper_ci"].round(3) == 1.429
+
+        # check implementation of Observed Covariate E-value against R package
+        assert analyzer._observed_covariate_e_value(2, 4).round(3) == 3.414
+        assert analyzer._observed_covariate_e_value(4, 2).round(3) == 3.414
+        assert analyzer._observed_covariate_e_value(0.8, 0.9).round(3) == 1.5
+        assert analyzer._observed_covariate_e_value(0.9, 0.8).round(3) == 1.5
+
+    @pytest.mark.parametrize(
+        "estimator_method",
+        [
+            ("backdoor.linear_regression"),
+        ],
+    )
+    @patch("matplotlib.pyplot.figure")
+    def test_evalue_linear_regression(self, mock_fig, estimator_method):
+        data = dowhy.datasets.linear_dataset(
+            beta=10, num_common_causes=5, num_samples=1000, treatment_is_binary=True, stddev_outcome_noise=5
+        )
+        model = CausalModel(
+            data=data["df"], treatment=data["treatment_name"], outcome=data["outcome_name"], graph=data["gml_graph"]
+        )
+        identified_estimand = model.identify_effect()
+        estimate = model.estimate_effect(identified_estimand, method_name=estimator_method)
+        refute = model.refute_estimate(
+            identified_estimand, estimate, method_name="add_unobserved_common_cause", simulation_method="e-value"
+        )
+
+        assert refute.stats["evalue_upper_ci"] is None
+        assert refute.stats["evalue_lower_ci"] < refute.stats["evalue_estimate"]
+        assert mock_fig.call_count > 0
+
+    @pytest.mark.parametrize(
+        "estimator_method",
+        [
+            ("backdoor.generalized_linear_model"),
+        ],
+    )
+    @patch("matplotlib.pyplot.figure")
+    def test_evalue_logistic_regression(self, mock_fig, estimator_method):
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            outcome_is_binary=True,
+            num_common_causes=5,
+            num_samples=1000,
+            treatment_is_binary=True,
+            stddev_outcome_noise=5,
+        )
+        model = CausalModel(
+            data=data["df"], treatment=data["treatment_name"], outcome=data["outcome_name"], graph=data["gml_graph"]
+        )
+        identified_estimand = model.identify_effect()
+        estimate = model.estimate_effect(
+            identified_estimand, method_name=estimator_method, method_params={"glm_family": sm.families.Binomial()}
+        )
+        refute = model.refute_estimate(
+            identified_estimand, estimate, method_name="add_unobserved_common_cause", simulation_method="e-value"
+        )
+
+        assert refute.stats["evalue_upper_ci"] is None
+        assert refute.stats["evalue_lower_ci"] < refute.stats["evalue_estimate"]
         assert mock_fig.call_count > 0
