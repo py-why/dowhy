@@ -13,7 +13,9 @@ from tqdm.auto import tqdm
 import dowhy.causal_estimators.econml
 from dowhy.causal_estimator import CausalEstimator
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
+from dowhy.causal_estimators.regression_estimator import RegressionEstimator
 from dowhy.causal_refuter import CausalRefutation, CausalRefuter
+from dowhy.causal_refuters.evalue_sensitivity_analyzer import EValueSensitivityAnalyzer
 from dowhy.causal_refuters.linear_sensitivity_analyzer import LinearSensitivityAnalyzer
 from dowhy.causal_refuters.non_parametric_sensitivity_analyzer import NonParametricSensitivityAnalyzer
 from dowhy.causal_refuters.partial_linear_sensitivity_analyzer import PartialLinearSensitivityAnalyzer
@@ -40,7 +42,7 @@ class AddUnobservedCommonCause(CausalRefuter):
         minimum and maximum effect strength of observed confounders on treatment
         and outcome respectively.
 
-        :param simulation_method: The method to use for simulating effect of unobserved confounder. Possible values are ["direct-simulation", "linear-partial-R2", "non-parametric-partial-R2"].
+        :param simulation_method: The method to use for simulating effect of unobserved confounder. Possible values are ["direct-simulation", "linear-partial-R2", "non-parametric-partial-R2", "e-value"].
         :param confounders_effect_on_treatment: str : The type of effect on the treatment due to the unobserved confounder. Possible values are ['binary_flip', 'linear']
         :param confounders_effect_on_outcome: str : The type of effect on the outcome due to the unobserved confounder. Possible values are ['binary_flip', 'linear']
         :param effect_strength_on_treatment: float, numpy.ndarray: [Used when simulation_method="direct-simulation"] Strength of the confounder's effect on treatment. When confounders_effect_on_treatment is linear,  it is the regression coefficient. When the confounders_effect_on_treatment is binary flip, it is the probability with which effect of unobserved confounder can invert the value of the treatment.
@@ -83,9 +85,11 @@ class AddUnobservedCommonCause(CausalRefuter):
             self.kappa_y = (
                 kwargs["partial_r2_confounder_outcome"] if "partial_r2_confounder_outcome" in kwargs else None
             )
+        elif self.simulation_method == "e-value":
+            pass
         else:
             raise ValueError(
-                "simulation method is not supported. Try direct-simulation, linear-partial-R2 or non-parametric-partial-R2"
+                "simulation method is not supported. Try direct-simulation, linear-partial-R2, non-parametric-partial-R2, or e-value"
             )
         self.frac_strength_treatment = (
             kwargs["effect_fraction_on_treatment"] if "effect_fraction_on_treatment" in kwargs else 1
@@ -295,6 +299,26 @@ class AddUnobservedCommonCause(CausalRefuter):
                 frac_strength_outcome=self.frac_strength_outcome,
                 theta_s=self._estimate.value,
                 plugin_reisz=self.plugin_reisz,
+            )
+            analyzer.check_sensitivity(plot=self.plot_estimate)
+            return analyzer
+
+        if self.simulation_method == "e-value":
+
+            if not isinstance(self._estimate.estimator, RegressionEstimator):
+                raise NotImplementedError(
+                    "E-Value sensitivity analysis is currently only implemented RegressionEstimator."
+                )
+
+            if len(self._estimate.estimator._effect_modifier_names) > 0:
+                raise NotImplementedError("The current implementation does not support effect modifiers")
+
+            analyzer = EValueSensitivityAnalyzer(
+                estimate=self._estimate,
+                estimand=self._target_estimand,
+                data=self._data,
+                treatment_name=self._treatment_name[0],
+                outcome_name=self._outcome_name[0],
             )
             analyzer.check_sensitivity(plot=self.plot_estimate)
             return analyzer
