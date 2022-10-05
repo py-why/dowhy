@@ -14,10 +14,9 @@ from tqdm.auto import tqdm
 import dowhy.causal_estimators.econml
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
+from dowhy.causal_estimators.regression_estimator import RegressionEstimator
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 from dowhy.causal_refuter import CausalRefutation, CausalRefuter, choose_variables
-from dowhy.causal_estimators.regression_estimator import RegressionEstimator
-from dowhy.causal_refuter import CausalRefutation, CausalRefuter
 from dowhy.causal_refuters.evalue_sensitivity_analyzer import EValueSensitivityAnalyzer
 from dowhy.causal_refuters.linear_sensitivity_analyzer import LinearSensitivityAnalyzer
 from dowhy.causal_refuters.non_parametric_sensitivity_analyzer import NonParametricSensitivityAnalyzer

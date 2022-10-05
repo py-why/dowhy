@@ -4,10 +4,10 @@ from importlib import import_module
 from dowhy.causal_refuter import CausalRefuter
 from dowhy.causal_refuters.add_unobserved_common_cause import (
     AddUnobservedCommonCause,
-    sensitivity_simulation,
+    sensitivity_e_value,
     sensitivity_linear_partial_r2,
     sensitivity_non_parametric_partial_r2,
-    sensitivity_e_value,
+    sensitivity_simulation,
 )
 from dowhy.causal_refuters.bootstrap_refuter import BootstrapRefuter, refute_bootstrap
 from dowhy.causal_refuters.data_subset_refuter import DataSubsetRefuter, refute_data_subset

@@ -27,6 +27,9 @@ class CausalRefuter:
 
     # todo: add docstring for common parameters here and remove from child refuter classes
 
+    This class is for backwards compatibility with CausalModel
+    Will be deprecated in the future in favor of function call refute_method_name() functions
+
     """
 
     # Default value for the number of simulations to be conducted

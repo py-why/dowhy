@@ -89,7 +89,7 @@ class AutoIdentifier:
         conditional_node_names: List[str] = None,
         **kwargs,
     ):
-        estimand = auto_identify_effect(
+        estimand = identify_effect_auto(
             graph,
             treatment_name,
             outcome_name,
@@ -126,7 +126,7 @@ class AutoIdentifier:
         )
 
 
-def auto_identify_effect(
+def identify_effect_auto(
     graph: CausalGraph,
     treatment_name: Union[str, List[str]],
     outcome_name: Union[str, List[str]],

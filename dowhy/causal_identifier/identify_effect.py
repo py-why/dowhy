@@ -1,7 +1,7 @@
 from typing import List, Protocol, Union
 
 from dowhy.causal_graph import CausalGraph
-from dowhy.causal_identifier.auto_identifier import BackdoorAdjustment, EstimandType, auto_identify_effect
+from dowhy.causal_identifier.auto_identifier import BackdoorAdjustment, EstimandType, identify_effect_auto
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 
 
@@ -40,7 +40,7 @@ def identify_effect(
     :param outcome: name of the outcome
     :returns: a probability expression (estimand) for the causal effect if identified, else NULL
     """
-    return auto_identify_effect(
+    return identify_effect_auto(
         graph,
         treatment_name,
         outcome_name,
