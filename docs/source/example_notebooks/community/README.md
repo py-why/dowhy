@@ -16,4 +16,6 @@ Make sure that your notebook conveys the following points:
 * Validation of the causal estimate(s). This can be through a mix of refutations and domain knowledge.
 * Preferred: A comparison of the results from DoWhy to alternative, non-causal methods.
 
+## Using datasets in your notebook
+This folder is intended to store only the notebook code, not the datasets. If you are using an external dataset, it is best to load it dynamically (using its URL) within your code. For example, see this [notebook](https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy_ihdp_data_example.ipynb). If you are bringing in a custom dataset that is not available through a URL, we suggest to host the dataset in a repo on your github account and link to it.
 
