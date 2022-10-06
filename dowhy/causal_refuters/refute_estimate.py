@@ -29,7 +29,7 @@ def refute_estimate(
     estimate: CausalEstimate,
     treatment_name: Optional[str] = None,
     outcome_name: Optional[str] = None,
-    refuters: List[Callable[[Any], Union[CausalRefutation, List[CausalRefutation]]]] = ALL_REFUTERS,
+    refuters: List[Callable[..., Union[CausalRefutation, List[CausalRefutation]]]] = ALL_REFUTERS,
     **kwargs,
 ) -> List[CausalRefutation]:
     """Executes a list of refuters using the default parameters
