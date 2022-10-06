@@ -1,3 +1,4 @@
+import collections
 import copy
 import logging
 import math
@@ -174,8 +175,13 @@ class AddUnobservedCommonCause(CausalRefuter):
             return np.arange(min_coeff, max_coeff, step)
 
     def _compute_min_max_coeff(self, min_coeff, max_coeff, effect_strength_fraction):
-        max_coeff = effect_strength_fraction * max_coeff
-        min_coeff = effect_strength_fraction * min_coeff
+        effect_str = (
+            effect_strength_fraction
+            if not isinstance(effect_strength_fraction, collections.abc.Sequence)
+            else np.array(effect_strength_fraction)
+        )
+        max_coeff = effect_str * max_coeff
+        min_coeff = effect_str * min_coeff
         return min_coeff, max_coeff
 
     def infer_default_kappa_y(self, len_kappa_y=10):
