@@ -94,7 +94,7 @@ def confidence_intervals(
                 position=0,
                 leave=True,
                 disable=not config.show_progress_bars,
-                desc="Estimating boostrap interval...",
+                desc="Estimating bootstrap interval...",
             )
         )
     )
