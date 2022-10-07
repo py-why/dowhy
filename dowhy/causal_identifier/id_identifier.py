@@ -102,16 +102,16 @@ class IDIdentifier:
         node_names: Optional[Union[str, List[str]]] = None,
         **kwargs,
     ):
-        return id_identify_effect(graph, treatment_name, outcome_name, node_names, **kwargs)
+        return identify_effect_id(graph, treatment_name, outcome_name, node_names, **kwargs)
 
 
-def id_identify_effect(
+def identify_effect_id(
     graph: CausalGraph,
     treatment_name: Union[str, List[str]],
     outcome_name: Union[str, List[str]],
     node_names: Optional[Union[str, List[str]]] = None,
     **kwargs,
-):
+) -> IDExpression:
     """
     Implementation of the ID algorithm.
     Link - https://ftp.cs.ucla.edu/pub/stat_ser/shpitser-thesis.pdf

@@ -63,7 +63,7 @@ def kernel_based(
     :param bootstrap_num_runs: Number of bootstrap runs (only relevant if use_bootstrap is True).
     :param bootstrap_num_samples_per_run: Number of samples used in a bootstrap run (only relevant if use_bootstrap is
                                           True).
-    :param bootstrap_n_jobs: Number of parallel jobs for the boostrap runs.
+    :param bootstrap_n_jobs: Number of parallel jobs for the bootstrap runs.
     :param p_value_adjust_func: A callable that expects a numpy array of multiple p-values and returns one p-value. This
                                 is typically used a family wise error rate control method.
     :return: The p-value for the null hypothesis that X and Y are independent (given Z).
@@ -172,7 +172,7 @@ def approx_kernel_based(
                           p-value is constructed based on the provided p_value_adjust_func function.
     :param bootstrap_num_runs: Number of bootstrap runs (only relevant if use_bootstrap is True).
     :param bootstrap_num_samples: Maximum number of used samples per bootstrap run.
-    :param bootstrap_n_jobs: Number of parallel jobs for the boostrap runs.
+    :param bootstrap_n_jobs: Number of parallel jobs for the bootstrap runs.
     :param p_value_adjust_func: A callable that expects a numpy array of multiple p-values and returns one p-value. This
                                 is typically used a family wise error rate control method.
     :return: The p-value for the null hypothesis that X and Y are independent (given Z).
