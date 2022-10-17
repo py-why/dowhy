@@ -1,11 +1,13 @@
 FROM ubuntu:focal
 
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install --yes --quiet \
+    dirmngr gnupg apt-transport-https ca-certificates software-properties-common \
+
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
 RUN add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
 
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt install --yes --quiet \
-    curl dirmngr gnupg apt-transport-https ca-certificates software-properties-common \
-    r-base pandoc graphviz libgraphviz-dev libgsl-dev libcurl4-openssl-dev libssl-dev libxml2-dev
+    curl r-base pandoc graphviz libgraphviz-dev libgsl-dev libcurl4-openssl-dev libssl-dev libxml2-dev
 
 RUN apt install  --yes --quiet python3-pip python3 git
 
