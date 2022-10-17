@@ -2,7 +2,7 @@
 # This dockerfile was used to generate darthtrevino/dowhy-docs, used in the 
 # build-and-publish-docs.yml workflow
 #
-FROM pego/dowhy-examples-notebooks-deps
+FROM ghcr.io/py-why/dowhy-example-notebooks-deps
 
 RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt install --yes --quiet curl
