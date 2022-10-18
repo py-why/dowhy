@@ -203,11 +203,6 @@ class CausalEstimator:
         :returns: A CausalEstimate instance that contains point estimates of average and conditional effects. Based on the parameters provided, it optionally includes confidence intervals, standard errors,statistical significance and other statistical parameters.
         """
 
-        if not hasattr(self, "_data"):
-            raise Exception(
-                "This %(name)s instance is not fitted yet. Call 'fit' with appropiate arguments before using this estimator"
-            )
-
         est = self._estimate_effect()
         est.add_estimator(self)
 
