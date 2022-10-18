@@ -6,12 +6,11 @@ import numpy as np
 import pandas as pd
 import sympy as sp
 from sklearn.utils import resample
-from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
-from dowhy.causal_graph import CausalGraph
-from dowhy import causal_estimators
-
 
 import dowhy.interpreters as interpreters
+from dowhy import causal_estimators
+from dowhy.causal_graph import CausalGraph
+from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 from dowhy.utils.api import parse_state
 
 logger = logging.getLogger(__name__)
