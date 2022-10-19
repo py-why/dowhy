@@ -259,13 +259,71 @@ class CausalModel:
             and other method-dependent information
 
         """
+
+        if effect_modifiers is None or len(effect_modifiers) == 0:
+            effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
+
+        if method_name is None:
+            # TODO add propensity score as default backdoor method, iv as default iv method, add an informational message to show which method has been selected.
+            pass
+        else:
+            # TODO add dowhy as a prefix to all dowhy estimators
+            num_components = len(method_name.split("."))
+            str_arr = method_name.split(".", maxsplit=1)
+            identifier_name = str_arr[0]
+            estimator_name = str_arr[1]
+            # This is done as all dowhy estimators have two parts and external ones have two or more parts
+            if num_components > 2:
+                estimator_package = estimator_name.split(".")[0]
+                if estimator_package == "dowhy":  # For updated dowhy methods
+                    estimator_method = estimator_name.split(".", maxsplit=1)[
+                        1
+                    ]  # discard dowhy from the full package name
+                    causal_estimator_class = causal_estimators.get_class_object(estimator_method + "_estimator")
+                else:
+                    third_party_estimator_package = estimator_package
+                    causal_estimator_class = causal_estimators.get_class_object(
+                        third_party_estimator_package, estimator_name
+                    )
+                    if method_params is None:
+                        method_params = {}
+                    # Define the third-party estimation method to be used
+                    method_params[third_party_estimator_package + "_methodname"] = estimator_name
+            else:  # For older dowhy methods
+                self.logger.info(estimator_name)
+                # Process the dowhy estimators
+                causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
+
+            if method_params is not None and (num_components <= 2 or estimator_package == "dowhy"):
+                extra_args = method_params.get("init_params", {})
+            else:
+                extra_args = {}
+            if method_params is None:
+                method_params = {}
+
+            identified_estimand.set_identifier_method(identifier_name)
+            causal_estimator = causal_estimator_class(
+                self._data,
+                identified_estimand,
+                self._treatment,
+                self._outcome,  # names of treatment and outcome
+                control_value=control_value,
+                treatment_value=treatment_value,
+                test_significance=test_significance,
+                evaluate_effect_strength=evaluate_effect_strength,
+                confidence_intervals=confidence_intervals,
+                target_units=target_units,
+                effect_modifiers=effect_modifiers,
+                **method_params,
+                **extra_args,
+            )
+
         return estimate_effect(
-            self._data,
             self._treatment,
             self._outcome,
             identified_estimand,
-            self._graph,
-            method_name,
+            identifier_name,
+            causal_estimator,
             control_value,
             treatment_value,
             test_significance,
