@@ -139,13 +139,14 @@ dev-dependencies and documentation-generation dependencies are also listed in he
 * pygraphviz (for plotting causal graphs)
 * sympy (for rendering symbolic expressions)
 
-If you face any problems, try installing dependencies manually. 
+If you face any problems, try installing dependencies manually.
 
 .. code:: shell
 
     pip install '<dependency-name>==<version>'
 
 Optionally, if you wish to input graphs in the dot format, then install pydot (or pygraphviz).
+
 
 For better-looking graphs, you can optionally install pygraphviz. To proceed,
 first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL).
