@@ -111,7 +111,7 @@ If you face "Solving environment" problems with conda, then try :code:`conda upd
 
 **Development Version**
 
-If you prefer to use the latest dev version, you will need to use Poetry or 
+If you prefer to use the latest dev version, your dependency management tool will need to point at our GitHub repository.
 
 .. code:: shell
 
@@ -151,7 +151,7 @@ For better-looking graphs, you can optionally install pygraphviz. To proceed,
 first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL).
 
 .. code:: shell
-
+git 
     sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
     ## from https://github.com/pygraphviz/pygraphviz/issues/71
     pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" \
