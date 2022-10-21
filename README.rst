@@ -115,7 +115,7 @@ If you prefer to use the latest dev version, your dependency management tool wil
 
 .. code:: shell
 
-  pip install git+git://github.com/py-why/dowhy@main
+  pip install git+https://github.com/py-why/dowhy@main
 
 **Requirements**
 
