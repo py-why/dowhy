@@ -91,7 +91,7 @@ of a subscription or rewards program for customers [`Rewards notebook
 Installation
 -------------
 
-DoWhy support Python 3.6+. To install, you can use pip or conda.
+DoWhy support Python 3.8+. To install, you can use pip or conda.
 
 **Latest Release**
 
@@ -111,33 +111,41 @@ If you face "Solving environment" problems with conda, then try :code:`conda upd
 
 **Development Version**
 
-If you prefer the latest dev version, clone this repository and run the following command from the top-most folder of
-the repository.
+If you prefer to use the latest dev version, you will need to use Poetry or 
 
 .. code:: shell
 
-    pip install -e .
+  pip install git+git://github.com/py-why/dowhy@main
 
 **Requirements**
 
-DoWhy requires the following packages:
+DoWhy requires a few dependencies. 
+Details on specific versions can be found in [pyproject.toml](./pyproject.toml), under the main dependencies section.
+dev-dependencies and documentation-generation dependencies are also listed in here, and are not necessary for using the library.
 
 * numpy
 * scipy
 * scikit-learn
 * pandas
+* statsmodels
+* joblib
+* tqdml
+* pydot (optional, for inputting graphs in dot format)
+* econml (optional, for using EconML estimators)
+* causalml (optional, for using CausalML estimators)
+* llvmlite (optional, necessary for CausalML)
 * networkx  (for analyzing causal graphs)
 * matplotlib (for general plotting)
+* pygraphviz (for plotting causal graphs)
 * sympy (for rendering symbolic expressions)
 
-If you face any problems, try installing dependencies manually.
+If you face any problems, try installing dependencies manually. Dependencies 
 
 .. code:: shell
 
-    pip install -r requirements.txt
+    pip install \'<dependency-name>==<version>\''
 
 Optionally, if you wish to input graphs in the dot format, then install pydot (or pygraphviz).
-
 
 For better-looking graphs, you can optionally install pygraphviz. To proceed,
 first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL).
