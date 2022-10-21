@@ -115,7 +115,7 @@ If you prefer to use the latest dev version, your dependency management tool wil
 
 .. code:: shell
 
-  pip install git+https://github.com/py-why/dowhy@main
+    pip install git+https://github.com/py-why/dowhy@main
 
 **Requirements**
 
@@ -139,11 +139,11 @@ dev-dependencies and documentation-generation dependencies are also listed in he
 * pygraphviz (for plotting causal graphs)
 * sympy (for rendering symbolic expressions)
 
-If you face any problems, try installing dependencies manually. Dependencies 
+If you face any problems, try installing dependencies manually. 
 
 .. code:: shell
 
-    pip install \'<dependency-name>==<version>\''
+    pip install '<dependency-name>==<version>'
 
 Optionally, if you wish to input graphs in the dot format, then install pydot (or pygraphviz).
 
