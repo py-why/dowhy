@@ -129,7 +129,7 @@ dev-dependencies and documentation-generation dependencies are also listed in he
 * pandas
 * statsmodels
 * joblib
-* tqdml
+* tqdm
 * pydot (optional, for inputting graphs in dot format)
 * econml (optional, for using EconML estimators)
 * causalml (optional, for using CausalML estimators)
