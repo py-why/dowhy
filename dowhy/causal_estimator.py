@@ -714,7 +714,8 @@ def estimate_effect(
 
     In addition, you can directly call any of the EconML estimation methods. The convention is "backdoor.econml.path-to-estimator-class". For example, for the double machine learning estimator ("DML" class) that is located inside "dml" module of EconML, you can use the method name, "backdoor.econml.dml.DML". CausalML estimators can also be called. See `this demo notebook <https://py-why.github.io/dowhy/example_notebooks/dowhy-conditional-treatment-effects.html>`_.
 
-
+    :param treatment: Name of the treatment
+    :param outcome: Name of the outcome
     :param identified_estimand: a probability expression
         that represents the effect to be estimated. Output of
         CausalModel.identify_effect method
@@ -739,19 +740,17 @@ def estimate_effect(
 
     identified_estimand.set_identifier_method(identifier_name)
 
-    if fit_estimator:
-        if identified_estimand.no_directed_path:
-            logger.warning("No directed path from {0} to {1}.".format(treatment, outcome))
-            return CausalEstimate(
-                0, identified_estimand, None, control_value=control_value, treatment_value=treatment_value
-            )
-        # Check if estimator's target estimand is identified
-        elif identified_estimand.estimands[identifier_name] is None:
-            logger.error("No valid identified estimand available.")
-            return CausalEstimate(None, None, None, control_value=control_value, treatment_value=treatment_value)
-    else:
-        # Estimator had been computed in a previous call
-        method.update_input(treatment_value, control_value, target_units)
+    if identified_estimand.no_directed_path:
+        logger.warning("No directed path from {0} to {1}.".format(treatment, outcome))
+        return CausalEstimate(
+            0, identified_estimand, None, control_value=control_value, treatment_value=treatment_value
+        )
+    # Check if estimator's target estimand is identified
+    elif identified_estimand.estimands[identifier_name] is None:
+        logger.error("No valid identified estimand available.")
+        return CausalEstimate(None, None, None, control_value=control_value, treatment_value=treatment_value)
+
+    method.update_input(treatment_value, control_value, target_units)
 
     estimate = method.estimate_effect()
     # Store parameters inside estimate object for refutation methods
