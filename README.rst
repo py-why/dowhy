@@ -91,7 +91,7 @@ of a subscription or rewards program for customers [`Rewards notebook
 Installation
 -------------
 
-DoWhy support Python 3.8+. To install, you can use pip or conda.
+DoWhy support Python 3.8+. To install, you can use pip, poetry, or conda.
 
 **Latest Release**
 
@@ -100,6 +100,12 @@ Install the latest `release <https://pypi.org/project/dowhy/>`__ using pip.
 .. code:: shell
 
    pip install dowhy
+
+Install the latest `release <https://pypi.org/project/dowhy/>`__ using poetry.
+
+.. code:: shell
+
+   poetry add dowhy
 
 Install the latest `release <https://anaconda.org/conda-forge/dowhy>`__ using conda.
 
