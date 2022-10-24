@@ -1,14 +1,16 @@
-name: Build Docs
+name: Build Docs (on demand)
+
 on:
-  push:
-    branches:
-      - main
+  issue_comment:
+    types: [created, edited]
+
 jobs:
   docs:
     runs-on: ubuntu-latest
     container:
       image: darthtrevino/dowhy-docs
       
+    if: ${{ github.event.comment.body == 'build docs'}}
     steps:
       - uses: actions/checkout@main
         with:
