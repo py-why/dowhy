@@ -126,24 +126,7 @@ If you prefer to use the latest dev version, your dependency management tool wil
 **Requirements**
 
 DoWhy requires a few dependencies. 
-Details on specific versions can be found in [pyproject.toml](./pyproject.toml), under the main dependencies section.
-dev-dependencies and documentation-generation dependencies are also listed in here, and are not necessary for using the library.
-
-* numpy
-* scipy
-* scikit-learn
-* pandas
-* statsmodels
-* joblib
-* tqdm
-* pydot (optional, for inputting graphs in dot format)
-* econml (optional, for using EconML estimators)
-* causalml (optional, for using CausalML estimators)
-* llvmlite (optional, necessary for CausalML)
-* networkx  (for analyzing causal graphs)
-* matplotlib (for general plotting)
-* pygraphviz (for plotting causal graphs)
-* sympy (for rendering symbolic expressions)
+Details on specific versions can be found in [pyproject.toml](./pyproject.toml), under the `tool.poetry.dependencies` section.
 
 If you face any problems, try installing dependencies manually.
 
