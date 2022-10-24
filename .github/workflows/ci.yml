@@ -48,3 +48,9 @@ jobs:
 
     - name: Test
       run: poetry run poe test --splits 4 --group ${{ matrix.test-group }}
+
+    - uses: fateyan/action-discord-notifier@v1
+      if: failure() && github.ref == 'refs/heads/main'
+      with:
+        message-title: CI Failed on Main
+        webhook: ${{ secrets.DISCORD_WEBHOOK }}

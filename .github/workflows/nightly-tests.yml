@@ -40,3 +40,9 @@ jobs:
 
       - name: Run Advanced Tests
         run: poetry run poe test_advanced --splits 4 --group ${{ matrix.test-group }}
+
+      - uses: fateyan/action-discord-notifier@v1
+        if: failure()
+        with:
+          message-title: Nightly Advanced Tests Failed
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
