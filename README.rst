@@ -91,7 +91,7 @@ of a subscription or rewards program for customers [`Rewards notebook
 Installation
 -------------
 
-DoWhy support Python 3.6+. To install, you can use pip or conda.
+DoWhy support Python 3.8+. To install, you can use pip, poetry, or conda.
 
 **Latest Release**
 
@@ -100,6 +100,12 @@ Install the latest `release <https://pypi.org/project/dowhy/>`__ using pip.
 .. code:: shell
 
    pip install dowhy
+
+Install the latest `release <https://pypi.org/project/dowhy/>`__ using poetry.
+
+.. code:: shell
+
+   poetry add dowhy
 
 Install the latest `release <https://anaconda.org/conda-forge/dowhy>`__ using conda.
 
@@ -111,30 +117,22 @@ If you face "Solving environment" problems with conda, then try :code:`conda upd
 
 **Development Version**
 
-If you prefer the latest dev version, clone this repository and run the following command from the top-most folder of
-the repository.
+If you prefer to use the latest dev version, your dependency management tool will need to point at our GitHub repository.
 
 .. code:: shell
 
-    pip install -e .
+    pip install git+https://github.com/py-why/dowhy@main
 
 **Requirements**
 
-DoWhy requires the following packages:
-
-* numpy
-* scipy
-* scikit-learn
-* pandas
-* networkx  (for analyzing causal graphs)
-* matplotlib (for general plotting)
-* sympy (for rendering symbolic expressions)
+DoWhy requires a few dependencies. 
+Details on specific versions can be found in `pyproject.toml <./pyproject.toml>`_, under the `tool.poetry.dependencies` section.
 
 If you face any problems, try installing dependencies manually.
 
 .. code:: shell
 
-    pip install -r requirements.txt
+    pip install '<dependency-name>==<version>'
 
 Optionally, if you wish to input graphs in the dot format, then install pydot (or pygraphviz).
 
