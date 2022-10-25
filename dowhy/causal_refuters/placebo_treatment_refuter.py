@@ -134,7 +134,7 @@ def _refute_once(
                 )
             )
             new_treatment = np.random.randint(
-                low=data[treatment_names[0]].min(), high=data[treatment_names[0]].max(), size=data.shape[0]
+                low=data[treatment_names[0]].min(), high=data[treatment_names[0]].max() + 1, size=data.shape[0]
             )
 
         elif "category" in type_dict[treatment_names[0]].name:
