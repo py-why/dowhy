@@ -115,6 +115,10 @@ def create_ada_boost_regressor(**kwargs) -> SklearnRegressionModel:
     return SklearnRegressionModel(AdaBoostRegressor(**kwargs))
 
 
+def create_product_regressor() -> PredictionModel:
+    return ProductRegressor()
+
+
 class InvertibleIdentityFunction(InvertibleFunction):
     def evaluate(self, X: np.ndarray) -> np.ndarray:
         return X
@@ -137,3 +141,15 @@ class InvertibleLogarithmicFunction(InvertibleFunction):
 
     def evaluate_inverse(self, X: np.ndarray) -> np.ndarray:
         return np.exp(X)
+
+
+class ProductRegressor(PredictionModel):
+    def fit(self, X, Y):
+        # Nothing to fit here.
+        pass
+
+    def predict(self, X):
+        return np.prod(X, axis=1).reshape(-1, 1)
+
+    def clone(self):
+        return ProductRegressor()

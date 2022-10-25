@@ -34,7 +34,12 @@ from dowhy.gcm.ml.classification import (
     create_random_forest_classifier,
     create_support_vector_classifier,
 )
-from dowhy.gcm.ml.regression import create_ada_boost_regressor, create_extra_trees_regressor, create_knn_regressor
+from dowhy.gcm.ml.regression import (
+    create_ada_boost_regressor,
+    create_extra_trees_regressor,
+    create_knn_regressor,
+    create_product_regressor,
+)
 from dowhy.gcm.stochastic_models import EmpiricalDistribution
 from dowhy.gcm.util.general import (
     apply_one_hot_encoding,
@@ -65,6 +70,7 @@ _LIST_OF_POTENTIAL_REGRESSORS = [
     create_extra_trees_regressor,
     create_knn_regressor,
     create_ada_boost_regressor,
+    create_product_regressor,
 ]
 
 
@@ -108,7 +114,6 @@ def assign_causal_mechanisms(
 
     :return: None
     """
-
     for node in causal_model.graph.nodes:
         if not override_models and CAUSAL_MECHANISM in causal_model.graph.nodes[node]:
             validate_causal_model_assignment(causal_model.graph, node)
@@ -133,7 +138,6 @@ def select_model(
     X: np.ndarray, Y: np.ndarray, model_selection_quality: AssignmentQuality
 ) -> Union[PredictionModel, ClassificationModel]:
     target_is_categorical = is_categorical(Y)
-
     if model_selection_quality == AssignmentQuality.GOOD:
         use_linear_prediction_models = has_linear_relationship(X, Y)
 
@@ -144,9 +148,13 @@ def select_model(
                 return create_hist_gradient_boost_classifier()
         else:
             if use_linear_prediction_models:
-                return create_linear_regressor()
+                return find_best_model(
+                    [create_linear_regressor, create_product_regressor], X, Y, model_selection_splits=2
+                )()
             else:
-                return create_hist_gradient_boost_regressor()
+                return find_best_model(
+                    [create_hist_gradient_boost_regressor, create_product_regressor], X, Y, model_selection_splits=2
+                )()
     elif model_selection_quality == AssignmentQuality.BETTER:
         if target_is_categorical:
             return find_best_model(_LIST_OF_POTENTIAL_CLASSIFIERS, X, Y)()
