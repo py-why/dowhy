@@ -120,7 +120,7 @@ If you prefer to use the latest dev version, your dependency management tool wil
 **Requirements**
 
 DoWhy requires a few dependencies. 
-Details on specific versions can be found in [pyproject.toml](./pyproject.toml), under the main dependencies section.
+Details on specific versions can be found in `pyproject.toml <./pyproject.toml>`_, under the main dependencies section.
 dev-dependencies and documentation-generation dependencies are also listed in here, and are not necessary for using the library.
 
 * numpy
