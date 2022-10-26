@@ -12,6 +12,7 @@ from dowhy.gcm import (
     distribution_change_of_graphs,
     fit,
 )
+from dowhy.gcm.auto import AssignmentQuality
 from dowhy.gcm.ml import create_linear_regressor
 from dowhy.gcm.shapley import ShapleyConfig
 
@@ -97,6 +98,37 @@ def test_when_using_distribution_change_with_return_additional_info_then_returns
         if node == "X1":
             continue
         assert type(causal_model_old.causal_mechanism(node)) == type(causal_model_new.causal_mechanism(node))
+
+
+@flaky(max_runs=3)
+def test_given_non_linear_data_when_using_distribution_change_with_mean_difference_then_returns_expected_results():
+    X0 = np.random.uniform(-1, 1, 1000)
+    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
+    X2 = np.exp(0.5 * X0) + np.random.normal(0, 0.1, 1000)
+    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
+    original_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
+
+    X0 = np.random.uniform(-1, 1, 1000)
+    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
+    X2 = 4 + np.exp(0.5 * X0) + np.random.normal(0, 0.1, 1000)
+    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
+    outlier_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
+
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([("X0", "X1"), ("X0", "X2"), ("X2", "X3")]))
+
+    attributions = distribution_change(
+        causal_model,
+        original_observations,
+        outlier_observations,
+        "X3",
+        difference_estimation_func=lambda x, y: np.mean(y) - np.mean(x),
+        auto_assignment_quality=AssignmentQuality.GOOD,
+    )
+
+    assert attributions["X0"] == approx(0, abs=0.05)
+    assert attributions["X2"] == approx(2, abs=0.05)
+    assert attributions["X3"] == approx(0, abs=0.05)
+    assert "X1" not in attributions
 
 
 def _assign_causal_mechanisms(causal_model):
