@@ -132,11 +132,14 @@ def test_given_constant_inputs_when_perform_kernel_based_test_then_returns_non_n
 
 @flaky(max_runs=5)
 def test_given_continuous_conditionally_independent_data_when_perform_approx_kernel_based_test_then_not_reject():
-    z = np.random.randn(1000, 1)
-    x = np.exp(z + np.random.rand(1000, 1))
-    y = np.exp(z + np.random.rand(1000, 1))
+    z = np.random.randn(5000, 1)
+    x = np.exp(z + np.random.rand(5000, 1))
+    y = np.exp(z + np.random.rand(5000, 1))
 
-    assert approx_kernel_based(x, y, z) > 0.05
+    assert (
+        approx_kernel_based(x, y, z, num_random_features_X=10, num_random_features_Y=10, num_random_features_Z=10)
+        > 0.05
+    )
 
 
 @flaky(max_runs=5)
