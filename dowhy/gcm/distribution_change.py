@@ -13,6 +13,7 @@ from numpy.matlib import repmat
 from statsmodels.stats.multitest import multipletests
 from tqdm import tqdm
 
+from dowhy.gcm.auto import AssignmentQuality, assign_causal_mechanisms
 from dowhy.gcm.cms import ProbabilisticCausalModel
 from dowhy.gcm.divergence import auto_estimate_kl_divergence
 from dowhy.gcm.fitting_sampling import draw_samples, fit_causal_model_of_target
@@ -100,6 +101,7 @@ def distribution_change(
     ] = mechanism_change_test,
     mechanism_change_test_significance_level: float = 0.05,
     mechanism_change_test_fdr_control_method: Optional[str] = "fdr_bh",
+    auto_assignment_quality: Optional[AssignmentQuality] = None,
     return_additional_info: bool = False,
     shapley_config: Optional[ShapleyConfig] = None,
     graph_factory: Callable[[Any], DirectedGraph] = nx.DiGraph,
@@ -132,6 +134,10 @@ def distribution_change(
     :param mechanism_change_test_fdr_control_method: The false discovery rate control method for mechanism change
                                                      tests. For more options, checkout `statsmodels manual
                                                      <https://www.statsmodels.org/dev/generated/statsmodels.stats.multitest.multipletests.html>`_.
+    :param auto_assignment_quality: If set to None, the assigned models from the given causal models are used for the
+                                    old and new graph. However, they are re-fitted on the given data.
+                                    If set to a valid assignment quality, new models are automatically assigned to the
+                                    old and new graph based on the respective data.
     :param return_additional_info: If set to True, three additional items are returned: a dictionary indicating
                                    whether each node's mechanism changed, the causal DAG whose causal models are
                                    learned from old data, and the causal DAG whose causal models are learned from new
@@ -146,12 +152,19 @@ def distribution_change(
              learned from old data, and the causal DAG whose causal models are learned from new data.
     """
     causal_graph_old = graph_factory(node_connected_subgraph_view(causal_model.graph, target_node))
-    clone_causal_models(causal_model.graph, causal_graph_old)
     causal_model_old = ProbabilisticCausalModel(causal_graph_old)
 
+    if auto_assignment_quality is None:
+        clone_causal_models(causal_model.graph, causal_model_old.graph)
+    else:
+        assign_causal_mechanisms(causal_model_old, old_data, override_models=True, quality=auto_assignment_quality)
+
     causal_graph_new = graph_factory(causal_graph_old)
-    clone_causal_models(causal_graph_old, causal_graph_new)
     causal_model_new = ProbabilisticCausalModel(causal_graph_new)
+    if auto_assignment_quality is None:
+        clone_causal_models(causal_graph_old, causal_model_new.graph)
+    else:
+        assign_causal_mechanisms(causal_model_new, new_data, override_models=True, quality=auto_assignment_quality)
 
     mechanism_changes = _fit_accounting_for_mechanism_change(
         causal_model_old,
