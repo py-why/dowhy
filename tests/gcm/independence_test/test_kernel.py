@@ -2,11 +2,9 @@ import random
 
 import numpy as np
 import pytest
-from _pytest.python_api import approx
 from flaky import flaky
 
 from dowhy.gcm.independence_test import approx_kernel_based, kernel_based
-from dowhy.gcm.independence_test.kernel import _fast_centering
 
 
 @flaky(max_runs=5)
@@ -60,11 +58,6 @@ def test_given_random_seed_when_perform_conditional_kernel_based_test_then_retur
     result_2 = kernel_based(x, z, y, bootstrap_num_samples_per_run=5, bootstrap_num_runs=2, p_value_adjust_func=np.mean)
 
     assert result_1 == result_2
-
-
-def test_given_too_few_samples_when_perform_kernel_based_test_then_raise_error():
-    with pytest.raises(RuntimeError):
-        kernel_based(np.array([1, 2, 3, 4]), np.array([1, 3, 2, 4]))
 
 
 @flaky(max_runs=5)
@@ -312,14 +305,6 @@ def test_given_random_seed_when_perform_pairwise_approx_kernel_based_test_then_r
     )
 
     assert result_1 == result_2
-
-
-def test_when_using_fast_centering_then_gives_expected_results():
-    X = np.random.normal(0, 1, (100, 100))
-
-    h = np.identity(X.shape[0]) - np.ones((X.shape[0], X.shape[0]), dtype=float) / X.shape[0]
-
-    assert _fast_centering(X) == approx(h @ X @ h)
 
 
 @flaky(max_runs=3)
