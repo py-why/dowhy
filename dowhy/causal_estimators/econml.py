@@ -1,5 +1,6 @@
 import inspect
 from importlib import import_module
+from typing import Any, List, Optional
 
 import econml
 import numpy as np
@@ -76,6 +77,56 @@ class Econml(CausalEstimator):
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
 
+    def fit(
+        self,
+        data: pd.DataFrame,
+        effect_modifier_names: Optional[List[str]] = None,
+        observed_common_causes_names: Optional[List[str]] = None,
+    ):
+        self._data = data
+        self._effect_modifier_names = effect_modifier_names
+        self._observed_common_causes_names = observed_common_causes_names
+
+        (module_name, _, class_name) = self._econml_methodname.rpartition(".")
+        if module_name.endswith("metalearners"):
+            effect_modifier_names = []
+            if self._effect_modifier_names is not None:
+                effect_modifier_names = self._effect_modifier_names.copy()
+            w_diff_x = [w for w in self._observed_common_causes_names if w not in effect_modifier_names]
+            if len(w_diff_x) > 0:
+                self.logger.warn(
+                    "Concatenating common_causes and effect_modifiers and providing a single list of variables to metalearner estimator method, "
+                    + class_name
+                    + ". EconML metalearners accept a single X argument."
+                )
+                effect_modifier_names.extend(w_diff_x)
+                # Override the effect_modifiers set in CausalEstimator.__init__()
+                # Also only update self._effect_modifiers, and create a copy of self._effect_modifier_names
+                # the latter can be used by other estimator methods later
+                self._effect_modifiers = self._data[effect_modifier_names]
+                self._effect_modifiers = pd.get_dummies(self._effect_modifiers, drop_first=True)
+                self._effect_modifier_names = effect_modifier_names
+            self.logger.debug("Effect modifiers: " + ",".join(effect_modifier_names))
+        if self._observed_common_causes_names:
+            self._observed_common_causes = self._data[self._observed_common_causes_names]
+            self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
+        else:
+            self._observed_common_causes = None
+        self.logger.debug("Back-door variables used:" + ",".join(self._observed_common_causes_names))
+        # Instrumental variables names, if present
+        # choosing the instrumental variable to use
+        if getattr(self, "iv_instrument_name", None) is None:
+            self.estimating_instrument_names = self._target_estimand.instrumental_variables
+        else:
+            self.estimating_instrument_names = parse_state(self.iv_instrument_name)
+        if self.estimating_instrument_names:
+            self._estimating_instruments = self._data[self.estimating_instrument_names]
+            self._estimating_instruments = pd.get_dummies(self._estimating_instruments, drop_first=True)
+        else:
+            self._estimating_instruments = None
+
+        return self
+
     def _get_econml_class_object(self, module_method_name, *args, **kwargs):
         # from https://www.bnmetrics.com/blog/factory-pattern-in-python3-simple-version
         try:
@@ -91,7 +142,7 @@ class Econml(CausalEstimator):
             )
         return estimator_class
 
-    def _estimate_effect(self):
+    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None):
         n_samples = self._treatment.shape[0]
         X = None  # Effect modifiers
         W = None  # common causes/ confounders
@@ -122,21 +173,21 @@ class Econml(CausalEstimator):
         X_test = X
         n_target_units = n_samples
         if X is not None:
-            if type(self._target_units) is pd.DataFrame:
-                X_test = self._target_units
-            elif callable(self._target_units):
-                filtered_rows = self._data.where(self._target_units)
+            if type(target_units) is pd.DataFrame:
+                X_test = target_units
+            elif callable(target_units):
+                filtered_rows = self._data.where(target_units)
                 boolean_criterion = np.array(filtered_rows.notnull().iloc[:, 0])
                 X_test = X[boolean_criterion]
             n_target_units = X_test.shape[0]
 
         # Changing shape to a list for a singleton value
-        if type(self._control_value) is not list:
-            self._control_value = [self._control_value]
-        if type(self._treatment_value) is not list:
-            self._treatment_value = [self._treatment_value]
-        T0_test = np.repeat([self._control_value], n_target_units, axis=0)
-        T1_test = np.repeat([self._treatment_value], n_target_units, axis=0)
+        if type(control_value) is not list:
+            control_value = [control_value]
+        if type(treatment_value) is not list:
+            treatment_value = [treatment_value]
+        T0_test = np.repeat([control_value], n_target_units, axis=0)
+        T1_test = np.repeat([treatment_value], n_target_units, axis=0)
         est = self.estimator.effect(X_test, T0=T0_test, T1=T1_test)
         ate = np.mean(est)
 
@@ -147,8 +198,8 @@ class Econml(CausalEstimator):
             )
         estimate = CausalEstimate(
             estimate=ate,
-            control_value=self._control_value,
-            treatment_value=self._treatment_value,
+            control_value=control_value,
+            treatment_value=treatment_value,
             target_estimand=self._target_estimand,
             realized_estimand_expr=self.symbolic_estimator,
             cate_estimates=est,

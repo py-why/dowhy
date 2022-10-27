@@ -1,3 +1,4 @@
+from typing import Any
 import numpy as np
 import pandas as pd
 
@@ -42,7 +43,14 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
 
-    def _estimate_effect(self):
+    def fit(self, data: pd.DataFrame, rd_variable_name=None):
+        self._data = data
+        self.rd_variable_name = rd_variable_name
+        self.rd_variable = self._data[self.rd_variable_name]
+
+        return self
+
+    def estimate_effect(self):
         upper_limit = self.rd_threshold_value + self.rd_bandwidth
         lower_limit = self.rd_threshold_value - self.rd_bandwidth
         rows_filter = np.s_[(self.rd_variable >= lower_limit) & (self.rd_variable <= upper_limit)]

@@ -1,3 +1,4 @@
+from typing import Any
 import numpy as np
 import pandas as pd
 from sklearn.neighbors import NearestNeighbors
@@ -81,7 +82,32 @@ class DistanceMatchingEstimator(CausalEstimator):
         self.matched_indices_att = None
         self.matched_indices_atc = None
 
-    def _estimate_effect(self):
+    def fit(self, data: pd.DataFrame, exact_match_cols=None):
+        self._data = data
+        self.exact_match_cols = exact_match_cols
+
+        self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
+
+        self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
+        if self._observed_common_causes_names:
+            if self.exact_match_cols is not None:
+                self._observed_common_causes_names = [
+                    v for v in self._observed_common_causes_names if v not in self.exact_match_cols
+                ]
+            self._observed_common_causes = self._data[self._observed_common_causes_names]
+            # Convert the categorical variables into dummy/indicator variables
+            # Basically, this gives a one hot encoding for each category
+            # The first category is taken to be the base line.
+            self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
+        else:
+            self._observed_common_causes = None
+            error_msg = "No common causes/confounders present. Distance matching methods are not applicable"
+            self.logger.error(error_msg)
+            raise Exception(error_msg)
+
+        return self
+
+    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None):
         # this assumes a binary treatment regime
         updated_df = pd.concat(
             [self._observed_common_causes, self._data[[self._outcome_name, self._treatment_name[0]]]], axis=1
@@ -96,11 +122,11 @@ class DistanceMatchingEstimator(CausalEstimator):
         fit_att, fit_atc = False, False
         est = None
         # TODO remove neighbors that are more than a given radius apart
-        if self._target_units == "att":
+        if target_units == "att":
             fit_att = True
-        elif self._target_units == "atc":
+        elif target_units == "atc":
             fit_atc = True
-        elif self._target_units == "ate":
+        elif target_units == "ate":
             fit_att = True
             fit_atc = True
         else:
@@ -127,9 +153,9 @@ class DistanceMatchingEstimator(CausalEstimator):
                     att += treated_outcome - control_outcome
 
                 att /= numtreatedunits
-                if self._target_units == "att":
+                if target_units == "att":
                     est = att
-                elif self._target_units == "ate":
+                elif target_units == "ate":
                     est = att * numtreatedunits
 
                 # Return indices in the original dataframe
@@ -165,9 +191,9 @@ class DistanceMatchingEstimator(CausalEstimator):
 
                 att /= numtreatedunits
 
-                if self._target_units == "att":
+                if target_units == "att":
                     est = att
-                elif self._target_units == "ate":
+                elif target_units == "ate":
                     est = att * numtreatedunits
 
         if fit_atc:
@@ -188,9 +214,9 @@ class DistanceMatchingEstimator(CausalEstimator):
 
             atc /= numcontrolunits
 
-            if self._target_units == "atc":
+            if target_units == "atc":
                 est = atc
-            elif self._target_units == "ate":
+            elif target_units == "ate":
                 est += atc * numcontrolunits
                 est /= numtreatedunits + numcontrolunits
 
@@ -202,8 +228,8 @@ class DistanceMatchingEstimator(CausalEstimator):
 
         estimate = CausalEstimate(
             estimate=est,
-            control_value=self._control_value,
-            treatment_value=self._treatment_value,
+            control_value=control_value,
+            treatment_value=treatment_value,
             target_estimand=self._target_estimand,
             realized_estimand_expr=self.symbolic_estimator,
         )

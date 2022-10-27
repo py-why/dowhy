@@ -1,3 +1,4 @@
+from typing import Any
 import pandas as pd
 from sklearn import linear_model
 
@@ -63,7 +64,10 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         self.num_strata = num_strata
         self.clipping_threshold = clipping_threshold
 
-    def _estimate_effect(self):
+    def fit(self, data: pd.DataFrame):
+        return super().fit(data)
+
+    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None):
         self._refresh_propensity_score()
 
         clipped = None
@@ -126,13 +130,13 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
             )
         )
 
-        if self._target_units == "att":
+        if target_units == "att":
             est = (
                 weighted_outcomes["effect"] * weighted_outcomes[treatment_sum_name]
             ).sum() / total_treatment_population
-        elif self._target_units == "atc":
+        elif target_units == "atc":
             est = (weighted_outcomes["effect"] * weighted_outcomes[control_sum_name]).sum() / total_control_population
-        elif self._target_units == "ate":
+        elif target_units == "ate":
             est = (
                 weighted_outcomes["effect"]
                 * (weighted_outcomes[control_sum_name] + weighted_outcomes[treatment_sum_name])
@@ -144,8 +148,8 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         #        such as how much clipping was done, or per-strata info for debugging?
         estimate = CausalEstimate(
             estimate=est,
-            control_value=self._control_value,
-            treatment_value=self._treatment_value,
+            control_value=control_value,
+            treatment_value=treatment_value,
             target_estimand=self._target_estimand,
             realized_estimand_expr=self.symbolic_estimator,
             propensity_scores=self._data[self.propensity_score_column],

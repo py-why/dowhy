@@ -1,4 +1,7 @@
+from typing import Any, Dict, List, Optional, Union
+
 import numpy as np
+import pandas as pd
 import sympy as sp
 import sympy.stats as spstats
 from statsmodels.sandbox.regression.gmm import IV2SLS
@@ -49,7 +52,23 @@ class InstrumentalVariableEstimator(CausalEstimator):
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
 
-    def _estimate_effect(self):
+    def fit(self, data: pd.DataFrame, iv_instrument_name: Optional[Union[List, Dict, str]] = None):
+        self._data = data
+        self.estimating_instrument_names = self._target_estimand.instrumental_variables
+        if iv_instrument_name is not None:
+            self.estimating_instrument_names = parse_state(iv_instrument_name)
+        self.logger.debug("Instrumental Variables used:" + ",".join(self.estimating_instrument_names))
+        if not self.estimating_instrument_names:
+            raise ValueError("No valid instruments found. IV Method not applicable")
+        if len(self.estimating_instrument_names) < len(self._treatment_name):
+            # TODO move this to the identification step
+            raise ValueError(
+                "Number of instruments fewer than number of treatments. 2SLS requires at least as many instruments as treatments."
+            )
+        self._estimating_instruments = self._data[self.estimating_instrument_names]
+        return self
+
+    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0):
         if len(self.estimating_instrument_names) == 1 and len(self._treatment_name) == 1:
             instrument = self._estimating_instruments.iloc[:, 0]
             self.logger.debug("Instrument Variable values: {0}".format(instrument))
@@ -81,8 +100,8 @@ class InstrumentalVariableEstimator(CausalEstimator):
             )  # the effect is the same for any treatment value (assume treatment goes from 0 to 1)
         estimate = CausalEstimate(
             estimate=iv_est,
-            control_value=self._control_value,
-            treatment_value=self._treatment_value,
+            control_value=control_value,
+            treatment_value=treatment_value,
             target_estimand=self._target_estimand,
             realized_estimand_expr=self.symbolic_estimator,
         )

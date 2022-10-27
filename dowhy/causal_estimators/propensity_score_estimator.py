@@ -74,10 +74,30 @@ class PropensityScoreEstimator(CausalEstimator):
             self.logger.error(error_msg)
             raise Exception(error_msg)
 
+    def fit(self, data: pd.DataFrame):
+        self._data = data
+
+        self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
+        self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
+
+        if self._observed_common_causes_names:
+            self._observed_common_causes = self._data[self._observed_common_causes_names]
+            # Convert the categorical variables into dummy/indicator variables
+            # Basically, this gives a one hot encoding for each category
+            # The first category is taken to be the base line.
+            self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
+        else:
+            self._observed_common_causes = None
+            error_msg = "No common causes/confounders present. Propensity score based methods are not applicable"
+            self.logger.error(error_msg)
+            raise Exception(error_msg)
+
+        return self
+
     def _refresh_propensity_score(self):
         """
         A custom estimator based on the way the propensity score estimates are to be used.
-        Invoked from the '_estimate_effect' method of various propensity score subclasses when the propensity score is not pre-computed.
+        Invoked from the 'estimate_effect' method of various propensity score subclasses when the propensity score is not pre-computed.
         """
         if self.recalculate_propensity_score is True:
             if self.propensity_score_model is None:
@@ -111,12 +131,5 @@ class PropensityScoreEstimator(CausalEstimator):
         A symbolic string that conveys what each estimator does.
         For instance, linear regression is expressed as
         y ~ bx + e
-        """
-        raise NotImplementedError
-
-    def _estimate_effect(self):
-        """
-        A custom estimator based on the way the propensity score estimates are to be used.
-
         """
         raise NotImplementedError

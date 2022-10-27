@@ -1,5 +1,6 @@
 import copy
 import itertools
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -91,7 +92,45 @@ class TwoStageRegressionEstimator(CausalEstimator):
             self.second_stage_model = self.__class__.DEFAULT_SECOND_STAGE_MODEL
             self.logger.warning("Second stage model not provided. Defaulting to backdoor.linear_regression.")
 
-    def _estimate_effect(self):
+    def fit(self, data: pd.DataFrame):
+        self._data = data
+
+        if self._target_estimand.identifier_method == "frontdoor":
+            self.logger.debug("Front-door variable used:" + ",".join(self._target_estimand.get_frontdoor_variables()))
+            self._frontdoor_variables_names = self._target_estimand.get_frontdoor_variables()
+
+            if self._frontdoor_variables_names:
+                self._frontdoor_variables = self._data[self._frontdoor_variables_names]
+            else:
+                self._frontdoor_variables = None
+                error_msg = "No front-door variable present. Two stage regression is not applicable"
+                self.logger.error(error_msg)
+        elif self._target_estimand.identifier_method == "mediation":
+            self.logger.debug("Mediators used:" + ",".join(self._target_estimand.get_mediator_variables()))
+            self._mediators_names = self._target_estimand.get_mediator_variables()
+
+            if self._mediators_names:
+                self._mediators = self._data[self._mediators_names]
+            else:
+                self._mediators = None
+                error_msg = "No mediator variable present. Two stage regression is not applicable"
+                self.logger.error(error_msg)
+        elif self._target_estimand.identifier_method == "iv":
+            self.logger.debug(
+                "Instrumental variables used:" + ",".join(self._target_estimand.get_instrumental_variables())
+            )
+            self._instrumental_variables_names = self._target_estimand.get_instrumental_variables()
+
+            if self._instrumental_variables_names:
+                self._instrumental_variables = self._data[self._instrumental_variables_names]
+            else:
+                self._instrumental_variables = None
+                error_msg = "No instrumental variable present. Two stage regression is not applicable"
+                self.logger.error(error_msg)
+
+        return self
+
+    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None):
         estimate_value = None
         # First stage
         modified_target_estimand = copy.deepcopy(self._target_estimand)
@@ -107,15 +146,15 @@ class TwoStageRegressionEstimator(CausalEstimator):
             modified_target_estimand,
             self._treatment_name,
             parse_state(modified_target_estimand.outcome_variable),
-            control_value=self._control_value,
-            treatment_value=self._treatment_value,
+            control_value=control_value,
+            treatment_value=treatment_value,
             test_significance=self._significance_test,
             evaluate_effect_strength=self._effect_strength_eval,
             confidence_intervals=self._confidence_intervals,
-            target_units=self._target_units,
+            target_units=target_units,
             effect_modifiers=self._effect_modifier_names,
             **self.method_params,
-        )._estimate_effect()
+        ).estimate_effect()
 
         # Second Stage
         modified_target_estimand = copy.deepcopy(self._target_estimand)
@@ -131,15 +170,15 @@ class TwoStageRegressionEstimator(CausalEstimator):
             modified_target_estimand,
             parse_state(modified_target_estimand.treatment_variable),
             parse_state(self._outcome_name),  # to convert it to array before passing to causal estimator
-            control_value=self._control_value,
-            treatment_value=self._treatment_value,
+            control_value=control_value,
+            treatment_value=treatment_value,
             test_significance=self._significance_test,
             evaluate_effect_strength=self._effect_strength_eval,
             confidence_intervals=self._confidence_intervals,
-            target_units=self._target_units,
+            target_units=target_units,
             effect_modifiers=self._effect_modifier_names,
             **self.method_params,
-        )._estimate_effect()
+        ).estimate_effect()
         # Combining the two estimates
         natural_indirect_effect = first_stage_estimate.value * second_stage_estimate.value
         # This same estimate is valid for frontdoor as well as mediation (NIE)
@@ -159,15 +198,15 @@ class TwoStageRegressionEstimator(CausalEstimator):
                 modified_target_estimand,
                 self._treatment_name,
                 parse_state(self._outcome_name),
-                control_value=self._control_value,
-                treatment_value=self._treatment_value,
+                control_value=control_value,
+                treatment_value=treatment_value,
                 test_significance=self._significance_test,
                 evaluate_effect_strength=self._effect_strength_eval,
                 confidence_intervals=self._confidence_intervals,
-                target_units=self._target_units,
+                target_units=target_units,
                 effect_modifiers=self._effect_modifier_names,
                 **self.method_params,
-            )._estimate_effect()
+            ).estimate_effect()
             natural_direct_effect = total_effect_estimate.value - natural_indirect_effect
             estimate_value = natural_direct_effect
             self.symbolic_estimator = self.construct_symbolic_estimator(
@@ -178,8 +217,8 @@ class TwoStageRegressionEstimator(CausalEstimator):
             )
         return CausalEstimate(
             estimate=estimate_value,
-            control_value=self._control_value,
-            treatment_value=self._treatment_value,
+            control_value=control_value,
+            treatment_value=treatment_value,
             target_estimand=self._target_estimand,
             realized_estimand_expr=self.symbolic_estimator,
         )

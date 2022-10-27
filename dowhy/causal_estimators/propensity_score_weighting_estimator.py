@@ -1,3 +1,4 @@
+from typing import Any
 import numpy as np
 import pandas as pd
 
@@ -70,7 +71,10 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
         self.min_ps_score = min_ps_score
         self.max_ps_score = max_ps_score
 
-    def _estimate_effect(self):
+    def fit(self, data: pd.DataFrame):
+        return super().fit(data)
+
+    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None):
         self._refresh_propensity_score()
 
         # trim propensity score weights
@@ -153,14 +157,14 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
             1 - p_treatment
         )
 
-        if isinstance(self._target_units, pd.DataFrame) or self._target_units == "ate":
+        if isinstance(target_units, pd.DataFrame) or target_units == "ate":
             weighting_scheme_name = self.weighting_scheme
-        elif self._target_units == "att":
+        elif target_units == "att":
             weighting_scheme_name = "t" + self.weighting_scheme
-        elif self._target_units == "atc":
+        elif target_units == "atc":
             weighting_scheme_name = "c" + self.weighting_scheme
         else:
-            raise ValueError(f"Target units value {self._target_units} not supported")
+            raise ValueError(f"Target units value {target_units} not supported")
 
         # Calculating the effect
         self._data["d_y"] = (
@@ -179,8 +183,8 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
         # TODO - how can we add additional information into the returned estimate?
         estimate = CausalEstimate(
             estimate=est,
-            control_value=self._control_value,
-            treatment_value=self._treatment_value,
+            control_value=control_value,
+            treatment_value=treatment_value,
             target_estimand=self._target_estimand,
             realized_estimand_expr=self.symbolic_estimator,
             propensity_scores=self._data[self.propensity_score_column],

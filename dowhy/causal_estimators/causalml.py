@@ -1,5 +1,6 @@
 import inspect
 from importlib import import_module
+from typing import Any
 
 import causalml
 import numpy as np
@@ -69,6 +70,39 @@ class Causalml(CausalEstimator):
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
 
+    def fit(
+        self,
+        data: pd.DataFrame,
+    ):
+        self._data = data
+        # Check the backdoor variables being used
+        self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
+
+        # Add the observed confounders and one hot encode the categorical variables
+        self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
+        if self._observed_common_causes_names:
+            # Get the data of the unobserved confounders
+            self._observed_common_causes = self._data[self._observed_common_causes_names]
+            # One hot encode the data if they are categorical
+            self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
+        else:
+            self._observed_common_causes = []
+
+        # Check the instrumental variables involved
+        self.logger.debug("Instrumental variables used:" + ",".join(self._target_estimand.instrumental_variables))
+
+        # Perform the same actions as the above
+        self._instrumental_variable_names = self._target_estimand.instrumental_variables
+        if self._instrumental_variable_names:
+            self._instrumental_variables = self._data[self._instrumental_variable_names]
+            self._instrumental_variables = pd.get_dummies(self._instrumental_variables, drop_first=True)
+        else:
+            self._instrumental_variables = []
+
+        # Check if effect modifiers are used
+        self.logger.debug("Effect Modifiers used:" + ",".join(self._effect_modifier_names))
+        return self
+
     def _get_causalml_class_object(self, module_method_name, *args, **kwargs):
 
         try:
@@ -84,7 +118,7 @@ class Causalml(CausalEstimator):
             )
         return estimator_class
 
-    def _estimate_effect(self):
+    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0):
         X_names = self._observed_common_causes_names + self._effect_modifier_names
 
         # Both the outcome and the treatment have to be 1D arrays according to the CausalML API
@@ -106,8 +140,8 @@ class Causalml(CausalEstimator):
 
         estimate = CausalEstimate(
             estimate=value_tuple[0],
-            control_value=self._control_value,
-            treatment_value=self._treatment_value,
+            control_value=control_value,
+            treatment_value=treatment_value,
             target_estimand=self._target_estimand,
             realized_estimand_expr=self.symbolic_estimator,
             cate_estimates=cate_estimates,

@@ -1,5 +1,6 @@
 import itertools
 
+import pandas as pd
 import statsmodels.api as sm
 
 from dowhy.causal_estimators.regression_estimator import RegressionEstimator
@@ -40,6 +41,9 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
         # Checking if Y is binary
         outcome_values = self._data[self._outcome_name].astype(int).unique()
         self.outcome_is_binary = all([v in [0, 1] for v in outcome_values])
+
+    def fit(self, data: pd.DataFrame):
+        return super().fit(data)
 
     def _build_model(self):
         features = self._build_features()

@@ -1,3 +1,4 @@
+from typing import Any
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
@@ -34,10 +35,20 @@ class RegressionEstimator(CausalEstimator):
         self.logger.info(self.symbolic_estimator)
         self.model = None
 
-    def _estimate_effect(self, data_df=None, need_conditional_estimates=None):
+    def fit(self, data: pd.DataFrame):
+        self._data = data
+        self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
+        self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
+        if len(self._observed_common_causes_names) > 0:
+            self._observed_common_causes = self._data[self._observed_common_causes_names]
+            self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
+        else:
+            self._observed_common_causes = None
+
+        return self
+
+    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, need_conditional_estimates=None):
         # TODO make treatment_value and control value also as local parameters
-        if data_df is None:
-            data_df = self._data
         if need_conditional_estimates is None:
             need_conditional_estimates = self.need_conditional_estimates
         # Checking if the model is already trained
@@ -48,7 +59,7 @@ class RegressionEstimator(CausalEstimator):
             self.logger.debug("Coefficients of the fitted model: " + ",".join(map(str, coefficients)))
             self.logger.debug(self.model.summary())
         # All treatments are set to the same constant value
-        effect_estimate = self._do(self._treatment_value, data_df) - self._do(self._control_value, data_df)
+        effect_estimate = self._do(treatment_value, self._data) - self._do(control_value, self._data)
         conditional_effect_estimates = None
         if need_conditional_estimates:
             conditional_effect_estimates = self._estimate_conditional_effects(
@@ -57,18 +68,14 @@ class RegressionEstimator(CausalEstimator):
         intercept_parameter = self.model.params[0]
         estimate = CausalEstimate(
             estimate=effect_estimate,
-            control_value=self._control_value,
-            treatment_value=self._treatment_value,
+            control_value=control_value,
+            treatment_value=treatment_value,
             conditional_estimates=conditional_effect_estimates,
             target_estimand=self._target_estimand,
             realized_estimand_expr=self.symbolic_estimator,
             intercept=intercept_parameter,
         )
         return estimate
-
-    def _estimate_effect_fn(self, data_df):
-        est = self._estimate_effect(data_df, need_conditional_estimates=False)
-        return est.value
 
     def _build_features(self, treatment_values=None, data_df=None):
         # Using all data by default

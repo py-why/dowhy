@@ -188,35 +188,35 @@ class CausalEstimator:
 
         return new_estimator
 
-    def _estimate_effect(self):
-        """This method is to be overriden by the child classes, so that they can run the estimation technique of their choice"""
-        raise NotImplementedError(
-            ("Main estimation method is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG).format(self.__class__)
-        )
+    # def _estimate_effect(self):
+    #     """This method is to be overriden by the child classes, so that they can run the estimation technique of their choice"""
+    #     raise NotImplementedError(
+    #         ("Main estimation method is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG).format(self.__class__)
+    #     )
 
-    def estimate_effect(self):
-        """Base estimation method that calls the estimate_effect method of its calling subclass.
+    # def estimate_effect(self):
+    #     """Base estimation method that calls the estimate_effect method of its calling subclass.
 
-        Can optionally also test significance and estimate effect strength for any returned estimate.
+    #     Can optionally also test significance and estimate effect strength for any returned estimate.
 
-        :param self: object instance of class Estimator
-        :returns: A CausalEstimate instance that contains point estimates of average and conditional effects. Based on the parameters provided, it optionally includes confidence intervals, standard errors,statistical significance and other statistical parameters.
-        """
+    #     :param self: object instance of class Estimator
+    #     :returns: A CausalEstimate instance that contains point estimates of average and conditional effects. Based on the parameters provided, it optionally includes confidence intervals, standard errors,statistical significance and other statistical parameters.
+    #     """
 
-        est = self._estimate_effect()
-        est.add_estimator(self)
+    #     est = self._estimate_effect()
+    #     est.add_estimator(self)
 
-        if self._significance_test:
-            self.test_significance(est.value, method=self._significance_test)
-        if self._confidence_intervals:
-            self.estimate_confidence_intervals(
-                est.value, confidence_level=self.confidence_level, method=self._confidence_intervals
-            )
-        if self._effect_strength_eval:
-            effect_strength_dict = self.evaluate_effect_strength(est)
-            est.add_effect_strength(effect_strength_dict)
+    #     if self._significance_test:
+    #         self.test_significance(est.value, method=self._significance_test)
+    #     if self._confidence_intervals:
+    #         self.estimate_confidence_intervals(
+    #             est.value, confidence_level=self.confidence_level, method=self._confidence_intervals
+    #         )
+    #     if self._effect_strength_eval:
+    #         effect_strength_dict = self.evaluate_effect_strength(est)
+    #         est.add_effect_strength(effect_strength_dict)
 
-        return est
+    #     return est
 
     def estimate_effect_naive(self):
         # TODO Only works for binary treatment

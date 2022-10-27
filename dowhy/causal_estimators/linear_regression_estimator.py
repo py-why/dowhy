@@ -1,5 +1,6 @@
 import itertools
 
+import pandas as pd
 import statsmodels.api as sm
 
 from dowhy.causal_estimators.regression_estimator import RegressionEstimator
@@ -27,6 +28,9 @@ class LinearRegressionEstimator(RegressionEstimator):
         self.logger.debug(args_dict)
         self.logger.info("INFO: Using Linear Regression Estimator")
         self._linear_model = self.model
+
+    def fit(self, data: pd.DataFrame):
+        return super().fit(data)
 
     def construct_symbolic_estimator(self, estimand):
         expr = "b: " + ",".join(estimand.outcome_variable) + "~"
