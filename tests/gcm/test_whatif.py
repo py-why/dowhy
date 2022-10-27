@@ -91,8 +91,8 @@ def test_interventional_samples_with_categorical_variables_draw():
     causal_model.set_causal_mechanism("X2", ClassifierFCM(classifier_model=create_logistic_regression_classifier()))
     causal_model.set_causal_mechanism("X3", ClassifierFCM(classifier_model=create_logistic_regression_classifier()))
 
-    X0 = np.random.normal(0, 1, 1000)
-    X1 = np.random.choice(2, 1000).astype(str)
+    X0 = np.random.normal(0, 1, 5000)
+    X1 = np.random.choice(2, 5000).astype(str)
 
     X2 = []
     for (x0, x1) in zip(X0, X1):
@@ -121,7 +121,7 @@ def test_interventional_samples_with_categorical_variables_draw():
     )
 
     assert intervention_results["X0"].to_numpy() == approx(np.array([0] * 100))
-    assert np.sum(intervention_results["X1"].to_numpy() == "0") > 95
+    assert np.all(intervention_results["X1"].to_numpy() == np.array(["0"] * 100))
     assert np.sum(intervention_results["X2"].to_numpy() == "True") > 95
     assert np.sum(intervention_results["X3"].to_numpy() == "False") > 95
 
