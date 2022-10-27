@@ -61,7 +61,7 @@ def fit_one_hot_encoders(X: np.ndarray) -> Dict[int, OneHotEncoder]:
     one_hot_encoders = {}
     for column in range(X.shape[1]):
         if isinstance(X[0, column], str):
-            one_hot_encoders[column] = OneHotEncoder(handle_unknown="ignore")
+            one_hot_encoders[column] = OneHotEncoder(handle_unknown="ignore", drop="if_binary")
             one_hot_encoders[column].fit(X[:, column].reshape(-1, 1))
 
     return one_hot_encoders
