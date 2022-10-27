@@ -8,15 +8,26 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     container:
-      image: darthtrevino/dowhy-docs
-      
+      image: "ghcr.io/${{ github.repository_owner }}/dowhy-docs-generation:latest"
+
     if: ${{ github.event.comment.body == 'build docs'}}
     steps:
+      - name: Message Initiating
+        uses: actions/github-script@v4
+        with:
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Launching documentation build 🚀',
+            });          
+
       - uses: actions/checkout@main
         with:
           fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
 
-      - name: Install Python Dependencies  
+      - name: Install Python Dependencies
         run: poetry install -E plotting -E causalml -E econml -E pydot --with docs
 
       - name: Build
@@ -26,9 +37,27 @@ jobs:
           # The following command avoids this.
           git config --global --add safe.directory /__w/dowhy/dowhy
           ./docs/generate_docs.sh
-          
-      - name: Commit and push to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v3
+
+      - name: Message success
+        if: ${{ success() }}
+        uses: actions/github-script@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dowhy-docs
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Documentation build succeeded! ✅',
+            });
+
+      - name: Message failure
+        if: ${{ failure() }}
+        uses: actions/github-script@v4
+        with:
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Documentation build failed! ❌',
+            });
