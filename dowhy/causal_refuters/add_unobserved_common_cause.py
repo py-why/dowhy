@@ -11,7 +11,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from tqdm.auto import tqdm
 
-import dowhy.causal_estimators.econml
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 from dowhy.causal_estimators.regression_estimator import RegressionEstimator
@@ -671,6 +670,8 @@ def sensitivity_non_parametric_partial_r2(
     :param g_s_estimator_param_list: list of dictionaries with parameters for tuning respective estimators in "g_s_estimator_list". The order of the dictionaries in the list should be consistent with the estimator objects order in "g_s_estimator_list". (relevant only for non-parametric-partial-R2 simulation method)
     :plugin_reisz: bool: Flag on whether to use the plugin estimator or the nonparametric estimator for reisz representer function (alpha_s).
     """
+
+    import dowhy.causal_estimators.econml
 
     # If the estimator used is LinearDML, partially linear sensitivity analysis will be automatically chosen
     if isinstance(estimate.estimator, dowhy.causal_estimators.econml.Econml):
