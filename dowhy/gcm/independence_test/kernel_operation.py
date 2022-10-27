@@ -2,13 +2,13 @@
 future.
 """
 
-from typing import Callable, List, Optional
+from typing import Optional
 
 import numpy as np
 from sklearn.kernel_approximation import Nystroem
 from sklearn.metrics import euclidean_distances
 
-from dowhy.gcm.util.general import is_categorical, shape_into_2d
+from dowhy.gcm.util.general import shape_into_2d
 
 
 def apply_rbf_kernel(X: np.ndarray, precision: Optional[float] = None) -> np.ndarray:
@@ -96,32 +96,6 @@ def approximate_delta_kernel_features(X: np.ndarray, num_random_components: int)
     result[result != 0] = 1
 
     return result
-
-
-def auto_create_list_of_kernels(X: np.ndarray) -> List[Callable[[np.ndarray], np.ndarray]]:
-    X = shape_into_2d(X)
-
-    tmp_list = []
-    for i in range(X.shape[1]):
-        if not is_categorical(X[:, i]):
-            tmp_list.append(apply_rbf_kernel)
-        else:
-            tmp_list.append(apply_delta_kernel)
-
-    return tmp_list
-
-
-def auto_create_list_of_kernel_approximations(X: np.ndarray) -> List[Callable[[np.ndarray, int], np.ndarray]]:
-    X = shape_into_2d(X)
-
-    tmp_list = []
-    for i in range(X.shape[1]):
-        if not is_categorical(X[:, i]):
-            tmp_list.append(approximate_rbf_kernel_features)
-        else:
-            tmp_list.append(approximate_delta_kernel_features)
-
-    return tmp_list
 
 
 def _median_based_precision(distances: np.ndarray) -> float:
