@@ -24,6 +24,10 @@ from dowhy.causal_refuters.partial_linear_sensitivity_analyzer import PartialLin
 logger = logging.getLogger(__name__)
 
 
+DEFAULT_CONVERGENCE_THRESHOLD = 0.1
+DEFAULT_C_STAR_MAX = 1000
+
+
 class AddUnobservedCommonCause(CausalRefuter):
 
     """Add an unobserved confounder for refutation.
@@ -183,7 +187,9 @@ class AddUnobservedCommonCause(CausalRefuter):
             refute.add_refuter(self)
             return refute
 
-    def include_simulated_confounder(self, convergence_threshold=0.1, c_star_max=1000):
+    def include_simulated_confounder(
+        self, convergence_threshold=DEFAULT_CONVERGENCE_THRESHOLD, c_star_max=DEFAULT_C_STAR_MAX
+    ):
         return include_simulated_confounder(
             self._data,
             self._treatment_name,
@@ -388,8 +394,8 @@ def include_simulated_confounder(
     kappa_t: float,
     kappa_y: float,
     variables_of_interest: List,
-    convergence_threshold: float = 0.1,
-    c_star_max: int = 1000,
+    convergence_threshold: float = DEFAULT_CONVERGENCE_THRESHOLD,
+    c_star_max: int = DEFAULT_C_STAR_MAX,
 ):
     """
     This function simulates an unobserved confounder based on the data using the following steps:
