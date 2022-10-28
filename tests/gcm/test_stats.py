@@ -96,6 +96,7 @@ def test_marginal_expectation_returns_reduced_results():
     assert results.shape[0] == 1000
     assert results.shape[1] == 1
 
+
 @flaky(max_runs=5)
 def test_marginal_expectation_independent_continuous_linear():
     X = np.random.normal(0, 1, (1000, 3))

@@ -172,6 +172,7 @@ def test_given_non_linear_data_and_correct_dag_when_refute_invertible_model_then
         == RejectionResult.NOT_REJECTED
     )
 
+
 @flaky(max_runs=2)
 def test_given_non_linear_data_and_incorrect_dag_when_refute_invertible_model_then_reject_model():
     data = _generate_simple_non_linear_data()
@@ -196,6 +197,7 @@ def test_given_non_linear_data_and_incorrect_dag_when_refute_invertible_model_th
         )
         == RejectionResult.REJECTED
     )
+
 
 @flaky(max_runs=3)
 def test_given_non_linear_data_and_incorrect_dag_with_collider_when_refute_invertible_model_then_reject_model():
