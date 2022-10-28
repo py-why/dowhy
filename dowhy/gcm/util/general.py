@@ -105,7 +105,7 @@ def is_categorical(X: np.ndarray) -> bool:
                 "Input contains NaN values! This is currently not supported. " "Consider imputing missing values."
             )
 
-        status &= isinstance(X[0, column], str) or isinstance(X[0, column], bool)
+        status &= isinstance(X[0, column], str) or isinstance(X[0, column], bool) or isinstance(X[0, column], np.bool_)
 
         if not status:
             break
@@ -127,14 +127,11 @@ def has_categorical(X: np.ndarray) -> bool:
     """
     X = shape_into_2d(X)
 
-    status = False
     for column in range(X.shape[1]):
-        status |= is_categorical(X[:, column])
+        if is_categorical(X[:, column]):
+            return True
 
-        if status:
-            break
-
-    return status
+    return False
 
 
 def means_difference(randomized_predictions: np.ndarray, baseline_values: np.ndarray) -> np.ndarray:
