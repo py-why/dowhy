@@ -97,8 +97,8 @@ second item contains the intervals of the contribution scores for each variable.
 To avoid defining a new function, we can streamline that call by using a lambda:
 
 >>> gcm.confidence_intervals(lambda: gcm.distribution_change(causal_model,
->>>                                                        data_old, data_new,
->>>                                                        target_node='Z'))
+>>>                                                          data_old, data_new,
+>>>                                                          target_node='Z'))
 
 Conveniently bootstrapping graph training on random subsets of training data
 ----------------------------------------------------------------------------
@@ -107,7 +107,7 @@ Many of the causal queries in the GCM package require a trained causal graph as 
 compute confidence intervals for these methods, we need to explicitly re-train our causal graph
 multiple times with different random subsets of data and also run our causal query with each newly
 trained graph. To do this conveniently, the GCM package provides a function
-``bootstrap_training_and_sampling``. Assuming that we have ``data`` and a causal graph:
+``fit_and_compute``. Assuming that we have ``data`` and a causal graph:
 
 >>> Z = np.random.normal(loc=0, scale=1, size=1000)
 >>> X = 2*Z + np.random.normal(loc=0, scale=1, size=1000)
@@ -117,13 +117,13 @@ trained graph. To do this conveniently, the GCM package provides a function
 >>> causal_model = gcm.StructuralCausalModel(nx.DiGraph([('Z', 'Y'), ('Z', 'X'), ('X', 'Y')]))
 >>> gcm.auto.assign_causal_mechanisms(causal_model, data_old)
 
-we can now use ``bootstrap_training_and_sampling`` as follows:
+we can now use ``fit_and_compute`` as follows:
 
 >>> strength_median, strength_intervals = gcm.confidence_intervals(
->>>     gcm.bootstrap_training_and_sampling(gcm.arrow_strength,
->>>                                         causal_model,
->>>                                         bootstrap_training_data=data,
->>>                                         target_node='Y'))
+>>>     gcm.fit_and_compute(gcm.arrow_strength,
+>>>                         causal_model,
+>>>                         bootstrap_training_data=data,
+>>>                         target_node='Y'))
 >>> strength_median, strength_intervals
 ({('X', 'Y'): 45.90886398636573, ('Z', 'Y'): 15.47129383737619},
 {('X', 'Y'): array([42.88319632, 50.43890079]), ('Z', 'Y'): array([13.44202416, 17.74266107])})

@@ -15,7 +15,7 @@ from .anomaly_scorers import (
 )
 from .cms import FunctionalCausalModel, InvertibleStructuralCausalModel, ProbabilisticCausalModel, StructuralCausalModel
 from .confidence_intervals import confidence_intervals
-from .confidence_intervals_cms import bootstrap_sampling, bootstrap_training_and_sampling
+from .confidence_intervals_cms import bootstrap_sampling, fit_and_compute
 from .density_estimators import GaussianMixtureDensityEstimator, KernelDensityEstimator1D
 from .distribution_change import distribution_change, distribution_change_of_graphs
 from .fcms import AdditiveNoiseModel, ClassificationModel, ClassifierFCM, PostNonlinearModel, PredictionModel
