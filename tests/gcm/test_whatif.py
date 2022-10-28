@@ -63,8 +63,8 @@ def test_interventional_samples_conditional():
     sample = sample.squeeze()
     assert sample[0] == 0
     assert sample[1] == 1
-    assert sample[2] == approx(10, abs=0.2)
-    assert sample[3] == approx(5, abs=0.2)
+    assert sample[2] == approx(10, abs=0.5)
+    assert sample[3] == approx(5, abs=0.25)
 
 
 @flaky(max_runs=3)
