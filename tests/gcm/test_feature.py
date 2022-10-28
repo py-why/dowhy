@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 from flaky import flaky
-from pytest import approx, mark
+from pytest import approx
 from scipy import stats
 
 from dowhy.gcm import (
@@ -44,7 +44,6 @@ def test_when_using_parent_relevance_with_continous_data_then_returns_correct_re
     assert noise == approx(0, abs=0.5)
 
 
-@mark.advanced
 @flaky(max_runs=5)
 def test_when_using_parent_relevance_with_categorical_data_then_returns_correct_results():
     causal_model = StructuralCausalModel(nx.DiGraph([("X0", "Y"), ("X1", "Y"), ("X2", "Y"), ("X3", "Y"), ("X4", "Y")]))
