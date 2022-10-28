@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 from flaky import flaky
-from pytest import approx, mark
+from pytest import approx
 
 from dowhy.gcm import (
     AdditiveNoiseModel,
@@ -120,7 +120,6 @@ def test_given_simple_gaussian_data_when_attribute_anomaly_scores_with_feature_r
     )
 
 
-@mark.advanced
 @flaky(max_runs=3)
 def test_given_simple_causal_chain_with_linear_relationships_when_attribute_anomaly_scores_with_it_score_then_returns_qualitatively_correct_results():
     num_training_samples = 5000

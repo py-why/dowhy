@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from flaky import flaky
 from numpy.matlib import repmat
-from pytest import approx, mark
+from pytest import approx
 
 from dowhy.gcm.ml import (
     create_hist_gradient_boost_classifier,
@@ -97,7 +97,6 @@ def test_marginal_expectation_returns_reduced_results():
     assert results.shape[1] == 1
 
 
-@mark.advanced
 @flaky(max_runs=5)
 def test_marginal_expectation_independent_continuous_linear():
     X = np.random.normal(0, 1, (1000, 3))
