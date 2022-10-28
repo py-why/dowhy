@@ -23,13 +23,11 @@ advanced_notebooks = [
     # Slow Notebooks
     #
     "tutorial-causalinference-machinelearning-using-dowhy-econml.ipynb",
-    "dowhy-conditional-treatment-effects.ipynb",
     "dowhy_refuter_notebook.ipynb",
     "DoWhy-The Causal Story Behind Hotel Booking Cancellations.ipynb",  # needs xgboost too
     "dowhy_twins_example.ipynb",
     "gcm_rca_microservice_architecture.ipynb",
     "gcm_supply_chain_dist_change.ipynb",
-    "dowhy_simple_example.ipynb",
     "gcm_401k_analysis.ipynb",
 ]
 
