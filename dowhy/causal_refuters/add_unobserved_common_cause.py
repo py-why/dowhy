@@ -24,6 +24,10 @@ from dowhy.causal_refuters.partial_linear_sensitivity_analyzer import PartialLin
 logger = logging.getLogger(__name__)
 
 
+DEFAULT_CONVERGENCE_THRESHOLD = 0.1
+DEFAULT_C_STAR_MAX = 1000
+
+
 class AddUnobservedCommonCause(CausalRefuter):
 
     """Add an unobserved confounder for refutation.
@@ -182,6 +186,20 @@ class AddUnobservedCommonCause(CausalRefuter):
             )
             refute.add_refuter(self)
             return refute
+
+    def include_simulated_confounder(
+        self, convergence_threshold=DEFAULT_CONVERGENCE_THRESHOLD, c_star_max=DEFAULT_C_STAR_MAX
+    ):
+        return include_simulated_confounder(
+            self._data,
+            self._treatment_name,
+            self._outcome_name,
+            self.kappa_t,
+            self.kappa_y,
+            self._variables_of_interest,
+            convergence_threshold,
+            c_star_max,
+        )
 
 
 def _infer_default_kappa_t(
@@ -375,8 +393,9 @@ def include_simulated_confounder(
     outcome_name: str,
     kappa_t: float,
     kappa_y: float,
-    convergence_threshold: float = 0.1,
-    c_star_max: int = 1000,
+    variables_of_interest: List,
+    convergence_threshold: float = DEFAULT_CONVERGENCE_THRESHOLD,
+    c_star_max: int = DEFAULT_C_STAR_MAX,
 ):
     """
     This function simulates an unobserved confounder based on the data using the following steps:
@@ -412,7 +431,7 @@ def include_simulated_confounder(
 
     # Obtaining the list of observed variables
     required_variables = True
-    observed_variables = choose_variables(required_variables)
+    observed_variables = choose_variables(required_variables, variables_of_interest)
 
     observed_variables_with_treatment_and_outcome = observed_variables + treatment_name + outcome_name
 
