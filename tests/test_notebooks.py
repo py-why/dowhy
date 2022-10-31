@@ -26,9 +26,6 @@ advanced_notebooks = [
     #
     "tutorial-causalinference-machinelearning-using-dowhy-econml.ipynb",
     "dowhy-conditional-treatment-effects.ipynb",
-    "dowhy_refuter_notebook.ipynb",
-    "dowhy_twins_example.ipynb",
-    "dowhy_simple_example.ipynb",
 ]
 
 ignore_notebooks = [
