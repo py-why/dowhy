@@ -23,7 +23,7 @@ advanced_notebooks = [
     "DoWhy-The Causal Story Behind Hotel Booking Cancellations.ipynb",
     # Slow Notebooks
     "dowhy-conditional-treatment-effects.ipynb",
-    "dowhy_refuter_notebook.ipynb"
+    "dowhy_refuter_notebook.ipynb",
 ]
 
 ignore_notebooks = [
