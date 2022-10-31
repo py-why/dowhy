@@ -41,8 +41,11 @@ jobs:
       - name: Run Advanced Tests
         run: poetry run poe test_advanced --splits 4 --group ${{ matrix.test-group }}
 
-      - uses: fateyan/action-discord-notifier@v1
-        if: failure()
-        with:
-          message-title: Nightly Advanced Tests Failed
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+      - name: Notify Discord
+        if: github.ref == 'refs/heads/main'
+        uses: th0th/notify-discord@v0.4.1
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_JOB_NAME: Nightly Tests ${{ job.status == 'success' && 'Passed' || 'Failed' }}
+          GITHUB_JOB_STATUS: ${{ job.status }}
