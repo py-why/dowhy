@@ -21,11 +21,9 @@ advanced_notebooks = [
     "dowhy_ranking_methods.ipynb",
     # needs xgboost too
     "DoWhy-The Causal Story Behind Hotel Booking Cancellations.ipynb",
-    #
     # Slow Notebooks
-    #
-    "tutorial-causalinference-machinelearning-using-dowhy-econml.ipynb",
     "dowhy-conditional-treatment-effects.ipynb",
+    "dowhy_refuter_notebook.ipynb"
 ]
 
 ignore_notebooks = [
