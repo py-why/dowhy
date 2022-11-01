@@ -12,8 +12,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8, 3.9]
-        poetry-version: [1.2.0]
-        test-group: [1, 2, 3, 4]
+        poetry-version: [1.2.1]
 
     steps:
       - uses: actions/checkout@v2
@@ -39,7 +38,7 @@ jobs:
           poetry install -E plotting -E causalml -E econml -E pydot --with docs
 
       - name: Run Advanced Tests
-        run: poetry run poe test_advanced --splits 4 --group ${{ matrix.test-group }}
+        run: poetry run poe test_advanced
 
       - name: Notify Discord
         if: github.ref == 'refs/heads/main'
