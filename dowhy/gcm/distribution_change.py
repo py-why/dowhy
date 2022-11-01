@@ -261,7 +261,7 @@ def _fit_accounting_for_mechanism_change(
         fdr_control_method,
     )
 
-    joint_data = old_data.append(new_data, ignore_index=True, sort=True)
+    joint_data = pd.concat([old_data, new_data], ignore_index=True, sort=True)
 
     for node in causal_model_new.graph.nodes:
         if mechanism_changed_for_node[node]:
