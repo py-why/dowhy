@@ -24,6 +24,7 @@ advanced_notebooks = [
     # Slow Notebooks
     "dowhy-conditional-treatment-effects.ipynb",
     "dowhy_refuter_notebook.ipynb",
+    "dowhy_twins_example.ipynb",
 ]
 
 ignore_notebooks = [
