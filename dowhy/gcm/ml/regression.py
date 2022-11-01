@@ -144,11 +144,14 @@ class InvertibleLogarithmicFunction(InvertibleFunction):
 
 
 class ProductRegressor(PredictionModel):
+    def __init__(self):
+        self._one_hot_encoders = {}
+
     def fit(self, X, Y):
-        # Nothing to fit here.
-        pass
+        self._one_hot_encoders = fit_one_hot_encoders(X)
 
     def predict(self, X):
+        X = apply_one_hot_encoding(X, self._one_hot_encoders)
         return np.prod(X, axis=1).reshape(-1, 1)
 
     def clone(self):
