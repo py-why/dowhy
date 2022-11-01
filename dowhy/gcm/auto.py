@@ -16,7 +16,6 @@ from dowhy.gcm.cms import ProbabilisticCausalModel
 from dowhy.gcm.fcms import AdditiveNoiseModel, ClassificationModel, ClassifierFCM, PredictionModel
 from dowhy.gcm.graph import CAUSAL_MECHANISM, get_ordered_predecessors, is_root_node, validate_causal_model_assignment
 from dowhy.gcm.ml import (
-    create_elastic_net_regressor,
     create_hist_gradient_boost_classifier,
     create_hist_gradient_boost_regressor,
     create_lasso_regressor,
@@ -31,14 +30,16 @@ from dowhy.gcm.ml.classification import (
     create_extra_trees_classifier,
     create_gaussian_nb_classifier,
     create_knn_classifier,
+    create_polynom_logistic_regression_classifier,
     create_random_forest_classifier,
     create_support_vector_classifier,
 )
 from dowhy.gcm.ml.regression import (
     create_ada_boost_regressor,
+    create_elastic_net_regressor,
     create_extra_trees_regressor,
     create_knn_regressor,
-    create_product_regressor,
+    create_polynom_regressor,
 )
 from dowhy.gcm.stochastic_models import EmpiricalDistribution
 from dowhy.gcm.util.general import (
@@ -51,6 +52,7 @@ from dowhy.gcm.util.general import (
 
 _LIST_OF_POTENTIAL_CLASSIFIERS = [
     partial(create_logistic_regression_classifier, max_iter=1000),
+    partial(create_polynom_logistic_regression_classifier, max_iter=1000),
     create_random_forest_classifier,
     create_hist_gradient_boost_classifier,
     create_extra_trees_classifier,
@@ -62,6 +64,7 @@ _LIST_OF_POTENTIAL_CLASSIFIERS = [
 _LIST_OF_POTENTIAL_REGRESSORS = [
     create_linear_regressor,
     create_ridge_regressor,
+    create_polynom_regressor,
     partial(create_lasso_regressor, max_iter=5000),
     partial(create_elastic_net_regressor, max_iter=5000),
     create_random_forest_regressor,
@@ -70,7 +73,6 @@ _LIST_OF_POTENTIAL_REGRESSORS = [
     create_extra_trees_regressor,
     create_knn_regressor,
     create_ada_boost_regressor,
-    create_product_regressor,
 ]
 
 
@@ -149,11 +151,11 @@ def select_model(
         else:
             if use_linear_prediction_models:
                 return find_best_model(
-                    [create_linear_regressor, create_product_regressor], X, Y, model_selection_splits=2
+                    [create_linear_regressor, create_polynom_regressor], X, Y, model_selection_splits=2
                 )()
             else:
                 return find_best_model(
-                    [create_hist_gradient_boost_regressor, create_product_regressor], X, Y, model_selection_splits=2
+                    [create_hist_gradient_boost_regressor, create_polynom_regressor], X, Y, model_selection_splits=2
                 )()
     elif model_selection_quality == AssignmentQuality.BETTER:
         if target_is_categorical:
