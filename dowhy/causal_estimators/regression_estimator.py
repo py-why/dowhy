@@ -76,11 +76,18 @@ class RegressionEstimator(CausalEstimator):
         return self
 
     def estimate_effect(
-        self, treatment_value: Any = 1, control_value: Any = 0, target_units=None, need_conditional_estimates=None, **_
+        self,
+        treatment_value: Any = 1,
+        control_value: Any = 0,
+        target_units=None,
+        need_conditional_estimates=None,
+        data: Optional[pd.DataFrame] = None,
+        **_,
     ):
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
+        data = data if data is not None else self._data
         # TODO make treatment_value and control value also as local parameters
         if need_conditional_estimates is None:
             need_conditional_estimates = self.need_conditional_estimates
@@ -111,6 +118,10 @@ class RegressionEstimator(CausalEstimator):
 
         estimate.add_estimator(self)
         return estimate
+
+    def _estimate_effect_fn(self, data_df):
+        est = self.estimate_effect(data=data_df, need_conditional_estimates=False)
+        return est.value
 
     def _build_features(self, treatment_values=None, data_df=None):
         # Using all data by default

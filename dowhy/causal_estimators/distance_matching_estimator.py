@@ -65,15 +65,7 @@ class DistanceMatchingEstimator(CausalEstimator):
             exact_match_cols=exact_match_cols,
             **kwargs,
         )
-        # Check if the treatment is one-dimensional
-        if len(self._treatment_name) > 1:
-            error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
-            raise Exception(error_msg)
-        # Checking if the treatment is binary
-        if not pd.api.types.is_bool_dtype(self._data[self._treatment_name[0]]):
-            error_msg = "Distance Matching method is applicable only for binary treatments"
-            self.logger.error(error_msg)
-            raise Exception(error_msg)
+        
 
         self.num_matches_per_unit = num_matches_per_unit
         self.distance_metric = distance_metric
@@ -104,6 +96,16 @@ class DistanceMatchingEstimator(CausalEstimator):
         self.exact_match_cols = exact_match_cols
 
         self.set_effect_modifiers(effect_modifier_names)
+
+        # Check if the treatment is one-dimensional
+        if len(self._treatment_name) > 1:
+            error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
+            raise Exception(error_msg)
+        # Checking if the treatment is binary
+        if not pd.api.types.is_bool_dtype(self._data[self._treatment_name[0]]):
+            error_msg = "Distance Matching method is applicable only for binary treatments"
+            self.logger.error(error_msg)
+            raise Exception(error_msg)
 
         self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
 

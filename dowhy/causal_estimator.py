@@ -142,7 +142,7 @@ class CausalEstimator:
         self.need_conditional_estimates = (
             self.need_conditional_estimates
             if self.need_conditional_estimates != "auto"
-            else bool(self._effect_modifier_names)
+            else (self._effect_modifier_names and len(self._effect_modifier_names) > 0)
         )
 
     def get_estimator_object(self, new_data, identified_estimand, estimate, fit_estimator=True):
@@ -178,36 +178,6 @@ class CausalEstimator:
             )
 
         return new_estimator
-
-    # def _estimate_effect(self):
-    #     """This method is to be overriden by the child classes, so that they can run the estimation technique of their choice"""
-    #     raise NotImplementedError(
-    #         ("Main estimation method is " + CausalEstimator.DEFAULT_NOTIMPLEMENTEDERROR_MSG).format(self.__class__)
-    #     )
-
-    # def estimate_effect(self):
-    #     """Base estimation method that calls the estimate_effect method of its calling subclass.
-
-    #     Can optionally also test significance and estimate effect strength for any returned estimate.
-
-    #     :param self: object instance of class Estimator
-    #     :returns: A CausalEstimate instance that contains point estimates of average and conditional effects. Based on the parameters provided, it optionally includes confidence intervals, standard errors,statistical significance and other statistical parameters.
-    #     """
-
-    #     est = self._estimate_effect()
-    #     est.add_estimator(self)
-
-    #     if self._significance_test:
-    #         self.test_significance(est.value, method=self._significance_test)
-    #     if self._confidence_intervals:
-    #         self.estimate_confidence_intervals(
-    #             est.value, confidence_level=self.confidence_level, method=self._confidence_intervals
-    #         )
-    #     if self._effect_strength_eval:
-    #         effect_strength_dict = self.evaluate_effect_strength(est)
-    #         est.add_effect_strength(effect_strength_dict)
-
-    #     return est
 
     def estimate_effect_naive(self):
         # TODO Only works for binary treatment
@@ -690,7 +660,7 @@ def estimate_effect(
     treatment: Union[str, List[str]],
     outcome: Union[str, List[str]],
     identifier_name: str,
-    method: CausalEstimator,
+    estimator: CausalEstimator,
     control_value: int = 0,
     treatment_value: int = 1,
     test_significance: Optional[bool] = None,
@@ -739,9 +709,9 @@ def estimate_effect(
 
     treatment = parse_state(treatment)
     outcome = parse_state(outcome)
-    causal_estimator_class = method.__class__
+    causal_estimator_class = estimator.__class__
 
-    identified_estimand = method._target_estimand
+    identified_estimand = estimator._target_estimand
     identified_estimand.set_identifier_method(identifier_name)
 
     if identified_estimand.no_directed_path:
@@ -755,14 +725,14 @@ def estimate_effect(
         return CausalEstimate(None, None, None, control_value=control_value, treatment_value=treatment_value)
 
     if fit_estimator:
-        method.fit(
+        estimator.fit(
             data=data,
             treatment_name=treatment,
             outcome_name=outcome,
             effect_modifier_names=effect_modifiers,
         )
 
-    estimate = method.estimate_effect(
+    estimate = estimator.estimate_effect(
         treatment_value=treatment_value,
         control_value=control_value,
         target_units=target_units,
@@ -782,6 +752,17 @@ def estimate_effect(
         effect_modifiers=effect_modifiers,
         method_params=method_params,
     )
+
+    if estimator._significance_test:
+        estimator.test_significance(estimate.value, method=estimator._significance_test)
+    if estimator._confidence_intervals:
+        estimator.estimate_confidence_intervals(
+            estimate.value, confidence_level=estimator.confidence_level, method=estimator._confidence_intervals
+        )
+    if estimator._effect_strength_eval:
+        effect_strength_dict = estimator.evaluate_effect_strength(estimate)
+        estimate.add_effect_strength(effect_strength_dict)
+
     return estimate
 
 

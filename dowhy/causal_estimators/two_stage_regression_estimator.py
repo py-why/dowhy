@@ -237,12 +237,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         if self._target_estimand.estimand_type == EstimandType.NONPARAMETRIC_NDE:
 
             total_effect_estimate = self._second_stage_model_nde_obj.estimate_effect(
-                self._data,
-                self._treatment_name,
-                parse_state(self._outcome_name),
-                control_value=control_value,
-                treatment_value=treatment_value,
-                **self.method_params,
+                control_value=control_value, treatment_value=treatment_value, target_units=target_units
             )
             natural_direct_effect = total_effect_estimate.value - natural_indirect_effect
             estimate_value = natural_direct_effect
