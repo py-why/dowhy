@@ -260,7 +260,11 @@ class EValueSensitivityAnalyzer:
             new_estimator = CausalEstimator.get_estimator_object(self.data, new_estimand, self.estimate)
 
             # new effect estimate
-            new_effect = new_estimator.estimate_effect()
+            new_effect = new_estimator.estimate_effect(
+                control_value=self.estimate.control_value,
+                treatment_value=self.estimate.treatment_value,
+                target_units=self.estimate.params["target_units"],
+            )
             if isinstance(self.estimate.estimator, LinearRegressionEstimator):
                 coef_est = new_effect.value
                 coef_se = new_effect.get_standard_error()[0]

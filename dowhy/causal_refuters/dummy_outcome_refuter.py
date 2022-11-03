@@ -490,7 +490,11 @@ def refute_dummy_outcome(
             new_data = validation_df.assign(dummy_outcome=outcome_validation)
 
             new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, estimate)
-            new_effect = new_estimator.estimate_effect()
+            new_effect = new_estimator.estimate_effect(
+                control_value=estimate.control_value,
+                treatment_value=estimate.treatment_value,
+                target_units=estimate.params["target_units"],
+            )
             estimates.append(new_effect.value)
 
         else:
@@ -560,7 +564,9 @@ def refute_dummy_outcome(
 
                 new_data = validation_df.assign(dummy_outcome=outcome_validation)
                 new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, estimate)
-                new_effect = new_estimator.estimate_effect()
+                new_effect = new_estimator.estimate_effect(control_value=estimate.control_value,
+        treatment_value=estimate.treatment_value,
+        target_units=estimate.params["target_units"],)
 
                 estimates.append(new_effect.value)
                 group_count += 1

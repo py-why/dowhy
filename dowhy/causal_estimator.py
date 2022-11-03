@@ -138,9 +138,9 @@ class CausalEstimator:
                 self._effect_modifiers = pd.get_dummies(self._effect_modifiers, drop_first=True)
                 self.logger.debug("Effect modifiers: " + ",".join(self._effect_modifier_names))
             else:
-                self._effect_modifier_names = None
+                self._effect_modifier_names = []
         else:
-            self._effect_modifier_names = None
+            self._effect_modifier_names = []
 
         self.need_conditional_estimates = (
             self.need_conditional_estimates
@@ -149,7 +149,7 @@ class CausalEstimator:
         )
 
     @staticmethod
-    def get_estimator_object(new_data, identified_estimand, estimate):
+    def get_estimator_object(new_data, identified_estimand, estimate, fit_estimator=True):
         """Create a new estimator of the same type as the one passed in the estimate argument.
 
         Creates a new object with new_data and the identified_estimand
@@ -166,20 +166,21 @@ class CausalEstimator:
         """
         estimator_class = estimate.params["estimator_class"]
         new_estimator = estimator_class(
-            new_data,
             identified_estimand,
-            identified_estimand.treatment_variable,
-            identified_estimand.outcome_variable,
-            # names of treatment and outcome
-            control_value=estimate.control_value,
-            treatment_value=estimate.treatment_value,
             test_significance=False,
             evaluate_effect_strength=False,
             confidence_intervals=estimate.params["confidence_intervals"],
-            target_units=estimate.params["target_units"],
-            effect_modifiers=estimate.params["effect_modifiers"],
             **estimate.params["method_params"] if estimate.params["method_params"] is not None else {},
         )
+
+        if fit_estimator:
+            new_estimator.fit(
+                new_data,
+                # names of treatment and outcome
+                identified_estimand.treatment_variable,
+                identified_estimand.outcome_variable,
+                effect_modifier_names=estimate.estimator._effect_modifier_names,
+            )
 
         return new_estimator
 

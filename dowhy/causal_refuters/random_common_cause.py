@@ -67,7 +67,11 @@ def _refute_once(
         new_data = data.assign(w_random=random_state.normal(size=data.shape[0]))
 
     new_estimator = CausalEstimator.get_estimator_object(new_data, target_estimand, estimate)
-    new_effect = new_estimator.estimate_effect()
+    new_effect = new_estimator.estimate_effect(
+        control_value=estimate.control_value,
+        treatment_value=estimate.treatment_value,
+        target_units=estimate.params["target_units"],
+    )
     return new_effect.value
 
 

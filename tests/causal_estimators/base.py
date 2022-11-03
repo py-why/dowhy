@@ -178,7 +178,11 @@ class TestEstimator(object):
             outcome=data["outcome_name"],
         )
         true_ate = data["ate"]
-        ate_estimate = estimator_ate.estimate_effect()
+        ate_estimate = estimator_ate.estimate_effect(
+            control_value=ate_estimate.control_value,
+            treatment_value=ate_estimate.treatment_value,
+            target_units=ate_estimate.params["target_units"],
+        )
         error = ate_estimate.value - true_ate
         print(
             "Error in ATE estimate = {0} with tolerance {1}%. Estimated={2},True={3}".format(

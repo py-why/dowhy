@@ -143,7 +143,7 @@ class Econml(CausalEstimator):
         Z = None  # Instruments
         Y = self._outcome
         T = self._treatment
-        if self._effect_modifiers is not None:
+        if self._effect_modifiers is not None and len(self._effect_modifiers) > 0:
             X = self._effect_modifiers
         if self._observed_common_causes_names:
             W = self._observed_common_causes
