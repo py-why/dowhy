@@ -1,8 +1,9 @@
-from typing import Any
+from typing import Any, List, Optional
+
 import numpy as np
 import pandas as pd
 
-from dowhy.causal_estimator import CausalEstimate
+from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from dowhy.causal_estimators.propensity_score_estimator import PropensityScoreEstimator
 
 
@@ -21,7 +22,16 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
 
     def __init__(
         self,
-        *args,
+        identified_estimand,
+        test_significance=False,
+        evaluate_effect_strength=False,
+        confidence_intervals=False,
+        num_null_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
+        num_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI,
+        sample_size_fraction=CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION,
+        confidence_level=CausalEstimator.DEFAULT_CONFIDENCE_LEVEL,
+        need_conditional_estimates="auto",
+        num_quantiles_to_discretize_cont_cols=CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
         min_ps_score=0.05,
         max_ps_score=0.95,
         weighting_scheme="ips_weight",
@@ -51,30 +61,51 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
         """
         # Required to ensure that self.method_params contains all the information
         # to create an object of this class
-        args_dict = kwargs
-        args_dict.update(
-            {"min_ps_score": min_ps_score, "max_ps_score": max_ps_score, "weighting_scheme": weighting_scheme}
-        )
         super().__init__(
-            *args,
+            identified_estimand=identified_estimand,
+            test_significance=test_significance,
+            evaluate_effect_strength=evaluate_effect_strength,
+            confidence_intervals=confidence_intervals,
+            num_null_simulations=num_null_simulations,
+            num_simulations=num_simulations,
+            sample_size_fraction=sample_size_fraction,
+            confidence_level=confidence_level,
+            need_conditional_estimates=need_conditional_estimates,
+            num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
             propensity_score_model=propensity_score_model,
             recalculate_propensity_score=recalculate_propensity_score,
             propensity_score_column=propensity_score_column,
-            **args_dict,
+            min_ps_score=min_ps_score,
+            max_ps_score=max_ps_score,
+            weighting_scheme=weighting_scheme,
+            **kwargs,
         )
 
         self.logger.info("INFO: Using Propensity Score Weighting Estimator")
-        self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
-        self.logger.info(self.symbolic_estimator)
+
         # Setting method specific parameters
         self.weighting_scheme = weighting_scheme
         self.min_ps_score = min_ps_score
         self.max_ps_score = max_ps_score
 
-    def fit(self, data: pd.DataFrame):
-        return super().fit(data)
+    def fit(
+        self,
+        data: pd.DataFrame,
+        treatment_name: str,
+        outcome_name: str,
+        effect_modifier_names: Optional[List[str]] = None,
+    ):
+        super().fit(data, treatment_name, outcome_name, effect_modifier_names=effect_modifier_names)
 
-    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None):
+        self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
+        self.logger.info(self.symbolic_estimator)
+
+        return self
+
+    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_):
+        self._target_units = target_units
+        self._treatment_value = treatment_value
+        self._control_value = control_value
         self._refresh_propensity_score()
 
         # trim propensity score weights
@@ -189,6 +220,8 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
             realized_estimand_expr=self.symbolic_estimator,
             propensity_scores=self._data[self.propensity_score_column],
         )
+
+        estimate.add_estimator(self)
         return estimate
 
     def construct_symbolic_estimator(self, estimand):

@@ -1,7 +1,9 @@
 import itertools
+from typing import List, Optional
 
 import pandas as pd
 import statsmodels.api as sm
+from dowhy.causal_estimator import CausalEstimator
 
 from dowhy.causal_estimators.regression_estimator import RegressionEstimator
 
@@ -15,22 +17,50 @@ class LinearRegressionEstimator(RegressionEstimator):
 
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        identified_estimand,
+        test_significance=False,
+        evaluate_effect_strength=False,
+        confidence_intervals=False,
+        num_null_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
+        num_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI,
+        sample_size_fraction=CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION,
+        confidence_level=CausalEstimator.DEFAULT_CONFIDENCE_LEVEL,
+        need_conditional_estimates="auto",
+        num_quantiles_to_discretize_cont_cols=CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
+        **kwargs,
+    ):
         """For a list of args and kwargs, see documentation for
         :class:`~dowhy.causal_estimator.CausalEstimator`.
 
         """
         # Required to ensure that self.method_params contains all the
         # parameters to create an object of this class
-        args_dict = {k: v for k, v in locals().items() if k not in type(self)._STD_INIT_ARGS}
-        args_dict.update(kwargs)
-        super().__init__(*args, **args_dict)
-        self.logger.debug(args_dict)
+        super().__init__(
+            identified_estimand=identified_estimand,
+            test_significance=test_significance,
+            evaluate_effect_strength=evaluate_effect_strength,
+            confidence_intervals=confidence_intervals,
+            num_null_simulations=num_null_simulations,
+            num_simulations=num_simulations,
+            sample_size_fraction=sample_size_fraction,
+            confidence_level=confidence_level,
+            need_conditional_estimates=need_conditional_estimates,
+            num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
+            **kwargs,
+        )
         self.logger.info("INFO: Using Linear Regression Estimator")
         self._linear_model = self.model
 
-    def fit(self, data: pd.DataFrame):
-        return super().fit(data)
+    def fit(
+        self,
+        data: pd.DataFrame,
+        treatment_name: str,
+        outcome_name: str,
+        effect_modifier_names: Optional[List[str]] = None,
+    ):
+        return super().fit(data, treatment_name, outcome_name, effect_modifier_names=effect_modifier_names)
 
     def construct_symbolic_estimator(self, estimand):
         expr = "b: " + ",".join(estimand.outcome_variable) + "~"

@@ -1,4 +1,5 @@
-from typing import Any
+from typing import Any, List, Optional
+
 import numpy as np
 import pandas as pd
 from sklearn.neighbors import NearestNeighbors
@@ -20,7 +21,23 @@ class DistanceMatchingEstimator(CausalEstimator):
     # allowed types of distance metric
     Valid_Dist_Metric_Params = ["p", "V", "VI", "w"]
 
-    def __init__(self, *args, num_matches_per_unit=1, distance_metric="minkowski", exact_match_cols=None, **kwargs):
+    def __init__(
+        self,
+        identified_estimand,
+        test_significance=False,
+        evaluate_effect_strength=False,
+        confidence_intervals=False,
+        num_null_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
+        num_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI,
+        sample_size_fraction=CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION,
+        confidence_level=CausalEstimator.DEFAULT_CONFIDENCE_LEVEL,
+        need_conditional_estimates="auto",
+        num_quantiles_to_discretize_cont_cols=CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
+        num_matches_per_unit=1,
+        distance_metric="minkowski",
+        exact_match_cols=None,
+        **kwargs,
+    ):
         """
         :param num_matches_per_unit: The number of matches per data point.
             Default=1.
@@ -32,9 +49,22 @@ class DistanceMatchingEstimator(CausalEstimator):
         """
         # Required to ensure that self.method_params contains all the
         # parameters to create an object of this class
-        args_dict = {k: v for k, v in locals().items() if k not in type(self)._STD_INIT_ARGS}
-        args_dict.update(kwargs)
-        super().__init__(*args, **args_dict)
+        super().__init__(
+            identified_estimand=identified_estimand,
+            test_significance=test_significance,
+            evaluate_effect_strength=evaluate_effect_strength,
+            confidence_intervals=confidence_intervals,
+            num_null_simulations=num_null_simulations,
+            num_simulations=num_simulations,
+            sample_size_fraction=sample_size_fraction,
+            confidence_level=confidence_level,
+            need_conditional_estimates=need_conditional_estimates,
+            num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
+            num_matches_per_unit=num_matches_per_unit,
+            distance_metric=distance_metric,
+            exact_match_cols=exact_match_cols,
+            **kwargs,
+        )
         # Check if the treatment is one-dimensional
         if len(self._treatment_name) > 1:
             error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
@@ -49,25 +79,6 @@ class DistanceMatchingEstimator(CausalEstimator):
         self.distance_metric = distance_metric
         self.exact_match_cols = exact_match_cols
 
-        self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
-
-        self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
-        if self._observed_common_causes_names:
-            if self.exact_match_cols is not None:
-                self._observed_common_causes_names = [
-                    v for v in self._observed_common_causes_names if v not in self.exact_match_cols
-                ]
-            self._observed_common_causes = self._data[self._observed_common_causes_names]
-            # Convert the categorical variables into dummy/indicator variables
-            # Basically, this gives a one hot encoding for each category
-            # The first category is taken to be the base line.
-            self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
-        else:
-            self._observed_common_causes = None
-            error_msg = "No common causes/confounders present. Distance matching methods are not applicable"
-            self.logger.error(error_msg)
-            raise Exception(error_msg)
-
         # Dictionary of any user-provided params for the distance metric
         # that will be passed to sklearn nearestneighbors
         self.distance_metric_params = {}
@@ -77,14 +88,22 @@ class DistanceMatchingEstimator(CausalEstimator):
                 self.distance_metric_params[param_name] = param_val
 
         self.logger.info("INFO: Using Distance Matching Estimator")
-        self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
-        self.logger.info(self.symbolic_estimator)
+
         self.matched_indices_att = None
         self.matched_indices_atc = None
 
-    def fit(self, data: pd.DataFrame, exact_match_cols=None):
-        self._data = data
+    def fit(
+        self,
+        data: pd.DataFrame,
+        treatment_name: str,
+        outcome_name: str,
+        exact_match_cols=None,
+        effect_modifier_names: Optional[List[str]] = None,
+    ):
+        self.set_data(data, treatment_name, outcome_name)
         self.exact_match_cols = exact_match_cols
+
+        self.set_effect_modifiers(effect_modifier_names)
 
         self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
 
@@ -105,10 +124,16 @@ class DistanceMatchingEstimator(CausalEstimator):
             self.logger.error(error_msg)
             raise Exception(error_msg)
 
+        self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
+        self.logger.info(self.symbolic_estimator)
+
         return self
 
-    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None):
+    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_):
         # this assumes a binary treatment regime
+        self._target_units = target_units
+        self._treatment_value = treatment_value
+        self._control_value = control_value
         updated_df = pd.concat(
             [self._observed_common_causes, self._data[[self._outcome_name, self._treatment_name[0]]]], axis=1
         )
@@ -233,6 +258,8 @@ class DistanceMatchingEstimator(CausalEstimator):
             target_estimand=self._target_estimand,
             realized_estimand_expr=self.symbolic_estimator,
         )
+
+        estimate.add_estimator(self)
         return estimate
 
     def construct_symbolic_estimator(self, estimand):

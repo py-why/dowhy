@@ -22,19 +22,52 @@ class InstrumentalVariableEstimator(CausalEstimator):
 
     """
 
-    def __init__(self, *args, iv_instrument_name=None, **kwargs):
+    def __init__(
+        self,
+        identified_estimand,
+        test_significance=False,
+        evaluate_effect_strength=False,
+        confidence_intervals=False,
+        num_null_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
+        num_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI,
+        sample_size_fraction=CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION,
+        confidence_level=CausalEstimator.DEFAULT_CONFIDENCE_LEVEL,
+        need_conditional_estimates="auto",
+        num_quantiles_to_discretize_cont_cols=CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
+        **kwargs,
+    ):
         """
         :param iv_instrument_name: Name of the specific instrumental variable
             to be used. Needs to be one of the IVs identified in the
             identification step. Default is to use all the IV variables
             from the identification step.
         """
-        # Required to ensure that self.method_params contains all the information
-        # to create an object of this class
-        args_dict = {k: v for k, v in locals().items() if k not in type(self)._STD_INIT_ARGS}
-        args_dict.update(kwargs)
-        super().__init__(*args, **args_dict)
-        # choosing the instrumental variable to use
+        super().__init__(
+            identified_estimand=identified_estimand,
+            test_significance=test_significance,
+            evaluate_effect_strength=evaluate_effect_strength,
+            confidence_intervals=confidence_intervals,
+            num_null_simulations=num_null_simulations,
+            num_simulations=num_simulations,
+            sample_size_fraction=sample_size_fraction,
+            confidence_level=confidence_level,
+            need_conditional_estimates=need_conditional_estimates,
+            num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
+            **kwargs,
+        )
+        self.logger.info("INFO: Using Instrumental Variable Estimator")
+
+    def fit(
+        self,
+        data: pd.DataFrame,
+        treatment_name: str,
+        outcome_name: str,
+        iv_instrument_name: Optional[Union[List, Dict, str]] = None,
+        effect_modifier_names: Optional[List[str]] = None,
+    ):
+        self.set_data(data, treatment_name, outcome_name)
+        self.set_effect_modifiers(effect_modifier_names)
+
         self.estimating_instrument_names = self._target_estimand.instrumental_variables
         if iv_instrument_name is not None:
             self.estimating_instrument_names = parse_state(iv_instrument_name)
@@ -47,28 +80,16 @@ class InstrumentalVariableEstimator(CausalEstimator):
                 "Number of instruments fewer than number of treatments. 2SLS requires at least as many instruments as treatments."
             )
         self._estimating_instruments = self._data[self.estimating_instrument_names]
-        self.logger.info("INFO: Using Instrumental Variable Estimator")
 
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
 
-    def fit(self, data: pd.DataFrame, iv_instrument_name: Optional[Union[List, Dict, str]] = None):
-        self._data = data
-        self.estimating_instrument_names = self._target_estimand.instrumental_variables
-        if iv_instrument_name is not None:
-            self.estimating_instrument_names = parse_state(iv_instrument_name)
-        self.logger.debug("Instrumental Variables used:" + ",".join(self.estimating_instrument_names))
-        if not self.estimating_instrument_names:
-            raise ValueError("No valid instruments found. IV Method not applicable")
-        if len(self.estimating_instrument_names) < len(self._treatment_name):
-            # TODO move this to the identification step
-            raise ValueError(
-                "Number of instruments fewer than number of treatments. 2SLS requires at least as many instruments as treatments."
-            )
-        self._estimating_instruments = self._data[self.estimating_instrument_names]
         return self
 
-    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0):
+    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_):
+        self._target_units = target_units
+        self._treatment_value = treatment_value
+        self._control_value = control_value
         if len(self.estimating_instrument_names) == 1 and len(self._treatment_name) == 1:
             instrument = self._estimating_instruments.iloc[:, 0]
             self.logger.debug("Instrument Variable values: {0}".format(instrument))
@@ -105,6 +126,8 @@ class InstrumentalVariableEstimator(CausalEstimator):
             target_estimand=self._target_estimand,
             realized_estimand_expr=self.symbolic_estimator,
         )
+
+        estimate.add_estimator(self)
         return estimate
 
     def construct_symbolic_estimator(self, estimand):

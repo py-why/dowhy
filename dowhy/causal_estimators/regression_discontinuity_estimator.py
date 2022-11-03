@@ -1,4 +1,5 @@
-from typing import Any
+from typing import Any, List, Optional
+
 import numpy as np
 import pandas as pd
 
@@ -19,7 +20,23 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
 
     """
 
-    def __init__(self, *args, rd_variable_name=None, rd_threshold_value=None, rd_bandwidth=None, **kwargs):
+    def __init__(
+        self,
+        identified_estimand,
+        test_significance=False,
+        evaluate_effect_strength=False,
+        confidence_intervals=False,
+        num_null_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
+        num_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI,
+        sample_size_fraction=CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION,
+        confidence_level=CausalEstimator.DEFAULT_CONFIDENCE_LEVEL,
+        need_conditional_estimates="auto",
+        num_quantiles_to_discretize_cont_cols=CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
+        rd_variable_name=None,
+        rd_threshold_value=None,
+        rd_bandwidth=None,
+        **kwargs,
+    ):
         """
         :param rd_variable_name: Name of the variable on which the
             discontinuity occurs. This is the instrument.
@@ -31,26 +48,48 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
         """
         # Required to ensure that self.method_params contains all the information
         # to create an object of this class
-        args_dict = {k: v for k, v in locals().items() if k not in type(self)._STD_INIT_ARGS}
-        args_dict.update(kwargs)
-        super().__init__(*args, **args_dict)
+        super().__init__(
+            identified_estimand=identified_estimand,
+            test_significance=test_significance,
+            evaluate_effect_strength=evaluate_effect_strength,
+            confidence_intervals=confidence_intervals,
+            num_null_simulations=num_null_simulations,
+            num_simulations=num_simulations,
+            sample_size_fraction=sample_size_fraction,
+            confidence_level=confidence_level,
+            need_conditional_estimates=need_conditional_estimates,
+            num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
+            rd_variable_name=rd_variable_name,
+            rd_threshold_value=rd_threshold_value,
+            rd_bandwidth=rd_bandwidth,
+            **kwargs,
+        )
         self.logger.info("Using Regression Discontinuity Estimator")
         self.rd_variable_name = rd_variable_name
         self.rd_threshold_value = rd_threshold_value
         self.rd_bandwidth = rd_bandwidth
+
+    def fit(
+        self,
+        data: pd.DataFrame,
+        treatment_name: str,
+        outcome_name: str,
+        effect_modifier_names: Optional[List[str]] = None,
+    ):
+        self.set_data(data, treatment_name, outcome_name)
+        self.set_effect_modifiers(effect_modifier_names)
+
         self.rd_variable = self._data[self.rd_variable_name]
 
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
 
-    def fit(self, data: pd.DataFrame, rd_variable_name=None):
-        self._data = data
-        self.rd_variable_name = rd_variable_name
-        self.rd_variable = self._data[self.rd_variable_name]
-
         return self
 
-    def estimate_effect(self):
+    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_):
+        self._target_units = target_units
+        self._treatment_value = treatment_value
+        self._control_value = control_value
         upper_limit = self.rd_threshold_value + self.rd_bandwidth
         lower_limit = self.rd_threshold_value - self.rd_bandwidth
         rows_filter = np.s_[(self.rd_variable >= lower_limit) & (self.rd_variable <= upper_limit)]
@@ -68,14 +107,20 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
         )
         self.logger.debug(local_df)
         iv_estimator = InstrumentalVariableEstimator(
-            local_df,
             self._target_estimand,
+            test_significance=self._significance_test,
+        )
+
+        iv_estimator.fit(
+            local_df,
             ["local_treatment"],
             ["local_outcome"],
-            test_significance=self._significance_test,
             iv_instrument_name="local_rd_variable",
         )
+
         est = iv_estimator.estimate_effect()
+
+        est.add_estimator(self)
         return est
 
     def construct_symbolic_estimator(self, estimand):

@@ -1,8 +1,8 @@
-from typing import Any
-import pandas as pd
-from sklearn import linear_model
+from typing import Any, List, Optional
 
-from dowhy.causal_estimator import CausalEstimate
+import pandas as pd
+
+from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from dowhy.causal_estimators.propensity_score_estimator import PropensityScoreEstimator
 
 
@@ -21,7 +21,16 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
 
     def __init__(
         self,
-        *args,
+        identified_estimand,
+        test_significance=False,
+        evaluate_effect_strength=False,
+        confidence_intervals=False,
+        num_null_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
+        num_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI,
+        sample_size_fraction=CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION,
+        confidence_level=CausalEstimator.DEFAULT_CONFIDENCE_LEVEL,
+        need_conditional_estimates="auto",
+        num_quantiles_to_discretize_cont_cols=CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
         num_strata="auto",
         clipping_threshold=10,
         propensity_score_model=None,
@@ -47,27 +56,48 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         """
         # Required to ensure that self.method_params contains all the information
         # to create an object of this class
-        args_dict = kwargs
-        args_dict.update({"num_strata": num_strata, "clipping_threshold": clipping_threshold})
         super().__init__(
-            *args,
+            identified_estimand=identified_estimand,
+            test_significance=test_significance,
+            evaluate_effect_strength=evaluate_effect_strength,
+            confidence_intervals=confidence_intervals,
+            num_null_simulations=num_null_simulations,
+            num_simulations=num_simulations,
+            sample_size_fraction=sample_size_fraction,
+            confidence_level=confidence_level,
+            need_conditional_estimates=need_conditional_estimates,
+            num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
             propensity_score_model=propensity_score_model,
             recalculate_propensity_score=recalculate_propensity_score,
             propensity_score_column=propensity_score_column,
-            **args_dict,
+            num_strata=num_strata,
+            clipping_threshold=clipping_threshold,
+            **kwargs,
         )
 
         self.logger.info("Using Propensity Score Stratification Estimator")
-        self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
-        self.logger.info(self.symbolic_estimator)
+
         # setting method-specific parameters
         self.num_strata = num_strata
         self.clipping_threshold = clipping_threshold
 
-    def fit(self, data: pd.DataFrame):
-        return super().fit(data)
+    def fit(
+        self,
+        data: pd.DataFrame,
+        treatment_name: str,
+        outcome_name: str,
+        effect_modifier_names: Optional[List[str]] = None,
+    ):
+        super().fit(data, treatment_name, outcome_name, effect_modifier_names=effect_modifier_names)
+        self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
+        self.logger.info(self.symbolic_estimator)
 
-    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None):
+        return self
+
+    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_):
+        self._target_units = target_units
+        self._treatment_value = treatment_value
+        self._control_value = control_value
         self._refresh_propensity_score()
 
         clipped = None
@@ -154,6 +184,8 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
             realized_estimand_expr=self.symbolic_estimator,
             propensity_scores=self._data[self.propensity_score_column],
         )
+
+        estimate.add_estimator(self)
         return estimate
 
     def _get_strata(self, num_strata, clipping_threshold):

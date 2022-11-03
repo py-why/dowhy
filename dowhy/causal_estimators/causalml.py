@@ -1,9 +1,8 @@
 import inspect
 from importlib import import_module
-from typing import Any
+from typing import Any, List, Optional
 
 import causalml
-import numpy as np
 import pandas as pd
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
@@ -20,61 +19,62 @@ class Causalml(CausalEstimator):
 
     """
 
-    def __init__(self, *args, causalml_methodname, **kwargs):
+    def __init__(
+        self,
+        identified_estimand,
+        causalml_methodname,
+        test_significance=False,
+        evaluate_effect_strength=False,
+        confidence_intervals=False,
+        num_null_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
+        num_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI,
+        sample_size_fraction=CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION,
+        confidence_level=CausalEstimator.DEFAULT_CONFIDENCE_LEVEL,
+        need_conditional_estimates="auto",
+        num_quantiles_to_discretize_cont_cols=CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
+        **kwargs,
+    ):
         """
         :param causalml_methodname: Fully qualified name of causalml estimator
             class.
         """
         # Required to ensure that self.method_params contains all the information
         # to create an object of this class
-        args_dict = {k: v for k, v in locals().items() if k not in type(self)._STD_INIT_ARGS}
-        args_dict.update(kwargs)
-        super().__init__(*args, **args_dict)
+        super().__init__(
+            identified_estimand=identified_estimand,
+            test_significance=test_significance,
+            evaluate_effect_strength=evaluate_effect_strength,
+            confidence_intervals=confidence_intervals,
+            num_null_simulations=num_null_simulations,
+            num_simulations=num_simulations,
+            sample_size_fraction=sample_size_fraction,
+            confidence_level=confidence_level,
+            need_conditional_estimates=need_conditional_estimates,
+            num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
+            causalml_methodname=causalml_methodname,
+            **kwargs,
+        )
         self._causalml_methodname = causalml_methodname
         # Add the identification method used in the estimator
         self.identifier_method = self._target_estimand.identifier_method
         self.logger.debug("The identifier method used {}".format(self.identifier_method))
-
-        # Check the backdoor variables being used
-        self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
-
-        # Add the observed confounders and one hot encode the categorical variables
-        self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
-        if self._observed_common_causes_names:
-            # Get the data of the unobserved confounders
-            self._observed_common_causes = self._data[self._observed_common_causes_names]
-            # One hot encode the data if they are categorical
-            self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
-        else:
-            self._observed_common_causes = []
-
-        # Check the instrumental variables involved
-        self.logger.debug("Instrumental variables used:" + ",".join(self._target_estimand.instrumental_variables))
-
-        # Perform the same actions as the above
-        self._instrumental_variable_names = self._target_estimand.instrumental_variables
-        if self._instrumental_variable_names:
-            self._instrumental_variables = self._data[self._instrumental_variable_names]
-            self._instrumental_variables = pd.get_dummies(self._instrumental_variables, drop_first=True)
-        else:
-            self._instrumental_variables = []
-
-        # Check if effect modifiers are used
-        self.logger.debug("Effect Modifiers used:" + ",".join(self._effect_modifier_names))
 
         # Get the class corresponding the the estimator to be used
         estimator_class = self._get_causalml_class_object(self._causalml_methodname)
         # Initialize the object
         self.estimator = estimator_class(**self.method_params["init_params"])
         self.logger.info("INFO: Using CausalML Estimator")
-        self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
-        self.logger.info(self.symbolic_estimator)
 
     def fit(
         self,
         data: pd.DataFrame,
+        treatment_name: str,
+        outcome_name: str,
+        effect_modifier_names: Optional[List[str]] = None,
     ):
-        self._data = data
+        self.set_data(data, treatment_name, outcome_name)
+        self.set_effect_modifiers(effect_modifier_names)
+
         # Check the backdoor variables being used
         self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
 
@@ -99,8 +99,9 @@ class Causalml(CausalEstimator):
         else:
             self._instrumental_variables = []
 
-        # Check if effect modifiers are used
-        self.logger.debug("Effect Modifiers used:" + ",".join(self._effect_modifier_names))
+        self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
+        self.logger.info(self.symbolic_estimator)
+
         return self
 
     def _get_causalml_class_object(self, module_method_name, *args, **kwargs):
@@ -118,7 +119,10 @@ class Causalml(CausalEstimator):
             )
         return estimator_class
 
-    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0):
+    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_):
+        self._target_units = target_units
+        self._treatment_value = treatment_value
+        self._control_value = control_value
         X_names = self._observed_common_causes_names + self._effect_modifier_names
 
         # Both the outcome and the treatment have to be 1D arrays according to the CausalML API
@@ -149,6 +153,7 @@ class Causalml(CausalEstimator):
             _estimator_object=self.estimator,
         )
 
+        estimate.add_estimator(self)
         return estimate
 
     def construct_symbolic_estimator(self, estimand):

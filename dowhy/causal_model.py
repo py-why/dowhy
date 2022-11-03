@@ -308,26 +308,16 @@ class CausalModel:
                 causal_estimator = self._estimator_cache[method_name]
             else:
                 causal_estimator = causal_estimator_class(
-                    self._data,
                     identified_estimand,
-                    self._treatment,
-                    self._outcome,  # names of treatment and outcome
-                    control_value=control_value,
-                    treatment_value=treatment_value,
-                    test_significance=test_significance,
-                    evaluate_effect_strength=evaluate_effect_strength,
-                    confidence_intervals=confidence_intervals,
-                    target_units=target_units,
-                    effect_modifiers=effect_modifiers,
                     **method_params,
                     **extra_args,
                 )
                 self._estimator_cache[method_name] = causal_estimator
 
         return estimate_effect(
+            self._data,
             self._treatment,
             self._outcome,
-            identified_estimand,
             identifier_name,
             causal_estimator,
             control_value,
@@ -381,12 +371,13 @@ class CausalModel:
                 # estimator from this function to call estimate_effect
                 # with fit_estimator=False.
                 self.causal_estimator = causal_estimator_class(
-                    self._data,
                     identified_estimand,
+                    **method_params,
+                )
+                self.causal_estimator.fit(
+                    self._data,
                     self._treatment,
                     self._outcome,
-                    test_significance=False,
-                    **method_params,
                 )
             else:
                 # Estimator had been computed in a previous call

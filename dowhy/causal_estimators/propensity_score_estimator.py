@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 import numpy as np
 import pandas as pd
 from sklearn import linear_model
@@ -20,7 +22,16 @@ class PropensityScoreEstimator(CausalEstimator):
 
     def __init__(
         self,
-        *args,
+        identified_estimand,
+        test_significance=False,
+        evaluate_effect_strength=False,
+        confidence_intervals=False,
+        num_null_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
+        num_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI,
+        sample_size_fraction=CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION,
+        confidence_level=CausalEstimator.DEFAULT_CONFIDENCE_LEVEL,
+        need_conditional_estimates="auto",
+        num_quantiles_to_discretize_cont_cols=CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
         propensity_score_model=None,
         recalculate_propensity_score=True,
         propensity_score_column="propensity_score",
@@ -36,16 +47,52 @@ class PropensityScoreEstimator(CausalEstimator):
         :param propensity_score_column: Column name that stores the
             propensity score. Default='propensity_score'
         """
-        # Required to ensure that self.method_params contains all the
-        # parameters to create an object of this class
-        args_dict = {k: v for k, v in locals().items() if k not in type(self)._STD_INIT_ARGS}
-        args_dict.update(kwargs)
-        super().__init__(*args, **args_dict)
+        super().__init__(
+            identified_estimand=identified_estimand,
+            test_significance=test_significance,
+            evaluate_effect_strength=evaluate_effect_strength,
+            confidence_intervals=confidence_intervals,
+            num_null_simulations=num_null_simulations,
+            num_simulations=num_simulations,
+            sample_size_fraction=sample_size_fraction,
+            confidence_level=confidence_level,
+            need_conditional_estimates=need_conditional_estimates,
+            num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
+            propensity_score_model=propensity_score_model,
+            recalculate_propensity_score=recalculate_propensity_score,
+            propensity_score_column=propensity_score_column,
+            **kwargs,
+        )
 
         # Enable the user to pass params for a custom propensity model
         self.propensity_score_model = propensity_score_model
         self.recalculate_propensity_score = recalculate_propensity_score
         self.propensity_score_column = propensity_score_column
+
+    def fit(
+        self,
+        data: pd.DataFrame,
+        treatment_name: str,
+        outcome_name: str,
+        effect_modifier_names: Optional[List[str]] = None,
+    ):
+        self.set_data(data, treatment_name, outcome_name)
+        self.set_effect_modifiers(effect_modifier_names)
+
+        self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
+        self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
+
+        if self._observed_common_causes_names:
+            self._observed_common_causes = self._data[self._observed_common_causes_names]
+            # Convert the categorical variables into dummy/indicator variables
+            # Basically, this gives a one hot encoding for each category
+            # The first category is taken to be the base line.
+            self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
+        else:
+            self._observed_common_causes = None
+            error_msg = "No common causes/confounders present. Propensity score based methods are not applicable"
+            self.logger.error(error_msg)
+            raise Exception(error_msg)
 
         # Check if the treatment is one-dimensional
         if len(self._treatment_name) > 1:
@@ -55,40 +102,6 @@ class PropensityScoreEstimator(CausalEstimator):
         treatment_values = self._data[self._treatment_name[0]].astype(int).unique()
         if any([v not in [0, 1] for v in treatment_values]):
             error_msg = "Propensity score methods are applicable only for binary treatments"
-            self.logger.error(error_msg)
-            raise Exception(error_msg)
-
-        self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
-
-        self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
-
-        if self._observed_common_causes_names:
-            self._observed_common_causes = self._data[self._observed_common_causes_names]
-            # Convert the categorical variables into dummy/indicator variables
-            # Basically, this gives a one hot encoding for each category
-            # The first category is taken to be the base line.
-            self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
-        else:
-            self._observed_common_causes = None
-            error_msg = "No common causes/confounders present. Propensity score based methods are not applicable"
-            self.logger.error(error_msg)
-            raise Exception(error_msg)
-
-    def fit(self, data: pd.DataFrame):
-        self._data = data
-
-        self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
-        self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
-
-        if self._observed_common_causes_names:
-            self._observed_common_causes = self._data[self._observed_common_causes_names]
-            # Convert the categorical variables into dummy/indicator variables
-            # Basically, this gives a one hot encoding for each category
-            # The first category is taken to be the base line.
-            self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
-        else:
-            self._observed_common_causes = None
-            error_msg = "No common causes/confounders present. Propensity score based methods are not applicable"
             self.logger.error(error_msg)
             raise Exception(error_msg)
 

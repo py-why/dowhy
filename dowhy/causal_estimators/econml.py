@@ -21,71 +21,57 @@ class Econml(CausalEstimator):
 
     """
 
-    def __init__(self, *args, econml_methodname, **kwargs):
+    def __init__(
+        self,
+        identified_estimand,
+        econml_methodname,
+        test_significance=False,
+        evaluate_effect_strength=False,
+        confidence_intervals=False,
+        num_null_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
+        num_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI,
+        sample_size_fraction=CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION,
+        confidence_level=CausalEstimator.DEFAULT_CONFIDENCE_LEVEL,
+        need_conditional_estimates="auto",
+        num_quantiles_to_discretize_cont_cols=CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
+        **kwargs,
+    ):
         """
         :param econml_methodname: Fully qualified name of econml estimator
             class. For example, 'econml.dml.DML'
         """
         # Required to ensure that self.method_params contains all the
         # parameters to create an object of this class
-        args_dict = {k: v for k, v in locals().items() if k not in type(self)._STD_INIT_ARGS}
-        args_dict.update(kwargs)
-        super().__init__(*args, **args_dict)
+        super().__init__(
+            identified_estimand=identified_estimand,
+            test_significance=test_significance,
+            evaluate_effect_strength=evaluate_effect_strength,
+            confidence_intervals=confidence_intervals,
+            num_null_simulations=num_null_simulations,
+            num_simulations=num_simulations,
+            sample_size_fraction=sample_size_fraction,
+            confidence_level=confidence_level,
+            need_conditional_estimates=need_conditional_estimates,
+            num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
+            econml_methodname=econml_methodname,
+            **kwargs,
+        )
         self._econml_methodname = econml_methodname
         self.logger.info("INFO: Using EconML Estimator")
         self.identifier_method = self._target_estimand.identifier_method
-        self._observed_common_causes_names = self._target_estimand.get_backdoor_variables().copy()
-        # For metalearners only--issue a warning if w contains variables not in x
-        (module_name, _, class_name) = self._econml_methodname.rpartition(".")
-        if module_name.endswith("metalearners"):
-            effect_modifier_names = []
-            if self._effect_modifier_names is not None:
-                effect_modifier_names = self._effect_modifier_names.copy()
-            w_diff_x = [w for w in self._observed_common_causes_names if w not in effect_modifier_names]
-            if len(w_diff_x) > 0:
-                self.logger.warn(
-                    "Concatenating common_causes and effect_modifiers and providing a single list of variables to metalearner estimator method, "
-                    + class_name
-                    + ". EconML metalearners accept a single X argument."
-                )
-                effect_modifier_names.extend(w_diff_x)
-                # Override the effect_modifiers set in CausalEstimator.__init__()
-                # Also only update self._effect_modifiers, and create a copy of self._effect_modifier_names
-                # the latter can be used by other estimator methods later
-                self._effect_modifiers = self._data[effect_modifier_names]
-                self._effect_modifiers = pd.get_dummies(self._effect_modifiers, drop_first=True)
-                self._effect_modifier_names = effect_modifier_names
-            self.logger.debug("Effect modifiers: " + ",".join(effect_modifier_names))
-        if self._observed_common_causes_names:
-            self._observed_common_causes = self._data[self._observed_common_causes_names]
-            self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
-        else:
-            self._observed_common_causes = None
-        self.logger.debug("Back-door variables used:" + ",".join(self._observed_common_causes_names))
-        # Instrumental variables names, if present
-        # choosing the instrumental variable to use
-        if getattr(self, "iv_instrument_name", None) is None:
-            self.estimating_instrument_names = self._target_estimand.instrumental_variables
-        else:
-            self.estimating_instrument_names = parse_state(self.iv_instrument_name)
-        if self.estimating_instrument_names:
-            self._estimating_instruments = self._data[self.estimating_instrument_names]
-            self._estimating_instruments = pd.get_dummies(self._estimating_instruments, drop_first=True)
-        else:
-            self._estimating_instruments = None
+
         self.estimator = None
-        self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
-        self.logger.info(self.symbolic_estimator)
 
     def fit(
         self,
         data: pd.DataFrame,
+        treatment_name: str,
+        outcome_name: str,
         effect_modifier_names: Optional[List[str]] = None,
-        observed_common_causes_names: Optional[List[str]] = None,
     ):
-        self._data = data
-        self._effect_modifier_names = effect_modifier_names
-        self._observed_common_causes_names = observed_common_causes_names
+        self.set_data(data, treatment_name, outcome_name)
+        self.set_effect_modifiers(effect_modifier_names)
+        self._observed_common_causes_names = self._target_estimand.get_backdoor_variables().copy()
 
         (module_name, _, class_name) = self._econml_methodname.rpartition(".")
         if module_name.endswith("metalearners"):
@@ -124,6 +110,9 @@ class Econml(CausalEstimator):
             self._estimating_instruments = pd.get_dummies(self._estimating_instruments, drop_first=True)
         else:
             self._estimating_instruments = None
+
+        self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
+        self.logger.info(self.symbolic_estimator)
 
         return self
 
@@ -142,7 +131,12 @@ class Econml(CausalEstimator):
             )
         return estimator_class
 
-    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None):
+    def estimate_effect(
+        self, treatment_value: Any = 1, control_value: Any = 0, confidence_intervals=False, target_units=None, **_
+    ):
+        self._target_units = target_units
+        self._treatment_value = treatment_value
+        self._control_value = control_value
         n_samples = self._treatment.shape[0]
         X = None  # Effect modifiers
         W = None  # common causes/ confounders
@@ -192,6 +186,7 @@ class Econml(CausalEstimator):
         ate = np.mean(est)
 
         self.effect_intervals = None
+        self._confidence_intervals = confidence_intervals
         if self._confidence_intervals:
             self.effect_intervals = self.estimator.effect_interval(
                 X_test, T0=T0_test, T1=T1_test, alpha=1 - self.confidence_level
@@ -206,6 +201,8 @@ class Econml(CausalEstimator):
             effect_intervals=self.effect_intervals,
             _estimator_object=self.estimator,
         )
+
+        estimate.add_estimator(self)
         return estimate
 
     def _estimate_confidence_intervals(self, confidence_level=None, method=None):
