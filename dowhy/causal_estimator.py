@@ -8,9 +8,6 @@ import sympy as sp
 from sklearn.utils import resample
 
 import dowhy.interpreters as interpreters
-from dowhy import causal_estimators
-from dowhy.causal_graph import CausalGraph
-from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 from dowhy.utils.api import parse_state
 
 logger = logging.getLogger(__name__)
@@ -148,8 +145,7 @@ class CausalEstimator:
             else bool(self._effect_modifier_names)
         )
 
-    @staticmethod
-    def get_estimator_object(new_data, identified_estimand, estimate, fit_estimator=True):
+    def get_estimator_object(self, new_data, identified_estimand, estimate, fit_estimator=True):
         """Create a new estimator of the same type as the one passed in the estimate argument.
 
         Creates a new object with new_data and the identified_estimand
@@ -164,13 +160,12 @@ class CausalEstimator:
 
         :returns: An instance of the same estimator class that had generated the given estimate.
         """
-        estimator_class = estimate.params["estimator_class"]
-        new_estimator = estimator_class(
+        new_estimator = type(self)(
             identified_estimand,
             test_significance=False,
             evaluate_effect_strength=False,
-            confidence_intervals=estimate.params["confidence_intervals"],
-            **estimate.params["method_params"] if estimate.params["method_params"] is not None else {},
+            confidence_intervals=self._confidence_intervals,
+            **self.method_params if self.method_params is not None else {},
         )
 
         if fit_estimator:
@@ -179,7 +174,7 @@ class CausalEstimator:
                 # names of treatment and outcome
                 identified_estimand.treatment_variable,
                 identified_estimand.outcome_variable,
-                effect_modifier_names=estimate.estimator._effect_modifier_names,
+                effect_modifier_names=self._effect_modifier_names,
             )
 
         return new_estimator

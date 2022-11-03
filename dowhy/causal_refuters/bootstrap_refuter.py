@@ -128,11 +128,11 @@ def _refute_once(
                 new_data[variable] = np.where(probs < probability_of_change, changed_data)
                 new_data[variable].astype("category")
 
-    new_estimator = CausalEstimator.get_estimator_object(new_data, target_estimand, estimate)
+    new_estimator = estimate.estimator.get_estimator_object(new_data, target_estimand, estimate)
     new_effect = new_estimator.estimate_effect(
         control_value=estimate.control_value,
         treatment_value=estimate.treatment_value,
-        target_units=estimate.params["target_units"],
+        target_units=estimate.estimator._target_units,
     )
     return new_effect.value
 
@@ -186,7 +186,7 @@ def refute_bootstrap(
         required_variables,
         target_estimand.get_backdoor_variables()
         + target_estimand.instrumental_variables
-        + estimate.params["effect_modifiers"],
+        + estimate.estimator._effect_modifier_names,
     )
 
     if chosen_variables is None:

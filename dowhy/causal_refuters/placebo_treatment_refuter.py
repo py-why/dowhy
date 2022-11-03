@@ -149,11 +149,11 @@ def _refute_once(
         new_data = pd.concat((new_data, new_instruments_df), axis=1)
     # Sanity check the data
     logger.debug(new_data[0:10])
-    new_estimator = CausalEstimator.get_estimator_object(new_data, target_estimand, estimate)
+    new_estimator = estimate.estimator.get_estimator_object(new_data, target_estimand, estimate)
     new_effect = new_estimator.estimate_effect(
         control_value=estimate.control_value,
         treatment_value=estimate.treatment_value,
-        target_units=estimate.params["target_units"],
+        target_units=estimate.estimator._target_units,
     )
     return new_effect.value
 
@@ -209,7 +209,7 @@ def refute_placebo_treatment(
         ]
         # For IV methods, the estimating_instrument_names should also be
         # changed. Create a copy to avoid modifying original object
-        if estimate.params["method_params"] is not None and "iv_instrument_name" in estimate.params["method_params"]:
+        if estimate.estimator.method_params is not None and "iv_instrument_name" in estimate.params["method_params"]:
             estimate = copy.deepcopy(estimate)
             estimate.params["method_params"]["iv_instrument_name"] = [
                 "placebo_" + s for s in parse_state(estimate.params["method_params"]["iv_instrument_name"])

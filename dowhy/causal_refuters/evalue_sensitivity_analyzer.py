@@ -257,13 +257,13 @@ class EValueSensitivityAnalyzer:
             new_backdoor_vars = [var for var in backdoor_vars if var != drop_var]
             new_estimand = copy.deepcopy(self.estimand)
             new_estimand.set_backdoor_variables(new_backdoor_vars)
-            new_estimator = CausalEstimator.get_estimator_object(self.data, new_estimand, self.estimate)
+            new_estimator = self.estimate.estimator.get_estimator_object(self.data, new_estimand, self.estimate)
 
             # new effect estimate
             new_effect = new_estimator.estimate_effect(
                 control_value=self.estimate.control_value,
                 treatment_value=self.estimate.treatment_value,
-                target_units=self.estimate.params["target_units"],
+                target_units=self.estimate.estimator._target_units,
             )
             if isinstance(self.estimate.estimator, LinearRegressionEstimator):
                 coef_est = new_effect.value

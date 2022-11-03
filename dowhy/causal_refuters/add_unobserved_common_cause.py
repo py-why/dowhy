@@ -817,11 +817,11 @@ def sensitivity_simulation(
             outcome_name,
             kappa_y,
         )
-        new_estimator = CausalEstimator.get_estimator_object(new_data, target_estimand, estimate)
+        new_estimator = estimate.estimator.get_estimator_object(new_data, target_estimand, estimate)
         new_effect = new_estimator.estimate_effect(
             control_value=estimate.control_value,
             treatment_value=estimate.treatment_value,
-            target_units=estimate.params["target_units"],
+            target_units=estimate.estimator._target_units,
         )
         refute = CausalRefutation(
             estimate.value, new_effect.value, refutation_type="Refute: Add an Unobserved Common Cause"
@@ -859,11 +859,11 @@ def sensitivity_simulation(
                         outcome_name,
                         kappa_y[j],
                     )
-                    new_estimator = CausalEstimator.get_estimator_object(new_data, target_estimand, estimate)
+                    new_estimator = estimate.estimator.get_estimator_object(new_data, target_estimand, estimate)
                     new_effect = new_estimator.estimate_effect(
                         control_value=estimate.control_value,
                         treatment_value=estimate.treatment_value,
-                        target_units=estimate.params["target_units"],
+                        target_units=estimate.estimator._target_units,
                     )
                     refute = CausalRefutation(
                         estimate.value,
@@ -930,11 +930,11 @@ def sensitivity_simulation(
                     outcome_name,
                     kappa_y,
                 )
-                new_estimator = CausalEstimator.get_estimator_object(new_data, target_estimand, estimate)
+                new_estimator = estimate.estimator.get_estimator_object(new_data, target_estimand, estimate)
                 new_effect = new_estimator.estimate_effect(
                     control_value=estimate.control_value,
                     treatment_value=estimate.treatment_value,
-                    target_units=estimate.params["target_units"],
+                    target_units=estimate.estimator._target_units,
                 )
                 refute = CausalRefutation(
                     estimate.value, new_effect.value, refutation_type="Refute: Add an Unobserved Common Cause"
@@ -983,11 +983,11 @@ def sensitivity_simulation(
                     outcome_name,
                     kappa_y[i],
                 )
-                new_estimator = CausalEstimator.get_estimator_object(new_data, target_estimand, estimate)
+                new_estimator = estimate.estimator.get_estimator_object(new_data, target_estimand, estimate)
                 new_effect = new_estimator.estimate_effect(
                     control_value=estimate.control_value,
                     treatment_value=estimate.treatment_value,
-                    target_units=estimate.params["target_units"],
+                    target_units=estimate.estimator._target_units,
                 )
                 refute = CausalRefutation(
                     estimate.value, new_effect.value, refutation_type="Refute: Add an Unobserved Common Cause"

@@ -181,7 +181,7 @@ class TestEstimator(object):
         ate_estimate = estimator_ate.estimate_effect(
             control_value=ate_estimate.control_value,
             treatment_value=ate_estimate.treatment_value,
-            target_units=ate_estimate.params["target_units"],
+            target_units=ate_estimate.estimator._target_units,
         )
         error = ate_estimate.value - true_ate
         print(

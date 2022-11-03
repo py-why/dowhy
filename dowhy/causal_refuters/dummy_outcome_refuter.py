@@ -439,7 +439,7 @@ def refute_dummy_outcome(
         required_variables,
         target_estimand.get_backdoor_variables()
         + target_estimand.instrumental_variables
-        + estimate.params["effect_modifiers"],
+        + estimate.estimator._effect_modifier_names,
     )
 
     # The rationale behind ordering of the loops is the fact that we induce randomness everytime we create the
@@ -489,11 +489,11 @@ def refute_dummy_outcome(
 
             new_data = validation_df.assign(dummy_outcome=outcome_validation)
 
-            new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, estimate)
+            new_estimator = estimate.estimator.get_estimator_object(new_data, identified_estimand, estimate)
             new_effect = new_estimator.estimate_effect(
                 control_value=estimate.control_value,
                 treatment_value=estimate.treatment_value,
-                target_units=estimate.params["target_units"],
+                target_units=estimate.estimator._target_units,
             )
             estimates.append(new_effect.value)
 
@@ -563,10 +563,12 @@ def refute_dummy_outcome(
                 outcome_validation += causal_effect_map[key_train]
 
                 new_data = validation_df.assign(dummy_outcome=outcome_validation)
-                new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, estimate)
-                new_effect = new_estimator.estimate_effect(control_value=estimate.control_value,
-        treatment_value=estimate.treatment_value,
-        target_units=estimate.params["target_units"],)
+                new_estimator = estimate.estimator.get_estimator_object(new_data, identified_estimand, estimate)
+                new_effect = new_estimator.estimate_effect(
+                    control_value=estimate.control_value,
+                    treatment_value=estimate.treatment_value,
+                    target_units=estimate.estimator._target_units,
+                )
 
                 estimates.append(new_effect.value)
                 group_count += 1
