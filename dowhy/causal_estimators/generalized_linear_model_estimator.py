@@ -3,8 +3,8 @@ from typing import List, Optional
 
 import pandas as pd
 import statsmodels.api as sm
-from dowhy.causal_estimator import CausalEstimator
 
+from dowhy.causal_estimator import CausalEstimator
 from dowhy.causal_estimators.regression_estimator import RegressionEstimator
 
 

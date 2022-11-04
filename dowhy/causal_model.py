@@ -312,7 +312,7 @@ class CausalModel:
                     **method_params,
                     **extra_args,
                 )
-                
+
                 self._estimator_cache[method_name] = causal_estimator
 
         return estimate_effect(
