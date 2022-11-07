@@ -14,8 +14,14 @@
 #
 import os
 import sys
+from docs.source.version_filter import create_version_filter
 
 sys.path.insert(0, os.path.abspath("../../"))
+
+
+# allow any version to be built that is not already built
+version_filter = create_version_filter("v0\.[0-8](\..*)?")
+print("version filter", version_filter)
 
 # -- Project information -----------------------------------------------------
 
@@ -195,6 +201,6 @@ todo_include_todos = True
 autoclass_content = "both"
 
 # Sphinx-Multiversion Options
-smv_tag_whitelist = r"^v\d*\.(9|\d{2,})(\..*)?$"
+smv_tag_whitelist = version_filter
 smv_branch_whitelist = r"main"
 smv_released_pattern = r"refs/tags/v.*"
