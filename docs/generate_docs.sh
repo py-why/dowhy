@@ -8,6 +8,7 @@ mv source/conf.py source/conf.py.orig
 cp source/conf-rtd.py source/conf.py
 cp source/_templates/versions-rtd.html source/_templates/versions.html
 
+poetry run pip uninstall -y dowhy
 poetry run sphinx-multiversion --dump-metadata source ${OUTPUT_DIR}
 poetry run sphinx-multiversion source ${OUTPUT_DIR}
 
