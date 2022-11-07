@@ -16,7 +16,7 @@ poetry run sphinx-multiversion source ${OUTPUT_DIR}
 #
 # Build >= 0.9 and main branch using Pydata THeme
 #
-mv source/conf-pydata.py source/conf.py
+cp source/conf-pydata.py source/conf.py
 cp source/_templates/versions-pydata.html source/_templates/versions.html
 
 poetry run sphinx-multiversion --dump-metadata source ${OUTPUT_DIR}
