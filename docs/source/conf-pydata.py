@@ -198,4 +198,3 @@ autoclass_content = "both"
 smv_tag_whitelist = r"^v\d*\.(9|\d{2,})(\..*)?$"
 smv_branch_whitelist = r"main"
 smv_released_pattern = r"refs/tags/v.*"
-smv_rebuild_tags = False

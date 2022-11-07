@@ -4,6 +4,14 @@ cd $( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 OUTPUT_DIR='../dowhy-docs'
 
+[ -d ${OUTPUT_DIR} ] && rm -rf ${OUTPUT_DIR}
+
+#
+# Cache existing docs
+#
+git clone --branch gh-pages git@github.com:py-why/dowhy.git ${OUTPUT_DIR}
+rm -rf ${OUTPUT_DIR}/.git
+
 #
 # Build <0.9 Versions using RTD Theme
 #

@@ -195,6 +195,6 @@ autoclass_content = "both"
 
 # Sphinx-Multiversion Options
 smv_tag_whitelist = r"^v0\.[0-8](\..*)?$"
-smv_branch_whitelist = None
+# don't match any branches
+smv_branch_whitelist = r"(\?\!\.*)"
 smv_released_pattern = r"refs/tags/v.*"
-smv_rebuild_tags = False
