@@ -22,7 +22,7 @@ cp source/_templates/versions-rtd.html source/_templates/versions.html
 
 poetry run sphinx-multiversion --dump-metadata source ${OUTPUT_DIR}
 
-# Ignore errors on this command
+# We expect an error with ret-code=2 when SMV cannot find a version to build
 set +e
 poetry run sphinx-multiversion source ${OUTPUT_DIR}
 retVal=$?
