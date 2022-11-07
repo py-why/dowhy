@@ -14,6 +14,7 @@
 #
 import os
 import sys
+
 from docs.source.version_filter import create_version_filter
 
 sys.path.insert(0, os.path.abspath("../../"))
