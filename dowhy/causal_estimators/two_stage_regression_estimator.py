@@ -45,11 +45,30 @@ class TwoStageRegressionEstimator(CausalEstimator):
         **kwargs,
     ):
         """
+        :param identified_estimand: probability expression
+            representing the target identified estimand to estimate.
+        :param test_significance: Binary flag or a string indicating whether to test significance and by which method. All estimators support test_significance="bootstrap" that estimates a p-value for the obtained estimate using the bootstrap method. Individual estimators can override this to support custom testing methods. The bootstrap method supports an optional parameter, num_null_simulations. If False, no testing is done. If True, significance of the estimate is tested using the custom method if available, otherwise by bootstrap.
+        :param evaluate_effect_strength: (Experimental) whether to evaluate the strength of effect
+        :param confidence_intervals: Binary flag or a string indicating whether the confidence intervals should be computed and which method should be used. All methods support estimation of confidence intervals using the bootstrap method by using the parameter confidence_intervals="bootstrap". The bootstrap method takes in two arguments (num_simulations and sample_size_fraction) that can be optionally specified in the params dictionary. Estimators may also override this to implement their own confidence interval method. If this parameter is False, no confidence intervals are computed. If True, confidence intervals are computed by the estimator's specific method if available, otherwise through bootstrap
+        :param num_null_simulations: The number of simulations for testing the
+            statistical significance of the estimator
+        :param num_simulations: The number of simulations for finding the
+            confidence interval (and/or standard error) for a estimate
+        :param sample_size_fraction: The size of the sample for the bootstrap
+            estimator
+        :param confidence_level: The confidence level of the confidence
+            interval estimate
+        :param need_conditional_estimates: Boolean flag indicating whether
+            conditional estimates should be computed. Defaults to True if
+            there are effect modifiers in the graph
+        :param num_quantiles_to_discretize_cont_cols: The number of quantiles
+            into which a numeric effect modifier is split, to enable
+            estimation of conditional treatment effect over it.
         :param first_stage_model: First stage estimator to be used. Default is
             linear regression.
         :param second_stage_model: Second stage estimator to be used. Default
             is linear regression.
-
+        :param kwargs: (optional) Additional estimator-specific parameters
         """
         # Required to ensure that self.method_params contains all the
         # parameters needed to create an object of this class

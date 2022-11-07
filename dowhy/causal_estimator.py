@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import sympy as sp
 from sklearn.utils import resample
+from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 
 import dowhy.interpreters as interpreters
 from dowhy.utils.api import parse_state
@@ -47,36 +48,27 @@ class CausalEstimator:
 
     def __init__(
         self,
-        identified_estimand,
-        test_significance=False,
-        evaluate_effect_strength=False,
-        confidence_intervals=False,
-        num_null_simulations=DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
-        num_simulations=DEFAULT_NUMBER_OF_SIMULATIONS_CI,
-        sample_size_fraction=DEFAULT_SAMPLE_SIZE_FRACTION,
-        confidence_level=DEFAULT_CONFIDENCE_LEVEL,
-        need_conditional_estimates="auto",
-        num_quantiles_to_discretize_cont_cols=NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
+        identified_estimand: IdentifiedEstimand,
+        test_significance: bool = False,
+        evaluate_effect_strength: bool = False,
+        confidence_intervals: bool = False,
+        num_null_simulations: int = DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
+        num_simulations: int = DEFAULT_NUMBER_OF_SIMULATIONS_CI,
+        sample_size_fraction: int = DEFAULT_SAMPLE_SIZE_FRACTION,
+        confidence_level: float = DEFAULT_CONFIDENCE_LEVEL,
+        need_conditional_estimates: Union[bool, str] = "auto",
+        num_quantiles_to_discretize_cont_cols: int = NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
         **kwargs,
     ):
         """Initializes an estimator with data and names of relevant variables.
 
         This method is called from the constructors of its child classes.
 
-        :param data: data frame containing the data
         :param identified_estimand: probability expression
             representing the target identified estimand to estimate.
-        :param treatment: name of the treatment variable
-        :param outcome: name of the outcome variable
-        :param control_value: Value of the treatment in the control group, for effect estimation.  If treatment is multi-variate, this can be a list.
-        :param treatment_value: Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.
         :param test_significance: Binary flag or a string indicating whether to test significance and by which method. All estimators support test_significance="bootstrap" that estimates a p-value for the obtained estimate using the bootstrap method. Individual estimators can override this to support custom testing methods. The bootstrap method supports an optional parameter, num_null_simulations. If False, no testing is done. If True, significance of the estimate is tested using the custom method if available, otherwise by bootstrap.
         :param evaluate_effect_strength: (Experimental) whether to evaluate the strength of effect
-        :param confidence_intervals: Binary flag or a string indicating whether the confidence intervals should be computed and which method should be used. All methods support estimation of confidence intervals using the bootstrap method by using the parameter confidence_intervals="bootstrap". The bootstrap method takes in two arguments (num_simulations and sample_size_fraction) that can be optionally specified in the params dictionary. Estimators may also override this to implement their own confidence interval method. If this parameter is False, no confidence intervals are computed. If True, confidence intervals are computed by the estimator's specific method if available, otherwise through bootstrap.
-        :param target_units: The units for which the treatment effect should be estimated. This can be a string for common specifications of target units (namely, "ate", "att" and "atc"). It can also be a lambda function that can be used as an index for the data (pandas DataFrame). Alternatively, it can be a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
-        :param effect_modifiers: Variables on which to compute separate
-            effects, or return a heterogeneous effect function. Not all
-            methods support this currently.
+        :param confidence_intervals: Binary flag or a string indicating whether the confidence intervals should be computed and which method should be used. All methods support estimation of confidence intervals using the bootstrap method by using the parameter confidence_intervals="bootstrap". The bootstrap method takes in two arguments (num_simulations and sample_size_fraction) that can be optionally specified in the params dictionary. Estimators may also override this to implement their own confidence interval method. If this parameter is False, no confidence intervals are computed. If True, confidence intervals are computed by the estimator's specific method if available, otherwise through bootstrap
         :param num_null_simulations: The number of simulations for testing the
             statistical significance of the estimator
         :param num_simulations: The number of simulations for finding the
@@ -119,6 +111,11 @@ class CausalEstimator:
         self._bootstrap_null_estimates = None
 
     def set_data(self, data: pd.DataFrame, treatment_name: List[str], outcome_name: List[str]):
+        """Sets the data for the estimator
+        :param data: data frame containing the data
+        :param treatment: name of the treatment variable
+        :param outcome: name of the outcome variable
+        """
         # Currently estimation methods only support univariate treatment and outcome
         self._data = data
         self._treatment_name = treatment_name
@@ -127,6 +124,11 @@ class CausalEstimator:
         self._outcome = self._data[self._outcome_name]
 
     def set_effect_modifiers(self, effect_modifier_names: Optional[List[str]] = None):
+        """Sets the effect modifiers for the estimator
+        :param effect_modifiers: Variables on which to compute separate
+            effects, or return a heterogeneous effect function. Not all
+            methods support this currently.
+        """
         self._effect_modifiers = effect_modifier_names
         if effect_modifier_names is not None:
             self._effect_modifier_names = [cname for cname in effect_modifier_names if cname in self._data.columns]
