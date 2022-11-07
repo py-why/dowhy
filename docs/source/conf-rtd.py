@@ -196,6 +196,8 @@ todo_include_todos = True
 # init docstrings should also be included in class
 autoclass_content = "both"
 
-smv_tag_whitelist = r"^v0\.[0-8](\..*)?$"
-smv_branch_whitelist = None
+# Sphinx-Multiversion Options
+smv_tag_whitelist = r"^v\d*\.(9|\d{2,})(\..*)?$"
+smv_branch_whitelist = r"main"
 smv_released_pattern = r"refs/tags/v.*"
+smv_rebuild_tags = False
