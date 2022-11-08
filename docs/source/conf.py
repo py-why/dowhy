@@ -39,7 +39,6 @@ extensions = [
     "sphinx.ext.todo",
     "nbsphinx",
     "sphinx_rtd_theme",
-    "sphinx_multiversion",
     "sphinxcontrib.googleanalytics",
     "sphinx_copybutton",
 ]
