@@ -15,8 +15,6 @@
 import os
 import sys
 
-from docs.source.version_filter import create_branch_filter, create_version_filter
-
 sys.path.insert(0, os.path.abspath("../../"))
 
 # -- Project information -----------------------------------------------------
@@ -195,9 +193,3 @@ todo_include_todos = True
 
 # init docstrings should also be included in class
 autoclass_content = "both"
-
-# Sphinx-Multiversion Options
-smv_tag_whitelist = create_version_filter("v0\.[0-8](\..*)?")
-smv_branch_whitelist = create_branch_filter()
-smv_released_pattern = r"refs/tags/v.*"
-smv_remote_whitelist = None
