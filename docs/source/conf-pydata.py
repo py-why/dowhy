@@ -17,6 +17,7 @@ import sys
 
 from docs.source.version_filter import create_version_filter
 
+current_branch = os.environ["CURRENT_BRANCH"]
 sys.path.insert(0, os.path.abspath("../../"))
 
 # -- Project information -----------------------------------------------------
@@ -199,7 +200,6 @@ autoclass_content = "both"
 # Sphinx-Multiversion Options
 smv_tag_whitelist = create_version_filter("v0\.[0-8](\..*)?")
 # print("pydata - version filter", smv_tag_whitelist)
-smv_branch_whitelist = r"main"
-smv_remote_whitelist = r"main"
+smv_branch_whitelist = current_branch
 smv_released_pattern = r"refs/tags/v.*"
 smv_prefer_remote_refs = True
