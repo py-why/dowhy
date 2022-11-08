@@ -1,0 +1,78 @@
+name: Build Docs (on demand)
+
+on:
+  issue_comment:
+    types: [created, edited]
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    container:
+      image: "ghcr.io/${{ github.repository_owner }}/dowhy-docs-generation:latest"
+
+    if: ${{ github.event.comment.body == 'build docs'}}
+    steps:
+      - name: Message Initiating
+        uses: actions/github-script@v4
+        with:
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Launching documentation build 🚀',
+            });          
+
+      - name: Get PR SHA
+        id: sha
+        uses: actions/github-script@v4
+        with:
+          result-encoding: string
+          script: |
+            const { owner, repo, number } = context.issue;
+            const pr = await github.pulls.get({
+              owner,
+              repo,
+              pull_number: number,
+            });
+            return pr.data.head.sha   
+
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ steps.sha.outputs.result }}
+          fetch-depth: 0
+
+      - name: Install Python Dependencies
+        run: poetry install -E plotting -E causalml -E econml -E pydot --with docs
+
+      - name: Build
+        run: |
+          # sphinx-multiversion invokes git internally. Its call to "git rev-parse --show-toplevel" throws the
+          # following error: "fatal: detected dubious ownership in repository at '/__w/dowhy/dowhy'"
+          # The following command avoids this.
+          git config --global --add safe.directory /__w/dowhy/dowhy
+          ./docs/generate_docs.sh
+
+      - name: Message success
+        if: ${{ success() }}
+        uses: actions/github-script@v4
+        with:
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Documentation build succeeded! ✅',
+            });
+
+      - name: Message failure
+        if: ${{ failure() }}
+        uses: actions/github-script@v4
+        with:
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Documentation build failed! ❌',
+            });
