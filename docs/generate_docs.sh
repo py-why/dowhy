@@ -2,8 +2,6 @@
 cd $( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 OUTPUT_DIR='../dowhy-docs'
 
-git for-each-ref --format "%(objectname)\t%(refname)\t%(creatordate:iso)" refs
-
 #
 # Cache existing docs
 #
