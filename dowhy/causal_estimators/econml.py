@@ -1,8 +1,9 @@
 import inspect
 from importlib import import_module
+from typing import Callable
 
-import econml
 import numpy as np
+from numpy.distutils.misc_util import is_sequence
 import pandas as pd
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
@@ -120,7 +121,6 @@ class Econml(CausalEstimator):
                 self.estimator.fit(**estimator_data_args, **self.method_params["fit_params"])
 
         X_test = X
-        n_target_units = n_samples
         if X is not None:
             if type(self._target_units) is pd.DataFrame:
                 X_test = self._target_units
@@ -128,23 +128,23 @@ class Econml(CausalEstimator):
                 filtered_rows = self._data.where(self._target_units)
                 boolean_criterion = np.array(filtered_rows.notnull().iloc[:, 0])
                 X_test = X[boolean_criterion]
-            n_target_units = X_test.shape[0]
 
         # Changing shape to a list for a singleton value
-        if type(self._control_value) is not list:
-            self._control_value = [self._control_value]
-        if type(self._treatment_value) is not list:
-            self._treatment_value = [self._treatment_value]
-        T0_test = np.repeat([self._control_value], n_target_units, axis=0)
-        T1_test = np.repeat([self._treatment_value], n_target_units, axis=0)
-        est = self.estimator.effect(X_test, T0=T0_test, T1=T1_test)
-        ate = np.mean(est)
 
-        self.effect_intervals = None
+        if isinstance(self._treatment_value, str) or not is_sequence(self._treatment_value):
+            self._treatment_value = [self._treatment_value]
+
+        est = self.effect(X_test)
+        ate = np.mean(est, axis=0) # one value per treatment value
+
+        if len(ate) == 1:
+            ate = ate[0]
+
         if self._confidence_intervals:
-            self.effect_intervals = self.estimator.effect_interval(
-                X_test, T0=T0_test, T1=T1_test, alpha=1 - self.confidence_level
-            )
+            self.effect_intervals = self.effect_interval(X_test)
+        else:
+            self.effect_intervals = None
+
         estimate = CausalEstimate(
             estimate=ate,
             control_value=self._control_value,
@@ -180,8 +180,42 @@ class Econml(CausalEstimator):
     def shap_values(self, df: pd.DataFrame, *args, **kwargs):
         return self.estimator.shap_values(df[self._effect_modifier_names].values, *args, **kwargs)
 
-    def effect(self, df: pd.DataFrame, *args, **kwargs) -> np.ndarray:
-        return self.estimator.effect(df[self._effect_modifier_names].values, *args, **kwargs)
+    def apply_multitreatment(self, df: pd.DataFrame, fun: Callable, *args, **kwargs):
+        ests = []
+        assert not isinstance(self._treatment_value, str)
+        assert is_sequence(self._treatment_value)
 
-    def effect_inference(self, df: pd.DataFrame, *args, **kwargs) -> np.ndarray:
-        return self.estimator.effect_inference(df[self._effect_modifier_names].values, *args, **kwargs)
+        for tv in self._treatment_value:
+            ests.append(
+                fun(
+                    df,
+                    T0=self._control_value,
+                    T1=tv,
+                    *args,
+                    **kwargs,
+                )
+            )
+        est = np.stack(ests, axis=1)
+        return est
+
+    def effect(self, df: pd.DataFrame, *args, **kwargs) -> np.ndarray:
+        def effect_fun(df, T0, T1, *args, **kwargs):
+            return self.estimator.effect(df[self._effect_modifier_names].values, T0=T0, T1=T1, *args, **kwargs)
+
+        return self.apply_multitreatment(df, effect_fun, *args, **kwargs)
+
+    def effect_interval(self, df: pd.DataFrame, *args, **kwargs) -> np.ndarray:
+        def effect_interval_fun(df, T0, T1, *args, **kwargs):
+            return self.estimator.effect_interval(
+                df[self._effect_modifier_names].values, T0=T0, T1=T1, alpha=1 - self.confidence_level, *args, **kwargs
+            )
+
+        return self.apply_multitreatment(df, effect_interval_fun, *args, **kwargs)
+
+    def effect_inference(self, df: pd.DataFrame, *args, **kwargs):
+        def effect_inference_fun(df, T0, T1, *args, **kwargs):
+            return self.estimator.effect_inference(
+                df[self._effect_modifier_names].values, T0=T0, T1=T1, *args, **kwargs
+            )
+
+        return self.apply_multitreatment(df, effect_inference_fun, *args, **kwargs)

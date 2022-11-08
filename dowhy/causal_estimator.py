@@ -3,6 +3,8 @@ from collections import namedtuple
 from typing import Dict, List, Optional, Union
 
 import numpy as np
+from numpy.distutils.misc_util import is_sequence
+
 import pandas as pd
 import sympy as sp
 from sklearn.utils import resample
@@ -224,6 +226,34 @@ class CausalEstimator:
         df_notreatment = self._data.loc[self._data[self._treatment_name] == 0]
         est = np.mean(df_withtreatment[self._outcome_name]) - np.mean(df_notreatment[self._outcome_name])
         return CausalEstimate(est, None, None, control_value=0, treatment_value=1)
+
+    def effect_tt(self, df: pd.DataFrame, *args, **kwargs):
+        """
+        Effect of treatment on the treated
+        @param df: unit features and treatment values
+        @param args: passed through to effect estimator
+        @param kwargs: passed through to effect estimator
+        @return: np.array of len(df) with effects of the actual treatment applied
+        """
+
+        eff = self.effect(df, *args, **kwargs).reshape((len(df), len(self._treatment_value)))
+
+        out = np.zeros(len(df))
+        if is_sequence(self._treatment_value) and not isinstance(self._treatment_value, str):
+            treatment_value = self._treatment_value
+        else:
+            treatment_value = [self._treatment_value]
+
+        if is_sequence(self._treatment_name) and not isinstance(self._treatment_name, str):
+            treatment_name = self._treatment_name[0]
+        else:
+            treatment_name = self._treatment_name
+
+        eff = np.reshape(eff, (len(df), len(treatment_value)))
+
+        for c, col in enumerate(treatment_value):
+            out[df[treatment_name] == col] = eff[df[treatment_name] == col, c]
+        return pd.Series(data=out, index=df.index)
 
     def _estimate_effect_fn(self, data_df):
         """Function used in conditional effect estimation. This function is to be overridden by each child estimator.
