@@ -21,6 +21,7 @@ jobs:
           fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
 
       # Reattach to a branch so that we can build docs on the branch
+      - run: git config --global --add safe.directory /__w/dowhy/dowhy
       - name: reattach HEAD to Head Ref
         run: git checkout "$(echo ${{ github.head_ref }} | sed -E 's|refs/[a-zA-Z]+/||')"
         if: github.head_ref != ''
@@ -28,13 +29,11 @@ jobs:
         run: git checkout "$(echo ${{ github.ref }} | sed -E 's|refs/[a-zA-Z]+/||')"
         if: github.head_ref == ''
 
+      - name: Debug
+        run: ./debug.sh
+
       - name: Install Python Dependencies
         run: poetry install -E plotting -E causalml -E econml -E pydot --with docs
 
       - name: Build
-        run: |
-          # sphinx-multiversion invokes git internally. Its call to "git rev-parse --show-toplevel" throws the
-          # following error: "fatal: detected dubious ownership in repository at '/__w/dowhy/dowhy'"
-          # The following command avoids this.
-          git config --global --add safe.directory /__w/dowhy/dowhy
-          ./docs/generate_docs.sh
+        run: ./docs/generate_docs.sh
