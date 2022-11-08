@@ -1,5 +1,7 @@
 import os
 
+is_ci = os.environ.get("CI", False)
+
 
 def create_version_filter(include: str):
     # Create a negative-lookahead regexp to exclude the version from being generated
@@ -11,3 +13,11 @@ def create_version_filter(include: str):
     versions.remove(".nojekyll")
     versions.remove("main")
     return "^".join(list(map(exclude, versions))) + include + "$"
+
+
+def create_branch_filter():
+    if is_ci == "true":
+        # build the currently checked-out branch, which should be the only branch in GH Actions
+        return "^.*$"
+
+    return "main"

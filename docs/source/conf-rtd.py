@@ -201,4 +201,3 @@ smv_tag_whitelist = create_version_filter("v0\.[0-8](\..*)?")
 # don't match any branches
 smv_branch_whitelist = r"(\?\!\.*)"
 smv_released_pattern = r"refs/tags/v.*"
-smv_prefer_remote_refs = True
