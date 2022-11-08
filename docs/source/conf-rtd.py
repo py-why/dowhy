@@ -197,7 +197,7 @@ autoclass_content = "both"
 
 # Sphinx-Multiversion Options
 smv_tag_whitelist = create_version_filter("v0\.[0-8](\..*)?")
-# print("version filter", smv_tag_whitelist)
+print("rtd - version filter", smv_tag_whitelist)
 # don't match any branches
 smv_branch_whitelist = r"(\?\!\.*)"
 smv_released_pattern = r"refs/tags/v.*"

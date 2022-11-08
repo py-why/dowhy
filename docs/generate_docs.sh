@@ -15,6 +15,7 @@ rm -rf ${OUTPUT_DIR}/.git
 # Build <0.9 Versions using RTD Theme
 #
 echo "Building legacy versions (<0.9)"
+rm source/conf.py
 cp source/conf-rtd.py source/conf.py
 cp source/_templates/versions-rtd.html source/_templates/versions.html
 poetry run sphinx-multiversion --dump-metadata source ${OUTPUT_DIR}
@@ -33,6 +34,7 @@ fi
 # Build >= 0.9 and main branch using Pydata THeme
 #
 echo "Building versions (>=0.9) and main branch"
+rm source/conf.py
 cp source/conf-pydata.py source/conf.py
 cp source/_templates/versions-pydata.html source/_templates/versions.html
 poetry run sphinx-multiversion --dump-metadata source ${OUTPUT_DIR}
