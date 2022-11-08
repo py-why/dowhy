@@ -19,11 +19,6 @@ from docs.source.version_filter import create_version_filter
 
 sys.path.insert(0, os.path.abspath("../../"))
 
-
-# allow any version to be built that is not already built
-version_filter = create_version_filter("v0\.[0-8](\..*)?")
-print("version filter", version_filter)
-
 # -- Project information -----------------------------------------------------
 
 project = "DoWhy"
@@ -202,6 +197,7 @@ todo_include_todos = True
 autoclass_content = "both"
 
 # Sphinx-Multiversion Options
-smv_tag_whitelist = version_filter
+smv_tag_whitelist = create_version_filter("v0\.[0-8](\..*)?")
+# print("version filter", smv_tag_whitelist)
 smv_branch_whitelist = r"main"
 smv_released_pattern = r"refs/tags/v.*"
