@@ -25,4 +25,4 @@ echo "<html>
     <head>
         <meta http-equiv="'"'"refresh"'"'" content="'"'"0; url=./${STABLE_VERSION}"'"'" />
     </head>
-</html>" > ${OUTPUT_DIR}/index.html
+</html>" > ${DOCS_ROOT}/index.html
