@@ -1,22 +1,23 @@
-#!/bin/bash -ex
-
+#!/bin/bash -e
 cd $( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+OUTPUT_DIR='../dowhy-docs/main'
 
-OUTPUT_DIR='../dowhy-docs'
+#
+# Cache existing docs
+#
+if [ ! -f "${OUTPUT_DIR}/index.html" ]; then
+    git clone --quiet --branch gh-pages https://github.com/py-why/dowhy.git ${OUTPUT_DIR}
+    rm -rf ${OUTPUT_DIR}/.git
+fi
 
-mv source/conf.py source/conf.py.orig
-cp source/conf-rtd.py source/conf.py
-cp source/_templates/versions-rtd.html source/_templates/versions.html
+#
+# Build docs
+echo "Executing sphinx-build"
+poetry run sphinx-build source ${OUTPUT_DIR}
 
-poetry run sphinx-multiversion --dump-metadata source ${OUTPUT_DIR}
-poetry run sphinx-multiversion source ${OUTPUT_DIR}
-
-mv source/conf.py.orig source/conf.py
-cp source/_templates/versions-pydata.html source/_templates/versions.html
-
-poetry run sphinx-multiversion --dump-metadata source ${OUTPUT_DIR}
-poetry run sphinx-multiversion source ${OUTPUT_DIR}
-
+#
+# Create the top-level index.html
+#
 STABLE_VERSION=$(git describe --tags --abbrev=0 --match='v*')
 
 echo "<html>

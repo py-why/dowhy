@@ -1,0 +1,25 @@
+name: Build Docs (CI)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/docs-ci.yml"
+      - "dowhy/**"
+      - "docs/**"
+      - "pyproject.toml"
+      - "poetry.lock"
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    container:
+      image: "ghcr.io/${{ github.repository_owner }}/dowhy-docs-generation:latest"
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install Python Dependencies
+        run: poetry install -E plotting -E causalml -E econml -E pydot --with docs
+
+      - name: Build
+        run: ./docs/generate_docs.sh
