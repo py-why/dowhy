@@ -23,6 +23,20 @@ jobs:
               body: 'Launching documentation build 🚀',
             });          
 
+      - name: Get PR SHA
+        id: sha
+        uses: actions/github-script@v4
+        with:
+          result-encoding: string
+          script: |
+            const { owner, repo, number } = context.issue;
+            const pr = await github.pulls.get({
+              owner,
+              repo,
+              pull_number: number,
+            });
+            return pr.data.head.sha   
+
       - uses: actions/checkout@v2
         with:
           ref: ${{ steps.sha.outputs.result }}
