@@ -6,7 +6,7 @@ OUTPUT_DIR='../dowhy-docs'
 # Cache existing docs
 #
 if [ ! -f "${OUTPUT_DIR}/index.html" ]; then
-    git clone --branch gh-pages https://github.com/py-why/dowhy.git ${OUTPUT_DIR}
+    git clone --quiet --branch gh-pages https://github.com/py-why/dowhy.git ${OUTPUT_DIR}
     rm -rf ${OUTPUT_DIR}/.git
 fi
 
