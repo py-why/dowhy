@@ -62,8 +62,6 @@ class DistanceMatchingEstimator(CausalEstimator):
             Default=1.
         :param distance_metric: Distance metric to use. Default="minkowski"
             that corresponds to Euclidean distance metric with p=2.
-        :param exact_match_cols: List of column names whose values should be
-        exactly matched. Typically used for columns with discrete values.
         :param kwargs: (optional) Additional estimator-specific parameters
         """
         # Required to ensure that self.method_params contains all the
@@ -81,14 +79,12 @@ class DistanceMatchingEstimator(CausalEstimator):
             num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
             num_matches_per_unit=num_matches_per_unit,
             distance_metric=distance_metric,
-            exact_match_cols=exact_match_cols,
             **kwargs,
         )
         
 
         self.num_matches_per_unit = num_matches_per_unit
         self.distance_metric = distance_metric
-        self.exact_match_cols = exact_match_cols
 
         # Dictionary of any user-provided params for the distance metric
         # that will be passed to sklearn nearestneighbors
@@ -111,6 +107,17 @@ class DistanceMatchingEstimator(CausalEstimator):
         exact_match_cols=None,
         effect_modifier_names: Optional[List[str]] = None,
     ):
+        """
+        Fits the estimator with data for effect estimation
+        :param data: data frame containing the data
+        :param treatment: name of the treatment variable
+        :param outcome: name of the outcome variable
+        :param exact_match_cols: List of column names whose values should be
+        exactly matched. Typically used for columns with discrete values.
+        :param effect_modifiers: Variables on which to compute separate
+                    effects, or return a heterogeneous effect function. Not all
+                    methods support this currently.
+        """
         self.set_data(data, treatment_name, outcome_name)
         self.exact_match_cols = exact_match_cols
 

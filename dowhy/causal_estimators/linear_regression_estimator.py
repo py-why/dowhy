@@ -78,6 +78,15 @@ class LinearRegressionEstimator(RegressionEstimator):
         outcome_name: str,
         effect_modifier_names: Optional[List[str]] = None,
     ):
+        """
+        Fits the estimator with data for effect estimation
+        :param data: data frame containing the data
+        :param treatment: name of the treatment variable
+        :param outcome: name of the outcome variable
+        :param effect_modifiers: Variables on which to compute separate
+                    effects, or return a heterogeneous effect function. Not all
+                    methods support this currently.
+        """
         return super().fit(data, treatment_name, outcome_name, effect_modifier_names=effect_modifier_names)
 
     def construct_symbolic_estimator(self, estimand):

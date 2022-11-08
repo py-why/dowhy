@@ -140,6 +140,19 @@ class TwoStageRegressionEstimator(CausalEstimator):
         effect_modifier_names: Optional[List[str]] = None,
         **_,
     ):
+        """
+        Fits the estimator with data for effect estimation
+        :param data: data frame containing the data
+        :param treatment: name of the treatment variable
+        :param outcome: name of the outcome variable
+        :param iv_instrument_name: Name of the specific instrumental variable
+            to be used. Needs to be one of the IVs identified in the
+            identification step. Default is to use all the IV variables
+            from the identification step.
+        :param effect_modifiers: Variables on which to compute separate
+                    effects, or return a heterogeneous effect function. Not all
+                    methods support this currently.
+        """
         self.set_data(data, treatment_name, outcome_name)
         self.set_effect_modifiers(effect_modifier_names)
 

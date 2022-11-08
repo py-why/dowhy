@@ -56,10 +56,7 @@ class InstrumentalVariableEstimator(CausalEstimator):
         :param num_quantiles_to_discretize_cont_cols: The number of quantiles
             into which a numeric effect modifier is split, to enable
             estimation of conditional treatment effect over it.
-        :param iv_instrument_name: Name of the specific instrumental variable
-            to be used. Needs to be one of the IVs identified in the
-            identification step. Default is to use all the IV variables
-            from the identification step.
+
         :param kwargs: (optional) Additional estimator-specific parameters
         """
         super().__init__(
@@ -85,6 +82,19 @@ class InstrumentalVariableEstimator(CausalEstimator):
         iv_instrument_name: Optional[Union[List, Dict, str]] = None,
         effect_modifier_names: Optional[List[str]] = None,
     ):
+        """
+        Fits the estimator with data for effect estimation
+        :param data: data frame containing the data
+        :param treatment: name of the treatment variable
+        :param outcome: name of the outcome variable
+        :param iv_instrument_name: Name of the specific instrumental variable
+            to be used. Needs to be one of the IVs identified in the
+            identification step. Default is to use all the IV variables
+            from the identification step.
+        :param effect_modifiers: Variables on which to compute separate
+                    effects, or return a heterogeneous effect function. Not all
+                    methods support this currently.
+        """
         self.set_data(data, treatment_name, outcome_name)
         self.set_effect_modifiers(effect_modifier_names)
 
