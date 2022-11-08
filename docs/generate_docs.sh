@@ -1,8 +1,9 @@
 #!/bin/bash -ex
 cd $( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-
-
 OUTPUT_DIR='../dowhy-docs'
+
+# Echo out the git refs that are present
+git for-each-ref --format "%(objectname)\t%(refname)\t%(creatordate:iso)" refs
 
 #
 # Cache existing docs
