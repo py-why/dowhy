@@ -12,12 +12,16 @@ def create_version_filter(include: str):
     versions.remove("index.html")
     versions.remove(".nojekyll")
     versions.remove("main")
-    return "^".join(list(map(exclude, versions))) + include + "$"
+    result = "^".join(list(map(exclude, versions))) + include + "$"
+    print("version filter: ", result)
+    return result
 
 
 def create_branch_filter():
+    result = "main"
     if is_ci == "true":
         # build the currently checked-out branch, which should be the only branch in GH Actions
-        return "^.*$"
+        result = "^.*$"
 
-    return "main"
+    print("branch filter: ", result)
+    return result

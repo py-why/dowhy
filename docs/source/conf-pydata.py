@@ -198,7 +198,6 @@ autoclass_content = "both"
 
 # Sphinx-Multiversion Options
 smv_tag_whitelist = create_version_filter("v0\.[0-8](\..*)?")
-# print("pydata - version filter", smv_tag_whitelist)
 smv_branch_whitelist = create_branch_filter()
 smv_released_pattern = r"refs/tags/v.*"
 smv_remote_whitelist = None
