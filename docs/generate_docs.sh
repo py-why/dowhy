@@ -1,5 +1,6 @@
-#!/bin/bash -ex
-
+#!/bin/bash -x
+set -e
+bash --version
 cd $( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 
@@ -26,6 +27,7 @@ poetry run sphinx-multiversion source ${OUTPUT_DIR}
 retVal=$?
 set -e
 
+echo "Return value: $retVal"
 if [[ $retVal -ne 0 ]] && [[ $retVal -ne 2 ]]; then
     echo "error generating documentation"
     exit $retVal
