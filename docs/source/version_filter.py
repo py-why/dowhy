@@ -9,4 +9,5 @@ def create_version_filter(include: str):
     versions = os.listdir("../../dowhy-docs")
     versions.remove("index.html")
     versions.remove(".nojekyll")
+    versions.remove("main")
     return "^".join(list(map(exclude, versions))) + include + "$"
