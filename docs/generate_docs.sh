@@ -9,7 +9,7 @@ OUTPUT_DIR='../dowhy-docs'
 # Cache existing docs
 #
 [ -d ${OUTPUT_DIR} ] && rm -rf ${OUTPUT_DIR}
-git clone --branch gh-pages git@github.com:py-why/dowhy.git ${OUTPUT_DIR}
+git clone --branch gh-pages https://github.com/py-why/dowhy.git ${OUTPUT_DIR}
 rm -rf ${OUTPUT_DIR}/.git
 
 #
