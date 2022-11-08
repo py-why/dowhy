@@ -13,7 +13,6 @@ def create_version_filter(include: str):
     versions.remove(".nojekyll")
     versions.remove("main")
     result = "^".join(list(map(exclude, versions))) + include + "$"
-    print("version filter: ", result)
     return result
 
 
@@ -23,5 +22,4 @@ def create_branch_filter():
         # build the currently checked-out branch, which should be the only branch in GH Actions
         result = "^.*$"
 
-    print("branch filter: ", result)
     return result

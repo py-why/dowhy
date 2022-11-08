@@ -2,6 +2,8 @@
 cd $( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 OUTPUT_DIR='../dowhy-docs'
 
+git for-each-ref --format "%(objectname)\t%(refname)\t%(creatordate:iso)" refs
+
 #
 # Cache existing docs
 #
@@ -32,7 +34,7 @@ fi
 #
 # Build >= 0.9 and main branch using Pydata THeme
 #
-echo "Building versions (>=0.9) and main branch"
+echo "Building versions (>=0.9) and branches"
 rm source/conf.py
 cp source/conf-pydata.py source/conf.py
 cp source/_templates/versions-pydata.html source/_templates/versions.html
