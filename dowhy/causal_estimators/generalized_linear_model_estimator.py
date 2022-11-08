@@ -5,8 +5,8 @@ import pandas as pd
 import statsmodels.api as sm
 
 from dowhy.causal_estimator import CausalEstimator
-from dowhy.causal_identifier import IdentifiedEstimand
 from dowhy.causal_estimators.regression_estimator import RegressionEstimator
+from dowhy.causal_identifier import IdentifiedEstimand
 
 
 class GeneralizedLinearModelEstimator(RegressionEstimator):

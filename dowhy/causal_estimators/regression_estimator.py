@@ -4,8 +4,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
-from dowhy.causal_estimator import CausalEstimate, CausalEstimator
-from dowhy.causal_estimator import IdentifiedEstimand
+from dowhy.causal_estimator import CausalEstimate, CausalEstimator, IdentifiedEstimand
 
 
 class RegressionEstimator(CausalEstimator):

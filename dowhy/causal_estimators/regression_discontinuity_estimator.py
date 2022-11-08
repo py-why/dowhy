@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 
 from dowhy.causal_estimator import CausalEstimator
-from dowhy.causal_identifier import IdentifiedEstimand
 from dowhy.causal_estimators.instrumental_variable_estimator import InstrumentalVariableEstimator
+from dowhy.causal_identifier import IdentifiedEstimand
 
 
 class RegressionDiscontinuityEstimator(CausalEstimator):

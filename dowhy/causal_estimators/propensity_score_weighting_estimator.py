@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
-from dowhy.causal_identifier import IdentifiedEstimand
 from dowhy.causal_estimators.propensity_score_estimator import PropensityScoreEstimator
+from dowhy.causal_identifier import IdentifiedEstimand
 
 
 class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
