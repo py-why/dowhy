@@ -22,4 +22,5 @@ def create_branch_filter():
         # build the currently checked-out branch, which should be the only branch in GH Actions
         result = "^.*$"
 
+    print("branch filter: ", result)
     return result
