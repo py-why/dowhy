@@ -14,13 +14,10 @@ rm -rf ${OUTPUT_DIR}/.git
 
 #
 # Build <0.9 Versions using RTD Theme
-# Note: commenting out so that we can speed up the build by using the pre-built docs for these older versions
 #
 
 cp source/conf-rtd.py source/conf.py
 cp source/_templates/versions-rtd.html source/_templates/versions.html
-
-poetry run sphinx-multiversion --dump-metadata source ${OUTPUT_DIR}
 
 # We expect an error with ret-code=2 when SMV cannot find a version to build
 set +e
