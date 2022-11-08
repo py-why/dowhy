@@ -12,8 +12,6 @@ fi
 
 #
 # Build docs
-echo "Configuring sphinx"
-cp source/_templates/versions-pydata.html source/_templates/versions.html
 echo "Executing sphinx-build"
 poetry run sphinx-build source ${OUTPUT_DIR}
 
