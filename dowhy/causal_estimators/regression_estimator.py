@@ -1,10 +1,11 @@
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
+from dowhy.causal_estimator import IdentifiedEstimand
 
 
 class RegressionEstimator(CausalEstimator):
@@ -20,16 +21,16 @@ class RegressionEstimator(CausalEstimator):
 
     def __init__(
         self,
-        identified_estimand,
-        test_significance=False,
-        evaluate_effect_strength=False,
-        confidence_intervals=False,
-        num_null_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
-        num_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI,
-        sample_size_fraction=CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION,
-        confidence_level=CausalEstimator.DEFAULT_CONFIDENCE_LEVEL,
-        need_conditional_estimates="auto",
-        num_quantiles_to_discretize_cont_cols=CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
+        identified_estimand: IdentifiedEstimand,
+        test_significance: bool = False,
+        evaluate_effect_strength: bool = False,
+        confidence_intervals: bool = False,
+        num_null_simulations: int = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
+        num_simulations: int = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI,
+        sample_size_fraction: int = CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION,
+        confidence_level: float = CausalEstimator.DEFAULT_CONFIDENCE_LEVEL,
+        need_conditional_estimates: Union[bool, str] = "auto",
+        num_quantiles_to_discretize_cont_cols: int = CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
         **kwargs,
     ):
         """

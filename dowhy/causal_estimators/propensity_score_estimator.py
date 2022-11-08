@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Any, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -6,6 +6,7 @@ from sklearn import linear_model
 from sklearn.exceptions import NotFittedError
 
 from dowhy.causal_estimator import CausalEstimator
+from dowhy.causal_identifier import IdentifiedEstimand
 
 
 class PropensityScoreEstimator(CausalEstimator):
@@ -22,19 +23,19 @@ class PropensityScoreEstimator(CausalEstimator):
 
     def __init__(
         self,
-        identified_estimand,
-        test_significance=False,
-        evaluate_effect_strength=False,
-        confidence_intervals=False,
-        num_null_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
-        num_simulations=CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI,
-        sample_size_fraction=CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION,
-        confidence_level=CausalEstimator.DEFAULT_CONFIDENCE_LEVEL,
-        need_conditional_estimates="auto",
-        num_quantiles_to_discretize_cont_cols=CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
-        propensity_score_model=None,
-        recalculate_propensity_score=True,
-        propensity_score_column="propensity_score",
+        identified_estimand: IdentifiedEstimand,
+        test_significance: bool = False,
+        evaluate_effect_strength: bool = False,
+        confidence_intervals: bool = False,
+        num_null_simulations: int = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
+        num_simulations: int = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI,
+        sample_size_fraction: int = CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION,
+        confidence_level: float = CausalEstimator.DEFAULT_CONFIDENCE_LEVEL,
+        need_conditional_estimates: Union[bool, str] = "auto",
+        num_quantiles_to_discretize_cont_cols: int = CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
+        propensity_score_model: Optional[Any] = None,
+        recalculate_propensity_score: bool = True,
+        propensity_score_column: str = "propensity_score",
         **kwargs,
     ):
         """
