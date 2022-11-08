@@ -201,3 +201,4 @@ smv_tag_whitelist = create_version_filter("v0\.[0-8](\..*)?")
 # print("pydata - version filter", smv_tag_whitelist)
 smv_branch_whitelist = r"^main$"
 smv_released_pattern = r"refs/tags/v.*"
+smv_prefer_remote_refs = True
