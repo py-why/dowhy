@@ -5,16 +5,17 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'G-B139P18WHM');
-</script>
-    <title>Sensitivity Analysis for Linear Regression Models &#8212; DoWhy  documentation</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Sensitivity Analysis for Regression Models &#8212; DoWhy  documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -43,6 +44,7 @@
     <script src="../_static/underscore.js"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/clipboard.min.js"></script>
     <script src="../_static/copybutton.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -144,34 +146,6 @@
       
       <div class="navbar-end-item">
         
-<div class="dropdown" id="version_switcher">
-    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
-        main-branch
-        <span class="caret"></span>
-    </button>
-    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
-        <dl>
-            <dt>Releases</dt>
-            <!-- hard-coding the old versions, as no further old version will be added -->
-            <!-- It would be nice if this opened the same page in an older version, but that seems to be overkill
-                 right now. Therefore defaulting to the starting page (index). -->
-            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
-            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
-            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
-            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
-            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
-            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
-            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
-            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
-            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
-            <dd><a href="/dowhy/v0.1-alpha/index.html">v0.1-alpha</a></dd>
-        </dl>
-        <dl>
-            <dt>Branches</dt>
-            <dd><a href="sensitivity_analysis_testing.html">main</a></dd>
-        </dl>
-    </div>
-</div>
       </div>
       
     </div>
@@ -240,23 +214,21 @@
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#Step-6:-Refutation-and-Sensitivity-Analysis">
-   Step 6: Refutation and Sensitivity Analysis
+  <a class="reference internal nav-link" href="#Step-6a:-Refutation-and-Sensitivity-Analysis---Method-1">
+   Step 6a: Refutation and Sensitivity Analysis - Method 1
   </a>
   <ul class="nav section-nav flex-column">
    <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#Parameter-List-for-plot-function">
      Parameter List for plot function
     </a>
-    <ul class="nav section-nav flex-column">
-     <li class="toc-h4 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#Sensitivity-Analysis-for-dataset-with-no-confounders">
-       Sensitivity Analysis for dataset with no confounders
-      </a>
-     </li>
-    </ul>
    </li>
   </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Step-6b:-Refutation-and-Sensitivity-Analysis---Method-2">
+   Step 6b: Refutation and Sensitivity Analysis - Method 2
+  </a>
  </li>
 </ul>
 
@@ -533,11 +505,13 @@ div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
 </style>
-<section id="Sensitivity-Analysis-for-Linear-Regression-Models">
-<h1>Sensitivity Analysis for Linear Regression Models<a class="headerlink" href="#Sensitivity-Analysis-for-Linear-Regression-Models" title="Permalink to this heading"></a></h1>
-<p>Sensitivity analysis helps us examine how sensitive a result is against the possibility of unobserved confounding. The current method only supports linear regression estimator. The partial R^2 of treatment with outcome shows how strongly confounders explaining all the residual outcome variation would have to be associated with the treatment to eliminate the estimated effect. The robustness value measures the minimum strength of association unobserved confounding should have with both treatment
-and outcome in order to change the conclusions. Robustness value close to 1 means the treatment effect can handle strong confounders explaining almost all residual variation of the treatment and the outcome. Robustness value close to 0 means that even very weak confounders can also change the results. Benchmarking examines the sensitivity of causal inferences to plausible strengths of the omitted confounders. This method is based on
-<a class="reference external" href="https://carloscinelli.com/files/Cinelli%20and%20Hazlett%20(2020)%20-%20Making%20Sense%20of%20Sensitivity.pdf">https://carloscinelli.com/files/Cinelli%20and%20Hazlett%20(2020)%20-%20Making%20Sense%20of%20Sensitivity.pdf</a></p>
+<section id="Sensitivity-Analysis-for-Regression-Models">
+<h1>Sensitivity Analysis for Regression Models<a class="headerlink" href="#Sensitivity-Analysis-for-Regression-Models" title="Permalink to this heading"></a></h1>
+<p>Sensitivity analysis helps us examine how sensitive a result is against the possibility of unobserved confounding. Two methods are implemented: 1. <a class="reference external" href="https://carloscinelli.com/files/Cinelli%20and%20Hazlett%20(2020)%20-%20Making%20Sense%20of%20Sensitivity.pdf">Cinelli &amp; Hazlett’s robustness value</a> - This method only supports linear regression estimator. - The partial R^2 of treatment with outcome shows how strongly confounders explaining all the residual outcome variation would have to be
+associated with the treatment to eliminate the estimated effect. - The robustness value measures the minimum strength of association unobserved confounding should have with both treatment and outcome in order to change the conclusions. - Robustness value close to 1 means the treatment effect can handle strong confounders explaining almost all residual variation of the treatment and the outcome. - Robustness value close to 0 means that even very weak confounders can also change the results. -
+Benchmarking examines the sensitivity of causal inferences to plausible strengths of the omitted confounders. - This method is based on <a class="reference external" href="https://carloscinelli.com/files/Cinelli%20and%20Hazlett%20(2020)%20-%20Making%20Sense%20of%20Sensitivity.pdf">https://carloscinelli.com/files/Cinelli%20and%20Hazlett%20(2020)%20-%20Making%20Sense%20of%20Sensitivity.pdf</a> 2. <a class="reference external" href="https://dash.harvard.edu/bitstream/handle/1/36874927/EValue_FinalSubmission.pdf">Ding &amp; VanderWeele’s E-Value</a> - This method supports linear and logistic regression. - The E-value is the minimum strength of association on the risk ratio scale that
+an unmeasured confounder would need to have with both the treatment and the outcome, conditional on the measured covariates, to fully explain away a specific treatment-outcome association. - The minimum E-value is 1, which means that no unmeasured confounding is needed to explain away the observed association (i.e. the confidence interval crosses the null). - Higher E-values mean that stronger unmeasured confounding is needed to explain away the observed association. There is no maximum E-value.
+- <a class="reference external" href="https://arxiv.org/abs/2011.07030">McGowan &amp; Greevy Jr’s</a> benchmarks the E-value against the measured confounders.</p>
 <section id="Step-1:-Load-required-packages">
 <h2>Step 1: Load required packages<a class="headerlink" href="#Step-1:-Load-required-packages" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
@@ -856,15 +830,15 @@ and outcome in order to change the conclusions. Robustness value close to 1 mean
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Estimand type: nonparametric-ate
+Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ### Estimand : 1
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W5,W3,W1,W2,W6])
+─────(E[y|W0,W6,W5,W1,W2,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W5,W3,W1,W2,W6,U) = P(y|v0,W0,W5,W3,W1,W2,W6)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W6,W5,W1,W2,W3,U) = P(y|v0,W0,W6,W5,W1,W2,W3)
 
 ### Estimand : 2
 Estimand name: iv
@@ -897,29 +871,29 @@ No such variable(s) found!
 *** Causal Estimate ***
 
 ## Identified estimand
-Estimand type: nonparametric-ate
+Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ### Estimand : 1
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W5,W3,W1,W2,W6])
+─────(E[y|W0,W6,W5,W1,W2,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W5,W3,W1,W2,W6,U) = P(y|v0,W0,W5,W3,W1,W2,W6)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W6,W5,W1,W2,W3,U) = P(y|v0,W0,W6,W5,W1,W2,W3)
 
 ## Realized estimand
-b: y~v0+W0+W5+W3+W1+W2+W6
+b: y~v0+W0+W6+W5+W1+W2+W3
 Target units: ate
 
 ## Estimate
-Mean value: 10.697677486880917
+Mean value: 10.69767748688092
 
 </pre></div></div>
 </div>
 </section>
-<section id="Step-6:-Refutation-and-Sensitivity-Analysis">
-<h2>Step 6: Refutation and Sensitivity Analysis<a class="headerlink" href="#Step-6:-Refutation-and-Sensitivity-Analysis" title="Permalink to this heading"></a></h2>
-<p>identified_estimand: An instance of the identifiedEstimand class that provides the information with respect to which causal pathways are employed when the treatment effects the outcome estimate: An instance of CausalEstimate class. The estimate obtained from the estimator for the original data. method_name: Refutation method name simulated_method_name: “linear-partial-R2” for Linear Sensitivity Analysis benchmark_common_causes: Name of the covariates used to bound the strengths of unobserved
+<section id="Step-6a:-Refutation-and-Sensitivity-Analysis---Method-1">
+<h2>Step 6a: Refutation and Sensitivity Analysis - Method 1<a class="headerlink" href="#Step-6a:-Refutation-and-Sensitivity-Analysis---Method-1" title="Permalink to this heading"></a></h2>
+<p>identified_estimand: An instance of the identifiedEstimand class that provides the information with respect to which causal pathways are employed when the treatment effects the outcome estimate: An instance of CausalEstimate class. The estimate obtained from the estimator for the original data. method_name: Refutation method name simulation_method: “linear-partial-R2” for Linear Sensitivity Analysis benchmark_common_causes: Name of the covariates used to bound the strengths of unobserved
 confounder percent_change_estimate: It is the percentage of reduction of treatment estimate that could alter the results (default = 1) if percent_change_estimate = 1, the robustness value describes the strength of association of confounders with treatment and outcome in order to reduce the estimate by 100% i.e bring it down to 0. confounder_increases_estimate: confounder_increases_estimate = True implies that confounder increases the absolute value of estimate and vice versa. Default is
 confounder_increases_estimate = False i.e. the considered confounders pull estimate towards zero effect_fraction_on_treatment: Strength of association between unobserved confounder and treatment compared to benchmark covariate effect_fraction_on_outcome: Strength of association between unobserved confounder and outcome compared to benchmark covariate null_hypothesis_effect: assumed effect under the null hypothesis (default = 0) plot_estimate: Generate contour plot for estimate while performing
 sensitivity analysis. (default = True). To override the setting, set plot_estimate = False.</p>
@@ -929,7 +903,7 @@ sensitivity analysis. (default = True). To override the setting, set plot_estima
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span> <span class="p">,</span>
                                <span class="n">method_name</span> <span class="o">=</span> <span class="s2">&quot;add_unobserved_common_cause&quot;</span><span class="p">,</span>
-                               <span class="n">simulated_method_name</span> <span class="o">=</span> <span class="s2">&quot;linear-partial-R2&quot;</span><span class="p">,</span>
+                               <span class="n">simulation_method</span> <span class="o">=</span> <span class="s2">&quot;linear-partial-R2&quot;</span><span class="p">,</span>
                                <span class="n">benchmark_common_causes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;W3&quot;</span><span class="p">],</span>
                                <span class="n">effect_fraction_on_treatment</span> <span class="o">=</span> <span class="p">[</span> <span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
                               <span class="p">)</span>
@@ -958,14 +932,14 @@ sensitivity analysis. (default = True). To override the setting, set plot_estima
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;estimate&#39;: 10.697677486880917,
- &#39;standard_error&#39;: 0.5938735661282948,
+{&#39;estimate&#39;: 10.69767748688092,
+ &#39;standard_error&#39;: 0.5938735661282951,
  &#39;degree of freedom&#39;: 492,
- &#39;t_statistic&#39;: 18.013392238727615,
- &#39;r2yt_w&#39;: 0.39741498372666795,
- &#39;partial_f2&#39;: 0.6595168698094559,
+ &#39;t_statistic&#39;: 18.01339223872761,
+ &#39;r2yt_w&#39;: 0.39741498372666784,
+ &#39;partial_f2&#39;: 0.6595168698094557,
  &#39;robustness_value&#39;: 0.5467445572181008,
- &#39;robustness_value_alpha&#39;: 0.5076289101030925}
+ &#39;robustness_value_alpha&#39;: 0.5076289101030924}
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1081,14 +1055,14 @@ position of the legend (default = (1.6, 0.6))</p>
 Sensitivity Analysis to Unobserved Confounding using R^2 paramterization
 
 Unadjusted Estimates of Treatment [&#39;v0&#39;] :
-Coefficient Estimate : 10.697677486880917
+Coefficient Estimate : 10.69767748688092
 Degree of Freedom : 492
-Standard Error : 0.5938735661282948
-t-value : 18.013392238727615
-F^2 value : 0.6595168698094559
+Standard Error : 0.5938735661282951
+t-value : 18.01339223872761
+F^2 value : 0.6595168698094557
 
 Sensitivity Statistics :
-Partial R2 of treatment with outcome : 0.39741498372666795
+Partial R2 of treatment with outcome : 0.39741498372666784
 Robustness Value : 0.5467445572181008
 
 Interpretation of results :
@@ -1100,11 +1074,188 @@ If confounders explained 100% of the residual variance of the outcome, they woul
 
 </pre></div></div>
 </div>
-<section id="Sensitivity-Analysis-for-dataset-with-no-confounders">
-<h4>Sensitivity Analysis for dataset with no confounders<a class="headerlink" href="#Sensitivity-Analysis-for-dataset-with-no-confounders" title="Permalink to this heading"></a></h4>
+</section>
+</section>
+<section id="Step-6b:-Refutation-and-Sensitivity-Analysis---Method-2">
+<h2>Step 6b: Refutation and Sensitivity Analysis - Method 2<a class="headerlink" href="#Step-6b:-Refutation-and-Sensitivity-Analysis---Method-2" title="Permalink to this heading"></a></h2>
+<p>simulated_method_name: “e-value” for E-value</p>
+<ul class="simple">
+<li><p>num_points_per_contour: number of points to calculate and plot for each contour (Default = 200)</p></li>
+<li><p>plot_size: size of the plot (Default = (6.4,4.8))</p></li>
+<li><p>contour_colors: colors for point estimate and confidence limit contour (Default = [“blue”, “red])</p></li>
+<li><p>xy_limit: plot’s maximum x and y value. Default is 2 x E-value. (Default = None)</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span> <span class="p">,</span>
+                               <span class="n">method_name</span> <span class="o">=</span> <span class="s2">&quot;add_unobserved_common_cause&quot;</span><span class="p">,</span>
+                               <span class="n">simulation_method</span> <span class="o">=</span> <span class="s2">&quot;e-value&quot;</span><span class="p">,</span>
+                              <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_sensitivity_analysis_testing_22_0.png" src="../_images/example_notebooks_sensitivity_analysis_testing_22_0.png" />
+</div>
+</div>
+<ul class="simple">
+<li><p>The x axis shows hypothetical values of the risk ratio of an unmeasured confounder at different levels of the treatment. The y axis shows hypothetical values of the risk ratio of the outcome at different levels of the confounder.</p></li>
+<li><p>Points lying on or above the blue contour represent combinations of these risk ratios that would tip (i.e. explain away) the point estimate.</p></li>
+<li><p>Points lying on or above the red contour represent combinations of these risk ratios that would tip (i.e. explain away) the confidence interval.</p></li>
+<li><p>The green points are Observed Covariate E-values. These measure how much the limiting bound of the confidence interval changes on the E-value scale after a specific covariate is dropped and the estimator is re-fit. The covariate that corresponds to the largest Observed Covariate E-value is labeled.</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">stats</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;converted_estimate&#39;: 2.457447065735423,
+ &#39;converted_lower_ci&#39;: 2.2288567270043145,
+ &#39;converted_upper_ci&#39;: 2.7094815057979953,
+ &#39;evalue_estimate&#39;: 4.349958364289864,
+ &#39;evalue_lower_ci&#39;: 3.883832733630414,
+ &#39;evalue_upper_ci&#39;: None}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">benchmarking_results</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>converted_est</th>
+      <th>converted_lower_ci</th>
+      <th>converted_upper_ci</th>
+      <th>observed_covariate_e_value</th>
+    </tr>
+    <tr>
+      <th>dropped_covariate</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>W1</th>
+      <td>2.992523</td>
+      <td>2.666604</td>
+      <td>3.358276</td>
+      <td>1.681140</td>
+    </tr>
+    <tr>
+      <th>W6</th>
+      <td>2.687656</td>
+      <td>2.446341</td>
+      <td>2.952774</td>
+      <td>1.424835</td>
+    </tr>
+    <tr>
+      <th>W3</th>
+      <td>2.692807</td>
+      <td>2.422402</td>
+      <td>2.993396</td>
+      <td>1.394043</td>
+    </tr>
+    <tr>
+      <th>W0</th>
+      <td>2.599868</td>
+      <td>2.368550</td>
+      <td>2.853776</td>
+      <td>1.320751</td>
+    </tr>
+    <tr>
+      <th>W5</th>
+      <td>2.553701</td>
+      <td>2.315245</td>
+      <td>2.816716</td>
+      <td>1.239411</td>
+    </tr>
+    <tr>
+      <th>W2</th>
+      <td>2.473648</td>
+      <td>2.217699</td>
+      <td>2.759138</td>
+      <td>1.076142</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">refute</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Sensitivity Analysis to Unobserved Confounding using the E-value
+
+Unadjusted Estimates of Treatment: v0
+Estimate (converted to risk ratio scale): 2.457447065735423
+Lower 95% CI (converted to risk ratio scale): 2.2288567270043145
+Upper 95% CI (converted to risk ratio scale): 2.7094815057979953
+
+Sensitivity Statistics:
+E-value for point estimate: 4.349958364289864
+E-value for lower 95% CI: 3.883832733630414
+E-value for upper 95% CI: None
+Largest Observed Covariate E-value: 1.6811401167656754 (W1)
+
+Interpretation of results:
+Unmeasured confounder(s) would have to be associated with a 4.35-fold increase in the risk of y, and must be 4.35 times more prevalent in v0, to explain away the observed point estimate.
+Unmeasured confounder(s) would have to be associated with a 3.88-fold increase in the risk of y, and must be 3.88 times more prevalent in v0, to explain away the observed confidence interval.
+</pre></div></div>
+</div>
 <p>We now run the sensitivity analysis for the same dataset but without dropping any variable. We get a robustness value goes from 0.55 to 0.95 which means that treatment effect can handle strong confounders explaining almost all residual variation of the treatment and the outcome.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
@@ -1119,7 +1270,7 @@ If confounders explained 100% of the residual variance of the outcome, they woul
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
@@ -1140,11 +1291,11 @@ If confounders explained 100% of the residual variance of the outcome, they woul
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_sensitivity_analysis_testing_23_0.png" src="../_images/example_notebooks_sensitivity_analysis_testing_23_0.png" />
+<img alt="../_images/example_notebooks_sensitivity_analysis_testing_29_0.png" src="../_images/example_notebooks_sensitivity_analysis_testing_29_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1243,7 +1394,7 @@ If confounders explained 100% of the residual variance of the outcome, they woul
 </div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1256,15 +1407,15 @@ If confounders explained 100% of the residual variance of the outcome, they woul
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Estimand type: nonparametric-ate
+Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ### Estimand : 1
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W5,W3,W4,W1,W2,W6])
+─────(E[y|W0,W6,W5,W1,W2,W4,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W5,W3,W4,W1,W2,W6,U) = P(y|v0,W0,W5,W3,W4,W1,W2,W6)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W6,W5,W1,W2,W4,W3,U) = P(y|v0,W0,W6,W5,W1,W2,W4,W3)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1277,7 +1428,7 @@ No such variable(s) found!
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">)</span>
@@ -1293,32 +1444,32 @@ No such variable(s) found!
 *** Causal Estimate ***
 
 ## Identified estimand
-Estimand type: nonparametric-ate
+Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ### Estimand : 1
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W5,W3,W4,W1,W2,W6])
+─────(E[y|W0,W6,W5,W1,W2,W4,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W5,W3,W4,W1,W2,W6,U) = P(y|v0,W0,W5,W3,W4,W1,W2,W6)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W6,W5,W1,W2,W4,W3,U) = P(y|v0,W0,W6,W5,W1,W2,W4,W3)
 
 ## Realized estimand
-b: y~v0+W0+W5+W3+W4+W1+W2+W6
+b: y~v0+W0+W6+W5+W1+W2+W4+W3
 Target units: ate
 
 ## Estimate
-Mean value: 10.0819243755883
+Mean value: 10.081924375588288
 
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span> <span class="p">,</span>
                                <span class="n">method_name</span> <span class="o">=</span> <span class="s2">&quot;add_unobserved_common_cause&quot;</span><span class="p">,</span>
-                               <span class="n">simulated_method_name</span> <span class="o">=</span> <span class="s2">&quot;linear-partial-R2&quot;</span><span class="p">,</span>
+                               <span class="n">simulation_method</span> <span class="o">=</span> <span class="s2">&quot;linear-partial-R2&quot;</span><span class="p">,</span>
                                <span class="n">benchmark_common_causes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;W3&quot;</span><span class="p">],</span>
                                <span class="n">effect_fraction_on_treatment</span> <span class="o">=</span> <span class="p">[</span> <span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
 </pre></div>
@@ -1339,11 +1490,11 @@ Mean value: 10.0819243755883
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_sensitivity_analysis_testing_26_1.png" src="../_images/example_notebooks_sensitivity_analysis_testing_26_1.png" />
+<img alt="../_images/example_notebooks_sensitivity_analysis_testing_32_1.png" src="../_images/example_notebooks_sensitivity_analysis_testing_32_1.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_type</span> <span class="o">=</span> <span class="s1">&#39;t-value&#39;</span><span class="p">)</span>
@@ -1354,11 +1505,11 @@ Mean value: 10.0819243755883
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_sensitivity_analysis_testing_27_0.png" src="../_images/example_notebooks_sensitivity_analysis_testing_27_0.png" />
+<img alt="../_images/example_notebooks_sensitivity_analysis_testing_33_0.png" src="../_images/example_notebooks_sensitivity_analysis_testing_33_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">refute</span><span class="p">)</span>
@@ -1373,9 +1524,9 @@ Mean value: 10.0819243755883
 Sensitivity Analysis to Unobserved Confounding using R^2 paramterization
 
 Unadjusted Estimates of Treatment [&#39;v0&#39;] :
-Coefficient Estimate : 10.0819243755883
+Coefficient Estimate : 10.081924375588288
 Degree of Freedom : 491
-Standard Error : 0.1044622954342475
+Standard Error : 0.10446229543424736
 t-value : 96.51256784735546
 F^2 value : 18.970826379817495
 
@@ -1393,7 +1544,7 @@ If confounders explained 100% of the residual variance of the outcome, they woul
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">stats</span>
@@ -1401,13 +1552,13 @@ If confounders explained 100% of the residual variance of the outcome, they woul
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;estimate&#39;: 10.0819243755883,
- &#39;standard_error&#39;: 0.1044622954342475,
+{&#39;estimate&#39;: 10.081924375588288,
+ &#39;standard_error&#39;: 0.10446229543424736,
  &#39;degree of freedom&#39;: 491,
  &#39;t_statistic&#39;: 96.51256784735546,
  &#39;r2yt_w&#39;: 0.9499269594066173,
@@ -1417,7 +1568,7 @@ If confounders explained 100% of the residual variance of the outcome, they woul
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">benchmarking_results</span>
@@ -1425,7 +1576,7 @@ If confounders explained 100% of the residual variance of the outcome, they woul
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1491,24 +1642,6 @@ If confounders explained 100% of the residual variance of the outcome, they woul
 </table>
 </div></div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
-</div>
-</section>
-</section>
 </section>
 </section>
 
@@ -1543,7 +1676,7 @@ If confounders explained 100% of the residual variance of the outcome, they woul
   
   <div class="footer-item">
     <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
   </div>
   

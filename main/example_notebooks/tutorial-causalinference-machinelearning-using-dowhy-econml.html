@@ -5,15 +5,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'G-B139P18WHM');
-</script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
     <title>Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML) &#8212; DoWhy  documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
@@ -43,6 +44,7 @@
     <script src="../_static/underscore.js"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/clipboard.min.js"></script>
     <script src="../_static/copybutton.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -144,34 +146,6 @@
       
       <div class="navbar-end-item">
         
-<div class="dropdown" id="version_switcher">
-    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
-        main-branch
-        <span class="caret"></span>
-    </button>
-    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
-        <dl>
-            <dt>Releases</dt>
-            <!-- hard-coding the old versions, as no further old version will be added -->
-            <!-- It would be nice if this opened the same page in an older version, but that seems to be overkill
-                 right now. Therefore defaulting to the starting page (index). -->
-            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
-            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
-            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
-            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
-            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
-            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
-            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
-            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
-            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
-            <dd><a href="/dowhy/v0.1-alpha/index.html">v0.1-alpha</a></dd>
-        </dl>
-        <dl>
-            <dt>Branches</dt>
-            <dd><a href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">main</a></dd>
-        </dl>
-    </div>
-</div>
       </div>
       
     </div>
@@ -799,15 +773,15 @@ on estimating the effect of the instrument on the action and the outcome to esti
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Estimand type: nonparametric-ate
+Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ### Estimand : 1
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W4,W1,W0,W2,W3])
+─────(E[y|W0,W2,W4,W3,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W1,W0,W2,W3,U) = P(y|v0,W4,W1,W0,W2,W3)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W4,W3,W1,U) = P(y|v0,W0,W2,W4,W3,W1)
 
 ### Estimand : 2
 Estimand name: iv
@@ -815,9 +789,9 @@ Estimand expression:
  ⎡                              -1⎤
  ⎢    d        ⎛    d          ⎞  ⎥
 E⎢─────────(y)⋅⎜─────────([v₀])⎟  ⎥
- ⎣d[Z₀  Z₁]    ⎝d[Z₀  Z₁]      ⎠  ⎦
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
-Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
+ ⎣d[Z₁  Z₀]    ⎝d[Z₁  Z₀]      ⎠  ⎦
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z1,Z0})
+Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→{v0}, then ¬({Z1,Z0}→y)
 
 ### Estimand : 3
 Estimand name: frontdoor
@@ -848,22 +822,22 @@ No such variable(s) found!
 *** Causal Estimate ***
 
 ## Identified estimand
-Estimand type: nonparametric-ate
+Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ### Estimand : 1
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W4,W1,W0,W2,W3])
+─────(E[y|W0,W2,W4,W3,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W1,W0,W2,W3,U) = P(y|v0,W4,W1,W0,W2,W3)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W4,W3,W1,U) = P(y|v0,W0,W2,W4,W3,W1)
 
 ## Realized estimand
-b: y~v0+W4+W1+W0+W2+W3
+b: y~v0+W0+W2+W4+W3+W1
 Target units: ate
 
 ## Estimate
-Mean value: 9.974233786775054
+Mean value: 9.999117948018224
 
 </pre></div></div>
 </div>
@@ -887,15 +861,6 @@ Mean value: 9.974233786775054
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-2022-09-14 20:30:13.043622: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library &#39;libcudart.so.11.0&#39;; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
-2022-09-14 20:30:13.043669: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
@@ -904,23 +869,24 @@ Mean value: 9.974233786775054
 *** Causal Estimate ***
 
 ## Identified estimand
-Estimand type: nonparametric-ate
+Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ### Estimand : 1
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W4,W1,W0,W2,W3])
+─────(E[y|W0,W2,W4,W3,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W1,W0,W2,W3,U) = P(y|v0,W4,W1,W0,W2,W3)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W4,W3,W1,U) = P(y|v0,W0,W2,W4,W3,W1)
 
 ## Realized estimand
-b: y~v0+W4+W1+W0+W2+W3 |
+b: y~v0+W0+W2+W4+W3+W1 |
 Target units: ate
 
 ## Estimate
-Mean value: 9.974242029209417
-Effect estimates: [9.97424203 9.97424203 9.97424203 ... 9.97424203 9.97424203 9.97424203]
+Mean value: 10.046454005438829
+Effect estimates: [10.04645401 10.04645401 10.04645401 ... 10.04645401 10.04645401
+ 10.04645401]
 
 </pre></div></div>
 </div>
@@ -944,9 +910,9 @@ estimate value of 0 when the action variable is replaced by a random variable, i
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:9.974233786775054
-New effect:-0.0014167155775602408
-p value:0.8999999999999999
+Estimated effect:9.999117948018224
+New effect:-0.019299751745495836
+p value:0.8400000000000001
 
 </pre></div></div>
 </div>
@@ -998,11 +964,11 @@ than learning a new toolkit. The power of EconML is that you can now implement t
 <div class="output_area docutils container">
 <div class="highlight"><pre>
    Treatment    Outcome        w0         s        w1
-0  15.966844  32.549687  3.271607  9.696592 -0.558189
-1  19.303492  38.571849 -3.757233  0.214819 -0.818056
-2  13.244313  26.815493 -2.672999  8.151955  0.522413
-3  17.518274  34.898594 -3.407994  0.278237 -0.225372
-4  17.988075  35.924037  3.369757  3.793879  0.817239
+0   7.927167  14.893659  0.798491  4.789276  2.166760
+1   6.529459  13.008533 -0.358136  0.912385  0.603265
+2  21.550888  43.126068  3.955320  3.211376 -0.087631
+3  21.230450  42.894982 -3.928840  7.266758  0.053023
+4   9.003473  17.294999 -1.420817  0.671735  1.328455
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1045,15 +1011,15 @@ than learning a new toolkit. The power of EconML is that you can now implement t
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Estimand type: nonparametric-ate
+Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ### Estimand : 1
 Estimand name: backdoor
 Estimand expression:
      d
-────────────(E[Outcome|w0,w1])
+────────────(E[Outcome|w1,w0])
 d[Treatment]
-Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w0,w1,U) = P(Outcome|Treatment,w0,w1)
+Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w1,w0,U) = P(Outcome|Treatment,w1,w0)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1091,24 +1057,24 @@ No such variable(s) found!
 *** Causal Estimate ***
 
 ## Identified estimand
-Estimand type: nonparametric-ate
+Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ### Estimand : 1
 Estimand name: backdoor
 Estimand expression:
      d
-────────────(E[Outcome|w0,w1])
+────────────(E[Outcome|w1,w0])
 d[Treatment]
-Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w0,w1,U) = P(Outcome|Treatment,w0,w1)
+Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w1,w0,U) = P(Outcome|Treatment,w1,w0)
 
 ## Realized estimand
-b: Outcome~Treatment+w0+w1
+b: Outcome~Treatment+w1+w0
 Target units: ate
 
 ## Estimate
-Mean value: 1.9992150011241874
+Mean value: 1.9992311912337413
 
-Causal Estimate is 1.9992150011241874
+Causal Estimate is 1.9992311912337413
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1149,23 +1115,23 @@ Causal Estimate is 1.9992150011241874
 *** Causal Estimate ***
 
 ## Identified estimand
-Estimand type: nonparametric-ate
+Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ### Estimand : 1
 Estimand name: backdoor
 Estimand expression:
      d
-────────────(E[Outcome|w0,w1])
+────────────(E[Outcome|w1,w0])
 d[Treatment]
-Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w0,w1,U) = P(Outcome|Treatment,w0,w1)
+Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w1,w0,U) = P(Outcome|Treatment,w1,w0)
 
 ## Realized estimand
-b: Outcome~Treatment+w0+w1 |
+b: Outcome~Treatment+w1+w0 |
 Target units: ate
 
 ## Estimate
-Mean value: 1.1484551505161915
-Effect estimates: [1.14845515 1.14845515 1.14845515 ... 1.14845515 1.14845515 1.14845515]
+Mean value: 1.0851420212239256
+Effect estimates: [1.08514202 1.08514202 1.08514202 ... 1.08514202 1.08514202 1.08514202]
 
 </pre></div></div>
 </div>
@@ -1188,9 +1154,9 @@ Effect estimates: [1.14845515 1.14845515 1.14845515 ... 1.14845515 1.14845515 1.
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a random common cause
-Estimated effect:1.1484551505161915
-New effect:1.1758900816469882
-p value:0.24
+Estimated effect:1.0851420212239256
+New effect:1.0880344943881475
+p value:0.88
 
 </pre></div></div>
 </div>
@@ -1211,9 +1177,9 @@ p value:0.24
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:1.1484551505161915
-New effect:3.9988249044815106e-06
-p value:0.49696242612594904
+Estimated effect:1.0851420212239256
+New effect:-0.00010433511511411461
+p value:0.41973328971841406
 
 </pre></div></div>
 </div>
@@ -1309,7 +1275,7 @@ refutation methods that can check the robustness of the estimate.</p>
   
   <div class="footer-item">
     <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
   </div>
   

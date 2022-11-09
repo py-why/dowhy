@@ -5,15 +5,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'G-B139P18WHM');
-</script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
     <title>Introduction &#8212; DoWhy  documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
@@ -43,6 +44,7 @@
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/clipboard.min.js"></script>
     <script src="../../_static/copybutton.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -144,34 +146,6 @@
       
       <div class="navbar-end-item">
         
-<div class="dropdown" id="version_switcher">
-    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
-        main-branch
-        <span class="caret"></span>
-    </button>
-    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
-        <dl>
-            <dt>Releases</dt>
-            <!-- hard-coding the old versions, as no further old version will be added -->
-            <!-- It would be nice if this opened the same page in an older version, but that seems to be overkill
-                 right now. Therefore defaulting to the starting page (index). -->
-            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
-            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
-            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
-            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
-            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
-            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
-            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
-            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
-            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
-            <dd><a href="/dowhy/v0.1-alpha/index.html">v0.1-alpha</a></dd>
-        </dl>
-        <dl>
-            <dt>Branches</dt>
-            <dd><a href="introduction.html">main</a></dd>
-        </dl>
-    </div>
-</div>
       </div>
       
     </div>
@@ -354,6 +328,29 @@
    </li>
   </ul>
  </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#typical-usage-of-the-dowhy-gcm-package">
+   Typical usage of the
+   <code class="docutils literal notranslate">
+    <span class="pre">
+     dowhy.gcm
+    </span>
+   </code>
+   package
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#modeling-an-scm">
+     Modeling an SCM
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#answering-a-causal-query-with-confidence-intervals">
+     Answering a causal query with confidence intervals
+    </a>
+   </li>
+  </ul>
+ </li>
 </ul>
 
 </nav>
@@ -382,16 +379,6 @@ undergo breaking changes in the future. It will be forming a part of a joint,
 <p>The <code class="docutils literal notranslate"><span class="pre">dowhy.gcm</span></code> package provides a variety of ways to answer causal questions and we’ll go through them in detail in
 section <a class="reference internal" href="answering_causal_questions/index.html"><span class="doc">Answering Causal Questions</span></a>. However, before diving into them, let’s understand
 the basic building blocks and usage patterns it is built upon.</p>
-<p>If you find the gcm package useful for your work, please cite us as follows:</p>
-<p>Bibtex:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@article</span><span class="p">{</span><span class="n">dowhy_gcm</span><span class="p">,</span>
-  <span class="n">author</span> <span class="o">=</span> <span class="p">{</span><span class="n">Bl</span><span class="p">{</span>\<span class="s2">&quot;o}baum, Patrick and G{</span><span class="se">\&quot;</span><span class="s2">o}tz, Peter and Budhathoki, Kailash and Mastakouri, Atalanti A. and Janzing, Dominik},</span>
-  <span class="n">title</span> <span class="o">=</span> <span class="p">{</span><span class="n">DoWhy</span><span class="o">-</span><span class="n">GCM</span><span class="p">:</span> <span class="n">An</span> <span class="n">extension</span> <span class="n">of</span> <span class="n">DoWhy</span> <span class="k">for</span> <span class="n">causal</span> <span class="n">inference</span> <span class="ow">in</span> <span class="n">graphical</span> <span class="n">causal</span> <span class="n">models</span><span class="p">},</span>
-  <span class="n">journal</span><span class="o">=</span><span class="p">{</span><span class="n">arXiv</span> <span class="n">preprint</span> <span class="n">arXiv</span><span class="p">:</span><span class="mf">2206.06821</span><span class="p">},</span>
-  <span class="n">year</span><span class="o">=</span><span class="p">{</span><span class="mi">2022</span><span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-</div>
 <section id="the-basic-building-blocks">
 <h2>The basic building blocks<a class="headerlink" href="#the-basic-building-blocks" title="Permalink to this heading"></a></h2>
 <p>All main features of the GCM-based inference in DoWhy are built around the concept of <strong>graphical causal models</strong>. A
@@ -530,6 +517,49 @@ relationships again, even though we didn’t know them before.</p>
 <p>This intervention says: “I’ll ignore any causal effects of X on Y, and set every value of Y
 to 2.34.” So the distribution of X will remain unchanged, whereas values of Y will be at a fixed
 value and Z will respond according to its causal model.</p>
+<p>These are the basic steps that need to happen. While we can run these steps explicitly, often they get
+executed as part of other steps, e.g. when fitting and re-fitting as part of computing confidence
+intervals. The next section therefore dives into a more typical usage pattern of the <code class="docutils literal notranslate"><span class="pre">dowhy.gcm</span></code> package.</p>
+</section>
+</section>
+<section id="typical-usage-of-the-dowhy-gcm-package">
+<h2>Typical usage of the <code class="docutils literal notranslate"><span class="pre">dowhy.gcm</span></code> package<a class="headerlink" href="#typical-usage-of-the-dowhy-gcm-package" title="Permalink to this heading"></a></h2>
+<p>In practice, we may not execute the steps we’ve learned above explicitly and in this order, but they
+get called by other abstractions. E.g. we usually want to use confidence intervals, when answering
+causal questions, to quantify our confidence in the results. In this case, <code class="docutils literal notranslate"><span class="pre">fit</span></code> will be called on
+behalf of us, but we won’t call it directly.</p>
+<section id="modeling-an-scm">
+<h3>Modeling an SCM<a class="headerlink" href="#modeling-an-scm" title="Permalink to this heading"></a></h3>
+<p>The graph modeling is the same as in <a class="reference internal" href="#step-1-modeling-cause-effect-relationships-as-a-structural-causal-model-scm">Step 1: Modeling cause-effect relationships as a structural
+causal model (SCM)</a>. First we construct the causal graph:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">)]))</span> <span class="c1"># X → Y → Z</span>
+</pre></div>
+</div>
+</section>
+<section id="answering-a-causal-query-with-confidence-intervals">
+<h3>Answering a causal query with confidence intervals<a class="headerlink" href="#answering-a-causal-query-with-confidence-intervals" title="Permalink to this heading"></a></h3>
+<p>When we answer a causal query without computing its confidence intervals, what we effectively get,
+are point estimates. These are not very useful when trying to assess the confidence in our results.
+Instead of calling <code class="docutils literal notranslate"><span class="pre">fit</span></code> explicitly, we can achieve its execution by going through the API for
+confidence intervals. Let’s say we wanted to understand the direct arrow strengths between nodes and
+quantify our confidence in those results. This is how we would do it:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">strength_median</span><span class="p">,</span> <span class="n">strength_intervals</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">gcm</span><span class="o">.</span><span class="n">bootstrap_training_and_sampling</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">direct_arrow_strength</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                        <span class="n">causal_model</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                        <span class="n">bootstrap_training_data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                        <span class="n">target_node</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">strength_median</span><span class="p">,</span> <span class="n">strength_intervals</span>
+<span class="go">({(&#39;X&#39;, &#39;Y&#39;): 45.90886398636573, (&#39;Z&#39;, &#39;Y&#39;): 15.47129383737619},</span>
+<span class="go">{(&#39;X&#39;, &#39;Y&#39;): array([42.88319632, 50.43890079]), (&#39;Z&#39;, &#39;Y&#39;): array([13.44202416, 17.74266107])})</span>
+</pre></div>
+</div>
+<p>In this case, <code class="docutils literal notranslate"><span class="pre">fit</span></code> will be called within <code class="docutils literal notranslate"><span class="pre">bootstrap_training_and_sampling</span></code>, so there is no need
+to do this ourselves.</p>
+<p>The calling sequence of <code class="docutils literal notranslate"><span class="pre">confidence_intervals</span></code> and <code class="docutils literal notranslate"><span class="pre">bootstrap_training_and_sampling</span></code> is not
+trivial, but exploits the fact our APIs are composable. If not everything makes sense
+to you yet, we recommend to simply treat this calling sequence as a ready-to-use construct. Read:
+“Get confidence intervals via bootstrapping training and sampling of direct arrow strength”. For a
+deeper understanding of this construct, see section <a class="reference internal" href="estimating_confidence_intervals.html"><span class="doc">Estimating Confidence Intervals</span></a>.</p>
 <p>With this knowledge, we can now dive deep into the meaning and usages of causal queries in section
 <a class="reference internal" href="answering_causal_questions/index.html"><span class="doc">Answering Causal Questions</span></a>.</p>
 </section>
@@ -581,7 +611,7 @@ value and Z will respond according to its causal model.</p>
   
   <div class="footer-item">
     <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
   </div>
   

@@ -5,15 +5,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'G-B139P18WHM');
-</script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
     <title>DoWhy example on the Lalonde dataset &#8212; DoWhy  documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
@@ -43,6 +44,7 @@
     <script src="../_static/underscore.js"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/clipboard.min.js"></script>
     <script src="../_static/copybutton.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -146,34 +148,6 @@
       
       <div class="navbar-end-item">
         
-<div class="dropdown" id="version_switcher">
-    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
-        main-branch
-        <span class="caret"></span>
-    </button>
-    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
-        <dl>
-            <dt>Releases</dt>
-            <!-- hard-coding the old versions, as no further old version will be added -->
-            <!-- It would be nice if this opened the same page in an older version, but that seems to be overkill
-                 right now. Therefore defaulting to the starting page (index). -->
-            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
-            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
-            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
-            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
-            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
-            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
-            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
-            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
-            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
-            <dd><a href="/dowhy/v0.1-alpha/index.html">v0.1-alpha</a></dd>
-        </dl>
-        <dl>
-            <dt>Branches</dt>
-            <dd><a href="dowhy_lalonde_example.html">main</a></dd>
-        </dl>
-    </div>
-</div>
       </div>
       
     </div>
@@ -368,18 +342,18 @@
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#Run-DoWhy-analysis:-model,-identify,-estimate">
-   Run DoWhy analysis: model, identify, estimate
+  <a class="reference internal nav-link" href="#2.-Run-DoWhy-analysis:-model,-identify,-estimate">
+   2. Run DoWhy analysis: model, identify, estimate
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#Interpret-the-estimate">
-   Interpret the estimate
+  <a class="reference internal nav-link" href="#3.-Interpret-the-estimate">
+   3. Interpret the estimate
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#Sanity-check:-compare-to-manual-IPW-estimate">
-   Sanity check: compare to manual IPW estimate
+  <a class="reference internal nav-link" href="#4.-Sanity-check:-compare-to-manual-IPW-estimate">
+   4. Sanity check: compare to manual IPW estimate
   </a>
  </li>
 </ul>
@@ -660,7 +634,7 @@ div.rendered_html tbody tr:hover {
 <section id="DoWhy-example-on-the-Lalonde-dataset">
 <h1>DoWhy example on the Lalonde dataset<a class="headerlink" href="#DoWhy-example-on-the-Lalonde-dataset" title="Permalink to this heading"></a></h1>
 <p>Thanks to [&#64;mizuy](<a class="reference external" href="https://github.com/mizuy">https://github.com/mizuy</a>) for providing this example. Here we use the Lalonde dataset and apply IPW estimator to it.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -669,90 +643,57 @@ div.rendered_html tbody tr:hover {
 
 <span class="kn">import</span> <span class="nn">dowhy</span>
 <span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
-<span class="kn">from</span> <span class="nn">rpy2.robjects</span> <span class="kn">import</span> <span class="n">r</span> <span class="k">as</span> <span class="n">R</span>
-<span class="o">%</span><span class="k">load_ext</span> rpy2.ipython
-
-<span class="c1">#%R install.packages(&quot;Matching&quot;)</span>
-<span class="o">%</span><span class="k">R</span> library(Matching)
-<br/></pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-R[write to console]: Loading required package: MASS
-
-R[write to console]: ##
-##  Matching (Version 4.10-2, Build Date: 2022-04-13)
-##  See http://sekhon.berkeley.edu/matching for additional documentation.
-##  Please cite software as:
-##   Jasjeet S. Sekhon. 2011. ``Multivariate and Propensity Score Matching
-##   Software with Automated Balance Optimization: The Matching package for R.&#39;&#39;
-##   Journal of Statistical Software, 42(7): 1-52.
-##
-
-
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="output_area rendered_html docutils container">
-<span>StrVector with 10 elements.</span>
-<table>
-<tbody>
-  <tr>
-
-    <td>
-    'Matching'
-    </td>
-
-    <td>
-    'MASS'
-    </td>
-
-    <td>
-    'tools'
-    </td>
-
-    <td>
-    ...
-    </td>
-
-    <td>
-    'datasets'
-    </td>
-
-    <td>
-    'methods'
-    </td>
-
-    <td>
-    'base'
-    </td>
-
-  </tr>
-</tbody>
-</table></div>
 </div>
 <section id="1.-Load-the-data">
 <h2>1. Load the data<a class="headerlink" href="#1.-Load-the-data" title="Permalink to this heading"></a></h2>
+<table class="table">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>The following code for loading the Lalonde dataset was copied from
+<a class="reference external" href="https://github.com/wayfair/pylift/blob/5afc9088e96f25672423663f5c9b4bb889b4dfc0/examples/Lalonde/Lalonde_sample.ipynb?short_path=b1d451f#L94-L99">wayfair/pylift</a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><em>Copyright 2018, Wayfair, Inc.</em></p></td>
+</tr>
+<tr class="row-odd"><td><p>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</p></td>
+</tr>
+<tr class="row-even"><td><ol class="arabic simple">
+<li><p>Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</p></li>
+</ol>
+</td>
+</tr>
+<tr class="row-odd"><td><p>2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation
+and/or other materials provided with the distribution.</p></td>
+</tr>
+<tr class="row-even"><td><p><em>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</em></p></td>
+</tr>
+</tbody>
+</table>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">R</span> data(lalonde)
-<span class="o">%</span><span class="k">R</span> -o lalonde
-<span class="n">lalonde</span> <span class="o">=</span> <span class="n">lalonde</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="s1">&#39;treat&#39;</span><span class="p">:</span><span class="s1">&#39;bool&#39;</span><span class="p">},</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span><span class="o">,</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;treat&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="s1">&#39;educ&#39;</span><span class="p">,</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="s1">&#39;hisp&#39;</span><span class="p">,</span> <span class="s1">&#39;married&#39;</span><span class="p">,</span> <span class="s1">&#39;nodegr&#39;</span><span class="p">,</span><span class="s1">&#39;re74&#39;</span><span class="p">,</span><span class="s1">&#39;re75&#39;</span><span class="p">,</span><span class="s1">&#39;re78&#39;</span><span class="p">]</span>
+<span class="n">control</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;http://www.nber.org/~rdehejia/data/nswre74_control.txt&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;\s+&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="n">cols</span><span class="p">)</span>
+<span class="n">treated</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;http://www.nber.org/~rdehejia/data/nswre74_treated.txt&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;\s+&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="n">cols</span><span class="p">)</span>
+<span class="n">lalonde</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">control</span><span class="p">,</span> <span class="n">treated</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="s1">&#39;treat&#39;</span><span class="p">:</span><span class="s1">&#39;bool&#39;</span><span class="p">},</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">lalonde</span><span class="p">[</span><span class="s1">&#39;u74&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lalonde</span><span class="p">[</span><span class="s1">&#39;re74&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">lalonde</span><span class="p">[</span><span class="s1">&#39;u75&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lalonde</span><span class="p">[</span><span class="s1">&#39;re75&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </section>
-<section id="Run-DoWhy-analysis:-model,-identify,-estimate">
-<h2>Run DoWhy analysis: model, identify, estimate<a class="headerlink" href="#Run-DoWhy-analysis:-model,-identify,-estimate" title="Permalink to this heading"></a></h2>
+<section id="2.-Run-DoWhy-analysis:-model,-identify,-estimate">
+<h2>2. Run DoWhy analysis: model, identify, estimate<a class="headerlink" href="#2.-Run-DoWhy-analysis:-model,-identify,-estimate" title="Permalink to this heading"></a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -782,7 +723,7 @@ R[write to console]: ##
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Causal Estimate is 1639.811454120606
+Causal Estimate is 1639.8122827865673
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -802,10 +743,10 @@ Causal Estimate is 1639.811454120606
   <th>Method:</th>             <td>Least Squares</td>  <th>  F-statistic:       </th> <td>   6.743</td>
 </tr>
 <tr>
-  <th>Date:</th>             <td>Wed, 14 Sep 2022</td> <th>  Prob (F-statistic):</th>  <td>0.00973</td>
+  <th>Date:</th>             <td>Wed, 09 Nov 2022</td> <th>  Prob (F-statistic):</th>  <td>0.00973</td>
 </tr>
 <tr>
-  <th>Time:</th>                 <td>20:11:31</td>     <th>  Log-Likelihood:    </th> <td> -4544.7</td>
+  <th>Time:</th>                 <td>17:19:51</td>     <th>  Log-Likelihood:    </th> <td> -4544.7</td>
 </tr>
 <tr>
   <th>No. Observations:</th>      <td>   445</td>      <th>  AIC:               </th> <td>   9093.</td>
@@ -825,10 +766,10 @@ Causal Estimate is 1639.811454120606
         <td></td>           <th>coef</th>     <th>std err</th>      <th>t</th>      <th>P>|t|</th>  <th>[0.025</th>    <th>0.975]</th>
 </tr>
 <tr>
-  <th>Intercept</th>     <td> 4555.0752</td> <td>  406.704</td> <td>   11.200</td> <td> 0.000</td> <td> 3755.766</td> <td> 5354.385</td>
+  <th>Intercept</th>     <td> 4555.0738</td> <td>  406.704</td> <td>   11.200</td> <td> 0.000</td> <td> 3755.764</td> <td> 5354.383</td>
 </tr>
 <tr>
-  <th>treat[T.True]</th> <td> 1639.8115</td> <td>  631.496</td> <td>    2.597</td> <td> 0.010</td> <td>  398.712</td> <td> 2880.911</td>
+  <th>treat[T.True]</th> <td> 1639.8123</td> <td>  631.496</td> <td>    2.597</td> <td> 0.010</td> <td>  398.713</td> <td> 2880.912</td>
 </tr>
 </table>
 <table class="simpletable">
@@ -836,7 +777,7 @@ Causal Estimate is 1639.811454120606
   <th>Omnibus:</th>       <td>303.263</td> <th>  Durbin-Watson:     </th> <td>   2.085</td>
 </tr>
 <tr>
-  <th>Prob(Omnibus):</th> <td> 0.000</td>  <th>  Jarque-Bera (JB):  </th> <td>4770.608</td>
+  <th>Prob(Omnibus):</th> <td> 0.000</td>  <th>  Jarque-Bera (JB):  </th> <td>4770.644</td>
 </tr>
 <tr>
   <th>Skew:</th>          <td> 2.709</td>  <th>  Prob(JB):          </th> <td>    0.00</td>
@@ -847,8 +788,8 @@ Causal Estimate is 1639.811454120606
 </table><br/><br/>Notes:<br/>[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.</div>
 </div>
 </section>
-<section id="Interpret-the-estimate">
-<h2>Interpret the estimate<a class="headerlink" href="#Interpret-the-estimate" title="Permalink to this heading"></a></h2>
+<section id="3.-Interpret-the-estimate">
+<h2>3. Interpret the estimate<a class="headerlink" href="#3.-Interpret-the-estimate" title="Permalink to this heading"></a></h2>
 <p>The plot below shows how the distribution of a confounder, “married” changes from the original data to the weighted data. In both datasets, we compare the distribution of “married” across treated and untreated units.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
@@ -863,12 +804,12 @@ Causal Estimate is 1639.811454120606
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_dowhy_lalonde_example_7_0.png" src="../_images/example_notebooks_dowhy_lalonde_example_7_0.png" />
+<img alt="../_images/example_notebooks_dowhy_lalonde_example_8_0.png" src="../_images/example_notebooks_dowhy_lalonde_example_8_0.png" />
 </div>
 </div>
 </section>
-<section id="Sanity-check:-compare-to-manual-IPW-estimate">
-<h2>Sanity check: compare to manual IPW estimate<a class="headerlink" href="#Sanity-check:-compare-to-manual-IPW-estimate" title="Permalink to this heading"></a></h2>
+<section id="4.-Sanity-check:-compare-to-manual-IPW-estimate">
+<h2>4. Sanity check: compare to manual IPW estimate<a class="headerlink" href="#4.-Sanity-check:-compare-to-manual-IPW-estimate" title="Permalink to this heading"></a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -892,7 +833,7 @@ Causal Estimate is 1639.811454120606
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Causal Estimate is 1639.8114541206078
+Causal Estimate is 1639.8122827865627
 </pre></div></div>
 </div>
 </section>
@@ -943,7 +884,7 @@ Causal Estimate is 1639.8114541206078
   
   <div class="footer-item">
     <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
   </div>
   
