@@ -14,10 +14,6 @@
 #
 import os
 
-docs_root = "../../dowhy-docs"
-tags = reversed(list(filter(lambda t: len(t) > 0, os.environ.get("TAGS").split(","))))
-tag_objects = list(map(lambda t: {"name": t, "url": f"/dowhy/{t}/index.html"}, tags))
-
 # -- Project information -----------------------------------------------------
 
 project = "DoWhy"
@@ -26,7 +22,15 @@ author = "PyWhy community"
 
 # Version Information (for version-switcher)
 current_version = {"name": os.environ.get("CURRENT_VERSION") or "main"}
-versions = {"tags": tag_objects, "branches": ["main"]}
+versions = {
+    "tags": list(
+        map(
+            lambda t: {"name": t, "url": f"/dowhy/{t}/index.html"},
+            reversed(list(filter(lambda t: len(t) > 0, os.environ.get("TAGS").split(",")))),
+        )
+    ),
+    "branches": ["main"],
+}
 
 print("Current Verison: ", current_version, "Versions: ", versions)
 
