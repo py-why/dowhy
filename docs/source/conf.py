@@ -52,7 +52,12 @@ extensions = [
     "sphinx_rtd_theme",
     "sphinxcontrib.googleanalytics",
     "sphinx_copybutton",
+    "sphinx_design",
 ]
+
+# sphinx-panels shouldn't add bootstrap css since the pydata-sphinx-theme
+# already loads it
+panels_add_bootstrap_css = False
 
 googleanalytics_id = "G-B139P18WHM"
 copybutton_prompt_text = ">>> "
