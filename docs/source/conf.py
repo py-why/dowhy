@@ -21,19 +21,18 @@ copyright = "2022, PyWhy contributors"
 author = "PyWhy community"
 
 # Version Information (for version-switcher)
-current_version = {"name": os.environ.get("CURRENT_VERSION") or "main"}
-versions = {
-    "tags": list(
-        map(
-            lambda t: {"name": t, "url": f"/dowhy/{t}/index.html"},
-            reversed(list(filter(lambda t: len(t) > 0, os.environ.get("TAGS").split(",")))),
-        )
-    ),
-    "branches": ["main"],
+html_context = {
+    "current_version": {"name": os.environ.get("CURRENT_VERSION")},
+    "versions": {
+        "tags": list(
+            map(
+                lambda t: {"name": t, "url": f"../{t}/index.html"},
+                reversed(list(filter(lambda t: len(t) > 0, os.environ.get("TAGS").split(",")))),
+            )
+        ),
+        "branches": [{"name": "main"}],
+    },
 }
-
-print("Current Verison: ", current_version, "Versions: ", versions)
-
 
 # -- General configuration ---------------------------------------------------
 
