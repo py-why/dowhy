@@ -57,5 +57,3 @@ Contributing
 
 Want to add to the codebase or documentation? Check out our :doc:`contributing` guide.
 
-.. include:: cite.rst
-
