@@ -13,15 +13,24 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-import sys
+from os import listdir
+from os.path import isdir, join
 
-sys.path.insert(0, os.path.abspath("../../"))
+docs_root = "../../dowhy-docs"
+tags = reversed(list(filter(lambda t: len(t) > 0, os.environ.get("TAGS").split(","))))
+tag_objects = list(map(lambda t: {"name": t, "url": f"/dowhy/{t}/index.html"}, tags))
 
 # -- Project information -----------------------------------------------------
 
 project = "DoWhy"
 copyright = "2022, PyWhy contributors"
 author = "PyWhy community"
+
+# Version Information (for version-switcher)
+current_version = {"name": os.environ.get("CURRENT_VERSION") or "main"}
+
+versions = {"tags": tag_objects, "branches": ["main"]}
+print("Current Verison: ", current_version, "Versions: ", versions)
 
 
 # -- General configuration ---------------------------------------------------
