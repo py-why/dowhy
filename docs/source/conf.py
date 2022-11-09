@@ -39,7 +39,6 @@ extensions = [
     "sphinx.ext.todo",
     "nbsphinx",
     "sphinx_rtd_theme",
-    "sphinx_multiversion",
     "sphinxcontrib.googleanalytics",
     "sphinx_copybutton",
 ]
@@ -193,7 +192,3 @@ todo_include_todos = True
 
 # init docstrings should also be included in class
 autoclass_content = "both"
-
-smv_tag_whitelist = r"^v\d*\.(9|\d{2,})(\..*)?$"
-smv_branch_whitelist = "main"
-smv_released_pattern = r"refs/tags/v.*"

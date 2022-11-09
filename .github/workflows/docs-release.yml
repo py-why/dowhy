@@ -1,18 +1,8 @@
-name: Build & Deploy Docs
+name: Build & Deploy Docs (For Release)
+
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - ".github/workflows/docs.yml"
-      - "dowhy/**"
-      - "docs/**"
-      - "pyproject.toml"
-      - "poetry.lock"
-  workflow_run:
-    workflows: [ "Build Docker image (docs)" ]
-    types:
-      - completed
+  release:
+    types: [created]
 
 jobs:
   docs:
@@ -31,6 +21,8 @@ jobs:
 
       - name: Build
         run: ./docs/generate_docs.sh
+        env:
+          DOCS_VERSION: ${{ github.event.release.tag_name }}
           
       - name: Commit and push to gh-pages branch
         uses: peaceiris/actions-gh-pages@v3
