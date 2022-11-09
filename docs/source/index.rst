@@ -27,33 +27,47 @@ Much like machine learning libraries have done for prediction, DoWhy is a Python
 causal thinking and analysis. DoWhy provides a wide variety of algorithms for effect estimation, causal
 structure learning, diagnosis of causal structures, root cause analysis, interventions and counterfactuals.
 
-Getting started
----------------
+.. grid:: 1 2 2 2
+    :gutter: 4
 
-New to DoWhy? Our :doc:`getting_started/index` guide will get you up to speed in minutes. Once completed, you'll be
-ready to check out our :doc:`example_notebooks/nb_index`, :doc:`user_guide/index`, and other sections.
+    .. grid-item-card:: Getting started
+        :shadow: md
+        :link: getting_started/index
+        :link-type: doc
 
-User Guide
-----------
+        :octicon:`rocket;2em;sd-text-info`
+        ^^^
+        New to DoWhy? Our Getting started guide will get you up to speed in minutes. It'll help you install DoWhy and
+        write your first lines of code. Once completed, you'll be ready to the run examples and follow along in the
+        User Guide.
 
-Complete newbie when it comes to causal inference and DoWhy? Then you probably want to read our
-comprehensive :doc:`user_guide/index`. It guides you through everything you need to know, including the concepts and
-science you need to know when trying to solve non-trivial problems.
+    .. grid-item-card:: User Guide
+        :shadow: md
+        :link: user_guide/intro
+        :link-type: doc
 
-Examples
---------
+        :octicon:`book;2em;sd-text-info`
+        ^^^
+        Complete newbie when it comes to causal inference and DoWhy? Then you probably want to read our
+        comprehensive User Guide. It guides you through everything you need to know, including the concepts and
+        science you need to know when trying to solve non-trivial problems.
 
-If you prefer to learn by example, we recommend our :doc:`example_notebooks/nb_index`.
+    .. grid-item-card:: Examples
+        :shadow: md
+        :link: example_notebooks/nb_index
+        :link-type: doc
 
-API Reference
--------------
+        :octicon:`video;2em;sd-text-info`
+        ^^^
+        If you prefer to learn by example, we recommend to browse the examples. It covers a wide variety of problems
+        that you can use to liken to your own problem.
 
-The :doc:`dowhy` guide contains a detailed description of the functions, modules, and objects included in DoWhy.
-The reference describes how the methods work and which parameters can be used. It assumes that you have an
-understanding of the key concepts.
+    .. grid-item-card:: API Reference
+        :shadow: md
+        :link: dowhy
+        :link-type: doc
 
-Contributing
-------------
-
-Want to add to the codebase or documentation? Check out our :doc:`contributing` guide.
-
+        :octicon:`code;2em;sd-text-info`
+        ^^^
+        The API reference contains a detailed description of the functions, modules, and objects included in DoWhy.
+        It assumes that you have an understanding of the key concepts.
