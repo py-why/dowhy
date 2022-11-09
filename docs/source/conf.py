@@ -129,6 +129,7 @@ html_static_path = ["_static"]
 # Output file base name for HTML help builder.
 htmlhelp_basename = "dowhydoc"
 
+html_logo = "_static/dowhy-logo-small.png"
 
 # -- Options for LaTeX output ------------------------------------------------
 

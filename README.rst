@@ -12,8 +12,13 @@
 .. |Downloads| image:: https://pepy.tech/badge/dowhy
 .. _Downloads: https://pepy.tech/project/dowhy
 
-DoWhy | An end-to-end library for causal inference
-===================================================
+
+.. image:: dowhy-logo-large.png
+  :width: 50%
+  :align: center
+
+\
+===============================
 
   Introducing DoWhy and the 4 steps of causal inference | `Microsoft Research Blog <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Video Tutorial <https://note.microsoft.com/MSR-Webinar-DoWhy-Library-Registration-On-Demand.html>`_ | `Arxiv Paper <https://arxiv.org/abs/2011.04216>`_ | `Arxiv Paper (GCM-extension) <https://arxiv.org/abs/2206.06821>`_ | `Slides <https://www2.slideshare.net/AmitSharma315/dowhy-an-endtoend-library-for-causal-inference>`_
 
