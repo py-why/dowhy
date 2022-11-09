@@ -19,7 +19,7 @@ fi
 #
 # Build docs
 echo "Executing sphinx-build"
-poetry run sphinx-build source ${OUTPUT_DIR}
+poetry run sphinx-build -j auto source ${OUTPUT_DIR}
 
 #
 # Create the top-level index.html
