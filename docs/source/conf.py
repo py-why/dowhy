@@ -19,6 +19,7 @@ import os
 project = "DoWhy"
 copyright = "2022, PyWhy contributors"
 author = "PyWhy community"
+version = os.environ.get("CURRENT_VERSION")
 
 # Version Information (for version-switcher)
 html_context = {

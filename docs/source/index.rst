@@ -13,16 +13,19 @@ DoWhy documentation
     Contributing <contributing>
     code_repo
 
+**Date**: |today| **Version**: |version|
 
-.. image:: https://raw.githubusercontent.com/py-why/dowhy/master/docs/images/dowhy-schematic.png
 
-Much like machine learning libraries have done for prediction, **"DoWhy" is a Python library that aims to spark
-causal thinking and analysis**. DoWhy provides a principled four-step interface for causal inference that focuses on
-explicitly modeling causal assumptions and validating them as much as possible. The key feature of DoWhy is its
-state-of-the-art refutation API that can automatically test causal assumptions for any estimation method, thus making
-inference more robust and accessible to non-experts. DoWhy supports estimation of the average causal effect for
-backdoor, frontdoor, instrumental variable and other identification methods, and estimation of the conditional effect
-(CATE) through an integration with the EconML library.
+**Related resources**:
+`Source Repository <https://github.com/py-why/dowhy>`__ |
+`Issues & Ideas <https://github.com/py-why/dowhy/issues>`__ |
+`Join the Community (Discord) <https://discord.gg/cSBGb3vsZb>`__
+`PyWhy Organization <https://www.pywhy.org>`__ |
+`DoWhy on PyPI <https://pypi.org/project/dowhy>`__ |
+
+Much like machine learning libraries have done for prediction, DoWhy is a Python library that aims to spark
+causal thinking and analysis. DoWhy provides a wide variety of algorithms for effect estimation, causal
+structure learning, diagnosis of causal structures, root cause analysis, interventions and counterfactuals.
 
 Getting started
 ---------------
