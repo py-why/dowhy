@@ -1,30 +1,46 @@
-#!/bin/bash -e
+#!/bin/bash -eu
 cd $( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 DOCS_ROOT='../dowhy-docs'
 # To change the build target, specify the DOCS_VERSION environment variable. (e.g. DOCS_VERSION=v0.8)
-TARGET_BUILD=${DOCS_VERSION:-main}
-OUTPUT_DIR="${DOCS_ROOT}/${TARGET_BUILD}"
+CURRENT_VERSION=${DOCS_VERSION:-main}
+CI=${CI:-false}
+OUTPUT_DIR="${DOCS_ROOT}/${CURRENT_VERSION}"
 STABLE_VERSION=$(git describe --tags --abbrev=0 --match='v*')
 
-echo "Building docs for version ${TARGET_BUILD} into ${OUTPUT_DIR}, stable version is ${STABLE_VERSION}"
+echo "Reading Tags..."
+readarray -t tags_arr < <(git --no-pager tag)
+TAGS=$(printf '%s,' "${tags_arr[@]}")
+
+echo "Building docs for version ${CURRENT_VERSION} into ${OUTPUT_DIR}, stable version is ${STABLE_VERSION}, tags=${TAGS}"
 
 #
 # Cache existing docs
 #
 if [ ! -f "${DOCS_ROOT}/index.html" ]; then
+    echo "Fetching existing docs..."
     git clone --quiet --branch gh-pages https://github.com/py-why/dowhy.git ${DOCS_ROOT}
     rm -rf ${DOCS_ROOT}/.git
 fi
 
 #
-# Build docs
-echo "Executing sphinx-build"
-poetry run sphinx-build -j auto source ${OUTPUT_DIR}
+# Build Docs
+#
+export CURRENT_VERSION
+export TAGS
+if  [ $CI == "true" ]; then
+    # Using parallelism is slower in GitHub actions
+    echo "Executing sphinx-build (Single-Threaded)"
+    poetry run sphinx-build source ${OUTPUT_DIR}
+else
+    echo "Executing sphinx-build (Parallel)"
+    poetry run sphinx-build -j auto source ${OUTPUT_DIR}
+fi
+
 
 #
 # Create the top-level index.html
 #
-
+echo "Creating top-level index.html"
 echo "<html>
     <head>
         <meta http-equiv="'"'"refresh"'"'" content="'"'"0; url=./${STABLE_VERSION}"'"'" />

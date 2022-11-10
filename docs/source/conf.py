@@ -13,9 +13,6 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-import sys
-
-sys.path.insert(0, os.path.abspath("../../"))
 
 # -- Project information -----------------------------------------------------
 
@@ -23,6 +20,19 @@ project = "DoWhy"
 copyright = "2022, PyWhy contributors"
 author = "PyWhy community"
 
+# Version Information (for version-switcher)
+html_context = {
+    "current_version": {"name": os.environ.get("CURRENT_VERSION")},
+    "versions": {
+        "tags": list(
+            map(
+                lambda t: {"name": t, "url": f"../{t}/index.html"},
+                reversed(list(filter(lambda t: len(t) > 0, os.environ.get("TAGS").split(",")))),
+            )
+        ),
+        "branches": [{"name": "main"}],
+    },
+}
 
 # -- General configuration ---------------------------------------------------
 
