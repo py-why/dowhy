@@ -36,6 +36,14 @@ else
     poetry run sphinx-build -j auto source ${OUTPUT_DIR}
 fi
 
+#
+# Patch Version-Selector Info
+#
+pushd version_patcher
+npm install
+npm run execute
+popd
+
 
 #
 # Create the top-level index.html
