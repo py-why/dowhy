@@ -18,5 +18,6 @@ backdoor, frontdoor, instrumental variable and other identification methods, and
    identify
    estimate
    refute
+   comparison.rst
 
 
