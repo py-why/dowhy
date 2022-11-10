@@ -32,7 +32,6 @@ for (const version of releasedVersions) {
 		}
 	}
 
-
 	// Append updated version links
 	for (const link of versionLinks) {
 		found.appendChild(link)
