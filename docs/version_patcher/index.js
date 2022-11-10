@@ -7,14 +7,17 @@ const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 const currentVersion = process.env['CURRENT_VERSION'] ?? 'main'
 
 const DOCS_ROOT = path.join(__dirname, "../../dowhy-docs")
-const releasedVersions = fs
-	.readdirSync(DOCS_ROOT)
-	.filter(d => d.startsWith("v"))
-	.map(v => path.join(DOCS_ROOT, v, 'index.html'));
-
 const versionLinks = readVersionInfo()
 
-for (const version of releasedVersions) {
+// Patch all of the published versions
+fs
+	.readdirSync(DOCS_ROOT)
+	.filter(d => d.startsWith("v") && d != currentVersion)
+	.map(v => path.join(DOCS_ROOT, v, 'index.html'))
+	.forEach(patchDocVersion);
+
+
+function patchDocVersion(version) {
 	console.log("updating", version)
 	const content = fs.readFileSync(version, 'utf-8');
 	const { window } = new JSDOM(content)
