@@ -29,5 +29,4 @@ Finally, there's further resources available:
   `Foundations of causal inference and its impacts on machine learning <https://note.microsoft.com/MSR-Webinar-DoWhy-Library-Registration-On-Demand.html>`_
 - The PDF book `Elements of Causal Inference <https://mitp-content-server.mit.edu/books/content/sectbyfn?collid=books_pres_0&id=11283&fn=11283.pdf>`_
 
-.. include:: comparison.rst
 
