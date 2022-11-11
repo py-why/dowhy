@@ -21,15 +21,17 @@ copyright = "2022, PyWhy contributors"
 author = "PyWhy community"
 
 # Version Information (for version-switcher)
+not_empty = lambda x: len(x) > 0
+to_tag_obj = lambda t: {"name": t, "url": f"../{t}/index.html"}
+has_doc = lambda t: os.path.exists(f"../../dowhy-docs/{t}/index.html")
+
+git_tags = reversed(list(filter(not_empty, os.environ.get("TAGS").split(","))))
+doc_tags = list(filter(has_doc, git_tags))
+
 html_context = {
     "current_version": {"name": os.environ.get("CURRENT_VERSION")},
     "versions": {
-        "tags": list(
-            map(
-                lambda t: {"name": t, "url": f"../{t}/index.html"},
-                reversed(list(filter(lambda t: len(t) > 0, os.environ.get("TAGS").split(",")))),
-            )
-        ),
+        "tags": list(map(to_tag_obj, doc_tags)),
         "branches": [{"name": "main"}],
     },
 }

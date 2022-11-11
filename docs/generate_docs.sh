@@ -13,6 +13,11 @@ TAGS=$(printf '%s,' "${tags_arr[@]}")
 
 echo "Building docs for version ${CURRENT_VERSION} into ${OUTPUT_DIR}, stable version is ${STABLE_VERSION}, tags=${TAGS}"
 
+# check for required tooling
+echo "Verifying Prerequisites"
+which npm
+which poetry
+
 #
 # Cache existing docs
 #
@@ -35,6 +40,14 @@ else
     echo "Executing sphinx-build (Parallel)"
     poetry run sphinx-build -j auto source ${OUTPUT_DIR}
 fi
+
+#
+# Patch Version-Selector Info
+#
+pushd version_patcher
+npm install
+npm run execute
+popd
 
 
 #
