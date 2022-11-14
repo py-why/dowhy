@@ -17,7 +17,7 @@ Introductory examples
         .. image:: ../_static/effect-estimation-estimand-expression.png
         +++
         | **Level:** Beginner
-        | **API:** Effect inference
+        | **Task:** Effect estimation
 
     .. card:: :doc:`dowhy-conditional-treatment-effects`
 
@@ -33,7 +33,7 @@ Introductory examples
 
         +++
         | **Level:** Beginner
-        | **API:** GCM inference
+        | **Task:** Intervention via GCM
 
 
 Real world-inspired examples
@@ -46,14 +46,14 @@ Real world-inspired examples
         .. image:: ../_static/hotel-bookings.png
         +++
         | **Level:** Beginner
-        | **API:** Effect inference
+        | **Task:** Effect estimation
 
     .. card:: :doc:`dowhy_example_effect_of_memberrewards_program`
 
         .. image:: ../_static/membership-program-graph.png
         +++
         | **Level:** Beginner
-        | **API:** Effect inference
+        | **Task:** Effect estimation
 
     .. card:: :doc:`gcm_rca_microservice_architecture`
 
@@ -61,13 +61,13 @@ Real world-inspired examples
 
         +++
         | **Level:** Beginner
-        | **API:** GCM inference
+        | **Task:** Root cause analysis, intervention via GCM
 
     .. card:: :doc:`gcm_401k_analysis`
 
         +++
         | **Level:** Advanced
-        | **API:** GCM inference
+        | **Task:** Intervention via GCM
 
     .. card:: :doc:`gcm_supply_chain_dist_change`
 
@@ -75,13 +75,13 @@ Real world-inspired examples
 
         +++
         | **Level:** Advanced
-        | **API:** GCM inference
+        | **Task:** Root cause analysis via GCM
 
     .. card:: :doc:`gcm_counterfactual_medical_dry_eyes`
 
         +++
         | **Level:** Advanced
-        | **API:** GCM inference
+        | **Task:** Counterfactuals via GCM
 
 
 Examples on benchmarks datasets
@@ -93,31 +93,31 @@ Examples on benchmarks datasets
 
         +++
         | **Level:** Advanced
-        | **API:** Effect inference
+        | **Task:** Effect inference
 
     .. card:: :doc:`dowhy_lalonde_example`
 
         +++
         | **Level:** Advanced
-        | **API:** Effect inference
+        | **Task:** Effect inference
 
     .. card:: :doc:`dowhy_refutation_testing`
 
         +++
         | **Level:** Advanced
-        | **API:** Effect inference
+        | **Task:** Effect inference
 
     .. card:: :doc:`gcm_401k_analysis`
 
         +++
         | **Level:** Advanced
-        | **API:** GCM inference
+        | **Task:** GCM inference
 
     .. card:: :doc:`lalonde_pandas_api`
 
         +++
         | **Level:** Advanced
-        | **API:** Do Sampler
+        | **Task:** Do Sampler
 
 
 Miscellaneous
@@ -129,43 +129,43 @@ Miscellaneous
 
         +++
         | **Level:** Beginner
-        | **API:** GCM inference
+        | **Task:** GCM inference
 
     .. card:: :doc:`load_graph_example`
 
         +++
         | **Level:** Beginner
-        | **API:** Effect inference
+        | **Task:** Effect inference
 
     .. card:: :doc:`gcm_draw_samples`
 
         +++
         | **Level:** Beginner
-        | **API:** GCM inference
+        | **Task:** GCM inference
 
     .. card:: :doc:`dowhy-simple-iv-example`
 
         +++
         | **Level:** Beginner
-        | **API:** Effect inference
+        | **Task:** Effect inference
 
     .. card:: :doc:`graph_conditional_independence_refuter`
 
         +++
         | **Level:** Beginner
-        | **API:** Effect inference
+        | **Task:** Effect inference
 
     .. card:: :doc:`dowhy_demo_dummy_outcome_refuter`
 
         +++
         | **Level:** Beginner
-        | **API:** Effect inference
+        | **Task:** Effect inference
 
     .. card:: :doc:`dowhy_multiple_treatments`
 
         +++
-        | **Level:** Beginner
-        | **API:** Effect inference
+        | **Level:** Advanced
+        | **Task:** Effect inference
 
 
 .. toctree::
