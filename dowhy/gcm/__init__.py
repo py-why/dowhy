@@ -25,5 +25,6 @@ from .graph import ConditionalStochasticModel, DirectedGraph, FunctionalCausalMo
 from .independence_test import approx_kernel_based, independence_test, kernel_based, regression_based
 from .influence import arrow_strength, intrinsic_causal_influence
 from .stochastic_models import BayesianGaussianMixtureDistribution, EmpiricalDistribution, ScipyDistribution
+from .unit_change import unit_change
 from .validation import RejectionResult, refute_causal_structure, refute_invertible_model
 from .whatif import average_causal_effect, counterfactual_samples, interventional_samples
