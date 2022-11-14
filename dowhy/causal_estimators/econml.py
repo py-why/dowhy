@@ -3,8 +3,8 @@ from importlib import import_module
 from typing import Callable
 
 import numpy as np
-from numpy.distutils.misc_util import is_sequence
 import pandas as pd
+from numpy.distutils.misc_util import is_sequence
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from dowhy.utils.api import parse_state
