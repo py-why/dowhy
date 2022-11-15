@@ -1,5 +1,5 @@
 def parse_state(state):
-    if type(state) == str:
+    if type(state) in [str, int]:
         return [state]
     if type(state) == list:
         return state
