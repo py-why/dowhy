@@ -81,14 +81,20 @@ class TestEconMLEstimator:
             effect_modifiers=data["effect_modifier_names"],
             graph=data_binary["gml_graph"],
         )
-        identified_estimand_binary = model_binary.identify_effect(proceed_when_unidentifiable=True)
+        identified_estimand_binary = model_binary.identify_effect(
+            proceed_when_unidentifiable=True
+        )
         drlearner_estimate = model_binary.estimate_effect(
             identified_estimand_binary,
             method_name="backdoor.econml.drlearner.LinearDRLearner",
             target_units=lambda df: df["X0"] > 1,
             confidence_intervals=False,
             method_params={
-                "init_params": {"model_propensity": LogisticRegressionCV(cv=3, solver="lbfgs", multi_class="auto")},
+                "init_params": {
+                    "model_propensity": LogisticRegressionCV(
+                        cv=3, solver="lbfgs", multi_class="auto"
+                    )
+                },
                 "fit_params": {},
             },
         )
@@ -120,7 +126,9 @@ class TestEconMLEstimator:
         dims_tx = len(model._treatment) + len(model._effect_modifiers)
         treatment_model = keras.Sequential(
             [
-                keras.layers.Dense(128, activation="relu", input_shape=(dims_zx,)),  # sum of dims of Z and X
+                keras.layers.Dense(
+                    128, activation="relu", input_shape=(dims_zx,)
+                ),  # sum of dims of Z and X
                 keras.layers.Dropout(0.17),
                 keras.layers.Dense(64, activation="relu"),
                 keras.layers.Dropout(0.17),
@@ -130,7 +138,9 @@ class TestEconMLEstimator:
         )
         response_model = keras.Sequential(
             [
-                keras.layers.Dense(128, activation="relu", input_shape=(dims_tx,)),  # sum of dims of T and X
+                keras.layers.Dense(
+                    128, activation="relu", input_shape=(dims_tx,)
+                ),  # sum of dims of T and X
                 keras.layers.Dropout(0.17),
                 keras.layers.Dense(64, activation="relu"),
                 keras.layers.Dropout(0.17),
@@ -194,7 +204,6 @@ class TestEconMLEstimator:
             },
         )
 
-
     def test_multivalue_treatment(self):
         n_points = 10000
         impact = {0: 0.0, 1: 2.0, 2: 1.0}
@@ -208,7 +217,7 @@ class TestEconMLEstimator:
         df["Y"] = df["W"] + df["T"].apply(lambda x: impact[x])
 
         train_data, test_data = train_test_split(df, train_size=0.9)
-        X_test = test_data[["X","T"]]
+        X_test = test_data[["X", "T"]]
 
         causal_model = CausalModel(
             data=train_data,
@@ -236,10 +245,7 @@ class TestEconMLEstimator:
 
         est_test = est_2.estimator.effect_tt(test_data)
 
-        est_error = (est_test - test_data["T"].apply(lambda x: impact[x]).values).abs().max()
+        est_error = (
+            (est_test - test_data["T"].apply(lambda x: impact[x]).values).abs().max()
+        )
         assert est_error < 0.01
-
-
-
-
-
