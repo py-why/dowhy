@@ -689,46 +689,13 @@ which we call a “do” sample.</p>
 <section id="Getting-the-Data">
 <h2>Getting the Data<a class="headerlink" href="#Getting-the-Data" title="Permalink to this heading"></a></h2>
 <p>First, download the data from the LaLonde example.</p>
-<table class="table">
-<colgroup>
-<col style="width: 100%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p>The following code for loading the Lalonde dataset was copied from
-<a class="reference external" href="https://github.com/wayfair/pylift/blob/5afc9088e96f25672423663f5c9b4bb889b4dfc0/examples/Lalonde/Lalonde_sample.ipynb?short_path=b1d451f#L94-L99">wayfair/pylift</a>.</p></td>
-</tr>
-<tr class="row-even"><td><p><em>Copyright 2018, Wayfair, Inc.</em></p></td>
-</tr>
-<tr class="row-odd"><td><p>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</p></td>
-</tr>
-<tr class="row-even"><td><ol class="arabic simple">
-<li><p>Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</p></li>
-</ol>
-</td>
-</tr>
-<tr class="row-odd"><td><p>2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.</p></td>
-</tr>
-<tr class="row-even"><td><p><em>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
-TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</em></p></td>
-</tr>
-</tbody>
-</table>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span><span class="o">,</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">dowhy.datasets</span>
 
-<span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;treat&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="s1">&#39;educ&#39;</span><span class="p">,</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="s1">&#39;hisp&#39;</span><span class="p">,</span> <span class="s1">&#39;married&#39;</span><span class="p">,</span> <span class="s1">&#39;nodegr&#39;</span><span class="p">,</span><span class="s1">&#39;re74&#39;</span><span class="p">,</span><span class="s1">&#39;re75&#39;</span><span class="p">,</span><span class="s1">&#39;re78&#39;</span><span class="p">]</span>
-<span class="n">control</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;http://www.nber.org/~rdehejia/data/nswre74_control.txt&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;\s+&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="n">cols</span><span class="p">)</span>
-<span class="n">treated</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;http://www.nber.org/~rdehejia/data/nswre74_treated.txt&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;\s+&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="n">cols</span><span class="p">)</span>
-<span class="n">lalonde</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">control</span><span class="p">,</span> <span class="n">treated</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="s1">&#39;treat&#39;</span><span class="p">:</span><span class="s1">&#39;bool&#39;</span><span class="p">},</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">lalonde</span><span class="p">[</span><span class="s1">&#39;u74&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lalonde</span><span class="p">[</span><span class="s1">&#39;re74&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-<span class="n">lalonde</span><span class="p">[</span><span class="s1">&#39;u75&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lalonde</span><span class="p">[</span><span class="s1">&#39;re75&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">lalonde</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">lalonde_dataset</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -939,88 +906,88 @@ TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF TH
   <tbody>
     <tr>
       <th>0</th>
-      <td>True</td>
-      <td>20.0</td>
+      <td>False</td>
+      <td>25.0</td>
       <td>11.0</td>
       <td>1.0</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>1.0</td>
-      <td>0.00</td>
-      <td>0.000</td>
-      <td>3972.540</td>
-      <td>1.0</td>
-      <td>1.0</td>
-      <td>0.354679</td>
-      <td>2.819451</td>
+      <td>15209.990</td>
+      <td>3072.7260</td>
+      <td>284.6584</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.637609</td>
+      <td>1.568359</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>True</td>
-      <td>23.0</td>
-      <td>7.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>1.0</td>
-      <td>0.00</td>
-      <td>0.000</td>
-      <td>0.000</td>
-      <td>1.0</td>
-      <td>1.0</td>
-      <td>0.446985</td>
-      <td>2.237214</td>
-    </tr>
-    <tr>
-      <th>2</th>
       <td>False</td>
-      <td>39.0</td>
-      <td>12.0</td>
-      <td>1.0</td>
-      <td>0.0</td>
-      <td>1.0</td>
-      <td>0.0</td>
-      <td>0.00</td>
-      <td>0.000</td>
-      <td>3795.799</td>
-      <td>1.0</td>
-      <td>1.0</td>
-      <td>0.387157</td>
-      <td>2.582930</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>False</td>
-      <td>32.0</td>
+      <td>26.0</td>
       <td>8.0</td>
       <td>1.0</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>1.0</td>
-      <td>0.00</td>
+      <td>1126.290</td>
+      <td>5562.5980</td>
+      <td>3523.5780</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.600265</td>
+      <td>1.665931</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>True</td>
+      <td>17.0</td>
+      <td>8.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
       <td>0.000</td>
-      <td>7152.132</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
       <td>1.0</td>
       <td>1.0</td>
-      <td>0.590571</td>
-      <td>1.693277</td>
+      <td>0.385343</td>
+      <td>2.595089</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>True</td>
+      <td>22.0</td>
+      <td>12.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>5605.852</td>
+      <td>936.1773</td>
+      <td>0.0000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.533740</td>
+      <td>1.873573</td>
     </tr>
     <tr>
       <th>4</th>
       <td>True</td>
-      <td>27.0</td>
+      <td>18.0</td>
       <td>11.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
       <td>1.0</td>
+      <td>3678.231</td>
+      <td>919.5579</td>
+      <td>4321.7050</td>
       <td>0.0</td>
       <td>0.0</td>
-      <td>1.0</td>
-      <td>2206.94</td>
-      <td>2666.274</td>
-      <td>0.000</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.365496</td>
-      <td>2.736010</td>
+      <td>0.389669</td>
+      <td>2.566279</td>
     </tr>
   </tbody>
 </table>
@@ -1061,7 +1028,7 @@ $\displaystyle 1794.34240427027$</div></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 2294.81829914079$</div></div>
+$\displaystyle 1414.84147064314$</div></div>
 </div>
 <p>We could get some rough error bars on the outcome using the normal approximation for a 95% confidence interval, like</p>
 <div class="nbinput docutils container">
@@ -1080,7 +1047,7 @@ $\displaystyle 2294.81829914079$</div></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 1479.77587319684$</div></div>
+$\displaystyle 1235.74581880673$</div></div>
 </div>
 <p>but note that these DO NOT contain propensity score estimation error. For that, a bootstrapping procedure might be more appropriate.</p>
 <p>This is just one statistic we can compute from the interventional distribution of <code class="docutils literal notranslate"><span class="pre">'re78'</span></code>. We can get all of the interventional moments as well, including functions of <code class="docutils literal notranslate"><span class="pre">'re78'</span></code>. We can leverage the full power of pandas, like</p>
@@ -1099,12 +1066,12 @@ $\displaystyle 1479.77587319684$</div></div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 count      445.000000
-mean      5540.604764
-std       7903.726512
+mean      5627.561156
+std       6738.979433
 min          0.000000
 25%          0.000000
-50%       3746.701000
-75%       8124.715000
+50%       3972.540000
+75%       8173.908000
 max      60307.930000
 Name: re78, dtype: float64
 </pre></div></div>
@@ -1166,7 +1133,7 @@ Name: re78, dtype: float64
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_lalonde_pandas_api_26_1.png" src="../_images/example_notebooks_lalonde_pandas_api_26_1.png" />
+<img alt="../_images/example_notebooks_lalonde_pandas_api_25_1.png" src="../_images/example_notebooks_lalonde_pandas_api_25_1.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -1190,7 +1157,7 @@ Name: re78, dtype: float64
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_lalonde_pandas_api_27_1.png" src="../_images/example_notebooks_lalonde_pandas_api_27_1.png" />
+<img alt="../_images/example_notebooks_lalonde_pandas_api_26_1.png" src="../_images/example_notebooks_lalonde_pandas_api_26_1.png" />
 </div>
 </div>
 </section>
@@ -1261,87 +1228,87 @@ Name: re78, dtype: float64
     <tr>
       <th>0</th>
       <td>True</td>
+      <td>29.0</td>
+      <td>12.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>10881.940</td>
+      <td>1817.284</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.545402</td>
+      <td>1.833509</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>True</td>
+      <td>46.0</td>
+      <td>8.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>3165.658</td>
+      <td>2594.723</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.432309</td>
+      <td>2.313159</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>True</td>
       <td>27.0</td>
+      <td>13.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.529496</td>
+      <td>1.888588</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>True</td>
+      <td>24.0</td>
       <td>11.0</td>
       <td>1.0</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>1.0</td>
       <td>0.000</td>
-      <td>0.0000</td>
-      <td>549.2984</td>
-      <td>1.0</td>
-      <td>1.0</td>
-      <td>0.365496</td>
-      <td>2.736010</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>True</td>
-      <td>19.0</td>
-      <td>9.0</td>
-      <td>1.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>1.0</td>
       <td>0.000</td>
-      <td>798.9079</td>
-      <td>17685.1800</td>
-      <td>1.0</td>
-      <td>0.0</td>
-      <td>0.376581</td>
-      <td>2.655472</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>True</td>
-      <td>26.0</td>
-      <td>10.0</td>
-      <td>1.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>1.0</td>
-      <td>0.000</td>
-      <td>0.0000</td>
-      <td>9265.7880</td>
+      <td>1991.4</td>
       <td>1.0</td>
       <td>1.0</td>
-      <td>0.375729</td>
-      <td>2.661496</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>True</td>
-      <td>31.0</td>
-      <td>4.0</td>
-      <td>1.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>1.0</td>
-      <td>8517.589</td>
-      <td>4023.2110</td>
-      <td>7382.5490</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.457423</td>
-      <td>2.186161</td>
+      <td>0.360843</td>
+      <td>2.771290</td>
     </tr>
     <tr>
       <th>4</th>
       <td>True</td>
-      <td>27.0</td>
-      <td>13.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
+      <td>24.0</td>
+      <td>10.0</td>
       <td>1.0</td>
       <td>0.0</td>
-      <td>9381.566</td>
-      <td>853.7225</td>
-      <td>0.0000</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>11703.200</td>
+      <td>4078.152</td>
       <td>0.0</td>
       <td>0.0</td>
-      <td>0.620452</td>
-      <td>1.611729</td>
+      <td>0.0</td>
+      <td>0.422861</td>
+      <td>2.364844</td>
     </tr>
   </tbody>
 </table>
