@@ -131,8 +131,7 @@ class Econml(CausalEstimator):
 
         # Changing shape to a list for a singleton value
 
-        if isinstance(self._treatment_value, str) or not is_sequence(self._treatment_value):
-            self._treatment_value = [self._treatment_value]
+        self._treatment_value = parse_state(self._treatment_value)
 
         est = self.effect(X_test)
         ate = np.mean(est, axis=0) # one value per treatment value
@@ -219,3 +218,34 @@ class Econml(CausalEstimator):
             )
 
         return self.apply_multitreatment(df, effect_inference_fun, *args, **kwargs)
+
+    def effect_tt(self, df: pd.DataFrame, *args, **kwargs):
+        """
+        Effect of the actual treatment that was applied to each unit
+        :param df: Features of the units to evaluate
+        :param args: passed through to estimator.effect()
+        :param kwargs: passed through to estimator.effect()
+        """
+
+        eff = self.effect(df, *args, **kwargs).reshape(
+            (len(df), len(self._treatment_value))
+        )
+
+        out = np.zeros(len(df))
+        if is_sequence(self._treatment_value) and not isinstance(
+            self._treatment_value, str
+        ):
+            treatment_value = self._treatment_value
+        else:
+            treatment_value = [self._treatment_value]
+
+        if is_sequence(self._treatment_name) and not isinstance(self._treatment_name, str):
+            treatment_name = self._treatment_name[0]
+        else:
+            treatment_name = self._treatment_name
+
+        eff = np.reshape(eff, (len(df), len(treatment_value)))
+
+        for c, col in enumerate(treatment_value):
+            out[df[treatment_name] == col] = eff[df[treatment_name] == col, c]
+        return pd.Series(data=out, index=df.index)
