@@ -22,7 +22,7 @@ author = "PyWhy community"
 
 # Version Information (for version-switcher)
 not_empty = lambda x: len(x) > 0
-to_tag_obj = lambda t: {"name": t, "url": f"../{t}/index.html"}
+to_tag_obj = lambda t: {"name": t, "url": f"/dowhy/{t}/index.html"}
 has_doc = lambda t: os.path.exists(f"../../dowhy-docs/{t}/index.html")
 
 git_tags = reversed(list(filter(not_empty, os.environ.get("TAGS").split(","))))
