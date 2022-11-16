@@ -320,23 +320,7 @@
    },
    "outputs": [],
    "source": [
-    "import numpy as np\n",
-    "import matplotlib.pyplot as plt\n",
-    "\n",
-    "def bar_plot_with_uncertainty(median_attribs, uncertainty_attribs, ylabel='Attribution Score', figsize=(8, 3), bwidth=0.8, xticks=None, xticks_rotation=90):\n",
-    "    fig, ax = plt.subplots(figsize=figsize)\n",
-    "    yerr_plus = [uncertainty_attribs[node][1] - median_attribs[node] for node in median_attribs.keys()]\n",
-    "    yerr_minus = [median_attribs[node] - uncertainty_attribs[node][0] for node in median_attribs.keys()]\n",
-    "    plt.bar(median_attribs.keys(), median_attribs.values(), yerr=np.array([yerr_minus, yerr_plus]), ecolor='#1E88E5', color='#ff0d57', width=bwidth)\n",
-    "    plt.xticks(rotation=xticks_rotation)\n",
-    "    plt.ylabel(ylabel)\n",
-    "    ax.spines['right'].set_visible(False)\n",
-    "    ax.spines['top'].set_visible(False)\n",
-    "    if xticks:\n",
-    "        plt.xticks(list(median_attribs.keys()), xticks)\n",
-    "    plt.show()\n",
-    "\n",
-    "bar_plot_with_uncertainty(median_attribs, uncertainty_attribs)"
+    "gcm.util.bar_plot(median_attribs, uncertainty_attribs, 'Attribution Score')"
    ]
   },
   {
@@ -433,6 +417,8 @@
    },
    "outputs": [],
    "source": [
+    "import numpy as np\n",
+    "\n",
     "median_attribs, uncertainty_attribs = gcm.confidence_intervals(\n",
     "    lambda : gcm.distribution_change(causal_model,\n",
     "                                     normal_data.sample(frac=0.6),\n",
@@ -441,7 +427,7 @@
     "                                     difference_estimation_func=lambda x, y: np.mean(y) - np.mean(x)),\n",
     "    num_bootstrap_resamples = 10)\n",
     "\n",
-    "bar_plot_with_uncertainty(median_attribs, uncertainty_attribs)"
+    "gcm.util.bar_plot(median_attribs, uncertainty_attribs, 'Attribution Score')"
    ]
   },
   {
@@ -504,13 +490,13 @@
    "outputs": [],
    "source": [
     "avg_website_latency_before = outlier_data.mean().to_dict()['Website']\n",
-    "bar_plot_with_uncertainty(dict(before=avg_website_latency_before, after=median_mean_latencies['Website']),\n",
-    "                          dict(before=np.array([avg_website_latency_before, avg_website_latency_before]), after=uncertainty_mean_latencies['Website']),\n",
-    "                          ylabel='Avg. Website Latency',\n",
-    "                          figsize=(3, 2),\n",
-    "                          bwidth=0.4,\n",
-    "                          xticks=['Before', 'After'],\n",
-    "                          xticks_rotation=45)"
+    "gcm.util.bar_plot(dict(before=avg_website_latency_before, after=median_mean_latencies['Website']),\n",
+    "                  dict(before=np.array([avg_website_latency_before, avg_website_latency_before]), after=uncertainty_mean_latencies['Website']),\n",
+    "                  ylabel='Avg. Website Latency',\n",
+    "                  figure_size=(3, 2),\n",
+    "                  bar_width=0.4,\n",
+    "                  xticks=['Before', 'After'],\n",
+    "                  xticks_rotation=45)"
    ]
   },
   {
