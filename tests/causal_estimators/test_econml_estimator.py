@@ -197,7 +197,7 @@ class TestEconMLEstimator:
         )
 
     def test_multivalue_treatment(self):
-        n_points = 10000
+        n_points = 100000
         impact = {0: 0.0, 1: 2.0, 2: 1.0}
         df = pd.DataFrame(
             {
@@ -235,7 +235,7 @@ class TestEconMLEstimator:
         est_test = est_2.estimator.effect_tt(test_data)
 
         est_error = (est_test - test_data["T"].apply(lambda x: impact[x]).values).abs().max()
-        assert est_error < 0.01
+        assert est_error < 0.03
 
     def test_empty_effect_modifiers(self):
         np.random.seed(101)
