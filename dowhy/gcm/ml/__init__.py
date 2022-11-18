@@ -25,3 +25,8 @@ from .regression import (
     create_ridge_regressor,
     create_support_vector_regressor,
 )
+
+try:
+    from dowhy.gcm.ml.autolguon import AutoGluonClassifier, AutoGluonRegressor
+except ImportError:
+    pass
