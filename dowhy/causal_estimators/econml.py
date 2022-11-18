@@ -128,9 +128,7 @@ class Econml(CausalEstimator):
                 filtered_rows = self._data.where(self._target_units)
                 boolean_criterion = np.array(filtered_rows.notnull().iloc[:, 0])
                 X_test = X[boolean_criterion]
-
         # Changing shape to a list for a singleton value
-
         self._treatment_value = parse_state(self._treatment_value)
 
         est = self.effect(X_test)
@@ -184,10 +182,15 @@ class Econml(CausalEstimator):
         assert not isinstance(self._treatment_value, str)
         assert is_sequence(self._treatment_value)
 
+        if df is None:
+            filtered_df = None
+        else:
+            filtered_df = df[self._effect_modifier_names].values
+
         for tv in self._treatment_value:
             ests.append(
                 fun(
-                    df,
+                    filtered_df,
                     T0=self._control_value,
                     T1=tv,
                     *args,
@@ -198,29 +201,22 @@ class Econml(CausalEstimator):
         return est
 
     def effect(self, df: pd.DataFrame, *args, **kwargs) -> np.ndarray:
-        def effect_fun(df, T0, T1, *args, **kwargs):
-            return self.estimator.effect(df[self._effect_modifier_names].values, T0=T0, T1=T1, *args, **kwargs)
+        def effect_fun(filtered_df, T0, T1, *args, **kwargs):
+            return self.estimator.effect(filtered_df, T0=T0, T1=T1, *args, **kwargs)
 
         return self.apply_multitreatment(df, effect_fun, *args, **kwargs)
 
     def effect_interval(self, df: pd.DataFrame, *args, **kwargs) -> np.ndarray:
-        def effect_interval_fun(df, T0, T1, *args, **kwargs):
+        def effect_interval_fun(filtered_df, T0, T1, *args, **kwargs):
             return self.estimator.effect_interval(
-                df[self._effect_modifier_names].values,
-                T0=T0,
-                T1=T1,
-                alpha=1 - self.confidence_level,
-                *args,
-                **kwargs,
+                filtered_df, T0=T0, T1=T1, alpha=1 - self.confidence_level, *args, **kwargs
             )
 
         return self.apply_multitreatment(df, effect_interval_fun, *args, **kwargs)
 
     def effect_inference(self, df: pd.DataFrame, *args, **kwargs):
-        def effect_inference_fun(df, T0, T1, *args, **kwargs):
-            return self.estimator.effect_inference(
-                df[self._effect_modifier_names].values, T0=T0, T1=T1, *args, **kwargs
-            )
+        def effect_inference_fun(filtered_df, T0, T1, *args, **kwargs):
+            return self.estimator.effect_inference(filtered_df, T0=T0, T1=T1, *args, **kwargs)
 
         return self.apply_multitreatment(df, effect_inference_fun, *args, **kwargs)
 
@@ -235,15 +231,8 @@ class Econml(CausalEstimator):
         eff = self.effect(df, *args, **kwargs).reshape((len(df), len(self._treatment_value)))
 
         out = np.zeros(len(df))
-        if is_sequence(self._treatment_value) and not isinstance(self._treatment_value, str):
-            treatment_value = self._treatment_value
-        else:
-            treatment_value = [self._treatment_value]
-
-        if is_sequence(self._treatment_name) and not isinstance(self._treatment_name, str):
-            treatment_name = self._treatment_name[0]
-        else:
-            treatment_name = self._treatment_name
+        treatment_value = parse_state(self._treatment_value)
+        treatment_name = parse_state(self._treatment_name)[0]
 
         eff = np.reshape(eff, (len(df), len(treatment_value)))
 
