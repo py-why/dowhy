@@ -9,6 +9,7 @@ from sklearn.pipeline import Pipeline
 
 from dowhy.gcm import ProbabilisticCausalModel
 from dowhy.gcm.auto import AssignmentQuality, assign_causal_mechanisms
+from dowhy.gcm.ml import AutoGluonClassifier, AutoGluonRegressor
 
 
 def _generate_linear_regression_data():
@@ -203,3 +204,15 @@ def test_when_auto_called_from_main_namespace_returns_no_attribute_error():
     from dowhy import gcm
 
     _ = gcm.auto.AssignmentQuality.GOOD
+
+
+def test_when_using_best_quality_then_returns_auto_gluon_model():
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([("X", "Y")]))
+
+    assign_causal_mechanisms(causal_model, pd.DataFrame({"X": [1], "Y": [1]}), quality=AssignmentQuality.BEST)
+    assert isinstance(causal_model.causal_mechanism("Y").prediction_model, AutoGluonRegressor)
+
+    assign_causal_mechanisms(
+        causal_model, pd.DataFrame({"X": [1], "Y": ["Class 1"]}), quality=AssignmentQuality.BEST, override_models=True
+    )
+    assert isinstance(causal_model.causal_mechanism("Y").classifier_model, AutoGluonClassifier)
