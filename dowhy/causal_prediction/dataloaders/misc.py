@@ -3,11 +3,12 @@
 """misc helper functions
 """
 
-from collections import OrderedDict, Counter
 import hashlib
+from collections import Counter, OrderedDict
 
 import numpy as np
 import torch
+
 
 def make_weights_for_balanced_classes(dataset):
     counts = Counter()
@@ -29,16 +30,21 @@ def make_weights_for_balanced_classes(dataset):
 
     return weights
 
+
 class _SplitDataset(torch.utils.data.Dataset):
     """Used by split_dataset"""
+
     def __init__(self, underlying_dataset, keys):
         super(_SplitDataset, self).__init__()
         self.underlying_dataset = underlying_dataset
         self.keys = keys
+
     def __getitem__(self, key):
         return self.underlying_dataset[self.keys[key]]
+
     def __len__(self):
         return len(self.keys)
+
 
 def split_dataset(dataset, n, seed=0):
     """
@@ -46,12 +52,13 @@ def split_dataset(dataset, n, seed=0):
     dataset, with n datapoints in the first dataset and the rest in the last,
     using the given random seed
     """
-    assert(n <= len(dataset))
+    assert n <= len(dataset)
     keys = list(range(len(dataset)))
     np.random.RandomState(seed).shuffle(keys)
     keys_1 = keys[:n]
     keys_2 = keys[n:]
     return _SplitDataset(dataset, keys_1), _SplitDataset(dataset, keys_2)
+
 
 def seed_hash(*args):
     """
@@ -59,4 +66,3 @@ def seed_hash(*args):
     """
     args_str = str(args)
     return int(hashlib.md5(args_str.encode("utf-8")).hexdigest(), 16) % (2**31)
-
