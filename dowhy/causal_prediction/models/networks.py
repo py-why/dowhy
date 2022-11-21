@@ -18,21 +18,22 @@ import torchvision.models
 
 class Identity(nn.Module):
     """An identity layer"""
+
     def __init__(self):
         super(Identity, self).__init__()
 
     def forward(self, x):
         return x
 
+
 class MLP(nn.Module):
     """Just  an MLP"""
+
     def __init__(self, n_inputs, n_outputs, mlp_width, mlp_depth, mlp_dropout):
         super(MLP, self).__init__()
         self.input = nn.Linear(n_inputs, mlp_width)
         self.dropout = nn.Dropout(mlp_dropout)
-        self.hiddens = nn.ModuleList([
-            nn.Linear(mlp_width, mlp_width)
-            for _ in range(mlp_depth-2)])
+        self.hiddens = nn.ModuleList([nn.Linear(mlp_width, mlp_width) for _ in range(mlp_depth - 2)])
         self.output = nn.Linear(mlp_width, n_outputs)
         self.n_outputs = n_outputs
 
@@ -46,8 +47,8 @@ class MLP(nn.Module):
             x = F.relu(x)
         x = self.output(x)
         return x
-    
-    
+
+
 class MNIST_MLP(nn.Module):
     def __init__(self, input_shape):
         super(MNIST_MLP, self).__init__()
@@ -56,16 +57,16 @@ class MNIST_MLP(nn.Module):
             nn.Linear(input_shape[0] * input_shape[1] * input_shape[2], hdim),
             nn.ReLU(True),
             nn.Linear(hdim, hdim),
-            nn.ReLU(True)
+            nn.ReLU(True),
         )
         self.n_outputs = hdim
-        
+
         for m in self.encoder:
             if isinstance(m, nn.Linear):
-                gain = nn.init.calculate_gain('relu')
+                gain = nn.init.calculate_gain("relu")
                 nn.init.xavier_uniform_(m.weight, gain=gain)
                 nn.init.zeros_(m.bias)
-    
+
     def forward(self, x):
         x = x.view(x.size(0), -1)
         return self.encoder(x)
@@ -73,7 +74,8 @@ class MNIST_MLP(nn.Module):
 
 class ResNet(torch.nn.Module):
     """ResNet with the softmax chopped off and the batchnorm frozen"""
-    def __init__(self, input_shape, resnet18=True, resnet_dropout=0.):
+
+    def __init__(self, input_shape, resnet18=True, resnet_dropout=0.0):
         super(ResNet, self).__init__()
         if resnet18:
             self.network = torchvision.models.resnet18(pretrained=True)
@@ -87,9 +89,7 @@ class ResNet(torch.nn.Module):
         if nc != 3:
             tmp = self.network.conv1.weight.data.clone()
 
-            self.network.conv1 = nn.Conv2d(
-                nc, 64, kernel_size=(7, 7),
-                stride=(2, 2), padding=(3, 3), bias=False)
+            self.network.conv1 = nn.Conv2d(nc, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
 
             for i in range(nc):
                 self.network.conv1.weight.data[:, i, :, :] = tmp[:, i % 3, :, :]
@@ -125,6 +125,7 @@ class MNIST_CNN(nn.Module):
     - adding a linear layer after the mean-pool in features hurts
         RotatedMNIST-100 generalization severely.
     """
+
     n_outputs = 128
 
     def __init__(self, input_shape):
@@ -190,6 +191,7 @@ def Classifier(in_features, out_features, is_nonlinear=False):
             torch.nn.ReLU(),
             torch.nn.Linear(in_features // 2, in_features // 4),
             torch.nn.ReLU(),
-            torch.nn.Linear(in_features // 4, out_features))
+            torch.nn.Linear(in_features // 4, out_features),
+        )
     else:
         return torch.nn.Linear(in_features, out_features)
