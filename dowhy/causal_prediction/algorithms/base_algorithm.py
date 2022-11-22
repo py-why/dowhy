@@ -5,6 +5,10 @@ from torch.nn import functional as F
 
 class Algorithm(pl.LightningModule):
     def __init__(self, model, optimizer, lr, weight_decay, betas, momentum):
+        """
+        This class implements the default methods for a Pytorch lightning module `pl.LightningModule`. 
+        Its methods are called when the `fit()` method is called. To know more about these methods, refer to https://pytorch-lightning.readthedocs.io/en/stable/common/lightning_module.html.
+        """
         super().__init__()
 
         self.model = model

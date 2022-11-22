@@ -109,7 +109,7 @@ class CACM(Algorithm):
         if "causal" in self.attr_types:
             if self.E_conditioned:
                 for i in range(nmb):
-                    unique_labels = torch.unique(targets[i])
+                    unique_labels = torch.unique(targets[i]) # find distinct labels in environment
                     unique_label_indices = []
                     for label in unique_labels:
                         label_ind = [ind for ind, j in enumerate(targets[i]) if j == label]
@@ -117,7 +117,7 @@ class CACM(Algorithm):
 
                     nulabels = unique_labels.shape[0]
                     for idx in range(nulabels):
-                        unique_attrs = torch.unique(causal_attribute_labels[i][unique_label_indices[idx]])
+                        unique_attrs = torch.unique(causal_attribute_labels[i][unique_label_indices[idx]]) # find distinct attributes in environment with same label
                         unique_attr_indices = []
                         for attr in unique_attrs:
                             single_attr = []
@@ -155,7 +155,7 @@ class CACM(Algorithm):
                             causal_attribute_labels[i][unique_label_indices[idx]]
                         )  # find distinct attributes in environment with same label
                         unique_attr_indices = []
-                        for attr in unique_attrs:
+                        for attr in unique_attrs: # storing indices with same attribute value and label
                             if attr not in overall_label_attr_vindices[label]:
                                 overall_label_attr_vindices[label][attr] = []
                                 overall_label_attr_eindices[label][attr] = []
@@ -167,7 +167,7 @@ class CACM(Algorithm):
                             overall_label_attr_eindices[label][attr].append(i)
                             unique_attr_indices.append(single_attr)
 
-                for y_val in overall_label_attr_vindices:
+                for y_val in overall_label_attr_vindices: # applying MMD penalty between distributions P(φ(x)|ai, y), P(φ(x)|aj, y) i.e samples with different attribute values but same label
                     tensors_list = []
                     for attr in overall_label_attr_vindices[y_val]:
                         attrs_list = []
