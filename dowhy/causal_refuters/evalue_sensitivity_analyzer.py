@@ -7,6 +7,7 @@ import pandas as pd
 import statsmodels.api as sm
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
+from dowhy.causal_estimators.econml import Econml
 from dowhy.causal_estimators.generalized_linear_model_estimator import GeneralizedLinearModelEstimator
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 from dowhy.causal_identifier import IdentifiedEstimand
@@ -257,7 +258,14 @@ class EValueSensitivityAnalyzer:
             new_backdoor_vars = [var for var in backdoor_vars if var != drop_var]
             new_estimand = copy.deepcopy(self.estimand)
             new_estimand.set_backdoor_variables(new_backdoor_vars)
-            new_estimator = self.estimate.estimator.get_estimator_object(self.data, new_estimand, self.estimate)
+            new_estimator = self.estimate.estimator.get_new_estimator_object(new_estimand)
+            new_estimator.fit(
+                self.data,
+                new_estimand.treatment_variable,
+                new_estimand.outcome_variable,
+                self.estimate.estimator._effect_modifier_names,
+                **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+            )
 
             # new effect estimate
             new_effect = new_estimator.estimate_effect(

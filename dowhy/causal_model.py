@@ -289,7 +289,7 @@ class CausalModel:
                     if method_params is None:
                         method_params = {}
                     # Define the third-party estimation method to be used
-                    method_params[third_party_estimator_package + "_methodname"] = estimator_name
+                    method_params[third_party_estimator_package + "_estimator"] = estimator_name
             else:  # For older dowhy methods
                 self.logger.info(estimator_name)
                 # Process the dowhy estimators
@@ -323,9 +323,6 @@ class CausalModel:
             causal_estimator,
             control_value,
             treatment_value,
-            test_significance,
-            evaluate_effect_strength,
-            confidence_intervals,
             target_units,
             effect_modifiers,
             fit_estimator,

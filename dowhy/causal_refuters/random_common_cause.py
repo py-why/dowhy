@@ -8,6 +8,7 @@ from joblib import Parallel, delayed
 from tqdm.auto import tqdm
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
+from dowhy.causal_estimators.econml import Econml
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 from dowhy.causal_refuter import CausalRefutation, CausalRefuter, test_significance
 
@@ -66,7 +67,14 @@ def _refute_once(
     else:
         new_data = data.assign(w_random=random_state.normal(size=data.shape[0]))
 
-    new_estimator = estimate.estimator.get_estimator_object(new_data, target_estimand, estimate)
+    new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
+    new_estimator.fit(
+        new_data,
+        target_estimand.treatment_variable,
+        target_estimand.outcome_variable,
+        estimate.estimator._effect_modifier_names,
+        **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+    )
     new_effect = new_estimator.estimate_effect(
         control_value=estimate.control_value,
         treatment_value=estimate.treatment_value,

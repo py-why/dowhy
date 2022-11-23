@@ -86,8 +86,9 @@ class RegressionEstimator(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        self.set_data(data, treatment_name, outcome_name)
-        self.set_effect_modifiers(effect_modifier_names)
+        self._set_data(data, treatment_name, outcome_name)
+        self._set_effect_modifiers(effect_modifier_names)
+
         self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
         self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
         if len(self._observed_common_causes_names) > 0:
@@ -98,6 +99,12 @@ class RegressionEstimator(CausalEstimator):
 
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
+
+        # The model is always built on the entire data
+        _, self.model = self._build_model()
+        coefficients = self.model.params[1:]  # first coefficient is the intercept
+        self.logger.debug("Coefficients of the fitted model: " + ",".join(map(str, coefficients)))
+        self.logger.debug(self.model.summary())
 
         return self
 
@@ -115,17 +122,8 @@ class RegressionEstimator(CausalEstimator):
         self._control_value = control_value
         data = data if data is not None else self._data
         # TODO make treatment_value and control value also as local parameters
-        if need_conditional_estimates is None:
-            need_conditional_estimates = self.need_conditional_estimates
-        # Checking if the model is already trained
-        if not self.model:
-            # The model is always built on the entire data
-            _, self.model = self._build_model()
-            coefficients = self.model.params[1:]  # first coefficient is the intercept
-            self.logger.debug("Coefficients of the fitted model: " + ",".join(map(str, coefficients)))
-            self.logger.debug(self.model.summary())
         # All treatments are set to the same constant value
-        effect_estimate = self._do(treatment_value, self._data) - self._do(control_value, self._data)
+        effect_estimate = self._do(treatment_value, data) - self._do(control_value, data)
         conditional_effect_estimates = None
         if need_conditional_estimates:
             conditional_effect_estimates = self._estimate_conditional_effects(

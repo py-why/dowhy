@@ -1,14 +1,31 @@
 import inspect
 from importlib import import_module
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional, Protocol, Union
+from warnings import warn
 
-import econml
 import numpy as np
 import pandas as pd
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from dowhy.causal_identifier import IdentifiedEstimand
 from dowhy.utils.api import parse_state
+
+
+class _EconmlEstimator(Protocol):
+    def fit(self, *args, **kwargs):
+        ...
+
+    def effect(self, *args, **kwargs):
+        ...
+
+    def effect_interval(self, *args, **kwargs):
+        ...
+
+    def effect_inference(self, *args, **kwargs):
+        ...
+
+    def shap_values(self, *args, **kwargs):
+        ...
 
 
 class Econml(CausalEstimator):
@@ -25,7 +42,7 @@ class Econml(CausalEstimator):
     def __init__(
         self,
         identified_estimand: IdentifiedEstimand,
-        econml_methodname: str,
+        econml_estimator: Union[_EconmlEstimator, str],
         test_significance: bool = False,
         evaluate_effect_strength: bool = False,
         confidence_intervals: bool = False,
@@ -62,8 +79,6 @@ class Econml(CausalEstimator):
         :param kwargs: (optional) Additional estimator-specific parameters
 
         """
-        # Required to ensure that self.method_params contains all the
-        # parameters to create an object of this class
         super().__init__(
             identified_estimand=identified_estimand,
             test_significance=test_significance,
@@ -75,14 +90,23 @@ class Econml(CausalEstimator):
             confidence_level=confidence_level,
             need_conditional_estimates=need_conditional_estimates,
             num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
-            econml_methodname=econml_methodname,
+            econml_estimator=econml_estimator,
             **kwargs,
         )
-        self._econml_methodname = econml_methodname
+
+        if isinstance(econml_estimator, str):
+            warn(
+                "Using a string to specify the value for econml_estimator is now deprecated, please provide an instance of a econml object",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            estimator_class = self._get_econml_class_object(econml_estimator)
+            self.estimator = estimator_class(**kwargs["init_params"])
+        else:
+            self.estimator = econml_estimator
+
         self.logger.info("INFO: Using EconML Estimator")
         self.identifier_method = self._target_estimand.identifier_method
-
-        self.estimator = None
 
     def fit(
         self,
@@ -90,6 +114,7 @@ class Econml(CausalEstimator):
         treatment_name: str,
         outcome_name: str,
         effect_modifier_names: Optional[List[str]] = None,
+        **kwargs,
     ):
         """
         Fits the estimator with data for effect estimation
@@ -100,12 +125,15 @@ class Econml(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        self.set_data(data, treatment_name, outcome_name)
-        self.set_effect_modifiers(effect_modifier_names)
+        self._set_data(data, treatment_name, outcome_name)
+        self._set_effect_modifiers(effect_modifier_names)
+
+        # Save parameters for later refutter fitting
+        self._econml_fit_params = kwargs
+
         self._observed_common_causes_names = self._target_estimand.get_backdoor_variables().copy()
 
-        (module_name, _, class_name) = self._econml_methodname.rpartition(".")
-        if module_name.endswith("metalearners"):
+        if self.estimator.__module__.endswith("metalearners"):
             effect_modifier_names = []
             if self._effect_modifier_names is not None:
                 effect_modifier_names = self._effect_modifier_names.copy()
@@ -113,7 +141,7 @@ class Econml(CausalEstimator):
             if len(w_diff_x) > 0:
                 self.logger.warn(
                     "Concatenating common_causes and effect_modifiers and providing a single list of variables to metalearner estimator method, "
-                    + class_name
+                    + self.estimator.__class__.__name__
                     + ". EconML metalearners accept a single X argument."
                 )
                 effect_modifier_names.extend(w_diff_x)
@@ -145,6 +173,28 @@ class Econml(CausalEstimator):
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
 
+        X = None
+        W = None  # common causes/ confounders
+        Z = None  # Instruments
+        Y = self._outcome
+        T = self._treatment
+        if self._effect_modifiers is not None and len(self._effect_modifiers) > 0:
+            X = self._effect_modifiers
+        if self._observed_common_causes_names:
+            W = self._observed_common_causes
+        if self.estimating_instrument_names:
+            Z = self._estimating_instruments
+        named_data_args = {"Y": Y, "T": T, "X": X, "W": W, "Z": Z}
+
+        # Calling the econml estimator's fit method
+        estimator_argspec = inspect.getfullargspec(inspect.unwrap(self.estimator.fit))
+        # As of v0.9, econml has some kewyord only arguments
+        estimator_named_args = estimator_argspec.args + estimator_argspec.kwonlyargs
+        estimator_data_args = {
+            arg: named_data_args[arg] for arg in named_data_args.keys() if arg in estimator_named_args
+        }
+        self.estimator.fit(**estimator_data_args, **kwargs)
+
         return self
 
     def _get_econml_class_object(self, module_method_name, *args, **kwargs):
@@ -162,38 +212,15 @@ class Econml(CausalEstimator):
             )
         return estimator_class
 
-    def estimate_effect(
-        self, treatment_value: Any = 1, control_value: Any = 0, confidence_intervals=False, target_units=None, **_
-    ):
+    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_):
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
+
         n_samples = self._treatment.shape[0]
         X = None  # Effect modifiers
-        W = None  # common causes/ confounders
-        Z = None  # Instruments
-        Y = self._outcome
-        T = self._treatment
         if self._effect_modifiers is not None and len(self._effect_modifiers) > 0:
             X = self._effect_modifiers
-        if self._observed_common_causes_names:
-            W = self._observed_common_causes
-        if self.estimating_instrument_names:
-            Z = self._estimating_instruments
-        named_data_args = {"Y": Y, "T": T, "X": X, "W": W, "Z": Z}
-
-        if self.estimator is None:
-            estimator_class = self._get_econml_class_object(self._econml_methodname)
-            self.estimator = estimator_class(**self.method_params["init_params"])
-            # Calling the econml estimator's fit method
-            estimator_argspec = inspect.getfullargspec(inspect.unwrap(self.estimator.fit))
-            # As of v0.9, econml has some kewyord only arguments
-            estimator_named_args = estimator_argspec.args + estimator_argspec.kwonlyargs
-            estimator_data_args = {
-                arg: named_data_args[arg] for arg in named_data_args.keys() if arg in estimator_named_args
-            }
-            if self.method_params["fit_params"] is not False:
-                self.estimator.fit(**estimator_data_args, **self.method_params["fit_params"])
 
         X_test = X
         n_target_units = n_samples
@@ -217,7 +244,6 @@ class Econml(CausalEstimator):
         ate = np.mean(est)
 
         self.effect_intervals = None
-        self._confidence_intervals = confidence_intervals
         if self._confidence_intervals:
             self.effect_intervals = self.estimator.effect_interval(
                 X_test, T0=T0_test, T1=T1_test, alpha=1 - self.confidence_level
@@ -246,8 +272,7 @@ class Econml(CausalEstimator):
     def construct_symbolic_estimator(self, estimand):
         expr = "b: " + ", ".join(estimand.outcome_variable) + "~"
         # TODO -- fix: we are actually conditioning on positive treatment (d=1)
-        (module_name, _, class_name) = self._econml_methodname.rpartition(".")
-        if module_name.endswith("metalearners"):
+        if self.estimator.__module__.endswith("metalearners"):
             var_list = estimand.treatment_variable + self._effect_modifier_names
             expr += "+".join(var_list)
         else:

@@ -12,6 +12,7 @@ from sklearn.preprocessing import StandardScaler
 from tqdm.auto import tqdm
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
+from dowhy.causal_estimators.econml import Econml
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 from dowhy.causal_estimators.regression_estimator import RegressionEstimator
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
@@ -693,24 +694,27 @@ def sensitivity_non_parametric_partial_r2(
     import dowhy.causal_estimators.econml
 
     # If the estimator used is LinearDML, partially linear sensitivity analysis will be automatically chosen
-    if isinstance(estimate.estimator, dowhy.causal_estimators.econml.Econml):
-        if estimate.estimator._econml_methodname == "econml.dml.LinearDML":
-            analyzer = PartialLinearSensitivityAnalyzer(
-                estimator=estimate._estimator_object,
-                observed_common_causes=estimate.estimator._observed_common_causes,
-                treatment=estimate.estimator._treatment,
-                outcome=estimate.estimator._outcome,
-                alpha_s_estimator_param_list=alpha_s_estimator_param_list,
-                g_s_estimator_list=g_s_estimator_list,
-                g_s_estimator_param_list=g_s_estimator_param_list,
-                effect_strength_treatment=kappa_t,
-                effect_strength_outcome=kappa_y,
-                benchmark_common_causes=benchmark_common_causes,
-                frac_strength_treatment=frac_strength_treatment,
-                frac_strength_outcome=frac_strength_outcome,
-            )
-            analyzer.check_sensitivity(plot=plot_estimate)
-            return analyzer
+    if (
+        isinstance(estimate.estimator, dowhy.causal_estimators.econml.Econml)
+        and estimate.estimator.estimator.__class__.__name__ == "LinearDML"
+    ):
+
+        analyzer = PartialLinearSensitivityAnalyzer(
+            estimator=estimate._estimator_object,
+            observed_common_causes=estimate.estimator._observed_common_causes,
+            treatment=estimate.estimator._treatment,
+            outcome=estimate.estimator._outcome,
+            alpha_s_estimator_param_list=alpha_s_estimator_param_list,
+            g_s_estimator_list=g_s_estimator_list,
+            g_s_estimator_param_list=g_s_estimator_param_list,
+            effect_strength_treatment=kappa_t,
+            effect_strength_outcome=kappa_y,
+            benchmark_common_causes=benchmark_common_causes,
+            frac_strength_treatment=frac_strength_treatment,
+            frac_strength_outcome=frac_strength_outcome,
+        )
+        analyzer.check_sensitivity(plot=plot_estimate)
+        return analyzer
 
     analyzer = NonParametricSensitivityAnalyzer(
         estimator=estimate.estimator,
@@ -817,7 +821,14 @@ def sensitivity_simulation(
             outcome_name,
             kappa_y,
         )
-        new_estimator = estimate.estimator.get_estimator_object(new_data, target_estimand, estimate)
+        new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
+        new_estimator.fit(
+            new_data,
+            target_estimand.treatment_variable,
+            target_estimand.outcome_variable,
+            estimate.estimator._effect_modifier_names,
+            **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+        )
         new_effect = new_estimator.estimate_effect(
             control_value=estimate.control_value,
             treatment_value=estimate.treatment_value,
@@ -859,7 +870,14 @@ def sensitivity_simulation(
                         outcome_name,
                         kappa_y[j],
                     )
-                    new_estimator = estimate.estimator.get_estimator_object(new_data, target_estimand, estimate)
+                    new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
+                    new_estimator.fit(
+                        new_data,
+                        target_estimand.treatment_variable,
+                        target_estimand.outcome_variable,
+                        estimate.estimator._effect_modifier_names,
+                        **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+                    )
                     new_effect = new_estimator.estimate_effect(
                         control_value=estimate.control_value,
                         treatment_value=estimate.treatment_value,
@@ -930,7 +948,14 @@ def sensitivity_simulation(
                     outcome_name,
                     kappa_y,
                 )
-                new_estimator = estimate.estimator.get_estimator_object(new_data, target_estimand, estimate)
+                new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
+                new_estimator.fit(
+                    new_data,
+                    target_estimand.treatment_variable,
+                    target_estimand.outcome_variable,
+                    estimate.estimator._effect_modifier_names,
+                    **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+                )
                 new_effect = new_estimator.estimate_effect(
                     control_value=estimate.control_value,
                     treatment_value=estimate.treatment_value,
@@ -983,7 +1008,14 @@ def sensitivity_simulation(
                     outcome_name,
                     kappa_y[i],
                 )
-                new_estimator = estimate.estimator.get_estimator_object(new_data, target_estimand, estimate)
+                new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
+                new_estimator.fit(
+                    new_data,
+                    target_estimand.treatment_variable,
+                    target_estimand.outcome_variable,
+                    estimate.estimator._effect_modifier_names,
+                    **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+                )
                 new_effect = new_estimator.estimate_effect(
                     control_value=estimate.control_value,
                     treatment_value=estimate.treatment_value,

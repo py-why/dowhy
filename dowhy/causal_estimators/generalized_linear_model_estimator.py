@@ -64,8 +64,6 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
 
 
         """
-        # Required to ensure that self.method_params contains all the
-        # parameters needed to create an object of this class
         super().__init__(
             identified_estimand=identified_estimand,
             test_significance=test_significance,
@@ -106,11 +104,7 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        super().fit(data, treatment_name, outcome_name, effect_modifier_names=effect_modifier_names)
-        # Checking if Y is binary
-        outcome_values = self._data[self._outcome_name].astype(int).unique()
-        self.outcome_is_binary = all([v in [0, 1] for v in outcome_values])
-        return self
+        return super().fit(data, treatment_name, outcome_name, effect_modifier_names=effect_modifier_names)
 
     def _build_model(self):
         features = self._build_features()
@@ -118,7 +112,11 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
         return (features, model)
 
     def predict_fn(self, model, features):
-        if self.outcome_is_binary:
+        # Checking if Y is binary
+        outcome_values = self._data[self._outcome_name].astype(int).unique()
+        outcome_is_binary = all([v in [0, 1] for v in outcome_values])
+
+        if outcome_is_binary:
             if self.predict_score:
                 return model.predict(features)
             else:

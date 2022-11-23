@@ -1,3 +1,4 @@
+import copy
 import logging
 from collections import namedtuple
 from typing import Dict, List, Optional, Union
@@ -58,7 +59,7 @@ class CausalEstimator:
         confidence_level: float = DEFAULT_CONFIDENCE_LEVEL,
         need_conditional_estimates: Union[bool, str] = "auto",
         num_quantiles_to_discretize_cont_cols: int = NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
-        **kwargs,
+        **_,
     ):
         """Initializes an estimator with data and names of relevant variables.
 
@@ -92,7 +93,6 @@ class CausalEstimator:
         self._effect_strength_eval = evaluate_effect_strength
         self._confidence_intervals = confidence_intervals
 
-        self.method_params = kwargs
         # Setting the default interpret method
         self.interpret_method = CausalEstimator.DEFAULT_INTERPRET_METHOD
 
@@ -110,21 +110,21 @@ class CausalEstimator:
         self._bootstrap_estimates = None
         self._bootstrap_null_estimates = None
 
-    def set_data(self, data: pd.DataFrame, treatment_name: List[str], outcome_name: List[str]):
+    def _set_data(self, data: pd.DataFrame, treatment_name: List[str], outcome_name: List[str]):
         """Sets the data for the estimator
         :param data: data frame containing the data
-        :param treatment: name of the treatment variable
-        :param outcome: name of the outcome variable
+        :param treatment_name: name of the treatment variable
+        :param outcome_name: name of the outcome variable
         """
-        # Currently estimation methods only support univariate treatment and outcome
         self._data = data
         self._treatment_name = treatment_name
         self._outcome_name = outcome_name[0]
         self._treatment = self._data[self._treatment_name]
         self._outcome = self._data[self._outcome_name]
 
-    def set_effect_modifiers(self, effect_modifier_names: Optional[List[str]] = None):
+    def _set_effect_modifiers(self, effect_modifier_names: Optional[List[str]] = None):
         """Sets the effect modifiers for the estimator
+        Modifies need_conditional_estimates accordingly to effect modifiers value
         :param effect_modifiers: Variables on which to compute separate
             effects, or return a heterogeneous effect function. Not all
             methods support this currently.
@@ -147,37 +147,38 @@ class CausalEstimator:
             else (self._effect_modifier_names and len(self._effect_modifier_names) > 0)
         )
 
-    def get_estimator_object(self, new_data, identified_estimand, estimate, fit_estimator=True):
+    def _set_identified_estimand(self, new_identified_estimand):
+        """Method used internally to change the target estimand (required by some refuters)
+
+        :param new_identified_estimand: The new target_estimand to use
+        """
+        self._target_estimand = new_identified_estimand
+
+    def get_new_estimator_object(
+        self,
+        identified_estimand,
+        test_significance=False,
+        evaluate_effect_strength=False,
+        confidence_intervals=None,
+    ):
         """Create a new estimator of the same type as the one passed in the estimate argument.
 
-        Creates a new object with new_data and the identified_estimand
+        Creates a new object with the identified_estimand
 
-        :param new_data: np.ndarray, pd.Series, pd.DataFrame
-            The newly assigned data on which the estimator should run
         :param identified_estimand: IdentifiedEstimand
             An instance of the identified estimand class that provides the information with
             respect to which causal pathways are employed when the treatment effects the outcome
-        :param estimate: CausalEstimate
-            It is an already existing estimate whose properties we wish to replicate
 
-        :returns: An instance of the same estimator class that had generated the given estimate.
+        :returns: A new instance of the same estimator class that had generated the given estimate.
         """
-        new_estimator = type(self)(
-            identified_estimand,
-            test_significance=False,
-            evaluate_effect_strength=False,
-            confidence_intervals=self._confidence_intervals,
-            **self.method_params if self.method_params is not None else {},
-        )
+        new_estimator = copy.deepcopy(self)
 
-        if fit_estimator:
-            new_estimator.fit(
-                new_data,
-                # names of treatment and outcome
-                identified_estimand.treatment_variable,
-                identified_estimand.outcome_variable,
-                effect_modifier_names=self._effect_modifier_names,
-            )
+        new_estimator._target_estimand = identified_estimand
+        new_estimator._test_significance = test_significance
+        new_estimator._evaluate_effect_strength = evaluate_effect_strength
+        new_estimator._confidence_intervals = (
+            self._confidence_intervals if confidence_intervals is None else confidence_intervals
+        )
 
         return new_estimator
 
@@ -287,13 +288,12 @@ class CausalEstimator:
         # Perform the set number of simulations
         for index in range(num_bootstrap_simulations):
             new_data = resample(self._data, n_samples=sample_size)
-            new_estimator = type(self)(
+            new_estimator = self.get_new_estimator_object(
                 self._target_estimand,
                 # names of treatment and outcome
                 test_significance=False,
                 evaluate_effect_strength=False,
                 confidence_intervals=False,
-                **self.method_params,
             )
             new_estimator.fit(
                 new_data,
@@ -305,7 +305,6 @@ class CausalEstimator:
                 treatment_value=self._treatment_value,
                 control_value=self._control_value,
                 target_units=self._target_units,
-                **self.method_params,
             )
             simulation_results[index] = new_effect.value
 
@@ -491,12 +490,11 @@ class CausalEstimator:
                 new_outcome = np.random.permutation(self._outcome)
                 new_data = self._data.assign(dummy_outcome=new_outcome)
                 # self._outcome = self._data["dummy_outcome"]
-                new_estimator = type(self)(
+                new_estimator = self.get_new_estimator_object(
                     self._target_estimand,
                     test_significance=False,
                     evaluate_effect_strength=False,
                     confidence_intervals=False,
-                    **self.method_params,
                 )
                 new_estimator.fit(
                     data=new_data,
@@ -507,7 +505,6 @@ class CausalEstimator:
 
                 new_effect = new_estimator.estimate_effect(
                     target_units=self._target_units,
-                    **self.method_params,
                 )
                 null_estimates[i] = new_effect.value
             self._bootstrap_null_estimates = CausalEstimator.BootstrapEstimates(
@@ -665,9 +662,6 @@ def estimate_effect(
     estimator: CausalEstimator,
     control_value: int = 0,
     treatment_value: int = 1,
-    test_significance: Optional[bool] = None,
-    evaluate_effect_strength: bool = False,
-    confidence_intervals: bool = False,
     target_units: str = "ate",
     effect_modifiers: List[str] = None,
     fit_estimator: bool = True,
@@ -694,14 +688,10 @@ def estimate_effect(
     :param method_name: name of the estimation method to be used.
     :param control_value: Value of the treatment in the control group, for effect estimation.  If treatment is multi-variate, this can be a list.
     :param treatment_value: Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.
-    :param test_significance: Binary flag on whether to additionally do a statistical signficance test for the estimate.
-    :param evaluate_effect_strength: (Experimental) Binary flag on whether to estimate the relative strength of the treatment's effect. This measure can be used to compare different treatments for the same outcome (by running this method with different treatments sequentially).
-    :param confidence_intervals: (Experimental) Binary flag indicating whether confidence intervals should be computed.
     :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be of three types. (1) a string for common specifications of target units (namely, "ate", "att" and "atc"), (2) a lambda function that can be used as an index for the data (pandas DataFrame), or (3) a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
     :param effect_modifiers: Names of effect modifier variables can be (optionally) specified here too, since they do not affect identification. If None, the effect_modifiers from the CausalModel are used.
     :param fit_estimator: Boolean flag on whether to fit the estimator.
         Setting it to False is useful to estimate the effect on new data using a previously fitted estimator.
-    :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method. See the docs for each estimation method for allowed method-specific params.
     :returns: An instance of the CausalEstimate class, containing the causal effect estimate
         and other method-dependent information
     """
@@ -732,13 +722,14 @@ def estimate_effect(
             treatment_name=treatment,
             outcome_name=outcome,
             effect_modifier_names=effect_modifiers,
+            **method_params["fit_params"] if "fit_params" in method_params else {},
         )
 
     estimate = estimator.estimate_effect(
         treatment_value=treatment_value,
         control_value=control_value,
         target_units=target_units,
-        confidence_intervals=confidence_intervals,
+        confidence_intervals=estimator._confidence_intervals,
     )
 
     # Store parameters inside estimate object for refutation methods
@@ -747,12 +738,11 @@ def estimate_effect(
     estimate.add_params(
         estimand_type=identified_estimand.estimand_type,
         estimator_class=causal_estimator_class,
-        test_significance=test_significance,
-        evaluate_effect_strength=evaluate_effect_strength,
-        confidence_intervals=confidence_intervals,
+        test_significance=estimator._significance_test,
+        evaluate_effect_strength=estimator._effect_strength_eval,
+        confidence_intervals=estimator._confidence_intervals,
         target_units=target_units,
         effect_modifiers=effect_modifiers,
-        method_params=method_params,
     )
 
     if estimator._significance_test:

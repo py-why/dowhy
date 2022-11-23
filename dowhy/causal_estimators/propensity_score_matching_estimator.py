@@ -34,7 +34,6 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
         need_conditional_estimates: Union[bool, str] = "auto",
         num_quantiles_to_discretize_cont_cols: int = CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
         propensity_score_model: Optional[Any] = None,
-        recalculate_propensity_score: bool = True,
         propensity_score_column: str = "propensity_score",
         **kwargs,
     ):
@@ -61,9 +60,6 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
         :param propensity_score_model: Model used to compute propensity score.
             Can be any classification model that supports fit() and
             predict_proba() methods. If None, LogisticRegression is used.
-        :param recalculate_propensity_score: Whether the propensity score
-            should be estimated. To use pre-computed propensity scores,
-            set this value to False. Default=True.
         :param propensity_score_column: Column name that stores the
             propensity score. Default='propensity_score'
         :param kwargs: (optional) Additional estimator-specific parameters
@@ -81,7 +77,6 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
             need_conditional_estimates=need_conditional_estimates,
             num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
             propensity_score_model=propensity_score_model,
-            recalculate_propensity_score=recalculate_propensity_score,
             propensity_score_column=propensity_score_column,
             **kwargs,
         )
@@ -114,7 +109,8 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
-        self._refresh_propensity_score()
+        if self.propensity_score_column not in self._data:
+            self.estimate_propensity_score_column()
 
         # this assumes a binary treatment regime
         treated = self._data.loc[self._data[self._treatment_name[0]] == 1]

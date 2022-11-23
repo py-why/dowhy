@@ -54,8 +54,6 @@ class LinearRegressionEstimator(RegressionEstimator):
             estimation of conditional treatment effect over it.
         :param kwargs: (optional) Additional estimator-specific parameters
         """
-        # Required to ensure that self.method_params contains all the
-        # parameters to create an object of this class
         super().__init__(
             identified_estimand=identified_estimand,
             test_significance=test_significance,

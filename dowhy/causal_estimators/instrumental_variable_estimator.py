@@ -26,6 +26,7 @@ class InstrumentalVariableEstimator(CausalEstimator):
     def __init__(
         self,
         identified_estimand: IdentifiedEstimand,
+        iv_instrument_name: Optional[Union[List, Dict, str]] = None,
         test_significance: bool = False,
         evaluate_effect_strength: bool = False,
         confidence_intervals: bool = False,
@@ -40,6 +41,10 @@ class InstrumentalVariableEstimator(CausalEstimator):
         """
         :param identified_estimand: probability expression
             representing the target identified estimand to estimate.
+        :param iv_instrument_name: Name of the specific instrumental variable
+            to be used. Needs to be one of the IVs identified in the
+            identification step. Default is to use all the IV variables
+            from the identification step.
         :param test_significance: Binary flag or a string indicating whether to test significance and by which method. All estimators support test_significance="bootstrap" that estimates a p-value for the obtained estimate using the bootstrap method. Individual estimators can override this to support custom testing methods. The bootstrap method supports an optional parameter, num_null_simulations. If False, no testing is done. If True, significance of the estimate is tested using the custom method if available, otherwise by bootstrap.
         :param evaluate_effect_strength: (Experimental) whether to evaluate the strength of effect
         :param confidence_intervals: Binary flag or a string indicating whether the confidence intervals should be computed and which method should be used. All methods support estimation of confidence intervals using the bootstrap method by using the parameter confidence_intervals="bootstrap". The bootstrap method takes in two arguments (num_simulations and sample_size_fraction) that can be optionally specified in the params dictionary. Estimators may also override this to implement their own confidence interval method. If this parameter is False, no confidence intervals are computed. If True, confidence intervals are computed by the estimator's specific method if available, otherwise through bootstrap
@@ -57,7 +62,6 @@ class InstrumentalVariableEstimator(CausalEstimator):
         :param num_quantiles_to_discretize_cont_cols: The number of quantiles
             into which a numeric effect modifier is split, to enable
             estimation of conditional treatment effect over it.
-
         :param kwargs: (optional) Additional estimator-specific parameters
         """
         super().__init__(
@@ -71,8 +75,10 @@ class InstrumentalVariableEstimator(CausalEstimator):
             confidence_level=confidence_level,
             need_conditional_estimates=need_conditional_estimates,
             num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
+            iv_instrument_name=iv_instrument_name,
             **kwargs,
         )
+        self.iv_instrument_name = iv_instrument_name
         self.logger.info("INFO: Using Instrumental Variable Estimator")
 
     def fit(
@@ -80,7 +86,6 @@ class InstrumentalVariableEstimator(CausalEstimator):
         data: pd.DataFrame,
         treatment_name: str,
         outcome_name: str,
-        iv_instrument_name: Optional[Union[List, Dict, str]] = None,
         effect_modifier_names: Optional[List[str]] = None,
     ):
         """
@@ -88,20 +93,16 @@ class InstrumentalVariableEstimator(CausalEstimator):
         :param data: data frame containing the data
         :param treatment: name of the treatment variable
         :param outcome: name of the outcome variable
-        :param iv_instrument_name: Name of the specific instrumental variable
-            to be used. Needs to be one of the IVs identified in the
-            identification step. Default is to use all the IV variables
-            from the identification step.
         :param effect_modifiers: Variables on which to compute separate
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        self.set_data(data, treatment_name, outcome_name)
-        self.set_effect_modifiers(effect_modifier_names)
+        self._set_data(data, treatment_name, outcome_name)
+        self._set_effect_modifiers(effect_modifier_names)
 
         self.estimating_instrument_names = self._target_estimand.instrumental_variables
-        if iv_instrument_name is not None:
-            self.estimating_instrument_names = parse_state(iv_instrument_name)
+        if self.iv_instrument_name is not None:
+            self.estimating_instrument_names = parse_state(self.iv_instrument_name)
         self.logger.debug("Instrumental Variables used:" + ",".join(self.estimating_instrument_names))
         if not self.estimating_instrument_names:
             raise ValueError("No valid instruments found. IV Method not applicable")

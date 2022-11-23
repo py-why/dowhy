@@ -1,5 +1,5 @@
 import copy
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -40,8 +40,8 @@ class TwoStageRegressionEstimator(CausalEstimator):
         confidence_level: float = CausalEstimator.DEFAULT_CONFIDENCE_LEVEL,
         need_conditional_estimates: Union[bool, str] = "auto",
         num_quantiles_to_discretize_cont_cols: int = CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
-        first_stage_model: Optional[CausalEstimator] = None,
-        second_stage_model: Optional[CausalEstimator] = None,
+        first_stage_model: Optional[Union[CausalEstimator, Type[CausalEstimator]]] = None,
+        second_stage_model: Optional[Union[CausalEstimator, Type[CausalEstimator]]] = None,
         **kwargs,
     ):
         """
@@ -70,8 +70,6 @@ class TwoStageRegressionEstimator(CausalEstimator):
             is linear regression.
         :param kwargs: (optional) Additional estimator-specific parameters
         """
-        # Required to ensure that self.method_params contains all the
-        # parameters needed to create an object of this class
         super().__init__(
             identified_estimand=identified_estimand,
             test_significance=test_significance,
@@ -89,47 +87,61 @@ class TwoStageRegressionEstimator(CausalEstimator):
         )
         self.logger.info("INFO: Using Two Stage Regression Estimator")
         # Check if the treatment is one-dimensional
-
+        modified_target_estimand = copy.deepcopy(self._target_estimand)
         if first_stage_model is not None:
-            self.first_stage_model = first_stage_model
+            self._first_stage_model = (
+                first_stage_model
+                if isinstance(first_stage_model, CausalEstimator)
+                else first_stage_model(
+                    modified_target_estimand,
+                    test_significance=self._significance_test,
+                    evaluate_effect_strength=self._effect_strength_eval,
+                    confidence_intervals=self._confidence_intervals,
+                    **kwargs,
+                )
+            )
         else:
-            self.first_stage_model = self.__class__.DEFAULT_FIRST_STAGE_MODEL
-            self.logger.warning("First stage model not provided. Defaulting to sklearn.linear_model.LinearRegression.")
-        if second_stage_model is not None:
-            self.second_stage_model = second_stage_model
-        else:
-            self.second_stage_model = self.__class__.DEFAULT_SECOND_STAGE_MODEL
-            self.logger.warning("Second stage model not provided. Defaulting to backdoor.linear_regression.")
-
-        modified_target_estimand = copy.deepcopy(self._target_estimand)
-
-        self._first_stage_model_obj = self.first_stage_model(
-            modified_target_estimand,
-            test_significance=self._significance_test,
-            evaluate_effect_strength=self._effect_strength_eval,
-            confidence_intervals=self._confidence_intervals,
-            **self.method_params,
-        )
-
-        # Second Stage
-        modified_target_estimand = copy.deepcopy(self._target_estimand)
-
-        self._second_stage_model_obj = self.second_stage_model(
-            modified_target_estimand,
-            test_significance=self._significance_test,
-            evaluate_effect_strength=self._effect_strength_eval,
-            confidence_intervals=self._confidence_intervals,
-            **self.method_params,
-        )
-
-        if self._target_estimand.estimand_type == EstimandType.NONPARAMETRIC_NDE:
-            modified_target_estimand = copy.deepcopy(self._target_estimand)
-            self._second_stage_model_nde_obj = self.second_stage_model(
+            self._first_stage_model = self.__class__.DEFAULT_FIRST_STAGE_MODEL(
                 modified_target_estimand,
                 test_significance=self._significance_test,
                 evaluate_effect_strength=self._effect_strength_eval,
                 confidence_intervals=self._confidence_intervals,
-                **self.method_params,
+                **kwargs,
+            )
+            self.logger.warning("First stage model not provided. Defaulting to sklearn.linear_model.LinearRegression.")
+
+        modified_target_estimand = copy.deepcopy(self._target_estimand)
+        if second_stage_model is not None:
+            self._second_stage_model = (
+                second_stage_model
+                if isinstance(second_stage_model, CausalEstimator)
+                else second_stage_model(
+                    modified_target_estimand,
+                    test_significance=self._significance_test,
+                    evaluate_effect_strength=self._effect_strength_eval,
+                    confidence_intervals=self._confidence_intervals,
+                    **kwargs,
+                )
+            )
+        else:
+            modified_target_estimand = copy.deepcopy(self._target_estimand)
+            self._second_stage_model = self.__class__.DEFAULT_SECOND_STAGE_MODEL(
+                modified_target_estimand,
+                test_significance=self._significance_test,
+                evaluate_effect_strength=self._effect_strength_eval,
+                confidence_intervals=self._confidence_intervals,
+                **kwargs,
+            )
+            self.logger.warning("Second stage model not provided. Defaulting to backdoor.linear_regression.")
+
+        if self._target_estimand.estimand_type == EstimandType.NONPARAMETRIC_NDE:
+            modified_target_estimand = copy.deepcopy(self._target_estimand)
+            self._second_stage_model_nde = type(self._second_stage_model)(
+                modified_target_estimand,
+                test_significance=self._significance_test,
+                evaluate_effect_strength=self._effect_strength_eval,
+                confidence_intervals=self._confidence_intervals,
+                **kwargs,
             )
 
     def fit(
@@ -153,8 +165,8 @@ class TwoStageRegressionEstimator(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        self.set_data(data, treatment_name, outcome_name)
-        self.set_effect_modifiers(effect_modifier_names)
+        self._set_data(data, treatment_name, outcome_name)
+        self._set_effect_modifiers(effect_modifier_names)
 
         if len(self._treatment_name) > 1:
             error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
@@ -193,43 +205,41 @@ class TwoStageRegressionEstimator(CausalEstimator):
                 error_msg = "No instrumental variable present. Two stage regression is not applicable"
                 self.logger.error(error_msg)
 
-        self._first_stage_model_obj._target_estimand.identifier_method = "backdoor"
-        self._first_stage_model_obj._target_estimand.backdoor_variables = (
+        self._first_stage_model._target_estimand.identifier_method = "backdoor"
+        self._first_stage_model._target_estimand.backdoor_variables = (
             self._target_estimand.mediation_first_stage_confounders
         )
         if self._target_estimand.identifier_method == "frontdoor":
-            self._first_stage_model_obj._target_estimand.outcome_variable = parse_state(self._frontdoor_variables_names)
+            self._first_stage_model._target_estimand.outcome_variable = parse_state(self._frontdoor_variables_names)
         elif self._target_estimand.identifier_method == "mediation":
-            self._first_stage_model_obj._target_estimand.outcome_variable = parse_state(self._mediators_names)
+            self._first_stage_model._target_estimand.outcome_variable = parse_state(self._mediators_names)
 
-        self._first_stage_model_obj.fit(
+        self._first_stage_model.fit(
             data,
             treatment_name,
-            parse_state(self._first_stage_model_obj._target_estimand.outcome_variable),
+            parse_state(self._first_stage_model._target_estimand.outcome_variable),
             effect_modifier_names=effect_modifier_names,
         )
 
-        self._second_stage_model_obj._target_estimand.identifier_method = "backdoor"
-        self._second_stage_model_obj._target_estimand.backdoor_variables = (
+        self._second_stage_model._target_estimand.identifier_method = "backdoor"
+        self._second_stage_model._target_estimand.backdoor_variables = (
             self._target_estimand.mediation_second_stage_confounders
         )
         if self._target_estimand.identifier_method == "frontdoor":
-            self._second_stage_model_obj._target_estimand.treatment_variable = parse_state(
-                self._frontdoor_variables_names
-            )
+            self._second_stage_model._target_estimand.treatment_variable = parse_state(self._frontdoor_variables_names)
         elif self._target_estimand.identifier_method == "mediation":
-            self._second_stage_model_obj._target_estimand.treatment_variable = parse_state(self._mediators_names)
+            self._second_stage_model._target_estimand.treatment_variable = parse_state(self._mediators_names)
 
-        self._second_stage_model_obj.fit(
+        self._second_stage_model.fit(
             data,
-            parse_state(self._second_stage_model_obj._target_estimand.treatment_variable),
+            parse_state(self._second_stage_model._target_estimand.treatment_variable),
             parse_state(self._outcome_name),  # to convert it to array before passing to causal estimator)
             effect_modifier_names=effect_modifier_names,
         )
 
         if self._target_estimand.estimand_type == EstimandType.NONPARAMETRIC_NDE:
-            self._second_stage_model_nde_obj._target_estimand.identifier_method = "backdoor"
-            self._second_stage_model_nde_obj.fit(
+            self._second_stage_model_nde._target_estimand.identifier_method = "backdoor"
+            self._second_stage_model_nde.fit(
                 data,
                 self._treatment_name,
                 parse_state(self._outcome_name),  # to convert it to array before passing to causal estimator)
@@ -245,14 +255,14 @@ class TwoStageRegressionEstimator(CausalEstimator):
 
         estimate_value = None
         # First stage
-        first_stage_estimate = self._first_stage_model_obj.estimate_effect(
+        first_stage_estimate = self._first_stage_model.estimate_effect(
             control_value=control_value,
             treatment_value=treatment_value,
             target_units=target_units,
         )
 
         # Second Stage
-        second_stage_estimate = self._second_stage_model_obj.estimate_effect(
+        second_stage_estimate = self._second_stage_model.estimate_effect(
             control_value=control_value,
             treatment_value=treatment_value,
             target_units=target_units,
@@ -268,7 +278,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         )
         if self._target_estimand.estimand_type == EstimandType.NONPARAMETRIC_NDE:
 
-            total_effect_estimate = self._second_stage_model_nde_obj.estimate_effect(
+            total_effect_estimate = self._second_stage_model_nde.estimate_effect(
                 control_value=control_value, treatment_value=treatment_value, target_units=target_units
             )
             natural_direct_effect = total_effect_estimate.value - natural_indirect_effect

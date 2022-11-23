@@ -35,7 +35,6 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         num_strata: Union[str, int] = "auto",
         clipping_threshold: int = 10,
         propensity_score_model: Optional[Any] = None,
-        recalculate_propensity_score: bool = True,
         propensity_score_column: str = "propensity_score",
         **kwargs,
     ):
@@ -67,15 +66,10 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
             score. Can be any classification model that supports fit() and
             predict_proba() methods. If None, use
             LogisticRegression model as the default.
-        :param recalculate_propensity_score: If true, force the estimator to
-            estimate the propensity score. To use pre-computed propensity
-            scores, set this value to False. Default=True
         :param propensity_score_column: Column name that stores the propensity
         score. Default='propensity_score'
         :param kwargs: (optional) Additional estimator-specific parameters
         """
-        # Required to ensure that self.method_params contains all the information
-        # to create an object of this class
         super().__init__(
             identified_estimand=identified_estimand,
             test_significance=test_significance,
@@ -88,7 +82,6 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
             need_conditional_estimates=need_conditional_estimates,
             num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
             propensity_score_model=propensity_score_model,
-            recalculate_propensity_score=recalculate_propensity_score,
             propensity_score_column=propensity_score_column,
             num_strata=num_strata,
             clipping_threshold=clipping_threshold,
@@ -127,7 +120,8 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
-        self._refresh_propensity_score()
+        if self.propensity_score_column not in self._data:
+            self.estimate_propensity_score_column()
 
         clipped = None
         # Infer the right strata based on clipping threshold

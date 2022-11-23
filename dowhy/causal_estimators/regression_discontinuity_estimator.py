@@ -66,8 +66,6 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
             control. Considered band is (threshold +- bandwidth)
         :param kwargs: (optional) Additional estimator-specific parameters
         """
-        # Required to ensure that self.method_params contains all the information
-        # to create an object of this class
         super().__init__(
             identified_estimand=identified_estimand,
             test_significance=test_significance,
@@ -105,20 +103,14 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        self.set_data(data, treatment_name, outcome_name)
-        self.set_effect_modifiers(effect_modifier_names)
+        self._set_data(data, treatment_name, outcome_name)
+        self._set_effect_modifiers(effect_modifier_names)
 
         self.rd_variable = self._data[self.rd_variable_name]
 
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
 
-        return self
-
-    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_):
-        self._target_units = target_units
-        self._treatment_value = treatment_value
-        self._control_value = control_value
         upper_limit = self.rd_threshold_value + self.rd_bandwidth
         lower_limit = self.rd_threshold_value - self.rd_bandwidth
         rows_filter = np.s_[(self.rd_variable >= lower_limit) & (self.rd_variable <= upper_limit)]
@@ -135,19 +127,28 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
             }
         )
         self.logger.debug(local_df)
-        iv_estimator = InstrumentalVariableEstimator(
+        self.iv_estimator = InstrumentalVariableEstimator(
             self._target_estimand,
             test_significance=self._significance_test,
-        )
-
-        iv_estimator.fit(
-            local_df,
-            ["local_treatment"],
-            ["local_outcome"],
             iv_instrument_name="local_rd_variable",
         )
 
-        est = iv_estimator.estimate_effect()
+        self.iv_estimator.fit(
+            local_df,
+            ["local_treatment"],
+            ["local_outcome"],
+        )
+
+        return self
+
+    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_):
+        self._target_units = target_units
+        self._treatment_value = treatment_value
+        self._control_value = control_value
+
+        est = self.iv_estimator.estimate_effect(
+            treatment_value=treatment_value, control_value=control_value, target_units=target_units
+        )
 
         est.add_estimator(self)
         return est

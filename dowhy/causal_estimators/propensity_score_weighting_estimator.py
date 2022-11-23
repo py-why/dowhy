@@ -37,7 +37,6 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
         max_ps_score: float = 0.95,
         weighting_scheme: str = "ips_weight",
         propensity_score_model: Optional[Any] = None,
-        recalculate_propensity_score: bool = True,
         propensity_score_column: str = "propensity_score",
         **kwargs,
     ):
@@ -73,15 +72,11 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
             score. Can be any classification model that supports fit() and
             predict_proba() methods. If None, use LogisticRegression model as
             the default. Default=None
-        :param recalculate_propensity_score: If true, force the estimator to
-            estimate the propensity score. To use pre-computed propensity
-            scores, set this value to false. Default=True
         :param propensity_score_column: Column name that stores the
             propensity score. Default='propensity_score'
         :param kwargs: (optional) Additional estimator-specific parameters
         """
-        # Required to ensure that self.method_params contains all the information
-        # to create an object of this class
+
         super().__init__(
             identified_estimand=identified_estimand,
             test_significance=test_significance,
@@ -94,7 +89,6 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
             need_conditional_estimates=need_conditional_estimates,
             num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
             propensity_score_model=propensity_score_model,
-            recalculate_propensity_score=recalculate_propensity_score,
             propensity_score_column=propensity_score_column,
             min_ps_score=min_ps_score,
             max_ps_score=max_ps_score,
@@ -136,7 +130,8 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
-        self._refresh_propensity_score()
+        if self.propensity_score_column not in self._data:
+            self.estimate_propensity_score_column()
 
         # trim propensity score weights
         self._data[self.propensity_score_column] = np.minimum(

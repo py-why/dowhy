@@ -64,8 +64,6 @@ class DistanceMatchingEstimator(CausalEstimator):
             that corresponds to Euclidean distance metric with p=2.
         :param kwargs: (optional) Additional estimator-specific parameters
         """
-        # Required to ensure that self.method_params contains all the
-        # parameters to create an object of this class
         super().__init__(
             identified_estimand=identified_estimand,
             test_significance=test_significance,
@@ -118,10 +116,10 @@ class DistanceMatchingEstimator(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        self.set_data(data, treatment_name, outcome_name)
+        self._set_data(data, treatment_name, outcome_name)
         self.exact_match_cols = exact_match_cols
 
-        self.set_effect_modifiers(effect_modifier_names)
+        self._set_effect_modifiers(effect_modifier_names)
 
         # Check if the treatment is one-dimensional
         if len(self._treatment_name) > 1:

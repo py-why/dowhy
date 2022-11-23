@@ -1,12 +1,20 @@
 import inspect
 from importlib import import_module
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional, Protocol, Union
+from warnings import warn
 
-import causalml
 import pandas as pd
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from dowhy.causal_identifier import IdentifiedEstimand
+
+
+class _CausalmlEstimator(Protocol):
+    def estimate_ate(self, *args, **kwargs):
+        ...
+
+    def fit_predict(self, *args, **kwargs):
+        ...
 
 
 class Causalml(CausalEstimator):
@@ -23,7 +31,7 @@ class Causalml(CausalEstimator):
     def __init__(
         self,
         identified_estimand: IdentifiedEstimand,
-        causalml_methodname: str,
+        causalml_estimator: Union[_CausalmlEstimator, str],
         test_significance: bool = False,
         evaluate_effect_strength: bool = False,
         confidence_intervals: bool = False,
@@ -59,8 +67,6 @@ class Causalml(CausalEstimator):
             estimation of conditional treatment effect over it.
         :param kwargs: (optional) Additional estimator-specific parameters
         """
-        # Required to ensure that self.method_params contains all the information
-        # to create an object of this class
         super().__init__(
             identified_estimand=identified_estimand,
             test_significance=test_significance,
@@ -72,18 +78,23 @@ class Causalml(CausalEstimator):
             confidence_level=confidence_level,
             need_conditional_estimates=need_conditional_estimates,
             num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
-            causalml_methodname=causalml_methodname,
+            causalml_estimator=causalml_estimator,
             **kwargs,
         )
-        self._causalml_methodname = causalml_methodname
         # Add the identification method used in the estimator
         self.identifier_method = self._target_estimand.identifier_method
         self.logger.debug("The identifier method used {}".format(self.identifier_method))
 
-        # Get the class corresponding the the estimator to be used
-        estimator_class = self._get_causalml_class_object(self._causalml_methodname)
-        # Initialize the object
-        self.estimator = estimator_class(**self.method_params["init_params"])
+        if isinstance(causalml_estimator, str):
+            warn(
+                "Using a string to specify the value for causalml_estimator is now deprecated, please provide an instance of a causalml estimator object",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            estimator_class = self._get_causalml_class_object(causalml_estimator)
+            self.estimator = estimator_class(**kwargs["init_params"])
+        else:
+            self.estimator = causalml_estimator
         self.logger.info("INFO: Using CausalML Estimator")
 
     def fit(
@@ -102,8 +113,8 @@ class Causalml(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        self.set_data(data, treatment_name, outcome_name)
-        self.set_effect_modifiers(effect_modifier_names)
+        self._set_data(data, treatment_name, outcome_name)
+        self._set_effect_modifiers(effect_modifier_names)
 
         # Check the backdoor variables being used
         self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))

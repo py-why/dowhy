@@ -34,7 +34,6 @@ class PropensityScoreEstimator(CausalEstimator):
         need_conditional_estimates: Union[bool, str] = "auto",
         num_quantiles_to_discretize_cont_cols: int = CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
         propensity_score_model: Optional[Any] = None,
-        recalculate_propensity_score: bool = True,
         propensity_score_column: str = "propensity_score",
         **kwargs,
     ):
@@ -61,9 +60,6 @@ class PropensityScoreEstimator(CausalEstimator):
         :param propensity_score_model: Model used to compute propensity score.
             Can be any classification model that supports fit() and
             predict_proba() methods. If None, LogisticRegression is used.
-        :param recalculate_propensity_score: Whether the propensity score
-            should be estimated. To use pre-computed propensity scores,
-            set this value to False. Default=True.
         :param propensity_score_column: Column name that stores the
             propensity score. Default='propensity_score'
         :param kwargs: (optional) Additional estimator-specific parameters
@@ -80,14 +76,12 @@ class PropensityScoreEstimator(CausalEstimator):
             need_conditional_estimates=need_conditional_estimates,
             num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
             propensity_score_model=propensity_score_model,
-            recalculate_propensity_score=recalculate_propensity_score,
             propensity_score_column=propensity_score_column,
             **kwargs,
         )
 
         # Enable the user to pass params for a custom propensity model
         self.propensity_score_model = propensity_score_model
-        self.recalculate_propensity_score = recalculate_propensity_score
         self.propensity_score_column = propensity_score_column
 
     def fit(
@@ -106,8 +100,8 @@ class PropensityScoreEstimator(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        self.set_data(data, treatment_name, outcome_name)
-        self.set_effect_modifiers(effect_modifier_names)
+        self._set_data(data, treatment_name, outcome_name)
+        self._set_effect_modifiers(effect_modifier_names)
 
         self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
         self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
@@ -135,39 +129,21 @@ class PropensityScoreEstimator(CausalEstimator):
             self.logger.error(error_msg)
             raise Exception(error_msg)
 
-        return self
-
-    def _refresh_propensity_score(self):
-        """
-        A custom estimator based on the way the propensity score estimates are to be used.
-        Invoked from the 'estimate_effect' method of various propensity score subclasses when the propensity score is not pre-computed.
-        """
-        if self.recalculate_propensity_score is True:
+        if self.propensity_score_column not in self._data:
             if self.propensity_score_model is None:
                 self.propensity_score_model = linear_model.LogisticRegression()
             treatment_reshaped = np.ravel(self._treatment)
             self.propensity_score_model.fit(self._observed_common_causes, treatment_reshaped)
+
+        return self
+
+    def estimate_propensity_score_column(self):
+        try:
             self._data[self.propensity_score_column] = self.propensity_score_model.predict_proba(
                 self._observed_common_causes
             )[:, 1]
-        else:
-            # check if user provides the propensity score column
-            if self.propensity_score_column not in self._data.columns:
-                if self.propensity_score_model is None:
-                    raise ValueError(
-                        f"""Propensity score column {self.propensity_score_column} does not exist, nor does a propensity_model. 
-                    Please specify the column name that has your pre-computed propensity score, or a model to compute it."""
-                    )
-                else:
-                    try:
-                        self._data[self.propensity_score_column] = self.propensity_score_model.predict_proba(
-                            self._observed_common_causes
-                        )[:, 1]
-                    except NotFittedError:
-                        raise NotFittedError("Please fit the propensity score model before calling predict_proba")
-
-            else:
-                self.logger.info(f"INFO: Using pre-computed propensity score in column {self.propensity_score_column}")
+        except NotFittedError:
+            raise NotFittedError("Please fit the propensity score model before calling predict_proba")
 
     def construct_symbolic_estimator(self, estimand):
         """

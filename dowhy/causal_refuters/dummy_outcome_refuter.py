@@ -13,6 +13,7 @@ from sklearn.svm import SVR
 from tqdm.auto import tqdm
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
+from dowhy.causal_estimators.econml import Econml
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 from dowhy.causal_refuter import CausalRefutation, CausalRefuter, choose_variables, test_significance
 
@@ -489,7 +490,14 @@ def refute_dummy_outcome(
 
             new_data = validation_df.assign(dummy_outcome=outcome_validation)
 
-            new_estimator = estimate.estimator.get_estimator_object(new_data, identified_estimand, estimate)
+            new_estimator = estimate.estimator.get_new_estimator_object(identified_estimand)
+            new_estimator.fit(
+                new_data,
+                identified_estimand.treatment_variable,
+                identified_estimand.outcome_variable,
+                estimate.estimator._effect_modifier_names,
+                **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+            )
             new_effect = new_estimator.estimate_effect(
                 control_value=estimate.control_value,
                 treatment_value=estimate.treatment_value,
@@ -563,7 +571,14 @@ def refute_dummy_outcome(
                 outcome_validation += causal_effect_map[key_train]
 
                 new_data = validation_df.assign(dummy_outcome=outcome_validation)
-                new_estimator = estimate.estimator.get_estimator_object(new_data, identified_estimand, estimate)
+                new_estimator = estimate.estimator.get_new_estimator_object(identified_estimand)
+                new_estimator.fit(
+                    new_data,
+                    identified_estimand.treatment_variable,
+                    identified_estimand.outcome_variable,
+                    estimate.estimator._effect_modifier_names,
+                    **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+                )
                 new_effect = new_estimator.estimate_effect(
                     control_value=estimate.control_value,
                     treatment_value=estimate.treatment_value,
