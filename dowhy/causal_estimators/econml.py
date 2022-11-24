@@ -1,9 +1,10 @@
 import inspect
 from importlib import import_module
+from typing import Callable
 
-import econml
 import numpy as np
 import pandas as pd
+from numpy.distutils.misc_util import is_sequence
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from dowhy.utils.api import parse_state
@@ -120,7 +121,6 @@ class Econml(CausalEstimator):
                 self.estimator.fit(**estimator_data_args, **self.method_params["fit_params"])
 
         X_test = X
-        n_target_units = n_samples
         if X is not None:
             if type(self._target_units) is pd.DataFrame:
                 X_test = self._target_units
@@ -128,23 +128,20 @@ class Econml(CausalEstimator):
                 filtered_rows = self._data.where(self._target_units)
                 boolean_criterion = np.array(filtered_rows.notnull().iloc[:, 0])
                 X_test = X[boolean_criterion]
-            n_target_units = X_test.shape[0]
-
         # Changing shape to a list for a singleton value
-        if type(self._control_value) is not list:
-            self._control_value = [self._control_value]
-        if type(self._treatment_value) is not list:
-            self._treatment_value = [self._treatment_value]
-        T0_test = np.repeat([self._control_value], n_target_units, axis=0)
-        T1_test = np.repeat([self._treatment_value], n_target_units, axis=0)
-        est = self.estimator.effect(X_test, T0=T0_test, T1=T1_test)
-        ate = np.mean(est)
+        self._treatment_value = parse_state(self._treatment_value)
 
-        self.effect_intervals = None
+        est = self.effect(X_test)
+        ate = np.mean(est, axis=0)  # one value per treatment value
+
+        if len(ate) == 1:
+            ate = ate[0]
+
         if self._confidence_intervals:
-            self.effect_intervals = self.estimator.effect_interval(
-                X_test, T0=T0_test, T1=T1_test, alpha=1 - self.confidence_level
-            )
+            self.effect_intervals = self.effect_interval(X_test)
+        else:
+            self.effect_intervals = None
+
         estimate = CausalEstimate(
             estimate=ate,
             control_value=self._control_value,
@@ -180,8 +177,90 @@ class Econml(CausalEstimator):
     def shap_values(self, df: pd.DataFrame, *args, **kwargs):
         return self.estimator.shap_values(df[self._effect_modifier_names].values, *args, **kwargs)
 
-    def effect(self, df: pd.DataFrame, *args, **kwargs) -> np.ndarray:
-        return self.estimator.effect(df[self._effect_modifier_names].values, *args, **kwargs)
+    def apply_multitreatment(self, df: pd.DataFrame, fun: Callable, *args, **kwargs):
+        ests = []
+        assert not isinstance(self._treatment_value, str)
+        assert is_sequence(self._treatment_value)
 
-    def effect_inference(self, df: pd.DataFrame, *args, **kwargs) -> np.ndarray:
-        return self.estimator.effect_inference(df[self._effect_modifier_names].values, *args, **kwargs)
+        if df is None:
+            filtered_df = None
+        else:
+            filtered_df = df[self._effect_modifier_names].values
+
+        for tv in self._treatment_value:
+            ests.append(
+                fun(
+                    filtered_df,
+                    T0=self._control_value,
+                    T1=tv,
+                    *args,
+                    **kwargs,
+                )
+            )
+        est = np.stack(ests, axis=1)
+        return est
+
+    def effect(self, df: pd.DataFrame, *args, **kwargs) -> np.ndarray:
+        """
+        Pointwise estimated treatment effect,
+        output shape n_units x n_treatment_values (not counting control)
+        :param df: Features of the units to evaluate
+        :param args: passed through to the underlying estimator
+        :param kwargs: passed through to the underlying estimator
+        """
+
+        def effect_fun(filtered_df, T0, T1, *args, **kwargs):
+            return self.estimator.effect(filtered_df, T0=T0, T1=T1, *args, **kwargs)
+
+        return self.apply_multitreatment(df, effect_fun, *args, **kwargs)
+
+    def effect_interval(self, df: pd.DataFrame, *args, **kwargs) -> np.ndarray:
+        """
+        Pointwise confidence intervals for the estimated treatment effect
+        :param df: Features of the units to evaluate
+        :param args: passed through to the underlying estimator
+        :param kwargs: passed through to the underlying estimator
+        """
+
+        def effect_interval_fun(filtered_df, T0, T1, *args, **kwargs):
+            return self.estimator.effect_interval(
+                filtered_df, T0=T0, T1=T1, alpha=1 - self.confidence_level, *args, **kwargs
+            )
+
+        return self.apply_multitreatment(df, effect_interval_fun, *args, **kwargs)
+
+    def effect_inference(self, df: pd.DataFrame, *args, **kwargs):
+        """
+        Inference (uncertainty) results produced by the underlying EconML estimator
+        :param df: Features of the units to evaluate
+        :param args: passed through to the underlying estimator
+        :param kwargs: passed through to the underlying estimator
+        """
+
+        def effect_inference_fun(filtered_df, T0, T1, *args, **kwargs):
+            return self.estimator.effect_inference(filtered_df, T0=T0, T1=T1, *args, **kwargs)
+
+        return self.apply_multitreatment(df, effect_inference_fun, *args, **kwargs)
+
+    def effect_tt(self, df: pd.DataFrame, *args, **kwargs):
+        """
+        Effect of the actual treatment that was applied to each unit
+        ("effect of Treatment on the Treated")
+        :param df: Features of the units to evaluate
+        :param args: passed through to estimator.effect()
+        :param kwargs: passed through to estimator.effect()
+        """
+
+        eff = self.effect(df, *args, **kwargs).reshape((len(df), len(self._treatment_value)))
+
+        out = np.zeros(len(df))
+        treatment_value = parse_state(self._treatment_value)
+        treatment_name = parse_state(self._treatment_name)[0]
+
+        eff = np.reshape(eff, (len(df), len(treatment_value)))
+
+        # For each unit, return the estimated effect of the treatment value
+        # that was actually applied to the unit
+        for c, col in enumerate(treatment_value):
+            out[df[treatment_name] == col] = eff[df[treatment_name] == col, c]
+        return pd.Series(data=out, index=df.index)
