@@ -207,12 +207,27 @@ class Econml(CausalEstimator):
         return est
 
     def effect(self, df: pd.DataFrame, *args, **kwargs) -> np.ndarray:
+        """
+        Pointwise estimated treatment effect,
+        output shape n_units x n_treatment_values (not counting control)
+        :param df: Features of the units to evaluate
+        :param args: passed through to the underlying estimator
+        :param kwargs: passed through to the underlying estimator
+        """
+
         def effect_fun(filtered_df, T0, T1, *args, **kwargs):
             return self.estimator.effect(filtered_df, T0=T0, T1=T1, *args, **kwargs)
 
         return self.apply_multitreatment(df, effect_fun, *args, **kwargs)
 
     def effect_interval(self, df: pd.DataFrame, *args, **kwargs) -> np.ndarray:
+        """
+        Pointwise confidence intervals for the estimated treatment effect
+        :param df: Features of the units to evaluate
+        :param args: passed through to the underlying estimator
+        :param kwargs: passed through to the underlying estimator
+        """
+
         def effect_interval_fun(filtered_df, T0, T1, *args, **kwargs):
             return self.estimator.effect_interval(
                 filtered_df, T0=T0, T1=T1, alpha=1 - self.confidence_level, *args, **kwargs
@@ -221,6 +236,13 @@ class Econml(CausalEstimator):
         return self.apply_multitreatment(df, effect_interval_fun, *args, **kwargs)
 
     def effect_inference(self, df: pd.DataFrame, *args, **kwargs):
+        """
+        Inference (uncertainty) results produced by the underlying EconML estimator
+        :param df: Features of the units to evaluate
+        :param args: passed through to the underlying estimator
+        :param kwargs: passed through to the underlying estimator
+        """
+
         def effect_inference_fun(filtered_df, T0, T1, *args, **kwargs):
             return self.estimator.effect_inference(filtered_df, T0=T0, T1=T1, *args, **kwargs)
 
@@ -229,6 +251,7 @@ class Econml(CausalEstimator):
     def effect_tt(self, df: pd.DataFrame, *args, **kwargs):
         """
         Effect of the actual treatment that was applied to each unit
+        ("effect of Treatment on the Treated")
         :param df: Features of the units to evaluate
         :param args: passed through to estimator.effect()
         :param kwargs: passed through to estimator.effect()
@@ -242,6 +265,8 @@ class Econml(CausalEstimator):
 
         eff = np.reshape(eff, (len(df), len(treatment_value)))
 
+        # For each unit, return the estimated effect of the treatment value
+        # that was actually applied to the unit
         for c, col in enumerate(treatment_value):
             out[df[treatment_name] == col] = eff[df[treatment_name] == col, c]
         return pd.Series(data=out, index=df.index)
