@@ -1,3 +1,4 @@
+from .general_cov_measure import general_cov_based
 from .kernel import approx_kernel_based, kernel_based
 from .regression import regression_based
 
@@ -18,6 +19,10 @@ def independence_test(X, Y, conditioned_on=None, method="kernel"):
 
     * `regression`: Regression based (conditional) independence test using a f-test. See :func:`~dowhy.gcm.regression_based` for more details.
 
+    * `gcm`: (Conditional) independence test based on the Generalised Covariance Measure. See :func:`~dowhy.gcm.general_cov_based` for more details.
+
+        * R. D. Shah and J Peters. *The hardness of conditional independence testing and the generalised covariance measure*, The Annals of Statistics 48(3), 2018
+
     :param X: Observations of X.
     :param Y: Observations of Y.
     :param conditioned_on: Observations of conditioning variable if we want to perform a conditional independence test. By default, independence test is carried out.
@@ -25,6 +30,7 @@ def independence_test(X, Y, conditioned_on=None, method="kernel"):
                    `kernel` (default): :func:`~dowhy.gcm.kernel_based` (conditional) independence test.
                    `approx_kernel`: :func:`~dowhy.gcm.approx_kernel_based` (conditional) independence test.
                    `regression`: :func:`~dowhy.gcm.regression_based` (conditional) independence test.
+                   `gcm`: :func:`~dowhy.gcm.general_cov_based` (conditional) independence test.
                    For more information about these methods, see above.
     :return:  p-value of the (conditional) independence test. (Conditional) Independence is the null hypothesis.
     """

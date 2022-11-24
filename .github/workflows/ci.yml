@@ -5,8 +5,22 @@ name: CI
 on:
   push:
     branches: [main]
+    paths:
+      - '.github/workflows/ci.yml'
+      - 'dowhy/**'
+      - 'tests/**'
+      - 'docs/source/example_notebooks/**'
+      - 'pyproject.toml'
+      - 'poetry.lock'
   pull_request:
     branches: [main]
+    paths:
+      - '.github/workflows/ci.yml'
+      - 'dowhy/**'
+      - 'tests/**'
+      - 'docs/source/example_notebooks/**'
+      - 'pyproject.toml'
+      - 'poetry.lock'
 
 jobs:
   build:
@@ -14,11 +28,11 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8, 3.9]
-        poetry-version: [1.2.1]
+        poetry-version: [1.2.2]
         test-group: [1, 2, 3, 4, 5, 6]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2

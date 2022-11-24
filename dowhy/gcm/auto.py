@@ -80,8 +80,9 @@ _LIST_OF_POTENTIAL_REGRESSORS_BETTER = _LIST_OF_POTENTIAL_REGRESSORS_GOOD + [
 
 
 class AssignmentQuality(Enum):
-    GOOD = (auto(),)
+    GOOD = auto()
     BETTER = auto()
+    BEST = auto()
 
 
 def assign_causal_mechanisms(
@@ -114,6 +115,13 @@ def assign_causal_mechanisms(
             Model training speed: Fast
             Model inference speed: Fast
             Model accuracy: Good
+        - AssignmentQuality.BEST: Uses an AutoGluon (auto ML) model with default settings defined by the AutoGluon
+            wrapper. While the model selection itself is fast, the training and inference speed can be significantly
+            slower than in the other options. NOTE: This requires the optional autogluon.tabular dependency.
+            Model selection speed: Instant
+            Model training speed: Slow
+            Model inference speed: Slow-Medium
+            Model accuracy: Best
         :param override_models: If set to True, existing model assignments are replaced with automatically selected
         ones. If set to False, the assigned models are only validated with respect to the graph structure.
 
@@ -142,7 +150,20 @@ def assign_causal_mechanisms(
 def select_model(
     X: np.ndarray, Y: np.ndarray, model_selection_quality: AssignmentQuality
 ) -> Union[PredictionModel, ClassificationModel]:
-    if model_selection_quality == AssignmentQuality.GOOD:
+    if model_selection_quality == AssignmentQuality.BEST:
+        try:
+            from dowhy.gcm.ml.autolguon import AutoGluonClassifier, AutoGluonRegressor
+
+            if is_categorical(Y):
+                return AutoGluonClassifier()
+            else:
+                return AutoGluonRegressor()
+        except ImportError:
+            raise RuntimeError(
+                "AutoGluon module not found! For the BEST auto assign quality, consider installing the "
+                "optional AutoGluon dependency."
+            )
+    elif model_selection_quality == AssignmentQuality.GOOD:
         list_of_regressor = list(_LIST_OF_POTENTIAL_REGRESSORS_GOOD)
         list_of_classifier = list(_LIST_OF_POTENTIAL_CLASSIFIERS_GOOD)
         model_selection_splits = 2

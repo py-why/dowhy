@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple
 
 import networkx as nx
+import numpy as np
 import pandas as pd
 from matplotlib import pyplot
 from networkx.drawing import nx_pydot
@@ -166,3 +167,51 @@ def _plot_causal_graph_networkx(
 
 def _calc_arrow_width(strength: float, max_strength: float):
     return 0.2 + 4.0 * float(abs(strength)) / float(max_strength)
+
+
+def bar_plot(
+    values: Dict[str, float],
+    uncertainties: Optional[Dict[str, Tuple[float, float]]] = None,
+    ylabel: str = "",
+    filename: Optional[str] = None,
+    display_plot: bool = True,
+    figure_size: Optional[List[int]] = None,
+    bar_width: float = 0.8,
+    xticks: List[str] = None,
+    xticks_rotation: int = 90,
+) -> None:
+    """Convenience function to make a bar plot of the given values with uncertainty bars, if provided. Useful for all
+    kinds of attribution results (including confidence intervals).
+
+    :param values: A dictionary where the keys are the labels and the values are the values to be plotted.
+    :param uncertainties: A dictionary of attributes to be added to the error bars.
+    :param ylabel: The label for the y-axis.
+    :param filename: An optional filename if the output should be plotted into a file.
+    :param display_plot: Optionally specify if the plot should be displayed or not (default to True).
+    :param figure_size: The size of the figure to be plotted.
+    :param bar_width: The width of the bars.
+    :param xticks: Explicitly specify the labels for the bars on the x-axis.
+    :param xticks_rotation: Specify the rotation of the labels on the x-axis.
+    """
+    if uncertainties is None:
+        uncertainties = {node: [values[node], values[node]] for node in values}
+
+    figure, ax = pyplot.subplots(figsize=figure_size)
+    ci_plus = [uncertainties[node][1] - values[node] for node in values.keys()]
+    ci_minus = [values[node] - uncertainties[node][0] for node in values.keys()]
+    yerr = np.array([ci_minus, ci_plus])
+    yerr[abs(yerr) < 10**-7] = 0
+    pyplot.bar(values.keys(), values.values(), yerr=yerr, ecolor="#1E88E5", color="#ff0d57", width=bar_width)
+    pyplot.ylabel(ylabel)
+    pyplot.xticks(rotation=xticks_rotation)
+
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
+    if xticks:
+        pyplot.xticks(list(uncertainties.keys()), xticks)
+
+    if display_plot:
+        pyplot.show()
+
+    if filename is not None:
+        figure.savefig(filename)
