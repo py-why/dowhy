@@ -92,6 +92,150 @@ def linear_dataset(
     stddev_outcome_noise=0.01,
     one_hot_encode=False,
 ):
+"""
+Generate a synthetic dataset with a known effect size, ready for DoWhy analysis
+
+This function generates a pandas dataFrame with num_samples records. The variables follow a naming convention were the first letter indicates its role in the causality graph and then a sequence number.
+
+Parameters
+---------------
+Beta : int or list/ndarray of lenght num_treatments of type int
+	defines the causality effect of interest. i.e. the magnitude of the resulting ATE. It affects the value magnitude for the continuous treatments ('v?') and outcomes variables - 'y' . Note, the absolute value is used mostly to factor the ranges.
+num_common_causes : int
+num_samples : int
+num_instruments : int, default 0
+num_effect_modifiers : int, default 0
+num_treatments : int, default 1
+num_frontdoor_variables : int, default  0
+treatment_is_binary : bool, default True
+	cannot be True if treatment_is_category is True
+treatment_is_category : bool, default False
+	cannot be True if treatment_is_binary is True
+outcome_is_binary : bool, default False,
+stochastic_discretization : bool, default True
+num_discrete_common_causes : int, default 0
+          of the total num_common_causes
+	quartiles are used when discretised variables are specified. They can be hot encoded.
+num_discrete_instruments  : int , default 0
+	of the total num_instruments
+	quartiles are used when discretised variables are specified. They can be hot encoded.
+num_discrete_effect_modifiers : int, default 0
+	of the total effect_modifiers
+	quartiles are used when discretised variables are specified. They can be hot encoded.
+stddev_treatment_noise  : int, default 1
+stddev_outcome_noise : int , default 0.01
+one_hot_encode : bool, default False
+
+Returns
+----------
+Dict
+	"df": pd.dataFrame
+		    with num_samples records. The variables follow a naming convention were the first letter indicates its role in the causality graph and then a sequence number.
+	
+		v variables - are the treatments. They can be binary or continues. In the case of continues abs(*beta*) defines thier magnitude;
+		
+		y - is the outcome variable where abs(*beta*) defines its magnitude. Basically:
+		 y = normal(0, stddev_outcome_noise) + t @ beta [where @ is a numpy matrix multiplication allowing for beta be a vector]
+		
+		W variables - commonly cause both the treatment and the outcome and are iid. if continuous, they are Norm(mue = Unif(-1,1), sigma = 1)
+		
+		Z variables - Instrument variables. Each one affects all treatments. i.e. if there is one instrument and two treatments then z0->v0, z0->v1
+		
+		X variables - effect modifiers. If continues, they are Norm(mue = Unif(-1,1), sigma = 1)
+	"treatment_name": str/list(str)
+	"outcome_name": str
+	"common_causes_names": str/list(str)
+	"instrument_names": str/list(str)
+	"effect_modifier_names": str/list(str)
+	"frontdoor_variables_names": str/list(str)
+	"dot_graph": dot_graph,
+	"gml_graph": gml_graph,
+	"ate": float
+
+Examples
+------------
+
+>>> import networkx as nx
+>>> import matplotlib.pyplot as plt
+>>> import pandas as pd
+>>> import numpy as np
+>>> import dowhy.datasets
+
+>>>  def plot_gml(gml_graph):
+>>>     G = nx.parse_gml(gml_graph)
+>>>     pos=nx.spring_layout(G)
+>>>     nx.draw_networkx(G, pos, with_labels=True, node_size=1000, node_color="darkorange")
+>>>     return(plt.show())
+
+>>> def describe_synthetic_data(synthetic_data):
+>>>  if (synthetic_data['gml_graph'] != None) :
+>>>     plot_gml(synthetic_data["gml_graph"])                                               
+>>>  synthetic_data_df=synthetic_data["df"]
+>>>  print('------- Variables --------')
+>>>  print('Treatment vars:'      , synthetic_data['treatment_name'])
+>>>  print('Outcome vars:'        , synthetic_data['outcome_name'])
+>>>  print('Common causes vars:'  , synthetic_data['common_causes_names'])
+>>>  print('Instrument vars:'     , synthetic_data['instrument_names'])
+>>>  print('Effect Modifier vars:', synthetic_data['effect_modifier_names'])
+>>>  print('Frontdoor vars:'      , synthetic_data['frontdoor_variables_names'])
+>>>  print('Treatment vars:', synthetic_data['outcome_name'])
+>>>  print('-------- Corr -------')
+>>>  print(synthetic_data_df.corr())
+>>>  print('------- Head --------')
+>>>  return(synthetic_data_df)
+
+# create a dataset with 10 observations one binary treatment and a continuous outcome affected by one common cause
+>>> synthetic_data = dowhy.datasets.linear_dataset(beta = 100,
+>>>                                                num_common_causes = 1,
+>>>                                                num_samples =10
+>>>                                                )
+>>> describe_synthetic_data(synthetic_data).head()
+
+
+# Two continuous treatments, no common cause, an instrumental variable and two effect modifiers - linearly added appropriately
+>>> synthetic_data = dowhy.datasets.linear_dataset(
+>>>                               beta                          = 100,
+>>>                               num_common_causes             =   0,
+>>>                               num_samples                   =  20,
+>>>                               num_instruments               =   1,
+>>>                               num_effect_modifiers          =   2, 
+>>>                               num_treatments                =   2,
+>>>                               num_frontdoor_variables       =   0,
+>>>                               treatment_is_binary           = False,
+>>>                               treatment_is_category         = False,
+>>>                               outcome_is_binary             = False,
+>>>                               stochastic_discretization     = True,
+>>>                               num_discrete_common_causes    =   0,
+>>>                               num_discrete_instruments      =   0,
+>>>                               num_discrete_effect_modifiers =   0,
+>>>                               stddev_treatment_noise        =   1,
+>>>                               stddev_outcome_noise          =  0.01,
+>>>                               one_hot_encode                = False
+>>>                                                )
+>>> describe_synthetic_data(synthetic_data).head()
+
+# Hot Encoding
+>>> synthetic_data = dowhy.datasets.linear_dataset(
+>>>                               beta                          = 100,
+>>>                               num_common_causes             =   2,
+>>>                               num_samples                   =  20,
+>>>                               num_instruments               =   1,
+>>>                               num_effect_modifiers          =   1, 
+>>>                               num_treatments                =   1,
+>>>                               num_frontdoor_variables       =   1,
+>>>                               treatment_is_binary           = False,
+>>>                               treatment_is_category         = False,
+>>>                               outcome_is_binary             = False,
+>>>                               stochastic_discretization     = True,
+>>>                               num_discrete_common_causes    =   1, #of the total num_common_causes
+>>>                               num_discrete_instruments      =   1,
+>>>                               num_discrete_effect_modifiers =   1,
+>>>                               stddev_treatment_noise        =   1,
+>>>                               stddev_outcome_noise          =  0.01,
+>>>                               one_hot_encode                = True
+>>>                                                )
+>>> describe_synthetic_data(synthetic_data).head()
+"""
     assert not (treatment_is_binary and treatment_is_category)
     W, X, Z, FD, c1, c2, ce, cz, cfd1, cfd2 = [None] * 10
     W_with_dummy, X_with_categorical = (None, None)
