@@ -14,9 +14,6 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
 
     Straightforward application of the back-door criterion.
 
-    For a list of standard args and kwargs, see documentation for
-    :class:`~dowhy.causal_estimator.CausalEstimator`.
-
     Supports additional parameters as listed below.
 
     """

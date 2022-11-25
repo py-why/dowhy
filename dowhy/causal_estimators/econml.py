@@ -31,9 +31,6 @@ class _EconmlEstimator(Protocol):
 class Econml(CausalEstimator):
     """Wrapper class for estimators from the EconML library.
 
-    For a list of standard args and kwargs, see documentation for
-    :class:`~dowhy.causal_estimator.CausalEstimator`.
-
     Supports additional parameters as listed below. For init and fit
     parameters of each estimator, refer to the EconML docs.
 

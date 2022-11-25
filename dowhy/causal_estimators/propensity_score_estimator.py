@@ -14,9 +14,6 @@ class PropensityScoreEstimator(CausalEstimator):
     Base class for estimators that estimate effects based on propensity of
     treatment assignment.
 
-    For a list of standard args and kwargs, see documentation for
-    :class:`~dowhy.causal_estimator.CausalEstimator`.
-
     Supports additional parameters as listed below.
 
     """

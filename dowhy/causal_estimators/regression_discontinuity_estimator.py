@@ -14,9 +14,6 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
     Estimates effect by transforming the problem to an instrumental variables
     problem.
 
-    For a list of standard args and kwargs, see documentation for
-    :class:`~dowhy.causal_estimator.CausalEstimator`.
-
     Supports additional parameters as listed below.
 
     """

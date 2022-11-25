@@ -16,9 +16,6 @@ class InstrumentalVariableEstimator(CausalEstimator):
 
     This is also a superclass that can be inherited by other specific methods.
 
-    For a list of standard args and kwargs, see documentation for
-    :class:`~dowhy.causal_estimator.CausalEstimator`.
-
     Supports additional parameters as listed below.
 
     """

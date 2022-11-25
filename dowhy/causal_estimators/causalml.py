@@ -20,9 +20,6 @@ class _CausalmlEstimator(Protocol):
 class Causalml(CausalEstimator):
     """Wrapper class for estimators from the causalml library.
 
-    For a list of standard args and kwargs, see documentation for
-    :class:`~dowhy.causal_estimator.CausalEstimator`.
-
     Supports additional parameters as listed below. For specific
     parameters of each estimator, refer to the CausalML docs.
 

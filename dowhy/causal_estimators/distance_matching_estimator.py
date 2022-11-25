@@ -12,9 +12,6 @@ class DistanceMatchingEstimator(CausalEstimator):
     """Simple matching estimator for binary treatments based on a distance
     metric.
 
-    For a list of standard args and kwargs, see documentation for
-    :class:`~dowhy.causal_estimator.CausalEstimator`.
-
     Supports additional parameters as listed below.
 
     """
