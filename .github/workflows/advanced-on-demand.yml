@@ -1,5 +1,5 @@
 # run advanced tests when `test advanced` comment is entered
-name: Run Advanced Tests on Demand
+name: Advanced Tests (on demand)
 
 on:
   issue_comment:
@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8, 3.9]
-        poetry-version: [1.2.0]
+        poetry-version: [1.2.2]
         test-group: [1, 2, 3, 4]
 
     if: ${{ github.event.comment.body == 'test advanced'}}
@@ -62,7 +62,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           echo "installing poetry dependencies"
-          poetry install -E plotting -E causalml
+          poetry install -E plotting -E causalml -E econml -E pydot
 
       - name: Run Advanced Tests
         run: poetry run poe test_advanced  --splits 4 --group ${{ matrix.test-group }}

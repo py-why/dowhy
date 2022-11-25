@@ -1,6 +1,6 @@
 import logging
 
-from dowhy.causal_identifier import EstimandType, auto_identify_effect, id_identify_effect, identify_effect
+from dowhy.causal_identifier import EstimandType, identify_effect, identify_effect_auto, identify_effect_id
 from dowhy.causal_model import CausalModel
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
@@ -12,4 +12,4 @@ logging.getLogger(__name__).addHandler(logging.NullHandler())
 __version__ = "0.0.0"
 
 
-__all__ = ["EstimandType", "auto_identify_effect", "id_identify_effect", "identify_effect", "CausalModel"]
+__all__ = ["EstimandType", "identify_effect_auto", "identify_effect_id", "identify_effect", "CausalModel"]

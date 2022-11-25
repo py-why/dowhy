@@ -1,6 +1,6 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-name: DoWhy CI
+name: Advanced Tests (nightly)
 
 on:
   schedule:
@@ -12,8 +12,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8, 3.9]
-        poetry-version: [1.2.0]
-        test-group: [1, 2, 3, 4]
+        poetry-version: [1.2.2]
 
     steps:
       - uses: actions/checkout@v2
@@ -36,7 +35,16 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           echo "installing poetry dependencies"
-          poetry install -E plotting -E causalml
+          poetry install -E plotting -E causalml -E econml -E pydot --with docs
 
       - name: Run Advanced Tests
-        run: poetry run poe test_advanced --splits 4 --group ${{ matrix.test-group }}
+        run: poetry run poe test_advanced
+
+      - name: Notify Discord
+        if: github.ref == 'refs/heads/main'
+        uses: th0th/notify-discord@v0.4.1
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_JOB_NAME: Nightly Tests ${{ job.status == 'success' && 'Passed' || 'Failed' }}
+          GITHUB_JOB_STATUS: ${{ job.status }}

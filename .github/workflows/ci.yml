@@ -1,12 +1,26 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-name: DoWhy CI
+name: CI
 
 on:
   push:
     branches: [main]
+    paths:
+      - '.github/workflows/ci.yml'
+      - 'dowhy/**'
+      - 'tests/**'
+      - 'docs/source/example_notebooks/**'
+      - 'pyproject.toml'
+      - 'poetry.lock'
   pull_request:
     branches: [main]
+    paths:
+      - '.github/workflows/ci.yml'
+      - 'dowhy/**'
+      - 'tests/**'
+      - 'docs/source/example_notebooks/**'
+      - 'pyproject.toml'
+      - 'poetry.lock'
 
 jobs:
   build:
@@ -14,11 +28,11 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8, 3.9]
-        poetry-version: [1.2.0]
-        test-group: [1, 2, 3, 4]
+        poetry-version: [1.2.2]
+        test-group: [1, 2, 3, 4, 5, 6]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -47,4 +61,13 @@ jobs:
       run: poetry run poe format_check
 
     - name: Test
-      run: poetry run poe test --splits 4 --group ${{ matrix.test-group }}
+      run: poetry run poe test --splits 6 --group ${{ matrix.test-group }}
+
+    - name: Notify Discord
+      if: failure() && github.ref == 'refs/heads/main'
+      uses: th0th/notify-discord@v0.4.1
+      env:
+        DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
+        GITHUB_ACTOR: ${{ github.actor }}
+        GITHUB_JOB_NAME: CI Failed on Main
+        GITHUB_JOB_STATUS: ${{ job.status }}

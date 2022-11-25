@@ -1,5 +1,6 @@
 import logging
 from collections import namedtuple
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -7,7 +8,12 @@ import sympy as sp
 from sklearn.utils import resample
 
 import dowhy.interpreters as interpreters
+from dowhy import causal_estimators
+from dowhy.causal_graph import CausalGraph
+from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 from dowhy.utils.api import parse_state
+
+logger = logging.getLogger(__name__)
 
 
 class CausalEstimator:
@@ -124,7 +130,6 @@ class CausalEstimator:
             self._treatment = self._data[self._treatment_name]
             self._outcome = self._data[self._outcome_name]
 
-        # Now saving the effect modifiers
         if self._effect_modifier_names:
             # only add the observed nodes
             self._effect_modifier_names = [
@@ -178,7 +183,7 @@ class CausalEstimator:
             confidence_intervals=estimate.params["confidence_intervals"],
             target_units=estimate.params["target_units"],
             effect_modifiers=estimate.params["effect_modifiers"],
-            **estimate.params["method_params"],
+            **estimate.params["method_params"] if estimate.params["method_params"] is not None else {},
         )
 
         return new_estimator
@@ -197,6 +202,7 @@ class CausalEstimator:
         :param self: object instance of class Estimator
         :returns: A CausalEstimate instance that contains point estimates of average and conditional effects. Based on the parameters provided, it optionally includes confidence intervals, standard errors,statistical significance and other statistical parameters.
         """
+
         est = self._estimate_effect()
         est.add_estimator(self)
 
@@ -677,6 +683,90 @@ class CausalEstimator:
         else:
             s += "{0}".format(pval)
         return s
+
+
+def estimate_effect(
+    treatment: Union[str, List[str]],
+    outcome: Union[str, List[str]],
+    identified_estimand: IdentifiedEstimand,
+    identifier_name: str,
+    method: CausalEstimator,
+    control_value: int = 0,
+    treatment_value: int = 1,
+    test_significance: Optional[bool] = None,
+    evaluate_effect_strength: bool = False,
+    confidence_intervals: bool = False,
+    target_units: str = "ate",
+    effect_modifiers: List[str] = [],
+    fit_estimator: bool = True,
+    method_params: Optional[Dict] = None,
+):
+    """Estimate the identified causal effect.
+
+    Currently requires an explicit method name to be specified. Method names follow the convention of identification method followed by the specific estimation method: "[backdoor/iv].estimation_method_name". Following methods are supported.
+        * Propensity Score Matching: "backdoor.propensity_score_matching"
+        * Propensity Score Stratification: "backdoor.propensity_score_stratification"
+        * Propensity Score-based Inverse Weighting: "backdoor.propensity_score_weighting"
+        * Linear Regression: "backdoor.linear_regression"
+        * Generalized Linear Models (e.g., logistic regression): "backdoor.generalized_linear_model"
+        * Instrumental Variables: "iv.instrumental_variable"
+        * Regression Discontinuity: "iv.regression_discontinuity"
+
+    In addition, you can directly call any of the EconML estimation methods. The convention is "backdoor.econml.path-to-estimator-class". For example, for the double machine learning estimator ("DML" class) that is located inside "dml" module of EconML, you can use the method name, "backdoor.econml.dml.DML". CausalML estimators can also be called. See `this demo notebook <https://py-why.github.io/dowhy/example_notebooks/dowhy-conditional-treatment-effects.html>`_.
+
+    :param treatment: Name of the treatment
+    :param outcome: Name of the outcome
+    :param identified_estimand: a probability expression
+        that represents the effect to be estimated. Output of
+        CausalModel.identify_effect method
+    :param method_name: name of the estimation method to be used.
+    :param control_value: Value of the treatment in the control group, for effect estimation.  If treatment is multi-variate, this can be a list.
+    :param treatment_value: Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.
+    :param test_significance: Binary flag on whether to additionally do a statistical signficance test for the estimate.
+    :param evaluate_effect_strength: (Experimental) Binary flag on whether to estimate the relative strength of the treatment's effect. This measure can be used to compare different treatments for the same outcome (by running this method with different treatments sequentially).
+    :param confidence_intervals: (Experimental) Binary flag indicating whether confidence intervals should be computed.
+    :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be of three types. (1) a string for common specifications of target units (namely, "ate", "att" and "atc"), (2) a lambda function that can be used as an index for the data (pandas DataFrame), or (3) a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
+    :param effect_modifiers: Names of effect modifier variables can be (optionally) specified here too, since they do not affect identification. If None, the effect_modifiers from the CausalModel are used.
+    :param fit_estimator: Boolean flag on whether to fit the estimator.
+        Setting it to False is useful to estimate the effect on new data using a previously fitted estimator.
+    :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method. See the docs for each estimation method for allowed method-specific params.
+    :returns: An instance of the CausalEstimate class, containing the causal effect estimate
+        and other method-dependent information
+
+    """
+    treatment = parse_state(treatment)
+    outcome = parse_state(outcome)
+    causal_estimator_class = method.__class__
+
+    identified_estimand.set_identifier_method(identifier_name)
+
+    if identified_estimand.no_directed_path:
+        logger.warning("No directed path from {0} to {1}.".format(treatment, outcome))
+        return CausalEstimate(
+            0, identified_estimand, None, control_value=control_value, treatment_value=treatment_value
+        )
+    # Check if estimator's target estimand is identified
+    elif identified_estimand.estimands[identifier_name] is None:
+        logger.error("No valid identified estimand available.")
+        return CausalEstimate(None, None, None, control_value=control_value, treatment_value=treatment_value)
+
+    method.update_input(treatment_value, control_value, target_units)
+
+    estimate = method.estimate_effect()
+    # Store parameters inside estimate object for refutation methods
+    # TODO: This add_params needs to move to the estimator class
+    # inside estimate_effect and estimate_conditional_effect
+    estimate.add_params(
+        estimand_type=identified_estimand.estimand_type,
+        estimator_class=causal_estimator_class,
+        test_significance=test_significance,
+        evaluate_effect_strength=evaluate_effect_strength,
+        confidence_intervals=confidence_intervals,
+        target_units=target_units,
+        effect_modifiers=effect_modifiers,
+        method_params=method_params,
+    )
+    return estimate
 
 
 class CausalEstimate:

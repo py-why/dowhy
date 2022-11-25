@@ -205,16 +205,16 @@ class EmpiricalDistribution(StochasticModel):
 
 class BayesianGaussianMixtureDistribution(StochasticModel):
     def __init__(self) -> None:
-        self.__gmm_model = None
+        self._gmm_model = None
 
     def fit(self, X: np.ndarray) -> None:
         X = shape_into_2d(X)
-        self.__gmm_model = BayesianGaussianMixture(
-            n_components=BayesianGaussianMixtureDistribution.__get_optimal_number_of_components(X), max_iter=1000
+        self._gmm_model = BayesianGaussianMixture(
+            n_components=BayesianGaussianMixtureDistribution._get_optimal_number_of_components(X), max_iter=1000
         ).fit(X)
 
     @staticmethod
-    def __get_optimal_number_of_components(X: np.ndarray) -> int:
+    def _get_optimal_number_of_components(X: np.ndarray) -> int:
         current_best = 0
         current_best_num_components = 1
         num_best_in_succession = 0
@@ -241,10 +241,10 @@ class BayesianGaussianMixtureDistribution(StochasticModel):
         return current_best_num_components
 
     def draw_samples(self, num_samples: int) -> np.ndarray:
-        if self.__gmm_model is None:
+        if self._gmm_model is None:
             raise RuntimeError("%s has not been fitted!" % self.__class__.__name__)
 
-        return shape_into_2d(self.__gmm_model.sample(num_samples)[0])
+        return shape_into_2d(self._gmm_model.sample(num_samples)[0])
 
     def __str__(self) -> str:
         return "Approximated data distribution"

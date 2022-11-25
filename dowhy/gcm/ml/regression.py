@@ -7,6 +7,8 @@ from typing import Any
 import numpy as np
 import sklearn
 from packaging import version
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import PolynomialFeatures
 
 if version.parse(sklearn.__version__) < version.parse("1.0"):
     from sklearn.experimental import enable_hist_gradient_boosting  # noqa
@@ -113,6 +115,12 @@ def create_knn_regressor(**kwargs) -> SklearnRegressionModel:
 
 def create_ada_boost_regressor(**kwargs) -> SklearnRegressionModel:
     return SklearnRegressionModel(AdaBoostRegressor(**kwargs))
+
+
+def create_polynom_regressor(degree: int = 3, **kwargs_linear_model) -> SklearnRegressionModel:
+    return SklearnRegressionModel(
+        make_pipeline(PolynomialFeatures(degree=degree, include_bias=False), LinearRegression(**kwargs_linear_model))
+    )
 
 
 class InvertibleIdentityFunction(InvertibleFunction):

@@ -89,7 +89,7 @@ class AutoIdentifier:
         conditional_node_names: List[str] = None,
         **kwargs,
     ):
-        estimand = auto_identify_effect(
+        estimand = identify_effect_auto(
             graph,
             treatment_name,
             outcome_name,
@@ -126,7 +126,7 @@ class AutoIdentifier:
         )
 
 
-def auto_identify_effect(
+def identify_effect_auto(
     graph: CausalGraph,
     treatment_name: Union[str, List[str]],
     outcome_name: Union[str, List[str]],
@@ -137,7 +137,7 @@ def auto_identify_effect(
     optimize_backdoor: bool = False,
     costs: Optional[List] = None,
     **kwargs,
-):
+) -> IdentifiedEstimand:
     """Main method that returns an identified estimand (if one exists).
 
     If estimand_type is non-parametric ATE, then  uses backdoor, instrumental variable and frontdoor identification methods,  to check if an identified estimand exists, based on the causal graph.

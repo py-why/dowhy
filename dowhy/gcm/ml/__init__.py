@@ -8,6 +8,7 @@ from .classification import (
     create_gaussian_process_classifier,
     create_hist_gradient_boost_classifier,
     create_logistic_regression_classifier,
+    create_polynom_logistic_regression_classifier,
     create_random_forest_classifier,
 )
 from .regression import (
@@ -19,7 +20,13 @@ from .regression import (
     create_lasso_regressor,
     create_linear_regressor,
     create_linear_regressor_with_given_parameters,
+    create_polynom_regressor,
     create_random_forest_regressor,
     create_ridge_regressor,
     create_support_vector_regressor,
 )
+
+try:
+    from dowhy.gcm.ml.autolguon import AutoGluonClassifier, AutoGluonRegressor
+except ImportError:
+    pass
