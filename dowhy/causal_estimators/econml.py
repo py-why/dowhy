@@ -35,6 +35,12 @@ class Econml(CausalEstimator):
         self.logger.info("INFO: Using EconML Estimator")
         self.identifier_method = self._target_estimand.identifier_method
         self._observed_common_causes_names = self._target_estimand.get_backdoor_variables().copy()
+
+        # Enforcing this ordering is necessary to feed through the propensity values from dataset
+        self._observed_common_causes_names = [
+            c for c in self._observed_common_causes_names if "propensity" not in c
+        ] + sorted([c for c in self._observed_common_causes_names if "propensity" in c])
+
         # For metalearners only--issue a warning if w contains variables not in x
         (module_name, _, class_name) = self._econml_methodname.rpartition(".")
         if module_name.endswith("metalearners"):
