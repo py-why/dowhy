@@ -669,15 +669,6 @@ def estimate_effect(
 ):
     """Estimate the identified causal effect.
 
-    Currently requires an explicit method name to be specified. Method names follow the convention of identification method followed by the specific estimation method: "[backdoor/iv].estimation_method_name". Following methods are supported.
-        * Propensity Score Matching: "backdoor.propensity_score_matching"
-        * Propensity Score Stratification: "backdoor.propensity_score_stratification"
-        * Propensity Score-based Inverse Weighting: "backdoor.propensity_score_weighting"
-        * Linear Regression: "backdoor.linear_regression"
-        * Generalized Linear Models (e.g., logistic regression): "backdoor.generalized_linear_model"
-        * Instrumental Variables: "iv.instrumental_variable"
-        * Regression Discontinuity: "iv.regression_discontinuity"
-
     In addition, you can directly call any of the EconML estimation methods. The convention is "backdoor.econml.path-to-estimator-class". For example, for the double machine learning estimator ("DML" class) that is located inside "dml" module of EconML, you can use the method name, "backdoor.econml.dml.DML". CausalML estimators can also be called. See `this demo notebook <https://py-why.github.io/dowhy/example_notebooks/dowhy-conditional-treatment-effects.html>`_.
 
     :param treatment: Name of the treatment
@@ -685,7 +676,7 @@ def estimate_effect(
     :param identified_estimand: a probability expression
         that represents the effect to be estimated. Output of
         CausalModel.identify_effect method
-    :param method_name: name of the estimation method to be used.
+    :param estimator: Instance of a CausalEstimator to use
     :param control_value: Value of the treatment in the control group, for effect estimation.  If treatment is multi-variate, this can be a list.
     :param treatment_value: Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.
     :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be of three types. (1) a string for common specifications of target units (namely, "ate", "att" and "atc"), (2) a lambda function that can be used as an index for the data (pandas DataFrame), or (3) a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
