@@ -1,6 +1,6 @@
 import inspect
 from importlib import import_module
-from typing import Any, List, Optional, Protocol, Union, Callable
+from typing import Any, Callable, List, Optional, Protocol, Union
 from warnings import warn
 
 import numpy as np

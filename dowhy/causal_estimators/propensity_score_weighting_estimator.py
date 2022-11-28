@@ -135,12 +135,8 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
             self.estimate_propensity_score_column(data)
 
         # trim propensity score weights
-        data[self.propensity_score_column] = np.minimum(
-            self.max_ps_score, data[self.propensity_score_column]
-        )
-        data[self.propensity_score_column] = np.maximum(
-            self.min_ps_score, data[self.propensity_score_column]
-        )
+        data[self.propensity_score_column] = np.minimum(self.max_ps_score, data[self.propensity_score_column])
+        data[self.propensity_score_column] = np.maximum(self.min_ps_score, data[self.propensity_score_column])
 
         # ips ==> (isTreated(y)/ps(y)) + ((1-isTreated(y))/(1-ps(y)))
         # nips ==> ips / (sum of ips over all units)
@@ -156,12 +152,12 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
         data["ips_weight"] = data[self._treatment_name[0]] / data[self.propensity_score_column] + (
             1 - data[self._treatment_name[0]]
         ) / (1 - data[self.propensity_score_column])
-        data["tips_weight"] = data[self._treatment_name[0]] + (
-            1 - data[self._treatment_name[0]]
-        ) * data[self.propensity_score_column] / (1 - data[self.propensity_score_column])
-        data["cips_weight"] = data[self._treatment_name[0]] * (
-            1 - data[self.propensity_score_column]
-        ) / data[self.propensity_score_column] + (1 - data[self._treatment_name[0]])
+        data["tips_weight"] = data[self._treatment_name[0]] + (1 - data[self._treatment_name[0]]) * data[
+            self.propensity_score_column
+        ] / (1 - data[self.propensity_score_column])
+        data["cips_weight"] = data[self._treatment_name[0]] * (1 - data[self.propensity_score_column]) / data[
+            self.propensity_score_column
+        ] + (1 - data[self._treatment_name[0]])
 
         # The Hajek estimator (or the self-normalized estimator)
         data["ips_normalized_weight"] = (
@@ -205,14 +201,10 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
         )
         data["tips_stabilized_weight"] = data[self._treatment_name[0]] * p_treatment + (
             1 - data[self._treatment_name[0]]
-        ) * data[self.propensity_score_column] / (1 - data[self.propensity_score_column]) * (
-            1 - p_treatment
-        )
+        ) * data[self.propensity_score_column] / (1 - data[self.propensity_score_column]) * (1 - p_treatment)
         data["cips_stabilized_weight"] = data[self._treatment_name[0]] * (
             1 - data[self.propensity_score_column]
-        ) / data[self.propensity_score_column] * p_treatment + (1 - data[self._treatment_name[0]]) * (
-            1 - p_treatment
-        )
+        ) / data[self.propensity_score_column] * p_treatment + (1 - data[self._treatment_name[0]]) * (1 - p_treatment)
 
         if isinstance(target_units, pd.DataFrame) or target_units == "ate":
             weighting_scheme_name = self.weighting_scheme
@@ -224,14 +216,8 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
             raise ValueError(f"Target units value {target_units} not supported")
 
         # Calculating the effect
-        data["d_y"] = (
-            data[weighting_scheme_name] * data[self._treatment_name[0]] * data[self._outcome_name]
-        )
-        data["dbar_y"] = (
-            data[weighting_scheme_name]
-            * (1 - data[self._treatment_name[0]])
-            * data[self._outcome_name]
-        )
+        data["d_y"] = data[weighting_scheme_name] * data[self._treatment_name[0]] * data[self._outcome_name]
+        data["dbar_y"] = data[weighting_scheme_name] * (1 - data[self._treatment_name[0]]) * data[self._outcome_name]
         sum_dy_weights = np.sum(data[self._treatment_name[0]] * data[weighting_scheme_name])
         sum_dbary_weights = np.sum((1 - data[self._treatment_name[0]]) * data[weighting_scheme_name])
         # Subtracting the weighted means

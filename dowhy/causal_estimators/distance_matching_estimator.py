@@ -76,7 +76,6 @@ class DistanceMatchingEstimator(CausalEstimator):
             distance_metric=distance_metric,
             **kwargs,
         )
-        
 
         self.num_matches_per_unit = num_matches_per_unit
         self.distance_metric = distance_metric
