@@ -102,16 +102,20 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
 
         return self
 
-    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_):
+    def estimate_effect(
+        self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+    ):
+        if data is None:
+            data = self._data
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
-        if self.propensity_score_column not in self._data:
-            self.estimate_propensity_score_column()
+        if self.propensity_score_column not in data:
+            self.estimate_propensity_score_column(data)
 
         # this assumes a binary treatment regime
-        treated = self._data.loc[self._data[self._treatment_name[0]] == 1]
-        control = self._data.loc[self._data[self._treatment_name[0]] == 0]
+        treated = data.loc[data[self._treatment_name[0]] == 1]
+        control = data.loc[data[self._treatment_name[0]] == 0]
 
         # TODO remove neighbors that are more than a given radius apart
 
@@ -161,7 +165,7 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
             treatment_value=treatment_value,
             target_estimand=self._target_estimand,
             realized_estimand_expr=self.symbolic_estimator,
-            propensity_scores=self._data[self.propensity_score_column],
+            propensity_scores=data[self.propensity_score_column],
         )
 
         estimate.add_estimator(self)

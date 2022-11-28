@@ -157,7 +157,12 @@ class Causalml(CausalEstimator):
             )
         return estimator_class
 
-    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_):
+    def estimate_effect(
+        self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+    ):
+        if data is None:
+            data = self._data
+
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
@@ -168,7 +173,7 @@ class Causalml(CausalEstimator):
         treatment_name = self._treatment_name[0]  # As we have only one treatment variable
         # We want to pass 'v0' rather than ['v0'] to prevent a shape mismatch
 
-        func_args = {"X": self._data[X_names], "y": self._data[y_name], "treatment": self._data[treatment_name]}
+        func_args = {"X": data[X_names], "y": data[y_name], "treatment": data[treatment_name]}
 
         arg_names = inspect.getfullargspec(self.estimator.estimate_ate)[0]
         matched_args = {arg: func_args[arg] for arg in func_args.keys() if arg in arg_names}

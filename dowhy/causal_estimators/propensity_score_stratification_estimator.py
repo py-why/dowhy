@@ -113,19 +113,23 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
 
         return self
 
-    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_):
+    def estimate_effect(
+        self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+    ):
+        if data is None:
+            data = self._data
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
-        if self.propensity_score_column not in self._data:
-            self.estimate_propensity_score_column()
+        if self.propensity_score_column not in data:
+            self.estimate_propensity_score_column(data)
 
         clipped = None
         # Infer the right strata based on clipping threshold
         if self.num_strata == "auto":
             # 0.5 because there are two values for the treatment
             clipping_t = self.clipping_threshold
-            num_strata = 0.5 * self._data.shape[0] / clipping_t
+            num_strata = 0.5 * data.shape[0] / clipping_t
             # To be conservative and allow most strata to be included in the
             # analysis
             strata_found = False
@@ -202,7 +206,7 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
             treatment_value=treatment_value,
             target_estimand=self._target_estimand,
             realized_estimand_expr=self.symbolic_estimator,
-            propensity_scores=self._data[self.propensity_score_column],
+            propensity_scores=data[self.propensity_score_column],
         )
 
         estimate.add_estimator(self)

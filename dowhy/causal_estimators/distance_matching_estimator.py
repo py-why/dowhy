@@ -152,18 +152,22 @@ class DistanceMatchingEstimator(CausalEstimator):
 
         return self
 
-    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_):
+    def estimate_effect(
+        self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+    ):
+        if data is None:
+            data = self._data
         # this assumes a binary treatment regime
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
         updated_df = pd.concat(
-            [self._observed_common_causes, self._data[[self._outcome_name, self._treatment_name[0]]]], axis=1
+            [self._observed_common_causes, data[[self._outcome_name, self._treatment_name[0]]]], axis=1
         )
         if self.exact_match_cols is not None:
-            updated_df = pd.concat([updated_df, self._data[self.exact_match_cols]], axis=1)
-        treated = updated_df.loc[self._data[self._treatment_name[0]] == 1]
-        control = updated_df.loc[self._data[self._treatment_name[0]] == 0]
+            updated_df = pd.concat([updated_df, data[self.exact_match_cols]], axis=1)
+        treated = updated_df.loc[data[self._treatment_name[0]] == 1]
+        control = updated_df.loc[data[self._treatment_name[0]] == 0]
         numtreatedunits = treated.shape[0]
         numcontrolunits = control.shape[0]
 

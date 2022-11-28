@@ -209,7 +209,11 @@ class Econml(CausalEstimator):
             )
         return estimator_class
 
-    def estimate_effect(self, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_):
+    def estimate_effect(
+        self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+    ):
+        if data is None:
+            data = self._data
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
@@ -225,7 +229,7 @@ class Econml(CausalEstimator):
             if type(target_units) is pd.DataFrame:
                 X_test = target_units
             elif callable(target_units):
-                filtered_rows = self._data.where(target_units)
+                filtered_rows = data.where(target_units)
                 boolean_criterion = np.array(filtered_rows.notnull().iloc[:, 0])
                 X_test = X[boolean_criterion]
             n_target_units = X_test.shape[0]

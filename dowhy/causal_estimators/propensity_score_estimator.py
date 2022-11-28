@@ -134,9 +134,9 @@ class PropensityScoreEstimator(CausalEstimator):
 
         return self
 
-    def estimate_propensity_score_column(self):
+    def estimate_propensity_score_column(self, data):
         try:
-            self._data[self.propensity_score_column] = self.propensity_score_model.predict_proba(
+            data[self.propensity_score_column] = self.propensity_score_model.predict_proba(
                 self._observed_common_causes
             )[:, 1]
         except NotFittedError:
