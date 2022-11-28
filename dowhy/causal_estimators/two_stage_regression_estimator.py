@@ -85,6 +85,8 @@ class TwoStageRegressionEstimator(CausalEstimator):
         self.logger.info("INFO: Using Two Stage Regression Estimator")
         # Check if the treatment is one-dimensional
         modified_target_estimand = copy.deepcopy(self._target_estimand)
+        modified_target_estimand.identifier_method = "backdoor"
+        modified_target_estimand.backdoor_variables = self._target_estimand.mediation_first_stage_confounders
         if first_stage_model is not None:
             self._first_stage_model = (
                 first_stage_model
@@ -108,6 +110,8 @@ class TwoStageRegressionEstimator(CausalEstimator):
             self.logger.warning("First stage model not provided. Defaulting to sklearn.linear_model.LinearRegression.")
 
         modified_target_estimand = copy.deepcopy(self._target_estimand)
+        modified_target_estimand.identifier_method = "backdoor"
+        modified_target_estimand.backdoor_variables = self._target_estimand.mediation_second_stage_confounders
         if second_stage_model is not None:
             self._second_stage_model = (
                 second_stage_model
@@ -132,6 +136,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
             self.logger.warning("Second stage model not provided. Defaulting to backdoor.linear_regression.")
 
         if self._target_estimand.estimand_type == EstimandType.NONPARAMETRIC_NDE:
+            modified_target_estimand.identifier_method = "backdoor"
             modified_target_estimand = copy.deepcopy(self._target_estimand)
             self._second_stage_model_nde = type(self._second_stage_model)(
                 modified_target_estimand,
@@ -202,10 +207,6 @@ class TwoStageRegressionEstimator(CausalEstimator):
                 error_msg = "No instrumental variable present. Two stage regression is not applicable"
                 self.logger.error(error_msg)
 
-        self._first_stage_model._target_estimand.identifier_method = "backdoor"
-        self._first_stage_model._target_estimand.backdoor_variables = (
-            self._target_estimand.mediation_first_stage_confounders
-        )
         if self._target_estimand.identifier_method == "frontdoor":
             self._first_stage_model._target_estimand.outcome_variable = parse_state(self._frontdoor_variables_names)
         elif self._target_estimand.identifier_method == "mediation":
@@ -218,10 +219,6 @@ class TwoStageRegressionEstimator(CausalEstimator):
             effect_modifier_names=effect_modifier_names,
         )
 
-        self._second_stage_model._target_estimand.identifier_method = "backdoor"
-        self._second_stage_model._target_estimand.backdoor_variables = (
-            self._target_estimand.mediation_second_stage_confounders
-        )
         if self._target_estimand.identifier_method == "frontdoor":
             self._second_stage_model._target_estimand.treatment_variable = parse_state(self._frontdoor_variables_names)
         elif self._target_estimand.identifier_method == "mediation":
