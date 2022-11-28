@@ -53,7 +53,6 @@ class SklearnRegressionModel(PredictionModel):
     def clone(self):
         """
         Clones the prediction model using the same hyper parameters but not fitted.
-
         :return: An unfitted clone of the prediction model.
         """
         return SklearnRegressionModel(sklearn_mdl=sklearn.clone(self._sklearn_mdl))
@@ -145,18 +144,3 @@ class InvertibleLogarithmicFunction(InvertibleFunction):
 
     def evaluate_inverse(self, X: np.ndarray) -> np.ndarray:
         return np.exp(X)
-
-
-class ProductRegressor(PredictionModel):
-    def __init__(self):
-        self._one_hot_encoders = {}
-
-    def fit(self, X, Y):
-        self._one_hot_encoders = fit_one_hot_encoders(X)
-
-    def predict(self, X):
-        X = apply_one_hot_encoding(X, self._one_hot_encoders)
-        return np.prod(X, axis=1).reshape(-1, 1)
-
-    def clone(self):
-        return ProductRegressor()
