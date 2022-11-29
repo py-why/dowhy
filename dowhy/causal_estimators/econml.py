@@ -219,6 +219,14 @@ class Econml(CausalEstimator):
     def estimate_effect(
         self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
     ):
+        """
+        data: dataframe containing the data on which treatment effect is to be estimated.
+        treatment_value: value of the treatment variable for which the effect is to be estimated.
+        control_value: value of the treatment variable that denotes its absence (usually 0)
+        target_units: The units for which the treatment effect should be estimated.
+                     It can be a DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
+                     It can also be a lambda function that can be used as an index for the data (pandas DataFrame) to select the required rows.
+        """
         if data is None:
             data = self._data
         self._target_units = target_units

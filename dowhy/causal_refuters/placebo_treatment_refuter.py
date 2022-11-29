@@ -8,7 +8,7 @@ import pandas as pd
 from joblib import Parallel, delayed
 from tqdm.auto import tqdm
 
-from dowhy.causal_estimator import CausalEstimate, CausalEstimator
+from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_estimators.econml import Econml
 from dowhy.causal_estimators.instrumental_variable_estimator import InstrumentalVariableEstimator
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
@@ -205,6 +205,12 @@ def refute_placebo_treatment(
             raise ValueError(
                 "Only placebo_type=''permute'' is supported for creating placebo for instrumental variable estimation methods."
             )
+
+    # For IV methods, the estimating_instrument_names should also be
+    # changed. Create a copy to avoid modifying original object
+    if isinstance(estimate, InstrumentalVariableEstimator):
+        estimate = copy.deepcopy(estimate)
+        estimate.iv_instrument_name = ["placebo_" + s for s in parse_state(estimate.iv_instrument_name)]
 
     # We need to change the identified estimand
     # We make a copy as a safety measure, we don't want to change the
