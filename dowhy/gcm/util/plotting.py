@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 from typing import Any, Dict, List, Optional, Tuple
 
 import networkx as nx
@@ -110,6 +111,8 @@ def _plot_causal_graph_networkx(
 
     if causal_strengths is None:
         causal_strengths = {}
+    else:
+        causal_strengths = deepcopy(causal_strengths)
 
     max_strength = 0.0
     for (source, target, strength) in causal_graph.edges(data="CAUSAL_STRENGTH", default=1):
