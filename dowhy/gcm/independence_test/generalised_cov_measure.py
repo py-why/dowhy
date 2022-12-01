@@ -8,7 +8,7 @@ from dowhy.gcm.fcms import PredictionModel
 from dowhy.gcm.util.general import is_categorical, shape_into_2d
 
 
-def general_cov_based(
+def generalised_cov_based(
     X: np.ndarray,
     Y: np.ndarray,
     Z: Optional[np.ndarray] = None,
