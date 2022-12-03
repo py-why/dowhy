@@ -94,9 +94,7 @@ class EfficientBackdoor:
         causal_vertices = set()
         causal_paths = list(
             nx.all_simple_paths(
-                self.graph._graph,
-                source=self.graph.treatment_name[0],
-                target=self.graph.outcome_name[0],
+                self.graph._graph, source=self.graph.treatment_name[0], target=self.graph.outcome_name[0],
             )
         )
 
@@ -250,9 +248,7 @@ class EfficientBackdoor:
         """
         D = self.build_D()
         _, flow_dict = nx.algorithms.flow.maximum_flow(
-            flowG=D,
-            _s=self.graph.outcome_name[0] + "''",
-            _t=self.graph.treatment_name[0] + "'",
+            flowG=D, _s=self.graph.outcome_name[0] + "''", _t=self.graph.treatment_name[0] + "'",
         )
         queu = [self.graph.outcome_name[0] + "''"]
         S_c = set()
