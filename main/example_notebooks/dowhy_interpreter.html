@@ -545,10 +545,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -699,8 +700,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
-<span class="o">%</span><span class="k">autoreload</span> 2
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%load_ext autoreload
+%autoreload 2
 </pre></div>
 </div>
 </div>
@@ -708,13 +709,13 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">logging</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
+import pandas as pd
+import logging
 
-<span class="kn">import</span> <span class="nn">dowhy</span>
-<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
-<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+import dowhy
+from dowhy import CausalModel
+import dowhy.datasets
 </pre></div>
 </div>
 </div>
@@ -724,17 +725,17 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">linear_dataset</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">num_common_causes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-        <span class="n">num_instruments</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">num_treatments</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">num_discrete_common_causes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">num_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
-        <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">outcome_is_binary</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">v0</span><span class="o">==</span><span class="kc">True</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">df</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>data = dowhy.datasets.linear_dataset(beta=1,
+        num_common_causes=5,
+        num_instruments = 2,
+        num_treatments=1,
+        num_discrete_common_causes=1,
+        num_samples=10000,
+        treatment_is_binary=True,
+        outcome_is_binary=False)
+df = data[&quot;df&quot;]
+print(df[df.v0==True].shape[0])
+df
 </pre></div>
 </div>
 </div>
@@ -743,7 +744,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-8767
+8058
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -784,62 +785,62 @@ div.rendered_html tbody tr:hover {
     <tr>
       <th>0</th>
       <td>0.0</td>
-      <td>0.793407</td>
-      <td>-2.629120</td>
-      <td>1.421717</td>
-      <td>-0.052626</td>
-      <td>-1.422821</td>
-      <td>0</td>
+      <td>0.519193</td>
+      <td>1.195356</td>
+      <td>-0.816108</td>
+      <td>-0.148041</td>
+      <td>-0.162337</td>
+      <td>2</td>
       <td>True</td>
-      <td>0.119344</td>
+      <td>1.841239</td>
     </tr>
     <tr>
       <th>1</th>
       <td>0.0</td>
-      <td>0.535601</td>
-      <td>1.085425</td>
-      <td>0.009649</td>
-      <td>-2.355845</td>
-      <td>0.118128</td>
-      <td>3</td>
-      <td>True</td>
-      <td>2.725203</td>
+      <td>0.260280</td>
+      <td>-0.560534</td>
+      <td>-3.019594</td>
+      <td>-1.230298</td>
+      <td>-1.349463</td>
+      <td>2</td>
+      <td>False</td>
+      <td>-2.660561</td>
     </tr>
     <tr>
       <th>2</th>
       <td>1.0</td>
-      <td>0.460490</td>
-      <td>-0.593490</td>
-      <td>-1.445162</td>
-      <td>0.004914</td>
-      <td>1.265035</td>
+      <td>0.812642</td>
+      <td>0.715830</td>
+      <td>-0.349009</td>
+      <td>-0.278999</td>
+      <td>-0.218270</td>
       <td>3</td>
       <td>True</td>
-      <td>3.151864</td>
+      <td>1.751957</td>
     </tr>
     <tr>
       <th>3</th>
       <td>1.0</td>
-      <td>0.526057</td>
-      <td>-1.517879</td>
-      <td>0.099358</td>
-      <td>1.003683</td>
-      <td>-0.172746</td>
-      <td>3</td>
+      <td>0.367540</td>
+      <td>0.556578</td>
+      <td>-1.801956</td>
+      <td>-0.685310</td>
+      <td>-1.725168</td>
+      <td>0</td>
       <td>True</td>
-      <td>2.813405</td>
+      <td>-1.210640</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0.0</td>
-      <td>0.924911</td>
-      <td>0.581969</td>
-      <td>-1.539133</td>
-      <td>0.598417</td>
-      <td>-0.993413</td>
-      <td>0</td>
+      <td>1.0</td>
+      <td>0.639453</td>
+      <td>-1.771376</td>
+      <td>-0.569808</td>
+      <td>-0.344986</td>
+      <td>-1.286793</td>
+      <td>3</td>
       <td>True</td>
-      <td>-0.804168</td>
+      <td>-0.910974</td>
     </tr>
     <tr>
       <th>...</th>
@@ -855,63 +856,63 @@ div.rendered_html tbody tr:hover {
     </tr>
     <tr>
       <th>9995</th>
-      <td>0.0</td>
-      <td>0.178841</td>
-      <td>0.405776</td>
-      <td>-0.633767</td>
-      <td>1.193745</td>
-      <td>-0.494475</td>
+      <td>1.0</td>
+      <td>0.874717</td>
+      <td>1.585963</td>
+      <td>0.848467</td>
+      <td>-2.531158</td>
+      <td>-1.118183</td>
       <td>3</td>
       <td>True</td>
-      <td>2.363939</td>
+      <td>-0.107537</td>
     </tr>
     <tr>
       <th>9996</th>
       <td>1.0</td>
-      <td>0.073738</td>
-      <td>0.065673</td>
-      <td>0.747091</td>
-      <td>-1.356397</td>
-      <td>-0.682139</td>
-      <td>0</td>
-      <td>False</td>
-      <td>-0.460672</td>
+      <td>0.259350</td>
+      <td>-1.426238</td>
+      <td>-1.638405</td>
+      <td>-2.465358</td>
+      <td>0.211600</td>
+      <td>1</td>
+      <td>True</td>
+      <td>-1.650352</td>
     </tr>
     <tr>
       <th>9997</th>
       <td>1.0</td>
-      <td>0.198841</td>
-      <td>1.587158</td>
-      <td>1.143979</td>
-      <td>0.452776</td>
-      <td>-2.302979</td>
-      <td>3</td>
+      <td>0.347919</td>
+      <td>3.023446</td>
+      <td>-0.206898</td>
+      <td>-1.448533</td>
+      <td>0.116533</td>
+      <td>2</td>
       <td>True</td>
-      <td>1.757302</td>
+      <td>2.333717</td>
     </tr>
     <tr>
       <th>9998</th>
-      <td>0.0</td>
-      <td>0.180476</td>
-      <td>1.393030</td>
-      <td>-0.126005</td>
-      <td>1.023083</td>
-      <td>-1.052596</td>
+      <td>1.0</td>
+      <td>0.297186</td>
+      <td>-0.404750</td>
+      <td>1.249617</td>
+      <td>-0.749888</td>
+      <td>-1.308529</td>
       <td>1</td>
       <td>True</td>
-      <td>0.952853</td>
+      <td>-0.597163</td>
     </tr>
     <tr>
       <th>9999</th>
       <td>1.0</td>
-      <td>0.760089</td>
-      <td>1.030184</td>
-      <td>1.884127</td>
-      <td>-0.734842</td>
-      <td>-0.529754</td>
-      <td>3</td>
+      <td>0.646051</td>
+      <td>2.570660</td>
+      <td>0.195861</td>
+      <td>-2.494010</td>
+      <td>-1.813135</td>
+      <td>2</td>
       <td>True</td>
-      <td>3.689682</td>
+      <td>-0.533396</td>
     </tr>
   </tbody>
 </table>
@@ -926,14 +927,14 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># With graph</span>
-<span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
-        <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
-        <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
-        <span class="n">graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;gml_graph&quot;</span><span class="p">],</span>
-        <span class="n">instruments</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;instrument_names&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># With graph
+model=CausalModel(
+        data = df,
+        treatment=data[&quot;treatment_name&quot;],
+        outcome=data[&quot;outcome_name&quot;],
+        graph=data[&quot;gml_graph&quot;],
+        instruments=data[&quot;instrument_names&quot;]
+        )
 </pre></div>
 </div>
 </div>
@@ -941,7 +942,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model.view_model()
 </pre></div>
 </div>
 </div>
@@ -949,8 +950,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
-<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from IPython.display import Image, display
+display(Image(filename=&quot;causal_model.png&quot;))
 </pre></div>
 </div>
 </div>
@@ -966,8 +967,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+print(identified_estimand)
 </pre></div>
 </div>
 </div>
@@ -982,9 +983,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W3,W1,W0,W2,W4])
+─────(E[y|W1,W3,W0,W2,W4])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W1,W0,W2,W4,U) = P(y|v0,W3,W1,W0,W2,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W3,W0,W2,W4,U) = P(y|v0,W1,W3,W0,W2,W4)
 
 ### Estimand : 2
 Estimand name: iv
@@ -992,9 +993,9 @@ Estimand expression:
  ⎡                              -1⎤
  ⎢    d        ⎛    d          ⎞  ⎥
 E⎢─────────(y)⋅⎜─────────([v₀])⎟  ⎥
- ⎣d[Z₁  Z₀]    ⎝d[Z₁  Z₀]      ⎠  ⎦
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z1,Z0})
-Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→{v0}, then ¬({Z1,Z0}→y)
+ ⎣d[Z₀  Z₁]    ⎝d[Z₀  Z₁]      ⎠  ⎦
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
+Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
 
 ### Estimand : 3
 Estimand name: frontdoor
@@ -1010,11 +1011,11 @@ No such variable(s) found!
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">causal_estimate_strat</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
-                                              <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_stratification&quot;</span><span class="p">,</span>
-                                              <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;att&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_strat</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">causal_estimate_strat</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>causal_estimate_strat = model.estimate_effect(identified_estimand,
+                                              method_name=&quot;backdoor.propensity_score_stratification&quot;,
+                                              target_units=&quot;att&quot;)
+print(causal_estimate_strat)
+print(&quot;Causal Estimate is &quot; + str(causal_estimate_strat.value))
 </pre></div>
 </div>
 </div>
@@ -1032,18 +1033,18 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W3,W1,W0,W2,W4])
+─────(E[y|W1,W3,W0,W2,W4])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W1,W0,W2,W4,U) = P(y|v0,W3,W1,W0,W2,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W3,W0,W2,W4,U) = P(y|v0,W1,W3,W0,W2,W4)
 
 ## Realized estimand
-b: y~v0+W3+W1+W0+W2+W4
+b: y~v0+W1+W3+W0+W2+W4
 Target units: att
 
 ## Estimate
-Mean value: 1.0201494210559374
+Mean value: 0.9851574221430728
 
-Causal Estimate is 1.0201494210559374
+Causal Estimate is 0.9851574221430728
 </pre></div></div>
 </div>
 <section id="Textual-Interpreter">
@@ -1053,8 +1054,8 @@ Causal Estimate is 1.0201494210559374
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Textual Interpreter</span>
-<span class="n">interpretation</span> <span class="o">=</span> <span class="n">causal_estimate_strat</span><span class="o">.</span><span class="n">interpret</span><span class="p">(</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;textual_effect_interpreter&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Textual Interpreter
+interpretation = causal_estimate_strat.interpret(method_name=&quot;textual_effect_interpreter&quot;)
 </pre></div>
 </div>
 </div>
@@ -1063,7 +1064,7 @@ Causal Estimate is 1.0201494210559374
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.0201494210559374 in the expected value of the outcome [y], over the data distribution/population represented by the dataset.
+Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 0.9851574221430728 in the expected value of the outcome [y], over the data distribution/population represented by the dataset.
 </pre></div></div>
 </div>
 </section>
@@ -1076,8 +1077,8 @@ Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.02
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Visual Interpreter</span>
-<span class="n">interpretation</span> <span class="o">=</span> <span class="n">causal_estimate_strat</span><span class="o">.</span><span class="n">interpret</span><span class="p">(</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;propensity_balance_interpreter&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Visual Interpreter
+interpretation = causal_estimate_strat.interpret(method_name=&quot;propensity_balance_interpreter&quot;)
 </pre></div>
 </div>
 </div>
@@ -1098,11 +1099,11 @@ Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.02
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">causal_estimate_match</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
-                                              <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_matching&quot;</span><span class="p">,</span>
-                                              <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;atc&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_match</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">causal_estimate_match</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>causal_estimate_match = model.estimate_effect(identified_estimand,
+                                              method_name=&quot;backdoor.propensity_score_matching&quot;,
+                                              target_units=&quot;atc&quot;)
+print(causal_estimate_match)
+print(&quot;Causal Estimate is &quot; + str(causal_estimate_match.value))
 </pre></div>
 </div>
 </div>
@@ -1120,26 +1121,26 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W3,W1,W0,W2,W4])
+─────(E[y|W1,W3,W0,W2,W4])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W1,W0,W2,W4,U) = P(y|v0,W3,W1,W0,W2,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W3,W0,W2,W4,U) = P(y|v0,W1,W3,W0,W2,W4)
 
 ## Realized estimand
-b: y~v0+W3+W1+W0+W2+W4
+b: y~v0+W1+W3+W0+W2+W4
 Target units: atc
 
 ## Estimate
-Mean value: 1.0117113950277328
+Mean value: 0.9803091244132675
 
-Causal Estimate is 1.0117113950277328
+Causal Estimate is 0.9803091244132675
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Textual Interpreter</span>
-<span class="n">interpretation</span> <span class="o">=</span> <span class="n">causal_estimate_match</span><span class="o">.</span><span class="n">interpret</span><span class="p">(</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;textual_effect_interpreter&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Textual Interpreter
+interpretation = causal_estimate_match.interpret(method_name=&quot;textual_effect_interpreter&quot;)
 </pre></div>
 </div>
 </div>
@@ -1148,7 +1149,7 @@ Causal Estimate is 1.0117113950277328
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.0117113950277328 in the expected value of the outcome [y], over the data distribution/population represented by the dataset.
+Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 0.9803091244132675 in the expected value of the outcome [y], over the data distribution/population represented by the dataset.
 </pre></div></div>
 </div>
 <p>Cannot use propensity balance interpretor here since the interpreter method only supports propensity score stratification estimator.</p>
@@ -1160,12 +1161,12 @@ Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.01
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">causal_estimate_ipw</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
-                                            <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_weighting&quot;</span><span class="p">,</span>
-                                            <span class="n">target_units</span> <span class="o">=</span> <span class="s2">&quot;ate&quot;</span><span class="p">,</span>
-                                            <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;weighting_scheme&quot;</span><span class="p">:</span><span class="s2">&quot;ips_weight&quot;</span><span class="p">})</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_ipw</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">causal_estimate_ipw</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>causal_estimate_ipw = model.estimate_effect(identified_estimand,
+                                            method_name=&quot;backdoor.propensity_score_weighting&quot;,
+                                            target_units = &quot;ate&quot;,
+                                            method_params={&quot;weighting_scheme&quot;:&quot;ips_weight&quot;})
+print(causal_estimate_ipw)
+print(&quot;Causal Estimate is &quot; + str(causal_estimate_ipw.value))
 </pre></div>
 </div>
 </div>
@@ -1183,26 +1184,26 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W3,W1,W0,W2,W4])
+─────(E[y|W1,W3,W0,W2,W4])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W1,W0,W2,W4,U) = P(y|v0,W3,W1,W0,W2,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W3,W0,W2,W4,U) = P(y|v0,W1,W3,W0,W2,W4)
 
 ## Realized estimand
-b: y~v0+W3+W1+W0+W2+W4
+b: y~v0+W1+W3+W0+W2+W4
 Target units: ate
 
 ## Estimate
-Mean value: 1.1566440740634603
+Mean value: 1.1009628142927934
 
-Causal Estimate is 1.1566440740634603
+Causal Estimate is 1.1009628142927934
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Textual Interpreter</span>
-<span class="n">interpretation</span> <span class="o">=</span> <span class="n">causal_estimate_ipw</span><span class="o">.</span><span class="n">interpret</span><span class="p">(</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;textual_effect_interpreter&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Textual Interpreter
+interpretation = causal_estimate_ipw.interpret(method_name=&quot;textual_effect_interpreter&quot;)
 </pre></div>
 </div>
 </div>
@@ -1211,14 +1212,14 @@ Causal Estimate is 1.1566440740634603
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.1566440740634603 in the expected value of the outcome [y], over the data distribution/population represented by the dataset.
+Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.1009628142927934 in the expected value of the outcome [y], over the data distribution/population represented by the dataset.
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">interpretation</span> <span class="o">=</span> <span class="n">causal_estimate_ipw</span><span class="o">.</span><span class="n">interpret</span><span class="p">(</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;confounder_distribution_interpreter&quot;</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">),</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">var_name</span><span class="o">=</span><span class="s1">&#39;W4&#39;</span><span class="p">,</span> <span class="n">var_type</span><span class="o">=</span><span class="s1">&#39;discrete&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>interpretation = causal_estimate_ipw.interpret(method_name=&quot;confounder_distribution_interpreter&quot;, fig_size=(8,8), font_size=12, var_name=&#39;W4&#39;, var_type=&#39;discrete&#39;)
 </pre></div>
 </div>
 </div>

@@ -540,10 +540,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -699,27 +700,27 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Creating some simulated data for our example</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="n">num_users</span> <span class="o">=</span> <span class="mi">10000</span>
-<span class="n">num_months</span> <span class="o">=</span> <span class="mi">12</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Creating some simulated data for our example
+import pandas as pd
+import numpy as np
+num_users = 10000
+num_months = 12
 
-<span class="n">signup_months</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_months</span><span class="p">),</span> <span class="n">num_users</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">num_users</span><span class="p">)</span> <span class="c1"># signup_months == 0 means customer did not sign up</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
-    <span class="s1">&#39;user_id&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_users</span><span class="p">),</span> <span class="n">num_months</span><span class="p">),</span>
-    <span class="s1">&#39;signup_month&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">signup_months</span><span class="p">,</span> <span class="n">num_months</span><span class="p">),</span> <span class="c1"># signup month == 0 means customer did not sign up</span>
-    <span class="s1">&#39;month&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_months</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">num_users</span><span class="p">),</span> <span class="c1"># months are from 1 to 12</span>
-    <span class="s1">&#39;spend&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="n">num_users</span><span class="o">*</span><span class="n">num_months</span><span class="p">)</span> <span class="c1">#np.random.beta(a=2, b=5, size=num_users * num_months)*1000 # centered at 500</span>
-<span class="p">})</span>
-<span class="c1"># A customer is in the treatment group if and only if they signed up</span>
-<span class="n">df</span><span class="p">[</span><span class="s2">&quot;treatment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;signup_month&quot;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span>
-<span class="c1"># Simulating an effect of month (monotonically decreasing--customers buy less later in the year)</span>
-<span class="n">df</span><span class="p">[</span><span class="s2">&quot;spend&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;spend&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">]</span><span class="o">*</span><span class="mi">10</span>
-<span class="c1"># Simulating a simple treatment effect of 100</span>
-<span class="n">after_signup</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;signup_month&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;treatment&quot;</span><span class="p">])</span>
-<span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">after_signup</span><span class="p">,</span><span class="s2">&quot;spend&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">after_signup</span><span class="p">][</span><span class="s2">&quot;spend&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">100</span>
-<span class="n">df</span>
+signup_months = np.random.choice(np.arange(1, num_months), num_users) * np.random.randint(0,2, size=num_users) # signup_months == 0 means customer did not sign up
+df = pd.DataFrame({
+    &#39;user_id&#39;: np.repeat(np.arange(num_users), num_months),
+    &#39;signup_month&#39;: np.repeat(signup_months, num_months), # signup month == 0 means customer did not sign up
+    &#39;month&#39;: np.tile(np.arange(1, num_months+1), num_users), # months are from 1 to 12
+    &#39;spend&#39;: np.random.poisson(500, num_users*num_months) #np.random.beta(a=2, b=5, size=num_users * num_months)*1000 # centered at 500
+})
+# A customer is in the treatment group if and only if they signed up
+df[&quot;treatment&quot;] = df[&quot;signup_month&quot;]&gt;0
+# Simulating an effect of month (monotonically decreasing--customers buy less later in the year)
+df[&quot;spend&quot;] = df[&quot;spend&quot;] - df[&quot;month&quot;]*10
+# Simulating a simple treatment effect of 100
+after_signup = (df[&quot;signup_month&quot;] &lt; df[&quot;month&quot;]) &amp; (df[&quot;treatment&quot;])
+df.loc[after_signup,&quot;spend&quot;] = df[after_signup][&quot;spend&quot;] + 100
+df
 </pre></div>
 </div>
 </div>
@@ -861,10 +862,10 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">dowhy</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import dowhy
 
-<span class="c1"># Setting the signup month (for ease of analysis)</span>
-<span class="n">i</span> <span class="o">=</span> <span class="mi">3</span>
+# Setting the signup month (for ease of analysis)
+i = 3
 </pre></div>
 </div>
 </div>
@@ -872,40 +873,40 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">causal_graph</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;digraph {</span>
-<span class="s2">treatment[label=&quot;Program Signup in month i&quot;];</span>
-<span class="s2">pre_spends;</span>
-<span class="s2">post_spends;</span>
-<span class="s2">Z-&gt;treatment;</span>
-<span class="s2">pre_spends -&gt; treatment;</span>
-<span class="s2">treatment-&gt;post_spends;</span>
-<span class="s2">signup_month-&gt;post_spends;</span>
-<span class="s2">signup_month-&gt;treatment;</span>
-<span class="s2">}&quot;&quot;&quot;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>causal_graph = &quot;&quot;&quot;digraph {
+treatment[label=&quot;Program Signup in month i&quot;];
+pre_spends;
+post_spends;
+Z-&gt;treatment;
+pre_spends -&gt; treatment;
+treatment-&gt;post_spends;
+signup_month-&gt;post_spends;
+signup_month-&gt;treatment;
+}&quot;&quot;&quot;
 
-<span class="c1"># Post-process the data based on the graph and the month of the treatment (signup)</span>
-<span class="c1"># For each customer, determine their average monthly spend before and after month i</span>
-<span class="n">df_i_signupmonth</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">signup_month</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">])]</span>
-    <span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;user_id&quot;</span><span class="p">,</span> <span class="s2">&quot;signup_month&quot;</span><span class="p">,</span> <span class="s2">&quot;treatment&quot;</span><span class="p">])</span>
-    <span class="o">.</span><span class="n">apply</span><span class="p">(</span>
-        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;pre_spends&quot;</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">month</span> <span class="o">&lt;</span> <span class="n">i</span><span class="p">,</span> <span class="s2">&quot;spend&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
-                <span class="s2">&quot;post_spends&quot;</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">month</span> <span class="o">&gt;</span> <span class="n">i</span><span class="p">,</span> <span class="s2">&quot;spend&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
-            <span class="p">}</span>
-        <span class="p">)</span>
-    <span class="p">)</span>
-    <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
-<span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">df_i_signupmonth</span><span class="p">)</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">CausalModel</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df_i_signupmonth</span><span class="p">,</span>
-                     <span class="n">graph</span><span class="o">=</span><span class="n">causal_graph</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">),</span>
-                     <span class="n">treatment</span><span class="o">=</span><span class="s2">&quot;treatment&quot;</span><span class="p">,</span>
-                     <span class="n">outcome</span><span class="o">=</span><span class="s2">&quot;post_spends&quot;</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
-<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+# Post-process the data based on the graph and the month of the treatment (signup)
+# For each customer, determine their average monthly spend before and after month i
+df_i_signupmonth = (
+    df[df.signup_month.isin([0, i])]
+    .groupby([&quot;user_id&quot;, &quot;signup_month&quot;, &quot;treatment&quot;])
+    .apply(
+        lambda x: pd.Series(
+            {
+                &quot;pre_spends&quot;: x.loc[x.month &lt; i, &quot;spend&quot;].mean(),
+                &quot;post_spends&quot;: x.loc[x.month &gt; i, &quot;spend&quot;].mean(),
+            }
+        )
+    )
+    .reset_index()
+)
+print(df_i_signupmonth)
+model = dowhy.CausalModel(data=df_i_signupmonth,
+                     graph=causal_graph.replace(&quot;\n&quot;, &quot; &quot;),
+                     treatment=&quot;treatment&quot;,
+                     outcome=&quot;post_spends&quot;)
+model.view_model()
+from IPython.display import Image, display
+display(Image(filename=&quot;causal_model.png&quot;))
 </pre></div>
 </div>
 </div>
@@ -947,8 +948,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+print(identified_estimand)
 </pre></div>
 </div>
 </div>
@@ -990,10 +991,10 @@ No such variable(s) found!
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
-                                 <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_matching&quot;</span><span class="p">,</span>
-                                <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;att&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>estimate = model.estimate_effect(identified_estimand,
+                                 method_name=&quot;backdoor.propensity_score_matching&quot;,
+                                target_units=&quot;att&quot;)
+print(estimate)
 </pre></div>
 </div>
 </div>
@@ -1044,9 +1045,9 @@ Mean value: 97.57746107152285
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refutation</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;placebo_treatment_refuter&quot;</span><span class="p">,</span>
-                     <span class="n">placebo_type</span><span class="o">=</span><span class="s2">&quot;permute&quot;</span><span class="p">,</span> <span class="n">num_simulations</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">refutation</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refutation = model.refute_estimate(identified_estimand, estimate, method_name=&quot;placebo_treatment_refuter&quot;,
+                     placebo_type=&quot;permute&quot;, num_simulations=20)
+print(refutation)
 </pre></div>
 </div>
 </div>

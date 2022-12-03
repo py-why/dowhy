@@ -528,10 +528,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -683,8 +684,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
-<span class="n">causal_graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">)])</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import networkx as nx
+causal_graph = nx.DiGraph([(&#39;X&#39;, &#39;Y&#39;), (&#39;Y&#39;, &#39;Z&#39;)])
 </pre></div>
 </div>
 </div>
@@ -693,8 +694,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">gcm</span>
-<span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from dowhy import gcm
+causal_model = gcm.StructuralCausalModel(causal_graph)
 </pre></div>
 </div>
 </div>
@@ -703,13 +704,13 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span><span class="o">,</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np, pandas as pd
 
-<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-<span class="n">Y</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">X</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-<span class="n">Z</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">Y</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">))</span>
-<span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+X = np.random.normal(loc=0, scale=1, size=1000)
+Y = 2 * X + np.random.normal(loc=0, scale=1, size=1000)
+Z = 3 * Y + np.random.normal(loc=0, scale=1, size=1000)
+data = pd.DataFrame(data=dict(X=X, Y=Y, Z=Z))
+data.head()
 </pre></div>
 </div>
 </div>
@@ -744,33 +745,33 @@ div.rendered_html tbody tr:hover {
   <tbody>
     <tr>
       <th>0</th>
-      <td>1.314540</td>
-      <td>2.282040</td>
-      <td>5.639193</td>
+      <td>-1.344216</td>
+      <td>-2.671694</td>
+      <td>-7.780252</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>2.450438</td>
-      <td>4.545329</td>
-      <td>13.893414</td>
+      <td>0.578493</td>
+      <td>-0.247740</td>
+      <td>0.644350</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.048459</td>
-      <td>-0.428041</td>
-      <td>-1.381543</td>
+      <td>-1.289286</td>
+      <td>-2.076950</td>
+      <td>-5.031143</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.533750</td>
-      <td>1.231439</td>
-      <td>3.292749</td>
+      <td>1.327573</td>
+      <td>4.046905</td>
+      <td>11.664044</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0.341923</td>
-      <td>-1.399454</td>
-      <td>-4.314677</td>
+      <td>-1.285166</td>
+      <td>-1.064975</td>
+      <td>-2.365370</td>
     </tr>
   </tbody>
 </table>
@@ -782,7 +783,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">assign_causal_mechanisms</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>gcm.auto.assign_causal_mechanisms(causal_model, data)
 </pre></div>
 </div>
 </div>
@@ -791,9 +792,9 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">EmpiricalDistribution</span><span class="p">())</span>
-<span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
-<span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>causal_model.set_causal_mechanism(&#39;X&#39;, gcm.EmpiricalDistribution())
+causal_model.set_causal_mechanism(&#39;Y&#39;, gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
+causal_model.set_causal_mechanism(&#39;Z&#39;, gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
 </pre></div>
 </div>
 </div>
@@ -806,7 +807,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>gcm.fit(causal_model, data)
 </pre></div>
 </div>
 </div>
@@ -815,7 +816,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00:00&lt;00:00, 526.17it/s]
+Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00:00&lt;00:00, 594.01it/s]
 </pre></div></div>
 </div>
 <p>Fitting means, we learn the generative models of the variables in the SCM according to the data.</p>
@@ -831,10 +832,10 @@ Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">samples</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">interventional_samples</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span>
-                                     <span class="p">{</span><span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="mf">2.34</span> <span class="p">},</span>
-                                     <span class="n">num_samples_to_draw</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-<span class="n">samples</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>samples = gcm.interventional_samples(causal_model,
+                                     {&#39;Y&#39;: lambda y: 2.34 },
+                                     num_samples_to_draw=1000)
+samples.head()
 </pre></div>
 </div>
 </div>
@@ -869,33 +870,33 @@ Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.477788</td>
+      <td>1.019536</td>
       <td>2.34</td>
-      <td>6.755721</td>
+      <td>8.224045</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.761721</td>
+      <td>-0.379012</td>
       <td>2.34</td>
-      <td>6.351683</td>
+      <td>7.510054</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.576950</td>
+      <td>0.187337</td>
       <td>2.34</td>
-      <td>8.283042</td>
+      <td>8.725844</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-0.497197</td>
+      <td>0.595614</td>
       <td>2.34</td>
-      <td>5.691122</td>
+      <td>8.655460</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-0.165451</td>
+      <td>0.400620</td>
       <td>2.34</td>
-      <td>5.757177</td>
+      <td>7.356312</td>
     </tr>
   </tbody>
 </table>

@@ -385,10 +385,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -544,31 +545,31 @@ an unmeasured confounder would need to have with both the treatment and the outc
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
-<span class="kn">import</span> <span class="nn">dowhy</span>
-<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import os, sys
+sys.path.append(os.path.abspath(&quot;../../../&quot;))
+import dowhy
+from dowhy import CausalModel
+import pandas as pd
+import numpy as np
+import dowhy.datasets
 
-<span class="c1"># Config dict to set the logging level</span>
-<span class="kn">import</span> <span class="nn">logging.config</span>
-<span class="n">DEFAULT_LOGGING</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s1">&#39;disable_existing_loggers&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s1">&#39;loggers&#39;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;ERROR&#39;</span><span class="p">,</span>
-        <span class="p">},</span>
-    <span class="p">}</span>
-<span class="p">}</span>
+# Config dict to set the logging level
+import logging.config
+DEFAULT_LOGGING = {
+    &#39;version&#39;: 1,
+    &#39;disable_existing_loggers&#39;: False,
+    &#39;loggers&#39;: {
+        &#39;&#39;: {
+            &#39;level&#39;: &#39;ERROR&#39;,
+        },
+    }
+}
 
-<span class="n">logging</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="n">DEFAULT_LOGGING</span><span class="p">)</span>
-<span class="c1"># Disabling warnings output</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">sklearn.exceptions</span> <span class="kn">import</span> <span class="n">DataConversionWarning</span>
-<span class="c1">#warnings.filterwarnings(action=&#39;ignore&#39;, category=DataConversionWarning)</span>
+logging.config.dictConfig(DEFAULT_LOGGING)
+# Disabling warnings output
+import warnings
+from sklearn.exceptions import DataConversionWarning
+#warnings.filterwarnings(action=&#39;ignore&#39;, category=DataConversionWarning)
 </pre></div>
 </div>
 </div>
@@ -580,14 +581,14 @@ an unmeasured confounder would need to have with both the treatment and the outc
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">linear_dataset</span><span class="p">(</span> <span class="n">beta</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-                                      <span class="n">num_common_causes</span> <span class="o">=</span> <span class="mi">7</span><span class="p">,</span>
-                                      <span class="n">num_samples</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
-                                      <span class="n">num_treatments</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-                                     <span class="n">stddev_treatment_noise</span> <span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-                                     <span class="n">stddev_outcome_noise</span> <span class="o">=</span> <span class="mi">5</span>
-                                    <span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>np.random.seed(100)
+data = dowhy.datasets.linear_dataset( beta = 10,
+                                      num_common_causes = 7,
+                                      num_samples = 500,
+                                      num_treatments = 1,
+                                     stddev_treatment_noise =10,
+                                     stddev_outcome_noise = 5
+                                    )
 </pre></div>
 </div>
 </div>
@@ -595,17 +596,17 @@ an unmeasured confounder would need to have with both the treatment and the outc
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span>
-            <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
-            <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
-            <span class="n">graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;gml_graph&quot;</span><span class="p">],</span>
-            <span class="n">test_significance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
-<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
-<span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model = CausalModel(
+            data=data[&quot;df&quot;],
+            treatment=data[&quot;treatment_name&quot;],
+            outcome=data[&quot;outcome_name&quot;],
+            graph=data[&quot;gml_graph&quot;],
+            test_significance=None,
+        )
+model.view_model()
+from IPython.display import Image, display
+display(Image(filename=&quot;causal_model.png&quot;))
+data[&#39;df&#39;].head()
 </pre></div>
 </div>
 </div>
@@ -723,19 +724,19 @@ an unmeasured confounder would need to have with both the treatment and the outc
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;W4&quot;</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
-<span class="n">graph_str</span> <span class="o">=</span> <span class="s1">&#39;graph[directed 1node[ id &quot;y&quot; label &quot;y&quot;]node[ id &quot;W0&quot; label &quot;W0&quot;] node[ id &quot;W1&quot; label &quot;W1&quot;] node[ id &quot;W2&quot; label &quot;W2&quot;] node[ id &quot;W3&quot; label &quot;W3&quot;]  node[ id &quot;W5&quot; label &quot;W5&quot;] node[ id &quot;W6&quot; label &quot;W6&quot;]node[ id &quot;v0&quot; label &quot;v0&quot;]edge[source &quot;v0&quot; target &quot;y&quot;]edge[ source &quot;W0&quot; target &quot;v0&quot;] edge[ source &quot;W1&quot; target &quot;v0&quot;] edge[ source &quot;W2&quot; target &quot;v0&quot;] edge[ source &quot;W3&quot; target &quot;v0&quot;] edge[ source &quot;W5&quot; target &quot;v0&quot;] edge[ source &quot;W6&quot; target &quot;v0&quot;]edge[ source &quot;W0&quot; target &quot;y&quot;] edge[ source &quot;W1&quot; target &quot;y&quot;] edge[ source &quot;W2&quot; target &quot;y&quot;] edge[ source &quot;W3&quot; target &quot;y&quot;] edge[ source &quot;W5&quot; target &quot;y&quot;] edge[ source &quot;W6&quot; target &quot;y&quot;]]&#39;</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span>
-            <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
-            <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
-            <span class="n">graph</span><span class="o">=</span><span class="n">graph_str</span><span class="p">,</span>
-            <span class="n">test_significance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
-<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
-<span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>data[&quot;df&quot;] = data[&quot;df&quot;].drop(&quot;W4&quot;, axis = 1)
+graph_str = &#39;graph[directed 1node[ id &quot;y&quot; label &quot;y&quot;]node[ id &quot;W0&quot; label &quot;W0&quot;] node[ id &quot;W1&quot; label &quot;W1&quot;] node[ id &quot;W2&quot; label &quot;W2&quot;] node[ id &quot;W3&quot; label &quot;W3&quot;]  node[ id &quot;W5&quot; label &quot;W5&quot;] node[ id &quot;W6&quot; label &quot;W6&quot;]node[ id &quot;v0&quot; label &quot;v0&quot;]edge[source &quot;v0&quot; target &quot;y&quot;]edge[ source &quot;W0&quot; target &quot;v0&quot;] edge[ source &quot;W1&quot; target &quot;v0&quot;] edge[ source &quot;W2&quot; target &quot;v0&quot;] edge[ source &quot;W3&quot; target &quot;v0&quot;] edge[ source &quot;W5&quot; target &quot;v0&quot;] edge[ source &quot;W6&quot; target &quot;v0&quot;]edge[ source &quot;W0&quot; target &quot;y&quot;] edge[ source &quot;W1&quot; target &quot;y&quot;] edge[ source &quot;W2&quot; target &quot;y&quot;] edge[ source &quot;W3&quot; target &quot;y&quot;] edge[ source &quot;W5&quot; target &quot;y&quot;] edge[ source &quot;W6&quot; target &quot;y&quot;]]&#39;
+model = CausalModel(
+            data=data[&quot;df&quot;],
+            treatment=data[&quot;treatment_name&quot;],
+            outcome=data[&quot;outcome_name&quot;],
+            graph=graph_str,
+            test_significance=None,
+        )
+model.view_model()
+from IPython.display import Image, display
+display(Image(filename=&quot;causal_model.png&quot;))
+data[&#39;df&#39;].head()
 </pre></div>
 </div>
 </div>
@@ -846,8 +847,8 @@ an unmeasured confounder would need to have with both the treatment and the outc
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+print(identified_estimand)
 </pre></div>
 </div>
 </div>
@@ -862,9 +863,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W3,W0,W5,W6,W1,W2])
+─────(E[y|W0,W2,W5,W6,W1,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W0,W5,W6,W1,W2,U) = P(y|v0,W3,W0,W5,W6,W1,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W5,W6,W1,W3,U) = P(y|v0,W0,W2,W5,W6,W1,W3)
 
 ### Estimand : 2
 Estimand name: iv
@@ -884,8 +885,8 @@ No such variable(s) found!
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>estimate = model.estimate_effect(identified_estimand,method_name=&quot;backdoor.linear_regression&quot;)
+print(estimate)
 </pre></div>
 </div>
 </div>
@@ -903,12 +904,12 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W3,W0,W5,W6,W1,W2])
+─────(E[y|W0,W2,W5,W6,W1,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W0,W5,W6,W1,W2,U) = P(y|v0,W3,W0,W5,W6,W1,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W5,W6,W1,W3,U) = P(y|v0,W0,W2,W5,W6,W1,W3)
 
 ## Realized estimand
-b: y~v0+W3+W0+W5+W6+W1+W2
+b: y~v0+W0+W2+W5+W6+W1+W3
 Target units: ate
 
 ## Estimate
@@ -927,12 +928,12 @@ sensitivity analysis. (default = True). To override the setting, set plot_estima
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span> <span class="p">,</span>
-                               <span class="n">method_name</span> <span class="o">=</span> <span class="s2">&quot;add_unobserved_common_cause&quot;</span><span class="p">,</span>
-                               <span class="n">simulation_method</span> <span class="o">=</span> <span class="s2">&quot;linear-partial-R2&quot;</span><span class="p">,</span>
-                               <span class="n">benchmark_common_causes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;W3&quot;</span><span class="p">],</span>
-                               <span class="n">effect_fraction_on_treatment</span> <span class="o">=</span> <span class="p">[</span> <span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
-                              <span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute = model.refute_estimate(identified_estimand, estimate ,
+                               method_name = &quot;add_unobserved_common_cause&quot;,
+                               simulation_method = &quot;linear-partial-R2&quot;,
+                               benchmark_common_causes = [&quot;W3&quot;],
+                               effect_fraction_on_treatment = [ 1,2,3]
+                              )
 </pre></div>
 </div>
 </div>
@@ -948,7 +949,7 @@ sensitivity analysis. (default = True). To override the setting, set plot_estima
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">stats</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute.stats
 </pre></div>
 </div>
 </div>
@@ -958,21 +959,21 @@ sensitivity analysis. (default = True). To override the setting, set plot_estima
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;estimate&#39;: 10.697677486880922,
- &#39;standard_error&#39;: 0.5938735661282953,
+{&#39;estimate&#39;: 10.697677486880924,
+ &#39;standard_error&#39;: 0.5938735661282952,
  &#39;degree of freedom&#39;: 492,
- &#39;t_statistic&#39;: 18.013392238727608,
- &#39;r2yt_w&#39;: 0.3974149837266678,
- &#39;partial_f2&#39;: 0.6595168698094552,
- &#39;robustness_value&#39;: 0.5467445572181007,
- &#39;robustness_value_alpha&#39;: 0.5076289101030923}
+ &#39;t_statistic&#39;: 18.013392238727615,
+ &#39;r2yt_w&#39;: 0.3974149837266679,
+ &#39;partial_f2&#39;: 0.6595168698094559,
+ &#39;robustness_value&#39;: 0.5467445572181008,
+ &#39;robustness_value_alpha&#39;: 0.5076289101030925}
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">benchmarking_results</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute.benchmarking_results
 </pre></div>
 </div>
 </div>
@@ -1053,7 +1054,7 @@ position of the legend (default = (1.6, 0.6))</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_type</span> <span class="o">=</span> <span class="s1">&#39;t-value&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute.plot(plot_type = &#39;t-value&#39;)
 </pre></div>
 </div>
 </div>
@@ -1069,7 +1070,7 @@ position of the legend (default = (1.6, 0.6))</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">refute</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(refute)
 </pre></div>
 </div>
 </div>
@@ -1081,15 +1082,15 @@ position of the legend (default = (1.6, 0.6))</p>
 Sensitivity Analysis to Unobserved Confounding using R^2 paramterization
 
 Unadjusted Estimates of Treatment [&#39;v0&#39;] :
-Coefficient Estimate : 10.697677486880922
+Coefficient Estimate : 10.697677486880924
 Degree of Freedom : 492
-Standard Error : 0.5938735661282953
-t-value : 18.013392238727608
-F^2 value : 0.6595168698094552
+Standard Error : 0.5938735661282952
+t-value : 18.013392238727615
+F^2 value : 0.6595168698094559
 
 Sensitivity Statistics :
-Partial R2 of treatment with outcome : 0.3974149837266678
-Robustness Value : 0.5467445572181007
+Partial R2 of treatment with outcome : 0.3974149837266679
+Robustness Value : 0.5467445572181008
 
 Interpretation of results :
 Any confounder explaining less than 54.67% percent of the residual variance of both the treatment and the outcome would not be strong enough to explain away the observed effect i.e bring down the estimate to 0
@@ -1115,10 +1116,10 @@ If confounders explained 100% of the residual variance of the outcome, they woul
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span> <span class="p">,</span>
-                               <span class="n">method_name</span> <span class="o">=</span> <span class="s2">&quot;add_unobserved_common_cause&quot;</span><span class="p">,</span>
-                               <span class="n">simulation_method</span> <span class="o">=</span> <span class="s2">&quot;e-value&quot;</span><span class="p">,</span>
-                              <span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute = model.refute_estimate(identified_estimand, estimate ,
+                               method_name = &quot;add_unobserved_common_cause&quot;,
+                               simulation_method = &quot;e-value&quot;,
+                              )
 </pre></div>
 </div>
 </div>
@@ -1139,7 +1140,7 @@ If confounders explained 100% of the residual variance of the outcome, they woul
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">stats</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute.stats
 </pre></div>
 </div>
 </div>
@@ -1161,7 +1162,7 @@ If confounders explained 100% of the residual variance of the outcome, they woul
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">benchmarking_results</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute.benchmarking_results
 </pre></div>
 </div>
 </div>
@@ -1252,7 +1253,7 @@ If confounders explained 100% of the residual variance of the outcome, they woul
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">refute</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(refute)
 </pre></div>
 </div>
 </div>
@@ -1272,7 +1273,7 @@ Sensitivity Statistics:
 E-value for point estimate: 4.349958364289865
 E-value for lower 95% CI: 3.883832733630414
 E-value for upper 95% CI: None
-Largest Observed Covariate E-value: 1.6811401167656788 (W1)
+Largest Observed Covariate E-value: 1.681140116765678 (W1)
 
 Interpretation of results:
 Unmeasured confounder(s) would have to be associated with a 4.35-fold increase in the risk of y, and must be 4.35 times more prevalent in v0, to explain away the observed point estimate.
@@ -1284,14 +1285,14 @@ Unmeasured confounder(s) would have to be associated with a 3.88-fold increase i
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">linear_dataset</span><span class="p">(</span> <span class="n">beta</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-                                      <span class="n">num_common_causes</span> <span class="o">=</span> <span class="mi">7</span><span class="p">,</span>
-                                      <span class="n">num_samples</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
-                                      <span class="n">num_treatments</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-                                     <span class="n">stddev_treatment_noise</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-                                     <span class="n">stddev_outcome_noise</span> <span class="o">=</span> <span class="mi">1</span>
-                                    <span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>np.random.seed(100)
+data = dowhy.datasets.linear_dataset( beta = 10,
+                                      num_common_causes = 7,
+                                      num_samples = 500,
+                                      num_treatments = 1,
+                                     stddev_treatment_noise=10,
+                                     stddev_outcome_noise = 1
+                                    )
 </pre></div>
 </div>
 </div>
@@ -1299,17 +1300,17 @@ Unmeasured confounder(s) would have to be associated with a 3.88-fold increase i
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span>
-            <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
-            <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
-            <span class="n">graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;gml_graph&quot;</span><span class="p">],</span>
-            <span class="n">test_significance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
-<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
-<span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model = CausalModel(
+            data=data[&quot;df&quot;],
+            treatment=data[&quot;treatment_name&quot;],
+            outcome=data[&quot;outcome_name&quot;],
+            graph=data[&quot;gml_graph&quot;],
+            test_significance=None,
+        )
+model.view_model()
+from IPython.display import Image, display
+display(Image(filename=&quot;causal_model.png&quot;))
+data[&#39;df&#39;].head()
 </pre></div>
 </div>
 </div>
@@ -1423,8 +1424,8 @@ Unmeasured confounder(s) would have to be associated with a 3.88-fold increase i
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+print(identified_estimand)
 </pre></div>
 </div>
 </div>
@@ -1439,9 +1440,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W3,W0,W4,W5,W6,W1,W2])
+─────(E[y|W0,W2,W4,W5,W6,W1,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W0,W4,W5,W6,W1,W2,U) = P(y|v0,W3,W0,W4,W5,W6,W1,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W4,W5,W6,W1,W3,U) = P(y|v0,W0,W2,W4,W5,W6,W1,W3)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1457,8 +1458,8 @@ No such variable(s) found!
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>estimate = model.estimate_effect(identified_estimand,method_name=&quot;backdoor.linear_regression&quot;)
+print(estimate)
 </pre></div>
 </div>
 </div>
@@ -1476,16 +1477,16 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W3,W0,W4,W5,W6,W1,W2])
+─────(E[y|W0,W2,W4,W5,W6,W1,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W0,W4,W5,W6,W1,W2,U) = P(y|v0,W3,W0,W4,W5,W6,W1,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W4,W5,W6,W1,W3,U) = P(y|v0,W0,W2,W4,W5,W6,W1,W3)
 
 ## Realized estimand
-b: y~v0+W3+W0+W4+W5+W6+W1+W2
+b: y~v0+W0+W2+W4+W5+W6+W1+W3
 Target units: ate
 
 ## Estimate
-Mean value: 10.081924375588297
+Mean value: 10.081924375588294
 
 </pre></div></div>
 </div>
@@ -1493,11 +1494,11 @@ Mean value: 10.081924375588297
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span> <span class="p">,</span>
-                               <span class="n">method_name</span> <span class="o">=</span> <span class="s2">&quot;add_unobserved_common_cause&quot;</span><span class="p">,</span>
-                               <span class="n">simulation_method</span> <span class="o">=</span> <span class="s2">&quot;linear-partial-R2&quot;</span><span class="p">,</span>
-                               <span class="n">benchmark_common_causes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;W3&quot;</span><span class="p">],</span>
-                               <span class="n">effect_fraction_on_treatment</span> <span class="o">=</span> <span class="p">[</span> <span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute = model.refute_estimate(identified_estimand, estimate ,
+                               method_name = &quot;add_unobserved_common_cause&quot;,
+                               simulation_method = &quot;linear-partial-R2&quot;,
+                               benchmark_common_causes = [&quot;W3&quot;],
+                               effect_fraction_on_treatment = [ 1,2,3])
 </pre></div>
 </div>
 </div>
@@ -1523,7 +1524,7 @@ Mean value: 10.081924375588297
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_type</span> <span class="o">=</span> <span class="s1">&#39;t-value&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute.plot(plot_type = &#39;t-value&#39;)
 </pre></div>
 </div>
 </div>
@@ -1538,7 +1539,7 @@ Mean value: 10.081924375588297
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">refute</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(refute)
 </pre></div>
 </div>
 </div>
@@ -1550,15 +1551,15 @@ Mean value: 10.081924375588297
 Sensitivity Analysis to Unobserved Confounding using R^2 paramterization
 
 Unadjusted Estimates of Treatment [&#39;v0&#39;] :
-Coefficient Estimate : 10.081924375588297
+Coefficient Estimate : 10.081924375588294
 Degree of Freedom : 491
-Standard Error : 0.10446229543424751
-t-value : 96.5125678473554
-F^2 value : 18.97082637981747
+Standard Error : 0.10446229543424743
+t-value : 96.51256784735544
+F^2 value : 18.970826379817492
 
 Sensitivity Statistics :
-Partial R2 of treatment with outcome : 0.9499269594066172
-Robustness Value : 0.952205780101238
+Partial R2 of treatment with outcome : 0.9499269594066173
+Robustness Value : 0.9522057801012398
 
 Interpretation of results :
 Any confounder explaining less than 95.22% percent of the residual variance of both the treatment and the outcome would not be strong enough to explain away the observed effect i.e bring down the estimate to 0
@@ -1573,7 +1574,7 @@ If confounders explained 100% of the residual variance of the outcome, they woul
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">stats</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute.stats
 </pre></div>
 </div>
 </div>
@@ -1583,21 +1584,21 @@ If confounders explained 100% of the residual variance of the outcome, they woul
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;estimate&#39;: 10.081924375588297,
- &#39;standard_error&#39;: 0.10446229543424751,
+{&#39;estimate&#39;: 10.081924375588294,
+ &#39;standard_error&#39;: 0.10446229543424743,
  &#39;degree of freedom&#39;: 491,
- &#39;t_statistic&#39;: 96.5125678473554,
- &#39;r2yt_w&#39;: 0.9499269594066172,
- &#39;partial_f2&#39;: 18.97082637981747,
- &#39;robustness_value&#39;: 0.952205780101238,
- &#39;robustness_value_alpha&#39;: 0.9503866913195278}
+ &#39;t_statistic&#39;: 96.51256784735544,
+ &#39;r2yt_w&#39;: 0.9499269594066173,
+ &#39;partial_f2&#39;: 18.970826379817492,
+ &#39;robustness_value&#39;: 0.9522057801012398,
+ &#39;robustness_value_alpha&#39;: 0.950386691319526}
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">benchmarking_results</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute.benchmarking_results
 </pre></div>
 </div>
 </div>

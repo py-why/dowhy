@@ -558,10 +558,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -708,7 +709,7 @@ div.rendered_html tbody tr:hover {
 <h1>Finding Root Causes of Changes in a Supply Chain<a class="headerlink" href="#Finding-Root-Causes-of-Changes-in-a-Supply-Chain" title="Permalink to this heading"></a></h1>
 <p>In a supply chain, the number of units of each product in the inventory that is available for shipment is crucial to fulfill customers’ demand faster. For this reason, retailers continuously buy products anticipating customers’ demand in the future.</p>
 <p>Suppose that each week a retailer submits purchase orders (POs) to vendors taking into account future demands for products and capacity constraints to consider for demands. The vendors will then confirm whether they can fulfill some or all of the retailer’s purchase orders. Once confirmed by the vendors and agreed by the retailer, products are then sent to the retailer. All of the confirmed POs, however, may not arrive at once.</p>
-<p><img alt="177331186471407fa18a41e1befe53c7" class="no-scaled-link" src="../_images/supply-chain.png" style="width: 800px;" /></p>
+<p><img alt="f2b7404ea6d248bdbe8b49730b288e35" class="no-scaled-link" src="../_images/supply-chain.png" style="width: 800px;" /></p>
 <section id="Week-over-week-changes">
 <h2>Week-over-week changes<a class="headerlink" href="#Week-over-week-changes" title="Permalink to this heading"></a></h2>
 <p>For this case study, we consider synthetic data inspired from a real-world use case in supply chain. Let us look at data over two weeks, <em>w1</em> and <em>w2</em> in particular.</p>
@@ -716,9 +717,9 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import pandas as pd
 
-<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;supply_chain_week_over_week.csv&#39;</span><span class="p">)</span>
+data = pd.read_csv(&#39;supply_chain_week_over_week.csv&#39;)
 </pre></div>
 </div>
 </div>
@@ -726,11 +727,11 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">HTML</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from IPython.display import HTML
 
-<span class="n">data_week1</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">week</span> <span class="o">==</span> <span class="s1">&#39;w1&#39;</span><span class="p">]</span>
+data_week1 = data[data.week == &#39;w1&#39;]
 
-<span class="n">HTML</span><span class="p">(</span><span class="n">data_week1</span><span class="o">.</span><span class="n">head</span><span class="p">()</span><span class="o">.</span><span class="n">to_html</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;&lt;br/&gt;&#39;</span><span class="p">)</span>
+HTML(data_week1.head().to_html(index=False)+&#39;&lt;br/&gt;&#39;)
 </pre></div>
 </div>
 </div>
@@ -804,9 +805,9 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_week2</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">week</span><span class="o">==</span><span class="s1">&#39;w2&#39;</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>data_week2 = data[data.week==&#39;w2&#39;]
 
-<span class="n">HTML</span><span class="p">(</span><span class="n">data_week2</span><span class="o">.</span><span class="n">head</span><span class="p">()</span><span class="o">.</span><span class="n">to_html</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;&lt;br/&gt;&#39;</span><span class="p">)</span>
+HTML(data_week2.head().to_html(index=False)+&#39;&lt;br/&gt;&#39;)
 </pre></div>
 </div>
 </div>
@@ -881,7 +882,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;week&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">()[[</span><span class="s1">&#39;received&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;average received&#39;</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">False</span><span class="p">);</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>data.groupby([&#39;week&#39;]).mean()[[&#39;received&#39;]].plot(kind=&#39;bar&#39;, title=&#39;average received&#39;, legend=False);
 </pre></div>
 </div>
 </div>
@@ -890,7 +891,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_5492/2641881978.py:1: FutureWarning: The default value of numeric_only in DataFrameGroupBy.mean is deprecated. In a future version, numeric_only will default to False. Either specify numeric_only or select only columns which should be valid for the function.
+/tmp/ipykernel_5838/2641881978.py:1: FutureWarning: The default value of numeric_only in DataFrameGroupBy.mean is deprecated. In a future version, numeric_only will default to False. Either specify numeric_only or select only columns which should be valid for the function.
   data.groupby([&#39;week&#39;]).mean()[[&#39;received&#39;]].plot(kind=&#39;bar&#39;, title=&#39;average received&#39;, legend=False);
 </pre></div></div>
 </div>
@@ -905,7 +906,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_week2</span><span class="o">.</span><span class="n">received</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">data_week1</span><span class="o">.</span><span class="n">received</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>data_week2.received.mean() - data_week1.received.mean()
 </pre></div>
 </div>
 </div>
@@ -929,7 +930,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;week&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;average&#39;</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">);</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>data.groupby([&#39;week&#39;]).mean().plot(kind=&#39;bar&#39;, title=&#39;average&#39;, legend=True);
 </pre></div>
 </div>
 </div>
@@ -938,7 +939,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_5492/3361261226.py:1: FutureWarning: The default value of numeric_only in DataFrameGroupBy.mean is deprecated. In a future version, numeric_only will default to False. Either specify numeric_only or select only columns which should be valid for the function.
+/tmp/ipykernel_5838/3361261226.py:1: FutureWarning: The default value of numeric_only in DataFrameGroupBy.mean is deprecated. In a future version, numeric_only will default to False. Either specify numeric_only or select only columns which should be valid for the function.
   data.groupby([&#39;week&#39;]).mean().plot(kind=&#39;bar&#39;, title=&#39;average&#39;, legend=True);
 </pre></div></div>
 </div>
@@ -963,14 +964,14 @@ causal graph. A causal mechanism of a variable is the conditional distribution o
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
-<span class="kn">import</span> <span class="nn">dowhy.gcm</span> <span class="k">as</span> <span class="nn">gcm</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import networkx as nx
+import dowhy.gcm as gcm
 
-<span class="n">causal_graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;demand&#39;</span><span class="p">,</span> <span class="s1">&#39;submitted&#39;</span><span class="p">),</span>
-                           <span class="p">(</span><span class="s1">&#39;constraint&#39;</span><span class="p">,</span> <span class="s1">&#39;submitted&#39;</span><span class="p">),</span>
-                           <span class="p">(</span><span class="s1">&#39;submitted&#39;</span><span class="p">,</span> <span class="s1">&#39;confirmed&#39;</span><span class="p">),</span>
-                           <span class="p">(</span><span class="s1">&#39;confirmed&#39;</span><span class="p">,</span> <span class="s1">&#39;received&#39;</span><span class="p">)])</span>
-<span class="n">gcm</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">)</span>
+causal_graph = nx.DiGraph([(&#39;demand&#39;, &#39;submitted&#39;),
+                           (&#39;constraint&#39;, &#39;submitted&#39;),
+                           (&#39;submitted&#39;, &#39;confirmed&#39;),
+                           (&#39;confirmed&#39;, &#39;received&#39;)])
+gcm.util.plot(causal_graph)
 </pre></div>
 </div>
 </div>
@@ -989,31 +990,31 @@ causal graph. A causal mechanism of a variable is the conditional distribution o
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import matplotlib.pyplot as plt
+import numpy as np
 
-<span class="c1"># disabling progress bar to not clutter the output here</span>
-<span class="n">gcm</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">disable_progress_bars</span><span class="p">()</span>
+# disabling progress bar to not clutter the output here
+gcm.config.disable_progress_bars()
 
-<span class="c1"># setting random seed for reproducibility</span>
-<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+# setting random seed for reproducibility
+np.random.seed(10)
 
-<span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">)</span>
+causal_model = gcm.StructuralCausalModel(causal_graph)
 
-<span class="c1"># Automatically assign appropriate causal models to each node in graph</span>
-<span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">assign_causal_mechanisms</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data_week1</span><span class="p">)</span>
+# Automatically assign appropriate causal models to each node in graph
+gcm.auto.assign_causal_mechanisms(causal_model, data_week1)
 
-<span class="c1"># call the API for attributing change in the average value of `received`</span>
-<span class="n">contributions</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">distribution_change</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span>
-                                        <span class="n">data_week1</span><span class="p">,</span>
-                                        <span class="n">data_week2</span><span class="p">,</span>
-                                        <span class="s1">&#39;received&#39;</span><span class="p">,</span>
-                                        <span class="n">num_samples</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
-                                        <span class="n">difference_estimation_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x1</span><span class="p">))</span>
+# call the API for attributing change in the average value of `received`
+contributions = gcm.distribution_change(causal_model,
+                                        data_week1,
+                                        data_week2,
+                                        &#39;received&#39;,
+                                        num_samples=2000,
+                                        difference_estimation_func=lambda x1, x2 : np.mean(x2) - np.mean(x1))
 
-<span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">contributions</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">contributions</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Contribution&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+plt.bar(contributions.keys(), contributions.values())
+plt.ylabel(&#39;Contribution&#39;)
+plt.show()
 </pre></div>
 </div>
 </div>
@@ -1029,22 +1030,22 @@ causal graph. A causal mechanism of a variable is the conditional distribution o
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">median_contribs</span><span class="p">,</span> <span class="n">uncertainty_contribs</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
-    <span class="n">gcm</span><span class="o">.</span><span class="n">bootstrap_sampling</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">distribution_change</span><span class="p">,</span>
-                           <span class="n">causal_model</span><span class="p">,</span>
-                           <span class="n">data_week1</span><span class="p">,</span>
-                           <span class="n">data_week2</span><span class="p">,</span>
-                           <span class="s1">&#39;received&#39;</span><span class="p">,</span>
-                           <span class="n">num_samples</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
-                           <span class="n">difference_estimation_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x1</span><span class="p">)),</span>
-    <span class="n">confidence_level</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
-    <span class="n">num_bootstrap_resamples</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>median_contribs, uncertainty_contribs = gcm.confidence_intervals(
+    gcm.bootstrap_sampling(gcm.distribution_change,
+                           causal_model,
+                           data_week1,
+                           data_week2,
+                           &#39;received&#39;,
+                           num_samples=2000,
+                           difference_estimation_func=lambda x1, x2 : np.mean(x2) - np.mean(x1)),
+    confidence_level=0.95,
+    num_bootstrap_resamples=10)
 
-<span class="n">yerr_plus</span> <span class="o">=</span> <span class="p">[</span><span class="n">uncertainty_contribs</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">median_contribs</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">median_contribs</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
-<span class="n">yerr_minus</span> <span class="o">=</span> <span class="p">[</span><span class="n">median_contribs</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">-</span> <span class="n">uncertainty_contribs</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">median_contribs</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">median_contribs</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">median_contribs</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">yerr</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">yerr_minus</span><span class="p">,</span> <span class="n">yerr_plus</span><span class="p">]),</span> <span class="n">ecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Contribution&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+yerr_plus = [uncertainty_contribs[node][1] - median_contribs[node] for node in median_contribs.keys()]
+yerr_minus = [median_contribs[node] - uncertainty_contribs[node][0] for node in median_contribs.keys()]
+plt.bar(median_contribs.keys(), median_contribs.values(), yerr=np.array([yerr_minus, yerr_plus]), ecolor=&#39;black&#39;)
+plt.ylabel(&#39;Contribution&#39;)
+plt.show()
 </pre></div>
 </div>
 </div>
@@ -1069,34 +1070,34 @@ value of demand mean from <span class="math notranslate nohighlight">\(2\)</span
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">secrets</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import pandas as pd
+import secrets
 
-<span class="n">ASINS</span> <span class="o">=</span> <span class="p">[</span><span class="n">secrets</span><span class="o">.</span><span class="n">token_hex</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">)]</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="k">def</span> <span class="nf">buying_data</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">demand_mean</span><span class="p">):</span>
-    <span class="n">constraint</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">gamma</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-    <span class="n">demand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">gamma</span><span class="p">(</span><span class="n">demand_mean</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-    <span class="n">submitted</span> <span class="o">=</span> <span class="n">demand</span> <span class="o">-</span> <span class="n">constraint</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">gamma</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-    <span class="n">confirmed</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">submitted</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">gamma</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-    <span class="n">received</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">confirmed</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">gamma</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">asin</span><span class="o">=</span><span class="n">ASINS</span><span class="p">,</span>
-                              <span class="n">demand</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">demand</span><span class="p">),</span>
-                              <span class="n">constraint</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">constraint</span><span class="p">),</span>
-                              <span class="n">submitted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">submitted</span><span class="p">),</span>
-                              <span class="n">confirmed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">confirmed</span><span class="p">),</span>
-                              <span class="n">received</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">received</span><span class="p">)))</span>
+ASINS = [secrets.token_hex(5).upper() for i in range(1000)]
+import numpy as np
+def buying_data(alpha, beta, demand_mean):
+    constraint = np.random.gamma(1, scale=1, size=1000)
+    demand = np.random.gamma(demand_mean, scale=1, size=1000)
+    submitted = demand - constraint + np.random.gamma(1, scale=1, size=1000)
+    confirmed = alpha * submitted + np.random.gamma(0.1, scale=1, size=1000)
+    received = beta * confirmed + np.random.gamma(0.1, scale=1, size=1000)
+    return pd.DataFrame(dict(asin=ASINS,
+                              demand=np.round(demand),
+                              constraint=np.round(constraint),
+                              submitted = np.round(submitted),
+                              confirmed = np.round(confirmed),
+                              received = np.round(received)))
 
 
-<span class="c1"># we change the parameters alpha and demand_mean between weeks</span>
-<span class="n">data_week1</span> <span class="o">=</span> <span class="n">buying_data</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">demand_mean</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">data_week1</span><span class="p">[</span><span class="s1">&#39;week&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;w1&#39;</span>
-<span class="n">data_week2</span> <span class="o">=</span> <span class="n">buying_data</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">demand_mean</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<span class="n">data_week2</span><span class="p">[</span><span class="s1">&#39;week&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;w2&#39;</span>
+# we change the parameters alpha and demand_mean between weeks
+data_week1 = buying_data(1, 1, demand_mean=2)
+data_week1[&#39;week&#39;] = &#39;w1&#39;
+data_week2 = buying_data(2, 1, demand_mean=4)
+data_week2[&#39;week&#39;] = &#39;w2&#39;
 
-<span class="n">data</span> <span class="o">=</span> <span class="n">data_week1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_week2</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="c1"># write data to a csv file</span>
-<span class="c1"># data.to_csv(&#39;supply_chain_week_over_week.csv&#39;, index=False)</span>
+data = data_week1.append(data_week2, ignore_index=True)
+# write data to a csv file
+# data.to_csv(&#39;supply_chain_week_over_week.csv&#39;, index=False)
 </pre></div>
 </div>
 </div>
@@ -1105,7 +1106,7 @@ value of demand mean from <span class="math notranslate nohighlight">\(2\)</span
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_5492/2721469738.py:26: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+/tmp/ipykernel_5838/2721469738.py:26: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
   data = data_week1.append(data_week2, ignore_index=True)
 </pre></div></div>
 </div>

@@ -368,10 +368,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -532,8 +533,8 @@ minimum cardinality.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dowhy.causal_graph</span> <span class="kn">import</span> <span class="n">CausalGraph</span>
-<span class="kn">from</span> <span class="nn">dowhy.causal_identifier</span> <span class="kn">import</span> <span class="n">AutoIdentifier</span><span class="p">,</span> <span class="n">BackdoorAdjustment</span><span class="p">,</span> <span class="n">EstimandType</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from dowhy.causal_graph import CausalGraph
+from dowhy.causal_identifier import AutoIdentifier, BackdoorAdjustment, EstimandType
 </pre></div>
 </div>
 </div>
@@ -547,56 +548,56 @@ to sense the movement, action, and location of their own bodies.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">graph_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;graph[directed 1 node[id &quot;coach&quot; label &quot;coach&quot;]</span>
-<span class="s2">                        node[id &quot;team motivation&quot; label &quot;team motivation&quot;]</span>
-<span class="s2">                        node[id &quot;fitness&quot; label &quot;fitness&quot;]</span>
-<span class="s2">                        node[id &quot;pre-game prop&quot; label &quot;pre-game prop&quot;]</span>
-<span class="s2">                        node[id &quot;intra-game prop&quot; label &quot;intra-game prop&quot;]</span>
-<span class="s2">                        node[id &quot;neuromusc fatigue&quot; label &quot;neuromusc fatigue&quot;]</span>
-<span class="s2">                        node[id &quot;warm-up&quot; label &quot;warm-up&quot;]</span>
-<span class="s2">                        node[id &quot;previous injury&quot; label &quot;previous injury&quot;]</span>
-<span class="s2">                        node[id &quot;contact sport&quot; label &quot;contact sport&quot;]</span>
-<span class="s2">                        node[id &quot;genetics&quot; label &quot;genetics&quot;]</span>
-<span class="s2">                        node[id &quot;injury&quot; label &quot;injury&quot;]</span>
-<span class="s2">                        node[id &quot;tissue disorder&quot; label &quot;tissue disorder&quot;]</span>
-<span class="s2">                        node[id &quot;tissue weakness&quot; label &quot;tissue weakness&quot;]</span>
-<span class="s2">                        edge[source &quot;coach&quot; target &quot;team motivation&quot;]</span>
-<span class="s2">                        edge[source &quot;coach&quot; target &quot;fitness&quot;]</span>
-<span class="s2">                        edge[source &quot;fitness&quot; target &quot;pre-game prop&quot;]</span>
-<span class="s2">                        edge[source &quot;fitness&quot; target &quot;neuromusc fatigue&quot;]</span>
-<span class="s2">                        edge[source &quot;team motivation&quot; target &quot;warm-up&quot;]</span>
-<span class="s2">                        edge[source &quot;team motivation&quot; target &quot;previous injury&quot;]</span>
-<span class="s2">                        edge[source &quot;pre-game prop&quot; target &quot;warm-up&quot;]</span>
-<span class="s2">                        edge[source &quot;warm-up&quot; target &quot;intra-game prop&quot;]</span>
-<span class="s2">                        edge[source &quot;contact sport&quot; target &quot;previous injury&quot;]</span>
-<span class="s2">                        edge[source &quot;contact sport&quot; target &quot;intra-game prop&quot;]</span>
-<span class="s2">                        edge[source &quot;intra-game prop&quot; target &quot;injury&quot;]</span>
-<span class="s2">                        edge[source &quot;genetics&quot; target &quot;fitness&quot;]</span>
-<span class="s2">                        edge[source &quot;genetics&quot; target &quot;neuromusc fatigue&quot;]</span>
-<span class="s2">                        edge[source &quot;genetics&quot; target &quot;tissue disorder&quot;]</span>
-<span class="s2">                        edge[source &quot;tissue disorder&quot; target &quot;neuromusc fatigue&quot;]</span>
-<span class="s2">                        edge[source &quot;tissue disorder&quot; target &quot;tissue weakness&quot;]</span>
-<span class="s2">                        edge[source &quot;neuromusc fatigue&quot; target &quot;intra-game prop&quot;]</span>
-<span class="s2">                        edge[source &quot;neuromusc fatigue&quot; target &quot;injury&quot;]</span>
-<span class="s2">                        edge[source &quot;tissue weakness&quot; target &quot;injury&quot;]</span>
-<span class="s2">                        ]</span>
-<span class="s2">&quot;&quot;&quot;</span>
-<span class="n">observed_node_names</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;coach&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;team motivation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;fitness&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;neuromusc fatigue&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;warm-up&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;previous injury&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;contact sport&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;tissue disorder&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;injury&quot;</span><span class="p">,</span>
-<span class="p">]</span>
-<span class="n">treatment_name</span> <span class="o">=</span> <span class="s2">&quot;warm-up&quot;</span>
-<span class="n">outcome_name</span> <span class="o">=</span> <span class="s2">&quot;injury&quot;</span>
-<span class="n">G</span> <span class="o">=</span> <span class="n">CausalGraph</span><span class="p">(</span>
-    <span class="n">graph</span><span class="o">=</span><span class="n">graph_str</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">observed_node_names</span><span class="o">=</span><span class="n">observed_node_names</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>graph_str = &quot;&quot;&quot;graph[directed 1 node[id &quot;coach&quot; label &quot;coach&quot;]
+                        node[id &quot;team motivation&quot; label &quot;team motivation&quot;]
+                        node[id &quot;fitness&quot; label &quot;fitness&quot;]
+                        node[id &quot;pre-game prop&quot; label &quot;pre-game prop&quot;]
+                        node[id &quot;intra-game prop&quot; label &quot;intra-game prop&quot;]
+                        node[id &quot;neuromusc fatigue&quot; label &quot;neuromusc fatigue&quot;]
+                        node[id &quot;warm-up&quot; label &quot;warm-up&quot;]
+                        node[id &quot;previous injury&quot; label &quot;previous injury&quot;]
+                        node[id &quot;contact sport&quot; label &quot;contact sport&quot;]
+                        node[id &quot;genetics&quot; label &quot;genetics&quot;]
+                        node[id &quot;injury&quot; label &quot;injury&quot;]
+                        node[id &quot;tissue disorder&quot; label &quot;tissue disorder&quot;]
+                        node[id &quot;tissue weakness&quot; label &quot;tissue weakness&quot;]
+                        edge[source &quot;coach&quot; target &quot;team motivation&quot;]
+                        edge[source &quot;coach&quot; target &quot;fitness&quot;]
+                        edge[source &quot;fitness&quot; target &quot;pre-game prop&quot;]
+                        edge[source &quot;fitness&quot; target &quot;neuromusc fatigue&quot;]
+                        edge[source &quot;team motivation&quot; target &quot;warm-up&quot;]
+                        edge[source &quot;team motivation&quot; target &quot;previous injury&quot;]
+                        edge[source &quot;pre-game prop&quot; target &quot;warm-up&quot;]
+                        edge[source &quot;warm-up&quot; target &quot;intra-game prop&quot;]
+                        edge[source &quot;contact sport&quot; target &quot;previous injury&quot;]
+                        edge[source &quot;contact sport&quot; target &quot;intra-game prop&quot;]
+                        edge[source &quot;intra-game prop&quot; target &quot;injury&quot;]
+                        edge[source &quot;genetics&quot; target &quot;fitness&quot;]
+                        edge[source &quot;genetics&quot; target &quot;neuromusc fatigue&quot;]
+                        edge[source &quot;genetics&quot; target &quot;tissue disorder&quot;]
+                        edge[source &quot;tissue disorder&quot; target &quot;neuromusc fatigue&quot;]
+                        edge[source &quot;tissue disorder&quot; target &quot;tissue weakness&quot;]
+                        edge[source &quot;neuromusc fatigue&quot; target &quot;intra-game prop&quot;]
+                        edge[source &quot;neuromusc fatigue&quot; target &quot;injury&quot;]
+                        edge[source &quot;tissue weakness&quot; target &quot;injury&quot;]
+                        ]
+&quot;&quot;&quot;
+observed_node_names = [
+    &quot;coach&quot;,
+    &quot;team motivation&quot;,
+    &quot;fitness&quot;,
+    &quot;neuromusc fatigue&quot;,
+    &quot;warm-up&quot;,
+    &quot;previous injury&quot;,
+    &quot;contact sport&quot;,
+    &quot;tissue disorder&quot;,
+    &quot;injury&quot;,
+]
+treatment_name = &quot;warm-up&quot;
+outcome_name = &quot;injury&quot;
+G = CausalGraph(
+    graph=graph_str, treatment_name=treatment_name, outcome_name=outcome_name, observed_node_names=observed_node_names
+)
 </pre></div>
 </div>
 </div>
@@ -605,7 +606,7 @@ to sense the movement, action, and location of their own bodies.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">G</span><span class="o">.</span><span class="n">view_graph</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>G.view_graph()
 </pre></div>
 </div>
 </div>
@@ -615,7 +616,7 @@ to sense the movement, action, and location of their own bodies.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">conditional_node_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;previous injury&quot;</span><span class="p">,</span> <span class="s2">&quot;team motivation&quot;</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>conditional_node_names = [&quot;previous injury&quot;, &quot;team motivation&quot;]
 </pre></div>
 </div>
 </div>
@@ -623,15 +624,15 @@ to sense the movement, action, and location of their own bodies.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ident_eff</span> <span class="o">=</span> <span class="n">AutoIdentifier</span><span class="p">(</span>
-    <span class="n">estimand_type</span><span class="o">=</span><span class="n">EstimandType</span><span class="o">.</span><span class="n">NONPARAMETRIC_ATE</span><span class="p">,</span>
-    <span class="n">backdoor_adjustment</span><span class="o">=</span><span class="n">BackdoorAdjustment</span><span class="o">.</span><span class="n">BACKDOOR_EFFICIENT</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span>
-    <span class="n">ident_eff</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span>
-        <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">conditional_node_names</span><span class="o">=</span><span class="n">conditional_node_names</span>
-    <span class="p">)</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ident_eff = AutoIdentifier(
+    estimand_type=EstimandType.NONPARAMETRIC_ATE,
+    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_EFFICIENT,
+)
+print(
+    ident_eff.identify_effect(
+        graph=G, treatment_name=treatment_name, outcome_name=outcome_name, conditional_node_names=conditional_node_names
+    )
+)
 </pre></div>
 </div>
 </div>
@@ -646,13 +647,13 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
     d
-──────────(E[injury|neuromusc fatigue,contact sport,tissue disorder,previous i
+──────────(E[injury|tissue disorder,team motivation,previous injury,neuromusc
 d[warm-up]
 
 
-njury,team motivation])
+fatigue,contact sport])
 
-Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,neuromusc fatigue,contact sport,tissue disorder,previous injury,team motivation,U) = P(injury|warm-up,neuromusc fatigue,contact sport,tissue disorder,previous injury,team motivation)
+Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,tissue disorder,team motivation,previous injury,neuromusc fatigue,contact sport,U) = P(injury|warm-up,tissue disorder,team motivation,previous injury,neuromusc fatigue,contact sport)
 
 ### Estimand : 2
 Estimand name: iv
@@ -670,15 +671,15 @@ No such variable(s) found!
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ident_minimal_eff</span> <span class="o">=</span> <span class="n">AutoIdentifier</span><span class="p">(</span>
-    <span class="n">estimand_type</span><span class="o">=</span><span class="n">EstimandType</span><span class="o">.</span><span class="n">NONPARAMETRIC_ATE</span><span class="p">,</span>
-    <span class="n">backdoor_adjustment</span><span class="o">=</span><span class="n">BackdoorAdjustment</span><span class="o">.</span><span class="n">BACKDOOR_MIN_EFFICIENT</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span>
-    <span class="n">ident_minimal_eff</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span>
-        <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">conditional_node_names</span><span class="o">=</span><span class="n">conditional_node_names</span>
-    <span class="p">)</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ident_minimal_eff = AutoIdentifier(
+    estimand_type=EstimandType.NONPARAMETRIC_ATE,
+    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MIN_EFFICIENT,
+)
+print(
+    ident_minimal_eff.identify_effect(
+        graph=G, treatment_name=treatment_name, outcome_name=outcome_name, conditional_node_names=conditional_node_names
+    )
+)
 </pre></div>
 </div>
 </div>
@@ -693,13 +694,13 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
     d
-──────────(E[injury|tissue disorder,team motivation,neuromusc fatigue,previous
+──────────(E[injury|previous injury,team motivation,neuromusc fatigue,tissue d
 d[warm-up]
 
 
- injury])
+isorder])
 
-Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,tissue disorder,team motivation,neuromusc fatigue,previous injury,U) = P(injury|warm-up,tissue disorder,team motivation,neuromusc fatigue,previous injury)
+Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,previous injury,team motivation,neuromusc fatigue,tissue disorder,U) = P(injury|warm-up,previous injury,team motivation,neuromusc fatigue,tissue disorder)
 
 ### Estimand : 2
 Estimand name: iv
@@ -716,15 +717,15 @@ No such variable(s) found!
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ident_mincost_eff</span> <span class="o">=</span> <span class="n">AutoIdentifier</span><span class="p">(</span>
-    <span class="n">estimand_type</span><span class="o">=</span><span class="n">EstimandType</span><span class="o">.</span><span class="n">NONPARAMETRIC_ATE</span><span class="p">,</span>
-    <span class="n">backdoor_adjustment</span><span class="o">=</span><span class="n">BackdoorAdjustment</span><span class="o">.</span><span class="n">BACKDOOR_MINCOST_EFFICIENT</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span>
-    <span class="n">ident_mincost_eff</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span>
-        <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">conditional_node_names</span><span class="o">=</span><span class="n">conditional_node_names</span>
-    <span class="p">)</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ident_mincost_eff = AutoIdentifier(
+    estimand_type=EstimandType.NONPARAMETRIC_ATE,
+    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MINCOST_EFFICIENT,
+)
+print(
+    ident_mincost_eff.identify_effect(
+        graph=G, treatment_name=treatment_name, outcome_name=outcome_name, conditional_node_names=conditional_node_names
+    )
+)
 </pre></div>
 </div>
 </div>
@@ -768,24 +769,24 @@ be detected based solely on graphical criteria.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">graph_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;graph[directed 1 node[id &quot;X&quot; label &quot;X&quot;]</span>
-<span class="s2">                        node[id &quot;Y&quot; label &quot;Y&quot;]</span>
-<span class="s2">                        node[id &quot;Z1&quot; label &quot;Z1&quot;]</span>
-<span class="s2">                        node[id &quot;Z2&quot; label &quot;Z2&quot;]</span>
-<span class="s2">                        node[id &quot;U&quot; label &quot;U&quot;]</span>
-<span class="s2">                        edge[source &quot;X&quot; target &quot;Y&quot;]</span>
-<span class="s2">                        edge[source &quot;Z1&quot; target &quot;X&quot;]</span>
-<span class="s2">                        edge[source &quot;Z1&quot; target &quot;Z2&quot;]</span>
-<span class="s2">                        edge[source &quot;U&quot; target &quot;Z2&quot;]</span>
-<span class="s2">                        edge[source &quot;U&quot; target &quot;Y&quot;]</span>
-<span class="s2">                        ]</span>
-<span class="s2">&quot;&quot;&quot;</span>
-<span class="n">observed_node_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">,</span> <span class="s2">&quot;Z1&quot;</span><span class="p">,</span> <span class="s2">&quot;Z2&quot;</span><span class="p">]</span>
-<span class="n">treatment_name</span> <span class="o">=</span> <span class="s2">&quot;X&quot;</span>
-<span class="n">outcome_name</span> <span class="o">=</span> <span class="s2">&quot;Y&quot;</span>
-<span class="n">G</span> <span class="o">=</span> <span class="n">CausalGraph</span><span class="p">(</span>
-    <span class="n">graph</span><span class="o">=</span><span class="n">graph_str</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">observed_node_names</span><span class="o">=</span><span class="n">observed_node_names</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>graph_str = &quot;&quot;&quot;graph[directed 1 node[id &quot;X&quot; label &quot;X&quot;]
+                        node[id &quot;Y&quot; label &quot;Y&quot;]
+                        node[id &quot;Z1&quot; label &quot;Z1&quot;]
+                        node[id &quot;Z2&quot; label &quot;Z2&quot;]
+                        node[id &quot;U&quot; label &quot;U&quot;]
+                        edge[source &quot;X&quot; target &quot;Y&quot;]
+                        edge[source &quot;Z1&quot; target &quot;X&quot;]
+                        edge[source &quot;Z1&quot; target &quot;Z2&quot;]
+                        edge[source &quot;U&quot; target &quot;Z2&quot;]
+                        edge[source &quot;U&quot; target &quot;Y&quot;]
+                        ]
+&quot;&quot;&quot;
+observed_node_names = [&quot;X&quot;, &quot;Y&quot;, &quot;Z1&quot;, &quot;Z2&quot;]
+treatment_name = &quot;X&quot;
+outcome_name = &quot;Y&quot;
+G = CausalGraph(
+    graph=graph_str, treatment_name=treatment_name, outcome_name=outcome_name, observed_node_names=observed_node_names
+)
 </pre></div>
 </div>
 </div>
@@ -794,14 +795,14 @@ be detected based solely on graphical criteria.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ident_eff</span> <span class="o">=</span> <span class="n">AutoIdentifier</span><span class="p">(</span>
-    <span class="n">estimand_type</span><span class="o">=</span><span class="n">EstimandType</span><span class="o">.</span><span class="n">NONPARAMETRIC_ATE</span><span class="p">,</span>
-    <span class="n">backdoor_adjustment</span><span class="o">=</span><span class="n">BackdoorAdjustment</span><span class="o">.</span><span class="n">BACKDOOR_EFFICIENT</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="n">results_eff</span> <span class="o">=</span> <span class="n">ident_eff</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">)</span>
-<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ident_eff = AutoIdentifier(
+    estimand_type=EstimandType.NONPARAMETRIC_ATE,
+    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_EFFICIENT,
+)
+try:
+    results_eff = ident_eff.identify_effect(graph=G, treatment_name=treatment_name, outcome_name=outcome_name)
+except ValueError as e:
+    print(e)
 </pre></div>
 </div>
 </div>
@@ -817,17 +818,17 @@ Conditions to guarantee the existence of an optimal adjustment set are not satis
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ident_eff</span> <span class="o">=</span> <span class="n">AutoIdentifier</span><span class="p">(</span>
-    <span class="n">estimand_type</span><span class="o">=</span><span class="n">EstimandType</span><span class="o">.</span><span class="n">NONPARAMETRIC_ATE</span><span class="p">,</span>
-    <span class="n">backdoor_adjustment</span><span class="o">=</span><span class="n">BackdoorAdjustment</span><span class="o">.</span><span class="n">BACKDOOR_MIN_EFFICIENT</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span>
-    <span class="n">ident_minimal_eff</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span>
-        <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span>
-        <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span>
-        <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span>
-    <span class="p">)</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ident_eff = AutoIdentifier(
+    estimand_type=EstimandType.NONPARAMETRIC_ATE,
+    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MIN_EFFICIENT,
+)
+print(
+    ident_minimal_eff.identify_effect(
+        graph=G,
+        treatment_name=treatment_name,
+        outcome_name=outcome_name,
+    )
+)
 </pre></div>
 </div>
 </div>
@@ -866,17 +867,17 @@ No such variable(s) found!
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ident_eff</span> <span class="o">=</span> <span class="n">AutoIdentifier</span><span class="p">(</span>
-    <span class="n">estimand_type</span><span class="o">=</span><span class="n">EstimandType</span><span class="o">.</span><span class="n">NONPARAMETRIC_ATE</span><span class="p">,</span>
-    <span class="n">backdoor_adjustment</span><span class="o">=</span><span class="n">BackdoorAdjustment</span><span class="o">.</span><span class="n">BACKDOOR_MINCOST_EFFICIENT</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span>
-    <span class="n">ident_mincost_eff</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span>
-        <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span>
-        <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span>
-        <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span>
-    <span class="p">)</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ident_eff = AutoIdentifier(
+    estimand_type=EstimandType.NONPARAMETRIC_ATE,
+    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MINCOST_EFFICIENT,
+)
+print(
+    ident_mincost_eff.identify_effect(
+        graph=G,
+        treatment_name=treatment_name,
+        outcome_name=outcome_name,
+    )
+)
 </pre></div>
 </div>
 </div>
@@ -919,20 +920,20 @@ No such variable(s) found!
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">graph_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;graph[directed 1 node[id &quot;X&quot; label &quot;X&quot;]</span>
-<span class="s2">                        node[id &quot;Y&quot; label &quot;Y&quot;]</span>
-<span class="s2">                        node[id &quot;U&quot; label &quot;U&quot;]</span>
-<span class="s2">                        edge[source &quot;X&quot; target &quot;Y&quot;]</span>
-<span class="s2">                        edge[source &quot;U&quot; target &quot;X&quot;]</span>
-<span class="s2">                        edge[source &quot;U&quot; target &quot;Y&quot;]</span>
-<span class="s2">                        ]</span>
-<span class="s2">&quot;&quot;&quot;</span>
-<span class="n">observed_node_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">]</span>
-<span class="n">treatment_name</span> <span class="o">=</span> <span class="s2">&quot;X&quot;</span>
-<span class="n">outcome_name</span> <span class="o">=</span> <span class="s2">&quot;Y&quot;</span>
-<span class="n">G</span> <span class="o">=</span> <span class="n">CausalGraph</span><span class="p">(</span>
-    <span class="n">graph</span><span class="o">=</span><span class="n">graph_str</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">observed_node_names</span><span class="o">=</span><span class="n">observed_node_names</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>graph_str = &quot;&quot;&quot;graph[directed 1 node[id &quot;X&quot; label &quot;X&quot;]
+                        node[id &quot;Y&quot; label &quot;Y&quot;]
+                        node[id &quot;U&quot; label &quot;U&quot;]
+                        edge[source &quot;X&quot; target &quot;Y&quot;]
+                        edge[source &quot;U&quot; target &quot;X&quot;]
+                        edge[source &quot;U&quot; target &quot;Y&quot;]
+                        ]
+&quot;&quot;&quot;
+observed_node_names = [&quot;X&quot;, &quot;Y&quot;]
+treatment_name = &quot;X&quot;
+outcome_name = &quot;Y&quot;
+G = CausalGraph(
+    graph=graph_str, treatment_name=treatment_name, outcome_name=outcome_name, observed_node_names=observed_node_names
+)
 </pre></div>
 </div>
 </div>
@@ -940,18 +941,18 @@ No such variable(s) found!
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ident_eff</span> <span class="o">=</span> <span class="n">AutoIdentifier</span><span class="p">(</span>
-    <span class="n">estimand_type</span><span class="o">=</span><span class="n">EstimandType</span><span class="o">.</span><span class="n">NONPARAMETRIC_ATE</span><span class="p">,</span>
-    <span class="n">backdoor_adjustment</span><span class="o">=</span><span class="n">BackdoorAdjustment</span><span class="o">.</span><span class="n">BACKDOOR_EFFICIENT</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="n">results_eff</span> <span class="o">=</span> <span class="n">ident_eff</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span>
-        <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span>
-        <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span>
-        <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span>
-    <span class="p">)</span>
-<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ident_eff = AutoIdentifier(
+    estimand_type=EstimandType.NONPARAMETRIC_ATE,
+    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_EFFICIENT,
+)
+try:
+    results_eff = ident_eff.identify_effect(
+        graph=G,
+        treatment_name=treatment_name,
+        outcome_name=outcome_name,
+    )
+except ValueError as e:
+    print(e)
 </pre></div>
 </div>
 </div>
@@ -971,44 +972,44 @@ An adjustment set formed by observable variables does not exist
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">graph_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;graph[directed 1 node[id &quot;L&quot; label &quot;L&quot;]</span>
-<span class="s2">                        node[id &quot;X&quot; label &quot;X&quot;]</span>
-<span class="s2">                        node[id &quot;K&quot; label &quot;K&quot;]</span>
-<span class="s2">                        node[id &quot;B&quot; label &quot;B&quot;]</span>
-<span class="s2">                        node[id &quot;Q&quot; label &quot;Q&quot;]</span>
-<span class="s2">                        node[id &quot;R&quot; label &quot;R&quot;]</span>
-<span class="s2">                        node[id &quot;T&quot; label &quot;T&quot;]</span>
-<span class="s2">                        node[id &quot;M&quot; label &quot;M&quot;]</span>
-<span class="s2">                        node[id &quot;Y&quot; label &quot;Y&quot;]</span>
-<span class="s2">                        node[id &quot;U&quot; label &quot;U&quot;]</span>
-<span class="s2">                        node[id &quot;F&quot; label &quot;F&quot;]</span>
-<span class="s2">                        edge[source &quot;L&quot; target &quot;X&quot;]</span>
-<span class="s2">                        edge[source &quot;X&quot; target &quot;M&quot;]</span>
-<span class="s2">                        edge[source &quot;K&quot; target &quot;X&quot;]</span>
-<span class="s2">                        edge[source &quot;B&quot; target &quot;K&quot;]</span>
-<span class="s2">                        edge[source &quot;B&quot; target &quot;R&quot;]</span>
-<span class="s2">                        edge[source &quot;Q&quot; target &quot;K&quot;]</span>
-<span class="s2">                        edge[source &quot;Q&quot; target &quot;T&quot;]</span>
-<span class="s2">                        edge[source &quot;R&quot; target &quot;Y&quot;]</span>
-<span class="s2">                        edge[source &quot;T&quot; target &quot;Y&quot;]</span>
-<span class="s2">                        edge[source &quot;M&quot; target &quot;Y&quot;]</span>
-<span class="s2">                        edge[source &quot;U&quot; target &quot;Y&quot;]</span>
-<span class="s2">                        edge[source &quot;U&quot; target &quot;F&quot;]</span>
-<span class="s2">                        ]</span>
-<span class="s2">                        &quot;&quot;&quot;</span>
-<span class="n">observed_node_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;L&quot;</span><span class="p">,</span> <span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="s2">&quot;Q&quot;</span><span class="p">,</span> <span class="s2">&quot;R&quot;</span><span class="p">,</span> <span class="s2">&quot;M&quot;</span><span class="p">,</span> <span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">,</span> <span class="s2">&quot;F&quot;</span><span class="p">]</span>
-<span class="n">conditional_node_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;L&quot;</span><span class="p">]</span>
-<span class="n">costs</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;cost&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}),</span>
-    <span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;cost&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}),</span>
-    <span class="p">(</span><span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;cost&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">}),</span>
-    <span class="p">(</span><span class="s2">&quot;Q&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;cost&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}),</span>
-    <span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;cost&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}),</span>
-    <span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;cost&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}),</span>
-<span class="p">]</span>
-<span class="n">G</span> <span class="o">=</span> <span class="n">CausalGraph</span><span class="p">(</span>
-    <span class="n">graph</span><span class="o">=</span><span class="n">graph_str</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">observed_node_names</span><span class="o">=</span><span class="n">observed_node_names</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>graph_str = &quot;&quot;&quot;graph[directed 1 node[id &quot;L&quot; label &quot;L&quot;]
+                        node[id &quot;X&quot; label &quot;X&quot;]
+                        node[id &quot;K&quot; label &quot;K&quot;]
+                        node[id &quot;B&quot; label &quot;B&quot;]
+                        node[id &quot;Q&quot; label &quot;Q&quot;]
+                        node[id &quot;R&quot; label &quot;R&quot;]
+                        node[id &quot;T&quot; label &quot;T&quot;]
+                        node[id &quot;M&quot; label &quot;M&quot;]
+                        node[id &quot;Y&quot; label &quot;Y&quot;]
+                        node[id &quot;U&quot; label &quot;U&quot;]
+                        node[id &quot;F&quot; label &quot;F&quot;]
+                        edge[source &quot;L&quot; target &quot;X&quot;]
+                        edge[source &quot;X&quot; target &quot;M&quot;]
+                        edge[source &quot;K&quot; target &quot;X&quot;]
+                        edge[source &quot;B&quot; target &quot;K&quot;]
+                        edge[source &quot;B&quot; target &quot;R&quot;]
+                        edge[source &quot;Q&quot; target &quot;K&quot;]
+                        edge[source &quot;Q&quot; target &quot;T&quot;]
+                        edge[source &quot;R&quot; target &quot;Y&quot;]
+                        edge[source &quot;T&quot; target &quot;Y&quot;]
+                        edge[source &quot;M&quot; target &quot;Y&quot;]
+                        edge[source &quot;U&quot; target &quot;Y&quot;]
+                        edge[source &quot;U&quot; target &quot;F&quot;]
+                        ]
+                        &quot;&quot;&quot;
+observed_node_names = [&quot;L&quot;, &quot;X&quot;, &quot;B&quot;, &quot;K&quot;, &quot;Q&quot;, &quot;R&quot;, &quot;M&quot;, &quot;T&quot;, &quot;Y&quot;, &quot;F&quot;]
+conditional_node_names = [&quot;L&quot;]
+costs = [
+    (&quot;L&quot;, {&quot;cost&quot;: 1}),
+    (&quot;B&quot;, {&quot;cost&quot;: 1}),
+    (&quot;K&quot;, {&quot;cost&quot;: 4}),
+    (&quot;Q&quot;, {&quot;cost&quot;: 1}),
+    (&quot;R&quot;, {&quot;cost&quot;: 2}),
+    (&quot;T&quot;, {&quot;cost&quot;: 1}),
+]
+G = CausalGraph(
+    graph=graph_str, treatment_name=treatment_name, outcome_name=outcome_name, observed_node_names=observed_node_names
+)
 </pre></div>
 </div>
 </div>
@@ -1017,16 +1018,16 @@ An adjustment set formed by observable variables does not exist
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ident_eff</span> <span class="o">=</span> <span class="n">AutoIdentifier</span><span class="p">(</span>
-    <span class="n">estimand_type</span><span class="o">=</span><span class="n">EstimandType</span><span class="o">.</span><span class="n">NONPARAMETRIC_ATE</span><span class="p">,</span>
-    <span class="n">backdoor_adjustment</span><span class="o">=</span><span class="n">BackdoorAdjustment</span><span class="o">.</span><span class="n">BACKDOOR_MINCOST_EFFICIENT</span><span class="p">,</span>
-    <span class="n">costs</span><span class="o">=</span><span class="n">costs</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span>
-    <span class="n">ident_mincost_eff</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span>
-        <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">conditional_node_names</span><span class="o">=</span><span class="n">conditional_node_names</span>
-    <span class="p">)</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ident_eff = AutoIdentifier(
+    estimand_type=EstimandType.NONPARAMETRIC_ATE,
+    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MINCOST_EFFICIENT,
+    costs=costs,
+)
+print(
+    ident_mincost_eff.identify_effect(
+        graph=G, treatment_name=treatment_name, outcome_name=outcome_name, conditional_node_names=conditional_node_names
+    )
+)
 </pre></div>
 </div>
 </div>
@@ -1041,9 +1042,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
  d
-────(E[Y|L,K])
+────(E[Y|K,L])
 d[X]
-Estimand assumption 1, Unconfoundedness: If U→{X} and U→Y then P(Y|X,L,K,U) = P(Y|X,L,K)
+Estimand assumption 1, Unconfoundedness: If U→{X} and U→Y then P(Y|X,K,L,U) = P(Y|X,K,L)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1072,15 +1073,15 @@ Estimand assumption 3, Second-stage-unconfoundedness: If U→{M} and U→Y then 
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ident_eff</span> <span class="o">=</span> <span class="n">AutoIdentifier</span><span class="p">(</span>
-    <span class="n">estimand_type</span><span class="o">=</span><span class="n">EstimandType</span><span class="o">.</span><span class="n">NONPARAMETRIC_ATE</span><span class="p">,</span>
-    <span class="n">backdoor_adjustment</span><span class="o">=</span><span class="n">BackdoorAdjustment</span><span class="o">.</span><span class="n">BACKDOOR_MIN_EFFICIENT</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span>
-    <span class="n">ident_minimal_eff</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span>
-        <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">conditional_node_names</span><span class="o">=</span><span class="n">conditional_node_names</span>
-    <span class="p">)</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ident_eff = AutoIdentifier(
+    estimand_type=EstimandType.NONPARAMETRIC_ATE,
+    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MIN_EFFICIENT,
+)
+print(
+    ident_minimal_eff.identify_effect(
+        graph=G, treatment_name=treatment_name, outcome_name=outcome_name, conditional_node_names=conditional_node_names
+    )
+)
 </pre></div>
 </div>
 </div>
@@ -1095,9 +1096,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
  d
-────(E[Y|T,L,R])
+────(E[Y|L,T,R])
 d[X]
-Estimand assumption 1, Unconfoundedness: If U→{X} and U→Y then P(Y|X,T,L,R,U) = P(Y|X,T,L,R)
+Estimand assumption 1, Unconfoundedness: If U→{X} and U→Y then P(Y|X,L,T,R,U) = P(Y|X,L,T,R)
 
 ### Estimand : 2
 Estimand name: iv

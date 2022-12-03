@@ -550,10 +550,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -702,15 +703,15 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
+import pandas as pd
 
-<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
-<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+from dowhy import CausalModel
+import dowhy.datasets
 
-<span class="c1"># Warnings and logging</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+# Warnings and logging
+import warnings
+warnings.filterwarnings(&#39;ignore&#39;)
 </pre></div>
 </div>
 </div>
@@ -720,15 +721,15 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Creating a dataset with a single confounder and a single mediator (num_frontdoor_variables)</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">linear_dataset</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">num_common_causes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
-                                     <span class="n">num_instruments</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_effect_modifiers</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                     <span class="n">num_treatments</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                     <span class="n">num_frontdoor_variables</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                     <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                    <span class="n">outcome_is_binary</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Creating a dataset with a single confounder and a single mediator (num_frontdoor_variables)
+data = dowhy.datasets.linear_dataset(10, num_common_causes=1, num_samples=10000,
+                                     num_instruments=0, num_effect_modifiers=0,
+                                     num_treatments=1,
+                                     num_frontdoor_variables=1,
+                                     treatment_is_binary=False,
+                                    outcome_is_binary=False)
+df = data[&#39;df&#39;]
+print(df.head())
 </pre></div>
 </div>
 </div>
@@ -738,11 +739,11 @@ div.rendered_html tbody tr:hover {
 <div class="output_area docutils container">
 <div class="highlight"><pre>
         FD0        W0        v0          y
-0  8.467585  2.173193  7.873100  21.805009
-1  7.470821  1.538374  5.347965  17.792316
-2  2.597310  0.244570  1.067172   5.097406
-3  3.093209  1.233783  3.454764   9.629292
-4  1.402298  0.204846  0.349444   3.022540
+0  1.763153  0.270444  2.628183   9.437176
+1  0.179642 -0.172959 -0.006560   0.370281
+2 -9.593100 -1.232978 -9.457680 -50.641144
+3 -3.977419 -0.996781 -3.723355 -22.441013
+4  2.007067  0.304626  0.566528  10.730795
 </pre></div></div>
 </div>
 </section>
@@ -753,14 +754,14 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span><span class="n">df</span><span class="p">,</span>
-                    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
-                    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;gml_graph&quot;</span><span class="p">],</span>
-                   <span class="n">missing_nodes_as_confounders</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model = CausalModel(df,
+                    data[&quot;treatment_name&quot;],data[&quot;outcome_name&quot;],
+                    data[&quot;gml_graph&quot;],
+                   missing_nodes_as_confounders=True)
 
-<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
-<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+model.view_model()
+from IPython.display import Image, display
+display(Image(filename=&quot;causal_model.png&quot;))
 </pre></div>
 </div>
 </div>
@@ -781,10 +782,10 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Natural direct effect (nde)</span>
-<span class="n">identified_estimand_nde</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">estimand_type</span><span class="o">=</span><span class="s2">&quot;nonparametric-nde&quot;</span><span class="p">,</span>
-                                            <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand_nde</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Natural direct effect (nde)
+identified_estimand_nde = model.identify_effect(estimand_type=&quot;nonparametric-nde&quot;,
+                                            proceed_when_unidentifiable=True)
+print(identified_estimand_nde)
 </pre></div>
 </div>
 </div>
@@ -811,10 +812,10 @@ Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→y the
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Natural indirect effect (nie)</span>
-<span class="n">identified_estimand_nie</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">estimand_type</span><span class="o">=</span><span class="s2">&quot;nonparametric-nie&quot;</span><span class="p">,</span>
-                                            <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand_nie</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Natural indirect effect (nie)
+identified_estimand_nie = model.identify_effect(estimand_type=&quot;nonparametric-nie&quot;,
+                                            proceed_when_unidentifiable=True)
+print(identified_estimand_nie)
 </pre></div>
 </div>
 </div>
@@ -848,17 +849,17 @@ Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→y the
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">dowhy.causal_estimators.linear_regression_estimator</span>
-<span class="n">causal_estimate_nie</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand_nie</span><span class="p">,</span>
-                                        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;mediation.two_stage_regression&quot;</span><span class="p">,</span>
-                                       <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                       <span class="n">test_significance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                        <span class="n">method_params</span> <span class="o">=</span> <span class="p">{</span>
-                                            <span class="s1">&#39;first_stage_model&#39;</span><span class="p">:</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">causal_estimators</span><span class="o">.</span><span class="n">linear_regression_estimator</span><span class="o">.</span><span class="n">LinearRegressionEstimator</span><span class="p">,</span>
-                                            <span class="s1">&#39;second_stage_model&#39;</span><span class="p">:</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">causal_estimators</span><span class="o">.</span><span class="n">linear_regression_estimator</span><span class="o">.</span><span class="n">LinearRegressionEstimator</span>
-                                        <span class="p">}</span>
-                                       <span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_nie</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import dowhy.causal_estimators.linear_regression_estimator
+causal_estimate_nie = model.estimate_effect(identified_estimand_nie,
+                                        method_name=&quot;mediation.two_stage_regression&quot;,
+                                       confidence_intervals=False,
+                                       test_significance=False,
+                                        method_params = {
+                                            &#39;first_stage_model&#39;: dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator,
+                                            &#39;second_stage_model&#39;: dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator
+                                        }
+                                       )
+print(causal_estimate_nie)
 </pre></div>
 </div>
 </div>
@@ -887,7 +888,7 @@ Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→y the
 Target units: ate
 
 ## Estimate
-Mean value: 1.70960309587469
+Mean value: 3.767443044805417
 
 </pre></div></div>
 </div>
@@ -896,7 +897,7 @@ Mean value: 1.70960309587469
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_nie</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;ate&quot;</span><span class="p">])</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(causal_estimate_nie.value, data[&quot;ate&quot;])
 </pre></div>
 </div>
 </div>
@@ -905,7 +906,7 @@ Mean value: 1.70960309587469
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-1.70960309587469 1.7041328401109386
+3.767443044805417 3.7563476477294966
 </pre></div></div>
 </div>
 <p>The parameter is called <code class="docutils literal notranslate"><span class="pre">ate</span></code> because in the simulated dataset, the direct effect is set to be zero.</p>
@@ -917,16 +918,16 @@ Mean value: 1.70960309587469
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">causal_estimate_nde</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand_nde</span><span class="p">,</span>
-                                        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;mediation.two_stage_regression&quot;</span><span class="p">,</span>
-                                       <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                       <span class="n">test_significance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                        <span class="n">method_params</span> <span class="o">=</span> <span class="p">{</span>
-                                            <span class="s1">&#39;first_stage_model&#39;</span><span class="p">:</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">causal_estimators</span><span class="o">.</span><span class="n">linear_regression_estimator</span><span class="o">.</span><span class="n">LinearRegressionEstimator</span><span class="p">,</span>
-                                            <span class="s1">&#39;second_stage_model&#39;</span><span class="p">:</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">causal_estimators</span><span class="o">.</span><span class="n">linear_regression_estimator</span><span class="o">.</span><span class="n">LinearRegressionEstimator</span>
-                                        <span class="p">}</span>
-                                       <span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_nde</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>causal_estimate_nde = model.estimate_effect(identified_estimand_nde,
+                                        method_name=&quot;mediation.two_stage_regression&quot;,
+                                       confidence_intervals=False,
+                                       test_significance=False,
+                                        method_params = {
+                                            &#39;first_stage_model&#39;: dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator,
+                                            &#39;second_stage_model&#39;: dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator
+                                        }
+                                       )
+print(causal_estimate_nde)
 </pre></div>
 </div>
 </div>
@@ -955,7 +956,7 @@ Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→y the
 Target units: ate
 
 ## Estimate
-Mean value: 6.747699507281268e-05
+Mean value: -4.5407397639696256e-05
 
 </pre></div></div>
 </div>

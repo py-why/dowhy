@@ -552,10 +552,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -705,8 +706,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span>
-<span class="n">Image</span><span class="p">(</span><span class="s1">&#39;microservice-architecture-dependencies.png&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from IPython.display import Image
+Image(&#39;microservice-architecture-dependencies.png&#39;, width=500)
 </pre></div>
 </div>
 </div>
@@ -727,10 +728,10 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import pandas as pd
 
-<span class="n">normal_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;rca_microservice_architecture_latencies.csv&quot;</span><span class="p">)</span>
-<span class="n">normal_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+normal_data = pd.read_csv(&quot;rca_microservice_architecture_latencies.csv&quot;)
+normal_data.head()
 </pre></div>
 </div>
 </div>
@@ -850,11 +851,11 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">axes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">scatter_matrix</span><span class="p">(</span><span class="n">normal_data</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;#ff0d57&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">hist_kwds</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;color&#39;</span><span class="p">:[</span><span class="s1">&#39;#1E88E5&#39;</span><span class="p">]});</span>
-<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="o">.</span><span class="n">flatten</span><span class="p">():</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_rotation</span><span class="p">(</span><span class="mi">90</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_rotation</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_ha</span><span class="p">(</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>axes = pd.plotting.scatter_matrix(normal_data, figsize=(10, 10), c=&#39;#ff0d57&#39;, alpha=0.2, hist_kwds={&#39;color&#39;:[&#39;#1E88E5&#39;]});
+for ax in axes.flatten():
+    ax.xaxis.label.set_rotation(90)
+    ax.yaxis.label.set_rotation(0)
+    ax.yaxis.label.set_ha(&#39;right&#39;)
 </pre></div>
 </div>
 </div>
@@ -874,22 +875,22 @@ relations. We shall use this information shortly to assign generative causal mod
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
-<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">gcm</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import networkx as nx
+from dowhy import gcm
 
-<span class="n">causal_graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;www&#39;</span><span class="p">,</span> <span class="s1">&#39;Website&#39;</span><span class="p">),</span>
-                           <span class="p">(</span><span class="s1">&#39;Auth Service&#39;</span><span class="p">,</span> <span class="s1">&#39;www&#39;</span><span class="p">),</span>
-                           <span class="p">(</span><span class="s1">&#39;API&#39;</span><span class="p">,</span> <span class="s1">&#39;www&#39;</span><span class="p">),</span>
-                           <span class="p">(</span><span class="s1">&#39;Customer DB&#39;</span><span class="p">,</span> <span class="s1">&#39;Auth Service&#39;</span><span class="p">),</span>
-                           <span class="p">(</span><span class="s1">&#39;Customer DB&#39;</span><span class="p">,</span> <span class="s1">&#39;API&#39;</span><span class="p">),</span>
-                           <span class="p">(</span><span class="s1">&#39;Product Service&#39;</span><span class="p">,</span> <span class="s1">&#39;API&#39;</span><span class="p">),</span>
-                           <span class="p">(</span><span class="s1">&#39;Auth Service&#39;</span><span class="p">,</span> <span class="s1">&#39;API&#39;</span><span class="p">),</span>
-                           <span class="p">(</span><span class="s1">&#39;Order Service&#39;</span><span class="p">,</span> <span class="s1">&#39;API&#39;</span><span class="p">),</span>
-                           <span class="p">(</span><span class="s1">&#39;Shipping Cost Service&#39;</span><span class="p">,</span> <span class="s1">&#39;Product Service&#39;</span><span class="p">),</span>
-                           <span class="p">(</span><span class="s1">&#39;Caching Service&#39;</span><span class="p">,</span> <span class="s1">&#39;Product Service&#39;</span><span class="p">),</span>
-                           <span class="p">(</span><span class="s1">&#39;Product DB&#39;</span><span class="p">,</span> <span class="s1">&#39;Caching Service&#39;</span><span class="p">),</span>
-                           <span class="p">(</span><span class="s1">&#39;Customer DB&#39;</span><span class="p">,</span> <span class="s1">&#39;Product Service&#39;</span><span class="p">),</span>
-                           <span class="p">(</span><span class="s1">&#39;Order DB&#39;</span><span class="p">,</span> <span class="s1">&#39;Order Service&#39;</span><span class="p">)])</span>
+causal_graph = nx.DiGraph([(&#39;www&#39;, &#39;Website&#39;),
+                           (&#39;Auth Service&#39;, &#39;www&#39;),
+                           (&#39;API&#39;, &#39;www&#39;),
+                           (&#39;Customer DB&#39;, &#39;Auth Service&#39;),
+                           (&#39;Customer DB&#39;, &#39;API&#39;),
+                           (&#39;Product Service&#39;, &#39;API&#39;),
+                           (&#39;Auth Service&#39;, &#39;API&#39;),
+                           (&#39;Order Service&#39;, &#39;API&#39;),
+                           (&#39;Shipping Cost Service&#39;, &#39;Product Service&#39;),
+                           (&#39;Caching Service&#39;, &#39;Product Service&#39;),
+                           (&#39;Product DB&#39;, &#39;Caching Service&#39;),
+                           (&#39;Customer DB&#39;, &#39;Product Service&#39;),
+                           (&#39;Order DB&#39;, &#39;Order Service&#39;)])
 </pre></div>
 </div>
 </div>
@@ -897,7 +898,7 @@ relations. We shall use this information shortly to assign generative causal mod
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gcm</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">,</span> <span class="n">figure_size</span><span class="o">=</span><span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">13</span><span class="p">])</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>gcm.util.plot(causal_graph, figure_size=[13, 13])
 </pre></div>
 </div>
 </div>
@@ -914,15 +915,15 @@ relations. We shall use this information shortly to assign generative causal mod
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">halfnorm</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from scipy.stats import halfnorm
 
-<span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">)</span>
+causal_model = gcm.StructuralCausalModel(causal_graph)
 
-<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">causal_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">causal_graph</span><span class="o">.</span><span class="n">predecessors</span><span class="p">(</span><span class="n">node</span><span class="p">)))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">ScipyDistribution</span><span class="p">(</span><span class="n">halfnorm</span><span class="p">))</span>
+for node in causal_graph.nodes:
+    if len(list(causal_graph.predecessors(node))) &gt; 0:
+        causal_model.set_causal_mechanism(node, gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
+    else:
+        causal_model.set_causal_mechanism(node, gcm.ScipyDistribution(halfnorm))
 </pre></div>
 </div>
 </div>
@@ -939,8 +940,8 @@ relations. We shall use this information shortly to assign generative causal mod
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">outlier_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;rca_microservice_architecture_anomaly.csv&quot;</span><span class="p">)</span>
-<span class="n">outlier_data</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>outlier_data = pd.read_csv(&quot;rca_microservice_architecture_anomaly.csv&quot;)
+outlier_data
 </pre></div>
 </div>
 </div>
@@ -1004,7 +1005,7 @@ relations. We shall use this information shortly to assign generative causal mod
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">outlier_data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;Website&#39;</span><span class="p">]</span><span class="o">-</span><span class="n">normal_data</span><span class="p">[</span><span class="s1">&#39;Website&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>outlier_data.iloc[0][&#39;Website&#39;]-normal_data[&#39;Website&#39;].mean()
 </pre></div>
 </div>
 </div>
@@ -1025,15 +1026,15 @@ process 10 times. This way, the confidence intervals we report account for (a) t
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gcm</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">disable_progress_bars</span><span class="p">()</span> <span class="c1"># to disable print statements when computing Shapley values</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>gcm.config.disable_progress_bars() # to disable print statements when computing Shapley values
 
-<span class="n">median_attribs</span><span class="p">,</span> <span class="n">uncertainty_attribs</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
-    <span class="n">gcm</span><span class="o">.</span><span class="n">fit_and_compute</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">attribute_anomalies</span><span class="p">,</span>
-                        <span class="n">causal_model</span><span class="p">,</span>
-                        <span class="n">normal_data</span><span class="p">,</span>
-                        <span class="n">target_node</span><span class="o">=</span><span class="s1">&#39;Website&#39;</span><span class="p">,</span>
-                        <span class="n">anomaly_samples</span><span class="o">=</span><span class="n">outlier_data</span><span class="p">),</span>
-    <span class="n">num_bootstrap_resamples</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+median_attribs, uncertainty_attribs = gcm.confidence_intervals(
+    gcm.fit_and_compute(gcm.attribute_anomalies,
+                        causal_model,
+                        normal_data,
+                        target_node=&#39;Website&#39;,
+                        anomaly_samples=outlier_data),
+    num_bootstrap_resamples=10)
 </pre></div>
 </div>
 </div>
@@ -1043,7 +1044,7 @@ process 10 times. This way, the confidence intervals we report account for (a) t
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gcm</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">bar_plot</span><span class="p">(</span><span class="n">median_attribs</span><span class="p">,</span> <span class="n">uncertainty_attribs</span><span class="p">,</span> <span class="s1">&#39;Attribution Score&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>gcm.util.bar_plot(median_attribs, uncertainty_attribs, &#39;Attribution Score&#39;)
 </pre></div>
 </div>
 </div>
@@ -1066,8 +1067,8 @@ child-relationship between <code class="docutils literal notranslate"><span clas
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">outlier_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;rca_microservice_architecture_anomaly_1000.csv&quot;</span><span class="p">)</span>
-<span class="n">outlier_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>outlier_data = pd.read_csv(&quot;rca_microservice_architecture_anomaly_1000.csv&quot;)
+outlier_data.head()
 </pre></div>
 </div>
 </div>
@@ -1187,7 +1188,7 @@ child-relationship between <code class="docutils literal notranslate"><span clas
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">outlier_data</span><span class="p">[</span><span class="s1">&#39;Website&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">normal_data</span><span class="p">[</span><span class="s1">&#39;Website&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>outlier_data[&#39;Website&#39;].mean() - normal_data[&#39;Website&#39;].mean()
 </pre></div>
 </div>
 </div>
@@ -1208,17 +1209,17 @@ them in a bar plot.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
 
-<span class="n">median_attribs</span><span class="p">,</span> <span class="n">uncertainty_attribs</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
-    <span class="k">lambda</span> <span class="p">:</span> <span class="n">gcm</span><span class="o">.</span><span class="n">distribution_change</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span>
-                                     <span class="n">normal_data</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mf">0.6</span><span class="p">),</span>
-                                     <span class="n">outlier_data</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mf">0.6</span><span class="p">),</span>
-                                     <span class="s1">&#39;Website&#39;</span><span class="p">,</span>
-                                     <span class="n">difference_estimation_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span>
-    <span class="n">num_bootstrap_resamples</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+median_attribs, uncertainty_attribs = gcm.confidence_intervals(
+    lambda : gcm.distribution_change(causal_model,
+                                     normal_data.sample(frac=0.6),
+                                     outlier_data.sample(frac=0.6),
+                                     &#39;Website&#39;,
+                                     difference_estimation_func=lambda x, y: np.mean(y) - np.mean(x)),
+    num_bootstrap_resamples = 10)
 
-<span class="n">gcm</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">bar_plot</span><span class="p">(</span><span class="n">median_attribs</span><span class="p">,</span> <span class="n">uncertainty_attribs</span><span class="p">,</span> <span class="s1">&#39;Attribution Score&#39;</span><span class="p">)</span>
+gcm.util.bar_plot(median_attribs, uncertainty_attribs, &#39;Attribution Score&#39;)
 </pre></div>
 </div>
 </div>
@@ -1236,22 +1237,22 @@ them in a bar plot.</p>
 <h2>Scenario 3: Simulating the intervention of shifting resources<a class="headerlink" href="#Scenario-3:-Simulating-the-intervention-of-shifting-resources" title="Permalink to this heading"></a></h2>
 <p>Next, let us imagine a scenario where permanent degradation has happened as in scenario 2 and we’ve successfully identified <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> as the root cause. Furthermore, we figured out that a recent deployment of the <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> contained a bug that is causing the overloaded hosts. A proper fix must be deployed, or the previous deployment must be rolled back. But, in the meantime, could we mitigate the situation by shifting over some resources from <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Service</span></code> to
 <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code>? And would that help? Before doing it in reality, let us simulate it first and see whether it improves the situation.</p>
-<p><img alt="bc807a9a27824034ac38e420aae74a42" class="no-scaled-link" src="../_images/shifting-resources.png" style="width: 600px;" /></p>
+<p><img alt="079faaa596bc429eba11cea169f2066e" class="no-scaled-link" src="../_images/shifting-resources.png" style="width: 600px;" /></p>
 <p>Let’s perform an intervention where we say we can reduce the average time of <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> by 1s. But at the same time we buy this speed-up by an average slow-down of 2s in <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Cost</span> <span class="pre">Service</span></code>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">median_mean_latencies</span><span class="p">,</span> <span class="n">uncertainty_mean_latencies</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
-    <span class="k">lambda</span> <span class="p">:</span> <span class="n">gcm</span><span class="o">.</span><span class="n">fit_and_compute</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">interventional_samples</span><span class="p">,</span>
-                                 <span class="n">causal_model</span><span class="p">,</span>
-                                 <span class="n">outlier_data</span><span class="p">,</span>
-                                 <span class="n">interventions</span> <span class="o">=</span> <span class="p">{</span>
-                                    <span class="s2">&quot;Caching Service&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>
-                                    <span class="s2">&quot;Shipping Cost Service&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">+</span><span class="mi">2</span>
-                                 <span class="p">},</span>
-                                 <span class="n">observed_data</span><span class="o">=</span><span class="n">outlier_data</span><span class="p">)()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
-    <span class="n">num_bootstrap_resamples</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>median_mean_latencies, uncertainty_mean_latencies = gcm.confidence_intervals(
+    lambda : gcm.fit_and_compute(gcm.interventional_samples,
+                                 causal_model,
+                                 outlier_data,
+                                 interventions = {
+                                    &quot;Caching Service&quot;: lambda x: x-1,
+                                    &quot;Shipping Cost Service&quot;: lambda x: x+2
+                                 },
+                                 observed_data=outlier_data)().mean().to_dict(),
+    num_bootstrap_resamples=10)
 </pre></div>
 </div>
 </div>
@@ -1260,14 +1261,14 @@ them in a bar plot.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">avg_website_latency_before</span> <span class="o">=</span> <span class="n">outlier_data</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()[</span><span class="s1">&#39;Website&#39;</span><span class="p">]</span>
-<span class="n">gcm</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">bar_plot</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">before</span><span class="o">=</span><span class="n">avg_website_latency_before</span><span class="p">,</span> <span class="n">after</span><span class="o">=</span><span class="n">median_mean_latencies</span><span class="p">[</span><span class="s1">&#39;Website&#39;</span><span class="p">]),</span>
-                  <span class="nb">dict</span><span class="p">(</span><span class="n">before</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">avg_website_latency_before</span><span class="p">,</span> <span class="n">avg_website_latency_before</span><span class="p">]),</span> <span class="n">after</span><span class="o">=</span><span class="n">uncertainty_mean_latencies</span><span class="p">[</span><span class="s1">&#39;Website&#39;</span><span class="p">]),</span>
-                  <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Avg. Website Latency&#39;</span><span class="p">,</span>
-                  <span class="n">figure_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-                  <span class="n">bar_width</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
-                  <span class="n">xticks</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Before&#39;</span><span class="p">,</span> <span class="s1">&#39;After&#39;</span><span class="p">],</span>
-                  <span class="n">xticks_rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>avg_website_latency_before = outlier_data.mean().to_dict()[&#39;Website&#39;]
+gcm.util.bar_plot(dict(before=avg_website_latency_before, after=median_mean_latencies[&#39;Website&#39;]),
+                  dict(before=np.array([avg_website_latency_before, avg_website_latency_before]), after=uncertainty_mean_latencies[&#39;Website&#39;]),
+                  ylabel=&#39;Avg. Website Latency&#39;,
+                  figure_size=(3, 2),
+                  bar_width=0.4,
+                  xticks=[&#39;Before&#39;, &#39;After&#39;],
+                  xticks_rotation=45)
 </pre></div>
 </div>
 </div>
@@ -1287,58 +1288,58 @@ them in a bar plot.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">truncexpon</span><span class="p">,</span> <span class="n">halfnorm</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from scipy.stats import truncexpon, halfnorm
 
 
-<span class="k">def</span> <span class="nf">create_observed_latency_data</span><span class="p">(</span><span class="n">unobserved_intrinsic_latencies</span><span class="p">):</span>
-    <span class="n">observed_latencies</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Product DB&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;Product DB&#39;</span><span class="p">]</span>
-    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Customer DB&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;Customer DB&#39;</span><span class="p">]</span>
-    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Order DB&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;Order DB&#39;</span><span class="p">]</span>
-    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Shipping Cost Service&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;Shipping Cost Service&#39;</span><span class="p">]</span>
-    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Caching Service&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Product DB&#39;</span><span class="p">]),),</span>
-                                                             <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mf">.5</span><span class="p">,</span> <span class="mf">.5</span><span class="p">])</span> <span class="o">*</span> \
-                                            <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Product DB&#39;</span><span class="p">]</span> \
-                                            <span class="o">+</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;Caching Service&#39;</span><span class="p">]</span>
-    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Product Service&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Shipping Cost Service&#39;</span><span class="p">],</span>
-                                                                  <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Caching Service&#39;</span><span class="p">]),</span>
-                                                       <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Customer DB&#39;</span><span class="p">])</span> \
-                                            <span class="o">+</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;Product Service&#39;</span><span class="p">]</span>
-    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Auth Service&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Customer DB&#39;</span><span class="p">]</span> \
-                                         <span class="o">+</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;Auth Service&#39;</span><span class="p">]</span>
-    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Order Service&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Order DB&#39;</span><span class="p">]</span> \
-                                          <span class="o">+</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;Order Service&#39;</span><span class="p">]</span>
-    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;API&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Product Service&#39;</span><span class="p">]</span> \
-                                <span class="o">+</span> <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Customer DB&#39;</span><span class="p">]</span> \
-                                <span class="o">+</span> <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Auth Service&#39;</span><span class="p">]</span> \
-                                <span class="o">+</span> <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Order Service&#39;</span><span class="p">]</span> \
-                                <span class="o">+</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;API&#39;</span><span class="p">]</span>
-    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;www&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;API&#39;</span><span class="p">]</span> \
-                                <span class="o">+</span> <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Auth Service&#39;</span><span class="p">]</span> \
-                                <span class="o">+</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;www&#39;</span><span class="p">]</span>
-    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Website&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;www&#39;</span><span class="p">]</span> \
-                                    <span class="o">+</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;Website&#39;</span><span class="p">]</span>
+def create_observed_latency_data(unobserved_intrinsic_latencies):
+    observed_latencies = {}
+    observed_latencies[&#39;Product DB&#39;] = unobserved_intrinsic_latencies[&#39;Product DB&#39;]
+    observed_latencies[&#39;Customer DB&#39;] = unobserved_intrinsic_latencies[&#39;Customer DB&#39;]
+    observed_latencies[&#39;Order DB&#39;] = unobserved_intrinsic_latencies[&#39;Order DB&#39;]
+    observed_latencies[&#39;Shipping Cost Service&#39;] = unobserved_intrinsic_latencies[&#39;Shipping Cost Service&#39;]
+    observed_latencies[&#39;Caching Service&#39;] = np.random.choice([0, 1], size=(len(observed_latencies[&#39;Product DB&#39;]),),
+                                                             p=[.5, .5]) * \
+                                            observed_latencies[&#39;Product DB&#39;] \
+                                            + unobserved_intrinsic_latencies[&#39;Caching Service&#39;]
+    observed_latencies[&#39;Product Service&#39;] = np.maximum(np.maximum(observed_latencies[&#39;Shipping Cost Service&#39;],
+                                                                  observed_latencies[&#39;Caching Service&#39;]),
+                                                       observed_latencies[&#39;Customer DB&#39;]) \
+                                            + unobserved_intrinsic_latencies[&#39;Product Service&#39;]
+    observed_latencies[&#39;Auth Service&#39;] = observed_latencies[&#39;Customer DB&#39;] \
+                                         + unobserved_intrinsic_latencies[&#39;Auth Service&#39;]
+    observed_latencies[&#39;Order Service&#39;] = observed_latencies[&#39;Order DB&#39;] \
+                                          + unobserved_intrinsic_latencies[&#39;Order Service&#39;]
+    observed_latencies[&#39;API&#39;] = observed_latencies[&#39;Product Service&#39;] \
+                                + observed_latencies[&#39;Customer DB&#39;] \
+                                + observed_latencies[&#39;Auth Service&#39;] \
+                                + observed_latencies[&#39;Order Service&#39;] \
+                                + unobserved_intrinsic_latencies[&#39;API&#39;]
+    observed_latencies[&#39;www&#39;] = observed_latencies[&#39;API&#39;] \
+                                + observed_latencies[&#39;Auth Service&#39;] \
+                                + unobserved_intrinsic_latencies[&#39;www&#39;]
+    observed_latencies[&#39;Website&#39;] = observed_latencies[&#39;www&#39;] \
+                                    + unobserved_intrinsic_latencies[&#39;Website&#39;]
 
-    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">observed_latencies</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">unobserved_intrinsic_latencies_normal</span><span class="p">(</span><span class="n">num_samples</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">{</span>
-        <span class="s1">&#39;Website&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
-        <span class="s1">&#39;www&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
-        <span class="s1">&#39;API&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
-        <span class="s1">&#39;Auth Service&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
-        <span class="s1">&#39;Product Service&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
-        <span class="s1">&#39;Order Service&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
-        <span class="s1">&#39;Shipping Cost Service&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
-        <span class="s1">&#39;Caching Service&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.1</span><span class="p">),</span>
-        <span class="s1">&#39;Order DB&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
-        <span class="s1">&#39;Customer DB&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
-        <span class="s1">&#39;Product DB&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
-    <span class="p">}</span>
+    return pd.DataFrame(observed_latencies)
 
 
-<span class="n">normal_data</span> <span class="o">=</span> <span class="n">create_observed_latency_data</span><span class="p">(</span><span class="n">unobserved_intrinsic_latencies_normal</span><span class="p">(</span><span class="mi">10000</span><span class="p">))</span>
+def unobserved_intrinsic_latencies_normal(num_samples):
+    return {
+        &#39;Website&#39;: truncexpon.rvs(size=num_samples, b=3, scale=0.2),
+        &#39;www&#39;: truncexpon.rvs(size=num_samples, b=2, scale=0.2),
+        &#39;API&#39;: halfnorm.rvs(size=num_samples, loc=0.5, scale=0.2),
+        &#39;Auth Service&#39;: halfnorm.rvs(size=num_samples, loc=0.1, scale=0.2),
+        &#39;Product Service&#39;: halfnorm.rvs(size=num_samples, loc=0.1, scale=0.2),
+        &#39;Order Service&#39;: halfnorm.rvs(size=num_samples, loc=0.5, scale=0.2),
+        &#39;Shipping Cost Service&#39;: halfnorm.rvs(size=num_samples, loc=0.1, scale=0.2),
+        &#39;Caching Service&#39;: halfnorm.rvs(size=num_samples, loc=0.1, scale=0.1),
+        &#39;Order DB&#39;: truncexpon.rvs(size=num_samples, b=5, scale=0.2),
+        &#39;Customer DB&#39;: truncexpon.rvs(size=num_samples, b=6, scale=0.2),
+        &#39;Product DB&#39;: truncexpon.rvs(size=num_samples, b=10, scale=0.2)
+    }
+
+
+normal_data = create_observed_latency_data(unobserved_intrinsic_latencies_normal(10000))
 </pre></div>
 </div>
 </div>
@@ -1350,22 +1351,22 @@ all three service have returned.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">unobserved_intrinsic_latencies_anomalous</span><span class="p">(</span><span class="n">num_samples</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">{</span>
-        <span class="s1">&#39;Website&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
-        <span class="s1">&#39;www&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
-        <span class="s1">&#39;API&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
-        <span class="s1">&#39;Auth Service&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
-        <span class="s1">&#39;Product Service&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
-        <span class="s1">&#39;Order Service&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
-        <span class="s1">&#39;Shipping Cost Service&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
-        <span class="s1">&#39;Caching Service&#39;</span><span class="p">:</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.1</span><span class="p">),</span>
-        <span class="s1">&#39;Order DB&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
-        <span class="s1">&#39;Customer DB&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
-        <span class="s1">&#39;Product DB&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
-    <span class="p">}</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def unobserved_intrinsic_latencies_anomalous(num_samples):
+    return {
+        &#39;Website&#39;: truncexpon.rvs(size=num_samples, b=3, scale=0.2),
+        &#39;www&#39;: truncexpon.rvs(size=num_samples, b=2, scale=0.2),
+        &#39;API&#39;: halfnorm.rvs(size=num_samples, loc=0.5, scale=0.2),
+        &#39;Auth Service&#39;: halfnorm.rvs(size=num_samples, loc=0.1, scale=0.2),
+        &#39;Product Service&#39;: halfnorm.rvs(size=num_samples, loc=0.1, scale=0.2),
+        &#39;Order Service&#39;: halfnorm.rvs(size=num_samples, loc=0.5, scale=0.2),
+        &#39;Shipping Cost Service&#39;: halfnorm.rvs(size=num_samples, loc=0.1, scale=0.2),
+        &#39;Caching Service&#39;: 2 + halfnorm.rvs(size=num_samples, loc=0.1, scale=0.1),
+        &#39;Order DB&#39;: truncexpon.rvs(size=num_samples, b=5, scale=0.2),
+        &#39;Customer DB&#39;: truncexpon.rvs(size=num_samples, b=6, scale=0.2),
+        &#39;Product DB&#39;: truncexpon.rvs(size=num_samples, b=10, scale=0.2)
+    }
 
-<span class="n">outlier_data</span> <span class="o">=</span> <span class="n">create_observed_latency_data</span><span class="p">(</span><span class="n">unobserved_intrinsic_latencies_anomalous</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span>
+outlier_data = create_observed_latency_data(unobserved_intrinsic_latencies_anomalous(1000))
 </pre></div>
 </div>
 </div>
