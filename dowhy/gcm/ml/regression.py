@@ -53,7 +53,6 @@ class SklearnRegressionModel(PredictionModel):
     def clone(self):
         """
         Clones the prediction model using the same hyper parameters but not fitted.
-
         :return: An unfitted clone of the prediction model.
         """
         return SklearnRegressionModel(sklearn_mdl=sklearn.clone(self._sklearn_mdl))

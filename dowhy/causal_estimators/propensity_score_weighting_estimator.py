@@ -1,8 +1,11 @@
+from typing import Any, List, Optional, Union
+
 import numpy as np
 import pandas as pd
 
-from dowhy.causal_estimator import CausalEstimate
+from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from dowhy.causal_estimators.propensity_score_estimator import PropensityScoreEstimator
+from dowhy.causal_identifier import IdentifiedEstimand
 
 
 class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
@@ -11,25 +14,49 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
 
     Straightforward application of the back-door criterion.
 
-    For a list of standard args and kwargs, see documentation for
-    :class:`~dowhy.causal_estimator.CausalEstimator`.
-
     Supports additional parameters as listed below.
 
     """
 
     def __init__(
         self,
-        *args,
-        min_ps_score=0.05,
-        max_ps_score=0.95,
-        weighting_scheme="ips_weight",
-        propensity_score_model=None,
-        recalculate_propensity_score=True,
-        propensity_score_column="propensity_score",
+        identified_estimand: IdentifiedEstimand,
+        test_significance: bool = False,
+        evaluate_effect_strength: bool = False,
+        confidence_intervals: bool = False,
+        num_null_simulations: int = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
+        num_simulations: int = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_CI,
+        sample_size_fraction: int = CausalEstimator.DEFAULT_SAMPLE_SIZE_FRACTION,
+        confidence_level: float = CausalEstimator.DEFAULT_CONFIDENCE_LEVEL,
+        need_conditional_estimates: Union[bool, str] = "auto",
+        num_quantiles_to_discretize_cont_cols: int = CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
+        min_ps_score: float = 0.05,
+        max_ps_score: float = 0.95,
+        weighting_scheme: str = "ips_weight",
+        propensity_score_model: Optional[Any] = None,
+        propensity_score_column: str = "propensity_score",
         **kwargs,
     ):
         """
+        :param identified_estimand: probability expression
+            representing the target identified estimand to estimate.
+        :param test_significance: Binary flag or a string indicating whether to test significance and by which method. All estimators support test_significance="bootstrap" that estimates a p-value for the obtained estimate using the bootstrap method. Individual estimators can override this to support custom testing methods. The bootstrap method supports an optional parameter, num_null_simulations. If False, no testing is done. If True, significance of the estimate is tested using the custom method if available, otherwise by bootstrap.
+        :param evaluate_effect_strength: (Experimental) whether to evaluate the strength of effect
+        :param confidence_intervals: Binary flag or a string indicating whether the confidence intervals should be computed and which method should be used. All methods support estimation of confidence intervals using the bootstrap method by using the parameter confidence_intervals="bootstrap". The bootstrap method takes in two arguments (num_simulations and sample_size_fraction) that can be optionally specified in the params dictionary. Estimators may also override this to implement their own confidence interval method. If this parameter is False, no confidence intervals are computed. If True, confidence intervals are computed by the estimator's specific method if available, otherwise through bootstrap
+        :param num_null_simulations: The number of simulations for testing the
+            statistical significance of the estimator
+        :param num_simulations: The number of simulations for finding the
+            confidence interval (and/or standard error) for a estimate
+        :param sample_size_fraction: The size of the sample for the bootstrap
+            estimator
+        :param confidence_level: The confidence level of the confidence
+            interval estimate
+        :param need_conditional_estimates: Boolean flag indicating whether
+            conditional estimates should be computed. Defaults to True if
+            there are effect modifiers in the graph
+        :param num_quantiles_to_discretize_cont_cols: The number of quantiles
+            into which a numeric effect modifier is split, to enable
+            estimation of conditional treatment effect over it.
         :param min_ps_score: Lower bound used to clip the propensity score.
             Default=0.05
         :param max_ps_score: Upper bound used to clip the propensity score.
@@ -42,149 +69,171 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
             score. Can be any classification model that supports fit() and
             predict_proba() methods. If None, use LogisticRegression model as
             the default. Default=None
-        :param recalculate_propensity_score: If true, force the estimator to
-            estimate the propensity score. To use pre-computed propensity
-            scores, set this value to false. Default=True
         :param propensity_score_column: Column name that stores the
             propensity score. Default='propensity_score'
+        :param kwargs: (optional) Additional estimator-specific parameters
         """
-        # Required to ensure that self.method_params contains all the information
-        # to create an object of this class
-        args_dict = kwargs
-        args_dict.update(
-            {"min_ps_score": min_ps_score, "max_ps_score": max_ps_score, "weighting_scheme": weighting_scheme}
-        )
+
         super().__init__(
-            *args,
+            identified_estimand=identified_estimand,
+            test_significance=test_significance,
+            evaluate_effect_strength=evaluate_effect_strength,
+            confidence_intervals=confidence_intervals,
+            num_null_simulations=num_null_simulations,
+            num_simulations=num_simulations,
+            sample_size_fraction=sample_size_fraction,
+            confidence_level=confidence_level,
+            need_conditional_estimates=need_conditional_estimates,
+            num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
             propensity_score_model=propensity_score_model,
-            recalculate_propensity_score=recalculate_propensity_score,
             propensity_score_column=propensity_score_column,
-            **args_dict,
+            min_ps_score=min_ps_score,
+            max_ps_score=max_ps_score,
+            weighting_scheme=weighting_scheme,
+            **kwargs,
         )
 
         self.logger.info("INFO: Using Propensity Score Weighting Estimator")
-        self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
-        self.logger.info(self.symbolic_estimator)
+
         # Setting method specific parameters
         self.weighting_scheme = weighting_scheme
         self.min_ps_score = min_ps_score
         self.max_ps_score = max_ps_score
 
-    def _estimate_effect(self):
-        self._refresh_propensity_score()
+    def fit(
+        self,
+        data: pd.DataFrame,
+        treatment_name: str,
+        outcome_name: str,
+        effect_modifier_names: Optional[List[str]] = None,
+    ):
+        """
+        Fits the estimator with data for effect estimation
+        :param data: data frame containing the data
+        :param treatment: name of the treatment variable
+        :param outcome: name of the outcome variable
+        :param effect_modifiers: Variables on which to compute separate
+                    effects, or return a heterogeneous effect function. Not all
+                    methods support this currently.
+        """
+        super().fit(data, treatment_name, outcome_name, effect_modifier_names=effect_modifier_names)
+
+        self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
+        self.logger.info(self.symbolic_estimator)
+
+        return self
+
+    def estimate_effect(
+        self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+    ):
+        if data is None:
+            data = self._data
+        self._target_units = target_units
+        self._treatment_value = treatment_value
+        self._control_value = control_value
+        if self.propensity_score_column not in data:
+            self.estimate_propensity_score_column(data)
 
         # trim propensity score weights
-        self._data[self.propensity_score_column] = np.minimum(
-            self.max_ps_score, self._data[self.propensity_score_column]
-        )
-        self._data[self.propensity_score_column] = np.maximum(
-            self.min_ps_score, self._data[self.propensity_score_column]
-        )
+        data[self.propensity_score_column] = np.minimum(self.max_ps_score, data[self.propensity_score_column])
+        data[self.propensity_score_column] = np.maximum(self.min_ps_score, data[self.propensity_score_column])
 
         # ips ==> (isTreated(y)/ps(y)) + ((1-isTreated(y))/(1-ps(y)))
         # nips ==> ips / (sum of ips over all units)
         # icps ==> ps(y)/(1-ps(y)) / (sum of (ps(y)/(1-ps(y))) over all control units)
         # itps ==> ps(y)/(1-ps(y)) / (sum of (ps(y)/(1-ps(y))) over all treatment units)
-        ipst_sum = sum(self._data[self._treatment_name[0]] / self._data[self.propensity_score_column])
-        ipsc_sum = sum((1 - self._data[self._treatment_name[0]]) / (1 - self._data[self.propensity_score_column]))
-        num_units = len(self._data[self._treatment_name[0]])
-        num_treatment_units = sum(self._data[self._treatment_name[0]])
+        ipst_sum = sum(data[self._treatment_name[0]] / data[self.propensity_score_column])
+        ipsc_sum = sum((1 - data[self._treatment_name[0]]) / (1 - data[self.propensity_score_column]))
+        num_units = len(data[self._treatment_name[0]])
+        num_treatment_units = sum(data[self._treatment_name[0]])
         num_control_units = num_units - num_treatment_units
 
         # Vanilla IPS estimator
-        self._data["ips_weight"] = self._data[self._treatment_name[0]] / self._data[self.propensity_score_column] + (
-            1 - self._data[self._treatment_name[0]]
-        ) / (1 - self._data[self.propensity_score_column])
-        self._data["tips_weight"] = self._data[self._treatment_name[0]] + (
-            1 - self._data[self._treatment_name[0]]
-        ) * self._data[self.propensity_score_column] / (1 - self._data[self.propensity_score_column])
-        self._data["cips_weight"] = self._data[self._treatment_name[0]] * (
-            1 - self._data[self.propensity_score_column]
-        ) / self._data[self.propensity_score_column] + (1 - self._data[self._treatment_name[0]])
+        data["ips_weight"] = data[self._treatment_name[0]] / data[self.propensity_score_column] + (
+            1 - data[self._treatment_name[0]]
+        ) / (1 - data[self.propensity_score_column])
+        data["tips_weight"] = data[self._treatment_name[0]] + (1 - data[self._treatment_name[0]]) * data[
+            self.propensity_score_column
+        ] / (1 - data[self.propensity_score_column])
+        data["cips_weight"] = data[self._treatment_name[0]] * (1 - data[self.propensity_score_column]) / data[
+            self.propensity_score_column
+        ] + (1 - data[self._treatment_name[0]])
 
         # The Hajek estimator (or the self-normalized estimator)
-        self._data["ips_normalized_weight"] = (
-            self._data[self._treatment_name[0]] / self._data[self.propensity_score_column] / ipst_sum
-            + (1 - self._data[self._treatment_name[0]]) / (1 - self._data[self.propensity_score_column]) / ipsc_sum
+        data["ips_normalized_weight"] = (
+            data[self._treatment_name[0]] / data[self.propensity_score_column] / ipst_sum
+            + (1 - data[self._treatment_name[0]]) / (1 - data[self.propensity_score_column]) / ipsc_sum
         )
-        ipst_for_att_sum = sum(self._data[self._treatment_name[0]])
+        ipst_for_att_sum = sum(data[self._treatment_name[0]])
         ipsc_for_att_sum = sum(
-            (1 - self._data[self._treatment_name[0]])
-            / (1 - self._data[self.propensity_score_column])
-            * self._data[self.propensity_score_column]
+            (1 - data[self._treatment_name[0]])
+            / (1 - data[self.propensity_score_column])
+            * data[self.propensity_score_column]
         )
-        self._data["tips_normalized_weight"] = (
-            self._data[self._treatment_name[0]] / ipst_for_att_sum
-            + (1 - self._data[self._treatment_name[0]])
-            * self._data[self.propensity_score_column]
-            / (1 - self._data[self.propensity_score_column])
+        data["tips_normalized_weight"] = (
+            data[self._treatment_name[0]] / ipst_for_att_sum
+            + (1 - data[self._treatment_name[0]])
+            * data[self.propensity_score_column]
+            / (1 - data[self.propensity_score_column])
             / ipsc_for_att_sum
         )
         ipst_for_atc_sum = sum(
-            self._data[self._treatment_name[0]]
-            / self._data[self.propensity_score_column]
-            * (1 - self._data[self.propensity_score_column])
+            data[self._treatment_name[0]]
+            / data[self.propensity_score_column]
+            * (1 - data[self.propensity_score_column])
         )
-        ipsc_for_atc_sum = sum((1 - self._data[self._treatment_name[0]]))
-        self._data["cips_normalized_weight"] = (
-            self._data[self._treatment_name[0]]
-            * (1 - self._data[self.propensity_score_column])
-            / self._data[self.propensity_score_column]
+        ipsc_for_atc_sum = sum((1 - data[self._treatment_name[0]]))
+        data["cips_normalized_weight"] = (
+            data[self._treatment_name[0]]
+            * (1 - data[self.propensity_score_column])
+            / data[self.propensity_score_column]
             / ipst_for_atc_sum
-            + (1 - self._data[self._treatment_name[0]]) / ipsc_for_atc_sum
+            + (1 - data[self._treatment_name[0]]) / ipsc_for_atc_sum
         )
 
         # Stabilized weights (from Robins, Hernan, Brumback (2000))
         # Paper: Marginal Structural Models and Causal Inference in Epidemiology
-        p_treatment = sum(self._data[self._treatment_name[0]]) / num_units
-        self._data["ips_stabilized_weight"] = self._data[self._treatment_name[0]] / self._data[
+        p_treatment = sum(data[self._treatment_name[0]]) / num_units
+        data["ips_stabilized_weight"] = data[self._treatment_name[0]] / data[
             self.propensity_score_column
-        ] * p_treatment + (1 - self._data[self._treatment_name[0]]) / (1 - self._data[self.propensity_score_column]) * (
+        ] * p_treatment + (1 - data[self._treatment_name[0]]) / (1 - data[self.propensity_score_column]) * (
             1 - p_treatment
         )
-        self._data["tips_stabilized_weight"] = self._data[self._treatment_name[0]] * p_treatment + (
-            1 - self._data[self._treatment_name[0]]
-        ) * self._data[self.propensity_score_column] / (1 - self._data[self.propensity_score_column]) * (
-            1 - p_treatment
-        )
-        self._data["cips_stabilized_weight"] = self._data[self._treatment_name[0]] * (
-            1 - self._data[self.propensity_score_column]
-        ) / self._data[self.propensity_score_column] * p_treatment + (1 - self._data[self._treatment_name[0]]) * (
-            1 - p_treatment
-        )
+        data["tips_stabilized_weight"] = data[self._treatment_name[0]] * p_treatment + (
+            1 - data[self._treatment_name[0]]
+        ) * data[self.propensity_score_column] / (1 - data[self.propensity_score_column]) * (1 - p_treatment)
+        data["cips_stabilized_weight"] = data[self._treatment_name[0]] * (
+            1 - data[self.propensity_score_column]
+        ) / data[self.propensity_score_column] * p_treatment + (1 - data[self._treatment_name[0]]) * (1 - p_treatment)
 
-        if isinstance(self._target_units, pd.DataFrame) or self._target_units == "ate":
+        if isinstance(target_units, pd.DataFrame) or target_units == "ate":
             weighting_scheme_name = self.weighting_scheme
-        elif self._target_units == "att":
+        elif target_units == "att":
             weighting_scheme_name = "t" + self.weighting_scheme
-        elif self._target_units == "atc":
+        elif target_units == "atc":
             weighting_scheme_name = "c" + self.weighting_scheme
         else:
-            raise ValueError(f"Target units value {self._target_units} not supported")
+            raise ValueError(f"Target units value {target_units} not supported")
 
         # Calculating the effect
-        self._data["d_y"] = (
-            self._data[weighting_scheme_name] * self._data[self._treatment_name[0]] * self._data[self._outcome_name]
-        )
-        self._data["dbar_y"] = (
-            self._data[weighting_scheme_name]
-            * (1 - self._data[self._treatment_name[0]])
-            * self._data[self._outcome_name]
-        )
-        sum_dy_weights = np.sum(self._data[self._treatment_name[0]] * self._data[weighting_scheme_name])
-        sum_dbary_weights = np.sum((1 - self._data[self._treatment_name[0]]) * self._data[weighting_scheme_name])
+        data["d_y"] = data[weighting_scheme_name] * data[self._treatment_name[0]] * data[self._outcome_name]
+        data["dbar_y"] = data[weighting_scheme_name] * (1 - data[self._treatment_name[0]]) * data[self._outcome_name]
+        sum_dy_weights = np.sum(data[self._treatment_name[0]] * data[weighting_scheme_name])
+        sum_dbary_weights = np.sum((1 - data[self._treatment_name[0]]) * data[weighting_scheme_name])
         # Subtracting the weighted means
-        est = self._data["d_y"].sum() / sum_dy_weights - self._data["dbar_y"].sum() / sum_dbary_weights
+        est = data["d_y"].sum() / sum_dy_weights - data["dbar_y"].sum() / sum_dbary_weights
 
         # TODO - how can we add additional information into the returned estimate?
         estimate = CausalEstimate(
             estimate=est,
-            control_value=self._control_value,
-            treatment_value=self._treatment_value,
+            control_value=control_value,
+            treatment_value=treatment_value,
             target_estimand=self._target_estimand,
             realized_estimand_expr=self.symbolic_estimator,
-            propensity_scores=self._data[self.propensity_score_column],
+            propensity_scores=data[self.propensity_score_column],
         )
+
+        estimate.add_estimator(self)
         return estimate
 
     def construct_symbolic_estimator(self, estimand):

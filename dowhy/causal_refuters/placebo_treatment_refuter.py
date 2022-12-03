@@ -8,7 +8,9 @@ import pandas as pd
 from joblib import Parallel, delayed
 from tqdm.auto import tqdm
 
-from dowhy.causal_estimator import CausalEstimate, CausalEstimator
+from dowhy.causal_estimator import CausalEstimate
+from dowhy.causal_estimators.econml import Econml
+from dowhy.causal_estimators.instrumental_variable_estimator import InstrumentalVariableEstimator
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 from dowhy.causal_refuter import CausalRefutation, CausalRefuter, test_significance
 from dowhy.utils.api import parse_state
@@ -149,8 +151,19 @@ def _refute_once(
         new_data = pd.concat((new_data, new_instruments_df), axis=1)
     # Sanity check the data
     logger.debug(new_data[0:10])
-    new_estimator = CausalEstimator.get_estimator_object(new_data, target_estimand, estimate)
-    new_effect = new_estimator.estimate_effect()
+    new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
+    new_estimator.fit(
+        new_data,
+        target_estimand.treatment_variable,
+        target_estimand.outcome_variable,
+        estimate.estimator._effect_modifier_names,
+        **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+    )
+    new_effect = new_estimator.estimate_effect(
+        control_value=estimate.control_value,
+        treatment_value=estimate.treatment_value,
+        target_units=estimate.estimator._target_units,
+    )
     return new_effect.value
 
 
@@ -193,6 +206,12 @@ def refute_placebo_treatment(
                 "Only placebo_type=''permute'' is supported for creating placebo for instrumental variable estimation methods."
             )
 
+    # For IV methods, the estimating_instrument_names should also be
+    # changed. Create a copy to avoid modifying original object
+    if isinstance(estimate, InstrumentalVariableEstimator):
+        estimate = copy.deepcopy(estimate)
+        estimate.iv_instrument_name = ["placebo_" + s for s in parse_state(estimate.iv_instrument_name)]
+
     # We need to change the identified estimand
     # We make a copy as a safety measure, we don't want to change the
     # original DataFrame
@@ -203,13 +222,6 @@ def refute_placebo_treatment(
         identified_estimand.instrumental_variables = [
             "placebo_" + s for s in identified_estimand.instrumental_variables
         ]
-        # For IV methods, the estimating_instrument_names should also be
-        # changed. Create a copy to avoid modifying original object
-        if estimate.params["method_params"] is not None and "iv_instrument_name" in estimate.params["method_params"]:
-            estimate = copy.deepcopy(estimate)
-            estimate.params["method_params"]["iv_instrument_name"] = [
-                "placebo_" + s for s in parse_state(estimate.params["method_params"]["iv_instrument_name"])
-            ]
 
     logger.info("Refutation over {} simulated datasets of {} treatment".format(num_simulations, placebo_type))
 

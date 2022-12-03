@@ -394,7 +394,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
     @pytest.mark.parametrize(
         ["estimator_method", "effect_fraction_on_outcome", "benchmark_common_causes", "simulation_method"],
         [
-            ("backdoor.econml.dml.LinearDML", 2, ["W3"], "non-parametric-partial-R2"),
+            ("backdoor.econml.dml.dml.LinearDML", 2, ["W3"], "non-parametric-partial-R2"),
         ],
     )
     @patch("matplotlib.pyplot.figure")

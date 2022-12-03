@@ -10,7 +10,7 @@ on:
       - "pyproject.toml"
       - "poetry.lock"
   workflow_run:
-    workflows: [ "Build Docker image (docs)" ]
+    workflows: ["Build Docker image (docs)"]
     types:
       - completed
 
@@ -24,14 +24,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Python Dependencies  
+      - name: Install Python Dependencies
         run: poetry install -E plotting -E causalml -E econml -E pydot --with docs
 
       - run: git config --global --add safe.directory /__w/dowhy/dowhy
 
       - name: Build
         run: ./docs/generate_docs.sh
-          
+
       - name: Commit and push to gh-pages branch
         uses: peaceiris/actions-gh-pages@v3
         with:
