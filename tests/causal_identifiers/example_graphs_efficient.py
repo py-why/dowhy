@@ -198,7 +198,12 @@ TEST_EFFICIENT_BD_SOLUTIONS = {
         efficient_adjustment={"R", "T"},
         efficient_minimal_adjustment={"R", "T"},
         efficient_mincost_adjustment={"B", "Q"},
-        costs=[("B", {"cost": 1}), ("Q", {"cost": 1}), ("R", {"cost": 2}), ("T", {"cost": 2}),],
+        costs=[
+            ("B", {"cost": 1}),
+            ("Q", {"cost": 1}),
+            ("R", {"cost": 2}),
+            ("T", {"cost": 2}),
+        ],
     ),
     # A graph where optimal, optimal minimal and optimal min cost are different
     "alldiff_example_graph": dict(
@@ -232,7 +237,21 @@ TEST_EFFICIENT_BD_SOLUTIONS = {
                         edge[source "O" target "Y"]
                         ]
                         """,
-        observed_node_names=["X", "Y", "K", "O", "W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8", "W9",],
+        observed_node_names=[
+            "X",
+            "Y",
+            "K",
+            "O",
+            "W1",
+            "W2",
+            "W3",
+            "W4",
+            "W5",
+            "W6",
+            "W7",
+            "W8",
+            "W9",
+        ],
         conditional_node_names=[],
         efficient_adjustment={"O", "W7", "W8", "W9"},
         efficient_minimal_adjustment={"W7", "W8", "W9"},
@@ -306,7 +325,12 @@ TEST_EFFICIENT_BD_SOLUTIONS = {
             "tissue disorder",
             "neuromusc fatigue",
         },
-        efficient_minimal_adjustment={"team motivation", "previous injury", "tissue disorder", "neuromusc fatigue",},
+        efficient_minimal_adjustment={
+            "team motivation",
+            "previous injury",
+            "tissue disorder",
+            "neuromusc fatigue",
+        },
         efficient_mincost_adjustment={"team motivation", "previous injury", "fitness"},
         costs=None,
     ),
