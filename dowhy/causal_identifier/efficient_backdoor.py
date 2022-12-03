@@ -117,9 +117,9 @@ class EfficientBackdoor:
         forbidden = set()
 
         for node in self.causal_vertices():
-            forbidden = forbidden.union(nx.descendants(self.graph._graph, node).union(node))
+            forbidden = forbidden.union(nx.descendants(self.graph._graph, node).union({node}))
 
-        return forbidden.union(self.graph.treatment_name[0])
+        return forbidden.union({self.graph.treatment_name[0]})
 
     def ignore(self):
         """Method to compute the set of ignorable vertices with respect to

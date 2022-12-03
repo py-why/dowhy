@@ -198,12 +198,7 @@ TEST_EFFICIENT_BD_SOLUTIONS = {
         efficient_adjustment={"R", "T"},
         efficient_minimal_adjustment={"R", "T"},
         efficient_mincost_adjustment={"B", "Q"},
-        costs=[
-            ("B", {"cost": 1}),
-            ("Q", {"cost": 1}),
-            ("R", {"cost": 2}),
-            ("T", {"cost": 2}),
-        ],
+        costs=[("B", {"cost": 1}), ("Q", {"cost": 1}), ("R", {"cost": 2}), ("T", {"cost": 2}),],
     ),
     # A graph where optimal, optimal minimal and optimal min cost are different
     "alldiff_example_graph": dict(
@@ -237,21 +232,7 @@ TEST_EFFICIENT_BD_SOLUTIONS = {
                         edge[source "O" target "Y"]
                         ]
                         """,
-        observed_node_names=[
-            "X",
-            "Y",
-            "K",
-            "O",
-            "W1",
-            "W2",
-            "W3",
-            "W4",
-            "W5",
-            "W6",
-            "W7",
-            "W8",
-            "W9",
-        ],
+        observed_node_names=["X", "Y", "K", "O", "W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8", "W9",],
         conditional_node_names=[],
         efficient_adjustment={"O", "W7", "W8", "W9"},
         efficient_minimal_adjustment={"W7", "W8", "W9"},
@@ -325,13 +306,70 @@ TEST_EFFICIENT_BD_SOLUTIONS = {
             "tissue disorder",
             "neuromusc fatigue",
         },
-        efficient_minimal_adjustment={
-            "team motivation",
-            "previous injury",
-            "tissue disorder",
-            "neuromusc fatigue",
-        },
+        efficient_minimal_adjustment={"team motivation", "previous injury", "tissue disorder", "neuromusc fatigue",},
         efficient_mincost_adjustment={"team motivation", "previous injury", "fitness"},
+        costs=None,
+    ),
+    # A graph for which the algorithm was producing wrong result due to a bug reported by Sara Taheri
+    "taheri_graph1": dict(
+        graph_str="""graph[directed 1 node[id "Z1" label "Z1"]
+                        node[id "Z2" label "Z2"]
+                        node[id "Z3" label "Z3"]
+                        node[id "M1" label "M1"]
+                        node[id "M2" label "M2"]                       
+                        node[id "X" label "X"]
+                        node[id "Y" label "Y"]
+                        edge[source "Z1" target "Z2"]
+                        edge[source "Z2" target "Z3"]
+                        edge[source "Z3" target "Y"]
+                        edge[source "Z1" target "X"]
+                        edge[source "X" target "M1"]
+                        edge[source "M1" target "M2"]
+                        edge[source "M2" target "Y"]
+                        ]
+""",
+        observed_node_names=["Z1", "Z2", "Z3", "X", "Y", "M1", "M2"],
+        conditional_node_names=[],
+        efficient_adjustment={"Z3"},
+        efficient_minimal_adjustment={"Z3"},
+        efficient_mincost_adjustment={"Z3"},
+        costs=None,
+    ),
+    # Another graph for which the algorithm was producing wrong result due to a bug reported by Sara Taheri
+    "taheri_graph2": dict(
+        graph_str="""graph[directed 1 node[id "Z1" label "Z1"]
+                        node[id "Z2" label "Z2"]
+                        node[id "Z3" label "Z3"]
+                        node[id "Z4" label "Z4"]
+                        node[id "Z5" label "Z5"]
+                        node[id "M1" label "M1"]
+                        node[id "M2" label "M2"]                       
+                        node[id "M3" label "M3"]                       
+                        node[id "X" label "X"]
+                        node[id "Y" label "Y"]
+                        node[id "U1" label "U1"]
+                        node[id "U2" label "U2"]
+                        edge[source "Z1" target "Z2"]
+                        edge[source "Z2" target "Z3"]
+                        edge[source "Z3" target "Z4"]
+                        edge[source "Z4" target "Z5"]
+                        edge[source "Z5" target "Y"]
+                        edge[source "Z1" target "X"]
+                        edge[source "X" target "M1"]
+                        edge[source "M1" target "M2"]
+                        edge[source "M2" target "M3"]
+                        edge[source "M3" target "Y"]
+                        edge[source "U1" target "X"]
+                        edge[source "U1" target "Z1"]
+                        edge[source "U2" target "Z2"]
+                        edge[source "U2" target "M1"]
+                        ]
+""",
+        observed_node_names=["Z1", "Z2", "Z3", "Z4", "Z5", "X", "Y", "M1", "M2", "M3"],
+        conditional_node_names=[],
+        efficient_adjustment={"Z1", "Z2", "Z5"},
+        efficient_minimal_adjustment={"Z1"},
+        efficient_mincost_adjustment={"Z1"},
         costs=None,
     ),
 }
