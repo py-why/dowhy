@@ -6,8 +6,8 @@ DoWhy is hosted on GitHub.
 You can browse the code in a html-friendly format `here
 <https://github.com/Microsoft/dowhy>`_.
 
-v0.9: New functional API (preview)
-----------
+v0.9: New functional API (preview), faster refutations, and better independence tests for GCMs
+----------------------------------------------------------------------------------------------
 December 5 2022
 
 * Preview for the new functional API (see `notebook <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy_functional_api.ipynb>`_). The new API (in experimental stage) allows for a modular use of the different functionalities and includes separate fit and estimate methods for causal estimators. Please leave your feedback here. The old DoWhy API based on CausalModel should work as before.  (@andresmor-ms)
