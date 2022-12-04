@@ -93,11 +93,11 @@ def linear_dataset(
     one_hot_encode=False,
 ):
     """
-    Generate a synthetic dataset with a known effect size. 
+    Generate a synthetic dataset with a known effect size.
 
     This function generates a pandas dataFrame with num_samples records. The variables follow a naming convention where the first letter indicates its role in the causality graph and then a sequence number.
 
-    :param beta: coefficient of the treatment(s) ('v?') in the generating equation of the outcome ('y'). 
+    :param beta: coefficient of the treatment(s) ('v?') in the generating equation of the outcome ('y').
     :type beta: int or list/ndarray of length num_treatments of type int
     :param num_common_causes: Number of variables affecting both the treatment and the outcome [w -> v; w -> y]
     :type num_common_causes: int
@@ -135,20 +135,20 @@ def linear_dataset(
     :returns: Dictionary with pandas dataFrame and few other metadata variables.
                         "df": pd.dataFrame
                         with num_samples records. The variables follow a naming convention were the first letter indicates its role in the causality graph and then a sequence number.
-            
+
                     v variables - are the treatments. They can be binary or continuous. In the case of continuous abs(*beta*) defines thier magnitude;
-                    
+
                     y - is the outcome variable. The generating equation is,
                      y = normal(0, stddev_outcome_noise) + t @ beta [where @ is a numpy matrix multiplication allowing for beta be a vector]
-                    
+
                     W variables - commonly cause both the treatment and the outcome and are iid. if continuous, they are Norm(mu = Unif(-1,1), sigma = 1)
-                    
+
                     Z variables - Instrument variables. Each one affects all treatments. i.e. if there is one instrument and two treatments then z0->v0, z0->v1
-                    
+
                     X variables - effect modifiers. If continuous, they are Norm(mu = Unif(-1,1), sigma = 1)
-                    
+
                     FD variables - Front door variables, v0->FD0->y
-                    
+
             "treatment_name": str/list(str)
             "outcome_name": str
             "common_causes_names": str/list(str)
@@ -177,7 +177,7 @@ def linear_dataset(
 
             def describe_synthetic_data(synthetic_data):
                     if (synthetic_data['gml_graph'] != None) :
-                    plot_gml(synthetic_data["gml_graph"])                                               
+                    plot_gml(synthetic_data["gml_graph"])
                     synthetic_data_df=synthetic_data["df"]
                     print('------- Variables --------')
                     print('Treatment vars:'      , synthetic_data['treatment_name'])
@@ -205,7 +205,7 @@ def linear_dataset(
                     num_common_causes             = 0,
                     num_samples                   = 20,
                     num_instruments               = 1,
-                    num_effect_modifiers          = 2, 
+                    num_effect_modifiers          = 2,
                     num_treatments                = 2,
                     num_frontdoor_variables       = 0,
                     treatment_is_binary           = False,
@@ -227,7 +227,7 @@ def linear_dataset(
                     num_common_causes             =   2,
                     num_samples                   =  20,
                     num_instruments               =   1,
-                    num_effect_modifiers          =   1, 
+                    num_effect_modifiers          =   1,
                     num_treatments                =   1,
                     num_frontdoor_variables       =   1,
                     treatment_is_binary           = False,
