@@ -4364,7 +4364,80 @@ It creates a random graph and models the variables linearly according to the rel
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.datasets.linear_dataset">
 <span class="sig-prename descclassname"><span class="pre">dowhy.datasets.</span></span><span class="sig-name descname"><span class="pre">linear_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_common_causes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_instruments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_effect_modifiers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_treatments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_frontdoor_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_is_binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_is_category</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_is_binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stochastic_discretization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_discrete_common_causes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_discrete_instruments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_discrete_effect_modifiers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stddev_treatment_noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stddev_outcome_noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">one_hot_encode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/datasets.html#linear_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.datasets.linear_dataset" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Generate a synthetic dataset with a known effect size.</p>
+<p>This function generates a pandas dataFrame with num_samples records. The variables follow a naming convention where the first letter indicates its role in the causality graph and then a sequence number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>int</em><em> or </em><em>list/ndarray</em><em> of </em><em>length num_treatments</em><em> of </em><em>type int</em>) – coefficient of the treatment(s) (‘v?’) in the generating equation of the outcome (‘y’).</p></li>
+<li><p><strong>num_common_causes</strong> (<em>int</em>) – Number of variables affecting both the treatment and the outcome [w -&gt; v; w -&gt; y]</p></li>
+<li><p><strong>num_samples</strong> (<em>int</em>) – Number of records to generate</p></li>
+<li><p><strong>num_instruments</strong> (<em>int</em>) – Number of instrumental variables  [z -&gt; v], defaults to 0</p></li>
+<li><p><strong>num_effect_modifiers</strong> (<em>int</em>) – Number of effect modifiers, variables affecting only the outcome [x -&gt; y], defaults to 0</p></li>
+<li><p><strong>num_treatments</strong> – Number of treatment variables [v], defaults to 1</p></li>
+</ul>
+</dd>
+</dl>
+<p>:type num_treatments : int
+:param num_frontdoor_variables : Number of frontdoor mediating variables [v -&gt; FD -&gt; y], defaults to  0
+:type num_frontdoor_variables: int
+:param treatment_is_binary: Cannot be True if treatment_is_category is True, defaults to True
+:type treatment_is_binary: bool
+:param treatment_is_category: Cannot be True if treatment_is_binary is True, defaults to False
+:type treatment_is_category: bool
+:param outcome_is_binary: defaults to False,
+:type outcome_is_binary: bool
+:param stochastic_discretization: if False, quartiles are used when discretised variables are specified. They can be hot encoded, defaults True
+:type stochastic_discretization: bool
+:param num_discrete_common_causes: Number of discrete common causes of the total num_common_causes, defaults to 0
+:type num_discrete_common_causes: int
+:param num_discrete_instruments: Number of discrete instrumental variables of the total num_instruments, defaults to 0
+:type num_discrete_instruments  : int
+:param num_discrete_effect_modifiers : Number of discrete effect modifiers of the total effect_modifiers, defaults to 0
+:type num_discrete_effect_modifiers: int
+:param stddev_treatment_noise : defaults to 1
+:type stddev_treatment_noise : float
+:param stddev_outcome_noise: defaults to 0.01
+:type stddev_outcome_noise: float
+:param one_hot_encode: defaults to False
+:type one_hot_encode: bool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><dl>
+<dt>Dictionary with pandas dataFrame and few other metadata variables.</dt><dd><blockquote>
+<div><p>”df”: pd.dataFrame
+with num_samples records. The variables follow a naming convention were the first letter indicates its role in the causality graph and then a sequence number.</p>
+</div></blockquote>
+<p>v variables - are the treatments. They can be binary or continuous. In the case of continuous abs(<em>beta</em>) defines thier magnitude;</p>
+<dl class="simple">
+<dt>y - is the outcome variable. The generating equation is,</dt><dd><p>y = normal(0, stddev_outcome_noise) + t &#64; beta [where &#64; is a numpy matrix multiplication allowing for beta be a vector]</p>
+</dd>
+</dl>
+<p>W variables - commonly cause both the treatment and the outcome and are iid. if continuous, they are Norm(mu = Unif(-1,1), sigma = 1)</p>
+<p>Z variables - Instrument variables. Each one affects all treatments. i.e. if there is one instrument and two treatments then z0-&gt;v0, z0-&gt;v1</p>
+<p>X variables - effect modifiers. If continuous, they are Norm(mu = Unif(-1,1), sigma = 1)</p>
+<p>FD variables - Front door variables, v0-&gt;FD0-&gt;y</p>
+</dd>
+</dl>
+<p>”treatment_name”: str/list(str)
+“outcome_name”: str
+“common_causes_names”: str/list(str)
+“instrument_names”: str/list(str)
+“effect_modifier_names”: str/list(str)
+“frontdoor_variables_names”: str/list(str)
+“dot_graph”: dot_graph,
+“gml_graph”: gml_graph,
+“ate”: float, the true ate in the dataset</p>
+</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+<section id="id2">
+<h3>Examples<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+</section>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.datasets.partially_linear_dataset">
