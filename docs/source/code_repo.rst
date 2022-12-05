@@ -17,6 +17,10 @@ December 5 2022
     * Non-linear sensitivity analysis [`Chernozhukov, Cinelli, Newey, Sharma & Syrgkanis (2021) <https://arxiv.org/abs/2112.13398>`_, `example notebook <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/sensitivity_analysis_nonparametric_estimators.ipynb>`_] (@anusha0409)
     * E-value sensitivity analysis [`Ding & Vanderweele (2016) <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4820664/>`, `example notebook <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/sensitivity_analysis_testing.ipynb>`_] (@jlgleason)
 
+* New API for unit change attribution (@kailashbuki)
+
+* New quality option `BEST` for auto-assignment of causal mechanisms, which uses the optional auto-ML library AutoGluon (@bloebp)
+
 * Better conditional independence tests through the causal-learn package (@bloebp)
 
 * Algorithms for computing efficient backdoor sets [`example notebook <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy_efficient_backdoor_example.ipynb>`_] (@esmucler)
@@ -25,7 +29,7 @@ December 5 2022
 
 * Support for multi-valued treatments for econml estimators (@EgorKraevTransferwise)
 
-* Revamped docs to provide a task-based view of dowhy's functionalities. Also, you can now browse docs separately for different versions of DoWhy (@petergtz)
+* New PyData theme for documentation with new homepage, Getting started guide, revised User Guide and examples page (@petergtz)
 
 * A `contributing guide <https://github.com/py-why/dowhy/blob/main/docs/source/contributing/contributing-code.rst>`_ and simplified instructions for new contributors. 
 
