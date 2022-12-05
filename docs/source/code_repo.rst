@@ -31,7 +31,7 @@ December 5 2022
 
 * New PyData theme for documentation with new homepage, Getting started guide, revised User Guide and examples page (@petergtz)
 
-* A `contributing guide <https://github.com/py-why/dowhy/blob/main/docs/source/contributing/contributing-code.rst>`_ and simplified instructions for new contributors. 
+* A `contributing guide <https://github.com/py-why/dowhy/blob/main/docs/source/contributing/contributing-code.rst>`_ and simplified instructions for new contributors (@MichaelMarien) 
 
 * Streamlined dev environment using Poetry for managing dependencies and project builds (@darthtrevino)
 
