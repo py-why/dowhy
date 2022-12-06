@@ -1,0 +1,1429 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Finding the Root Cause of Elevated Latencies in a Microservice Architecture &#8212; DoWhy  documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Impact of 401(k) eligibility on net financial assets" href="gcm_401k_analysis.html" />
+    <link rel="prev" title="Estimating the Effect of a Member Rewards Program" href="dowhy_example_effect_of_memberrewards_program.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="Logo image">
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../user_guide/index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="nb_index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../dowhy.html">
+  API reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../contributing.html">
+  Contributing
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../code_repo.html">
+  Release notes
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+      <div class="navbar-end-item">
+        <div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.9
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Introductory examples
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_simple_example.html">
+   Basic Example for Calculating the Causal Effect
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_basic_example.html">
+   Basic Example for Graphical Causal Model-Based Intervention
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_confounder_example.html">
+   Confounding Example: Finding causal effects from observed data
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_estimation_methods.html">
+   DoWhy: Different estimation methods for causal inference
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_interpreter.html">
+   DoWhy: Interpreters for Causal Estimators
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy-conditional-treatment-effects.html">
+   Conditional Average Treatment Effects (CATE) with DoWhy and EconML
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_mediation_analysis.html">
+   Mediation analysis with DoWhy: Direct and Indirect Effects
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refuter_notebook.html">
+   Iterating over multiple refutation tests
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_api.html">
+   Demo for the DoWhy causal API
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="do_sampler_demo.html">
+   Do-sampler Introduction
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Real world-inspired examples
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">
+   Exploring Causes of Hotel Booking Cancellations
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_example_effect_of_memberrewards_program.html">
+   Estimating the Effect of a Member Rewards Program
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Finding the Root Cause of Elevated Latencies in a Microservice Architecture
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_401k_analysis.html">
+   Impact of 401(k) eligibility on net financial assets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_supply_chain_dist_change.html">
+   Finding Root Causes of Changes in a Supply Chain
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_counterfactual_medical_dry_eyes.html">
+   Counterfactual Analysis in a Medical Case
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Examples on benchmarks datasets
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_ihdp_data_example.html">
+   DoWhy example on ihdp (Infant Health and Development Program) dataset
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_lalonde_example.html">
+   DoWhy example on the Lalonde dataset
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refutation_testing.html">
+   Applying refutation tests to the Lalonde and IHDP datasets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_401k_analysis.html">
+   Impact of 401(k) eligibility on net financial assets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="lalonde_pandas_api.html">
+   Lalonde Pandas API Example
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Miscellaneous
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="load_graph_example.html">
+   Different ways to load an input graph
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_draw_samples.html">
+   Basic Example for generating samples from a GCM
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy-simple-iv-example.html">
+   Simple example on using Instrumental Variables method for estimation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="graph_conditional_independence_refuter.html">
+   Testing Assumptions in model with DoWhy: A simple example
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">
+   A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_multiple_treatments.html">
+   Estimating effect of multiple treatments
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="identifying_effects_using_id_algorithm.html">
+   Identifying Effect using ID Algorithm
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Setting-up-the-causal-graph">
+   Setting up the causal graph
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Scenario-1:-Observing-a-single-outlier">
+   Scenario 1: Observing a single outlier
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Attributing-an-outlier-latency-at-a-target-service-to-other-services">
+     Attributing an outlier latency at a target service to other services
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Scenario-2:-Observing-permanent-degradation-of-latencies">
+   Scenario 2: Observing permanent degradation of latencies
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Attributing-permanent-degradation-of-latencies-at-a-target-service-to-other-services">
+     Attributing permanent degradation of latencies at a target service to other services
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Scenario-3:-Simulating-the-intervention-of-shifting-resources">
+   Scenario 3: Simulating the intervention of shifting resources
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Appendix:-Data-generation-process">
+   Appendix: Data generation process
+  </a>
+ </li>
+</ul>
+
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars and line breaks on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+    white-space: pre;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.jp-RenderedHTMLCommon thead,
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+.jp-RenderedHTMLCommon th,
+div.rendered_html th {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+.jp-RenderedHTMLCommon tbody tr:hover,
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<section id="Finding-the-Root-Cause-of-Elevated-Latencies-in-a-Microservice-Architecture">
+<h1>Finding the Root Cause of Elevated Latencies in a Microservice Architecture<a class="headerlink" href="#Finding-the-Root-Cause-of-Elevated-Latencies-in-a-Microservice-Architecture" title="Permalink to this heading"></a></h1>
+<p>In this case study, we identify the root causes of “unexpected” observed latencies in cloud services that empower an online shop. We focus on the process of placing an order, which involves different services to make sure that the placed order is valid, the customer is authenticated, the shipping costs are calculated correctly, and the shipping process is initiated accordingly. The dependencies of the services is shown in the graph below.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from IPython.display import Image
+Image(&#39;microservice-architecture-dependencies.png&#39;, width=500)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_rca_microservice_architecture_1_0.png" class="no-scaled-link" src="../_images/example_notebooks_gcm_rca_microservice_architecture_1_0.png" style="width: 500px;" />
+</div>
+</div>
+<p>This kind of dependency graph could be obtained from services like <a class="reference external" href="https://aws.amazon.com/xray/">Amazon X-Ray</a> or defined manually based on the trace structure of requests.</p>
+<p>We assume that the dependency graph above is correct and that we are able to measure the latency (in seconds) of each node for an order request. In case of <code class="docutils literal notranslate"><span class="pre">Website</span></code>, the latency would represent the time until a confirmation of the order is shown. For simplicity, let us assume that the services are synchronized, i.e., a service has to wait for downstream services in order to proceed. Further, we assume that two nodes are not impacted by unobserved factors (hidden confounders) at the same time
+(i.e., causal sufficiency). Seeing that, for instance, network traffic affects multiple services, this assumption might be typically violated in a real-world scenario. However, weak confounders can be neglected, while stronger ones (like network traffic) could falsely render multiple nodes as root causes. Generally, we can only identify causes that are part of the data.</p>
+<p>Under these assumptions, the observed latency of a node is defined by the latency of the node itself (intrinsic latency), and the sum over all latencies of direct child nodes. This could also include calling a child node multiple times.</p>
+<p>Let us load data with observed latencies of each node.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import pandas as pd
+
+normal_data = pd.read_csv(&quot;rca_microservice_architecture_latencies.csv&quot;)
+normal_data.head()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Product DB</th>
+      <th>Customer DB</th>
+      <th>Order DB</th>
+      <th>Shipping Cost Service</th>
+      <th>Caching Service</th>
+      <th>Product Service</th>
+      <th>Auth Service</th>
+      <th>Order Service</th>
+      <th>API</th>
+      <th>www</th>
+      <th>Website</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.553608</td>
+      <td>0.057729</td>
+      <td>0.153977</td>
+      <td>0.120217</td>
+      <td>0.122195</td>
+      <td>0.391738</td>
+      <td>0.399664</td>
+      <td>0.710525</td>
+      <td>2.103962</td>
+      <td>2.580403</td>
+      <td>2.971071</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.053393</td>
+      <td>0.239560</td>
+      <td>0.297794</td>
+      <td>0.142854</td>
+      <td>0.275471</td>
+      <td>0.545372</td>
+      <td>0.646370</td>
+      <td>0.991620</td>
+      <td>2.932192</td>
+      <td>3.804571</td>
+      <td>3.895535</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.023860</td>
+      <td>0.300044</td>
+      <td>0.042169</td>
+      <td>0.125017</td>
+      <td>0.152685</td>
+      <td>0.574918</td>
+      <td>0.672228</td>
+      <td>0.964807</td>
+      <td>3.106218</td>
+      <td>4.076227</td>
+      <td>4.441924</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.118598</td>
+      <td>0.478097</td>
+      <td>0.042383</td>
+      <td>0.143969</td>
+      <td>0.222720</td>
+      <td>0.618129</td>
+      <td>0.638179</td>
+      <td>0.938366</td>
+      <td>3.217643</td>
+      <td>4.043560</td>
+      <td>4.334924</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.524901</td>
+      <td>0.078031</td>
+      <td>0.031694</td>
+      <td>0.231884</td>
+      <td>0.647452</td>
+      <td>1.081753</td>
+      <td>0.388506</td>
+      <td>0.711937</td>
+      <td>2.793605</td>
+      <td>3.215307</td>
+      <td>3.255062</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Let us also take a look at the pair-wise scatter plots and histograms of the variables.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>axes = pd.plotting.scatter_matrix(normal_data, figsize=(10, 10), c=&#39;#ff0d57&#39;, alpha=0.2, hist_kwds={&#39;color&#39;:[&#39;#1E88E5&#39;]});
+for ax in axes.flatten():
+    ax.xaxis.label.set_rotation(90)
+    ax.yaxis.label.set_rotation(0)
+    ax.yaxis.label.set_ha(&#39;right&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_rca_microservice_architecture_5_0.png" src="../_images/example_notebooks_gcm_rca_microservice_architecture_5_0.png" />
+</div>
+</div>
+<p>In the matrix above, the plots on the diagonal line are histograms of variables, whereas those outside of the diagonal are scatter plots of pair of variables. The histograms of services without a dependency, namely <code class="docutils literal notranslate"><span class="pre">Customer</span> <span class="pre">DB</span></code>, <code class="docutils literal notranslate"><span class="pre">Product</span> <span class="pre">DB</span></code>, <code class="docutils literal notranslate"><span class="pre">Order</span> <span class="pre">DB</span></code> and <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Cost</span> <span class="pre">Service</span></code>, have shapes similar to one half of a Gaussian distribution. The scatter plots of various pairs of variables (e.g., <code class="docutils literal notranslate"><span class="pre">API</span></code> and <code class="docutils literal notranslate"><span class="pre">www</span></code>, <code class="docutils literal notranslate"><span class="pre">www</span></code> and <code class="docutils literal notranslate"><span class="pre">Website</span></code>, <code class="docutils literal notranslate"><span class="pre">Order</span> <span class="pre">Service</span></code> and <code class="docutils literal notranslate"><span class="pre">Order</span> <span class="pre">DB</span></code>) show linear
+relations. We shall use this information shortly to assign generative causal models to nodes in the causal graph.</p>
+<section id="Setting-up-the-causal-graph">
+<h2>Setting up the causal graph<a class="headerlink" href="#Setting-up-the-causal-graph" title="Permalink to this heading"></a></h2>
+<p>If we look at the <code class="docutils literal notranslate"><span class="pre">Website</span></code> node, it becomes apparent that the latency we experience there depends on the latencies of all downstream nodes. In particular, if one of the downstream nodes takes a long time, <code class="docutils literal notranslate"><span class="pre">Website</span></code> will also take a long time to show an update. Seeing this, the causal graph of the latencies can be built by inverting the arrows of the service graph.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import networkx as nx
+from dowhy import gcm
+
+causal_graph = nx.DiGraph([(&#39;www&#39;, &#39;Website&#39;),
+                           (&#39;Auth Service&#39;, &#39;www&#39;),
+                           (&#39;API&#39;, &#39;www&#39;),
+                           (&#39;Customer DB&#39;, &#39;Auth Service&#39;),
+                           (&#39;Customer DB&#39;, &#39;API&#39;),
+                           (&#39;Product Service&#39;, &#39;API&#39;),
+                           (&#39;Auth Service&#39;, &#39;API&#39;),
+                           (&#39;Order Service&#39;, &#39;API&#39;),
+                           (&#39;Shipping Cost Service&#39;, &#39;Product Service&#39;),
+                           (&#39;Caching Service&#39;, &#39;Product Service&#39;),
+                           (&#39;Product DB&#39;, &#39;Caching Service&#39;),
+                           (&#39;Customer DB&#39;, &#39;Product Service&#39;),
+                           (&#39;Order DB&#39;, &#39;Order Service&#39;)])
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>gcm.util.plot(causal_graph, figure_size=[13, 13])
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_rca_microservice_architecture_9_0.png" src="../_images/example_notebooks_gcm_rca_microservice_architecture_9_0.png" />
+</div>
+</div>
+<div class="alert alert-block alert-info"><p>Here, we are interested in the causal relationships between latencies of services rather than the order of calling the services.</p>
+</div><p>We will use the information from the pair-wise scatter plots and histograms to manually assign causal models. In particular, we assign half-Normal distributions to the root nodes (i.e., <code class="docutils literal notranslate"><span class="pre">Customer</span> <span class="pre">DB</span></code>, <code class="docutils literal notranslate"><span class="pre">Product</span> <span class="pre">DB</span></code>, <code class="docutils literal notranslate"><span class="pre">Order</span> <span class="pre">DB</span></code> and <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Cost</span> <span class="pre">Service</span></code>). For non-root nodes, we assign linear additive noise models (which scatter plots of many parent-child pairs indicate) with empirical distribution of noise terms.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from scipy.stats import halfnorm
+
+causal_model = gcm.StructuralCausalModel(causal_graph)
+
+for node in causal_graph.nodes:
+    if len(list(causal_graph.predecessors(node))) &gt; 0:
+        causal_model.set_causal_mechanism(node, gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
+    else:
+        causal_model.set_causal_mechanism(node, gcm.ScipyDistribution(halfnorm))
+</pre></div>
+</div>
+</div>
+<div class="alert alert-block alert-info"><p>Alternatively, we can also automate this <strong>if</strong> we don’t have prior knowledge or are not familiar with the statistical implications:</p>
+<blockquote>
+<div><p>gcm.auto.assign_causal_mechanisms(causal_model, normal_data)</p>
+</div></blockquote>
+</div></section>
+<section id="Scenario-1:-Observing-a-single-outlier">
+<h2>Scenario 1: Observing a single outlier<a class="headerlink" href="#Scenario-1:-Observing-a-single-outlier" title="Permalink to this heading"></a></h2>
+<p>Suppose we get an alert from our system where a customer experienced an unusually high latency when an order is placed. Our task is now to investigate this issue and to find the root cause of this behaviour.</p>
+<p>We first load the latency to the corresponding alert.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>outlier_data = pd.read_csv(&quot;rca_microservice_architecture_anomaly.csv&quot;)
+outlier_data
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Product DB</th>
+      <th>Customer DB</th>
+      <th>Order DB</th>
+      <th>Shipping Cost Service</th>
+      <th>Caching Service</th>
+      <th>Product Service</th>
+      <th>Auth Service</th>
+      <th>Order Service</th>
+      <th>API</th>
+      <th>www</th>
+      <th>Website</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.493145</td>
+      <td>0.180896</td>
+      <td>0.192593</td>
+      <td>0.197001</td>
+      <td>2.130865</td>
+      <td>2.48584</td>
+      <td>0.533847</td>
+      <td>1.132151</td>
+      <td>4.85583</td>
+      <td>5.522179</td>
+      <td>5.572588</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>We are interested in the increased latency of <code class="docutils literal notranslate"><span class="pre">Website</span></code> which the customer directly experienced.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>outlier_data.iloc[0][&#39;Website&#39;]-normal_data[&#39;Website&#39;].mean()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle 2.00895545064217$</div></div>
+</div>
+<p>For this customer, <code class="docutils literal notranslate"><span class="pre">Website</span></code> was roughly 2 seconds slower than for other customers on average. Why?</p>
+<section id="Attributing-an-outlier-latency-at-a-target-service-to-other-services">
+<h3>Attributing an outlier latency at a target service to other services<a class="headerlink" href="#Attributing-an-outlier-latency-at-a-target-service-to-other-services" title="Permalink to this heading"></a></h3>
+<p>To answer why <code class="docutils literal notranslate"><span class="pre">Website</span></code> was slower for this customer, we attribute the outlier latency at <code class="docutils literal notranslate"><span class="pre">Website</span></code> to upstream services in the causal graph. We refer the reader to <a class="reference external" href="https://arxiv.org/abs/1912.02724">Janzing et al., 2019</a> for scientific details behind this API. We will calculate a 95% bootstrapped confidence interval of our attributions. In particular, we learn the causal models from a random subset of normal data and attribute the target outlier score using those models, repeating the
+process 10 times. This way, the confidence intervals we report account for (a) the uncertainty of our causal models as well as (b) the uncertainty in the attributions due to the variance in the samples drawn from those causal models.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>gcm.config.disable_progress_bars() # to disable print statements when computing Shapley values
+
+median_attribs, uncertainty_attribs = gcm.confidence_intervals(
+    gcm.fit_and_compute(gcm.attribute_anomalies,
+                        causal_model,
+                        normal_data,
+                        target_node=&#39;Website&#39;,
+                        anomaly_samples=outlier_data),
+    num_bootstrap_resamples=10)
+</pre></div>
+</div>
+</div>
+<div class="alert alert-block alert-info"><p>By default, a quantile-based anomaly score is used that estimates the negative log-probability of a sample being normal. This is, the higher the probabilty of an outlier, the larger the score. The library offers different kinds of outlier scoring functions, such as the z-score, where the mean is the expected value based on the causal model.</p>
+</div><p>Let us visualize the attributions along with their uncertainty in a bar plot.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>gcm.util.bar_plot(median_attribs, uncertainty_attribs, &#39;Attribution Score&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_rca_microservice_architecture_22_0.png" src="../_images/example_notebooks_gcm_rca_microservice_architecture_22_0.png" />
+</div>
+</div>
+<p>The attributions indicate that <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> is the main driver of high latency in <code class="docutils literal notranslate"><span class="pre">Website</span></code> which is expected as we perturb the causal mechanism of <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> to generate an outlier latency in <code class="docutils literal notranslate"><span class="pre">Website</span></code> (see Appendix below). Attributions to <code class="docutils literal notranslate"><span class="pre">Customer</span> <span class="pre">DB</span></code> and <code class="docutils literal notranslate"><span class="pre">Product</span> <span class="pre">Service</span></code> can be explained by misspecification of causal models. First, some of the parent-child relationships in the causal graph are non-linear (by looking at the scatter matrix). Second, the parent
+child-relationship between <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> and <code class="docutils literal notranslate"><span class="pre">Product</span> <span class="pre">DB</span></code> seems to indicate two mechanisms. This could be due to an unobserved binary variable (e.g., Cache hit/miss) that has a multiplicative effect on <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code>. An additive noise cannot capture the multiplicative effect of this unobserved variable.</p>
+</section>
+</section>
+<section id="Scenario-2:-Observing-permanent-degradation-of-latencies">
+<h2>Scenario 2: Observing permanent degradation of latencies<a class="headerlink" href="#Scenario-2:-Observing-permanent-degradation-of-latencies" title="Permalink to this heading"></a></h2>
+<p>In the previous scenario, we attributed a <em>single</em> outlier latency in <code class="docutils literal notranslate"><span class="pre">Website</span></code> to services that are nodes in the causal graph, which is useful for anecdotal deep dives. Next, we consider a scenario where we observe a permanent degradation of latencies and we want to understand its drivers. In particular, we attribute the change in the average latency of <code class="docutils literal notranslate"><span class="pre">Website</span></code> to upstream nodes.</p>
+<p>Suppose we get additional 1000 requests with higher latencies as follows.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>outlier_data = pd.read_csv(&quot;rca_microservice_architecture_anomaly_1000.csv&quot;)
+outlier_data.head()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Product DB</th>
+      <th>Customer DB</th>
+      <th>Order DB</th>
+      <th>Shipping Cost Service</th>
+      <th>Caching Service</th>
+      <th>Product Service</th>
+      <th>Auth Service</th>
+      <th>Order Service</th>
+      <th>API</th>
+      <th>www</th>
+      <th>Website</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.140874</td>
+      <td>0.270117</td>
+      <td>0.021619</td>
+      <td>0.159421</td>
+      <td>2.201327</td>
+      <td>2.453859</td>
+      <td>0.958687</td>
+      <td>0.572128</td>
+      <td>4.921074</td>
+      <td>5.891927</td>
+      <td>5.937950</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.160903</td>
+      <td>0.008235</td>
+      <td>0.182182</td>
+      <td>0.114568</td>
+      <td>2.105901</td>
+      <td>2.259432</td>
+      <td>0.325054</td>
+      <td>0.683030</td>
+      <td>4.009969</td>
+      <td>4.373290</td>
+      <td>4.418746</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.013300</td>
+      <td>0.127177</td>
+      <td>0.591904</td>
+      <td>0.112362</td>
+      <td>2.160395</td>
+      <td>2.278189</td>
+      <td>0.645109</td>
+      <td>1.097460</td>
+      <td>4.915487</td>
+      <td>5.578015</td>
+      <td>5.708616</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1.317167</td>
+      <td>0.145850</td>
+      <td>0.094301</td>
+      <td>0.401206</td>
+      <td>3.505417</td>
+      <td>3.622197</td>
+      <td>0.502680</td>
+      <td>0.880008</td>
+      <td>5.652773</td>
+      <td>6.265665</td>
+      <td>6.356730</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.699519</td>
+      <td>0.425039</td>
+      <td>0.233269</td>
+      <td>0.572897</td>
+      <td>2.931482</td>
+      <td>3.062255</td>
+      <td>0.598265</td>
+      <td>0.885846</td>
+      <td>5.585744</td>
+      <td>6.266662</td>
+      <td>6.346390</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>We are interested in the increased latency of <code class="docutils literal notranslate"><span class="pre">Website</span></code> on average for 1000 requests which the customers directly experienced.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>outlier_data[&#39;Website&#39;].mean() - normal_data[&#39;Website&#39;].mean()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle 1.93236488530225$</div></div>
+</div>
+<p>The <em>Website</em> is slower on average (by almost 2 seconds) than usual. Why?</p>
+<section id="Attributing-permanent-degradation-of-latencies-at-a-target-service-to-other-services">
+<h3>Attributing permanent degradation of latencies at a target service to other services<a class="headerlink" href="#Attributing-permanent-degradation-of-latencies-at-a-target-service-to-other-services" title="Permalink to this heading"></a></h3>
+<p>To answer why <code class="docutils literal notranslate"><span class="pre">Website</span></code> is slower for those 1000 requests compared to before, we attribute the change in the average latency of <code class="docutils literal notranslate"><span class="pre">Website</span></code> to services upstream in the causal graph. We refer the reader to <a class="reference external" href="https://assets.amazon.science/b6/c0/604565d24d049a1b83355921cc6c/why-did-the-distribution-change.pdf">Budhathoki et al., 2021</a> for scientific details behind this API. As in the previous scenario, we will calculate a 95% bootstrapped confidence interval of our attributions and visualize
+them in a bar plot.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
+
+median_attribs, uncertainty_attribs = gcm.confidence_intervals(
+    lambda : gcm.distribution_change(causal_model,
+                                     normal_data.sample(frac=0.6),
+                                     outlier_data.sample(frac=0.6),
+                                     &#39;Website&#39;,
+                                     difference_estimation_func=lambda x, y: np.mean(y) - np.mean(x)),
+    num_bootstrap_resamples = 10)
+
+gcm.util.bar_plot(median_attribs, uncertainty_attribs, &#39;Attribution Score&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_rca_microservice_architecture_30_0.png" src="../_images/example_notebooks_gcm_rca_microservice_architecture_30_0.png" />
+</div>
+</div>
+<p>We observe that <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> is the root cause that slowed down <code class="docutils literal notranslate"><span class="pre">Website</span></code>. In particular, the method we used tells us that the change in the causal mechanism (i.e., the input-output behaviour) of <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> (e.g., Caching algorithm) slowed down <code class="docutils literal notranslate"><span class="pre">Website</span></code>. This is also expected as the outlier latencies were generated by changing the causal mechanism of <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> (see Appendix below).</p>
+</section>
+</section>
+<section id="Scenario-3:-Simulating-the-intervention-of-shifting-resources">
+<h2>Scenario 3: Simulating the intervention of shifting resources<a class="headerlink" href="#Scenario-3:-Simulating-the-intervention-of-shifting-resources" title="Permalink to this heading"></a></h2>
+<p>Next, let us imagine a scenario where permanent degradation has happened as in scenario 2 and we’ve successfully identified <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> as the root cause. Furthermore, we figured out that a recent deployment of the <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> contained a bug that is causing the overloaded hosts. A proper fix must be deployed, or the previous deployment must be rolled back. But, in the meantime, could we mitigate the situation by shifting over some resources from <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Service</span></code> to
+<code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code>? And would that help? Before doing it in reality, let us simulate it first and see whether it improves the situation.</p>
+<p><img alt="58177c7c374e45fb8bffb08eebf16346" class="no-scaled-link" src="../_images/shifting-resources.png" style="width: 600px;" /></p>
+<p>Let’s perform an intervention where we say we can reduce the average time of <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> by 1s. But at the same time we buy this speed-up by an average slow-down of 2s in <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Cost</span> <span class="pre">Service</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>median_mean_latencies, uncertainty_mean_latencies = gcm.confidence_intervals(
+    lambda : gcm.fit_and_compute(gcm.interventional_samples,
+                                 causal_model,
+                                 outlier_data,
+                                 interventions = {
+                                    &quot;Caching Service&quot;: lambda x: x-1,
+                                    &quot;Shipping Cost Service&quot;: lambda x: x+2
+                                 },
+                                 observed_data=outlier_data)().mean().to_dict(),
+    num_bootstrap_resamples=10)
+</pre></div>
+</div>
+</div>
+<p>Has the situation improved? Let’s visualize the results.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>avg_website_latency_before = outlier_data.mean().to_dict()[&#39;Website&#39;]
+gcm.util.bar_plot(dict(before=avg_website_latency_before, after=median_mean_latencies[&#39;Website&#39;]),
+                  dict(before=np.array([avg_website_latency_before, avg_website_latency_before]), after=uncertainty_mean_latencies[&#39;Website&#39;]),
+                  ylabel=&#39;Avg. Website Latency&#39;,
+                  figure_size=(3, 2),
+                  bar_width=0.4,
+                  xticks=[&#39;Before&#39;, &#39;After&#39;],
+                  xticks_rotation=45)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_rca_microservice_architecture_35_0.png" src="../_images/example_notebooks_gcm_rca_microservice_architecture_35_0.png" />
+</div>
+</div>
+<p>Indeed, we do get an improvement by about 1s. We’re not back at normal operation, but we’ve mitigated part of the problem. From here, maybe we can wait until a proper fix is deployed.</p>
+</section>
+<section id="Appendix:-Data-generation-process">
+<h2>Appendix: Data generation process<a class="headerlink" href="#Appendix:-Data-generation-process" title="Permalink to this heading"></a></h2>
+<p>The scenarios above work on synthetic data. The normal data was generated using the following functions:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from scipy.stats import truncexpon, halfnorm
+
+
+def create_observed_latency_data(unobserved_intrinsic_latencies):
+    observed_latencies = {}
+    observed_latencies[&#39;Product DB&#39;] = unobserved_intrinsic_latencies[&#39;Product DB&#39;]
+    observed_latencies[&#39;Customer DB&#39;] = unobserved_intrinsic_latencies[&#39;Customer DB&#39;]
+    observed_latencies[&#39;Order DB&#39;] = unobserved_intrinsic_latencies[&#39;Order DB&#39;]
+    observed_latencies[&#39;Shipping Cost Service&#39;] = unobserved_intrinsic_latencies[&#39;Shipping Cost Service&#39;]
+    observed_latencies[&#39;Caching Service&#39;] = np.random.choice([0, 1], size=(len(observed_latencies[&#39;Product DB&#39;]),),
+                                                             p=[.5, .5]) * \
+                                            observed_latencies[&#39;Product DB&#39;] \
+                                            + unobserved_intrinsic_latencies[&#39;Caching Service&#39;]
+    observed_latencies[&#39;Product Service&#39;] = np.maximum(np.maximum(observed_latencies[&#39;Shipping Cost Service&#39;],
+                                                                  observed_latencies[&#39;Caching Service&#39;]),
+                                                       observed_latencies[&#39;Customer DB&#39;]) \
+                                            + unobserved_intrinsic_latencies[&#39;Product Service&#39;]
+    observed_latencies[&#39;Auth Service&#39;] = observed_latencies[&#39;Customer DB&#39;] \
+                                         + unobserved_intrinsic_latencies[&#39;Auth Service&#39;]
+    observed_latencies[&#39;Order Service&#39;] = observed_latencies[&#39;Order DB&#39;] \
+                                          + unobserved_intrinsic_latencies[&#39;Order Service&#39;]
+    observed_latencies[&#39;API&#39;] = observed_latencies[&#39;Product Service&#39;] \
+                                + observed_latencies[&#39;Customer DB&#39;] \
+                                + observed_latencies[&#39;Auth Service&#39;] \
+                                + observed_latencies[&#39;Order Service&#39;] \
+                                + unobserved_intrinsic_latencies[&#39;API&#39;]
+    observed_latencies[&#39;www&#39;] = observed_latencies[&#39;API&#39;] \
+                                + observed_latencies[&#39;Auth Service&#39;] \
+                                + unobserved_intrinsic_latencies[&#39;www&#39;]
+    observed_latencies[&#39;Website&#39;] = observed_latencies[&#39;www&#39;] \
+                                    + unobserved_intrinsic_latencies[&#39;Website&#39;]
+
+    return pd.DataFrame(observed_latencies)
+
+
+def unobserved_intrinsic_latencies_normal(num_samples):
+    return {
+        &#39;Website&#39;: truncexpon.rvs(size=num_samples, b=3, scale=0.2),
+        &#39;www&#39;: truncexpon.rvs(size=num_samples, b=2, scale=0.2),
+        &#39;API&#39;: halfnorm.rvs(size=num_samples, loc=0.5, scale=0.2),
+        &#39;Auth Service&#39;: halfnorm.rvs(size=num_samples, loc=0.1, scale=0.2),
+        &#39;Product Service&#39;: halfnorm.rvs(size=num_samples, loc=0.1, scale=0.2),
+        &#39;Order Service&#39;: halfnorm.rvs(size=num_samples, loc=0.5, scale=0.2),
+        &#39;Shipping Cost Service&#39;: halfnorm.rvs(size=num_samples, loc=0.1, scale=0.2),
+        &#39;Caching Service&#39;: halfnorm.rvs(size=num_samples, loc=0.1, scale=0.1),
+        &#39;Order DB&#39;: truncexpon.rvs(size=num_samples, b=5, scale=0.2),
+        &#39;Customer DB&#39;: truncexpon.rvs(size=num_samples, b=6, scale=0.2),
+        &#39;Product DB&#39;: truncexpon.rvs(size=num_samples, b=10, scale=0.2)
+    }
+
+
+normal_data = create_observed_latency_data(unobserved_intrinsic_latencies_normal(10000))
+</pre></div>
+</div>
+</div>
+<p>This simulates the latency relationships under the assumption of having synchronized services and that there are no hidden aspects that impact two nodes at the same time. Furthermore, we assume that the Caching Service has to call through to the Product DB only in 50% of the cases (i.e., we have a 50% cache miss rate). Also, we assume that the Product Service can make calls in parallel to its downstream services Shipping Cost Service, Caching Service, and Customer DB and join the threads when
+all three service have returned.</p>
+<div class="alert alert-block alert-info"><p>We use truncated exponential and half-normal distributions, since their shapes are similar to distributions observed in real services.</p>
+</div><p>The anomalous data is generated in the following way:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def unobserved_intrinsic_latencies_anomalous(num_samples):
+    return {
+        &#39;Website&#39;: truncexpon.rvs(size=num_samples, b=3, scale=0.2),
+        &#39;www&#39;: truncexpon.rvs(size=num_samples, b=2, scale=0.2),
+        &#39;API&#39;: halfnorm.rvs(size=num_samples, loc=0.5, scale=0.2),
+        &#39;Auth Service&#39;: halfnorm.rvs(size=num_samples, loc=0.1, scale=0.2),
+        &#39;Product Service&#39;: halfnorm.rvs(size=num_samples, loc=0.1, scale=0.2),
+        &#39;Order Service&#39;: halfnorm.rvs(size=num_samples, loc=0.5, scale=0.2),
+        &#39;Shipping Cost Service&#39;: halfnorm.rvs(size=num_samples, loc=0.1, scale=0.2),
+        &#39;Caching Service&#39;: 2 + halfnorm.rvs(size=num_samples, loc=0.1, scale=0.1),
+        &#39;Order DB&#39;: truncexpon.rvs(size=num_samples, b=5, scale=0.2),
+        &#39;Customer DB&#39;: truncexpon.rvs(size=num_samples, b=6, scale=0.2),
+        &#39;Product DB&#39;: truncexpon.rvs(size=num_samples, b=10, scale=0.2)
+    }
+
+outlier_data = create_observed_latency_data(unobserved_intrinsic_latencies_anomalous(1000))
+</pre></div>
+</div>
+</div>
+<p>Here, we significantly increased the average time of the <em>Caching Service</em> by two seconds, which coincides with our results from the RCA. Note that a high latency in <em>Caching Service</em> would lead to a constantly higher latency in upstream services. In particular, customers experience a higher latency than usual.</p>
+</section>
+</section>
+
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="dowhy_example_effect_of_memberrewards_program.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Estimating the Effect of a Member Rewards Program</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="gcm_401k_analysis.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Impact of 401(k) eligibility on net financial assets</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, PyWhy contributors.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

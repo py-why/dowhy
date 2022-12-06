@@ -1,0 +1,901 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>DoWhy example on the Lalonde dataset &#8212; DoWhy  documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Applying refutation tests to the Lalonde and IHDP datasets" href="dowhy_refutation_testing.html" />
+    <link rel="prev" title="DoWhy example on ihdp (Infant Health and Development Program) dataset" href="dowhy_ihdp_data_example.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="Logo image">
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../user_guide/index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="nb_index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../dowhy.html">
+  API reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../contributing.html">
+  Contributing
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../code_repo.html">
+  Release notes
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+      <div class="navbar-end-item">
+        <div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.9
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Introductory examples
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_simple_example.html">
+   Basic Example for Calculating the Causal Effect
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_basic_example.html">
+   Basic Example for Graphical Causal Model-Based Intervention
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_confounder_example.html">
+   Confounding Example: Finding causal effects from observed data
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_estimation_methods.html">
+   DoWhy: Different estimation methods for causal inference
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_interpreter.html">
+   DoWhy: Interpreters for Causal Estimators
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy-conditional-treatment-effects.html">
+   Conditional Average Treatment Effects (CATE) with DoWhy and EconML
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_mediation_analysis.html">
+   Mediation analysis with DoWhy: Direct and Indirect Effects
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refuter_notebook.html">
+   Iterating over multiple refutation tests
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_api.html">
+   Demo for the DoWhy causal API
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="do_sampler_demo.html">
+   Do-sampler Introduction
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Real world-inspired examples
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">
+   Exploring Causes of Hotel Booking Cancellations
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_example_effect_of_memberrewards_program.html">
+   Estimating the Effect of a Member Rewards Program
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_rca_microservice_architecture.html">
+   Finding the Root Cause of Elevated Latencies in a Microservice Architecture
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_401k_analysis.html">
+   Impact of 401(k) eligibility on net financial assets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_supply_chain_dist_change.html">
+   Finding Root Causes of Changes in a Supply Chain
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_counterfactual_medical_dry_eyes.html">
+   Counterfactual Analysis in a Medical Case
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Examples on benchmarks datasets
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_ihdp_data_example.html">
+   DoWhy example on ihdp (Infant Health and Development Program) dataset
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   DoWhy example on the Lalonde dataset
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refutation_testing.html">
+   Applying refutation tests to the Lalonde and IHDP datasets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_401k_analysis.html">
+   Impact of 401(k) eligibility on net financial assets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="lalonde_pandas_api.html">
+   Lalonde Pandas API Example
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Miscellaneous
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="load_graph_example.html">
+   Different ways to load an input graph
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_draw_samples.html">
+   Basic Example for generating samples from a GCM
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy-simple-iv-example.html">
+   Simple example on using Instrumental Variables method for estimation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="graph_conditional_independence_refuter.html">
+   Testing Assumptions in model with DoWhy: A simple example
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">
+   A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_multiple_treatments.html">
+   Estimating effect of multiple treatments
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="identifying_effects_using_id_algorithm.html">
+   Identifying Effect using ID Algorithm
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#1.-Load-the-data">
+   1. Load the data
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#2.-Run-DoWhy-analysis:-model,-identify,-estimate">
+   2. Run DoWhy analysis: model, identify, estimate
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#3.-Interpret-the-estimate">
+   3. Interpret the estimate
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#4.-Sanity-check:-compare-to-manual-IPW-estimate">
+   4. Sanity check: compare to manual IPW estimate
+  </a>
+ </li>
+</ul>
+
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars and line breaks on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+    white-space: pre;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.jp-RenderedHTMLCommon thead,
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+.jp-RenderedHTMLCommon th,
+div.rendered_html th {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+.jp-RenderedHTMLCommon tbody tr:hover,
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<section id="DoWhy-example-on-the-Lalonde-dataset">
+<h1>DoWhy example on the Lalonde dataset<a class="headerlink" href="#DoWhy-example-on-the-Lalonde-dataset" title="Permalink to this heading"></a></h1>
+<p>Thanks to [&#64;mizuy](<a class="reference external" href="https://github.com/mizuy">https://github.com/mizuy</a>) for providing this example. Here we use the Lalonde dataset and apply IPW estimator to it.</p>
+<section id="1.-Load-the-data">
+<h2>1. Load the data<a class="headerlink" href="#1.-Load-the-data" title="Permalink to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import dowhy.datasets
+
+lalonde = dowhy.datasets.lalonde_dataset()
+</pre></div>
+</div>
+</div>
+</section>
+<section id="2.-Run-DoWhy-analysis:-model,-identify,-estimate">
+<h2>2. Run DoWhy analysis: model, identify, estimate<a class="headerlink" href="#2.-Run-DoWhy-analysis:-model,-identify,-estimate" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from dowhy import CausalModel
+
+
+model=CausalModel(
+        data = lalonde,
+        treatment=&#39;treat&#39;,
+        outcome=&#39;re78&#39;,
+        common_causes=&#39;nodegr+black+hisp+age+educ+married&#39;.split(&#39;+&#39;))
+identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+estimate = model.estimate_effect(identified_estimand,
+        method_name=&quot;backdoor.propensity_score_weighting&quot;,
+        target_units=&quot;ate&quot;,
+        method_params={&quot;weighting_scheme&quot;:&quot;ips_weight&quot;})
+
+print(&quot;Causal Estimate is &quot; + str(estimate.value))
+
+import statsmodels.formula.api as smf
+reg=smf.wls(&#39;re78~1+treat&#39;, data=lalonde, weights=lalonde.ips_stabilized_weight)
+res=reg.fit()
+res.summary()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Causal Estimate is 1639.8542908702111
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<table class="simpletable">
+<caption>WLS Regression Results</caption>
+<tr>
+  <th>Dep. Variable:</th>          <td>re78</td>       <th>  R-squared:         </th> <td>   0.015</td>
+</tr>
+<tr>
+  <th>Model:</th>                   <td>WLS</td>       <th>  Adj. R-squared:    </th> <td>   0.013</td>
+</tr>
+<tr>
+  <th>Method:</th>             <td>Least Squares</td>  <th>  F-statistic:       </th> <td>   6.743</td>
+</tr>
+<tr>
+  <th>Date:</th>             <td>Tue, 06 Dec 2022</td> <th>  Prob (F-statistic):</th>  <td>0.00972</td>
+</tr>
+<tr>
+  <th>Time:</th>                 <td>09:41:05</td>     <th>  Log-Likelihood:    </th> <td> -4544.7</td>
+</tr>
+<tr>
+  <th>No. Observations:</th>      <td>   445</td>      <th>  AIC:               </th> <td>   9093.</td>
+</tr>
+<tr>
+  <th>Df Residuals:</th>          <td>   443</td>      <th>  BIC:               </th> <td>   9102.</td>
+</tr>
+<tr>
+  <th>Df Model:</th>              <td>     1</td>      <th>                     </th>     <td> </td>
+</tr>
+<tr>
+  <th>Covariance Type:</th>      <td>nonrobust</td>    <th>                     </th>     <td> </td>
+</tr>
+</table>
+<table class="simpletable">
+<tr>
+        <td></td>           <th>coef</th>     <th>std err</th>      <th>t</th>      <th>P>|t|</th>  <th>[0.025</th>    <th>0.975]</th>
+</tr>
+<tr>
+  <th>Intercept</th>     <td> 4555.0709</td> <td>  406.707</td> <td>   11.200</td> <td> 0.000</td> <td> 3755.757</td> <td> 5354.385</td>
+</tr>
+<tr>
+  <th>treat[T.True]</th> <td> 1639.8543</td> <td>  631.498</td> <td>    2.597</td> <td> 0.010</td> <td>  398.750</td> <td> 2880.959</td>
+</tr>
+</table>
+<table class="simpletable">
+<tr>
+  <th>Omnibus:</th>       <td>303.267</td> <th>  Durbin-Watson:     </th> <td>   2.085</td>
+</tr>
+<tr>
+  <th>Prob(Omnibus):</th> <td> 0.000</td>  <th>  Jarque-Bera (JB):  </th> <td>4770.872</td>
+</tr>
+<tr>
+  <th>Skew:</th>          <td> 2.709</td>  <th>  Prob(JB):          </th> <td>    0.00</td>
+</tr>
+<tr>
+  <th>Kurtosis:</th>      <td>18.098</td>  <th>  Cond. No.          </th> <td>    2.47</td>
+</tr>
+</table><br/><br/>Notes:<br/>[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.</div>
+</div>
+</section>
+<section id="3.-Interpret-the-estimate">
+<h2>3. Interpret the estimate<a class="headerlink" href="#3.-Interpret-the-estimate" title="Permalink to this heading"></a></h2>
+<p>The plot below shows how the distribution of a confounder, “married” changes from the original data to the weighted data. In both datasets, we compare the distribution of “married” across treated and untreated units.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>estimate.interpret(method_name=&quot;confounder_distribution_interpreter&quot;,var_type=&#39;discrete&#39;,
+                   var_name=&#39;married&#39;, fig_size = (10, 7), font_size = 12)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_dowhy_lalonde_example_6_0.png" src="../_images/example_notebooks_dowhy_lalonde_example_6_0.png" />
+</div>
+</div>
+</section>
+<section id="4.-Sanity-check:-compare-to-manual-IPW-estimate">
+<h2>4. Sanity check: compare to manual IPW estimate<a class="headerlink" href="#4.-Sanity-check:-compare-to-manual-IPW-estimate" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>df = model._data
+ps = df[&#39;propensity_score&#39;]
+y = df[&#39;re78&#39;]
+z = df[&#39;treat&#39;]
+
+ey1 = z*y/ps / sum(z/ps)
+ey0 = (1-z)*y/(1-ps) / sum((1-z)/(1-ps))
+ate = ey1.sum()-ey0.sum()
+print(&quot;Causal Estimate is &quot; + str(ate))
+
+# correct -&gt; Causal Estimate is 1634.9868359746906
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Causal Estimate is 1639.854290870213
+</pre></div></div>
+</div>
+</section>
+</section>
+
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="dowhy_ihdp_data_example.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">DoWhy example on ihdp (Infant Health and Development Program) dataset</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="dowhy_refutation_testing.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Applying refutation tests to the Lalonde and IHDP datasets</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, PyWhy contributors.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

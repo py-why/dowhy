@@ -1,0 +1,534 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Quantifying Intrinsic Causal Influence &#8212; DoWhy  documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Simulating the Impact of Interventions" href="simulate_impact_of_interventions.html" />
+    <link rel="prev" title="Quantifying Arrow Strength" href="quantify_arrow_strength.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+    <img src="../../../_static/dowhy-logo-small.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="../../index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../example_notebooks/nb_index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../dowhy.html">
+  API reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../contributing.html">
+  Contributing
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../code_repo.html">
+  Release notes
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+      <div class="navbar-end-item">
+        <div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.9
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../intro.html">
+   Introduction to DoWhy
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../../effect_inference/index.html">
+   Effect inference
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../../effect_inference/model.html">
+     1. Model a causal problem
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../../effect_inference/identify.html">
+     2. Identify a target estimand under the model
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../../effect_inference/estimate.html">
+     3. Estimate causal effect based on the identified estimand
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../../effect_inference/refute.html">
+     4. Refute the obtained estimate
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../../effect_inference/comparison.html">
+     5. Comparison to other packages
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 current active has-children">
+  <a class="reference internal" href="../index.html">
+   GCM-based inference (Experimental)
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+  <label for="toctree-checkbox-2">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul class="current">
+   <li class="toctree-l2">
+    <a class="reference internal" href="../introduction.html">
+     Introduction
+    </a>
+   </li>
+   <li class="toctree-l2 current active has-children">
+    <a class="reference internal" href="index.html">
+     Answering Causal Questions
+    </a>
+    <input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+    <label for="toctree-checkbox-3">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul class="current">
+     <li class="toctree-l3">
+      <a class="reference internal" href="quantify_arrow_strength.html">
+       Quantifying Arrow Strength
+      </a>
+     </li>
+     <li class="toctree-l3 current active">
+      <a class="current reference internal" href="#">
+       Quantifying Intrinsic Causal Influence
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="simulate_impact_of_interventions.html">
+       Simulating the Impact of Interventions
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="computing_counterfactuals.html">
+       Computing Counterfactuals
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="average_causal_effect.html">
+       Estimating Average Causal Effects
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="attribute_distributional_changes.html">
+       Attributing Distributional Changes
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../draw_samples.html">
+     Generate samples from a GCM
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../customizing_model_assignment.html">
+     Customizing Causal Mechanism Assignment
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../estimating_confidence_intervals.html">
+     Estimating Confidence Intervals
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../independence_tests.html">
+     Independence Tests
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../cite.html">
+   Citing this package
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#how-to-use-it">
+   How to use it
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#understanding-the-method">
+   Understanding the method
+  </a>
+ </li>
+</ul>
+
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <section id="quantifying-intrinsic-causal-influence">
+<h1>Quantifying Intrinsic Causal Influence<a class="headerlink" href="#quantifying-intrinsic-causal-influence" title="Permalink to this heading"></a></h1>
+<p>By quantifying intrinsic causal influence, we answer the question:</p>
+<blockquote>
+<div><p>How strong is the causal influence of a source node to a target node
+that is not inherited from the parents of the source node?</p>
+</div></blockquote>
+<p>Naturally, descendants will have a zero intrinsic influence on the target node.</p>
+<section id="how-to-use-it">
+<h2>How to use it<a class="headerlink" href="#how-to-use-it" title="Permalink to this heading"></a></h2>
+<p>To see how the method works, let us generate some data.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span><span class="o">,</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span><span class="o">,</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">gcm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dowhy.gcm.uncertainty</span> <span class="kn">import</span> <span class="n">estimate_variance</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># to reproduce these results</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Y</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">X</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Z</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">Y</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Next, we will model cause-effect relationships as a structural causal model and fit it to the data.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">)]))</span> <span class="c1"># X -&gt; Y -&gt; Z</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">EmpiricalDistribution</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Finally, we can ask for the intrinsic causal influences of ancestors to a node of interest (e.g., <span class="math notranslate nohighlight">\(Z\)</span>).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">contributions</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">intrinsic_causal_influence</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                              <span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">(),</span>
+<span class="gp">&gt;&gt;&gt; </span>                                              <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">_</span><span class="p">:</span> <span class="n">estimate_variance</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">contributions</span>
+<span class="go">    {&#39;X&#39;: 33.34300732332951, &#39;Y&#39;: 9.599478688607254, &#39;Z&#39;: 0.9750701113403872}</span>
+</pre></div>
+</div>
+<p><strong>Interpreting the results:</strong> We estimated the intrinsic influence of ancestors of
+<span class="math notranslate nohighlight">\(Z\)</span>, including itself, to its variance. These contributions sum up to the variance of <span class="math notranslate nohighlight">\(Z\)</span>.
+We observe that ~76% of the variance of <span class="math notranslate nohighlight">\(Z\)</span> comes from <span class="math notranslate nohighlight">\(X\)</span>.</p>
+</section>
+<section id="understanding-the-method">
+<h2>Understanding the method<a class="headerlink" href="#understanding-the-method" title="Permalink to this heading"></a></h2>
+<p>Consider the following example to get the intuition behind the notion of “intrinsic”
+causal influence we seek to measure here.</p>
+<blockquote>
+<div><p>A charity event is organised to collect funds to help an orphanage. At the end of the event,
+a donation box is passed around to each participant. Since the donation is voluntary, some may
+not donate for various reasons. For instance, they may not have the cash. In this scenario, a
+participant that simply passes the donation box to the other participant does not contribute
+anything to the collective donation after all. Each person’s contribution then is simply the
+amount they donated.</p>
+</div></blockquote>
+<p>To measure the <a class="reference external" href="https://arxiv.org/pdf/2007.00714.pdf">intrinsic causal influence</a> of a source
+node to a target node, we need a functional causal model. In particular, we assume that the
+causal model of each node follows an additive noise model (ANM), i.e. <span class="math notranslate nohighlight">\(X_j := f_j
+(\textrm{PA}_j) + N_j\)</span>, where <span class="math notranslate nohighlight">\(\textrm{PA}_j\)</span> are the parents of node <span class="math notranslate nohighlight">\(X_j\)</span> in the causal graph,
+and <span class="math notranslate nohighlight">\(N_j\)</span> is the independent unobserved noise term. To compute the “intrinsic” contribution of ancestors of <span class="math notranslate nohighlight">\(X_n\)</span> to
+some property (e.g. entropy, variance) of the marginal distribution of <span class="math notranslate nohighlight">\(X_n\)</span>, we first
+have to set up our causal graph, and learn the causal model of each node from the dataset.</p>
+<p>Consider a causal graph <span class="math notranslate nohighlight">\(X \rightarrow Y \rightarrow Z\)</span> as in the code example above,
+induced by the following ANMs.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}X &amp;:= N_X\\
+Y &amp;:= 2 X + N_Y\\
+Z &amp;:= 3 Y + N_Z \;,\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(N_w \sim \mathcal{N}(0, 1)\)</span>, for all <span class="math notranslate nohighlight">\(w \in \{X, Y, Z\}\)</span>, are standard Normal
+noise variables.</p>
+<p>Suppose that we are interested in the contribution of each variable to the <em>variance</em> of the
+target <span class="math notranslate nohighlight">\(Z\)</span>, i.e. <span class="math notranslate nohighlight">\(\mathrm{Var}[Z]\)</span>. If there were no noise variables, everything can
+be contributed to the root node <span class="math notranslate nohighlight">\(X\)</span> as all other variables would then be its deterministic
+function. The intrinsic contribution of each variable to the target quantity
+<span class="math notranslate nohighlight">\(\mathrm{Var}[Z]\)</span> is then really the contribution of corresponding noise term.</p>
+<p>To compute “intrinsic” contribution, we also require conditional distributions of <span class="math notranslate nohighlight">\(Z\)</span> given
+subsets of noise variables <span class="math notranslate nohighlight">\(N_T\)</span>, i.e., <span class="math notranslate nohighlight">\(P_{Z \mid
+N_T}\)</span>, where <span class="math notranslate nohighlight">\(T \subseteq \{X, Y, Z\}\)</span>. We estimate them using an ANM. To this end,
+we have to specify the prediction model from a subset of noise variables to the target. Below, we
+quantify the intrinsic causal influence of <span class="math notranslate nohighlight">\(X, Y\)</span> and <span class="math notranslate nohighlight">\(Z\)</span> to
+<span class="math notranslate nohighlight">\(\mathrm{Var}[Z]\)</span> using a linear prediction model from noise variables to <span class="math notranslate nohighlight">\(Z\)</span>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dowhy.gcm.uncertainty</span> <span class="kn">import</span> <span class="n">estimate_variance</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prediction_model_from_noises_to_target</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">node_to_contribution</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">intrinsic_causal_influence</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                                     <span class="n">prediction_model_from_noises_to_target</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                                     <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">_</span><span class="p">:</span> <span class="n">estimate_variance</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>While using variance as uncertainty estimator gives valuable information about the
+contribution of nodes to the squared deviations in the target, one might be rather interested
+in other quantities, such as absolute deviations. This can also be simply computed by replacing
+the uncertainty estimator with a custom function:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mean_absolute_deviation_estimator</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">node_to_contribution</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">intrinsic_causal_influence</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                                     <span class="n">prediction_model_from_noises_to_target</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                                     <span class="n">mean_absolute_deviation_estimator</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If the choice of a prediction model is unclear, the prediction model parameter can also be set
+to “auto”.</p>
+</div>
+</section>
+</section>
+
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="quantify_arrow_strength.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Quantifying Arrow Strength</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="simulate_impact_of_interventions.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Simulating the Impact of Interventions</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, PyWhy contributors.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

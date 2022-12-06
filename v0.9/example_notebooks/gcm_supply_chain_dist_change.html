@@ -1,0 +1,1168 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Finding Root Causes of Changes in a Supply Chain &#8212; DoWhy  documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Counterfactual Analysis in a Medical Case" href="gcm_counterfactual_medical_dry_eyes.html" />
+    <link rel="prev" title="Impact of 401(k) eligibility on net financial assets" href="gcm_401k_analysis.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="Logo image">
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../user_guide/index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="nb_index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../dowhy.html">
+  API reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../contributing.html">
+  Contributing
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../code_repo.html">
+  Release notes
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+      <div class="navbar-end-item">
+        <div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.9
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Introductory examples
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_simple_example.html">
+   Basic Example for Calculating the Causal Effect
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_basic_example.html">
+   Basic Example for Graphical Causal Model-Based Intervention
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_confounder_example.html">
+   Confounding Example: Finding causal effects from observed data
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_estimation_methods.html">
+   DoWhy: Different estimation methods for causal inference
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_interpreter.html">
+   DoWhy: Interpreters for Causal Estimators
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy-conditional-treatment-effects.html">
+   Conditional Average Treatment Effects (CATE) with DoWhy and EconML
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_mediation_analysis.html">
+   Mediation analysis with DoWhy: Direct and Indirect Effects
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refuter_notebook.html">
+   Iterating over multiple refutation tests
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_api.html">
+   Demo for the DoWhy causal API
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="do_sampler_demo.html">
+   Do-sampler Introduction
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Real world-inspired examples
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">
+   Exploring Causes of Hotel Booking Cancellations
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_example_effect_of_memberrewards_program.html">
+   Estimating the Effect of a Member Rewards Program
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_rca_microservice_architecture.html">
+   Finding the Root Cause of Elevated Latencies in a Microservice Architecture
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_401k_analysis.html">
+   Impact of 401(k) eligibility on net financial assets
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Finding Root Causes of Changes in a Supply Chain
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_counterfactual_medical_dry_eyes.html">
+   Counterfactual Analysis in a Medical Case
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Examples on benchmarks datasets
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_ihdp_data_example.html">
+   DoWhy example on ihdp (Infant Health and Development Program) dataset
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_lalonde_example.html">
+   DoWhy example on the Lalonde dataset
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refutation_testing.html">
+   Applying refutation tests to the Lalonde and IHDP datasets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_401k_analysis.html">
+   Impact of 401(k) eligibility on net financial assets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="lalonde_pandas_api.html">
+   Lalonde Pandas API Example
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Miscellaneous
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="load_graph_example.html">
+   Different ways to load an input graph
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_draw_samples.html">
+   Basic Example for generating samples from a GCM
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy-simple-iv-example.html">
+   Simple example on using Instrumental Variables method for estimation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="graph_conditional_independence_refuter.html">
+   Testing Assumptions in model with DoWhy: A simple example
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">
+   A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_multiple_treatments.html">
+   Estimating effect of multiple treatments
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="identifying_effects_using_id_algorithm.html">
+   Identifying Effect using ID Algorithm
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Week-over-week-changes">
+   Week-over-week changes
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Why-did-the-average-value-of-received-quantity-change-week-over-week?">
+   Why did the average value of
+   <code class="docutils literal notranslate">
+    <span class="pre">
+     received
+    </span>
+   </code>
+   quantity change week-over-week?
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Ad-hoc-attribution-analysis">
+     Ad-hoc attribution analysis
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Causal-Attribution-Analysis">
+     Causal Attribution Analysis
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#Graphical-causal-model">
+       Graphical causal model
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#Attributing-change">
+       Attributing change
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Appendix:-Ground-Truth">
+   Appendix: Ground Truth
+  </a>
+ </li>
+</ul>
+
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars and line breaks on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+    white-space: pre;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.jp-RenderedHTMLCommon thead,
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+.jp-RenderedHTMLCommon th,
+div.rendered_html th {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+.jp-RenderedHTMLCommon tbody tr:hover,
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<section id="Finding-Root-Causes-of-Changes-in-a-Supply-Chain">
+<h1>Finding Root Causes of Changes in a Supply Chain<a class="headerlink" href="#Finding-Root-Causes-of-Changes-in-a-Supply-Chain" title="Permalink to this heading"></a></h1>
+<p>In a supply chain, the number of units of each product in the inventory that is available for shipment is crucial to fulfill customers’ demand faster. For this reason, retailers continuously buy products anticipating customers’ demand in the future.</p>
+<p>Suppose that each week a retailer submits purchase orders (POs) to vendors taking into account future demands for products and capacity constraints to consider for demands. The vendors will then confirm whether they can fulfill some or all of the retailer’s purchase orders. Once confirmed by the vendors and agreed by the retailer, products are then sent to the retailer. All of the confirmed POs, however, may not arrive at once.</p>
+<p><img alt="7d83fb6f516e4a5c8558e8a433425063" class="no-scaled-link" src="../_images/supply-chain.png" style="width: 800px;" /></p>
+<section id="Week-over-week-changes">
+<h2>Week-over-week changes<a class="headerlink" href="#Week-over-week-changes" title="Permalink to this heading"></a></h2>
+<p>For this case study, we consider synthetic data inspired from a real-world use case in supply chain. Let us look at data over two weeks, <em>w1</em> and <em>w2</em> in particular.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import pandas as pd
+
+data = pd.read_csv(&#39;supply_chain_week_over_week.csv&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from IPython.display import HTML
+
+data_week1 = data[data.week == &#39;w1&#39;]
+
+HTML(data_week1.head().to_html(index=False)+&#39;&lt;br/&gt;&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>asin</th>
+      <th>demand</th>
+      <th>constraint</th>
+      <th>submitted</th>
+      <th>confirmed</th>
+      <th>received</th>
+      <th>week</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>C33384370E</td>
+      <td>5.0</td>
+      <td>2.0</td>
+      <td>5.0</td>
+      <td>5.0</td>
+      <td>5.0</td>
+      <td>w1</td>
+    </tr>
+    <tr>
+      <td>F48C534AEF</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>2.0</td>
+      <td>2.0</td>
+      <td>2.0</td>
+      <td>w1</td>
+    </tr>
+    <tr>
+      <td>6DF2CA5FB8</td>
+      <td>4.0</td>
+      <td>2.0</td>
+      <td>2.0</td>
+      <td>2.0</td>
+      <td>2.0</td>
+      <td>w1</td>
+    </tr>
+    <tr>
+      <td>1D1C2500DB</td>
+      <td>2.0</td>
+      <td>1.0</td>
+      <td>2.0</td>
+      <td>2.0</td>
+      <td>2.0</td>
+      <td>w1</td>
+    </tr>
+    <tr>
+      <td>0A83B415E2</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-0.0</td>
+      <td>-0.0</td>
+      <td>-0.0</td>
+      <td>w1</td>
+    </tr>
+  </tbody>
+</table><br/></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>data_week2 = data[data.week==&#39;w2&#39;]
+
+HTML(data_week2.head().to_html(index=False)+&#39;&lt;br/&gt;&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>asin</th>
+      <th>demand</th>
+      <th>constraint</th>
+      <th>submitted</th>
+      <th>confirmed</th>
+      <th>received</th>
+      <th>week</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>C33384370E</td>
+      <td>3.0</td>
+      <td>1.0</td>
+      <td>3.0</td>
+      <td>7.0</td>
+      <td>7.0</td>
+      <td>w2</td>
+    </tr>
+    <tr>
+      <td>F48C534AEF</td>
+      <td>3.0</td>
+      <td>2.0</td>
+      <td>1.0</td>
+      <td>3.0</td>
+      <td>3.0</td>
+      <td>w2</td>
+    </tr>
+    <tr>
+      <td>6DF2CA5FB8</td>
+      <td>5.0</td>
+      <td>1.0</td>
+      <td>6.0</td>
+      <td>12.0</td>
+      <td>12.0</td>
+      <td>w2</td>
+    </tr>
+    <tr>
+      <td>1D1C2500DB</td>
+      <td>3.0</td>
+      <td>3.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>w2</td>
+    </tr>
+    <tr>
+      <td>0A83B415E2</td>
+      <td>3.0</td>
+      <td>1.0</td>
+      <td>2.0</td>
+      <td>5.0</td>
+      <td>5.0</td>
+      <td>w2</td>
+    </tr>
+  </tbody>
+</table><br/></div>
+</div>
+<p>Our target of interest is the average value of <em>received</em> over those two weeks.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>data.groupby([&#39;week&#39;]).mean()[[&#39;received&#39;]].plot(kind=&#39;bar&#39;, title=&#39;average received&#39;, legend=False);
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_5844/2641881978.py:1: FutureWarning: The default value of numeric_only in DataFrameGroupBy.mean is deprecated. In a future version, numeric_only will default to False. Either specify numeric_only or select only columns which should be valid for the function.
+  data.groupby([&#39;week&#39;]).mean()[[&#39;received&#39;]].plot(kind=&#39;bar&#39;, title=&#39;average received&#39;, legend=False);
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_supply_chain_dist_change_6_1.png" src="../_images/example_notebooks_gcm_supply_chain_dist_change_6_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>data_week2.received.mean() - data_week1.received.mean()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+6.197
+</pre></div></div>
+</div>
+<p>The average value of <em>received</em> quantity has increased from week <em>w1</em> to week <em>w2</em>. Why?</p>
+</section>
+<section id="Why-did-the-average-value-of-received-quantity-change-week-over-week?">
+<h2>Why did the average value of <code class="docutils literal notranslate"><span class="pre">received</span></code> quantity change week-over-week?<a class="headerlink" href="#Why-did-the-average-value-of-received-quantity-change-week-over-week?" title="Permalink to this heading"></a></h2>
+<section id="Ad-hoc-attribution-analysis">
+<h3>Ad-hoc attribution analysis<a class="headerlink" href="#Ad-hoc-attribution-analysis" title="Permalink to this heading"></a></h3>
+<p>To answer the question, one option is to look at the average value of other variables week-over-week, and see if there are any associations.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>data.groupby([&#39;week&#39;]).mean().plot(kind=&#39;bar&#39;, title=&#39;average&#39;, legend=True);
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_5844/3361261226.py:1: FutureWarning: The default value of numeric_only in DataFrameGroupBy.mean is deprecated. In a future version, numeric_only will default to False. Either specify numeric_only or select only columns which should be valid for the function.
+  data.groupby([&#39;week&#39;]).mean().plot(kind=&#39;bar&#39;, title=&#39;average&#39;, legend=True);
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_supply_chain_dist_change_11_1.png" src="../_images/example_notebooks_gcm_supply_chain_dist_change_11_1.png" />
+</div>
+</div>
+<p>We see that the average values of other variables, except <em>constraint</em>, have also increased. While this suggests that some event(s) that changed the average values of other variables could possibly have changed the average value of <em>received</em>, that on itself is not a satisfactory answer. One may also use domain knowledge here to claim that change in the average value of demand could be the main driver, after all demand is a key variable. We will see later that such conclusions can miss other
+important factors. For a rather systematic answer, we turn to attribution analysis based on causality.</p>
+</section>
+<section id="Causal-Attribution-Analysis">
+<h3>Causal Attribution Analysis<a class="headerlink" href="#Causal-Attribution-Analysis" title="Permalink to this heading"></a></h3>
+<p>We consider the distribution-change-attribution method based on graphical causal models described in <a class="reference external" href="https://arxiv.org/abs/2102.13384">Budhathoki et al., 2021</a>, which is also implmented in <em>Causality</em>. In summary, given the underlying causal graph of variables, the attribution method attributes the change in the marginal distribution of a target variable (or its summary, such as its mean) to changes in data-generating processes (also called “causal mechanisms”) of variables upstream in the
+causal graph. A causal mechanism of a variable is the conditional distribution of the variable given its <em>direct causes</em>. We can also think of a causal mechanism as an algorithm (or a compute program) in the system that takes the values of direct causes as input and produces the value of the effect as an output. To use the attribution method, we first require the causal graph of the variables, namely <em>demand</em>, <em>constraint</em>, <em>submitted</em>, <em>confirmed</em> and <em>received</em>.</p>
+<section id="Graphical-causal-model">
+<h4>Graphical causal model<a class="headerlink" href="#Graphical-causal-model" title="Permalink to this heading"></a></h4>
+<p>We build the causal graph using domain knowledge. Based on the description of supply chain in the introduction, it is plausible to assume the following causal graph.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import networkx as nx
+import dowhy.gcm as gcm
+
+causal_graph = nx.DiGraph([(&#39;demand&#39;, &#39;submitted&#39;),
+                           (&#39;constraint&#39;, &#39;submitted&#39;),
+                           (&#39;submitted&#39;, &#39;confirmed&#39;),
+                           (&#39;confirmed&#39;, &#39;received&#39;)])
+gcm.util.plot(causal_graph)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_supply_chain_dist_change_15_0.png" src="../_images/example_notebooks_gcm_supply_chain_dist_change_15_0.png" />
+</div>
+</div>
+</section>
+<section id="Attributing-change">
+<h4>Attributing change<a class="headerlink" href="#Attributing-change" title="Permalink to this heading"></a></h4>
+<p>We can now attribute the week-over-week change in the average value of <em>received</em> quantity using <em>Causality</em>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import matplotlib.pyplot as plt
+import numpy as np
+
+# disabling progress bar to not clutter the output here
+gcm.config.disable_progress_bars()
+
+# setting random seed for reproducibility
+np.random.seed(10)
+
+causal_model = gcm.StructuralCausalModel(causal_graph)
+
+# Automatically assign appropriate causal models to each node in graph
+gcm.auto.assign_causal_mechanisms(causal_model, data_week1)
+
+# call the API for attributing change in the average value of `received`
+contributions = gcm.distribution_change(causal_model,
+                                        data_week1,
+                                        data_week2,
+                                        &#39;received&#39;,
+                                        num_samples=2000,
+                                        difference_estimation_func=lambda x1, x2 : np.mean(x2) - np.mean(x1))
+
+plt.bar(contributions.keys(), contributions.values())
+plt.ylabel(&#39;Contribution&#39;)
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_supply_chain_dist_change_17_0.png" src="../_images/example_notebooks_gcm_supply_chain_dist_change_17_0.png" />
+</div>
+</div>
+<p>These point estimates suggest that changes in the causal mechanisms of <em>demand</em> and <em>confirmed</em> are the main drivers of the change in the average value of <em>received</em> between two weeks. It would be risky, however, to draw conclusions from these point estimates. Therefore, we compute the bootstrap confidence interval for each attribution.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>median_contribs, uncertainty_contribs = gcm.confidence_intervals(
+    gcm.bootstrap_sampling(gcm.distribution_change,
+                           causal_model,
+                           data_week1,
+                           data_week2,
+                           &#39;received&#39;,
+                           num_samples=2000,
+                           difference_estimation_func=lambda x1, x2 : np.mean(x2) - np.mean(x1)),
+    confidence_level=0.95,
+    num_bootstrap_resamples=10)
+
+yerr_plus = [uncertainty_contribs[node][1] - median_contribs[node] for node in median_contribs.keys()]
+yerr_minus = [median_contribs[node] - uncertainty_contribs[node][0] for node in median_contribs.keys()]
+plt.bar(median_contribs.keys(), median_contribs.values(), yerr=np.array([yerr_minus, yerr_plus]), ecolor=&#39;black&#39;)
+plt.ylabel(&#39;Contribution&#39;)
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_supply_chain_dist_change_19_0.png" src="../_images/example_notebooks_gcm_supply_chain_dist_change_19_0.png" />
+</div>
+</div>
+<p>Whereas the <span class="math notranslate nohighlight">\(95\%\)</span> confidence intervals for the contributions of <em>demand</em> and <em>confirmed</em> are above <span class="math notranslate nohighlight">\(0\)</span>, those of other nodes are close to <span class="math notranslate nohighlight">\(0\)</span>. Overall, these results suggest that changes in the causal mechanisms of <em>demand</em> and <em>confirmed</em> are the drivers for the observed change in the <em>received</em> quantity week-over-week. Causal mechanisms can change in a real-world system, for instance, after deploying a new subsystem with a different algorithm. In fact, these results are
+consistent with the <strong>ground truth</strong> (see Appendix).</p>
+</section>
+</section>
+</section>
+<section id="Appendix:-Ground-Truth">
+<h2>Appendix: Ground Truth<a class="headerlink" href="#Appendix:-Ground-Truth" title="Permalink to this heading"></a></h2>
+<p>We generate synthetic data inspired from a real-world use case in Amazon’s supply chain. To this end, we assume a linear Additive Noise Model (ANM) as the underlying data-generating process at each node. That is, each node is a linear function of its direct causes and an additive unobserved noise term. For more technical details on ANMs, we refer the interested reader to Chapter 7.1.2 of <a class="reference external" href="https://library.oapen.org/bitstream/handle/20.500.12657/26040/11283.pdf?sequence=1&amp;isAllowed=y">Elements of Causal Inference
+book</a>. Using linear ANMs, we generate data (or draw i.i.d. samples) from the distribution of each variable. We use the Gamma distribution for noise terms mainly to mimic real-world setting, where the distribution of variables often show heavy-tail behaviour. Between two weeks, we only change the data-generating process (causal mechanism) of <em>demand</em> and <em>confirmed</em> respectively by changing the
+value of demand mean from <span class="math notranslate nohighlight">\(2\)</span> to <span class="math notranslate nohighlight">\(4\)</span>, and linear coefficient <span class="math notranslate nohighlight">\(\alpha\)</span> from <span class="math notranslate nohighlight">\(1\)</span> to <span class="math notranslate nohighlight">\(2\)</span>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import pandas as pd
+import secrets
+
+ASINS = [secrets.token_hex(5).upper() for i in range(1000)]
+import numpy as np
+def buying_data(alpha, beta, demand_mean):
+    constraint = np.random.gamma(1, scale=1, size=1000)
+    demand = np.random.gamma(demand_mean, scale=1, size=1000)
+    submitted = demand - constraint + np.random.gamma(1, scale=1, size=1000)
+    confirmed = alpha * submitted + np.random.gamma(0.1, scale=1, size=1000)
+    received = beta * confirmed + np.random.gamma(0.1, scale=1, size=1000)
+    return pd.DataFrame(dict(asin=ASINS,
+                              demand=np.round(demand),
+                              constraint=np.round(constraint),
+                              submitted = np.round(submitted),
+                              confirmed = np.round(confirmed),
+                              received = np.round(received)))
+
+
+# we change the parameters alpha and demand_mean between weeks
+data_week1 = buying_data(1, 1, demand_mean=2)
+data_week1[&#39;week&#39;] = &#39;w1&#39;
+data_week2 = buying_data(2, 1, demand_mean=4)
+data_week2[&#39;week&#39;] = &#39;w2&#39;
+
+data = data_week1.append(data_week2, ignore_index=True)
+# write data to a csv file
+# data.to_csv(&#39;supply_chain_week_over_week.csv&#39;, index=False)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_5844/2721469738.py:26: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  data = data_week1.append(data_week2, ignore_index=True)
+</pre></div></div>
+</div>
+</section>
+</section>
+
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="gcm_401k_analysis.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Impact of 401(k) eligibility on net financial assets</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="gcm_counterfactual_medical_dry_eyes.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Counterfactual Analysis in a Medical Case</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, PyWhy contributors.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>
