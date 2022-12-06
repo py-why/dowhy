@@ -9,7 +9,7 @@ Subpackages
 
    dowhy.api
    dowhy.causal_estimators
-   dowhy.causal_identifiers
+   dowhy.causal_identifier
    dowhy.causal_refuters
    dowhy.data_transformers
    dowhy.do_samplers
@@ -33,14 +33,6 @@ dowhy.causal\_graph module
 --------------------------
 
 .. automodule:: dowhy.causal_graph
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-dowhy.causal\_identifier module
--------------------------------
-
-.. automodule:: dowhy.causal_identifier
    :members:
    :undoc-members:
    :show-inheritance:

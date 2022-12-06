@@ -60,6 +60,14 @@ dowhy.utils.propensity\_score module
    :undoc-members:
    :show-inheritance:
 
+dowhy.utils.regression module
+-----------------------------
+
+.. automodule:: dowhy.utils.regression
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 
