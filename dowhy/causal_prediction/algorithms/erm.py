@@ -2,10 +2,10 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from dowhy.causal_prediction.algorithms.base_algorithm import Algorithm
+from dowhy.causal_prediction.algorithms.base_algorithm import PredictionAlgorithm
 
 
-class ERM(Algorithm):
+class ERM(PredictionAlgorithm):
     def __init__(self, model, optimizer="Adam", lr=1e-3, weight_decay=0.0, betas=(0.9, 0.999), momentum=0.9):
         super().__init__(model, optimizer, lr, weight_decay, betas, momentum)
 
@@ -17,13 +17,13 @@ class ERM(Algorithm):
         :param weight_decay: Value of weight decay for optimizer
         :param betas: Adam configuration parameters (beta1, beta2), exponential decay rate for the first moment and second-moment estimates, respectively.
         :param momentum: Value of momentum for SGD optimzer
-        :returns: an instance of Algorithm class
+        :returns: an instance of PredictionAlgorithm class
 
         """
 
     def training_step(self, train_batch, batch_idx):
         """
-        Override `training_step` from Algorithm class for ERM-specific training loop.
+        Override `training_step` from PredictionAlgorithm class for ERM-specific training loop.
 
         """
 
