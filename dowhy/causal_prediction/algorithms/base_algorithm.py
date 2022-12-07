@@ -3,10 +3,10 @@ import torch
 from torch.nn import functional as F
 
 
-class Algorithm(pl.LightningModule):
+class PredictionAlgorithm(pl.LightningModule):
     def __init__(self, model, optimizer, lr, weight_decay, betas, momentum):
         """
-        This class implements the default methods for a Pytorch lightning module `pl.LightningModule`. 
+        This class implements the default methods for a Pytorch lightning module `pl.LightningModule`.
         Its methods are called when the `fit()` method is called. To know more about these methods, refer to https://pytorch-lightning.readthedocs.io/en/stable/common/lightning_module.html.
         """
         super().__init__()
@@ -70,7 +70,7 @@ class Algorithm(pl.LightningModule):
 
     def configure_optimizers(self):
         """
-        Initialize the optimizer using params passed when initializing Algorithm class.
+        Initialize the optimizer using params passed when initializing PredictionAlgorithm class.
 
         """
         if self.optimizer == "Adam":
