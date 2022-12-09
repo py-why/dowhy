@@ -96,7 +96,7 @@ class Causalml(CausalEstimator):
                 estimator_class = self._get_causalml_class_object(causalml_estimator)
                 self.estimator = estimator_class(**kwargs["init_params"])
             except ImportError:
-                logger.error("You must install causalml to use this functionality")
+                logger.error("You must install https://github.com/uber/causalml to use this functionality")
                 raise
         else:
             self.estimator = causalml_estimator
