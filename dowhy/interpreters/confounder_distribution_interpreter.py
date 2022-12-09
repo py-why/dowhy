@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_estimators.propensity_score_weighting_estimator import PropensityScoreWeightingEstimator
@@ -62,14 +63,14 @@ class ConfounderDistributionInterpreter(VisualInterpreter):
         ax.set_xticklabels(labels)
         ax.legend()
 
-    def interpret(self):
+    def interpret(self, data: pd.DataFrame):
 
         """
         Shows distribution changes for confounding variables before and after applying inverse propensity weights.
         """
 
         cols = self.estimator._observed_common_causes_names + self.estimator._treatment_name
-        df = self.estimator._data[cols].copy()
+        df = data[cols].copy()
         treated = self.estimator._treatment_name[0]
         propensity = self.estimate.propensity_scores
 

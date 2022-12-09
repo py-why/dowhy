@@ -76,6 +76,7 @@ class TestEstimator(object):
 
         true_ate = data["ate"]
         ate_estimate = estimator_ate.estimate_effect(
+            data["df"],
             control_value=0,
             treatment_value=1,
             test_significance=test_significance,
@@ -95,14 +96,14 @@ class TestEstimator(object):
         assert res
         # Compute confidence intervals, standard error and significance tests
         if confidence_intervals:
-            ate_estimate.get_confidence_intervals()
-            ate_estimate.get_confidence_intervals(confidence_level=0.99)
-            ate_estimate.get_confidence_intervals(method="bootstrap")
-            ate_estimate.get_standard_error()
-            ate_estimate.get_standard_error(method="bootstrap")
+            ate_estimate.get_confidence_intervals(data["df"])
+            ate_estimate.get_confidence_intervals(data["df"], confidence_level=0.99)
+            ate_estimate.get_confidence_intervals(data["df"], method="bootstrap")
+            ate_estimate.get_standard_error(data["df"])
+            ate_estimate.get_standard_error(data["df"], method="bootstrap")
         if test_significance:
-            ate_estimate.test_stat_significance()
-            ate_estimate.test_stat_significance(method="bootstrap")
+            ate_estimate.test_stat_significance(data["df"])
+            ate_estimate.test_stat_significance(data["df"], method="bootstrap")
 
     def average_treatment_effect_testsuite(
         self,
@@ -178,7 +179,7 @@ class TestEstimator(object):
             outcome=data["outcome_name"],
         )
         true_ate = data["ate"]
-        ate_estimate = estimator_ate.estimate_effect()
+        ate_estimate = estimator_ate.estimate_effect(data["df"])
         error = ate_estimate.value - true_ate
         print(
             "Error in ATE estimate = {0} with tolerance {1}%. Estimated={2},True={3}".format(

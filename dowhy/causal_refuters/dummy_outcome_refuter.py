@@ -499,6 +499,7 @@ def refute_dummy_outcome(
                 **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
             )
             new_effect = new_estimator.estimate_effect(
+                new_data,
                 control_value=estimate.control_value,
                 treatment_value=estimate.treatment_value,
                 target_units=estimate.estimator._target_units,
@@ -580,6 +581,7 @@ def refute_dummy_outcome(
                     **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
                 )
                 new_effect = new_estimator.estimate_effect(
+                    new_data,
                     control_value=estimate.control_value,
                     treatment_value=estimate.treatment_value,
                     target_units=estimate.estimator._target_units,

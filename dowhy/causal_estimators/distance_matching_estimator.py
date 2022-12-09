@@ -22,7 +22,7 @@ class DistanceMatchingEstimator(CausalEstimator):
     def __init__(
         self,
         identified_estimand: IdentifiedEstimand,
-        test_significance: bool = False,
+        test_significance: Union[bool, str] = False,
         evaluate_effect_strength: bool = False,
         confidence_intervals: bool = False,
         num_null_simulations: int = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
@@ -115,14 +115,14 @@ class DistanceMatchingEstimator(CausalEstimator):
         self._set_data(data, treatment_name, outcome_name)
         self.exact_match_cols = exact_match_cols
 
-        self._set_effect_modifiers(effect_modifier_names)
+        self._set_effect_modifiers(data, effect_modifier_names)
 
         # Check if the treatment is one-dimensional
         if len(self._treatment_name) > 1:
             error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
             raise Exception(error_msg)
         # Checking if the treatment is binary
-        if not pd.api.types.is_bool_dtype(self._data[self._treatment_name[0]]):
+        if not pd.api.types.is_bool_dtype(data[self._treatment_name[0]]):
             error_msg = "Distance Matching method is applicable only for binary treatments"
             self.logger.error(error_msg)
             raise Exception(error_msg)
@@ -135,7 +135,7 @@ class DistanceMatchingEstimator(CausalEstimator):
                 self._observed_common_causes_names = [
                     v for v in self._observed_common_causes_names if v not in self.exact_match_cols
                 ]
-            self._observed_common_causes = self._data[self._observed_common_causes_names]
+            self._observed_common_causes = data[self._observed_common_causes_names]
             # Convert the categorical variables into dummy/indicator variables
             # Basically, this gives a one hot encoding for each category
             # The first category is taken to be the base line.
@@ -154,8 +154,6 @@ class DistanceMatchingEstimator(CausalEstimator):
     def estimate_effect(
         self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
     ):
-        if data is None:
-            data = self._data
         # this assumes a binary treatment regime
         self._target_units = target_units
         self._treatment_value = treatment_value

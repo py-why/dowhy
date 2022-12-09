@@ -41,7 +41,7 @@ class Econml(CausalEstimator):
         self,
         identified_estimand: IdentifiedEstimand,
         econml_estimator: Union[_EconmlEstimator, str],
-        test_significance: bool = False,
+        test_significance: Union[bool, str] = False,
         evaluate_effect_strength: bool = False,
         confidence_intervals: bool = False,
         num_null_simulations: int = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
@@ -124,7 +124,7 @@ class Econml(CausalEstimator):
                     methods support this currently.
         """
         self._set_data(data, treatment_name, outcome_name)
-        self._set_effect_modifiers(effect_modifier_names)
+        self._set_effect_modifiers(data, effect_modifier_names)
 
         # Save parameters for later refutter fitting
         self._econml_fit_params = kwargs
@@ -152,12 +152,12 @@ class Econml(CausalEstimator):
                 # Override the effect_modifiers set in CausalEstimator.__init__()
                 # Also only update self._effect_modifiers, and create a copy of self._effect_modifier_names
                 # the latter can be used by other estimator methods later
-                self._effect_modifiers = self._data[effect_modifier_names]
+                self._effect_modifiers = data[effect_modifier_names]
                 self._effect_modifiers = pd.get_dummies(self._effect_modifiers, drop_first=True)
                 self._effect_modifier_names = effect_modifier_names
             self.logger.debug("Effect modifiers: " + ",".join(effect_modifier_names))
         if self._observed_common_causes_names:
-            self._observed_common_causes = self._data[self._observed_common_causes_names]
+            self._observed_common_causes = data[self._observed_common_causes_names]
             self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
         else:
             self._observed_common_causes = None
@@ -169,7 +169,7 @@ class Econml(CausalEstimator):
         else:
             self.estimating_instrument_names = parse_state(self.iv_instrument_name)
         if self.estimating_instrument_names:
-            self._estimating_instruments = self._data[self.estimating_instrument_names]
+            self._estimating_instruments = data[self.estimating_instrument_names]
             self._estimating_instruments = pd.get_dummies(self._estimating_instruments, drop_first=True)
         else:
             self._estimating_instruments = None
@@ -227,8 +227,6 @@ class Econml(CausalEstimator):
                      It can be a DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
                      It can also be a lambda function that can be used as an index for the data (pandas DataFrame) to select the required rows.
         """
-        if data is None:
-            data = self._data
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value

@@ -21,7 +21,7 @@ class LinearRegressionEstimator(RegressionEstimator):
     def __init__(
         self,
         identified_estimand: IdentifiedEstimand,
-        test_significance: bool = False,
+        test_significance: Union[bool, str] = False,
         evaluate_effect_strength: bool = False,
         confidence_intervals: bool = False,
         num_null_simulations: int = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
@@ -100,11 +100,11 @@ class LinearRegressionEstimator(RegressionEstimator):
             expr += "+" + "+".join(interaction_terms)
         return expr
 
-    def predict_fn(self, model, features):
+    def predict_fn(self, data, model, features):
         return model.predict(features)
 
-    def _build_model(self):
-        features = self._build_features()
+    def _build_model(self, data: pd.DataFrame):
+        features = self._build_features(data)
         model = sm.OLS(self._outcome, features).fit()
         return (features, model)
 

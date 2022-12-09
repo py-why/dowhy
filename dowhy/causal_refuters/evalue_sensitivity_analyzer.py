@@ -64,7 +64,7 @@ class EValueSensitivityAnalyzer:
         self.benchmarking_results = None
         self.sd_outcome = np.std(self.data[outcome_name])
 
-    def check_sensitivity(self, plot=True):
+    def check_sensitivity(self, data: pd.DataFrame, plot=True):
         """
         Computes E-value for point estimate and confidence limits. Benchmarks E-values against
         measured confounders using Observed Covariate E-values. Plots E-values and Observed
@@ -75,7 +75,7 @@ class EValueSensitivityAnalyzer:
 
         if isinstance(self.estimate.estimator, LinearRegressionEstimator):
             coef_est = self.estimate.value
-            coef_se = self.estimate.get_standard_error()[0]
+            coef_se = self.estimate.get_standard_error(data)[0]
         elif isinstance(self.estimate.estimator, GeneralizedLinearModelEstimator):
             coef_est = self.estimate.estimator.model.params[1:2].to_numpy()[0]
             coef_se = self.estimate.estimator.model.bse[1:2].to_numpy()[0]
@@ -88,7 +88,7 @@ class EValueSensitivityAnalyzer:
                 "Not benchmarking with Observed Covariate E-values. Confidence interval is already tipped."
             )
         else:
-            self.benchmark()
+            self.benchmark(data)
 
         if plot:
             self.plot()
@@ -237,7 +237,7 @@ class EValueSensitivityAnalyzer:
         )
         ax.plot(x_est, y_est, color=color)
 
-    def benchmark(self):
+    def benchmark(self, data: pd.DataFrame):
         """
         Benchmarks E-values against the measured confounders using McGowan and Greevy Jr.'s Observed
         Covariate E-value. This approach drops measured confounders and re-fits the estimator, measuring
@@ -269,13 +269,14 @@ class EValueSensitivityAnalyzer:
 
             # new effect estimate
             new_effect = new_estimator.estimate_effect(
+                self.data,
                 control_value=self.estimate.control_value,
                 treatment_value=self.estimate.treatment_value,
                 target_units=self.estimate.estimator._target_units,
             )
             if isinstance(self.estimate.estimator, LinearRegressionEstimator):
                 coef_est = new_effect.value
-                coef_se = new_effect.get_standard_error()[0]
+                coef_se = new_effect.get_standard_error(data)[0]
             elif isinstance(self.estimate.estimator, GeneralizedLinearModelEstimator):
                 coef_est = new_effect.estimator.model.params[1:2].to_numpy()[0]
                 coef_se = new_effect.estimator.model.bse[1:2].to_numpy()[0]

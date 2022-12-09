@@ -12,7 +12,7 @@ class TextualEffectInterpreter(TextualInterpreter):
         # Setting estimator attribute for convenience
         self.estimator = self.estimate.estimator
 
-    def interpret(self):
+    def interpret(self, data: pd.DataFrame):
         """Interpret causal effect by showing how much a unit change in treatment will cause change in the outcome."""
         interpret_text = ""
         treatments_str = ",".join(self.estimator._treatment_name)

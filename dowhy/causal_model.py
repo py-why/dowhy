@@ -449,7 +449,7 @@ class CausalModel:
 
         for method in method_name_arr:
             interpreter = interpreters.get_class_object(method)
-            interpreter(self, **kwargs).interpret()
+            interpreter(self, **kwargs).interpret(self._data)
 
     def summary(self, print_to_stdout=False):
         """Print a text summary of the model.

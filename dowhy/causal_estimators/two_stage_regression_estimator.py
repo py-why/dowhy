@@ -28,7 +28,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
     def __init__(
         self,
         identified_estimand: IdentifiedEstimand,
-        test_significance: bool = False,
+        test_significance: Union[bool, str] = False,
         evaluate_effect_strength: bool = False,
         confidence_intervals: bool = False,
         num_null_simulations: int = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
@@ -168,7 +168,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
                     methods support this currently.
         """
         self._set_data(data, treatment_name, outcome_name)
-        self._set_effect_modifiers(effect_modifier_names)
+        self._set_effect_modifiers(data, effect_modifier_names)
 
         if len(self._treatment_name) > 1:
             error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
@@ -179,7 +179,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
             self._frontdoor_variables_names = self._target_estimand.get_frontdoor_variables()
 
             if self._frontdoor_variables_names:
-                self._frontdoor_variables = self._data[self._frontdoor_variables_names]
+                self._frontdoor_variables = data[self._frontdoor_variables_names]
             else:
                 self._frontdoor_variables = None
                 error_msg = "No front-door variable present. Two stage regression is not applicable"
@@ -189,7 +189,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
             self._mediators_names = self._target_estimand.get_mediator_variables()
 
             if self._mediators_names:
-                self._mediators = self._data[self._mediators_names]
+                self._mediators = data[self._mediators_names]
             else:
                 self._mediators = None
                 error_msg = "No mediator variable present. Two stage regression is not applicable"
@@ -201,7 +201,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
             self._instrumental_variables_names = self._target_estimand.get_instrumental_variables()
 
             if self._instrumental_variables_names:
-                self._instrumental_variables = self._data[self._instrumental_variables_names]
+                self._instrumental_variables = data[self._instrumental_variables_names]
             else:
                 self._instrumental_variables = None
                 error_msg = "No instrumental variable present. Two stage regression is not applicable"
@@ -245,8 +245,6 @@ class TwoStageRegressionEstimator(CausalEstimator):
     def estimate_effect(
         self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
     ):
-        if data is None:
-            data = self._data
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
@@ -254,6 +252,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         estimate_value = None
         # First stage
         first_stage_estimate = self._first_stage_model.estimate_effect(
+            data,
             control_value=control_value,
             treatment_value=treatment_value,
             target_units=target_units,
@@ -261,6 +260,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
 
         # Second Stage
         second_stage_estimate = self._second_stage_model.estimate_effect(
+            data,
             control_value=control_value,
             treatment_value=treatment_value,
             target_units=target_units,
@@ -277,7 +277,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         if self._target_estimand.estimand_type == EstimandType.NONPARAMETRIC_NDE:
 
             total_effect_estimate = self._second_stage_model_nde.estimate_effect(
-                control_value=control_value, treatment_value=treatment_value, target_units=target_units
+                data, control_value=control_value, treatment_value=treatment_value, target_units=target_units
             )
             natural_direct_effect = total_effect_estimate.value - natural_indirect_effect
             estimate_value = natural_direct_effect
@@ -298,8 +298,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         estimate.add_estimator(self)
         return estimate
 
-    def build_first_stage_features(self):
-        data_df = self._data
+    def build_first_stage_features(self, data_df: pd.DataFrame):
         treatment_vals = data_df[self._treatment_name]
         if len(self._observed_common_causes_names) > 0:
             observed_common_causes_vals = data_df[self._observed_common_causes_names]

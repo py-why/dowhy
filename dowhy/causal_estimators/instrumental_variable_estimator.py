@@ -24,7 +24,7 @@ class InstrumentalVariableEstimator(CausalEstimator):
         self,
         identified_estimand: IdentifiedEstimand,
         iv_instrument_name: Optional[Union[List, Dict, str]] = None,
-        test_significance: bool = False,
+        test_significance: Union[bool, str] = False,
         evaluate_effect_strength: bool = False,
         confidence_intervals: bool = False,
         num_null_simulations: int = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
@@ -95,7 +95,7 @@ class InstrumentalVariableEstimator(CausalEstimator):
                     methods support this currently.
         """
         self._set_data(data, treatment_name, outcome_name)
-        self._set_effect_modifiers(effect_modifier_names)
+        self._set_effect_modifiers(data, effect_modifier_names)
 
         self.estimating_instrument_names = self._target_estimand.instrumental_variables
         if self.iv_instrument_name is not None:
@@ -108,7 +108,7 @@ class InstrumentalVariableEstimator(CausalEstimator):
             raise ValueError(
                 "Number of instruments fewer than number of treatments. 2SLS requires at least as many instruments as treatments."
             )
-        self._estimating_instruments = self._data[self.estimating_instrument_names]
+        self._estimating_instruments = data[self.estimating_instrument_names]
 
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
@@ -126,8 +126,6 @@ class InstrumentalVariableEstimator(CausalEstimator):
                      It can be a DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
                      It can also be a lambda function that can be used as an index for the data (pandas DataFrame) to select the required rows.
         """
-        if data is None:
-            data = self._data
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value

@@ -303,7 +303,7 @@ class CausalRefutation:
 
         for method in method_name_arr:
             interpreter = interpreters.get_class_object(method)
-            interpreter(self, **kwargs).interpret()
+            interpreter(self, **kwargs).interpret(self.refuter._data)
 
     def __str__(self):
         if self.refutation_result is None:

@@ -26,14 +26,14 @@ class PropensityBalanceInterpreter(VisualInterpreter):
             self.logger.error(error_msg)
             raise ValueError(error_msg)
 
-    def interpret(self):
+    def interpret(self, data: pd.DataFrame):
         """Balance plot that shows the change in standardized mean differences for each covariate after propensity score stratification."""
         cols = (
             self.estimator._observed_common_causes_names
             + self.estimator._treatment_name
             + ["strata", "propensity_score"]
         )
-        df = self.estimator._data[cols]
+        df = data[cols]
         df_long = (
             pd.wide_to_long(df.reset_index(), stubnames=["W"], i="index", j="common_cause_id")
             .reset_index()

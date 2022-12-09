@@ -29,7 +29,7 @@ class Causalml(CausalEstimator):
         self,
         identified_estimand: IdentifiedEstimand,
         causalml_estimator: Union[_CausalmlEstimator, str],
-        test_significance: bool = False,
+        test_significance: Union[bool, str] = False,
         evaluate_effect_strength: bool = False,
         confidence_intervals: bool = False,
         num_null_simulations: int = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
@@ -111,7 +111,7 @@ class Causalml(CausalEstimator):
                     methods support this currently.
         """
         self._set_data(data, treatment_name, outcome_name)
-        self._set_effect_modifiers(effect_modifier_names)
+        self._set_effect_modifiers(data, effect_modifier_names)
 
         # Check the backdoor variables being used
         self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
@@ -120,7 +120,7 @@ class Causalml(CausalEstimator):
         self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
         if self._observed_common_causes_names:
             # Get the data of the unobserved confounders
-            self._observed_common_causes = self._data[self._observed_common_causes_names]
+            self._observed_common_causes = data[self._observed_common_causes_names]
             # One hot encode the data if they are categorical
             self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
         else:
@@ -132,7 +132,7 @@ class Causalml(CausalEstimator):
         # Perform the same actions as the above
         self._instrumental_variable_names = self._target_estimand.instrumental_variables
         if self._instrumental_variable_names:
-            self._instrumental_variables = self._data[self._instrumental_variable_names]
+            self._instrumental_variables = data[self._instrumental_variable_names]
             self._instrumental_variables = pd.get_dummies(self._instrumental_variables, drop_first=True)
         else:
             self._instrumental_variables = []
@@ -168,9 +168,6 @@ class Causalml(CausalEstimator):
                      It can be a DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
                      It can also be a lambda function that can be used as an index for the data (pandas DataFrame) to select the required rows.
         """
-        if data is None:
-            data = self._data
-
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
@@ -192,6 +189,23 @@ class Causalml(CausalEstimator):
         arg_names = inspect.getfullargspec(self.estimator.fit_predict)[0]
         matched_args = {arg: func_args[arg] for arg in func_args.keys() if arg in arg_names}
         cate_estimates = self.estimator.fit_predict(**matched_args)
+
+        significance_result = (
+            self.test_significance(data, estimate.value, method=self._significance_test)
+            if self._significance_test
+            else None
+        )
+
+        confidence_intervals = (
+            self.estimate_confidence_intervals(
+                data, estimate.value, confidence_level=self.confidence_level, method=self._confidence_intervals
+            )
+            if self._confidence_intervals
+            else None
+        )
+
+        effect_strength_dict = self.evaluate_effect_strength(estimate) if self._effect_strength_eval else None
+        # estimate.add_effect_strength(effect_strength_dict)
 
         estimate = CausalEstimate(
             estimate=value_tuple[0],

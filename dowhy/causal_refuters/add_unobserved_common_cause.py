@@ -758,7 +758,7 @@ def sensitivity_e_value(
         treatment_name=treatment_name[0],
         outcome_name=outcome_name[0],
     )
-    analyzer.check_sensitivity(plot=plot_estimate)
+    analyzer.check_sensitivity(data, plot=plot_estimate)
     return analyzer
 
 
@@ -830,6 +830,7 @@ def sensitivity_simulation(
             **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
         )
         new_effect = new_estimator.estimate_effect(
+            new_data,
             control_value=estimate.control_value,
             treatment_value=estimate.treatment_value,
             target_units=estimate.estimator._target_units,
@@ -879,6 +880,7 @@ def sensitivity_simulation(
                         **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
                     )
                     new_effect = new_estimator.estimate_effect(
+                        new_data,
                         control_value=estimate.control_value,
                         treatment_value=estimate.treatment_value,
                         target_units=estimate.estimator._target_units,
@@ -957,6 +959,7 @@ def sensitivity_simulation(
                     **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
                 )
                 new_effect = new_estimator.estimate_effect(
+                    new_data,
                     control_value=estimate.control_value,
                     treatment_value=estimate.treatment_value,
                     target_units=estimate.estimator._target_units,
@@ -1017,6 +1020,7 @@ def sensitivity_simulation(
                     **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
                 )
                 new_effect = new_estimator.estimate_effect(
+                    new_data,
                     control_value=estimate.control_value,
                     treatment_value=estimate.treatment_value,
                     target_units=estimate.estimator._target_units,
