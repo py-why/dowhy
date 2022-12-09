@@ -7,13 +7,16 @@
 # ----------------------------------------------#
 
 import os
+
 import numpy as np
 import pandas as pd
-from .load_process_data_BCS import extract_target, binarize_features
+
+from .load_process_data_BCS import binarize_features, extract_target
 
 
 class PricingInstance(object):
     """Instance of the pricing problem"""
+
     def __init__(self, rp, rn, Xp, Xn, v0, z0):
         self.rp = rp
         self.rn = rn
@@ -34,7 +37,7 @@ class PricingInstance(object):
         Rp0 = self.rp.sum()
         self.LB = np.minimum(np.cumsum(np.sort(self.Rp)[::-1])[1:], Rp0)
         self.LB += np.sort(self.Rn)[-2::-1]
-        self.LB -= lambda1 * np.arange(2, len(self.Rp)+1)
+        self.LB -= lambda1 * np.arange(2, len(self.Rp) + 1)
         self.LB = self.v0 - self.LB
 
         # Lower bound specific to each singleton solution
@@ -66,9 +69,9 @@ def beam_search(r, X, lambda0, lambda1, K=1, UB=0, D=10, B=5, wLB=0.5, eps=1e-6)
 
     # Remove redundant rows by grouping by unique feature combinations and summing residual
     X2 = X.copy()
-#    X2[('r','','')] = r
-#    X2 = X2.groupby(X2.columns.tolist()[:-1], as_index=False, sort=False).sum()
-#    r2 = X2.pop(('r','',''))
+    #    X2[('r','','')] = r
+    #    X2 = X2.groupby(X2.columns.tolist()[:-1], as_index=False, sort=False).sum()
+    #    r2 = X2.pop(('r','',''))
     r2 = r
 
     # Initialize queue with root instance
@@ -92,15 +95,17 @@ def beam_search(r, X, lambda0, lambda1, K=1, UB=0, D=10, B=5, wLB=0.5, eps=1e-6)
 
         # Process instances in queue
         for inst in instCurr:
-        #inst = instCurr[0]
+            # inst = instCurr[0]
 
             # Evaluate all singleton solutions
             inst.eval_singletons(lambda1)
 
             # Best solutions that also improve on current output (allow for duplicate removal)
-            vCand = inst.v1[inst.v1 < UB - eps].sort_values()[:K+B]
+            vCand = inst.v1[inst.v1 < UB - eps].sort_values()[: K + B]
             if len(vCand):
-                zCand = pd.DataFrame(zOut.index.values[:,np.newaxis] == vCand.index.values, index=zOut.index).astype(int)
+                zCand = pd.DataFrame(zOut.index.values[:, np.newaxis] == vCand.index.values, index=zOut.index).astype(
+                    int
+                )
                 zCand = zCand.add(inst.z0, axis=0)
                 # Append to current output
                 vOut = np.append(vOut, vCand.values)
@@ -108,12 +113,12 @@ def beam_search(r, X, lambda0, lambda1, K=1, UB=0, D=10, B=5, wLB=0.5, eps=1e-6)
                 # Remove duplicates
                 _, idxUniq = np.unique(zOut, return_index=True, axis=1)
                 vOut = vOut[idxUniq]
-                zOut = zOut.iloc[:,idxUniq]
+                zOut = zOut.iloc[:, idxUniq]
                 # Update output
                 indBest = np.argsort(vOut)[:K]
                 vOut = vOut[indBest]
                 UB = vOut.max()
-                zOut = zOut.iloc[:,indBest]
+                zOut = zOut.iloc[:, indBest]
                 zOut.columns = range(zOut.shape[1])
 
             # Compute lower bounds on higher-degree solutions
@@ -122,7 +127,7 @@ def beam_search(r, X, lambda0, lambda1, K=1, UB=0, D=10, B=5, wLB=0.5, eps=1e-6)
             # Evaluate children using weighted average of their costs and LBs
             vChild = (1 - wLB) * inst.v1 + wLB * inst.LB1
             # Best children with potential to improve on current output and current candidates (allow for duplicate removal)
-            vChild = vChild[(inst.LB1 < UB - eps) & (vChild < vNextMax - eps)].sort_values()[:2*B]
+            vChild = vChild[(inst.LB1 < UB - eps) & (vChild < vNextMax - eps)].sort_values()[: 2 * B]
             # Iterate through best children
             numAdded = 0
             for i in vChild.index:
@@ -145,14 +150,16 @@ def beam_search(r, X, lambda0, lambda1, K=1, UB=0, D=10, B=5, wLB=0.5, eps=1e-6)
                 Xn = inst.Xn.loc[rowKeep]
                 # Remove redundant features
                 colKeep = pd.Series(Xp.columns.get_level_values(0) != i[0], index=Xp.columns)
-                if i[1] == '<=':
-                    thresh = Xp[i[0]].columns.get_level_values(1).to_series().replace('NaN', np.nan)
-                    colKeep[i[0]] = (Xp[i[0]].columns.get_level_values(0) == '>') & (thresh < i[2])
-                elif i[1] == '>':
-                    thresh = Xp[i[0]].columns.get_level_values(1).to_series().replace('NaN', np.nan)
-                    colKeep[i[0]] = (Xp[i[0]].columns.get_level_values(0) == '<=') & (thresh > i[2])
-                elif i[1] == '!=':
-                    colKeep[i[0]] = (Xp[i[0]].columns.get_level_values(0) == '!=') & (Xp[i[0]].columns.get_level_values(1) != i[2])
+                if i[1] == "<=":
+                    thresh = Xp[i[0]].columns.get_level_values(1).to_series().replace("NaN", np.nan)
+                    colKeep[i[0]] = (Xp[i[0]].columns.get_level_values(0) == ">") & (thresh < i[2])
+                elif i[1] == ">":
+                    thresh = Xp[i[0]].columns.get_level_values(1).to_series().replace("NaN", np.nan)
+                    colKeep[i[0]] = (Xp[i[0]].columns.get_level_values(0) == "<=") & (thresh > i[2])
+                elif i[1] == "!=":
+                    colKeep[i[0]] = (Xp[i[0]].columns.get_level_values(0) == "!=") & (
+                        Xp[i[0]].columns.get_level_values(1) != i[2]
+                    )
                 Xp = Xp.loc[:, colKeep]
                 Xn = Xn.loc[:, colKeep]
                 instNext.append(PricingInstance(rp, rn, Xp, Xn, inst.v1[i], z0))
@@ -172,7 +179,7 @@ def beam_search(r, X, lambda0, lambda1, K=1, UB=0, D=10, B=5, wLB=0.5, eps=1e-6)
         instCurr = instNext
 
     # Conjunctions corresponding to solutions
-    aOut = 1 - (np.dot(1 - X, zOut) > 0) # Changed matmul to dot, because failed on some machines
+    aOut = 1 - (np.dot(1 - X, zOut) > 0)  # Changed matmul to dot, because failed on some machines
 
     return vOut, zOut, aOut
 
@@ -239,21 +246,23 @@ def beam_search_K1(r, X, lambda0, lambda1, UB=0, D=10, B=5, wLB=0.5, eps=1e-6):
             vChild = (1 - wLB) * inst.v1 + wLB * inst.LB1
 
             # Best children with potential to improve on current output and current candidates (allow for duplicate removal)
-            vChild = vChild[(inst.LB1 < UB - eps) & (vChild < vNextMax - eps)].sort_values()[:B+idxInst]
+            vChild = vChild[(inst.LB1 < UB - eps) & (vChild < vNextMax - eps)].sort_values()[: B + idxInst]
             if len(vChild):
                 # Feature indicators of these best children
-                zChild = pd.DataFrame(zOut.index.values[:,np.newaxis] == vChild.index.values, index=zOut.index).astype(int)
+                zChild = pd.DataFrame(zOut.index.values[:, np.newaxis] == vChild.index.values, index=zOut.index).astype(
+                    int
+                )
                 zChild = zChild.add(inst.z0, axis=0)
 
                 # Append to current candidates
                 vNext = np.append(vNext, vChild.values)
                 zNext = pd.concat([zNext, zChild], axis=1, ignore_index=True)
-                idxInstNext = np.append(idxInstNext, np.full(B+idxInst, idxInst))
+                idxInstNext = np.append(idxInstNext, np.full(B + idxInst, idxInst))
                 idxFeatNext = np.append(idxFeatNext, vChild.index.values)
                 # Remove duplicates
                 _, idxUniq = np.unique(zNext, return_index=True, axis=1)
                 vNext = vNext[idxUniq]
-                zNext = zNext.iloc[:,idxUniq]
+                zNext = zNext.iloc[:, idxUniq]
                 idxInstNext = idxInstNext[idxUniq]
                 idxFeatNext = idxFeatNext[idxUniq]
                 # Update candidates
@@ -261,7 +270,7 @@ def beam_search_K1(r, X, lambda0, lambda1, UB=0, D=10, B=5, wLB=0.5, eps=1e-6):
                 vNext = vNext[idxBest]
                 if len(vNext):
                     vNextMax = vNext[-1]
-                zNext = zNext.iloc[:,idxBest]
+                zNext = zNext.iloc[:, idxBest]
                 zNext.columns = range(zNext.shape[1])
                 idxInstNext = idxInstNext[idxBest]
                 idxFeatNext = idxFeatNext[idxBest]
@@ -279,14 +288,16 @@ def beam_search_K1(r, X, lambda0, lambda1, UB=0, D=10, B=5, wLB=0.5, eps=1e-6):
             Xn = instCurr[idxInst].Xn.loc[rowKeep]
             # Remove redundant features
             colKeep = pd.Series(Xp.columns.get_level_values(0) != i[0], index=Xp.columns)
-            if i[1] == '<=':
-                thresh = Xp[i[0]].columns.get_level_values(1).to_series().replace('NaN', np.nan)
-                colKeep[i[0]] = (Xp[i[0]].columns.get_level_values(0) == '>') & (thresh < i[2])
-            elif i[1] == '>':
-                thresh = Xp[i[0]].columns.get_level_values(1).to_series().replace('NaN', np.nan)
-                colKeep[i[0]] = (Xp[i[0]].columns.get_level_values(0) == '<=') & (thresh > i[2])
-            elif i[1] == '!=':
-                colKeep[i[0]] = (Xp[i[0]].columns.get_level_values(0) == '!=') & (Xp[i[0]].columns.get_level_values(1) != i[2])
+            if i[1] == "<=":
+                thresh = Xp[i[0]].columns.get_level_values(1).to_series().replace("NaN", np.nan)
+                colKeep[i[0]] = (Xp[i[0]].columns.get_level_values(0) == ">") & (thresh < i[2])
+            elif i[1] == ">":
+                thresh = Xp[i[0]].columns.get_level_values(1).to_series().replace("NaN", np.nan)
+                colKeep[i[0]] = (Xp[i[0]].columns.get_level_values(0) == "<=") & (thresh > i[2])
+            elif i[1] == "!=":
+                colKeep[i[0]] = (Xp[i[0]].columns.get_level_values(0) == "!=") & (
+                    Xp[i[0]].columns.get_level_values(1) != i[2]
+                )
             Xp = Xp.loc[:, colKeep]
             Xn = Xn.loc[:, colKeep]
             instNext.append(PricingInstance(rp, rn, Xp, Xn, instCurr[idxInst].v1[i], zNext[idxz]))
@@ -328,9 +339,9 @@ def beam_search_no_dup(r, X, lambda0, lambda1, zOld, K=1, UB=0, D=10, B=5, wLB=0
 
     # Remove redundant rows by grouping by unique feature combinations and summing residual
     X2 = X.copy()
-#    X2[('r','','')] = r
-#    X2 = X2.groupby(X2.columns.tolist()[:-1], as_index=False, sort=False).sum()
-#    r2 = X2.pop(('r','',''))
+    #    X2[('r','','')] = r
+    #    X2 = X2.groupby(X2.columns.tolist()[:-1], as_index=False, sort=False).sum()
+    #    r2 = X2.pop(('r','',''))
     r2 = r
 
     # Initialize queue with root instance
@@ -354,16 +365,18 @@ def beam_search_no_dup(r, X, lambda0, lambda1, zOld, K=1, UB=0, D=10, B=5, wLB=0
 
         # Process instances in queue
         for inst in instCurr:
-        #inst = instCurr[0]
+            # inst = instCurr[0]
 
             # Evaluate all singleton solutions
             inst.eval_singletons(lambda1)
 
             # Solutions that improve on current output
             vCand = inst.v1[inst.v1 < UB - eps]
-#            vCand = inst.v1[inst.v1 < UB - eps].sort_values()[:K+B]
+            #            vCand = inst.v1[inst.v1 < UB - eps].sort_values()[:K+B]
             if len(vCand):
-                zCand = pd.DataFrame(zOut.index.values[:,np.newaxis] == vCand.index.values, index=zOut.index).astype(int)
+                zCand = pd.DataFrame(zOut.index.values[:, np.newaxis] == vCand.index.values, index=zOut.index).astype(
+                    int
+                )
                 zCand = zCand.add(inst.z0, axis=0)
                 # Append to previous solutions
                 zDup = pd.concat([zOld, zCand], axis=1, ignore_index=True)
@@ -372,11 +385,11 @@ def beam_search_no_dup(r, X, lambda0, lambda1, zOld, K=1, UB=0, D=10, B=5, wLB=0
                 idxUniq = idxUniq[idxUniq >= nOld] - nOld
                 # Remove duplicates
                 vCand = vCand[idxUniq]
-                zCand = zCand.iloc[:,idxUniq]
+                zCand = zCand.iloc[:, idxUniq]
                 # Best of remaining solutions (allow for further duplicate removal)
-                indBest = vCand.argsort()[:K+B]
+                indBest = vCand.argsort()[: K + B]
                 vCand = vCand[indBest]
-                zCand = zCand.iloc[:,indBest]
+                zCand = zCand.iloc[:, indBest]
 
             if len(vCand):
                 # Append to current output
@@ -385,12 +398,12 @@ def beam_search_no_dup(r, X, lambda0, lambda1, zOld, K=1, UB=0, D=10, B=5, wLB=0
                 # Remove duplicates
                 _, idxUniq = np.unique(zOut, return_index=True, axis=1)
                 vOut = vOut[idxUniq]
-                zOut = zOut.iloc[:,idxUniq]
+                zOut = zOut.iloc[:, idxUniq]
                 # Update output
                 indBest = np.argsort(vOut)[:K]
                 vOut = vOut[indBest]
                 UB = vOut.max()
-                zOut = zOut.iloc[:,indBest]
+                zOut = zOut.iloc[:, indBest]
                 zOut.columns = range(zOut.shape[1])
 
             # Compute lower bounds on higher-degree solutions
@@ -399,7 +412,7 @@ def beam_search_no_dup(r, X, lambda0, lambda1, zOld, K=1, UB=0, D=10, B=5, wLB=0
             # Evaluate children using weighted average of their costs and LBs
             vChild = (1 - wLB) * inst.v1 + wLB * inst.LB1
             # Best children with potential to improve on current output and current candidates (allow for duplicate removal)
-            vChild = vChild[(inst.LB1 < UB - eps) & (vChild < vNextMax - eps)].sort_values()[:2*B]
+            vChild = vChild[(inst.LB1 < UB - eps) & (vChild < vNextMax - eps)].sort_values()[: 2 * B]
             # Iterate through best children
             numAdded = 0
             for i in vChild.index:
@@ -422,14 +435,16 @@ def beam_search_no_dup(r, X, lambda0, lambda1, zOld, K=1, UB=0, D=10, B=5, wLB=0
                 Xn = inst.Xn.loc[rowKeep]
                 # Remove redundant features
                 colKeep = pd.Series(Xp.columns.get_level_values(0) != i[0], index=Xp.columns)
-                if i[1] == '<=':
-                    thresh = Xp[i[0]].columns.get_level_values(1).to_series().replace('NaN', np.nan)
-                    colKeep[i[0]] = (Xp[i[0]].columns.get_level_values(0) == '>') & (thresh < i[2])
-                elif i[1] == '>':
-                    thresh = Xp[i[0]].columns.get_level_values(1).to_series().replace('NaN', np.nan)
-                    colKeep[i[0]] = (Xp[i[0]].columns.get_level_values(0) == '<=') & (thresh > i[2])
-                elif i[1] == '!=':
-                    colKeep[i[0]] = (Xp[i[0]].columns.get_level_values(0) == '!=') & (Xp[i[0]].columns.get_level_values(1) != i[2])
+                if i[1] == "<=":
+                    thresh = Xp[i[0]].columns.get_level_values(1).to_series().replace("NaN", np.nan)
+                    colKeep[i[0]] = (Xp[i[0]].columns.get_level_values(0) == ">") & (thresh < i[2])
+                elif i[1] == ">":
+                    thresh = Xp[i[0]].columns.get_level_values(1).to_series().replace("NaN", np.nan)
+                    colKeep[i[0]] = (Xp[i[0]].columns.get_level_values(0) == "<=") & (thresh > i[2])
+                elif i[1] == "!=":
+                    colKeep[i[0]] = (Xp[i[0]].columns.get_level_values(0) == "!=") & (
+                        Xp[i[0]].columns.get_level_values(1) != i[2]
+                    )
                 Xp = Xp.loc[:, colKeep]
                 Xn = Xn.loc[:, colKeep]
                 instNext.append(PricingInstance(rp, rn, Xp, Xn, inst.v1[i], z0))
@@ -454,14 +469,14 @@ def beam_search_no_dup(r, X, lambda0, lambda1, zOld, K=1, UB=0, D=10, B=5, wLB=0
     return vOut, zOut, aOut
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Load iris-"plus" data for testing
-    dirData = '../../Data/'
-    datasets = pd.read_pickle(os.path.join(dirData, 'datasets.pkl'))
-    ds = 'iris'
+    dirData = "../../Data/"
+    datasets = pd.read_pickle(os.path.join(dirData, "datasets.pkl"))
+    ds = "iris"
     d = datasets[ds]
-    filePath = os.path.join(d['dirData'], d['fileName'] + '.csv')
-    data = pd.read_csv(filePath, names=d['colNames'], header=d['rowHeader'], error_bad_lines=False)
+    filePath = os.path.join(d["dirData"], d["fileName"] + ".csv")
+    data = pd.read_csv(filePath, names=d["colNames"], header=d["rowHeader"], error_bad_lines=False)
     y = extract_target(data, **d)
     # Binarize all features including negations
     X = binarize_features(data, negations=True, **d)
@@ -470,5 +485,5 @@ if __name__ == '__main__':
     r = y - y.mean()
 
     # Regularization parameters
-    lambda0 = 1     # fixed cost of term
-    lambda1 = 1     # cost per literal
+    lambda0 = 1  # fixed cost of term
+    lambda1 = 1  # cost per literal
