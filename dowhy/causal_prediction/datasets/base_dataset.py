@@ -10,6 +10,7 @@
         }
 """
 
+
 class MultipleDomainDataset:
     N_STEPS = 5001  # Default, subclasses may override
     CHECKPOINT_FREQ = 100  # Default, subclasses may override
