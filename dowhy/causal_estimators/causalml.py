@@ -1,4 +1,5 @@
 import inspect
+import logging
 from importlib import import_module
 from typing import Any, List, Optional, Protocol, Union
 from warnings import warn
@@ -15,6 +16,9 @@ class _CausalmlEstimator(Protocol):
 
     def fit_predict(self, *args, **kwargs):
         ...
+
+
+logger = logging.getLogger(__name__)
 
 
 class Causalml(CausalEstimator):
@@ -88,8 +92,12 @@ class Causalml(CausalEstimator):
                 DeprecationWarning,
                 stacklevel=2,
             )
-            estimator_class = self._get_causalml_class_object(causalml_estimator)
-            self.estimator = estimator_class(**kwargs["init_params"])
+            try:
+                estimator_class = self._get_causalml_class_object(causalml_estimator)
+                self.estimator = estimator_class(**kwargs["init_params"])
+            except ImportError:
+                logger.error("You must install causalml to use this functionality")
+                raise
         else:
             self.estimator = causalml_estimator
         self.logger.info("INFO: Using CausalML Estimator")
