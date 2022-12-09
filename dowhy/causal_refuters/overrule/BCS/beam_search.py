@@ -179,7 +179,7 @@ def beam_search(r, X, lambda0, lambda1, K=1, UB=0, D=10, B=5, wLB=0.5, eps=1e-6)
         instCurr = instNext
 
     # Conjunctions corresponding to solutions
-    aOut = 1 - (np.dot(1 - X, zOut) > 0)  # Changed matmul to dot, because failed on some machines
+    aOut = 1 - (np.dot(1 - X, zOut) > 0)
 
     return vOut, zOut, aOut
 
@@ -309,7 +309,7 @@ def beam_search_K1(r, X, lambda0, lambda1, UB=0, D=10, B=5, wLB=0.5, eps=1e-6):
         zOut = pd.DataFrame(zOut)
     else:
         zOut = pd.DataFrame(index=X.columns)
-    aOut = 1 - (np.matmul(1 - X, zOut) > 0)
+    aOut = 1 - (np.dot(1 - X, zOut) > 0)
 
     return vOut, zOut, aOut
 
@@ -464,7 +464,7 @@ def beam_search_no_dup(r, X, lambda0, lambda1, zOld, K=1, UB=0, D=10, B=5, wLB=0
         instCurr = instNext
 
     # Conjunctions corresponding to solutions
-    aOut = 1 - (np.matmul(1 - X, zOut) > 0)
+    aOut = 1 - (np.dot(1 - X, zOut) > 0)
 
     return vOut, zOut, aOut
 
