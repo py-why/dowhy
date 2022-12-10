@@ -137,7 +137,8 @@ class OverlapBooleanRule(object):
         else:
             xiO = cvx.Variable(nO, nonneg=True)
             if not self.hamming:
-                xiN = cvx.Variable(nN)
+                if nN:
+                    xiN = cvx.Variable(nN)
                 if nU:
                     xiU = cvx.Variable(nU)
         if not nU:
@@ -149,37 +150,40 @@ class OverlapBooleanRule(object):
             if nU:
                 if nN:
                     obj = cvx.Minimize(
-                        cvx.sum(A[N, :] * w) / (nN * (1 + self.gamma))
-                        + self.gamma * cvx.sum(A[U, :] * w) / (nU * (1 + self.gamma))
-                        + lambdas * w
+                        cvx.sum(A[N, :] @ w) / (nN * (1 + self.gamma))
+                        + self.gamma * cvx.sum(A[U, :] @ w) / (nU * (1 + self.gamma))
+                        + lambdas @ w
                     )
                 else:
-                    obj = cvx.Minimize(cvx.sum(A[U, :] * w) / nU + lambdas * w)
+                    # DNF with hamming loss for support
+                    obj = cvx.Minimize(cvx.sum(A[U, :] @ w) / nU + lambdas @ w)
             else:
-                obj = cvx.Minimize(cvx.sum(A[N, :] * w) / nN + lambdas * w)
+                obj = cvx.Minimize(cvx.sum(A[N, :] @ w) / nN + lambdas @ w)
         else:
             if nU:
                 if nN:
                     obj = cvx.Minimize(
                         cvx.sum(xiN) / (nN * (1 + self.gamma))
                         + self.gamma * cvx.sum(xiU) / (nU * (1 + self.gamma))
-                        + lambdas * w
+                        + lambdas @ w
                     )
                 else:
-                    obj = cvx.Minimize(cvx.sum(xiU) / nU + lambdas * w)
+                    # This gets activated for DNF
+                    obj = cvx.Minimize(cvx.sum(xiU) / nU + lambdas @ w)
             else:
-                obj = cvx.Minimize(cvx.sum(xiN) / nN + lambdas * w)
+                obj = cvx.Minimize(cvx.sum(xiN) / nN + lambdas @ w)
         # Constraints
         if self.CNF:
             if nN:
-                constraints = [cvx.sum(A[O, :] * w) <= (1 - self.alpha) * nO, xiN + A[N, :] * w >= 1]
+                constraints = [cvx.sum(A[O, :] @ w) <= (1 - self.alpha) * nO, xiN + A[N, :] @ w >= 1]
             else:
-                constraints = [cvx.sum(A[O, :] * w) <= (1 - self.alpha) * nO]
+                constraints = [cvx.sum(A[O, :] @ w) <= (1 - self.alpha) * nO]
 
             if nU:
-                constraints.append(xiU + A[U, :] * w >= 1)
+                constraints.append(xiU + A[U, :] @ w >= 1)
         else:
-            constraints = [cvx.sum(xiO) <= (1 - self.alpha) * nO, xiO + A[O, :] * w >= 1]
+            # This gets activated for DNF
+            constraints = [cvx.sum(xiO) <= (1 - self.alpha) * nO, xiO + A[O, :] @ w >= 1]
             if not self.hamming:
                 for (ii, i) in enumerate(N):
                     constraints.append(xiN[ii] >= cvx.max(w[A[i, :] > 0]))
@@ -252,36 +256,36 @@ class OverlapBooleanRule(object):
                 if nU:
                     if nN:
                         obj = cvx.Minimize(
-                            cvx.sum(A[N, :] * w) / (nN * (1 + self.gamma))
-                            + self.gamma * cvx.sum(A[U, :] * w) / (nU * (1 + self.gamma))
-                            + lambdas * w
+                            cvx.sum(A[N, :] @ w) / (nN * (1 + self.gamma))
+                            + self.gamma * cvx.sum(A[U, :] @ w) / (nU * (1 + self.gamma))
+                            + lambdas @ w
                         )
                     else:
-                        obj = cvx.Minimize(cvx.sum(A[U, :] * w) / nU + lambdas * w)
+                        obj = cvx.Minimize(cvx.sum(A[U, :] @ w) / nU + lambdas * w)
                 else:
-                    obj = cvx.Minimize(cvx.sum(A[N, :] * w) / nN + lambdas * w)
+                    obj = cvx.Minimize(cvx.sum(A[N, :] @ w) / nN + lambdas * w)
             else:
                 if nU and nN:
                     obj = cvx.Minimize(
                         cvx.sum(xiN) / (nN * (1 + self.gamma))
                         + self.gamma * cvx.sum(xiU) / (nU * (1 + self.gamma))
-                        + lambdas * w
+                        + lambdas @ w
                     )
                 elif nU:
-                    obj = cvx.Minimize(cvx.sum(xiU) / nU + lambdas * w)
+                    obj = cvx.Minimize(cvx.sum(xiU) / nU + lambdas @ w)
                 else:
-                    obj = cvx.Minimize(cvx.sum(xiN) / nN + lambdas * w)
+                    obj = cvx.Minimize(cvx.sum(xiN) / nN + lambdas @ w)
             # Constraints
             if self.CNF:
                 if nN:
-                    constraints = [cvx.sum(A[O, :] * w) <= (1 - self.alpha) * nO, xiN + A[N, :] * w >= 1]
+                    constraints = [cvx.sum(A[O, :] @ w) <= (1 - self.alpha) * nO, xiN + A[N, :] @ w >= 1]
                 else:
-                    constraints = [cvx.sum(A[O, :] * w) <= (1 - self.alpha) * nO]
+                    constraints = [cvx.sum(A[O, :] @ w) <= (1 - self.alpha) * nO]
 
                 if nU:
-                    constraints.append(xiU + A[U, :] * w >= 1)
+                    constraints.append(xiU + A[U, :] @ w >= 1)
             else:
-                constraints = [cvx.sum(xiO) <= (1 - self.alpha) * nO, xiO + A[O, :] * w >= 1]
+                constraints = [cvx.sum(xiO) <= (1 - self.alpha) * nO, xiO + A[O, :] @ w >= 1]
                 if not self.hamming:
                     for (ii, i) in enumerate(N):
                         constraints.append(xiN[ii] >= cvx.max(w[A[i, :] > 0]))
