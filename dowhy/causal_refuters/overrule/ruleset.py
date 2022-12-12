@@ -3,20 +3,13 @@
 # @Authors: Fredrik D. Johansson, Michael Oberst #
 # -----------------------------------------------#
 
-# For Decision Tree Classifier
-import graphviz
 import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_auc_score
-from sklearn.tree import DecisionTreeClassifier, export_graphviz
 
-from .BCS.load_process_data_BCS import FeatureBinarizer, extract_target
-
-# For BCS
+from .BCS.load_process_data_BCS import FeatureBinarizer
 from .BCS.overlap_boolean_rule import OverlapBooleanRule
-
-# Overrule imports
-from .utils import rule_str, sample_reference, sampleUnif
+from .utils import rule_str, sample_reference
 
 
 class RulesetEstimator(object):
@@ -50,15 +43,6 @@ class RulesetEstimator(object):
         """
         pass
 
-    def predict_proba(self, x):
-        """Predicts the probability of overlap at a point x
-            @TODO: Is it bad form to have predict_proba here?
-
-        @args:
-            x: Test point
-        """
-        return np.array([1 - self.predict(x), self.predict(x)]).T
-
     def describe(self, outpath):
         """Returns a description of the model
 
@@ -74,106 +58,10 @@ class RulesetEstimator(object):
         pass
 
 
-class DTRulesetEstimator(RulesetEstimator):
-    """Ruleset Estimator based on Decision Trees"""
-
-    def __init__(self, n_ref_multiplier=1.0, **kwargs):
-        """Initializes the estimator
-
-        @args:
-            kwargs: Keyword arguments for the DecisionTreeClassifier
-        """
-        self.n_ref_multiplier = n_ref_multiplier
-        self.kwargs = kwargs
-
-        # Bookkeeping
-        self.refSamples = None
-        self.overlapSamples = None
-
-        # Initialize estimator
-        self.init_estimator_()
-
-        # Valid parameters
-        self.valid_params = ["n_ref_multiplier"]
-
-    def init_estimator_(self):
-        """Init rule set estimator"""
-        self.M = DecisionTreeClassifier(**self.kwargs)
-
-    def fit(self, x, o):
-        """Fit the overlap region based on a sample x and an indicator for
-        overlap, denoted s
-
-        @args:
-            x: Samples
-            o: Binary indicator for overlap, where 1 indicates overlap
-        """
-        dim = x.shape[1]
-        nRef = int(x.shape[0] * dim * self.n_ref_multiplier)
-
-        # Convert to dataframe if not
-        X = x if isinstance(x, pd.DataFrame) else pd.DataFrame(dict([("x%d" % i, x[:, i]) for i in range(x.shape[1])]))
-
-        # Format labels
-        o = o.values.ravel() if (isinstance(o, pd.DataFrame) or isinstance(o, pd.Series)) else o.ravel()
-
-        # Sample from reference measure and construct features
-        # @TODO: Should not be uniform noise if binary features
-        self.refSamples = sample_reference(X, n=nRef)
-
-        # Add reference samples
-        data = pd.concat([X, self.refSamples], 0)
-        o = np.hstack([o, -np.ones(nRef)])
-
-        # Fit model
-        self.M.fit(data, o)
-
-    def predict(self, x):
-        """Predict whether or not X lies in the overlap region (1 = True)
-
-        @args:
-            x: Test point
-        """
-        X = x if isinstance(x, pd.DataFrame) else pd.DataFrame(dict([("x%d" % i, x[:, i]) for i in range(x.shape[1])]))
-
-        return self.M.predict(X)
-
-    def describe(self, outpath):
-        """Returns a description of the model"""
-        dot_data = export_graphviz(self.M, filled=True, rounded=True, out_file=None)
-        graph = graphviz.Source(dot_data)
-        graph.render(outpath)
-
-    def get_params(self, deep=False):
-        """Returns estimator parameters"""
-        # @TODO: Deep not implemented
-        params = dict([(k, getattr(self, k)) for k in self.valid_params])
-
-        if deep:
-            return {**params, **self.M.get_params(deep=True)}
-        else:
-            return params
-
-    def set_params(self, **params):
-        """Sets estimator parameters"""
-        if not params:
-            return self
-
-        reinit = False
-        for k, v in params.items():
-            if k in self.valid_params:
-                setattr(self, k, v)
-            elif k in self.M.get_params(deep=True):
-                reinit = True
-                self.kwargs[k] = v
-        if reinit:
-            self.init_estimator_()
-
-        return self
-
-
 class BCSRulesetEstimator(RulesetEstimator):
     """Ruleset Estimator based on ./BCS"""
+
+    # TODO: Arguments
 
     def __init__(
         self,
@@ -258,9 +146,10 @@ class BCSRulesetEstimator(RulesetEstimator):
             threshOverride=self.thresh_override,
         )
 
-    def fit(self, x, o):
-        """Fit the overlap region based on a sample x and an indicator for
-        overlap, denoted o
+    def fit(self, x, o=None):
+        """Fit rules for either characterizing support (if O is not provided) or for
+        characterizing overlap, in which case O should be a vector indicating overlap by
+        1 and non-overlap by 0.
 
         @args:
             x: Samples
@@ -270,6 +159,8 @@ class BCSRulesetEstimator(RulesetEstimator):
         n = x.shape[0]
         dim = x.shape[1]
         nRef = int(n * dim * self.n_ref_multiplier)
+        if o is None:
+            o = np.ones((n,))
 
         # Convert to dataframe if not
         X = x if isinstance(x, pd.DataFrame) else pd.DataFrame(dict([("x%d" % i, x[:, i]) for i in range(x.shape[1])]))
