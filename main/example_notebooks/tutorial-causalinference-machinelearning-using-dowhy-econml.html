@@ -807,9 +807,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W3,W2,W4,W1])
+─────(E[y|W1,W3,W0,W4,W2])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W2,W4,W1,U) = P(y|v0,W0,W3,W2,W4,W1)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W3,W0,W4,W2,U) = P(y|v0,W1,W3,W0,W4,W2)
 
 ### Estimand : 2
 Estimand name: iv
@@ -817,9 +817,9 @@ Estimand expression:
  ⎡                              -1⎤
  ⎢    d        ⎛    d          ⎞  ⎥
 E⎢─────────(y)⋅⎜─────────([v₀])⎟  ⎥
- ⎣d[Z₀  Z₁]    ⎝d[Z₀  Z₁]      ⎠  ⎦
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
-Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
+ ⎣d[Z₁  Z₀]    ⎝d[Z₁  Z₀]      ⎠  ⎦
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z1,Z0})
+Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→{v0}, then ¬({Z1,Z0}→y)
 
 ### Estimand : 3
 Estimand name: frontdoor
@@ -856,16 +856,16 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W3,W2,W4,W1])
+─────(E[y|W1,W3,W0,W4,W2])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W2,W4,W1,U) = P(y|v0,W0,W3,W2,W4,W1)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W3,W0,W4,W2,U) = P(y|v0,W1,W3,W0,W4,W2)
 
 ## Realized estimand
-b: y~v0+W0+W3+W2+W4+W1
+b: y~v0+W1+W3+W0+W4+W2
 Target units: ate
 
 ## Estimate
-Mean value: 9.975300279251684
+Mean value: 10.0531862476103
 
 </pre></div></div>
 </div>
@@ -903,17 +903,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W3,W2,W4,W1])
+─────(E[y|W1,W3,W0,W4,W2])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W2,W4,W1,U) = P(y|v0,W0,W3,W2,W4,W1)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W3,W0,W4,W2,U) = P(y|v0,W1,W3,W0,W4,W2)
 
 ## Realized estimand
-b: y~v0+W0+W3+W2+W4+W1 |
+b: y~v0+W1+W3+W0+W4+W2 |
 Target units: ate
 
 ## Estimate
-Mean value: 10.024431371640713
-Effect estimates: [[10.02443137]]
+Mean value: 9.916460265046753
+Effect estimates: [[9.91646027]]
 
 </pre></div></div>
 </div>
@@ -937,8 +937,8 @@ print(refute_results)
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:9.975300279251684
-New effect:4.799407411618016e-05
+Estimated effect:10.0531862476103
+New effect:-0.012480823531509484
 p value:0.9199999999999999
 
 </pre></div></div>
@@ -991,11 +991,11 @@ dowhy.plotter.plot_treatment_outcome(df[data_dict[&quot;treatment_name&quot;]], 
 <div class="output_area docutils container">
 <div class="highlight"><pre>
    Treatment    Outcome        w0         s        w1
-0  13.790171  23.559620  3.066880  3.965981 -1.870906
-1  12.856991  21.311646  2.615763  9.572113  0.055589
-2  11.967643  20.513111  2.566544  1.802730 -1.028299
-3  12.332889  15.772390 -2.450210  8.244905  0.602226
-4   7.049691  11.621679 -1.062473  8.713922  0.294502
+0  17.965286  19.746905 -3.398295  6.224303 -0.566996
+1  23.863060  24.863649 -4.231327  0.130971 -0.888696
+2  23.387068  25.030126 -4.216855  0.133494 -0.642190
+3  26.439584  37.450664  4.515853  9.918193  0.900767
+4  21.637342  32.711621  3.934762  2.744583  1.345400
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1099,9 +1099,9 @@ b: Outcome~Treatment+w0+w1
 Target units: ate
 
 ## Estimate
-Mean value: 0.9998254661046371
+Mean value: 0.9986175606620362
 
-Causal Estimate is 0.9998254661046371
+Causal Estimate is 0.9986175606620362
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1157,8 +1157,8 @@ b: Outcome~Treatment+w0+w1 |
 Target units: ate
 
 ## Estimate
-Mean value: 0.14947239006726343
-Effect estimates: [[0.14947239]]
+Mean value: 0.08543476033309196
+Effect estimates: [[0.08543476]]
 
 </pre></div></div>
 </div>
@@ -1181,9 +1181,9 @@ print(res_random)
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a random common cause
-Estimated effect:0.14947239006726343
-New effect:0.15362452533733204
-p value:0.74
+Estimated effect:0.08543476033309196
+New effect:0.07185601947720317
+p value:0.3400000000000001
 
 </pre></div></div>
 </div>
@@ -1204,9 +1204,9 @@ print(res_placebo)
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:0.14947239006726343
-New effect:5.289347887683028e-05
-p value:0.44370534411499746
+Estimated effect:0.08543476033309196
+New effect:-5.0518925830481155e-05
+p value:0.42644559334993304
 
 </pre></div></div>
 </div>
