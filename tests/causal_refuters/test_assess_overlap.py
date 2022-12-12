@@ -1,40 +1,60 @@
 import numpy as np
+import pandas as pd
 import pytest
 
-import dowhy.datasets
 from dowhy import CausalModel
-from dowhy.causal_refuters.assess_overlap_overrule import OverruleAnalyzer
+
+
+@pytest.fixture
+def dummy_data():
+    """
+    Returns a dataframe with known violation of support and overlap.
+
+    Two binary features (X1, X2) and a treatment indicator (T), where
+    P(X1 = 1, X2 = 1) = 0
+    P(T | X1 = 0, X2 = 0) = 0.5, and zero otherwise
+    """
+
+    return pd.DataFrame(
+        np.array(
+            [
+                [0, 0, 1, 0],
+                [0, 0, 0, 1],
+                [0, 1, 0, 0],
+                [1, 0, 0, 0],
+            ]
+            * 50
+        ),
+        columns=["X1", "X2", "T", "Y"],
+    )
+
+
+@pytest.fixture
+def refute(dummy_data):
+    model = CausalModel(data=dummy_data, treatment="T", outcome="Y", common_causes=["X1", "X2"])
+    identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+    estimate = model.estimate_effect(identified_estimand, method_name="backdoor.linear_regression")
+
+    np.random.seed(0)
+    return model.refute_estimate(identified_estimand, estimate, method_name="assess_overlap")
 
 
 class TestAssessOverlapRefuter(object):
-    @pytest.mark.parametrize(
-        "method_name",
-        [("assess_overlap")],
-    )
-    def test_rules(self, method_name):
-        np.random.seed(100)
-        data = dowhy.datasets.linear_dataset(
-            beta=10,
-            num_common_causes=7,
-            num_samples=500,
-            num_treatments=1,
-            stddev_treatment_noise=10,
-            stddev_outcome_noise=5,
-        )
+    # TODO: Make the optimization problem fully deterministic
+    def test_rules_support(self, refute):
+        """
+        These rules are all equivalent (and have equal objective values w/regularization, so at the moment the
+        optimization is liable to select any of them.
+        """
+        assert refute.RS_support_estimator.rules() in [
+            [[("X1", "not", "")], [("X1", "", ""), ("X2", "not", "")]],
+            [[("X1", "not", "")], [("X2", "not", ""), ("X1", "", "")]],
+            [[("X2", "not", "")], [("X1", "not", ""), ("X2", "", "")]],
+            [[("X2", "not", "")], [("X2", "", ""), ("X1", "not", "")]],
+        ]
 
-        model = CausalModel(
-            data=data["df"],
-            treatment=data["treatment_name"],
-            outcome=data["outcome_name"],
-            graph=data["gml_graph"],
-            test_significance=None,
-        )
-
-        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
-
-        estimate = model.estimate_effect(identified_estimand, method_name="backdoor.linear_regression")
-
-        refute = model.refute_estimate(identified_estimand, estimate, method_name=method_name)
-
-        # This is a dummy result for now, until we have real output
-        assert refute.rules == "Men over 60 years old"
+    def test_rules_overlap(self, refute):
+        assert refute.RS_overlap_estimator.rules() in [
+            [[("X1", "not", ""), ("X2", "not", "")]],
+            [[("X2", "not", ""), ("X1", "not", "")]],
+        ]
