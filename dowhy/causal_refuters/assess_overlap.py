@@ -1,6 +1,7 @@
 import logging
 from typing import List
 
+from dowhy.assess_overlap_overrule import OverlapConfig, SupportConfig
 from dowhy.causal_refuter import CausalRefuter
 from dowhy.causal_refuters.assess_overlap_overrule import OverruleAnalyzer
 
@@ -10,27 +11,54 @@ logger = logging.getLogger(__name__)
 class AssessOverlap(CausalRefuter):
     """Assess Overlap
 
-    AssessOverlap class implements the OverRule method from Oberst et al. 2020
+    This class implements the OverRule algorithm for assessing support and overlap via Boolean Rulesets, from [1].
+
+    [1] Oberst, M., Johansson, F., Wei, D., Gao, T., Brat, G., Sontag, D., & Varshney, K. (2020). Characterization of
+    Overlap in Observational Studies. In S. Chiappa & R. Calandra (Eds.), Proceedings of the Twenty Third International
+    Conference on Artificial Intelligence and Statistics (Vol. 108, pp. 788–798). PMLR.
     """
 
     def __init__(self, *args, **kwargs):
         """
         Initialize the parameters required for the refuter.
 
-        This is called with arguments passed through `refute_estimate`
+        Arguments are passed through to the `refute_estimate` method. See dowhy.causal_refuters.assess_overlap_overrule
+        for the definition of the `SupportConfig` and `OverlapConfig` dataclasses that define optimization
+        hyperparameters.
 
-        :param: cat_feats: List[str]: List of categorical features, all
-        others will be discretized
+        .. warning::
+            This method is only compatible with estimators that use backdoor adjustment, and will attempt to acquire
+            the set of backdoor variables via `self._target_estimand.get_backdoor_variables()`.
+
+        :param: cat_feats: List[str]: List of categorical features, all others will be discretized
+        :param: support_config: SupportConfig: DataClass with configuration options for learning support rules
+        :param: overlap_config: OverlapConfig: DataClass with configuration options for learning overlap rules
+        :param: overlap_eps: float: Defines the range of propensity scores for a point to be considered in the overlap
+            region, with the range defined as `(overlap_eps, 1 - overlap_eps)`, defaults to 0.1
+        :param: overrule_verbose: bool: Enable verbose logging of optimization output, defaults to False
         """
         super().__init__(*args, **kwargs)
+        # TODO: Check that the target estimand has backdoor variables?
         self._backdoor_vars = self._target_estimand.get_backdoor_variables()
         self._cat_feats = kwargs.pop("cat_feats", [])
         self._support_config = kwargs.pop("support_config", None)
         self._overlap_config = kwargs.pop("overlap_config", None)
         self._overlap_eps = kwargs.pop("overlap_eps", 0.1)
+        if self._overlap_eps < 0 or self._overlap_eps > 1:
+            raise ValueError(f"Value of `overlap_eps` must be in [0, 1], got {self._overlap_eps}")
         self._overrule_verbose = kwargs.pop("overrule_verbose", False)
 
     def refute_estimate(self, show_progress_bar=False):
+        """
+        Learn overlap and support rules.
+
+        :param show_progress_bar: Not implemented, will raise error if set to True, defaults to False
+        :type show_progress_bar: bool
+        :raises NotImplementedError: Will raise this error if show_progress_bar=True
+        """
+        if show_progress_bar:
+            raise NotImplementedError("No progress bar is available for OverRule")
+
         return assess_support_and_overlap_overrule(
             data=self._data,
             backdoor_vars=self._backdoor_vars,
@@ -44,8 +72,34 @@ class AssessOverlap(CausalRefuter):
 
 
 def assess_support_and_overlap_overrule(
-    data, backdoor_vars, treatment_name, cat_feats, overlap_config, support_config, overlap_eps, verbose
+    data,
+    backdoor_vars: List[str],
+    treatment_name: str,
+    cat_feats: List[str],
+    overlap_config: OverlapConfig,
+    support_config: SupportConfig,
+    overlap_eps: float,
+    verbose: bool,
 ):
+    """
+    Learn support and overlap rules using OverRule.
+
+    :param data: Data containing backdoor variables and treatment name
+    :param backdoor_vars: List of backdoor variables. Support and overlap rules will only be learned with respect to
+    these variables
+    :type backdoor_vars: List[str]
+    :param treatment_name: Treatment name
+    :type treatment_name: str
+    :param cat_feats: Categorical features
+    :type cat_feats: List[str]
+    :param overlap_config: Configuration for learning overlap rules
+    :type overlap_config: OverlapConfig
+    :param support_config: Configuration for learning support rules
+    :type support_config: SupportConfig
+    :param: overlap_eps: float: Defines the range of propensity scores for a point to be considered in the overlap
+        region, with the range defined as `(overlap_eps, 1 - overlap_eps)`, defaults to 0.1
+    :param: verbose: bool: Enable verbose logging of optimization output, defaults to False
+    """
     X = data[backdoor_vars]
     t = data[treatment_name]
     analyzer = OverruleAnalyzer(

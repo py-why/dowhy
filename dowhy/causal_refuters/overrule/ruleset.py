@@ -1,118 +1,76 @@
-# -----------------------------------------------#
-# OverRule: Overlap Estimation using Rule Sets   #
-# @Authors: Fredrik D. Johansson, Michael Oberst #
-# -----------------------------------------------#
+"""Ruleset estimator class for OverRule.
+
+This module implements the boolean ruleset estimator from OverRule [1]. Code is adapted (with some simplifications)
+from https://github.com/clinicalml/overlap-code, under the MIT License.
+
+[1] https://arxiv.org/abs/1907.04138
+"""
+from typing import Callable, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import roc_auc_score
 
 from .BCS.load_process_data_BCS import FeatureBinarizer
 from .BCS.overlap_boolean_rule import OverlapBooleanRule
 from .utils import rule_str, sample_reference
 
 
-class RulesetEstimator(object):
+class BCSRulesetEstimator:
+    """Ruleset estimator based on Boolean Rules with Column Generation.
+
+    Operates according to an scikit-learn interface with a few additional methods.
     """
-    RulesetEstimator
-
-    Binary classification of overlap / non-overlap with a binary classifier,
-    along with corresponding rules, which may be in different formats based
-    on the underlying classifier used
-    """
-
-    def __init__(self, n_ref_multiplier=1.0):
-        pass
-
-    def fit(self, x, s):
-        """Fit the overlap region based on a sample x and an indicator for
-        overlap, denoted s. If it is necessary to generate a reference measure,
-        then do so here
-
-        @args:
-            x: Samples
-            s: Binary indicator for overlap, where 1 indicates overlap
-        """
-        pass
-
-    def predict(self, x):
-        """Predict whether or not X lies in the overlap region (1 = True)
-
-        @args:
-            x: Test point
-        """
-        pass
-
-    def describe(self, outpath):
-        """Returns a description of the model
-
-        @args:
-            outpath: A file to write the desciption to
-        """
-        pass
-
-    def set_params(self, **params):
-        pass
-
-    def get_params(self):
-        pass
-
-
-class BCSRulesetEstimator(RulesetEstimator):
-    """Ruleset Estimator based on ./BCS"""
-
-    # TODO: Arguments
 
     def __init__(
         self,
-        lambda0=0.0,
-        lambda1=0.0,
-        cat_cols=[],
-        n_ref_multiplier=1.0,
-        negations=True,
-        num_thresh=9,
-        seed=None,
-        ref_range=None,
-        thresh_override=None,
+        lambda0: float = 0.0,
+        lambda1: float = 0.0,
+        cat_cols: Optional[List] = None,
+        n_ref_multiplier: float = 1.0,
+        negations: bool = True,
+        num_thresh: int = 9,
+        seed: int = None,
+        ref_range: Optional[Dict] = None,
+        thresh_override: Optional[Dict] = None,
         **kwargs,
     ):
-        """Initializes the estimator
-
-        @args:
-            lambda0: Regularization of #rules
-            lambda1: Regularization of #literals
-            cat_cols: Set of categorical columns
-            n_ref_multiplier: Reference sample count multiplier
-            negations: Whether to use negations of literals
-            num_thresh: Number of bins for continuous variables
-            seed: Random seed for reference samples
-            ref_range: Manual override of the range for reference samples, given as a
-                       dictionary of {column_name:
-                                       {'is_binary': true/false,
-                                        'min': min
-                                        'max': max}
-                                      }
-            thresh_override: Manual override of the thresholds for continuous
-                features, given as a dictionary like this, will only be applied
-                to continuous features with more than num_thresh unique values
-                    {column_name: np.linspace(0, 100, 10)}
-            kwargs: Keyword arguments for the OverlapBooleanRule
-                    (see ./BCS/overlap_boolean_rule.py for description of arguments)
         """
+        Initializes the estimator.
 
+        `**kwargs` are passed to OverlapBooleanRule (see ./BCS/overlap_boolean_rule.py for description of arguments)
+
+        :param lambda0: Regularization on the # of rules, defaults to 0.0
+        :type lambda0: float, optional
+        :param lambda1: Regularization on the # of literals, defaults to 0.0
+        :type lambda1: float, optional
+        :param cat_cols: Set of categorical columns, defaults to None
+        :type cat_cols: Optional[List], optional
+        :param n_ref_multiplier: Reference sample count multiplier, only used for estimating support, defaults to 1.0
+        :type n_ref_multiplier: float, optional
+        :param negations: Include negation of literals, defaults to True
+        :type negations: bool, optional
+        :param num_thresh: Number of bins to discretize continuous variables, defaults to 9 (for deciles)
+        :type num_thresh: int, optional
+        :param seed: Random seed for reference samples, only used for estimating support, defaults to None
+        :type seed: int, optional
+        :param ref_range: Manual override of the range for reference samples, given as a dictionary of the form
+            `ref_range = {c: {"is_binary": True/False, "min": min_value, "max": max_value}}`
+        :type ref_range: Optional[Dict], optional
+        :param thresh_override: Manual override of the thresholds for continuous features, given as a dictionary like
+            the following, will only be applied to continuous features with more than num_thresh unique values
+            `thresh_override = {column_name: np.linspace(0, 100, 10)}`
+        :type thresh_override: Optional[Dict], optional
+        """
         # Parameters
         self.lambda0 = lambda0
         self.lambda1 = lambda1
-        self.cat_cols = cat_cols
+        self.cat_cols = cat_cols if cat_cols else []
         self.n_ref_multiplier = n_ref_multiplier
         self.negations = negations
         self.num_thresh = num_thresh
         self.seed = seed
         self.ref_range = ref_range
         self.thresh_override = thresh_override
-
-        # @TODO: something not right if these are set for the constructor
-        # using partial() and then passed to GridSearchCV. not passed on.
         self.kwargs = kwargs
 
         # Bookkeeping
@@ -122,7 +80,6 @@ class BCSRulesetEstimator(RulesetEstimator):
         # Initialize estimators
         self.init_estimator_()
 
-        # @TODO: Make class variable?
         self.valid_params = ["lambda0", "lambda1", "cat_cols", "n_ref_multiplier", "negations", "num_thresh", "seed"]
 
     def __getstate__(self):
@@ -135,8 +92,7 @@ class BCSRulesetEstimator(RulesetEstimator):
         self.__dict__.update(state)
 
     def init_estimator_(self):
-
-        """Init rule set estimator and binarizer"""
+        """Initialize rule set estimator and feature binarizer."""
         self.M = OverlapBooleanRule(lambda0=self.lambda0, lambda1=self.lambda1, **self.kwargs)
 
         self.FeatureBinarizer = FeatureBinarizer(
@@ -147,13 +103,19 @@ class BCSRulesetEstimator(RulesetEstimator):
         )
 
     def fit(self, x, o=None):
-        """Fit rules for either characterizing support (if O is not provided) or for
-        characterizing overlap, in which case O should be a vector indicating overlap by
-        1 and non-overlap by 0.
+        """
+        Fit rules for either characterizing support (if O is not provided) or for characterizing overlap, in which case
+        O should be a vector indicating overlap by 1 and non-overlap by 0.
 
-        @args:
-            x: Samples
-            o: Binary indicator for overlap, where 1 indicates overlap
+        This function is primarily a wrapper around the OverlapBooleanRule estimator, making sure that features are
+        binarized before being fed into the ruleset estimator, constructing reference samples for the support
+        characterization, and so on.
+
+        :param x: Samples of covariates
+        :type x: Pandas DataFrame or Numpy Array, shape (n, d)
+        :param o: Binary indicator for whether or not a sample belongs in the overlap region, defaults to None.  If
+            provided, should have the same length as `x`
+        :type o: Pandas DataFrame or Numpy Array, shape (n, )
         """
 
         n = x.shape[0]
@@ -189,10 +151,11 @@ class BCSRulesetEstimator(RulesetEstimator):
         return self
 
     def predict(self, x):
-        """Predict whether or not X lies in the overlap region (1 = True)
+        """
+        Predict whether or not X lies in the overlap region (1 = True).
 
-        @args:
-            x: Test point
+        :param x: Samples of covariates
+        :type x: Pandas DataFrame or Numpy Array, shape (n, d)
         """
         # Construct features dataframe
         data = (
@@ -206,10 +169,14 @@ class BCSRulesetEstimator(RulesetEstimator):
         return preds
 
     def predict_rules(self, x):
-        """Predict rules activated by x
+        """
+        Predict rules activated by x
 
-        @args:
-            x: Test point
+        :param x: Samples of covariates
+        :type x: Pandas DataFrame or Numpy Array, shape (n, d)
+        :return: Matrix with binary values, of shape (n, r), where r is the total number of rules considered by the
+            estimator, and where 1 indicates that the sample matches the rule, and 0 indicates otherwise.
+        :rtype: Numpy Array, shape (n, r)
         """
         # Construct features dataframe
         data = (
@@ -220,36 +187,26 @@ class BCSRulesetEstimator(RulesetEstimator):
 
         return self.M.predict_rules(X)
 
-    def get_objective_value_(self, x, o):
-        # Construct features dataframe
-        data = (
-            x if isinstance(x, pd.DataFrame) else pd.DataFrame(dict([("x%d" % i, x[:, i]) for i in range(x.shape[1])]))
-        )
+    def rules(
+        self,
+        as_str: bool = False,
+        transform: Optional[Callable[[str, float], float]] = None,
+        fmt: str = "%.3f",
+        labels: Dict[str, str] = {},
+    ):
+        """
+        Return rules learned by the estimator.
 
-        X = self.FeatureBinarizer.transform(data).fillna(0)
-
-        return self.M.get_objective_value(X, o)
-
-    def round_(self, x, o, scoring="roc_auc", **kwargs):
-        """Round rule set"""
-        # Construct features dataframe
-        data = (
-            x if isinstance(x, pd.DataFrame) else pd.DataFrame(dict([("x%d" % i, x[:, i]) for i in range(x.shape[1])]))
-        )
-
-        X = self.FeatureBinarizer.transform(data).fillna(0)
-
-        self.M.round_(X, o, scoring=scoring, **kwargs)
-
-    def rules(self, as_str=False, transform=None, fmt="%.3f", labels={}):
-        """Returns rules learned by the estimator
-
-        @args:
-            as_str: Returns a string if True, otherwise a dictionary
-            transform: A function that takes key-value pairs for rules and
-                thresholds and transforms the value. Used to re-scale
-                standardized data for example
-            fmt: Formatting string for float values
+        :param as_str: Return a string if True, otherwise a dictionary, defaults to False
+        :type as_str: bool, optional
+        :param transform: A function that takes key-value pairs for rules and thresholds and transforms the value.
+            This function is used to re-scale standardized data, defaults to None
+        :type transform: Optional[Callable[[str, float], float]], optional
+        :param fmt: Formatting string for float values, for printing rules with thresholds, defaults to "%.3f"
+        :type fmt: str, optional
+        :param labels: Dictionary mapping from original feature names to display names when printing rules, any
+            feature not specified here will default to the original name, defaults to {}
+        :type labels: Dict[str, str], optional
         """
         w, z = (self.M.w, self.M.z)
         w_sel = np.where(w)[0]
@@ -274,34 +231,8 @@ class BCSRulesetEstimator(RulesetEstimator):
         else:
             return C
 
-    def describe(self, outpath):
-        """Returns a description of the model"""
-        with open(outpath, "w") as f:
-            f.write("Conjunctions:\n")
-            f.write(self.M.z)
-            f.write("\n\nCoefficients:\n")
-            f.write(self.M.w)
-
-    def complexity(self):
-        """Returns number of rules and number of atoms"""
-        rules_o = self.rules()
-
-        n_rules_o = len(rules_o)
-        n_atoms_o = np.sum([len(r) for r in rules_o])
-
-        return n_rules_o, n_atoms_o
-
-    def score(self, x, y):
-        """Evaluates the fitted models. If a label y is supplied, the score
-            measures the accuracy of the ruleset estimation
-        @args
-            x: Test point
-            y: Label indicating the label at x
-        """
-        return roc_auc_score(y, self.predict(x))
-
     def get_params(self, deep=False):
-        """Returns estimator parameters"""
+        """Return estimator parameters"""
         params = dict([(k, getattr(self, k)) for k in self.valid_params])
 
         if deep:
@@ -310,7 +241,7 @@ class BCSRulesetEstimator(RulesetEstimator):
             return params
 
     def set_params(self, **params):
-        """Sets estimator parameters"""
+        """Set estimator parameters"""
         if not params:
             return self
 
