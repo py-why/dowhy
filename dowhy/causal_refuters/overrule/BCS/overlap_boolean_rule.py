@@ -48,7 +48,7 @@ class OverlapBooleanRule(object):
         # Silence output
         self.silent = silent
         if logger is None:
-            logger = logging.getLogger("OverlapBooleanRule")
+            self.logger = logging.getLogger(__name__)
         self.logger = logger
         # Verbose optimizer
         self.verbose = verbose
