@@ -25,10 +25,10 @@ class BCSRulesetEstimator:
 
     def __init__(
         self,
+        n_ref_multiplier: float = 1.0,
         lambda0: float = 0.0,
         lambda1: float = 0.0,
         cat_cols: Optional[List] = None,
-        n_ref_multiplier: float = 1.0,
         negations: bool = True,
         num_thresh: int = 9,
         seed: int = None,
@@ -41,14 +41,15 @@ class BCSRulesetEstimator:
 
         `**kwargs` are passed to OverlapBooleanRule (see ./BCS/overlap_boolean_rule.py for description of arguments)
 
+        :param n_ref_multiplier: Reference sample count multiplier, only used for estimating support, defaults to 1.0,
+            but should be set to zero for Overlap rules
+        :type n_ref_multiplier: float, optional
         :param lambda0: Regularization on the # of rules, defaults to 0.0
         :type lambda0: float, optional
         :param lambda1: Regularization on the # of literals, defaults to 0.0
         :type lambda1: float, optional
         :param cat_cols: Set of categorical columns, defaults to None
         :type cat_cols: Optional[List], optional
-        :param n_ref_multiplier: Reference sample count multiplier, only used for estimating support, defaults to 1.0
-        :type n_ref_multiplier: float, optional
         :param negations: Include negation of literals, defaults to True
         :type negations: bool, optional
         :param num_thresh: Number of bins to discretize continuous variables, defaults to 9 (for deciles)
@@ -64,10 +65,10 @@ class BCSRulesetEstimator:
         :type thresh_override: Optional[Dict], optional
         """
         # Parameters
+        self.n_ref_multiplier = n_ref_multiplier
         self.lambda0 = lambda0
         self.lambda1 = lambda1
         self.cat_cols = cat_cols if cat_cols else []
-        self.n_ref_multiplier = n_ref_multiplier
         self.negations = negations
         self.num_thresh = num_thresh
         self.seed = seed

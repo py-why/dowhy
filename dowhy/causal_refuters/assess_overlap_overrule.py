@@ -19,9 +19,9 @@ class SupportConfig:
     :type n_ref_multiplier: float, optional
     :param alpha: Fraction of the existing examples to ensure are included in the rules, defaults to 0.98
     :type alpha: float, optional
-    :param lambda0: Regularization on the # of rules, defaults to 0.0
+    :param lambda0: Regularization on the # of rules, defaults to 1e-2
     :type lambda0: float, optional
-    :param lambda1: Regularization on the # of literals, defaults to 0.0
+    :param lambda1: Regularization on the # of literals, defaults to 1e-3
     :type lambda1: float, optional
     :param K: Maximum results returned during beam search, defaults to 20
     :type K: int, optional
@@ -39,10 +39,10 @@ class SupportConfig:
     :type rounding: str, optional
     """
 
-    n_ref_multiplier: float = 1
+    n_ref_multiplier: float = 1.0
     alpha: float = 0.98
-    lambda0: float = 0.0
-    lambda1: float = 0.0
+    lambda0: float = 1e-2
+    lambda1: float = 1e-3
     K: int = 20
     D: int = 20
     B: int = 10
@@ -59,9 +59,9 @@ class OverlapConfig:
 
     :param alpha: Fraction of the overlap samples to ensure are included in the rules, defaults to 0.95
     :type alpha: float, optional
-    :param lambda0: Regularization on the # of rules, defaults to 1e-7
+    :param lambda0: Regularization on the # of rules, defaults to 1e-3
     :type lambda0: float, optional
-    :param lambda1: Regularization on the # of literals, defaults to 0.0
+    :param lambda1: Regularization on the # of literals, defaults to 1e-3
     :type lambda1: float, optional
     :param K: Maximum results returned during beam search, defaults to 20
     :type K: int, optional
@@ -80,8 +80,8 @@ class OverlapConfig:
     """
 
     alpha: float = 0.95
-    lambda0: float = 1e-7
-    lambda1: float = 0.0
+    lambda0: float = 1e-3
+    lambda1: float = 1e-3
     K: int = 20
     D: int = 20
     B: int = 10
@@ -89,9 +89,6 @@ class OverlapConfig:
     num_thresh: int = 9
     solver: str = "ECOS"
     rounding: str = "greedy_sweep"
-
-    def __post_init__(self):
-        self.n_ref_multiplier = 0.0  # Should not be set to any other value!
 
 
 class OverruleAnalyzer:
@@ -133,7 +130,7 @@ class OverruleAnalyzer:
             cat_cols=cat_feats, silent=verbose, verbose=verbose, **asdict(support_config)
         )
         self.RS_overlap_estimator = BCSRulesetEstimator(
-            cat_cols=cat_feats, silent=verbose, verbose=verbose, **asdict(overlap_config)
+            cat_cols=cat_feats, silent=verbose, verbose=verbose, n_ref_multiplier=0.0, **asdict(overlap_config)
         )
         self.overlap_eps = overlap_eps
 
@@ -170,7 +167,7 @@ class OverruleAnalyzer:
     def _predict_overlap(self, X, t):
         prop_scores = cross_val_predict(self.prop_estimator, X, t.values.ravel(), method="predict_proba")
         prop_scores = prop_scores[:, 1]  # Probability of treatment
-        overlap_set = np.logical_and(prop_scores < 1 - self.overlap_eps, prop_scores > self.overlap_eps)
+        overlap_set = np.logical_and(prop_scores < 1 - self.overlap_eps, prop_scores > self.overlap_eps).astype(int)
         return overlap_set
 
     def predict(self, X):

@@ -9,6 +9,7 @@ Conference on Artificial Intelligence and Statistics (Vol. 108, pp. 788–798). 
 """
 
 import logging
+from typing import Union
 
 import cvxpy as cvx
 import numpy as np
@@ -18,7 +19,7 @@ from sklearn.metrics import roc_auc_score
 from .beam_search import beam_search
 
 
-class OverlapBooleanRule(object):
+class OverlapBooleanRule:
     """Overlap Boolean Rule class in the style of scikit-learn"""
 
     def __init__(
@@ -102,7 +103,7 @@ class OverlapBooleanRule(object):
         self.__dict__.update(state)
         self.logger = None
 
-    def fit(self, X, y):
+    def fit(self, X: pd.DataFrame, y: Union[np.ndarray, pd.DataFrame]):
         """
         Fit model to training data.
 
@@ -220,7 +221,7 @@ class OverlapBooleanRule(object):
 
         self.round_(X, y, scoring=self.rounding)
 
-    def greedy_round_(self, X, y, xi=0.5, use_lp=False):
+    def greedy_round_(self, X: pd.DataFrame, y: Union[np.ndarray, pd.DataFrame], xi: float = 0.5, use_lp: bool = False):
         """
         Round the rule coefficients to integer values.
 
@@ -283,7 +284,14 @@ class OverlapBooleanRule(object):
         self.w = np.zeros(A.shape[1])
         self.w[U] = 1
 
-    def round_(self, X, y, scoring="greedy", xi=None, use_lp=True):
+    def round_(
+        self,
+        X: pd.DataFrame,
+        y: Union[np.ndarray, pd.DataFrame],
+        scoring: str = "greedy",
+        xi=None,
+        use_lp: bool = True,
+    ):
         """
         Round the rule coefficients to integer values via a greedy approach, either using a fixed reward
         (`scoring="greedy"`) or optimizing the reward for including positive examples according
@@ -368,7 +376,7 @@ class OverlapBooleanRule(object):
 
         return ((A * self.w) > 0).astype(int)
 
-    def get_params(self, deep=False):
+    def get_params(self):
         """Returns estimator parameters"""
         return dict([(k, getattr(self, k)) for k in self.valid_params])
 

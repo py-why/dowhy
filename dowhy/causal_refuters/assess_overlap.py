@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Optional
 
 from dowhy.causal_refuter import CausalRefuter
 from dowhy.causal_refuters.assess_overlap_overrule import OverlapConfig, OverruleAnalyzer, SupportConfig
@@ -75,8 +75,8 @@ def assess_support_and_overlap_overrule(
     backdoor_vars: List[str],
     treatment_name: str,
     cat_feats: List[str],
-    overlap_config: OverlapConfig,
-    support_config: SupportConfig,
+    overlap_config: Optional[OverlapConfig],
+    support_config: Optional[SupportConfig],
     overlap_eps: float,
     verbose: bool,
 ):

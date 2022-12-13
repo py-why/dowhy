@@ -1,15 +1,23 @@
-# ----------------------------------------------#
-# OverRule: Overlap Estimation using Rule Sets  #
-# @Authors: Dennis Wei                          #
-# ----------------------------------------------#
+"""Beam search utilities for optimization.
 
+This module implements the boolean ruleset estimator from OverRule [1]. Code is adapted (with some simplifications)
+from https://github.com/clinicalml/overlap-code, under the MIT License.
+
+[1] Oberst, M., Johansson, F., Wei, D., Gao, T., Brat, G., Sontag, D., & Varshney, K. (2020). Characterization of
+Overlap in Observational Studies. In S. Chiappa & R. Calandra (Eds.), Proceedings of the Twenty Third International
+Conference on Artificial Intelligence and Statistics (Vol. 108, pp. 788–798). PMLR. https://arxiv.org/abs/1907.04138
+"""
 
 import numpy as np
 import pandas as pd
 
 
-class PricingInstance(object):
-    """Instance of the pricing problem"""
+class PricingInstance:
+    """
+    Instance of the pricing problem.
+
+    This is an internal function.
+    """
 
     def __init__(self, rp, rn, Xp, Xn, v0, z0):
         self.rp = rp
@@ -40,23 +48,39 @@ class PricingInstance(object):
             self.LB1[self.LB1 < self.LB.min()] = self.LB.min()
 
 
-def beam_search(r, X, lambda0, lambda1, K=1, UB=0, D=10, B=5, wLB=0.5, eps=1e-6):
+def beam_search(
+    r,
+    X,
+    lambda0: float,
+    lambda1: float,
+    K: int = 1,
+    UB: float = 0,
+    D: int = 10,
+    B: int = 5,
+    wLB: float = 0.5,
+    eps: float = 1e-6,
+):
     """
-    Beam search to generate solutions to pricing problem
+    Beam search to generate solutions to pricing problem.
 
-    Problem parameters:
-        r = cost vector (residuals)
-        X = binary feature DataFrame
-        lambda0 = fixed cost of a term
-        lambda1 = cost per literal
-
-    Algorithm parameters:
-        K = maximum number of solutions returned
-        UB = initial upper bound on value of solutions
-        D = maximum degree
-        B = beam width
-        wLB = weight on lower bound in evaluating nodes
-        eps = numerical tolerance on comparisons
+    :param r: Cost vector (residuals)
+    :param X: Binary features in a DataFrame
+    :param lambda0: Fixed cost of a term
+    :type lambda0: float
+    :param lambda1: Cost per literal
+    :type lambda1: float
+    :param K: Maximum number of solutions returned, defaults to 1
+    :type K: int, optional
+    :param UB: Initial upper bound on value of solutions, defaults to 0
+    :type UB: float, optional
+    :param D: Maximum Degree, defaults to 10
+    :type D: int, optional
+    :param B: Beam width, defaults to 5
+    :type B: int, optional
+    :param wLB: Weight on lower bound in evaluating nodes, defaults to 0.5
+    :type wLB: float, optional
+    :param eps: Numerical tolerance on comparisons, defaults to 1e-6
+    :type eps: float, optional
     """
 
     # Initialize output

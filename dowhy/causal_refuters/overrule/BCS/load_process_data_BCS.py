@@ -8,6 +8,8 @@ Overlap in Observational Studies. In S. Chiappa & R. Calandra (Eds.), Proceeding
 Conference on Artificial Intelligence and Statistics (Vol. 108, pp. 788–798). PMLR. https://arxiv.org/abs/1907.04138
 """
 
+from typing import Dict, List
+
 import numpy as np
 import pandas as pd
 from sklearn.base import TransformerMixin
@@ -16,18 +18,35 @@ from sklearn.preprocessing import OneHotEncoder
 
 class FeatureBinarizer(TransformerMixin):
     """
-    TODO: Fix docstring
-    Transformer for binarizing categorical and ordinal (including continuous) features
+    Transformer for binarizing categorical and ordinal (including continuous) features.
 
-    Parameters:
-        colCateg = list of categorical features ('object' dtype automatically treated as categorical)
-        numThresh = number of quantile thresholds used to binarize ordinal variables (default 9)
-        negations = whether to append negations
-        threshStr = whether to convert thresholds on ordinal features to strings
-        threshOverride = dictionary of {colname : np.linspace object} to define cuts
+    Note that all features are converted into binary variables before learning Boolean rules.
     """
 
-    def __init__(self, colCateg=[], numThresh=9, negations=False, threshStr=False, threshOverride={}, **kwargs):
+    def __init__(
+        self,
+        colCateg: List[str] = [],
+        numThresh: int = 9,
+        negations: bool = False,
+        threshStr: bool = False,
+        threshOverride: Dict = {},
+        **kwargs,
+    ):
+        """
+        Initialize transformer for binarizing categorical and ordinal (including continuous) features
+
+        :param colCateg: List of categorical columns, defaults to [], 'object' dtype automatically treated as categorical
+        :type colCateg: List[str], optional
+        :param numThresh: Number of quantile thresholds to binarize ordinal features, defaults to 9
+        :type numThresh: int, optional
+        :param negations: Include negations, defaults to False
+        :type negations: bool, optional
+        :param threshStr: Convert thresholds to strings, defaults to False
+        :type threshStr: bool, optional
+        :param threshOverride: Dictionary to override quantile thresholds, defaults to {},
+            formatted as `{colname : np.linspace object}` to define cuts
+        :type threshOverride: Dict, optional
+        """
         # List of categorical columns
         if type(colCateg) is pd.Series:
             self.colCateg = colCateg.tolist()
@@ -39,7 +58,7 @@ class FeatureBinarizer(TransformerMixin):
         self.threshOverride = {} if threshOverride is None else threshOverride
         # Number of quantile thresholds used to binarize ordinal features
         self.numThresh = numThresh
-        self.thresh = {}
+        self.thresh: Dict[str, np.ndarray] = {}
         # whether to append negations
         self.negations = negations
         # whether to convert thresholds on ordinal features to strings
@@ -47,14 +66,17 @@ class FeatureBinarizer(TransformerMixin):
 
     def fit(self, X):
         """
-        TODO: Fix docstring
-        Inputs:
-            X = original feature DataFrame
-        Outputs:
-            maps = dictionary of mappings for unary/binary columns
-            enc = dictionary of OneHotEncoders for categorical columns
-            thresh = dictionary of lists of thresholds for ordinal columns
-            NaN = list of ordinal columns containing NaN values"""
+        Fit to data, including the learning of thresholds where appropriate.
+
+        Sets the following internal variables:
+        * `maps` = dictionary of mappings for unary/binary columns
+        * `enc` = dictionary of OneHotEncoders for categorical columns
+        * `thresh` = dictionary of lists of thresholds for ordinal columns
+        * `NaN` = list of ordinal columns containing NaN values
+
+        :param X: Original features as a Pandas Dataframe
+        :type X: pd.DataFrame
+        """
         data = X
         # Quantile probabilities
         quantProb = np.linspace(1.0 / (self.numThresh + 1.0), self.numThresh / (self.numThresh + 1.0), self.numThresh)
@@ -107,11 +129,15 @@ class FeatureBinarizer(TransformerMixin):
         self.NaN = NaN
         return self
 
-    def transform(self, X):
-        """Inputs:
-            X = original feature DataFrame
-        Outputs:
-            A = binary feature DataFrame"""
+    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+        """
+        Transform data into binary features.
+
+        :param X: Original features as a Pandas Dataframe
+        :type X: pd.DataFrame
+        :return A: Binary feature dataframe
+        :type A: pd.DataFrame
+        """
         data = X
         maps = self.maps
         enc = self.enc
