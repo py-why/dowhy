@@ -1,9 +1,8 @@
 import logging
 from typing import List
 
-from dowhy.assess_overlap_overrule import OverlapConfig, SupportConfig
 from dowhy.causal_refuter import CausalRefuter
-from dowhy.causal_refuters.assess_overlap_overrule import OverruleAnalyzer
+from dowhy.causal_refuters.assess_overlap_overrule import OverlapConfig, OverruleAnalyzer, SupportConfig
 
 logger = logging.getLogger(__name__)
 
