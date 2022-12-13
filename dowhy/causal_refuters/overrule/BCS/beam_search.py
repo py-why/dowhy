@@ -41,7 +41,9 @@ class PricingInstance(object):
 
 
 def beam_search(r, X, lambda0, lambda1, K=1, UB=0, D=10, B=5, wLB=0.5, eps=1e-6):
-    """Beam search to generate solutions to pricing problem
+    """
+    Beam search to generate solutions to pricing problem
+
     Problem parameters:
         r = cost vector (residuals)
         X = binary feature DataFrame

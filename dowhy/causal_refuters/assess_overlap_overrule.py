@@ -1,5 +1,5 @@
 from dataclasses import asdict, dataclass
-from typing import List
+from typing import List, Optional, Union
 
 import numpy as np
 from sklearn.base import BaseEstimator
@@ -12,44 +12,112 @@ from dowhy.causal_refuters.overrule.utils import fatom
 
 @dataclass
 class SupportConfig:
+    """
+    Configuration for learning support rules.
+
+    :param n_ref_multiplier: Reference sample count multiplier, defaults to 1.0
+    :type n_ref_multiplier: float, optional
+    :param alpha: Fraction of the existing examples to ensure are included in the rules, defaults to 0.98
+    :type alpha: float, optional
+    :param lambda0: Regularization on the # of rules, defaults to 0.0
+    :type lambda0: float, optional
+    :param lambda1: Regularization on the # of literals, defaults to 0.0
+    :type lambda1: float, optional
+    :param K: Maximum results returned during beam search, defaults to 20
+    :type K: int, optional
+    :param D: Maximum extra rules per beam seach iteration, defaults to 20
+    :type D: int, optional
+    :param B: Width of beam search, defaults to 10
+    :type B: int, optional
+    :param iterMax: Maximum number of iterations of column generation, defaults to 10
+    :type iterMax: int, optional
+    :param num_thresh: Number of bins to discretize continuous variables, defaults to 9 (for deciles)
+    :type num_thresh: int, optional
+    :param solver: Linear programming solver used by CVXPY to solve the LP relaxation, defaults to 'ECOS'
+    :type solver: str, optional
+    :param rounding: Strategy to perform rounding, either 'greedy' or 'greedy_sweep', defaults to 'greedy_sweep'
+    :type rounding: str, optional
+    """
+
     n_ref_multiplier: float = 1
     alpha: float = 0.98
     lambda0: float = 0.0
     lambda1: float = 0.0
-    K: int = 20  # Maximum results returned during beam search
-    D: int = 20  # Maximum extra rules per beam seach iteration
-    B: int = 10  # Width of Beam Search
+    K: int = 20
+    D: int = 20
+    B: int = 10
     iterMax: int = 10
-    num_thresh: int = 5
+    num_thresh: int = 9
     solver: str = "ECOS"
     rounding: str = "greedy_sweep"
 
 
 @dataclass
 class OverlapConfig:
-    n_ref_multiplier: float = 0.0
+    """
+    Configuration for learning overlap rules.
+
+    :param alpha: Fraction of the overlap samples to ensure are included in the rules, defaults to 0.95
+    :type alpha: float, optional
+    :param lambda0: Regularization on the # of rules, defaults to 1e-7
+    :type lambda0: float, optional
+    :param lambda1: Regularization on the # of literals, defaults to 0.0
+    :type lambda1: float, optional
+    :param K: Maximum results returned during beam search, defaults to 20
+    :type K: int, optional
+    :param D: Maximum extra rules per beam seach iteration, defaults to 20
+    :type D: int, optional
+    :param B: Width of beam search, defaults to 10
+    :type B: int, optional
+    :param iterMax: Maximum number of iterations of column generation, defaults to 10
+    :type iterMax: int, optional
+    :param num_thresh: Number of bins to discretize continuous variables, defaults to 9 (for deciles)
+    :type num_thresh: int, optional
+    :param solver: Linear programming solver used by CVXPY to solve the LP relaxation, defaults to 'ECOS'
+    :type solver: str, optional
+    :param rounding: Strategy to perform rounding, either 'greedy' or 'greedy_sweep', defaults to 'greedy_sweep'
+    :type rounding: str, optional
+    """
+
     alpha: float = 0.95
     lambda0: float = 1e-7
     lambda1: float = 0.0
-    K: int = 20  # Maximum results returned during beam search
-    D: int = 20  # Maximum extra rules per beam seach iteration
-    B: int = 10  # Width of Beam Search
+    K: int = 20
+    D: int = 20
+    B: int = 10
     iterMax: int = 10
-    num_thresh: int = 5
+    num_thresh: int = 9
     solver: str = "ECOS"
     rounding: str = "greedy_sweep"
+
+    def __post_init__(self):
+        self.n_ref_multiplier = 0.0  # Should not be set to any other value!
 
 
 class OverruleAnalyzer:
     def __init__(
         self,
-        cat_feats: List[str],
-        support_config=None,
-        overlap_config=None,
-        prop_estimator=None,
-        overlap_eps=0.1,
-        verbose=False,
+        cat_feats: Optional[List[str]] = None,
+        support_config: Optional[SupportConfig] = None,
+        overlap_config: Optional[OverlapConfig] = None,
+        prop_estimator: Optional[Union[BaseEstimator, GridSearchCV]] = None,
+        overlap_eps: float = 0.1,
+        verbose: bool = False,
     ):
+        """
+        Learn support and overlap rules.
+
+        :param: cat_feats: List[str]: List of categorical features, all others will be discretized
+        :param: support_config: SupportConfig: DataClass with configuration options for learning support rules
+        :param: overlap_config: OverlapConfig: DataClass with configuration options for learning overlap rules
+        :param: overrule_verbose: bool: Enable verbose logging of optimization output, defaults to False
+        :param prop_estimator: Propensity score estimator, defaults to XGBClassifier learned via GridSearchCV
+        :type prop_estimator: Optional[Union[BaseEstimator, GridSearchCV]], optional
+        :param: overlap_eps: float: Defines the range of propensity scores for a point to be considered in the overlap
+            region, with the range defined as `(overlap_eps, 1 - overlap_eps)`, defaults to 0.1
+        :param verbose: Verbose optimization output, defaults to False
+        :type verbose: bool, optional
+        """
         if support_config is None:
             support_config = SupportConfig()
         if overlap_config is None:

@@ -15,7 +15,7 @@ class AssessOverlap(CausalRefuter):
 
     [1] Oberst, M., Johansson, F., Wei, D., Gao, T., Brat, G., Sontag, D., & Varshney, K. (2020). Characterization of
     Overlap in Observational Studies. In S. Chiappa & R. Calandra (Eds.), Proceedings of the Twenty Third International
-    Conference on Artificial Intelligence and Statistics (Vol. 108, pp. 788–798). PMLR.
+    Conference on Artificial Intelligence and Statistics (Vol. 108, pp. 788–798). PMLR. https://arxiv.org/abs/1907.04138
     """
 
     def __init__(self, *args, **kwargs):

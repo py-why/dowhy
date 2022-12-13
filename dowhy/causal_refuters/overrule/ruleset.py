@@ -3,7 +3,9 @@
 This module implements the boolean ruleset estimator from OverRule [1]. Code is adapted (with some simplifications)
 from https://github.com/clinicalml/overlap-code, under the MIT License.
 
-[1] https://arxiv.org/abs/1907.04138
+[1] Oberst, M., Johansson, F., Wei, D., Gao, T., Brat, G., Sontag, D., & Varshney, K. (2020). Characterization of
+Overlap in Observational Studies. In S. Chiappa & R. Calandra (Eds.), Proceedings of the Twenty Third International
+Conference on Artificial Intelligence and Statistics (Vol. 108, pp. 788–798). PMLR. https://arxiv.org/abs/1907.04138
 """
 from typing import Callable, Dict, List, Optional
 

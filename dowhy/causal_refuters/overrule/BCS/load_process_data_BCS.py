@@ -1,8 +1,12 @@
-# -*- coding: utf-8 -*-
-# ----------------------------------------------#
-# OverRule: Overlap Estimation using Rule Sets  #
-# @Authors: Dennis Wei                          #
-# ----------------------------------------------#
+"""Code for Binarizing Features.
+
+This module implements the boolean ruleset estimator from OverRule [1]. Code is adapted (with some simplifications)
+from https://github.com/clinicalml/overlap-code, under the MIT License.
+
+[1] Oberst, M., Johansson, F., Wei, D., Gao, T., Brat, G., Sontag, D., & Varshney, K. (2020). Characterization of
+Overlap in Observational Studies. In S. Chiappa & R. Calandra (Eds.), Proceedings of the Twenty Third International
+Conference on Artificial Intelligence and Statistics (Vol. 108, pp. 788–798). PMLR. https://arxiv.org/abs/1907.04138
+"""
 
 import numpy as np
 import pandas as pd
@@ -11,7 +15,10 @@ from sklearn.preprocessing import OneHotEncoder
 
 
 class FeatureBinarizer(TransformerMixin):
-    """Transformer for binarizing categorical and ordinal (including continuous) features
+    """
+    TODO: Fix docstring
+    Transformer for binarizing categorical and ordinal (including continuous) features
+
     Parameters:
         colCateg = list of categorical features ('object' dtype automatically treated as categorical)
         numThresh = number of quantile thresholds used to binarize ordinal variables (default 9)
@@ -39,7 +46,9 @@ class FeatureBinarizer(TransformerMixin):
         self.threshStr = threshStr
 
     def fit(self, X):
-        """Inputs:
+        """
+        TODO: Fix docstring
+        Inputs:
             X = original feature DataFrame
         Outputs:
             maps = dictionary of mappings for unary/binary columns

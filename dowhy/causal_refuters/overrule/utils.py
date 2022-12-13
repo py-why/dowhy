@@ -1,22 +1,20 @@
-# ----------------------------------------------------------#
-# OverRule: Overlap Estimation using Rule Sets              #
-# @Authors: Fredrik D. Johansson, Michael Oberst, Tian Gao  #
-# ----------------------------------------------------------#
+"""Utilities for learning boolean rules.
+
+This module implements the boolean ruleset estimator from OverRule [1]. Code is adapted (with some simplifications)
+from https://github.com/clinicalml/overlap-code, under the MIT License.
+
+[1] Oberst, M., Johansson, F., Wei, D., Gao, T., Brat, G., Sontag, D., & Varshney, K. (2020). Characterization of
+Overlap in Observational Studies. In S. Chiappa & R. Calandra (Eds.), Proceedings of the Twenty Third International
+Conference on Artificial Intelligence and Statistics (Vol. 108, pp. 788–798). PMLR. https://arxiv.org/abs/1907.04138
+"""
 
 import numpy as np
 import pandas as pd
 
 
 def sampleUnif(x, n=10000, seed=None):
-    """Generates samples from a uniform distribution over the max / min of each
-    column of the sample X
-
-    @args:
-        x: Samples as a 2D numpy array
-        n: Number of samples to return
-
-    @returns:
-        refSamples: Uniform samples as numpy array
+    """
+    Generate samples from a uniform distribution over the max / min of each column of the sample X
     """
     if seed is not None:
         np.random.seed(seed)
@@ -29,8 +27,8 @@ def sampleUnif(x, n=10000, seed=None):
 
 
 def sample_reference(x, n=None, cat_cols=[], seed=None, ref_range=None):
-    """Generates samples from a uniform distribution over the columns of X
-    TODO: Docstring
+    """
+    Generate samples from a uniform distribution over the columns of X.
     """
 
     if n is None:
