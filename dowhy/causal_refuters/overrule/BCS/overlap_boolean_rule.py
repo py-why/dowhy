@@ -248,6 +248,9 @@ class OverlapBooleanRule(object):
         if use_lp:
             R = [R[i] for i in range(len(R)) if self.w_raw[i] > 0]
 
+        # NOTE: This is a greedy approach, so it does not incorporate lambda0 explicitly
+        # Similarly, it will prefer a larger number of smaller rules if lambda1 is set
+        # to a larger value, because the incremental cost will be lower.
         while (i < MAX_ITER) and (C[y == 1].mean() < self.alpha):
             if (y == 0).sum() > 0:
                 neg_cover = (A[(y == 0), :][:, R]).mean(0)
@@ -280,7 +283,7 @@ class OverlapBooleanRule(object):
         self.w = np.zeros(A.shape[1])
         self.w[U] = 1
 
-    def round_(self, X, y, scoring="greedy", xi=None, use_lp=False):
+    def round_(self, X, y, scoring="greedy", xi=None, use_lp=True):
         """
         Round the rule coefficients to integer values via a greedy approach, either using a fixed reward
         (`scoring="greedy"`) or optimizing the reward for including positive examples according
@@ -312,7 +315,9 @@ class OverlapBooleanRule(object):
                 for xii in xis:
                     self.greedy_round_(X, y, xi=xii, use_lp=use_lp)
                     auc = roc_auc_score(y, self.predict(X))
-                    if auc > best_auc:
+                    # Small tolerance on comparisons
+                    # This can be useful to break ties and favor larger values of xi
+                    if auc > best_auc - 0.001:
                         best_xi = xii
                     if auc > best_auc:
                         best_auc = auc
