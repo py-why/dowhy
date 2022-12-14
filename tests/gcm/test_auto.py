@@ -1,8 +1,8 @@
 import networkx as nx
 import numpy as np
 import pandas as pd
-from pytest import mark
 from flaky import flaky
+from pytest import mark
 from sklearn.ensemble import HistGradientBoostingClassifier, HistGradientBoostingRegressor
 from sklearn.linear_model import ElasticNetCV, LassoCV, LinearRegression, LogisticRegression, RidgeCV
 from sklearn.naive_bayes import GaussianNB
@@ -10,6 +10,7 @@ from sklearn.pipeline import Pipeline
 
 from dowhy.gcm import ProbabilisticCausalModel
 from dowhy.gcm.auto import AssignmentQuality, assign_causal_mechanisms
+
 # from dowhy.gcm.ml import AutoGluonClassifier, AutoGluonRegressor
 
 
@@ -205,6 +206,7 @@ def test_when_auto_called_from_main_namespace_returns_no_attribute_error():
     from dowhy import gcm
 
     _ = gcm.auto.AssignmentQuality.GOOD
+
 
 @mark.skip()
 def test_when_using_best_quality_then_returns_auto_gluon_model():
