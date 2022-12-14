@@ -1,6 +1,6 @@
 import logging
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import networkx as nx
 import numpy as np
@@ -14,6 +14,7 @@ _logger = logging.getLogger(__name__)
 def plot(
     causal_graph: nx.Graph,
     causal_strengths: Optional[Dict[Tuple[Any, Any], float]] = None,
+    colors: Optional[Dict[Union[Any, Tuple[Any, Any]], str]] = None,
     filename: Optional[str] = None,
     display_plot: bool = True,
     figure_size: Optional[List[int]] = None,
@@ -27,6 +28,7 @@ def plot(
 
     :param causal_graph: The graph to be plotted
     :param causal_strengths: An optional dictionary with Edge -> float entries.
+    :param colors: An optional dictionary with color specifications for edges or nodes.
     :param filename: An optional filename if the output should be plotted into a file.
     :param display_plot: Optionally specify if the plot should be displayed or not (default to True).
     :param figure_size: A tuple to define the width and height (as a tuple) of the pyplot. This is used to parameter to
@@ -37,6 +39,7 @@ def plot(
 
     >>> plot(nx.DiGraph([('X', 'Y')])) # plots X -> Y
     >>> plot(nx.DiGraph([('X', 'Y')]), causal_strengths={('X', 'Y'): 0.43}) # annotates arrow with 0.43
+    >>> plot(nx.DiGraph([('X', 'Y')]), colors={('X', 'Y'): 'red', 'X': 'green'}) # colors X -> Y red and X green
     """
     try:
         from dowhy.gcm.util.pygraphviz import _plot_causal_graph_graphviz
@@ -45,6 +48,7 @@ def plot(
             _plot_causal_graph_graphviz(
                 causal_graph,
                 causal_strengths=causal_strengths,
+                colors=colors,
                 filename=filename,
                 display_plot=display_plot,
                 figure_size=figure_size,
@@ -59,6 +63,7 @@ def plot(
             _plot_causal_graph_networkx(
                 causal_graph,
                 causal_strengths=causal_strengths,
+                colors=colors,
                 filename=filename,
                 display_plot=display_plot,
                 figure_size=figure_size,
@@ -75,6 +80,7 @@ def plot(
         _plot_causal_graph_networkx(
             causal_graph,
             causal_strengths=causal_strengths,
+            colors=colors,
             filename=filename,
             display_plot=display_plot,
             figure_size=figure_size,
@@ -96,6 +102,7 @@ def _plot_causal_graph_networkx(
     causal_graph: nx.Graph,
     pydot_layout_prog: Optional[str] = None,
     causal_strengths: Optional[Dict[Tuple[Any, Any], float]] = None,
+    colors: Optional[Dict[Union[Any, Tuple[Any, Any]], str]] = None,
     filename: Optional[str] = None,
     display_plot: bool = True,
     label_wrap_length: int = 3,
@@ -113,12 +120,18 @@ def _plot_causal_graph_networkx(
         causal_strengths = {}
     else:
         causal_strengths = deepcopy(causal_strengths)
+    if colors is None:
+        colors = {}
+    else:
+        colors = deepcopy(colors)
 
     max_strength = 0.0
     for (source, target, strength) in causal_graph.edges(data="CAUSAL_STRENGTH", default=1):
         if (source, target) not in causal_strengths:
             causal_strengths[(source, target)] = strength
         max_strength = max(max_strength, abs(causal_strengths[(source, target)]))
+        if (source, target) not in colors:
+            colors[(source, target)] = "black"
 
     for edge in causal_graph.edges:
         if edge[0] == edge[1]:
@@ -131,6 +144,8 @@ def _plot_causal_graph_networkx(
     # Wrapping labels if they are too long
     labels = {}
     for node in causal_graph.nodes:
+        if node not in colors:
+            colors[node] = "lightblue"
         node_name_splits = str(node).split(" ")
         for i in range(1, len(node_name_splits)):
             if len(node_name_splits[i - 1]) > label_wrap_length:
@@ -149,7 +164,8 @@ def _plot_causal_graph_networkx(
     nx.draw(
         causal_graph,
         pos=layout,
-        node_color="lightblue",
+        node_color=[colors[node] for node in causal_graph.nodes()],
+        edge_color=[colors[(s, t)] for (s, t) in causal_graph.edges()],
         linewidths=0.25,
         labels=labels,
         font_size=8,
