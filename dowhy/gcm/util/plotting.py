@@ -198,6 +198,7 @@ def bar_plot(
     bar_width: float = 0.8,
     xticks: List[str] = None,
     xticks_rotation: int = 90,
+    sort_names: bool = True,
 ) -> None:
     """Convenience function to make a bar plot of the given values with uncertainty bars, if provided. Useful for all
     kinds of attribution results (including confidence intervals).
@@ -211,7 +212,12 @@ def bar_plot(
     :param bar_width: The width of the bars.
     :param xticks: Explicitly specify the labels for the bars on the x-axis.
     :param xticks_rotation: Specify the rotation of the labels on the x-axis.
+    :param sort_names: If True, the names in the plot are sorted alphabetically. If False, the order as given in values
+                       are used.
     """
+    if sort_names:
+        values = {k: values[k] for k in sorted(values)}
+
     if uncertainties is None:
         uncertainties = {node: [values[node], values[node]] for node in values}
 
