@@ -217,7 +217,7 @@ class Econml(CausalEstimator):
         return estimator_class
 
     def estimate_effect(
-        self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+        self, data: pd.DataFrame, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
     ):
         """
         data: dataframe containing the data on which treatment effect is to be estimated.
@@ -259,6 +259,7 @@ class Econml(CausalEstimator):
             self.effect_intervals = None
 
         estimate = CausalEstimate(
+            data=data,
             estimate=ate,
             control_value=control_value,
             treatment_value=treatment_value,

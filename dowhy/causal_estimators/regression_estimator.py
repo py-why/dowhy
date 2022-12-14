@@ -110,7 +110,7 @@ class RegressionEstimator(CausalEstimator):
 
     def estimate_effect(
         self,
-        data: pd.DataFrame = None,
+        data: pd.DataFrame,
         treatment_value: Any = 1,
         control_value: Any = 0,
         target_units=None,
@@ -130,6 +130,7 @@ class RegressionEstimator(CausalEstimator):
             )
         intercept_parameter = self.model.params[0]
         estimate = CausalEstimate(
+            data=data,
             estimate=effect_estimate,
             control_value=control_value,
             treatment_value=treatment_value,

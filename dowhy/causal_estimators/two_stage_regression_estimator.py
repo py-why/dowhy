@@ -243,7 +243,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         return self
 
     def estimate_effect(
-        self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+        self, data: pd.DataFrame, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
     ):
         self._target_units = target_units
         self._treatment_value = treatment_value
@@ -288,6 +288,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
                 estimand_type=self._target_estimand.estimand_type,
             )
         estimate = CausalEstimate(
+            data=data,
             estimate=estimate_value,
             control_value=control_value,
             treatment_value=treatment_value,

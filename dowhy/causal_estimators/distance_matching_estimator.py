@@ -152,7 +152,7 @@ class DistanceMatchingEstimator(CausalEstimator):
         return self
 
     def estimate_effect(
-        self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+        self, data: pd.DataFrame, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
     ):
         # this assumes a binary treatment regime
         self._target_units = target_units
@@ -276,6 +276,7 @@ class DistanceMatchingEstimator(CausalEstimator):
                 self.matched_indices_atc[control_df_index[i]] = treated.iloc[indices[i]].index.tolist()
 
         estimate = CausalEstimate(
+            data=data,
             estimate=est,
             control_value=control_value,
             treatment_value=treatment_value,

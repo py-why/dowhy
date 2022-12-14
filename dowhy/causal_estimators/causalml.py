@@ -166,7 +166,7 @@ class Causalml(CausalEstimator):
         return estimator_class
 
     def estimate_effect(
-        self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+        self, data: pd.DataFrame, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
     ):
         """
         data: dataframe containing the data on which treatment effect is to be estimated.
@@ -198,24 +198,8 @@ class Causalml(CausalEstimator):
         matched_args = {arg: func_args[arg] for arg in func_args.keys() if arg in arg_names}
         cate_estimates = self.estimator.fit_predict(**matched_args)
 
-        significance_result = (
-            self.test_significance(data, estimate.value, method=self._significance_test)
-            if self._significance_test
-            else None
-        )
-
-        confidence_intervals = (
-            self.estimate_confidence_intervals(
-                data, estimate.value, confidence_level=self.confidence_level, method=self._confidence_intervals
-            )
-            if self._confidence_intervals
-            else None
-        )
-
-        effect_strength_dict = self.evaluate_effect_strength(estimate) if self._effect_strength_eval else None
-        # estimate.add_effect_strength(effect_strength_dict)
-
         estimate = CausalEstimate(
+            data=data,
             estimate=value_tuple[0],
             control_value=control_value,
             treatment_value=treatment_value,

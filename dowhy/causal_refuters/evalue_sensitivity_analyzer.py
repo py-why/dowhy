@@ -75,7 +75,7 @@ class EValueSensitivityAnalyzer:
 
         if isinstance(self.estimate.estimator, LinearRegressionEstimator):
             coef_est = self.estimate.value
-            coef_se = self.estimate.get_standard_error(data)[0]
+            coef_se = self.estimate.get_standard_error()[0]
         elif isinstance(self.estimate.estimator, GeneralizedLinearModelEstimator):
             coef_est = self.estimate.estimator.model.params[1:2].to_numpy()[0]
             coef_se = self.estimate.estimator.model.bse[1:2].to_numpy()[0]
@@ -276,7 +276,7 @@ class EValueSensitivityAnalyzer:
             )
             if isinstance(self.estimate.estimator, LinearRegressionEstimator):
                 coef_est = new_effect.value
-                coef_se = new_effect.get_standard_error(data)[0]
+                coef_se = new_effect.get_standard_error()[0]
             elif isinstance(self.estimate.estimator, GeneralizedLinearModelEstimator):
                 coef_est = new_effect.estimator.model.params[1:2].to_numpy()[0]
                 coef_se = new_effect.estimator.model.bse[1:2].to_numpy()[0]

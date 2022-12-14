@@ -19,7 +19,7 @@ def test_causal_refuter_placeholder_method():
 
 @flaky(max_runs=3)
 def test_causal_refuter_bootstrap_test():
-    estimator = CausalEstimate(0, None, None, None, None)
+    estimator = CausalEstimate(None, 0, None, None, None, None)
     refuter = MockRefuter(None, IdentifiedEstimand(None, None, None), None)
     simulations = np.random.normal(0, 1, 5000)
     pvalue = refuter.perform_bootstrap_test(estimator, simulations)

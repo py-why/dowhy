@@ -124,7 +124,7 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
         return self
 
     def estimate_effect(
-        self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+        self, data: pd.DataFrame, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
     ):
         self._target_units = target_units
         self._treatment_value = treatment_value
@@ -223,6 +223,7 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
 
         # TODO - how can we add additional information into the returned estimate?
         estimate = CausalEstimate(
+            data=data,
             estimate=est,
             control_value=control_value,
             treatment_value=treatment_value,

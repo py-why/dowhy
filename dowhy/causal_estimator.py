@@ -190,7 +190,7 @@ class CausalEstimator:
         df_withtreatment = data.loc[data[self._treatment_name] == 1]
         df_notreatment = data.loc[data[self._treatment_name] == 0]
         est = np.mean(df_withtreatment[self._outcome_name]) - np.mean(df_notreatment[self._outcome_name])
-        return CausalEstimate(est, None, None, control_value=0, treatment_value=1)
+        return CausalEstimate(data, est, None, None, control_value=0, treatment_value=1)
 
     def _estimate_effect_fn(self, data_df):
         """Function used in conditional effect estimation. This function is to be overridden by each child estimator.
@@ -710,7 +710,7 @@ def estimate_effect(
     if identified_estimand.no_directed_path:
         logger.warning("No directed path from {0} to {1}.".format(treatment, outcome))
         return CausalEstimate(
-            0, identified_estimand, None, control_value=control_value, treatment_value=treatment_value
+            None, 0, identified_estimand, None, control_value=control_value, treatment_value=treatment_value
         )
     # Check if estimator's target estimand is identified
     elif identified_estimand.estimands[identifier_name] is None:
@@ -750,26 +750,12 @@ def estimate_effect(
     return estimate
 
 
-@dataclass
 class CausalEstimate:
     """Class for the estimate object that every causal estimator returns"""
 
-    value: float
-    target_estimand: IdentifiedEstimand
-    realized_estimand_expr: str
-    control_value: Any
-    treatment_value: Any
-    estimator: CausalEstimator
-    confidence_intervals: Optional[Tuple[float, float]] = None
-    standard_error: Optional[float] = None
-    p_value: Optional[float] = None
-    conditional_effects: Optional[pd.Series] = None
-    effect_strength: Optional[Dict[Any]] = None
-    params: Optional[Dict[str, Any]] = None
-    conditional_estimates: Optional[Any] = None
-
     def __init__(
         self,
+        data,
         estimate,
         target_estimand,
         realized_estimand_expr,
@@ -778,6 +764,11 @@ class CausalEstimate:
         conditional_estimates=None,
         **kwargs,
     ):
+        # TODO: Remove _data from this object
+        # we save it here to enable the methods that required the data saved in the estimator
+        # eventually we should call those methods and just save the results in this object
+        # instead of having this object invoke the estimator methods with the data.
+        self._data = data
         self.value = estimate
         self.target_estimand = target_estimand
         self.realized_estimand_expr = realized_estimand_expr
@@ -800,7 +791,7 @@ class CausalEstimate:
     def add_params(self, **kwargs):
         self.params.update(kwargs)
 
-    def get_confidence_intervals(self, data: pd.DataFrame, confidence_level=None, method=None, **kwargs):
+    def get_confidence_intervals(self, confidence_level=None, method=None, **kwargs):
         """Get confidence intervals of the obtained estimate.
 
         By default, this is done with the help of bootstrapped confidence intervals
@@ -814,11 +805,11 @@ class CausalEstimate:
         :returns: The obtained confidence interval.
         """
         confidence_intervals = self.estimator.estimate_confidence_intervals(
-            data, estimate_value=self.value, confidence_level=confidence_level, method=method, **kwargs
+            data=self._data, estimate_value=self.value, confidence_level=confidence_level, method=method, **kwargs
         )
         return confidence_intervals
 
-    def get_standard_error(self, data: pd.DataFrame, method=None, **kwargs):
+    def get_standard_error(self, method=None, **kwargs):
         """Get standard error of the obtained estimate.
 
         By default, this is done with the help of bootstrapped standard errors
@@ -831,10 +822,10 @@ class CausalEstimate:
         :returns: Standard error of the causal estimate.
 
         """
-        std_error = self.estimator.estimate_std_error(data, method=method, **kwargs)
+        std_error = self.estimator.estimate_std_error(self._data, method=method, **kwargs)
         return std_error
 
-    def test_stat_significance(self, data: pd.DataFrame, method=None, **kwargs):
+    def test_stat_significance(self, method=None, **kwargs):
         """Test statistical significance of the estimate obtained.
 
         By default, uses resampling to create a non-parametric significance test.
@@ -847,7 +838,7 @@ class CausalEstimate:
 
         :returns: p-value from the significance test
         """
-        signif_results = self.estimator.test_significance(data, self.value, method=method, **kwargs)
+        signif_results = self.estimator.test_significance(self._data, self.value, method=method, **kwargs)
         return {"p_value": signif_results["p_value"]}
 
     def estimate_conditional_effects(
@@ -897,13 +888,15 @@ class CausalEstimate:
         s += ""
         if hasattr(self, "cate_estimates"):
             s += "Effect estimates: {0}\n".format(self.cate_estimates)
-        # if hasattr(self, "estimator"):
-        # if self.estimator._significance_test:
-        #     s += "p-value: {0}\n".format(self.estimator.signif_results_tostr(self.test_stat_significance(data))) # TODO: figure out where to get the data from?
-        # if self.estimator._confidence_intervals:
-        #     s += "{0}% confidence interval: {1}\n".format(
-        #         100 * self.estimator.confidence_level, self.get_confidence_intervals(data) # TODO: figure out where to get the data from?
-        #     )
+        if hasattr(self, "estimator"):
+            if self.estimator._significance_test:
+                s += "p-value: {0}\n".format(
+                    self.estimator.signif_results_tostr(self.test_stat_significance(self._data))
+                )
+            if self.estimator._confidence_intervals:
+                s += "{0}% confidence interval: {1}\n".format(
+                    100 * self.estimator.confidence_level, self.get_confidence_intervals(self._data)
+                )
         if self.conditional_estimates is not None:
             s += "### Conditional Estimates\n"
             s += str(self.conditional_estimates)

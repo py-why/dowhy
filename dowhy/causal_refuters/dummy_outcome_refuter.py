@@ -605,6 +605,7 @@ def refute_dummy_outcome(
     if estimator_present == False:
 
         dummy_estimate = CausalEstimate(
+            data=None,
             estimate=causal_effect_map[None],
             control_value=estimate.control_value,
             treatment_value=estimate.treatment_value,
@@ -626,6 +627,7 @@ def refute_dummy_outcome(
         # Iterating through the refutation for each category
         for train_category in range(simulation_results.shape[1]):
             dummy_estimate = CausalEstimate(
+                data=None,
                 estimate=causal_effect_list[train_category],
                 control_value=estimate.control_value,
                 treatment_value=estimate.treatment_value,

@@ -251,6 +251,7 @@ def refute_placebo_treatment(
     # Ideally we should expect that ZERO should fall in the distribution of the effect estimates as we have severed any causal
     # relationship between the treatment and the outcome.
     dummy_estimator = CausalEstimate(
+        data=data,
         estimate=0,
         control_value=estimate.control_value,
         treatment_value=estimate.treatment_value,

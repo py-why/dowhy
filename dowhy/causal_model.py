@@ -359,7 +359,7 @@ class CausalModel:
         # Check if estimator's target estimand is identified
         if identified_estimand.estimands[identifier_name] is None:
             self.logger.warning("No valid identified estimand for using instrumental variables method")
-            estimate = CausalEstimate(None, None, None, None, None)
+            estimate = CausalEstimate(None, None, None, None, None, None)
         else:
             if fit_estimator:
                 # Note that while the name of the variable is the same,

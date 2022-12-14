@@ -116,7 +116,7 @@ class InstrumentalVariableEstimator(CausalEstimator):
         return self
 
     def estimate_effect(
-        self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+        self, data: pd.DataFrame, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
     ):
         """
         data: dataframe containing the data on which treatment effect is to be estimated.
@@ -159,6 +159,7 @@ class InstrumentalVariableEstimator(CausalEstimator):
                 reg_results.params
             )  # the effect is the same for any treatment value (assume treatment goes from 0 to 1)
         estimate = CausalEstimate(
+            data=data,
             estimate=iv_est,
             control_value=control_value,
             treatment_value=treatment_value,

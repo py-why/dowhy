@@ -96,14 +96,14 @@ class TestEstimator(object):
         assert res
         # Compute confidence intervals, standard error and significance tests
         if confidence_intervals:
-            ate_estimate.get_confidence_intervals(data["df"])
-            ate_estimate.get_confidence_intervals(data["df"], confidence_level=0.99)
-            ate_estimate.get_confidence_intervals(data["df"], method="bootstrap")
-            ate_estimate.get_standard_error(data["df"])
-            ate_estimate.get_standard_error(data["df"], method="bootstrap")
+            ate_estimate.get_confidence_intervals()
+            ate_estimate.get_confidence_intervals(confidence_level=0.99)
+            ate_estimate.get_confidence_intervals(method="bootstrap")
+            ate_estimate.get_standard_error()
+            ate_estimate.get_standard_error(method="bootstrap")
         if test_significance:
-            ate_estimate.test_stat_significance(data["df"])
-            ate_estimate.test_stat_significance(data["df"], method="bootstrap")
+            ate_estimate.test_stat_significance()
+            ate_estimate.test_stat_significance(method="bootstrap")
 
     def average_treatment_effect_testsuite(
         self,
