@@ -17,6 +17,7 @@ classifiers = [
     'License :: OSI Approved :: MIT License',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
 ]
 keywords = [
     'causality',
@@ -41,12 +42,11 @@ files = ["dowhy/__init__.py"]
 
 #
 # Dependency compatibility notes:
-# * xgboost requires Python >=3.8
-# * pygraphviz requires Python >=3.8
-# * networkx requires Python >= 3.8
+# * autogluon requires scikit-learn <1.2.0
+# * numba (imported by econml) requires python <3.11
 #
 [tool.poetry.dependencies]
-python = ">=3.8,<3.10"
+python = ">=3.8,<3.11"
 cython = "^0.29.32"
 scipy = "^1.8.1"
 statsmodels = "^0.13.2"
@@ -54,14 +54,16 @@ numpy = "^1.23.1"
 pandas = "^1.4.3"
 networkx = "^2.8.5"
 sympy = "^1.10.1"
-scikit-learn = "1.0.2"
+scikit-learn = "<1.2.0"
 pydot = { version = "^1.4.2", optional = true }
 joblib = "^1.1.0"
 pygraphviz = { version = "^1.9", optional = true }
 econml = { version = "*" }
 tqdm = "^4.64.0"
 causal-learn = "^0.1.3.0"
-autogluon-tabular = {extras = ["all"], version = "^0.6.0", optional = true}
+autogluon-tabular = { extras = [
+    "all",
+], version = "^0.6.0", optional = true, python = "<3.10" }
 
 #Plotting Extra
 matplotlib = { version = "^3.5.3", optional = true }
@@ -84,11 +86,9 @@ pytest-split = "^0.8.0"
 nbformat = "^5.4.0"
 jupyter = "^1.0.0"
 flaky = "^3.7.0"
-tensorflow = "^2.9.1"
 keras = "^2.9.0"
 xgboost = "^1.7.0"
 mypy = "^0.971"
-autogluon-tabular = {extras = ["all"], version = "^0.6.0"}
 
 [tool.poetry.group.docs]
 optional = true
@@ -106,6 +106,7 @@ pydata-sphinx-theme = "^0.9.0"
 ipykernel = "^6.15.1"
 sphinx-copybutton = "0.5.0"
 seaborn = "^0.12.1"
+tensorflow = "^2.11.0"
 
 #
 # Versions defined for security reasons
@@ -117,7 +118,7 @@ nbconvert = { version = "7.0.0rc3", allow-prereleases = true }
 markers = [
     "advanced: not be to run each time. only on package updates.",
     "notebook: jupyter notebook tests",
-    "focused: a debug marker to focus on specific tests"
+    "focused: a debug marker to focus on specific tests",
 ]
 
 [tool.poe.tasks]
