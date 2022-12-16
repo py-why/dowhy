@@ -50,9 +50,9 @@ jobs:
         echo "GITHUB_CONTEXT='$GITHUB_CONTEXT'"
         pip install git+https://github.com/${HEAD_REPO}@${HEAD_BRANCH:-main}
       env:
-        GITHUB_CONTEXT: ${{ toJson(github) }}
-        HEAD_REPO: ${{ github.head.repo.full_name }}
-        HEAD_BRANCH: ${{ github.head.ref }}
+        GITHUB_CONTEXT: ${{ toJson(github.event.pull_request) }}
+        HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+        HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.head_ref || 'main' }}
 
     - name: Notify Discord
       if: failure() && github.ref == 'refs/heads/main'
