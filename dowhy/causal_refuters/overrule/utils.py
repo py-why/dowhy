@@ -60,8 +60,7 @@ def sample_reference(
     if n is None:
         n = x.shape[0]
 
-    if seed is not None:
-        np.random.seed(seed)
+    rng = np.random.default_rng(seed)
 
     data = x if isinstance(x, pd.DataFrame) else pd.DataFrame(x)
 
@@ -77,9 +76,9 @@ def sample_reference(
         if c in ref_range.keys():
             # logging.info("Using provided reference range for {}".format(c))
             if ref_range[c]["is_binary"]:
-                ref_cols[c] = np.random.choice([0, 1], n)
+                ref_cols[c] = rng.choice([0, 1], n)
             else:
-                ref_cols[c] = np.random.uniform(low=ref_range[c]["min"], high=ref_range[c]["max"], size=(n, 1)).ravel()
+                ref_cols[c] = rng.uniform(low=ref_range[c]["min"], high=ref_range[c]["max"], size=(n, 1)).ravel()
         else:
             # number of unique values
             valUniq = data[c].nunique()
@@ -91,7 +90,7 @@ def sample_reference(
             # Binary column
             elif valUniq == 2 or (c in cat_cols) or (data[c].dtype == "object"):
                 cs = data[c].unique()
-                ref_cols[c] = np.random.choice(cs, n)
+                ref_cols[c] = rng.choice(cs, n)
 
             # Ordinal column (seed = counter so not correlated)
             elif np.issubdtype(data[c].dtype, np.dtype(int).type) | np.issubdtype(data[c].dtype, np.dtype(float).type):
