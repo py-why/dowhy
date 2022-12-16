@@ -85,7 +85,7 @@ def sample_reference(
 
             # Constant column
             if valUniq < 2:
-                ref_cols[c] = [data[c].values[0]] * n
+                ref_cols[c] = np.array([data[c].values[0]] * n)
 
             # Binary column
             elif valUniq == 2 or (c in cat_cols) or (data[c].dtype == "object"):
