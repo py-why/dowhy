@@ -6,6 +6,53 @@ DoWhy is hosted on GitHub.
 You can browse the code in a html-friendly format `here
 <https://github.com/Microsoft/dowhy>`_.
 
+v0.9: New functional API (preview), faster refutations, and better independence tests for GCMs
+----------------------------------------------------------------------------------------------
+December 5 2022
+
+* Preview for the new functional API (see `notebook <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy_functional_api.ipynb>`_). The new API (in experimental stage) allows for a modular use of the different functionalities and includes separate fit and estimate methods for causal estimators. Please leave your feedback here. The old DoWhy API based on CausalModel should work as before.  (@andresmor-ms)
+
+* Faster, better sensitivity analyses. 
+    * Many refutations now support joblib for parallel processing and show a progress bar (@astoeffelbauer, @yemaedahrav).
+    * Non-linear sensitivity analysis [`Chernozhukov, Cinelli, Newey, Sharma & Syrgkanis (2021) <https://arxiv.org/abs/2112.13398>`_, `example notebook <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/sensitivity_analysis_nonparametric_estimators.ipynb>`_] (@anusha0409)
+    * E-value sensitivity analysis [`Ding & Vanderweele (2016) <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4820664/>`, `example notebook <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/sensitivity_analysis_testing.ipynb>`_] (@jlgleason)
+
+* New API for unit change attribution (@kailashbuki)
+
+* New quality option `BEST` for auto-assignment of causal mechanisms, which uses the optional auto-ML library AutoGluon (@bloebp)
+
+* Better conditional independence tests through the causal-learn package (@bloebp)
+
+* Algorithms for computing efficient backdoor sets [`example notebook <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy_efficient_backdoor_example.ipynb>`_] (@esmucler)
+
+* Support for estimating controlled direct effect (@amit-sharma)
+
+* Support for multi-valued treatments for econml estimators (@EgorKraevTransferwise)
+
+* New PyData theme for documentation with new homepage, Getting started guide, revised User Guide and examples page (@petergtz)
+
+* A `contributing guide <https://github.com/py-why/dowhy/blob/main/docs/source/contributing/contributing-code.rst>`_ and simplified instructions for new contributors (@MichaelMarien) 
+
+* Streamlined dev environment using Poetry for managing dependencies and project builds (@darthtrevino)
+
+* Bug fixes
+
+v0.8: GCM support and partial R2-based sensitivity analysis
+-------------------------------------------------------------
+July 18 2022
+
+A big thanks to @petergtz, @kailashbuki, and @bloebp for the GCM package and @anusha0409 for an implementation of partial R2 sensitivity analysis for linear models.
+
+* **Graphical Causal Models**: SCMs, root-cause analysis, attribution, what-if analysis, and more.
+
+* **Sensitivity Analysis**: Faster, more general partial-R2 based sensitivity analysis for linear models, based on `Cinelli & Hazlett (2020) <https://rss.onlinelibrary.wiley.com/doi/10.1111/rssb.12348>`_.
+
+* **New docs structure**: Updated docs structure including user and contributors' guide. Check out the `docs <https://py-why.github.io/dowhy/>`_.
+
+* Bug fixes
+
+**Contributors**: @amit-sharma, @anusha0409, @bloebp, @EgorKraevTransferwise, @elikling, @kailashbuki, @itsoum, @MichaelMarien, @petergtz, @ryanrussell
+
 v0.7.1: Added Graph refuter. Support for dagitty graphs and external estimators
 --------------------------------------------------------------------------------------
 

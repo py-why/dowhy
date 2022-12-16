@@ -4,6 +4,14 @@ dowhy.gcm.ml package
 Submodules
 ----------
 
+dowhy.gcm.ml.autolguon module
+-----------------------------
+
+.. automodule:: dowhy.gcm.ml.autolguon
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.gcm.ml.classification module
 ----------------------------------
 

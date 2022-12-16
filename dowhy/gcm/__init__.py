@@ -22,7 +22,13 @@ from .fcms import AdditiveNoiseModel, ClassificationModel, ClassifierFCM, PostNo
 from .feature import feature_relevance_distribution, feature_relevance_sample, parent_relevance
 from .fitting_sampling import draw_samples, fit
 from .graph import ConditionalStochasticModel, DirectedGraph, FunctionalCausalModel, StochasticModel, is_root_node
-from .independence_test import approx_kernel_based, general_cov_based, independence_test, kernel_based, regression_based
+from .independence_test import (
+    approx_kernel_based,
+    generalised_cov_based,
+    independence_test,
+    kernel_based,
+    regression_based,
+)
 from .influence import arrow_strength, intrinsic_causal_influence
 from .stochastic_models import BayesianGaussianMixtureDistribution, EmpiricalDistribution, ScipyDistribution
 from .unit_change import unit_change

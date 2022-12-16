@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy
-from econml.utilities import cross_product
 from sklearn.compose import ColumnTransformer, make_column_selector
 from sklearn.linear_model import Lasso, LinearRegression
 from sklearn.model_selection import KFold

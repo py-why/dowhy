@@ -9,6 +9,7 @@ from sklearn.utils import resample
 from tqdm.auto import tqdm
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
+from dowhy.causal_estimators.econml import Econml
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 from dowhy.causal_refuter import CausalRefutation, CausalRefuter, choose_variables, test_significance
 
@@ -128,8 +129,19 @@ def _refute_once(
                 new_data[variable] = np.where(probs < probability_of_change, changed_data)
                 new_data[variable].astype("category")
 
-    new_estimator = CausalEstimator.get_estimator_object(new_data, target_estimand, estimate)
-    new_effect = new_estimator.estimate_effect()
+    new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
+    new_estimator.fit(
+        new_data,
+        target_estimand.treatment_variable,
+        target_estimand.outcome_variable,
+        estimate.estimator._effect_modifier_names,
+        **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+    )
+    new_effect = new_estimator.estimate_effect(
+        control_value=estimate.control_value,
+        treatment_value=estimate.treatment_value,
+        target_units=estimate.estimator._target_units,
+    )
     return new_effect.value
 
 
@@ -182,7 +194,7 @@ def refute_bootstrap(
         required_variables,
         target_estimand.get_backdoor_variables()
         + target_estimand.instrumental_variables
-        + estimate.params["effect_modifiers"],
+        + estimate.estimator._effect_modifier_names,
     )
 
     if chosen_variables is None:

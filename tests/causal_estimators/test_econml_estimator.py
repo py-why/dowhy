@@ -46,7 +46,7 @@ class TestEconMLEstimator:
         # Test LinearDML
         dml_estimate = model.estimate_effect(
             identified_estimand,
-            method_name="backdoor.econml.dml.LinearDML",
+            method_name="backdoor.econml.dml.dml.LinearDML",
             control_value=0,
             treatment_value=1,
             target_units=lambda df: df["X0"] > 1,  # condition used for CATE
@@ -62,7 +62,7 @@ class TestEconMLEstimator:
         # Test ContinuousTreatmentOrthoForest
         orthoforest_estimate = model.estimate_effect(
             identified_estimand,
-            method_name="backdoor.econml.ortho_forest.ContinuousTreatmentOrthoForest",
+            method_name="backdoor.econml.orf.DMLOrthoForest",
             target_units=lambda df: df["X0"] > 2,
             method_params={"init_params": {"n_trees": 10}, "fit_params": {}},
         )
@@ -86,7 +86,7 @@ class TestEconMLEstimator:
         identified_estimand_binary = model_binary.identify_effect(proceed_when_unidentifiable=True)
         drlearner_estimate = model_binary.estimate_effect(
             identified_estimand_binary,
-            method_name="backdoor.econml.drlearner.LinearDRLearner",
+            method_name="backdoor.econml.dr.LinearDRLearner",
             target_units=lambda df: df["X0"] > 1,
             confidence_intervals=False,
             method_params={
@@ -143,7 +143,7 @@ class TestEconMLEstimator:
         )
         deepiv_estimate = model.estimate_effect(
             identified_estimand,
-            method_name="iv.econml.deepiv.DeepIVEstimator",
+            method_name="iv.econml.iv.nnet.DeepIV",
             target_units=lambda df: df["X0"] > -1,
             confidence_intervals=False,
             method_params={
@@ -182,7 +182,7 @@ class TestEconMLEstimator:
         identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
         driv_estimate = model.estimate_effect(
             identified_estimand,
-            method_name="iv.econml.ortho_iv.LinearIntentToTreatDRIV",
+            method_name="iv.econml.iv.dr.LinearIntentToTreatDRIV",
             target_units=lambda df: df["X0"] > 1,
             confidence_intervals=False,
             method_params={
@@ -221,7 +221,7 @@ class TestEconMLEstimator:
 
         est_2 = causal_model.estimate_effect(
             identified_estimand,
-            method_name="backdoor.econml.dml.LinearDML",
+            method_name="backdoor.econml.dml.dml.LinearDML",
             control_value=0,
             treatment_value=[1, 2],
             target_units="ate",  # condition used for CATE
@@ -275,7 +275,7 @@ class TestEconMLEstimator:
         # Estimate effect
         model.estimate_effect(
             identified_estimand,
-            method_name="backdoor.econml.dml.LinearDML",
+            method_name="backdoor.econml.dml.dml.LinearDML",
             method_params={
                 "init_params": {
                     "model_y": GradientBoostingRegressor(),

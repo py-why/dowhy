@@ -2,6 +2,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 from flaky import flaky
+from pytest import mark
 from sklearn.ensemble import HistGradientBoostingClassifier, HistGradientBoostingRegressor
 from sklearn.linear_model import ElasticNetCV, LassoCV, LinearRegression, LogisticRegression, RidgeCV
 from sklearn.naive_bayes import GaussianNB
@@ -9,7 +10,6 @@ from sklearn.pipeline import Pipeline
 
 from dowhy.gcm import ProbabilisticCausalModel
 from dowhy.gcm.auto import AssignmentQuality, assign_causal_mechanisms
-from dowhy.gcm.ml import AutoGluonClassifier, AutoGluonRegressor
 
 
 def _generate_linear_regression_data():
@@ -206,7 +206,10 @@ def test_when_auto_called_from_main_namespace_returns_no_attribute_error():
     _ = gcm.auto.AssignmentQuality.GOOD
 
 
+@mark.skip("Not running AutoGluon-based tests as part of CI yet.")
 def test_when_using_best_quality_then_returns_auto_gluon_model():
+    from dowhy.gcm.ml import AutoGluonClassifier, AutoGluonRegressor
+
     causal_model = ProbabilisticCausalModel(nx.DiGraph([("X", "Y")]))
 
     assign_causal_mechanisms(causal_model, pd.DataFrame({"X": [1], "Y": [1]}), quality=AssignmentQuality.BEST)
