@@ -80,13 +80,13 @@ def assess_support_and_overlap_overrule(
     data,
     backdoor_vars: List[str],
     treatment_name: str,
-    cat_feats: List[str],
-    overlap_config: Optional[OverlapConfig],
-    support_config: Optional[SupportConfig],
-    overlap_eps: float,
-    support_only: bool,
-    overlap_only: bool,
-    verbose: bool,
+    cat_feats: List[str] = [],
+    overlap_config: Optional[OverlapConfig] = None,
+    support_config: Optional[SupportConfig] = None,
+    overlap_eps: float = 0.1,
+    support_only: bool = False,
+    overlap_only: bool = False,
+    verbose: bool = False,
 ):
     """
     Learn support and overlap rules using OverRule.
