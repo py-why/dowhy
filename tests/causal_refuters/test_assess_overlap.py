@@ -40,17 +40,19 @@ def refute(dummy_data):
 
 
 class TestAssessOverlapRefuter(object):
-    # TODO: Make the optimization problem fully deterministic
+    # TODO: Check directly for correct behavior, rather than checking the rules
+    # themselves, which can be non-deterministic (all the following are equivalent)
     def test_rules_support(self, refute):
         """
-        These rules are all equivalent (and have equal objective values w/regularization, so at the moment the
-        optimization is liable to select any of them.
+        Check if the support rules cover the correct region.
         """
         assert refute.RS_support_estimator.rules() in [
             [[("X1", "not", "")], [("X1", "", ""), ("X2", "not", "")]],
             [[("X1", "not", "")], [("X2", "not", ""), ("X1", "", "")]],
             [[("X2", "not", "")], [("X1", "not", ""), ("X2", "", "")]],
             [[("X2", "not", "")], [("X2", "", ""), ("X1", "not", "")]],
+            [[("X2", "not", "")], [("X1", "not", "")]],
+            [[("X1", "not", "")], [("X2", "not", "")]],
         ]
 
     def test_rules_overlap(self, refute):
