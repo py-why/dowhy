@@ -807,9 +807,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W4,W1,W3,W0])
+─────(E[y|W1,W0,W2,W3,W4])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W4,W1,W3,W0,U) = P(y|v0,W2,W4,W1,W3,W0)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W0,W2,W3,W4,U) = P(y|v0,W1,W0,W2,W3,W4)
 
 ### Estimand : 2
 Estimand name: iv
@@ -817,9 +817,9 @@ Estimand expression:
  ⎡                              -1⎤
  ⎢    d        ⎛    d          ⎞  ⎥
 E⎢─────────(y)⋅⎜─────────([v₀])⎟  ⎥
- ⎣d[Z₀  Z₁]    ⎝d[Z₀  Z₁]      ⎠  ⎦
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
-Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
+ ⎣d[Z₁  Z₀]    ⎝d[Z₁  Z₀]      ⎠  ⎦
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z1,Z0})
+Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→{v0}, then ¬({Z1,Z0}→y)
 
 ### Estimand : 3
 Estimand name: frontdoor
@@ -856,16 +856,16 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W4,W1,W3,W0])
+─────(E[y|W1,W0,W2,W3,W4])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W4,W1,W3,W0,U) = P(y|v0,W2,W4,W1,W3,W0)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W0,W2,W3,W4,U) = P(y|v0,W1,W0,W2,W3,W4)
 
 ## Realized estimand
-b: y~v0+W2+W4+W1+W3+W0
+b: y~v0+W1+W0+W2+W3+W4
 Target units: ate
 
 ## Estimate
-Mean value: 10.079643217740283
+Mean value: 10.085079483798467
 
 </pre></div></div>
 </div>
@@ -903,17 +903,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W4,W1,W3,W0])
+─────(E[y|W1,W0,W2,W3,W4])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W4,W1,W3,W0,U) = P(y|v0,W2,W4,W1,W3,W0)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W0,W2,W3,W4,U) = P(y|v0,W1,W0,W2,W3,W4)
 
 ## Realized estimand
-b: y~v0+W2+W4+W1+W3+W0 |
+b: y~v0+W1+W0+W2+W3+W4 |
 Target units: ate
 
 ## Estimate
-Mean value: 10.015079122983176
-Effect estimates: [[10.01507912]]
+Mean value: 9.964312736226267
+Effect estimates: [[9.96431274]]
 
 </pre></div></div>
 </div>
@@ -937,9 +937,9 @@ print(refute_results)
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:10.079643217740283
-New effect:-0.007173513264110368
-p value:0.98
+Estimated effect:10.085079483798467
+New effect:-0.0007034090009628404
+p value:0.9
 
 </pre></div></div>
 </div>
@@ -991,11 +991,11 @@ dowhy.plotter.plot_treatment_outcome(df[data_dict[&quot;treatment_name&quot;]], 
 <div class="output_area docutils container">
 <div class="highlight"><pre>
    Treatment    Outcome        w0         s        w1
-0   6.275244  12.708420  0.050399  1.012640  0.833269
-1  16.952075  19.983299 -3.186007  6.097785  1.354168
-2  23.354645  33.891462  4.118792  9.849349  0.849423
-3   7.531655  13.445895 -0.473228  8.877970  1.873671
-4  19.450659  29.641581  3.648159  3.593162  0.328291
+0   7.357680  14.905411  1.200125  1.326717 -0.054302
+1   6.024260  12.281450  0.292912  9.071934  0.279903
+2   6.992758  13.904044 -1.052191  5.283081 -0.515069
+3  20.992423  41.987127 -3.859505  6.625173  0.172139
+4   5.962905  11.953802  0.112224  1.028256 -0.198527
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1044,9 +1044,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
      d
-────────────(E[Outcome|w1,w0])
+────────────(E[Outcome|w0,w1])
 d[Treatment]
-Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w1,w0,U) = P(Outcome|Treatment,w1,w0)
+Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w0,w1,U) = P(Outcome|Treatment,w0,w1)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1090,18 +1090,18 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
      d
-────────────(E[Outcome|w1,w0])
+────────────(E[Outcome|w0,w1])
 d[Treatment]
-Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w1,w0,U) = P(Outcome|Treatment,w1,w0)
+Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w0,w1,U) = P(Outcome|Treatment,w0,w1)
 
 ## Realized estimand
-b: Outcome~Treatment+w1+w0
+b: Outcome~Treatment+w0+w1
 Target units: ate
 
 ## Estimate
-Mean value: 0.9994174348691613
+Mean value: 1.9987655938416162
 
-Causal Estimate is 0.9994174348691613
+Causal Estimate is 1.9987655938416162
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1148,17 +1148,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
      d
-────────────(E[Outcome|w1,w0])
+────────────(E[Outcome|w0,w1])
 d[Treatment]
-Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w1,w0,U) = P(Outcome|Treatment,w1,w0)
+Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w0,w1,U) = P(Outcome|Treatment,w0,w1)
 
 ## Realized estimand
-b: Outcome~Treatment+w1+w0 |
+b: Outcome~Treatment+w0+w1 |
 Target units: ate
 
 ## Estimate
-Mean value: 0.19260574463683752
-Effect estimates: [[0.19260574]]
+Mean value: 1.1678912227355764
+Effect estimates: [[1.16789122]]
 
 </pre></div></div>
 </div>
@@ -1181,9 +1181,9 @@ print(res_random)
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a random common cause
-Estimated effect:0.19260574463683752
-New effect:0.22834879509518033
-p value:0.0
+Estimated effect:1.1678912227355764
+New effect:1.1425079744287436
+p value:0.45999999999999996
 
 </pre></div></div>
 </div>
@@ -1204,9 +1204,9 @@ print(res_placebo)
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:0.19260574463683752
-New effect:2.7082338494380965e-05
-p value:0.46266972895521885
+Estimated effect:1.1678912227355764
+New effect:3.7209772347503406e-06
+p value:0.497673801945054
 
 </pre></div></div>
 </div>
