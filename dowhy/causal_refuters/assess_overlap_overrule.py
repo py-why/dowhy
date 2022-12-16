@@ -151,7 +151,7 @@ class OverruleAnalyzer:
             self.RS_support_estimator = None
         else:
             self.RS_support_estimator = BCSRulesetEstimator(
-                cat_cols=cat_feats, silent=verbose, verbose=verbose, **asdict(support_config)
+                cat_cols=cat_feats, silent=not verbose, verbose=verbose, **asdict(support_config)
             )
 
         if support_only:
@@ -159,7 +159,7 @@ class OverruleAnalyzer:
             self.overlap_eps = None
         else:
             self.RS_overlap_estimator = BCSRulesetEstimator(
-                cat_cols=cat_feats, silent=verbose, verbose=verbose, n_ref_multiplier=0.0, **asdict(overlap_config)
+                cat_cols=cat_feats, silent=not verbose, verbose=verbose, n_ref_multiplier=0.0, **asdict(overlap_config)
             )
             self.overlap_eps = overlap_eps
 
