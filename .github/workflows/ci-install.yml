@@ -6,20 +6,18 @@ on:
   push:
     branches: [main]
     paths:
-      - '.github/workflows/ci.yml'
+      - '.github/workflows/ci-install.yml'
       - 'dowhy/**'
       - 'tests/**'
-      - 'docs/source/example_notebooks/**'
       - 'pyproject.toml'
       - 'poetry.lock'
 
   pull_request:
     branches: [main]
     paths:
-      - '.github/workflows/ci.yml'
+      - '.github/workflows/ci-install.yml'
       - 'dowhy/**'
       - 'tests/**'
-      - 'docs/source/example_notebooks/**'
       - 'pyproject.toml'
       - 'poetry.lock'
 
@@ -45,7 +43,14 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install git+https://github.com/${GITHUB_REPOSITORY}@${GITHUB_HEAD_REF:-main}
+        echo "HEAD_REPO='$HEAD_REPO'"
+        echo "HEAD_BRANCH='$HEAD_BRANCH'"
+        echo "GITHUB_CONTEXT='$GITHUB_CONTEXT'"
+        pip install git+https://github.com/${HEAD_REPO}@${HEAD_BRANCH:-main}
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+        HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+        HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.head_ref || 'main' }}
 
     - name: Notify Discord
       if: failure() && github.ref == 'refs/heads/main'
