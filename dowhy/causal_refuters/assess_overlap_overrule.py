@@ -1,5 +1,5 @@
 from dataclasses import asdict, dataclass
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 from sklearn.base import BaseEstimator
@@ -33,6 +33,10 @@ class SupportConfig:
     :type iterMax: int, optional
     :param num_thresh: Number of bins to discretize continuous variables, defaults to 9 (for deciles)
     :type num_thresh: int, optional
+    :param thresh_override: Manual override of the thresholds for continuous features, given as a dictionary like
+        the following, will only be applied to continuous features with more than num_thresh unique values
+        `thresh_override = {column_name: np.linspace(0, 100, 10)}`
+    :type thresh_override: Optional[Dict], optional
     :param solver: Linear programming solver used by CVXPY to solve the LP relaxation, defaults to 'ECOS'
     :type solver: str, optional
     :param rounding: Strategy to perform rounding, either 'greedy' or 'greedy_sweep', defaults to 'greedy_sweep'
@@ -48,6 +52,7 @@ class SupportConfig:
     B: int = 10
     iterMax: int = 10
     num_thresh: int = 9
+    thresh_override: Optional[Dict] = None
     solver: str = "ECOS"
     rounding: str = "greedy_sweep"
 
@@ -73,6 +78,10 @@ class OverlapConfig:
     :type iterMax: int, optional
     :param num_thresh: Number of bins to discretize continuous variables, defaults to 9 (for deciles)
     :type num_thresh: int, optional
+    :param thresh_override: Manual override of the thresholds for continuous features, given as a dictionary like
+        the following, will only be applied to continuous features with more than num_thresh unique values
+        `thresh_override = {column_name: np.linspace(0, 100, 10)}`
+    :type thresh_override: Optional[Dict], optional
     :param solver: Linear programming solver used by CVXPY to solve the LP relaxation, defaults to 'ECOS'
     :type solver: str, optional
     :param rounding: Strategy to perform rounding, either 'greedy' or 'greedy_sweep', defaults to 'greedy_sweep'
@@ -87,6 +96,7 @@ class OverlapConfig:
     B: int = 10
     iterMax: int = 10
     num_thresh: int = 9
+    thresh_override: Optional[Dict] = None
     solver: str = "ECOS"
     rounding: str = "greedy_sweep"
 
