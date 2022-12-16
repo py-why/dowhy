@@ -45,11 +45,13 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        echo "HEAD_REPO='$HEAD_REPO'"
+        echo "HEAD_BRANCH='$HEAD_BRANCH'"
         echo "GITHUB_CONTEXT='$GITHUB_CONTEXT'"
         pip install git+https://github.com/${HEAD_REPO}@${HEAD_BRANCH:-main}
       env:
-        GITHUB_CONTEXT: ${{ toJson(github) }}
-        HEAD_REPO: ${{ github.head.repo.full_name}}
+        GITHUB_CONTEXT: ${{ toJson(github.head) }}
+        HEAD_REPO: ${{ github.head.repo.full_name }}
         HEAD_BRANCH: ${{ github.head.ref}}
 
     - name: Notify Discord
