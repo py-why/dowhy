@@ -45,13 +45,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        echo "GITHUB_HEAD_REF='${GITHUB_HEAD_REF}'"
-        echo "GITHUB_REF='${GITHUB_REF}'"
-        echo "GITHUB_REPOSITORY='${GITHUB_REPOSITORY}'"
         echo "GITHUB_CONTEXT='$GITHUB_CONTEXT'"
-        pip install git+https://github.com/${GITHUB_REPOSITORY}@${GITHUB_HEAD_REF:-main}
+        pip install git+https://github.com/${HEAD_REPO}@${HEAD_BRANCH:-main}
       env:
         GITHUB_CONTEXT: ${{ toJson(github) }}
+        HEAD_REPO: ${{ github.head.repo.full_name}}
+        HEAD_BRANCH: ${{ github.head.ref}}
 
     - name: Notify Discord
       if: failure() && github.ref == 'refs/heads/main'
