@@ -99,6 +99,8 @@ class OverruleAnalyzer:
         overlap_config: Optional[OverlapConfig] = None,
         prop_estimator: Optional[Union[BaseEstimator, GridSearchCV]] = None,
         overlap_eps: float = 0.1,
+        support_only: bool = False,
+        overlap_only: bool = False,
         verbose: bool = False,
     ):
         """
@@ -112,6 +114,10 @@ class OverruleAnalyzer:
         :type prop_estimator: Optional[Union[BaseEstimator, GridSearchCV]], optional
         :param: overlap_eps: float: Defines the range of propensity scores for a point to be considered in the overlap
             region, with the range defined as `(overlap_eps, 1 - overlap_eps)`, defaults to 0.1
+        :param support_only: Only fit the support region, not the overlap, defaults to False
+        :type support_only: bool, optional
+        :param overlap_only: Only fit the overlap region, not the support, defaults to False
+        :type overlap_only: bool, optional
         :param verbose: Verbose optimization output, defaults to False
         :type verbose: bool, optional
         """
@@ -126,13 +132,26 @@ class OverruleAnalyzer:
         if not isinstance(overlap_config, OverlapConfig):
             raise ValueError("overlap_config not a OverlapConfig class")
 
-        self.RS_support_estimator = BCSRulesetEstimator(
-            cat_cols=cat_feats, silent=verbose, verbose=verbose, **asdict(support_config)
-        )
-        self.RS_overlap_estimator = BCSRulesetEstimator(
-            cat_cols=cat_feats, silent=verbose, verbose=verbose, n_ref_multiplier=0.0, **asdict(overlap_config)
-        )
-        self.overlap_eps = overlap_eps
+        if overlap_only and support_only:
+            raise ValueError("Only one of `overlap_only` and `support_only` can be True")
+
+        self._overlap_only = overlap_only
+        self._support_only = support_only
+        if overlap_only:
+            self.RS_support_estimator = None
+        else:
+            self.RS_support_estimator = BCSRulesetEstimator(
+                cat_cols=cat_feats, silent=verbose, verbose=verbose, **asdict(support_config)
+            )
+
+        if support_only:
+            self.RS_overlap_estimator = None
+            self.overlap_eps = None
+        else:
+            self.RS_overlap_estimator = BCSRulesetEstimator(
+                cat_cols=cat_feats, silent=verbose, verbose=verbose, n_ref_multiplier=0.0, **asdict(overlap_config)
+            )
+            self.overlap_eps = overlap_eps
 
         if prop_estimator is None:
             param_grid = {"max_depth": [2, 4, 6], "n_estimators": [200]}
@@ -147,17 +166,24 @@ class OverruleAnalyzer:
 
     def fit(self, X, t):
         # Do the support characterization
-        self.RS_support_estimator.fit(X)
-        # Recover the samples that are in the support
-        supp = self.RS_support_estimator.predict(X).astype(bool)
+        if self._overlap_only:
+            supp = np.ones(X.shape[0]).astype(bool)
+        else:
+            self.RS_support_estimator.fit(X)
+            # Recover the samples that are in the support
+            supp = self.RS_support_estimator.predict(X).astype(bool)
+
+        self.support_indicator = supp
         X_supp, t_supp = X[supp], t[supp]
 
         # Get the propensity scores out. Note that we perform cross-fitting here
-        self.raw_overlap_set = self._predict_overlap(X_supp, t_supp)
-        self.RS_overlap_estimator.fit(X_supp, self.raw_overlap_set)
+        if self._support_only:
+            self.overla_indicator = supp
+        else:
+            self.raw_overlap_set = self._predict_overlap(X_supp, t_supp)
+            self.RS_overlap_estimator.fit(X_supp, self.raw_overlap_set)
+            self.overlap_indicator = self.RS_overlap_estimator.predict(X_supp)
 
-        self.support_indicator = supp
-        self.overlap_indicator = self.RS_overlap_estimator.predict(X_supp)
         self.is_fitted = True
         self.X = X
         self.t = t
@@ -172,23 +198,29 @@ class OverruleAnalyzer:
 
     def predict(self, X):
         self._check_is_fitted()
-        supp_ind = self.RS_support_estimator.predict(X)
-        overlap_ind = self.RS_overlap_estimator.predict(X)
-        return supp_ind * overlap_ind
+        if self._overlap_only:
+            return self.RS_overlap_estimator.predict(X)
+        elif self._support_only:
+            return self.RS_support_estimator.predict(X)
+        else:
+            supp_ind = self.RS_support_estimator.predict(X)
+            overlap_ind = self.RS_overlap_estimator.predict(X)
+            return supp_ind * overlap_ind
 
     def describe_all_rules(self):
         self._check_is_fitted()
         coverage = self.predict(self.X).mean()
         return_str = "SUMMARY:\n"
         return_str = f"Rules cover {coverage:.1%} of all samples\n"
-        return_str += (
-            f"Overall, {self.raw_overlap_set.mean():.1%} of samples meet the criteria for inclusion in the overlap set, "
-            "defined as: Covered by support rules and propensity score in "
-            f"({self.overlap_eps:.2f}, {1 - self.overlap_eps:.2f})\n"
-        )
-        true_positive = self.overlap_indicator * self.raw_overlap_set
-        overlap_coverage = true_positive.sum() / self.raw_overlap_set.sum()
-        return_str += f"Rules capture {overlap_coverage:.1%} of samples which meet these criteria\n"
+        if not self._support_only:
+            return_str += (
+                f"Overall, {self.raw_overlap_set.mean():.1%} of samples meet the criteria for inclusion in the overlap set, "
+                "defined as: Covered by support rules and propensity score in "
+                f"({self.overlap_eps:.2f}, {1 - self.overlap_eps:.2f})\n"
+            )
+            true_positive = self.overlap_indicator * self.raw_overlap_set
+            overlap_coverage = true_positive.sum() / self.raw_overlap_set.sum()
+            return_str += f"Rules capture {overlap_coverage:.1%} of samples which meet these criteria\n"
         return_str += "\nDETAILED RULES:\n"
         return_str += self.describe_support_rules()
         return_str += self.describe_overlap_rules()
@@ -196,15 +228,21 @@ class OverruleAnalyzer:
 
     def describe_support_rules(self):
         self._check_is_fitted()
-        X = self.X
-        s_est = self.RS_support_estimator
-        return self._describe_rules(s_est, X, estimator_name="SUPPORT")
+        if self._overlap_only:
+            return "No Support Rules Fitted (overlap_only=True).\n"
+        else:
+            X = self.X
+            s_est = self.RS_support_estimator
+            return self._describe_rules(s_est, X, estimator_name="SUPPORT")
 
     def describe_overlap_rules(self):
         self._check_is_fitted()
-        X = self.X_supp
-        o_est = self.RS_overlap_estimator
-        return self._describe_rules(o_est, X, estimator_name="OVERLAP")
+        if self._support_only:
+            return "No Overlap Rules Fitted (support_only=True)."
+        else:
+            X = self.X_supp
+            o_est = self.RS_overlap_estimator
+            return self._describe_rules(o_est, X, estimator_name="OVERLAP")
 
     def _describe_rules(self, estimator, X, estimator_name=""):
         rules_by_sample = estimator.predict_rules(X)

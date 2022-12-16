@@ -35,6 +35,8 @@ class AssessOverlap(CausalRefuter):
         :param: overlap_eps: float: Defines the range of propensity scores for a point to be considered in the overlap
             region, with the range defined as `(overlap_eps, 1 - overlap_eps)`, defaults to 0.1
         :param: overrule_verbose: bool: Enable verbose logging of optimization output, defaults to False
+        :param: support_only: bool: Only fit rules to describe the support region (do not fit overlap rules), defaults to False
+        :param: overlap_only: bool: Only fit rules to describe the overlap region (do not fit support rules), defaults to False
         """
         super().__init__(*args, **kwargs)
         # TODO: Check that the target estimand has backdoor variables?
@@ -45,6 +47,8 @@ class AssessOverlap(CausalRefuter):
         self._overlap_eps = kwargs.pop("overlap_eps", 0.1)
         if self._overlap_eps < 0 or self._overlap_eps > 1:
             raise ValueError(f"Value of `overlap_eps` must be in [0, 1], got {self._overlap_eps}")
+        self._support_only = kwargs.pop("support_only", False)
+        self._overlap_only = kwargs.pop("overlap_only", False)
         self._overrule_verbose = kwargs.pop("overrule_verbose", False)
 
     def refute_estimate(self, show_progress_bar=False):
@@ -66,6 +70,8 @@ class AssessOverlap(CausalRefuter):
             overlap_config=self._overlap_config,
             support_config=self._support_config,
             overlap_eps=self._overlap_eps,
+            support_only=self._support_only,
+            overlap_only=self._overlap_only,
             verbose=self._overrule_verbose,
         )
 
@@ -78,6 +84,8 @@ def assess_support_and_overlap_overrule(
     overlap_config: Optional[OverlapConfig],
     support_config: Optional[SupportConfig],
     overlap_eps: float,
+    support_only: bool,
+    overlap_only: bool,
     verbose: bool,
 ):
     """
@@ -97,6 +105,8 @@ def assess_support_and_overlap_overrule(
     :type support_config: SupportConfig
     :param: overlap_eps: float: Defines the range of propensity scores for a point to be considered in the overlap
         region, with the range defined as `(overlap_eps, 1 - overlap_eps)`, defaults to 0.1
+    :param: support_only: bool: Only fit the support region
+    :param: overlap_only: bool: Only fit the overlap region
     :param: verbose: bool: Enable verbose logging of optimization output, defaults to False
     """
     X = data[backdoor_vars]
@@ -106,6 +116,8 @@ def assess_support_and_overlap_overrule(
         overlap_config=overlap_config,
         support_config=support_config,
         overlap_eps=overlap_eps,
+        support_only=support_only,
+        overlap_only=overlap_only,
         verbose=verbose,
     )
     analyzer.fit(X, t)
