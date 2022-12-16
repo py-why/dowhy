@@ -3,8 +3,8 @@ from typing import Dict, List, Optional, Union
 
 import numpy as np
 from sklearn.base import BaseEstimator
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV, cross_val_predict
-from xgboost import XGBClassifier
 
 from dowhy.causal_refuters.overrule.ruleset import BCSRulesetEstimator
 from dowhy.causal_refuters.overrule.utils import fatom
@@ -120,7 +120,7 @@ class OverruleAnalyzer:
         :param: support_config: SupportConfig: DataClass with configuration options for learning support rules
         :param: overlap_config: OverlapConfig: DataClass with configuration options for learning overlap rules
         :param: overrule_verbose: bool: Enable verbose logging of optimization output, defaults to False
-        :param prop_estimator: Propensity score estimator, defaults to XGBClassifier learned via GridSearchCV
+        :param prop_estimator: Propensity score estimator, defaults to RandomForestClassifier learned via GridSearchCV
         :type prop_estimator: Optional[Union[BaseEstimator, GridSearchCV]], optional
         :param: overlap_eps: float: Defines the range of propensity scores for a point to be considered in the overlap
             region, with the range defined as `(overlap_eps, 1 - overlap_eps)`, defaults to 0.1
@@ -164,8 +164,8 @@ class OverruleAnalyzer:
             self.overlap_eps = overlap_eps
 
         if prop_estimator is None:
-            param_grid = {"max_depth": [2, 4, 6], "n_estimators": [200]}
-            estimator = XGBClassifier(objective="binary:logistic", random_state=0)
+            param_grid = {"max_depth": [4, 8], "min_samples_leaf": [0.01, 0.1], "n_estimators": [200]}
+            estimator = RandomForestClassifier(criterion="log_loss", random_state=0)
             prop_estimator = GridSearchCV(estimator=estimator, param_grid=param_grid)
 
         if not isinstance(prop_estimator, BaseEstimator) and not isinstance(prop_estimator, GridSearchCV):
