@@ -29,11 +29,10 @@ def sampleUnif(x, n: int = 10000, seed: Optional[int] = None):
     :param seed: Random seed for uniform sampling, defaults to None
     :type seed: int, optional
     """
-    if seed is not None:
-        np.random.seed(seed)
+    rng = np.random.default_rng(seed)
 
     xMin, xMax = np.nanmin(x, axis=0), np.nanmax(x, axis=0)
-    refSamples = np.random.uniform(low=xMin.tolist(), high=xMax.tolist(), size=(n, xMin.shape[0]))
+    refSamples = rng.uniform(low=xMin.tolist(), high=xMax.tolist(), size=(n, xMin.shape[0]))
 
     assert refSamples.shape[1] == x.shape[1]
     return refSamples
