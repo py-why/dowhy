@@ -32,7 +32,7 @@ class BCSRulesetEstimator:
         negations: bool = True,
         num_thresh: int = 9,
         seed: int = None,
-        ref_range: Optional[Dict] = None,
+        ref_range: Optional[Dict[str, Dict]] = None,
         thresh_override: Optional[Dict] = None,
         **kwargs,
     ):
