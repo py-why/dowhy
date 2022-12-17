@@ -17,6 +17,8 @@ class SupportConfig:
 
     :param n_ref_multiplier: Reference sample count multiplier, defaults to 1.0
     :type n_ref_multiplier: float, optional
+    :param seed: Random seed for reference samples, only used for estimating support, defaults to None
+    :type seed: int, optional
     :param alpha: Fraction of the existing examples to ensure are included in the rules, defaults to 0.98
     :type alpha: float, optional
     :param lambda0: Regularization on the # of rules, defaults to 1e-2
@@ -44,6 +46,7 @@ class SupportConfig:
     """
 
     n_ref_multiplier: float = 1.0
+    seed: Optional[int] = None
     alpha: float = 0.98
     lambda0: float = 1e-2
     lambda1: float = 1e-3

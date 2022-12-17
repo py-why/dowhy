@@ -3,6 +3,7 @@ import pandas as pd
 import pytest
 
 from dowhy import CausalModel
+from dowhy.causal_refuters.assess_overlap_overrule import SupportConfig
 
 
 @pytest.fixture
@@ -34,9 +35,14 @@ def refute(dummy_data):
     model = CausalModel(data=dummy_data, treatment="T", outcome="Y", common_causes=["X1", "X2"])
     identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
     estimate = model.estimate_effect(identified_estimand, method_name="backdoor.linear_regression")
+    support_config = SupportConfig(seed=0)
 
-    np.random.seed(0)
-    return model.refute_estimate(identified_estimand, estimate, method_name="assess_overlap")
+    return model.refute_estimate(
+        identified_estimand,
+        estimate,
+        method_name="assess_overlap",
+        support_config=support_config,
+    )
 
 
 class TestAssessOverlapRefuter(object):
