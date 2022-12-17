@@ -1,0 +1,1274 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Sensitivity analysis for non-parametric causal estimators &#8212; DoWhy  documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="Logo image">
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../user_guide/index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="nb_index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../dowhy.html">
+  API reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../contributing.html">
+  Contributing
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../code_repo.html">
+  Release notes
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+      <div class="navbar-end-item">
+        <div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.9.1
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#I.-Sensitivity-analysis-for-partially-linear-models">
+   I. Sensitivity analysis for partially linear models
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Creating-a-dataset-with-unobserved-confounding">
+     Creating a dataset with unobserved confounding
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Obtaining-a-causal-estimate-using-Model,-Identify,-Estimate-steps">
+     Obtaining a causal estimate using Model, Identify, Estimate steps
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Sensitivity-Analysis-using-the-Refute-step">
+     Sensitivity Analysis using the Refute step
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#II.-Sensitivity-Analysis-for-general-non-parametric-models">
+   II. Sensitivity Analysis for general non-parametric models
+  </a>
+ </li>
+</ul>
+
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars and line breaks on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+    white-space: pre;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.jp-RenderedHTMLCommon thead,
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+.jp-RenderedHTMLCommon th,
+div.rendered_html th {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+.jp-RenderedHTMLCommon tbody tr:hover,
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<section id="Sensitivity-analysis-for-non-parametric-causal-estimators">
+<h1>Sensitivity analysis for non-parametric causal estimators<a class="headerlink" href="#Sensitivity-analysis-for-non-parametric-causal-estimators" title="Permalink to this heading"></a></h1>
+<p>Sensitivity analysis helps us study how robust an estimated effect is when the assumption of no unobserved confounding is violated. That is, how much bias does our estimate have due to omitting an (unobserved) confounder? Known as the <em>omitted variable bias (OVB)</em>, it gives us a measure of how the inclusion of an omitted common cause (confounder) would have changed the estimated effect.</p>
+<p>This notebook shows how to estimate the OVB for general, non-parametric causal estimators. For gaining intuition, we suggest going through an introductory notebook that describes how to estimate OVB for a a linear estimator: <a class="reference external" href="https://github.com/py-why/dowhy/blob/master/docs/source/example_notebooks/sensitivity_analysis_testing.ipynb">Sensitivity analysis for linear estimators</a>. To recap, in that notebook, we saw how the OVB depended on linear partial R^2 values and used this insight to
+compute the adjusted estimate values depending on the relative strength of the confounder with the outcome and treatment. We now generalize the technique using the non-parametric partial R^2 and Reisz representers.</p>
+<p>This notebook is based on <em>Chernozhukov et al., Long Story Short: Omitted Variable Bias in Causal Machine Learning. https://arxiv.org/abs/2112.13398</em>.</p>
+<section id="I.-Sensitivity-analysis-for-partially-linear-models">
+<h2>I. Sensitivity analysis for partially linear models<a class="headerlink" href="#I.-Sensitivity-analysis-for-partially-linear-models" title="Permalink to this heading"></a></h2>
+<p>We first analyze the sensitivity of a causal estimate when the true data-generating process (DGP) is known to be partially linear. That is, the outcome can be additively decomposed into a linear function of the treatment and a non-linear function of the confounders. We denote the treatment by <span class="math notranslate nohighlight">\(T\)</span>, outcome by <span class="math notranslate nohighlight">\(Y\)</span>, observed confounders by <span class="math notranslate nohighlight">\(W\)</span> and unobserved confounders by <span class="math notranslate nohighlight">\(U\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[Y = g(T, W, U) + \epsilon = \theta T + h(W, U) + \epsilon\]</div>
+<p>However, we cannot estimate the above equation because the confounders <span class="math notranslate nohighlight">\(U\)</span> are unobserved. Thus, in practice, a causal estimator uses the following “short” equation,</p>
+<div class="math notranslate nohighlight">
+\[Y = g_s(T, W) + \epsilon_s = \theta_s T + h_s(W) + \epsilon_s\]</div>
+<p>The goal of sensitivity analysis is to answer how far <span class="math notranslate nohighlight">\(\theta_s\)</span> would be from the true <span class="math notranslate nohighlight">\(\theta\)</span>. Chernozhukov et al. show that given a special function called Reisz function <span class="math notranslate nohighlight">\(\alpha\)</span>, the omitted variable bias, <span class="math notranslate nohighlight">\(|\theta - \theta_s|\)</span> is bounded by <span class="math notranslate nohighlight">\(\sqrt{E[g-g_s]^2E[\alpha-\alpha_s]^2}\)</span>. For partial linear models, <span class="math notranslate nohighlight">\(\alpha\)</span> and the “short” <span class="math notranslate nohighlight">\(\alpha_s\)</span> are defined as,</p>
+<div class="math notranslate nohighlight">
+\[\alpha := \frac{T - E[T | W, U] )}{E(T - E[T | W, U]) ^ 2}\]</div>
+<div class="math notranslate nohighlight">
+\[\alpha_s := \frac{(T - E[T | W] )}{E(T - E[T | W]) ^ 2}\]</div>
+<p>The bound can be expressed in terms of the <em>partial</em> R^2 of the unobserved confounder <span class="math notranslate nohighlight">\(U\)</span> with the treatment and outcome, conditioned on the observed confounders <span class="math notranslate nohighlight">\(W\)</span>. Recall that R^2 of <span class="math notranslate nohighlight">\(U\)</span> wrt some target <span class="math notranslate nohighlight">\(Z\)</span> is defined as the ratio of variance of the prediction <span class="math notranslate nohighlight">\(E[Z|U]\)</span> with the variance of <span class="math notranslate nohighlight">\(Z\)</span>, <span class="math notranslate nohighlight">\(R^2_{Z\sim U}=\frac{\operatorname{Var}(E[Z|U])}{\operatorname{Var}(Y)}\)</span>. We can define the partial R^2 as an extension that measures the additional gain in
+explanatory power conditioned on some variables <span class="math notranslate nohighlight">\(W\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\eta^2_{Z\sim U| W} = \frac{\operatorname{Var}(E[Z|W, U]) - \operatorname{Var}(E[Z|W])}{\operatorname{Var}(Z) - \operatorname{Var}(E[Z|W])}\]</div>
+<p>The bound is given by,</p>
+<div class="math notranslate nohighlight">
+\[(\theta - \theta_s)^2 = E[g-g_s]^2E[\alpha-\alpha_s]^2 = S^2 C_Y^2 C_T^2\]</div>
+<p>where,</p>
+<div class="math notranslate nohighlight">
+\[S^2 = \frac{E[(Y-g_s)^2]}{E[\alpha_s^2]}; \ \ C_Y^2 = \eta^2_{Y \sim U | T, W}, \ \ C_T^2 = \frac{\eta^2_{T\sim U | W}}{1 - \eta^2_{T\sim U | W}}\]</div>
+<p><span class="math notranslate nohighlight">\(S^2\)</span> can be estimated from data. The other two parameters need to be specified manually: they convey the strength of the unobserved confounder <span class="math notranslate nohighlight">\(U\)</span> on treatment and outcome. Below we show how to create a sensitivity contour plot by specifying a range of plausible values for <span class="math notranslate nohighlight">\(\eta^2_{Y \sim U | T, W}\)</span> and <span class="math notranslate nohighlight">\(\eta^2_{T\sim U | W}\)</span>. We also show how to benchmark and set these values as a fraction of the maximum partial R^2 due to any subset of the observed covariates.</p>
+<section id="Creating-a-dataset-with-unobserved-confounding">
+<h3>Creating a dataset with unobserved confounding<a class="headerlink" href="#Creating-a-dataset-with-unobserved-confounding" title="Permalink to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%load_ext autoreload
+%autoreload 2
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Required libraries
+import re
+import numpy as np
+import dowhy
+from dowhy import CausalModel
+import dowhy.datasets
+from dowhy.utils.regression import create_polynomial_function
+</pre></div>
+</div>
+</div>
+<p>We create a dataset with linear relationship between treatment and outcome, following the partial linear data-generating process. <span class="math notranslate nohighlight">\(\beta\)</span> is the true causal effect.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>np.random.seed(101)
+data = dowhy.datasets.partially_linear_dataset(beta = 10,
+                                               num_common_causes = 7,
+                                               num_unobserved_common_causes=1,
+                                               strength_unobserved_confounding=10,
+                                               num_samples = 1000,
+                                               num_treatments = 1,
+                                               stddev_treatment_noise = 10,
+                                               stddev_outcome_noise = 5
+                                                )
+display(data)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;df&#39;:            W0        W1        W2        W3        W4        W5        W6  \
+ 0    0.345542  0.696984 -0.708658 -1.997165 -0.709139  0.165913 -0.554212
+ 1   -0.075270  1.652779 -0.259591  0.282963 -0.764418  0.032002 -0.360908
+ 2   -0.240272 -0.174564 -0.934469 -0.451650  1.959730  1.201015  0.471282
+ 3    0.119874 -0.256127  0.318636 -0.223625  0.233940  1.549934 -0.763879
+ 4    0.179436  1.410457 -0.635170 -1.263762  1.289872 -0.528325  0.122878
+ ..        ...       ...       ...       ...       ...       ...       ...
+ 995  1.131240  0.084704 -1.837648 -0.250193 -0.774702 -0.466984 -0.979246
+ 996 -0.581574  0.167608 -1.914603 -0.653232  2.027677  0.513934 -1.188357
+ 997  0.009781  2.095094 -1.417172 -0.118229  1.953746  0.357782 -0.129897
+ 998 -0.310415  0.410795 -0.205454 -0.818042  0.747265  1.235053  0.627017
+ 999 -0.015367 -0.026768 -0.390476 -0.064762 -0.095389  0.911950  0.329420
+
+         v0          y
+ 0     True   8.391102
+ 1     True  21.853491
+ 2    False   1.247109
+ 3     True  13.881250
+ 4     True  13.929866
+ ..     ...        ...
+ 995   True  14.289693
+ 996  False   6.831359
+ 997   True  10.695485
+ 998  False  -8.849379
+ 999   True  13.994482
+
+ [1000 rows x 9 columns],
+ &#39;treatment_name&#39;: [&#39;v0&#39;],
+ &#39;outcome_name&#39;: &#39;y&#39;,
+ &#39;common_causes_names&#39;: [&#39;W0&#39;, &#39;W1&#39;, &#39;W2&#39;, &#39;W3&#39;, &#39;W4&#39;, &#39;W5&#39;, &#39;W6&#39;],
+ &#39;dot_graph&#39;: &#39;digraph {v0-&gt;y;W0-&gt; v0; W1-&gt; v0; W2-&gt; v0; W3-&gt; v0; W4-&gt; v0; W5-&gt; v0; W6-&gt; v0;W0-&gt; y; W1-&gt; y; W2-&gt; y; W3-&gt; y; W4-&gt; y; W5-&gt; y; W6-&gt; y;}&#39;,
+ &#39;gml_graph&#39;: &#39;graph[directed 1node[ id &#34;y&#34; label &#34;y&#34;]node[ id &#34;W0&#34; label &#34;W0&#34;] node[ id &#34;W1&#34; label &#34;W1&#34;] node[ id &#34;W2&#34; label &#34;W2&#34;] node[ id &#34;W3&#34; label &#34;W3&#34;] node[ id &#34;W4&#34; label &#34;W4&#34;] node[ id &#34;W5&#34; label &#34;W5&#34;] node[ id &#34;W6&#34; label &#34;W6&#34;]node[ id &#34;v0&#34; label &#34;v0&#34;]edge[source &#34;v0&#34; target &#34;y&#34;]edge[ source &#34;W0&#34; target &#34;v0&#34;] edge[ source &#34;W1&#34; target &#34;v0&#34;] edge[ source &#34;W2&#34; target &#34;v0&#34;] edge[ source &#34;W3&#34; target &#34;v0&#34;] edge[ source &#34;W4&#34; target &#34;v0&#34;] edge[ source &#34;W5&#34; target &#34;v0&#34;] edge[ source &#34;W6&#34; target &#34;v0&#34;]edge[ source &#34;W0&#34; target &#34;y&#34;] edge[ source &#34;W1&#34; target &#34;y&#34;] edge[ source &#34;W2&#34; target &#34;y&#34;] edge[ source &#34;W3&#34; target &#34;y&#34;] edge[ source &#34;W4&#34; target &#34;y&#34;] edge[ source &#34;W5&#34; target &#34;y&#34;] edge[ source &#34;W6&#34; target &#34;y&#34;]]&#39;,
+ &#39;ate&#39;: 10.085246711266985}
+</pre></div></div>
+</div>
+<p>The true ATE for this data-generating process is,</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>data[&quot;ate&quot;]
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle 10.085246711267$</div></div>
+</div>
+<p>To simulate unobserved confounding, we remove one of the common causes from the dataset.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Observed data
+dropped_cols=[&quot;W0&quot;]
+user_data = data[&quot;df&quot;].drop(dropped_cols, axis = 1)
+# assumed graph
+user_graph = data[&quot;gml_graph&quot;]
+for col in dropped_cols:
+    user_graph = user_graph.replace(&#39;node[ id &quot;{0}&quot; label &quot;{0}&quot;]&#39;.format(col), &#39;&#39;)
+    user_graph = re.sub(&#39;edge\[ source &quot;{}&quot; target &quot;[vy][0]*&quot;\]&#39;.format(col), &quot;&quot;, user_graph)
+user_data
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>W1</th>
+      <th>W2</th>
+      <th>W3</th>
+      <th>W4</th>
+      <th>W5</th>
+      <th>W6</th>
+      <th>v0</th>
+      <th>y</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.696984</td>
+      <td>-0.708658</td>
+      <td>-1.997165</td>
+      <td>-0.709139</td>
+      <td>0.165913</td>
+      <td>-0.554212</td>
+      <td>True</td>
+      <td>8.391102</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1.652779</td>
+      <td>-0.259591</td>
+      <td>0.282963</td>
+      <td>-0.764418</td>
+      <td>0.032002</td>
+      <td>-0.360908</td>
+      <td>True</td>
+      <td>21.853491</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>-0.174564</td>
+      <td>-0.934469</td>
+      <td>-0.451650</td>
+      <td>1.959730</td>
+      <td>1.201015</td>
+      <td>0.471282</td>
+      <td>False</td>
+      <td>1.247109</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-0.256127</td>
+      <td>0.318636</td>
+      <td>-0.223625</td>
+      <td>0.233940</td>
+      <td>1.549934</td>
+      <td>-0.763879</td>
+      <td>True</td>
+      <td>13.881250</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1.410457</td>
+      <td>-0.635170</td>
+      <td>-1.263762</td>
+      <td>1.289872</td>
+      <td>-0.528325</td>
+      <td>0.122878</td>
+      <td>True</td>
+      <td>13.929866</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>995</th>
+      <td>0.084704</td>
+      <td>-1.837648</td>
+      <td>-0.250193</td>
+      <td>-0.774702</td>
+      <td>-0.466984</td>
+      <td>-0.979246</td>
+      <td>True</td>
+      <td>14.289693</td>
+    </tr>
+    <tr>
+      <th>996</th>
+      <td>0.167608</td>
+      <td>-1.914603</td>
+      <td>-0.653232</td>
+      <td>2.027677</td>
+      <td>0.513934</td>
+      <td>-1.188357</td>
+      <td>False</td>
+      <td>6.831359</td>
+    </tr>
+    <tr>
+      <th>997</th>
+      <td>2.095094</td>
+      <td>-1.417172</td>
+      <td>-0.118229</td>
+      <td>1.953746</td>
+      <td>0.357782</td>
+      <td>-0.129897</td>
+      <td>True</td>
+      <td>10.695485</td>
+    </tr>
+    <tr>
+      <th>998</th>
+      <td>0.410795</td>
+      <td>-0.205454</td>
+      <td>-0.818042</td>
+      <td>0.747265</td>
+      <td>1.235053</td>
+      <td>0.627017</td>
+      <td>False</td>
+      <td>-8.849379</td>
+    </tr>
+    <tr>
+      <th>999</th>
+      <td>-0.026768</td>
+      <td>-0.390476</td>
+      <td>-0.064762</td>
+      <td>-0.095389</td>
+      <td>0.911950</td>
+      <td>0.329420</td>
+      <td>True</td>
+      <td>13.994482</td>
+    </tr>
+  </tbody>
+</table>
+<p>1000 rows × 8 columns</p>
+</div></div>
+</div>
+</section>
+<section id="Obtaining-a-causal-estimate-using-Model,-Identify,-Estimate-steps">
+<h3>Obtaining a causal estimate using Model, Identify, Estimate steps<a class="headerlink" href="#Obtaining-a-causal-estimate-using-Model,-Identify,-Estimate-steps" title="Permalink to this heading"></a></h3>
+<p>Create a causal model with the “observed” data and causal graph.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model = CausalModel(
+            data=user_data,
+            treatment=data[&quot;treatment_name&quot;],
+            outcome=data[&quot;outcome_name&quot;],
+            graph=user_graph,
+            test_significance=None,
+        )
+model.view_model()
+from IPython.display import Image, display
+display(Image(filename=&quot;causal_model.png&quot;))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_sensitivity_analysis_nonparametric_estimators_12_0.png" src="../_images/example_notebooks_sensitivity_analysis_nonparametric_estimators_12_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Identify effect
+identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+print(identified_estimand)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Estimand type: EstimandType.NONPARAMETRIC_ATE
+
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(E[y|W3,W4,W1,W5,W2,W6])
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W4,W1,W5,W2,W6,U) = P(y|v0,W3,W4,W1,W5,W2,W6)
+
+### Estimand : 2
+Estimand name: iv
+No such variable(s) found!
+
+### Estimand : 3
+Estimand name: frontdoor
+No such variable(s) found!
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Estimate effect
+import econml
+from sklearn.ensemble import GradientBoostingRegressor
+linear_dml_estimate = model.estimate_effect(identified_estimand,
+                                    method_name=&quot;backdoor.econml.dml.dml.LinearDML&quot;,
+                                    method_params={
+                                        &#39;init_params&#39;: {&#39;model_y&#39;:GradientBoostingRegressor(),
+                                                        &#39;model_t&#39;: GradientBoostingRegressor(),
+                                                        &#39;linear_first_stages&#39;: False
+                                                       },
+                                        &#39;fit_params&#39;: {&#39;cache_values&#39;: True,}
+                                     })
+print(linear_dml_estimate)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Identified estimand
+Estimand type: EstimandType.NONPARAMETRIC_ATE
+
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(E[y|W3,W4,W1,W5,W2,W6])
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W4,W1,W5,W2,W6,U) = P(y|v0,W3,W4,W1,W5,W2,W6)
+
+## Realized estimand
+b: y~v0+W3+W4+W1+W5+W2+W6 |
+Target units: ate
+
+## Estimate
+Mean value: 11.731303908771556
+Effect estimates: [[11.73130391]]
+
+</pre></div></div>
+</div>
+</section>
+<section id="Sensitivity-Analysis-using-the-Refute-step">
+<h3>Sensitivity Analysis using the Refute step<a class="headerlink" href="#Sensitivity-Analysis-using-the-Refute-step" title="Permalink to this heading"></a></h3>
+<p>After estimation , we need to check how robust our estimate is against the possibility of unobserved confounders. We perform sensitivity analysis for the LinearDML estimator assuming that its assumption on data-generating process holds: the true function for <span class="math notranslate nohighlight">\(Y\)</span> is partial linear. For computational efficiency, we set cache_values = True in <code class="docutils literal notranslate"><span class="pre">fit_params</span></code> to cache the results of first stage estimation.</p>
+<p>Parameters used:</p>
+<ul class="simple">
+<li><p>method_name: Refutation method name</p></li>
+<li><p>simulation_method: “non-parametric-partial-R2” for non Parametric Sensitivity Analysis. Note that partial linear sensitivity analysis is automatically chosen if LinearDML estimator is used for estimation.</p></li>
+<li><p><strong>partial_r2_confounder_treatment</strong>: <span class="math notranslate nohighlight">\(\eta^2_{T\sim U | W}\)</span>, Partial R2 of unobserved confounder with treatment conditioned on all observed confounders.</p></li>
+<li><p><strong>partial_r2_confounder_outcome</strong>: <span class="math notranslate nohighlight">\(\eta^2_{Y \sim U | T, W}\)</span>, Partial R2 of unobserved confounder with outcome conditioned on treatment and all observed confounders.</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute = model.refute_estimate(identified_estimand, linear_dml_estimate ,
+                               method_name = &quot;add_unobserved_common_cause&quot;,
+                               simulation_method = &quot;non-parametric-partial-R2&quot;,
+                               partial_r2_confounder_treatment = np.arange(0, 0.8, 0.1),
+                               partial_r2_confounder_outcome = np.arange(0, 0.8, 0.1)
+                              )
+print(refute)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_sensitivity_analysis_nonparametric_estimators_16_0.png" src="../_images/example_notebooks_sensitivity_analysis_nonparametric_estimators_16_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Sensitivity Analysis to Unobserved Confounding using partial R^2 parameterization
+
+Original Effect Estimate : 11.731303908771556
+Robustness Value : 0.45
+
+Robustness Value (alpha=0.05) : 0.41000000000000003
+
+Interpretation of results :
+Any confounder explaining less than 45.0% percent of the residual variance of both the treatment and the outcome would not be strong enough to explain away the observed effect i.e bring down the estimate to 0
+
+For a significance level of 5.0%, any confounder explaining more than 41.0% percent of the residual variance of both the treatment and the outcome would be strong enough to make the estimated effect not &#39;statistically significant&#39;
+
+
+</pre></div></div>
+</div>
+<p><strong>Intepretation of the plot.</strong> In the above plot, the x-axis shows hypothetical partial R2 values of unobserved confounder(s) with the treatment. The y-axis shows hypothetical partial R2 of unobserved confounder(s) with the outcome. At &lt;x=0,y=0&gt;, the black diamond shows the original estimate (theta_s) without considering the unobserved confounders.</p>
+<p>The contour levels represent <em>adjusted</em> lower confidence bound estimate of the effect, which would be obtained if the unobserved confounder(s) had been included in the estimation model. The red contour line is the critical threshold where the adjusted effect goes to zero. Thus, confounders with such strength or stronger are sufficient to reverse the sign of the estimated effect and invalidate the estimate’s conclusions. This notion can be quantified by outputting the robustness value.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute.RV
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle 0.45$</div></div>
+</div>
+<p>The robustness value measures the minimal equal strength of <span class="math notranslate nohighlight">\(\eta^2_{T\sim U | W}\)</span> and <span class="math notranslate nohighlight">\(\eta^2_{Y \sim U | T, W}\)</span> such the bound for the average treatment effect would include zero. It can be between 0 and 1. A robustness value of 0.45 implies that confounders with <span class="math notranslate nohighlight">\(\eta^2_{T\sim U | W}\)</span> and <span class="math notranslate nohighlight">\(\eta^2_{Y \sim U | T, W}\)</span> values less than 0.4 would not be sufficient enough to bring down the estimates to zero. In general, a low robustness value implies that the results can be
+changed even by the presence of weak confounders whereas a robustness value close to 1 means the treatment effect can handle even strong confounders that may explain all residual variation of the treatment and the outcome.</p>
+<p><strong>Benchmarking.</strong> In general, however, providing a plausible range of partial R2 values is difficult. Instead, we can infer the partial R2 of the unobserved confounder as a multiple of the partial R2 of any subset of observed confounders. So now we just need to specify the effect of unobserved confounding as a multiple/fraction of the observed confounding. This process is known as <em>benchmarking</em>.</p>
+<p>The relevant arguments for bencmarking are: - benchmark_common_causes: Names of the observed confounders used to bound the strengths of unobserved confounder - effect_fraction_on_treatment: Strength of association between unobserved confounder and treatment compared to benchmark confounders - effect_fraction_on_outcome: Strength of association between unobserved confounder and outcome compared to benchmark confounders</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute_bm = model.refute_estimate(identified_estimand, linear_dml_estimate ,
+                               method_name = &quot;add_unobserved_common_cause&quot;,
+                               simulation_method = &quot;non-parametric-partial-R2&quot;,
+                               benchmark_common_causes = [&quot;W1&quot;],
+                               effect_fraction_on_treatment = 0.2,
+                               effect_fraction_on_outcome = 0.2
+                              )
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_sensitivity_analysis_nonparametric_estimators_22_0.png" src="../_images/example_notebooks_sensitivity_analysis_nonparametric_estimators_22_0.png" />
+</div>
+</div>
+<p>The red triangle shows the estimated partial-R^2 of a chosen benchmark observed covariate with the treatment and outcome. In the above call, we chose <em>W1</em> as the benchmark covariate. Under assumption that the unobserved confounder cannot be stronger in its effect on treatment and outcome than the observed benchmark covariate (<em>W1</em>), the above plot shows that the mean estimated effect will reduce after accounting for unobserved confounding, but still remain substantially above zero.</p>
+<p><strong>Plot types</strong>. The default <code class="docutils literal notranslate"><span class="pre">plot_type</span></code> is to show the <code class="docutils literal notranslate"><span class="pre">lower_confidence_bound</span></code> under a significance level . Other possible values for the <code class="docutils literal notranslate"><span class="pre">plot_type</span></code> are: * <code class="docutils literal notranslate"><span class="pre">upper_confidence_bound</span></code>: preferably used in cases where the unobserved confounder is expected to lower the estimate. * <code class="docutils literal notranslate"><span class="pre">lower_ate_bound</span></code>: lower (point) estimate for unconfounded average treatment effect without considering the significance level * <code class="docutils literal notranslate"><span class="pre">upper_ate_bound</span></code>: upper (point) estimate for unconfounded average treatment
+effect without considering the significance level * <code class="docutils literal notranslate"><span class="pre">bias</span></code>: the bias of the obtained estimate compared to the true estimate</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute_bm.plot(plot_type = &quot;upper_confidence_bound&quot;)
+refute_bm.plot(plot_type = &quot;bias&quot;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_sensitivity_analysis_nonparametric_estimators_25_0.png" src="../_images/example_notebooks_sensitivity_analysis_nonparametric_estimators_25_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_sensitivity_analysis_nonparametric_estimators_25_1.png" src="../_images/example_notebooks_sensitivity_analysis_nonparametric_estimators_25_1.png" />
+</div>
+</div>
+<p>We can also access the benchmarking results as a data frame.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute_bm.results
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>r2tu_w</th>
+      <th>r2yu_tw</th>
+      <th>short estimate</th>
+      <th>bias</th>
+      <th>lower_ate_bound</th>
+      <th>upper_ate_bound</th>
+      <th>lower_confidence_bound</th>
+      <th>upper_confidence_bound</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.048603</td>
+      <td>0.054064</td>
+      <td>11.731304</td>
+      <td>1.047281</td>
+      <td>10.684023</td>
+      <td>12.778585</td>
+      <td>9.533734</td>
+      <td>13.901772</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+</section>
+<section id="II.-Sensitivity-Analysis-for-general-non-parametric-models">
+<h2>II. Sensitivity Analysis for general non-parametric models<a class="headerlink" href="#II.-Sensitivity-Analysis-for-general-non-parametric-models" title="Permalink to this heading"></a></h2>
+<p>We now perform sensitivity analysis without making any assumption on the true data-generating process. The sensitivity still depends on the partial R2 of unobserved confounder with outcome, <span class="math notranslate nohighlight">\(\eta^2_{Y \sim U | T, W}\)</span>, and a similar parameter for the confounder-treatment relationship. However, the computation of bounds is more complicated and requires estimation of a special function known as reisz function. Refer to Chernozhukov et al. for details.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Estimate effect using a non-parametric estimator
+from sklearn.ensemble import GradientBoostingRegressor
+estimate_npar = model.estimate_effect(identified_estimand,
+                                    method_name=&quot;backdoor.econml.dml.KernelDML&quot;,
+                                    method_params={
+                                        &#39;init_params&#39;: {&#39;model_y&#39;:GradientBoostingRegressor(),
+                                                        &#39;model_t&#39;: GradientBoostingRegressor(),                                                       },
+                                        &#39;fit_params&#39;: {},
+                                     })
+print(estimate_npar)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Identified estimand
+Estimand type: EstimandType.NONPARAMETRIC_ATE
+
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(E[y|W3,W4,W1,W5,W2,W6])
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W4,W1,W5,W2,W6,U) = P(y|v0,W3,W4,W1,W5,W2,W6)
+
+## Realized estimand
+b: y~v0+W3+W4+W1+W5+W2+W6 |
+Target units: ate
+
+## Estimate
+Mean value: 11.84110017730197
+Effect estimates: [[11.84110018]]
+
+</pre></div></div>
+</div>
+<p>To do the sensitivity analysis, we now use the same <code class="docutils literal notranslate"><span class="pre">non-parametric--partial-R2</span></code> method, however the estimation of partial R2 will be based on reisz representers. We use <code class="docutils literal notranslate"><span class="pre">plugin_reisz=True</span></code> to specify that we will be using a plugin reisz function estimator (this is faster and available for binary treatments). Otherwise, we can set it to <code class="docutils literal notranslate"><span class="pre">False</span></code> to estimate reisz function using a loss function.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute_npar = model.refute_estimate(identified_estimand, estimate_npar,
+                               method_name = &quot;add_unobserved_common_cause&quot;,
+                               simulation_method = &quot;non-parametric-partial-R2&quot;,
+                               benchmark_common_causes = [&quot;W1&quot;],
+                               effect_fraction_on_treatment = 0.2,
+                               effect_fraction_on_outcome = 0.2,
+                               plugin_reisz=True
+                              )
+print(refute_npar)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_sensitivity_analysis_nonparametric_estimators_31_0.png" src="../_images/example_notebooks_sensitivity_analysis_nonparametric_estimators_31_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Sensitivity Analysis to Unobserved Confounding using partial R^2 parameterization
+
+Original Effect Estimate : 11.84110017730197
+Robustness Value : 0.66
+
+Robustness Value (alpha=0.05) : 0.64
+
+Interpretation of results :
+Any confounder explaining less than 66.0% percent of the residual variance of both the treatment and the outcome would not be strong enough to explain away the observed effect i.e bring down the estimate to 0
+
+For a significance level of 5.0%, any confounder explaining more than 64.0% percent of the residual variance of both the treatment and the outcome would be strong enough to make the estimated effect not &#39;statistically significant&#39;
+
+
+</pre></div></div>
+</div>
+<p>The plot has the same interpretation as before. We obtain a robustness value of 0.66 compared to robustness value of 0.45 for LinearDML estimator.</p>
+<p>Note that the robustness value changes, even though the point estimates from LinearDML and KernelDML are similar. This is because we made different assumptions on the true data-generating process.</p>
+</section>
+</section>
+
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, PyWhy contributors.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

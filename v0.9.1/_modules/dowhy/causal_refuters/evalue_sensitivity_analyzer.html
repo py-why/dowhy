@@ -1,0 +1,802 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>dowhy.causal_refuters.evalue_sensitivity_analyzer &#8212; DoWhy  documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+    <img src="../../../_static/dowhy-logo-small.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../user_guide/index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../example_notebooks/nb_index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../dowhy.html">
+  API reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../contributing.html">
+  Contributing
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../code_repo.html">
+  Release notes
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+      <div class="navbar-end-item">
+        <div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.9.1
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <h1>Source code for dowhy.causal_refuters.evalue_sensitivity_analyzer</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
+
+<span class="kn">from</span> <span class="nn">dowhy.causal_estimator</span> <span class="kn">import</span> <span class="n">CausalEstimate</span><span class="p">,</span> <span class="n">CausalEstimator</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_estimators.econml</span> <span class="kn">import</span> <span class="n">Econml</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_estimators.generalized_linear_model_estimator</span> <span class="kn">import</span> <span class="n">GeneralizedLinearModelEstimator</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_estimators.linear_regression_estimator</span> <span class="kn">import</span> <span class="n">LinearRegressionEstimator</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_identifier</span> <span class="kn">import</span> <span class="n">IdentifiedEstimand</span>
+
+
+<div class="viewcode-block" id="EValueSensitivityAnalyzer"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.evalue_sensitivity_analyzer.EValueSensitivityAnalyzer">[docs]</a><span class="k">class</span> <span class="nc">EValueSensitivityAnalyzer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class computes Ding &amp; VanderWeele&#39;s E-value for unmeasured confounding. The E-value is the minimum</span>
+<span class="sd">    strength of association on the risk ratio scale that an unmeasured confounder would need to have with</span>
+<span class="sd">    both the treatment and the outcome, conditional on the measured covariates, to fully explain away a specific</span>
+<span class="sd">    treatment-outcome association.</span>
+
+<span class="sd">    It benchmarks the E-value against measured confounders using McGowan and Greevy Jr.&#39;s Observed Covariate E-value.</span>
+<span class="sd">    This approach drops measured confounders and re-fits the estimator, measuring how much the limiting bound of the</span>
+<span class="sd">    confidence interval changes on the E-value scale. This benchmarks hypothetical unmeasured confounding against each</span>
+<span class="sd">    of the measured confounders.</span>
+
+<span class="sd">    See: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4820664/,</span>
+<span class="sd">    https://dash.harvard.edu/bitstream/handle/1/36874927/EValue_FinalSubmission.pdf, and</span>
+<span class="sd">    https://arxiv.org/pdf/2011.07030.pdf.</span>
+<span class="sd">    The implementation is based on the R packages https://github.com/cran/EValue and https://github.com/LucyMcGowan/tipr.</span>
+
+<span class="sd">    :param estimate: CausalEstimate</span>
+<span class="sd">    :param estimand: IdentifiedEstimand</span>
+<span class="sd">    :param data: pd.DataFrame</span>
+<span class="sd">    :param outcome_name: Outcome variable name</span>
+<span class="sd">    :param no_effect_baseline: A number to which to shift the observed estimate to. Defaults to 1 for ratio measures (RR, OR, HR)</span>
+<span class="sd">    and 0 for additive measures (OLS, MD). (Default = None)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">estimate</span><span class="p">:</span> <span class="n">CausalEstimate</span><span class="p">,</span>
+        <span class="n">estimand</span><span class="p">:</span> <span class="n">IdentifiedEstimand</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">treatment_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">outcome_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">no_effect_baseline</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimate</span> <span class="o">=</span> <span class="n">estimate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimand</span> <span class="o">=</span> <span class="n">estimand</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span> <span class="o">=</span> <span class="n">treatment_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span> <span class="o">=</span> <span class="n">outcome_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">no_effect_baseline</span> <span class="o">=</span> <span class="n">no_effect_baseline</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">no_effect_baseline</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span> <span class="n">LinearRegressionEstimator</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">no_effect_baseline</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span> <span class="n">GeneralizedLinearModelEstimator</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">no_effect_baseline</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stats</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">benchmarking_results</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sd_outcome</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">outcome_name</span><span class="p">])</span>
+
+<div class="viewcode-block" id="EValueSensitivityAnalyzer.check_sensitivity"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.evalue_sensitivity_analyzer.EValueSensitivityAnalyzer.check_sensitivity">[docs]</a>    <span class="k">def</span> <span class="nf">check_sensitivity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes E-value for point estimate and confidence limits. Benchmarks E-values against</span>
+<span class="sd">        measured confounders using Observed Covariate E-values. Plots E-values and Observed</span>
+<span class="sd">        Covariate E-values.</span>
+
+<span class="sd">        :param plot: plots E-value for point estimate and confidence limit. (Default = True)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span> <span class="n">LinearRegressionEstimator</span><span class="p">):</span>
+            <span class="n">coef_est</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">coef_se</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">get_standard_error</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span> <span class="n">GeneralizedLinearModelEstimator</span><span class="p">):</span>
+            <span class="n">coef_est</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">coef_se</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">bse</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_evalue</span><span class="p">(</span><span class="n">coef_est</span><span class="p">,</span> <span class="n">coef_se</span><span class="p">)</span>
+
+        <span class="n">eval_lo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;evalue_lower_ci&quot;</span><span class="p">]</span>
+        <span class="n">eval_hi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;evalue_upper_ci&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">eval_lo</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">eval_hi</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">eval_hi</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">eval_lo</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;Not benchmarking with Observed Covariate E-values. Confidence interval is already tipped.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">benchmark</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="EValueSensitivityAnalyzer.get_evalue"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.evalue_sensitivity_analyzer.EValueSensitivityAnalyzer.get_evalue">[docs]</a>    <span class="k">def</span> <span class="nf">get_evalue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coef_est</span><span class="p">,</span> <span class="n">coef_se</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes E-value for point estimate and confidence limits. The estimate and</span>
+<span class="sd">        confidence limits are converted to the risk ratio scale before the E-value is calculated.</span>
+
+<span class="sd">        :param coef_est: coefficient estimate</span>
+<span class="sd">        :param coef_se: coefficient standard error</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span> <span class="n">LinearRegressionEstimator</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evalue_OLS</span><span class="p">(</span><span class="n">coef_est</span><span class="p">,</span> <span class="n">coef_se</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd_outcome</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">no_effect_baseline</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span> <span class="n">GeneralizedLinearModelEstimator</span><span class="p">):</span>
+            <span class="n">est</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">coef_est</span><span class="p">)</span>
+            <span class="n">lo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">coef_est</span> <span class="o">-</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">coef_se</span><span class="p">)</span>
+            <span class="n">hi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">coef_est</span> <span class="o">+</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">coef_se</span><span class="p">)</span>
+
+            <span class="n">family</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">family</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">family</span><span class="o">.</span><span class="n">link</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">family</span><span class="p">,</span> <span class="n">sm</span><span class="o">.</span><span class="n">families</span><span class="o">.</span><span class="n">Binomial</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">sm</span><span class="o">.</span><span class="n">families</span><span class="o">.</span><span class="n">links</span><span class="o">.</span><span class="n">Logit</span><span class="p">):</span>
+                <span class="n">rare</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.15</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evalue_OR</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">,</span> <span class="n">rare</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">no_effect_baseline</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">family</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">sm</span><span class="o">.</span><span class="n">families</span><span class="o">.</span><span class="n">Poisson</span><span class="p">,</span> <span class="n">sm</span><span class="o">.</span><span class="n">families</span><span class="o">.</span><span class="n">NegativeBinomial</span><span class="p">,</span> <span class="n">sm</span><span class="o">.</span><span class="n">families</span><span class="o">.</span><span class="n">Gamma</span><span class="p">),</span>
+            <span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">sm</span><span class="o">.</span><span class="n">families</span><span class="o">.</span><span class="n">links</span><span class="o">.</span><span class="n">Log</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evalue_RR</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">no_effect_baseline</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                    <span class="s2">&quot;Currently, only four GLM families are supported: &quot;</span>
+                    <span class="s2">&quot;1) sm.families.Binomial(link=sm.families.links.logit), &quot;</span>
+                    <span class="s2">&quot;2) sm.families.Poisson(link=sm.families.links.log), &quot;</span>
+                    <span class="s2">&quot;3) sm.families.NegativeBinomial(link=sm.families.links.log), &quot;</span>
+                    <span class="s2">&quot;4) sm.families.Gamma(link=sm.families.links.log), &quot;</span>
+                <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EValueSensitivityAnalyzer.plot"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.evalue_sensitivity_analyzer.EValueSensitivityAnalyzer.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">num_points_per_contour</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+        <span class="n">plot_size</span><span class="o">=</span><span class="p">(</span><span class="mf">6.4</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">),</span>
+        <span class="n">contour_colors</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="s2">&quot;red&quot;</span><span class="p">],</span>
+        <span class="n">benchmarking_color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span>
+        <span class="n">xy_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots contours showing the combinations of treatment-confounder and confounder-outcome</span>
+<span class="sd">        risk ratios that would tip the point estimate and confidence limit. The X-axis shows</span>
+<span class="sd">        the treatment-confounder risk ratio and the Y-axis shows the confounder-outcome risk ratio.</span>
+
+<span class="sd">        :param num_points_per_contour: number of points to calculate and plot for each contour (Default = 200)</span>
+<span class="sd">        :param plot_size: size of the plot (Default = (6.4,4.8))</span>
+<span class="sd">        :param contour_colors: colors for point estimate and confidence limit contour (Default = [&quot;blue&quot;, &quot;red&quot;])</span>
+<span class="sd">        :param benchmarking_color: color for observed covariate E-values. (Default = &quot;green&quot;)</span>
+<span class="sd">        :param xy_limit: plot&#39;s maximum x and y value. Default is 2 x E-value. (Default = None)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Must call ``check_sensitivity&#39;&#39; before calling ``plot&#39;&#39;&quot;</span><span class="p">)</span>
+
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">plot_size</span><span class="p">)</span>
+
+        <span class="n">eval_est</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;evalue_estimate&quot;</span><span class="p">]</span>
+        <span class="n">rr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;converted_estimate&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">rr</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">rr</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">rr</span>
+
+        <span class="k">if</span> <span class="n">xy_limit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xy_limit</span> <span class="o">=</span> <span class="n">eval_est</span> <span class="o">*</span> <span class="mi">2</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_contour</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">rr</span><span class="p">,</span> <span class="n">eval_est</span><span class="p">,</span> <span class="n">num_points_per_contour</span><span class="p">,</span> <span class="n">contour_colors</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xy_limit</span><span class="p">)</span>
+
+        <span class="n">eval_lo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;evalue_lower_ci&quot;</span><span class="p">]</span>
+        <span class="n">eval_hi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;evalue_upper_ci&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">eval_lo</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">eval_hi</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">eval_hi</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">eval_lo</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Plotting contour for point estimate only. Confidence interval is already tipped.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">eval_lo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">rr_ci</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;converted_upper_ci&quot;</span><span class="p">]</span>
+                <span class="n">eval_ci</span> <span class="o">=</span> <span class="n">eval_hi</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rr_ci</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;converted_lower_ci&quot;</span><span class="p">]</span>
+                <span class="n">eval_ci</span> <span class="o">=</span> <span class="n">eval_lo</span>
+            <span class="k">if</span> <span class="n">rr_ci</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">rr_ci</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">rr_ci</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_plot_contour</span><span class="p">(</span>
+                <span class="n">ax</span><span class="p">,</span>
+                <span class="n">rr_ci</span><span class="p">,</span>
+                <span class="n">eval_ci</span><span class="p">,</span>
+                <span class="n">num_points_per_contour</span><span class="p">,</span>
+                <span class="n">contour_colors</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">xy_limit</span><span class="p">,</span>
+                <span class="n">point_est</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">benchmarking_results</span><span class="p">[</span><span class="s2">&quot;observed_covariate_e_value&quot;</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">benchmarking_results</span><span class="p">[</span><span class="s2">&quot;observed_covariate_e_value&quot;</span><span class="p">],</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Observed Covariate E-values&quot;</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">benchmarking_color</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">example_var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">benchmarking_results</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">obs_evalue</span> <span class="o">=</span> <span class="n">example_var</span><span class="p">[</span><span class="s2">&quot;observed_covariate_e_value&quot;</span><span class="p">]</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">obs_evalue</span><span class="p">,</span> <span class="n">obs_evalue</span><span class="p">,</span> <span class="n">example_var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;$RR_{treatment-confounder}$&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;$RR_{confounder-outcome}$&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">xy_limit</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">xy_limit</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_plot_contour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">rr</span><span class="p">,</span> <span class="n">evalue</span><span class="p">,</span> <span class="n">n_pts</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">xy_limit</span><span class="p">,</span> <span class="n">point_est</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots a single contour line</span>
+
+<span class="sd">        :param ax: matplotlib axis</span>
+<span class="sd">        :param rr: observed point estimate/confidence limit on the risk ratio scale</span>
+<span class="sd">        :param evalue: E-value corresponding to observed point estimate/confidence limit</span>
+<span class="sd">        :param n_pts: number of points to calculate and plot for each contour</span>
+<span class="sd">        :param color: color for contour</span>
+<span class="sd">        :param xy_limit: plot&#39;s maximum x and y value</span>
+<span class="sd">        :param point_est: whether this is the point estimate (Default = True)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">step</span> <span class="o">=</span> <span class="p">(</span><span class="n">xy_limit</span> <span class="o">-</span> <span class="n">rr</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_pts</span>
+        <span class="n">x_est</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">rr</span> <span class="o">+</span> <span class="n">step</span><span class="p">,</span> <span class="n">xy_limit</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">n_pts</span><span class="p">)</span>
+        <span class="n">y_est</span> <span class="o">=</span> <span class="n">rr</span> <span class="o">*</span> <span class="p">(</span><span class="n">rr</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">x_est</span> <span class="o">-</span> <span class="n">rr</span><span class="p">)</span> <span class="o">+</span> <span class="n">rr</span>
+
+        <span class="n">est_string</span> <span class="o">=</span> <span class="s2">&quot;point estimate&quot;</span> <span class="k">if</span> <span class="n">point_est</span> <span class="k">else</span> <span class="s2">&quot;confidence interval&quot;</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+            <span class="n">evalue</span><span class="p">,</span>
+            <span class="n">evalue</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;E-value for </span><span class="si">{</span><span class="n">est_string</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">evalue</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+            <span class="n">x_est</span><span class="p">,</span>
+            <span class="n">y_est</span><span class="p">,</span>
+            <span class="n">xy_limit</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Tips </span><span class="si">{</span><span class="n">est_string</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_est</span><span class="p">,</span> <span class="n">y_est</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EValueSensitivityAnalyzer.benchmark"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.evalue_sensitivity_analyzer.EValueSensitivityAnalyzer.benchmark">[docs]</a>    <span class="k">def</span> <span class="nf">benchmark</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Benchmarks E-values against the measured confounders using McGowan and Greevy Jr.&#39;s Observed</span>
+<span class="sd">        Covariate E-value. This approach drops measured confounders and re-fits the estimator, measuring</span>
+<span class="sd">        how much the limiting bound of the confidence interval changes on the E-value scale. This benchmarks</span>
+<span class="sd">        hypothetical unmeasured confounding against each of the measured confounders.</span>
+
+<span class="sd">        See: https://arxiv.org/pdf/2011.07030.pdf and https://github.com/LucyMcGowan/tipr</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">new_ests</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">new_lo</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">new_hi</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">observed_covariate_e_values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">backdoor_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimand</span><span class="o">.</span><span class="n">get_backdoor_variables</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">drop_var</span> <span class="ow">in</span> <span class="n">backdoor_vars</span><span class="p">:</span>
+
+            <span class="c1"># new estimator</span>
+            <span class="n">new_backdoor_vars</span> <span class="o">=</span> <span class="p">[</span><span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">backdoor_vars</span> <span class="k">if</span> <span class="n">var</span> <span class="o">!=</span> <span class="n">drop_var</span><span class="p">]</span>
+            <span class="n">new_estimand</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimand</span><span class="p">)</span>
+            <span class="n">new_estimand</span><span class="o">.</span><span class="n">set_backdoor_variables</span><span class="p">(</span><span class="n">new_backdoor_vars</span><span class="p">)</span>
+            <span class="n">new_estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">get_new_estimator_object</span><span class="p">(</span><span class="n">new_estimand</span><span class="p">)</span>
+            <span class="n">new_estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+                <span class="n">new_estimand</span><span class="o">.</span><span class="n">treatment_variable</span><span class="p">,</span>
+                <span class="n">new_estimand</span><span class="o">.</span><span class="n">outcome_variable</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">_effect_modifier_names</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">new_estimator</span><span class="o">.</span><span class="n">_econml_fit_params</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_estimator</span><span class="p">,</span> <span class="n">Econml</span><span class="p">)</span> <span class="k">else</span> <span class="p">{},</span>
+            <span class="p">)</span>
+
+            <span class="c1"># new effect estimate</span>
+            <span class="n">new_effect</span> <span class="o">=</span> <span class="n">new_estimator</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span>
+                <span class="n">control_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">control_value</span><span class="p">,</span>
+                <span class="n">treatment_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">treatment_value</span><span class="p">,</span>
+                <span class="n">target_units</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">_target_units</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span> <span class="n">LinearRegressionEstimator</span><span class="p">):</span>
+                <span class="n">coef_est</span> <span class="o">=</span> <span class="n">new_effect</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">coef_se</span> <span class="o">=</span> <span class="n">new_effect</span><span class="o">.</span><span class="n">get_standard_error</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span> <span class="n">GeneralizedLinearModelEstimator</span><span class="p">):</span>
+                <span class="n">coef_est</span> <span class="o">=</span> <span class="n">new_effect</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">coef_se</span> <span class="o">=</span> <span class="n">new_effect</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">bse</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">new_stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_evalue</span><span class="p">(</span><span class="n">coef_est</span><span class="p">,</span> <span class="n">coef_se</span><span class="p">)</span>
+
+            <span class="c1"># observed covariate E-value</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;evalue_lower_ci&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ci</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;converted_upper_ci&quot;</span><span class="p">]</span>
+                <span class="n">new_ci</span> <span class="o">=</span> <span class="n">new_stats</span><span class="p">[</span><span class="s2">&quot;converted_upper_ci&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ci</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;converted_lower_ci&quot;</span><span class="p">]</span>
+                <span class="n">new_ci</span> <span class="o">=</span> <span class="n">new_stats</span><span class="p">[</span><span class="s2">&quot;converted_lower_ci&quot;</span><span class="p">]</span>
+            <span class="n">covariate_e_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observed_covariate_e_value</span><span class="p">(</span><span class="n">ci</span><span class="p">,</span> <span class="n">new_ci</span><span class="p">)</span>
+
+            <span class="n">new_ests</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_stats</span><span class="p">[</span><span class="s2">&quot;converted_estimate&quot;</span><span class="p">])</span>
+            <span class="n">new_lo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_stats</span><span class="p">[</span><span class="s2">&quot;converted_lower_ci&quot;</span><span class="p">])</span>
+            <span class="n">new_hi</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_stats</span><span class="p">[</span><span class="s2">&quot;converted_upper_ci&quot;</span><span class="p">])</span>
+            <span class="n">observed_covariate_e_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">covariate_e_value</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">benchmarking_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;dropped_covariate&quot;</span><span class="p">:</span> <span class="n">backdoor_vars</span><span class="p">,</span>
+                <span class="s2">&quot;converted_est&quot;</span><span class="p">:</span> <span class="n">new_ests</span><span class="p">,</span>
+                <span class="s2">&quot;converted_lower_ci&quot;</span><span class="p">:</span> <span class="n">new_lo</span><span class="p">,</span>
+                <span class="s2">&quot;converted_upper_ci&quot;</span><span class="p">:</span> <span class="n">new_hi</span><span class="p">,</span>
+                <span class="s2">&quot;observed_covariate_e_value&quot;</span><span class="p">:</span> <span class="n">observed_covariate_e_values</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;observed_covariate_e_value&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">benchmarking_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">benchmarking_results</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;dropped_covariate&quot;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_observed_covariate_e_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ci</span><span class="p">,</span> <span class="n">new_ci</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes Observed Covariate E-value given effect estimate from new model without</span>
+<span class="sd">        a specific measured confounder.</span>
+
+<span class="sd">        Based on: https://github.com/LucyMcGowan/tipr/blob/master/R/observed_covariate_e_value.R</span>
+
+<span class="sd">        :param ci: limiting confidence bound from original model on risk ratio scale</span>
+<span class="sd">        :param new_ci: limiting confidence bound from new model on risk ratio scale</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">ci</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">ci</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">ci</span>
+            <span class="n">new_ci</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">new_ci</span>
+        <span class="k">if</span> <span class="n">ci</span> <span class="o">&lt;</span> <span class="n">new_ci</span><span class="p">:</span>
+            <span class="n">ratio</span> <span class="o">=</span> <span class="n">new_ci</span> <span class="o">/</span> <span class="n">ci</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ratio</span> <span class="o">=</span> <span class="n">ci</span> <span class="o">/</span> <span class="n">new_ci</span>
+
+        <span class="k">return</span> <span class="n">ratio</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ratio</span> <span class="o">*</span> <span class="p">(</span><span class="n">ratio</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_evalue_OLS</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">est</span><span class="p">,</span> <span class="n">se</span><span class="p">,</span> <span class="n">sd</span><span class="p">,</span> <span class="n">no_effect_baseline</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes E-value from OLS coefficient.</span>
+
+<span class="sd">        :param est: coefficient from OLS</span>
+<span class="sd">        :param se: standard error of point estimate</span>
+<span class="sd">        :param sd: residual standard deviation</span>
+<span class="sd">        :param no_effect_baseline: no_effect_baseline standardized difference to which to shift the observed estimate. (Default = 0)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">se</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Standard error cannot be negative&quot;</span><span class="p">)</span>
+
+        <span class="n">delta</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">_treatment_value</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">_control_value</span><span class="p">)</span>
+        <span class="n">est</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_smd</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="n">sd</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="n">delta</span><span class="p">)</span>
+        <span class="n">se</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_smd</span><span class="p">(</span>
+            <span class="n">se</span><span class="p">,</span> <span class="n">sd</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">)</span>  <span class="c1"># already multiplied by delta in LinearRegressionEstimator._estimate_std_error()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evalue_MD</span><span class="p">(</span><span class="n">est</span><span class="o">=</span><span class="n">est</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="n">se</span><span class="p">,</span> <span class="n">no_effect_baseline</span><span class="o">=</span><span class="n">no_effect_baseline</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_evalue_MD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">est</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">no_effect_baseline</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes E-value for standardized difference and its confidence limits.</span>
+
+<span class="sd">        :param est: point estimate as standardized difference (i.e., Cohen&#39;s d)</span>
+<span class="sd">        :param se: standard error of the point estimate</span>
+<span class="sd">        :param no_effect_baseline: no_effect_baseline standardized difference to which to shift the observed estimate. (Default = 0)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">se</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Standard error cannot be negative&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">se</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lo</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">hi</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># see Table 2 and p.37 in https://dash.harvard.edu/bitstream/handle/1/36874927/EValue_FinalSubmission.pdf</span>
+            <span class="n">lo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">0.91</span> <span class="o">*</span> <span class="n">est</span> <span class="o">-</span> <span class="mf">1.78</span> <span class="o">*</span> <span class="n">se</span><span class="p">)</span>
+            <span class="n">hi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">0.91</span> <span class="o">*</span> <span class="n">est</span> <span class="o">+</span> <span class="mf">1.78</span> <span class="o">*</span> <span class="n">se</span><span class="p">)</span>
+
+        <span class="n">est</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_md_to_rr</span><span class="p">(</span><span class="n">est</span><span class="p">)</span>
+        <span class="n">no_effect_baseline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_md_to_rr</span><span class="p">(</span><span class="n">no_effect_baseline</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evalue_RR</span><span class="p">(</span><span class="n">est</span><span class="o">=</span><span class="n">est</span><span class="p">,</span> <span class="n">lo</span><span class="o">=</span><span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="o">=</span><span class="n">hi</span><span class="p">,</span> <span class="n">no_effect_baseline</span><span class="o">=</span><span class="n">no_effect_baseline</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_evalue_OR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">est</span><span class="p">,</span> <span class="n">lo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rare</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">no_effect_baseline</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes E-value for an odds ratio and its confidence limits.</span>
+
+<span class="sd">        :param est: point estimate</span>
+<span class="sd">        :param lo: lower limit of confidence interval</span>
+<span class="sd">        :param hi: upper limit of confidence interval</span>
+<span class="sd">        :param rare: if outcome is rare (&lt;15%)</span>
+<span class="sd">        :param no_effect_baseline: the no_effect_baseline OR to which to shift the observed estimate. (Default = 1)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">est</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Odds Ratio cannot be negative&quot;</span><span class="p">)</span>
+
+        <span class="n">est</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_or_to_rr</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="n">rare</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_or_to_rr</span><span class="p">(</span><span class="n">lo</span><span class="p">,</span> <span class="n">rare</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">hi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">hi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_or_to_rr</span><span class="p">(</span><span class="n">hi</span><span class="p">,</span> <span class="n">rare</span><span class="p">)</span>
+        <span class="n">no_effect_baseline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_or_to_rr</span><span class="p">(</span><span class="n">no_effect_baseline</span><span class="p">,</span> <span class="n">rare</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evalue_RR</span><span class="p">(</span><span class="n">est</span><span class="o">=</span><span class="n">est</span><span class="p">,</span> <span class="n">lo</span><span class="o">=</span><span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="o">=</span><span class="n">hi</span><span class="p">,</span> <span class="n">no_effect_baseline</span><span class="o">=</span><span class="n">no_effect_baseline</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_evalue_RR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">est</span><span class="p">,</span> <span class="n">lo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">no_effect_baseline</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes E-value for a risk ratio or rate ratio and its confidence limits.</span>
+
+<span class="sd">        :param est: point estimate</span>
+<span class="sd">        :param lo: lower limit of confidence interval</span>
+<span class="sd">        :param hi: upper limit of confidence interval</span>
+<span class="sd">        :param no_effect_baseline: the no_effect_baseline RR to which to shift the observed estimate. (Default = 1)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">est</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Risk/Rate Ratio cannot be negative&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">no_effect_baseline</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;no_effect_baseline value is impossible&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">no_effect_baseline</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s1">&#39;You are calculating a &quot;non-null&quot; E-value, i.e., an E-value for the minimum amount of unmeasured &#39;</span>
+                <span class="s2">&quot;confounding needed to move the estimate and confidence interval to your specified no_effect_baseline value &quot;</span>
+                <span class="s2">&quot;rather than to the null value.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">lo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">lo</span> <span class="o">&gt;</span> <span class="n">hi</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Lower confidence limit should be less than upper confidence limit&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">est</span> <span class="o">&lt;</span> <span class="n">lo</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Point estimate should be inside confidence interval&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">hi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">est</span> <span class="o">&gt;</span> <span class="n">hi</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Point estimate should be inside confidence interval&quot;</span><span class="p">)</span>
+
+        <span class="n">e_est</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_threshold</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="n">no_effect_baseline</span><span class="o">=</span><span class="n">no_effect_baseline</span><span class="p">)</span>
+        <span class="n">e_lo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_threshold</span><span class="p">(</span><span class="n">lo</span><span class="p">,</span> <span class="n">no_effect_baseline</span><span class="o">=</span><span class="n">no_effect_baseline</span><span class="p">)</span>
+        <span class="n">e_hi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_threshold</span><span class="p">(</span><span class="n">hi</span><span class="p">,</span> <span class="n">no_effect_baseline</span><span class="o">=</span><span class="n">no_effect_baseline</span><span class="p">)</span>
+
+        <span class="c1"># if CI crosses null, set its E-value to 1</span>
+        <span class="n">null_CI</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">est</span> <span class="o">&gt;</span> <span class="n">no_effect_baseline</span> <span class="ow">and</span> <span class="n">lo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">null_CI</span> <span class="o">=</span> <span class="n">lo</span> <span class="o">&lt;</span> <span class="n">no_effect_baseline</span>
+        <span class="k">if</span> <span class="n">est</span> <span class="o">&lt;</span> <span class="n">no_effect_baseline</span> <span class="ow">and</span> <span class="n">hi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">null_CI</span> <span class="o">=</span> <span class="n">hi</span> <span class="o">&gt;</span> <span class="n">no_effect_baseline</span>
+        <span class="k">if</span> <span class="n">null_CI</span><span class="p">:</span>
+            <span class="n">e_lo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">e_hi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># only report E-value for CI limit closer to null</span>
+        <span class="k">if</span> <span class="n">lo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">hi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">est</span> <span class="o">&gt;</span> <span class="n">no_effect_baseline</span><span class="p">:</span>
+                <span class="n">e_hi</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">e_lo</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;converted_estimate&quot;</span><span class="p">:</span> <span class="n">est</span><span class="p">,</span>
+            <span class="s2">&quot;converted_lower_ci&quot;</span><span class="p">:</span> <span class="n">lo</span><span class="p">,</span>
+            <span class="s2">&quot;converted_upper_ci&quot;</span><span class="p">:</span> <span class="n">hi</span><span class="p">,</span>
+            <span class="s2">&quot;evalue_estimate&quot;</span><span class="p">:</span> <span class="n">e_est</span><span class="p">,</span>
+            <span class="s2">&quot;evalue_lower_ci&quot;</span><span class="p">:</span> <span class="n">e_lo</span><span class="p">,</span>
+            <span class="s2">&quot;evalue_upper_ci&quot;</span><span class="p">:</span> <span class="n">e_hi</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">no_effect_baseline</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes E-value for single value of risk ratio.</span>
+
+<span class="sd">        :param x: risk ratio</span>
+<span class="sd">        :param no_effect_baseline: the no_effect_baseline RR to which to shift the observed estimate</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">x</span>
+            <span class="n">no_effect_baseline</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">no_effect_baseline</span>
+
+        <span class="k">if</span> <span class="n">no_effect_baseline</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">no_effect_baseline</span><span class="p">)))</span> <span class="o">/</span> <span class="n">no_effect_baseline</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ratio</span> <span class="o">=</span> <span class="n">no_effect_baseline</span> <span class="o">/</span> <span class="n">x</span>
+            <span class="k">return</span> <span class="n">ratio</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ratio</span> <span class="o">*</span> <span class="p">(</span><span class="n">ratio</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_to_smd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">est</span><span class="p">,</span> <span class="n">sd</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts estimate to standardized mean difference.</span>
+
+<span class="sd">        :param est: estimate</span>
+<span class="sd">        :param sd: residual standard deviation or standard deviation of outcome</span>
+<span class="sd">        :param delta: contrast of interest in the treatment/exposure</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">est</span> <span class="o">*</span> <span class="n">delta</span> <span class="o">/</span> <span class="n">sd</span>
+
+    <span class="k">def</span> <span class="nf">_md_to_rr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">est</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts standardized mean difference to approximate risk ratio.</span>
+
+<span class="sd">        :param est: estimate</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># see Table 2 and p.37 in https://dash.harvard.edu/bitstream/handle/1/36874927/EValue_FinalSubmission.pdf</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">0.91</span> <span class="o">*</span> <span class="n">est</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_hr_to_rr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">est</span><span class="p">,</span> <span class="n">rare</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts hazard ratio to approximate risk ratio.</span>
+
+<span class="sd">        :param est: estimate</span>
+<span class="sd">        :param rare: if outcome is rare (&lt;15%)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">rare</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Must specify whether the rare outcome assumption can be made. Use argument &quot;rare&quot; =&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rare</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">est</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">**</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">est</span><span class="p">))</span> <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">**</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">est</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="nf">_or_to_rr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">est</span><span class="p">,</span> <span class="n">rare</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts odds ratio to approximate risk ratio.</span>
+
+<span class="sd">        :param est: estimate</span>
+<span class="sd">        :param rare: if outcome is rare (&lt;15%)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">rare</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">est</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">est</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Sensitivity Analysis to Unobserved Confounding using the E-value</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Unadjusted Estimates of Treatment: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Estimate (converted to risk ratio scale): </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;converted_estimate&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Lower 95% CI (converted to risk ratio scale): </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;converted_lower_ci&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Upper 95% CI (converted to risk ratio scale): </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;converted_upper_ci&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Sensitivity Statistics: </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;E-value for point estimate: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;evalue_estimate&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;E-value for lower 95% CI: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;evalue_lower_ci&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;E-value for upper 95% CI: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;evalue_upper_ci&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">largest_obs_evalue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">benchmarking_results</span><span class="p">[</span><span class="s2">&quot;observed_covariate_e_value&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">largest_obs_cov</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">benchmarking_results</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Largest Observed Covariate E-value: </span><span class="si">{</span><span class="n">largest_obs_evalue</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">largest_obs_cov</span><span class="si">}</span><span class="s2">)</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Interpretation of results:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;evalue_lower_ci&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ci</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;evalue_upper_ci&quot;</span><span class="p">]</span>
+            <span class="n">direction</span> <span class="o">=</span> <span class="s2">&quot;decrease&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ci</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;evalue_lower_ci&quot;</span><span class="p">]</span>
+            <span class="n">direction</span> <span class="o">=</span> <span class="s2">&quot;increase&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Unmeasured confounder(s) would have to be associated with a </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;evalue_estimate&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">-fold </span><span class="si">{</span><span class="n">direction</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;in the risk of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span><span class="si">}</span><span class="s2">, and must be </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;evalue_estimate&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> times more prevalent in &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span><span class="si">}</span><span class="s2">, to explain away the observed point estimate.</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Unmeasured confounder(s) would have to be associated with a </span><span class="si">{</span><span class="n">ci</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">-fold </span><span class="si">{</span><span class="n">direction</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;in the risk of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outcome_name</span><span class="si">}</span><span class="s2">, and must be </span><span class="si">{</span><span class="n">ci</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> times more prevalent in &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span><span class="si">}</span><span class="s2">, to explain away the observed confidence interval.&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">s</span></div>
+</pre></div>
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, PyWhy contributors.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

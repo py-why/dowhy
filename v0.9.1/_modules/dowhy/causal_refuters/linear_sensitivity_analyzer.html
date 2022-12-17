@@ -1,0 +1,790 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>dowhy.causal_refuters.linear_sensitivity_analyzer &#8212; DoWhy  documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+    <img src="../../../_static/dowhy-logo-small.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../user_guide/index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../example_notebooks/nb_index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../dowhy.html">
+  API reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../contributing.html">
+  Contributing
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../code_repo.html">
+  Release notes
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+      <div class="navbar-end-item">
+        <div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.9.1
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <h1>Source code for dowhy.causal_refuters.linear_sensitivity_analyzer</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">t</span>
+
+<span class="kn">from</span> <span class="nn">dowhy.utils.api</span> <span class="kn">import</span> <span class="n">parse_state</span>
+
+
+<div class="viewcode-block" id="LinearSensitivityAnalyzer"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.linear_sensitivity_analyzer.LinearSensitivityAnalyzer">[docs]</a><span class="k">class</span> <span class="nc">LinearSensitivityAnalyzer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to perform sensitivity analysis</span>
+<span class="sd">    See: https://carloscinelli.com/files/Cinelli%20and%20Hazlett%20(2020)%20-%20Making%20Sense%20of%20Sensitivity.pdf</span>
+
+<span class="sd">    :param estimator: linear estimator of the causal model</span>
+<span class="sd">    :param data: Pandas dataframe</span>
+<span class="sd">    :param treatment_name: name of treatment</span>
+<span class="sd">     :param percent_change_estimate: It is the percentage of reduction of treatment estimate that could alter the results (default = 1)</span>
+<span class="sd">                                        if percent_change_estimate = 1, the robustness value describes the strength of association of confounders with treatment and outcome in order to reduce the estimate by 100% i.e bring it down to 0.</span>
+<span class="sd">    :param null_hypothesis_effect: assumed effect under the null hypothesis</span>
+<span class="sd">    :param confounder_increases_estimate: True implies that confounder increases the absolute value of estimate and vice versa. (Default = True)</span>
+<span class="sd">    :param benchmark_common_causes: names of variables for bounding strength of confounders</span>
+<span class="sd">    :param significance_level: confidence interval for statistical inference(default = 0.05)</span>
+<span class="sd">    :param frac_strength_treatment: strength of association between unobserved confounder and treatment compared to benchmark covariate</span>
+<span class="sd">    :param frac_strength_outcome: strength of association between unobserved confounder and outcome compared to benchmark covariate</span>
+<span class="sd">    :param common_causes_order: The order of column names in OLS regression data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">estimator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">treatment_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">percent_change_estimate</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">significance_level</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+        <span class="n">confounder_increases_estimate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">benchmark_common_causes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">null_hypothesis_effect</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">frac_strength_treatment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">frac_strength_outcome</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">common_causes_order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># original_treatment_name: : stores original variable names for labelling</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original_treatment_name</span> <span class="o">=</span> <span class="n">treatment_name</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">treatment_name</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;x&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">percent_change_estimate</span> <span class="o">=</span> <span class="n">percent_change_estimate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">significance_level</span> <span class="o">=</span> <span class="n">significance_level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">confounder_increases_estimate</span> <span class="o">=</span> <span class="n">confounder_increases_estimate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="o">=</span> <span class="n">estimator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator_model</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">null_hypothesis_effect</span> <span class="o">=</span> <span class="n">null_hypothesis_effect</span>
+
+        <span class="c1"># common_causes_map : maps the original variable names to variable names in OLS regression</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">common_causes_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">common_causes_order</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">common_causes_map</span><span class="p">[</span><span class="n">common_causes_order</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span><span class="p">)</span> <span class="o">+</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># benchmark_common_causes: stores variable names in terms of regression model variables</span>
+        <span class="n">benchmark_common_causes</span> <span class="o">=</span> <span class="n">parse_state</span><span class="p">(</span><span class="n">benchmark_common_causes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">benchmark_common_causes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># original_benchmark_covariates: stores original variable names for labelling</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original_benchmark_covariates</span> <span class="o">=</span> <span class="n">benchmark_common_causes</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">benchmark_common_causes</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">benchmark_common_causes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">common_causes_map</span><span class="p">[</span><span class="n">benchmark_common_causes</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">frac_strength_treatment</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">frac_strength_treatment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">frac_strength_treatment</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">frac_strength_outcome</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">frac_strength_outcome</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">frac_strength_outcome</span><span class="p">)</span>
+
+        <span class="c1"># estimate: estimate of regression</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimate</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># degree_of_freedom: degree of freedom of error in regression</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">degree_of_freedom</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># standard_error: standard error in regression</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">standard_error</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># t_stats: Treatment coefficient t-value - measures how many standard errors the estimate is away from zero.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_stats</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># partial_f2: value to determine if a regression model and a nested version of it have a statistically significant difference between them</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partial_f2</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># r2tu_w: partial R^2  of unobserved confounder &quot;u&quot; with treatment &quot;t&quot;, after conditioning on observed covariates &quot;w&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r2tu_w</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># r2yu_tw: partial R^2  of unobserved confounder &quot;u&quot; with outcome &quot;y&quot;, after conditioning on observed covariates &quot;w&quot; and treatment &quot;t&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r2yu_tw</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># r2twj_w: partial R^2 of observed covariate wj with treatment &quot;t&quot;, after conditioning on observed covariates &quot;w&quot; excluding wj</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r2twj_w</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># r2ywj_tw:  partial R^2 of observed covariate wj with outcome &quot;y&quot;, after conditioning on observed covariates &quot;w&quot; (excluding wj) and treatment &quot;t&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r2ywj_tw</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># benchmarking_results: dataframe containing information about bounds and bias adjusted terms</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">benchmarking_results</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># stats: dictionary containing information like robustness value, partial R^2, estimate, standard error , degree of freedom, partial f^2, t-statistic</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stats</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LinearSensitivityAnalyzer.treatment_regression"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.linear_sensitivity_analyzer.LinearSensitivityAnalyzer.treatment_regression">[docs]</a>    <span class="k">def</span> <span class="nf">treatment_regression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function to perform regression with treatment as outcome</span>
+
+<span class="sd">        :returns: new OLS regression model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">_observed_common_causes</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">treatment_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">_treatment</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">add_constant</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+        <span class="n">features</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">common_causes_map</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">OLS</span><span class="p">(</span><span class="n">treatment_df</span><span class="p">,</span> <span class="n">features</span><span class="p">)</span>
+        <span class="n">estimator_model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">estimator_model</span></div>
+
+<div class="viewcode-block" id="LinearSensitivityAnalyzer.partial_r2_func"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.linear_sensitivity_analyzer.LinearSensitivityAnalyzer.partial_r2_func">[docs]</a>    <span class="k">def</span> <span class="nf">partial_r2_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">treatment</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the partial R^2 of regression model</span>
+
+<span class="sd">        :param estimator_model: Linear regression model</span>
+<span class="sd">        :param treatment: treatment name</span>
+
+<span class="sd">        :returns: partial R^2 value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">estimate</span> <span class="o">=</span> <span class="n">estimator_model</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="n">treatment</span><span class="p">]</span>
+        <span class="n">degree_of_freedom</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">estimator_model</span><span class="o">.</span><span class="n">df_resid</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">estimate</span><span class="p">):</span>  <span class="c1"># for single covariate</span>
+            <span class="n">t_stats</span> <span class="o">=</span> <span class="n">estimator_model</span><span class="o">.</span><span class="n">tvalues</span><span class="p">[</span><span class="n">treatment</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">t_stats</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">t_stats</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">degree_of_freedom</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># compute for a group of covariates</span>
+            <span class="n">covariance_matrix</span> <span class="o">=</span> <span class="n">estimator_model</span><span class="o">.</span><span class="n">cov_params</span><span class="p">()</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">treatment</span><span class="p">,</span> <span class="p">:][</span><span class="n">treatment</span><span class="p">]</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>  <span class="c1"># number of parameters in model</span>
+            <span class="n">f_stat</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">covariance_matrix</span><span class="o">.</span><span class="n">values</span><span class="p">)),</span> <span class="n">estimate</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">f_stat</span> <span class="o">*</span> <span class="n">n</span> <span class="o">/</span> <span class="p">(</span><span class="n">f_stat</span> <span class="o">*</span> <span class="n">n</span> <span class="o">+</span> <span class="n">degree_of_freedom</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LinearSensitivityAnalyzer.robustness_value_func"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.linear_sensitivity_analyzer.LinearSensitivityAnalyzer.robustness_value_func">[docs]</a>    <span class="k">def</span> <span class="nf">robustness_value_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function to calculate the robustness value.</span>
+<span class="sd">        It is the minimum strength of association that confounders must have with treatment and outcome to change conclusions.</span>
+<span class="sd">        Robustness value describes how strong the association must be in order to reduce the estimated effect by (100 * percent_change_estimate)%.</span>
+<span class="sd">        Robustness value close to 1 means the treatment effect can handle strong confounders explaining  almost all residual variation of the treatment and the outcome.</span>
+<span class="sd">        Robustness value close to 0 means that even very weak confounders can also change the results.</span>
+
+<span class="sd">        :param alpha: confidence interval (default = 1)</span>
+
+<span class="sd">        :returns: robustness value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">partial_cohen_f</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">t_stats</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">degree_of_freedom</span><span class="p">)</span>
+        <span class="p">)</span>  <span class="c1"># partial f of treatment t with outcome y. f = t_val/sqrt(dof)</span>
+        <span class="n">f_q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">percent_change_estimate</span> <span class="o">*</span> <span class="n">partial_cohen_f</span>
+        <span class="n">t_alpha_df_1</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span>
+            <span class="n">alpha</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">degree_of_freedom</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="p">)</span>  <span class="c1"># t-value threshold with alpha significance level and dof-1 degrees of freedom</span>
+        <span class="n">f_critical</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">t_alpha_df_1</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">degree_of_freedom</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">f_adjusted</span> <span class="o">=</span> <span class="n">f_q</span> <span class="o">-</span> <span class="n">f_critical</span>
+
+        <span class="k">if</span> <span class="n">f_adjusted</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">r_value</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">r_value</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">f_adjusted</span><span class="o">**</span><span class="mi">4</span> <span class="o">+</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">f_adjusted</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">-</span> <span class="n">f_adjusted</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">f_adjusted</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">f_q</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">f_critical</span><span class="p">:</span>
+            <span class="n">r_value</span> <span class="o">=</span> <span class="p">(</span><span class="n">f_q</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">f_critical</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">f_q</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">r_value</span></div>
+
+<div class="viewcode-block" id="LinearSensitivityAnalyzer.compute_bias_adjusted"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.linear_sensitivity_analyzer.LinearSensitivityAnalyzer.compute_bias_adjusted">[docs]</a>    <span class="k">def</span> <span class="nf">compute_bias_adjusted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r2tu_w</span><span class="p">,</span> <span class="n">r2yu_tw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the bias adjusted estimate, standard error, t-value,  partial R2, confidence intervals</span>
+
+<span class="sd">        :param r2tu_w: partial r^2 from regressing unobserved confounder u on treatment t after conditioning on observed covariates w</span>
+<span class="sd">        :param r2yu_tw: partial r^2 from regressing unobserved confounder u on outcome y after conditioning on observed covariates w and treatment t</span>
+
+<span class="sd">        :returns: Python dictionary with information about partial R^2 of confounders with treatment and outcome and bias adjusted variables</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">bias_factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">r2yu_tw</span> <span class="o">*</span> <span class="n">r2tu_w</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">r2tu_w</span><span class="p">))</span>
+        <span class="n">bias</span> <span class="o">=</span> <span class="n">bias_factor</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">standard_error</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">degree_of_freedom</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">confounder_increases_estimate</span><span class="p">:</span>
+            <span class="n">bias_adjusted_estimate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="p">)</span> <span class="o">-</span> <span class="n">bias</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bias_adjusted_estimate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="p">)</span> <span class="o">+</span> <span class="n">bias</span><span class="p">)</span>
+
+        <span class="n">bias_adjusted_se</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">r2yu_tw</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">r2tu_w</span><span class="p">))</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_error</span>
+            <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">degree_of_freedom</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">degree_of_freedom</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="p">)</span>
+
+        <span class="n">bias_adjusted_t</span> <span class="o">=</span> <span class="p">(</span><span class="n">bias_adjusted_estimate</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">null_hypothesis_effect</span><span class="p">)</span> <span class="o">/</span> <span class="n">bias_adjusted_se</span>
+
+        <span class="n">bias_adjusted_partial_r2</span> <span class="o">=</span> <span class="n">bias_adjusted_t</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="n">bias_adjusted_t</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">degree_of_freedom</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>  <span class="c1"># partial r2 formula used with new t value and dof - 1</span>
+
+        <span class="n">num_se</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">significance_level</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">degree_of_freedom</span>
+        <span class="p">)</span>  <span class="c1"># Number of standard errors within Confidence Interval</span>
+
+        <span class="n">bias_adjusted_upper_CI</span> <span class="o">=</span> <span class="n">bias_adjusted_estimate</span> <span class="o">-</span> <span class="n">num_se</span> <span class="o">*</span> <span class="n">bias_adjusted_se</span>
+        <span class="n">bias_adjusted_lower_CI</span> <span class="o">=</span> <span class="n">bias_adjusted_estimate</span> <span class="o">+</span> <span class="n">num_se</span> <span class="o">*</span> <span class="n">bias_adjusted_se</span>
+
+        <span class="n">benchmarking_results</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;r2tu_w&quot;</span><span class="p">:</span> <span class="n">r2tu_w</span><span class="p">,</span>
+            <span class="s2">&quot;r2yu_tw&quot;</span><span class="p">:</span> <span class="n">r2yu_tw</span><span class="p">,</span>
+            <span class="s2">&quot;bias_adjusted_estimate&quot;</span><span class="p">:</span> <span class="n">bias_adjusted_estimate</span><span class="p">,</span>
+            <span class="s2">&quot;bias_adjusted_se&quot;</span><span class="p">:</span> <span class="n">bias_adjusted_se</span><span class="p">,</span>
+            <span class="s2">&quot;bias_adjusted_t&quot;</span><span class="p">:</span> <span class="n">bias_adjusted_t</span><span class="p">,</span>
+            <span class="s2">&quot;bias_adjusted_lower_CI&quot;</span><span class="p">:</span> <span class="n">bias_adjusted_lower_CI</span><span class="p">,</span>
+            <span class="s2">&quot;bias_adjusted_upper_CI&quot;</span><span class="p">:</span> <span class="n">bias_adjusted_upper_CI</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">benchmarking_results</span></div>
+
+<div class="viewcode-block" id="LinearSensitivityAnalyzer.check_sensitivity"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.linear_sensitivity_analyzer.LinearSensitivityAnalyzer.check_sensitivity">[docs]</a>    <span class="k">def</span> <span class="nf">check_sensitivity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function to perform sensitivity analysis.</span>
+<span class="sd">        :param plot: plot = True generates a plot of point estimate and the variations with respect to unobserved confounding.</span>
+<span class="sd">                     plot = False overrides the setting</span>
+
+<span class="sd">        :returns: instance of LinearSensitivityAnalyzer class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">standard_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator_model</span><span class="o">.</span><span class="n">bse</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">degree_of_freedom</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator_model</span><span class="o">.</span><span class="n">df_resid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator_model</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_stats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator_model</span><span class="o">.</span><span class="n">tvalues</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># partial R^2 (r2yt_w) is the proportion of variation in outcome uniquely explained by treatment</span>
+        <span class="n">partial_r2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partial_r2_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">treatment_name</span><span class="p">)</span>
+        <span class="n">RVq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">robustness_value_func</span><span class="p">()</span>
+        <span class="n">RV_qalpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">robustness_value_func</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">significance_level</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">confounder_increases_estimate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">null_hypothesis_effect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">percent_change_estimate</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">null_hypothesis_effect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">percent_change_estimate</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_stats</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimate</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">null_hypothesis_effect</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partial_f2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_stats</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">degree_of_freedom</span>
+
+        <span class="c1"># build a new regression model by considering treatment variables as outcome</span>
+        <span class="n">treatment_linear_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">treatment_regression</span><span class="p">()</span>
+
+        <span class="c1"># r2twj_w is partial R^2 of covariate wj with treatment &quot;t&quot;, after conditioning on covariates w(excluding wj)</span>
+        <span class="c1"># r2ywj_tw is partial R^2 of covariate wj with outcome &quot;y&quot;, after conditioning on covariates w(excluding wj) and treatment &quot;t&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r2twj_w</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r2ywj_tw</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">covariate</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">benchmark_common_causes</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">r2ywj_tw</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">partial_r2_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator_model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">r2twj_w</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">partial_r2_func</span><span class="p">(</span><span class="n">treatment_linear_model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_common_causes</span><span class="p">)):</span>
+            <span class="n">r2twj_w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r2twj_w</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">r2ywj_tw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r2ywj_tw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="c1"># r2tu_w is the partial r^2 from regressing u on t after conditioning on w</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">r2tu_w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frac_strength_treatment</span> <span class="o">*</span> <span class="p">(</span><span class="n">r2twj_w</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">r2twj_w</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">val</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">r2tu_w</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;r2tu_w can not be &gt;= 1. Try a lower frac_strength_treatment value&quot;</span><span class="p">)</span>
+
+            <span class="n">r2uwj_wt</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">frac_strength_treatment</span>
+                <span class="o">*</span> <span class="p">(</span><span class="n">r2twj_w</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+                <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">frac_strength_treatment</span> <span class="o">*</span> <span class="n">r2twj_w</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">r2twj_w</span><span class="p">))</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">val</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">r2uwj_wt</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;r2uwj_wt can not be &gt;= 1. Try a lower frac_strength_treatment value&quot;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">r2yu_tw</span> <span class="o">=</span> <span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frac_strength_outcome</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">r2uwj_wt</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">r2uwj_wt</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="n">r2ywj_tw</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">r2ywj_tw</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">val</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">r2yu_tw</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">r2yu_tw</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">r2yu_tw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">r2yu_tw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;Warning: r2yu_tw can not be &gt; 1. Try a lower frac_strength_treatment. Setting r2yu_tw to 1&quot;</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Compute bias adjusted terms</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">benchmarking_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_bias_adjusted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">r2tu_w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">r2yu_tw</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">plot</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stats</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;estimate&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="p">,</span>
+            <span class="s2">&quot;standard_error&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_error</span><span class="p">,</span>
+            <span class="s2">&quot;degree of freedom&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">degree_of_freedom</span><span class="p">,</span>
+            <span class="s2">&quot;t_statistic&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_stats</span><span class="p">,</span>
+            <span class="s2">&quot;r2yt_w&quot;</span><span class="p">:</span> <span class="n">partial_r2</span><span class="p">,</span>
+            <span class="s2">&quot;partial_f2&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">partial_f2</span><span class="p">,</span>
+            <span class="s2">&quot;robustness_value&quot;</span><span class="p">:</span> <span class="n">RVq</span><span class="p">,</span>
+            <span class="s2">&quot;robustness_value_alpha&quot;</span><span class="p">:</span> <span class="n">RV_qalpha</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">benchmarking_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmarking_results</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="LinearSensitivityAnalyzer.plot_estimate"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.linear_sensitivity_analyzer.LinearSensitivityAnalyzer.plot_estimate">[docs]</a>    <span class="k">def</span> <span class="nf">plot_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r2tu_w</span><span class="p">,</span> <span class="n">r2yu_tw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the contours, threshold line and bounds for plotting estimates.</span>
+<span class="sd">        Contour lines (z - axis) correspond to the adjusted estimate values for different values of r2tu_w (x) and r2yu_tw (y).</span>
+<span class="sd">        :param r2tu_w: hypothetical partial R^2 of confounder with treatment(x - axis)</span>
+<span class="sd">        :param r2yu_tw: hypothetical partial R^2 of confounder with outcome(y - axis)</span>
+
+<span class="sd">        :returns:</span>
+<span class="sd">        contour_values : values of contour lines for the plot</span>
+<span class="sd">        critical_estimate : threshold point</span>
+<span class="sd">        estimate_bounds : estimate values for unobserved confounders (bias adjusted estimates)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">critical_estimate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">null_hypothesis_effect</span>
+        <span class="n">contour_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">r2yu_tw</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">r2tu_w</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r2yu_tw</span><span class="p">)):</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">r2yu_tw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r2tu_w</span><span class="p">)):</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">r2tu_w</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">benchmarking_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_bias_adjusted</span><span class="p">(</span><span class="n">r2tu_w</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">r2yu_tw</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+                <span class="n">estimate</span> <span class="o">=</span> <span class="n">benchmarking_results</span><span class="p">[</span><span class="s2">&quot;bias_adjusted_estimate&quot;</span><span class="p">]</span>
+                <span class="n">contour_values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">estimate</span>
+
+        <span class="n">estimate_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">benchmarking_results</span><span class="p">[</span><span class="s2">&quot;bias_adjusted_estimate&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">contour_values</span><span class="p">,</span> <span class="n">critical_estimate</span><span class="p">,</span> <span class="n">estimate_bounds</span></div>
+
+<div class="viewcode-block" id="LinearSensitivityAnalyzer.plot_t"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.linear_sensitivity_analyzer.LinearSensitivityAnalyzer.plot_t">[docs]</a>    <span class="k">def</span> <span class="nf">plot_t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r2tu_w</span><span class="p">,</span> <span class="n">r2yu_tw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the contours, threshold line and bounds for plotting t.</span>
+<span class="sd">        Contour lines (z - axis) correspond to the adjusted t values for different values of r2tu_w (x) and r2yu_tw (y).</span>
+<span class="sd">        :param r2tu_w: hypothetical partial R^2 of confounder with treatment(x - axis)</span>
+<span class="sd">        :param r2yu_tw: hypothetical partial R^2 of confounder with outcome(y - axis)</span>
+
+<span class="sd">        :returns:</span>
+<span class="sd">        contour_values : values of contour lines for the plot</span>
+<span class="sd">        critical_t : threshold point</span>
+<span class="sd">        t_bounds : t-value for unobserved confounders (bias adjusted t values)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">t_alpha_df_1</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">significance_level</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">degree_of_freedom</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="p">)</span>  <span class="c1"># t-value threshold with alpha significance level and dof-1 degrees of freedom</span>
+        <span class="n">critical_t</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">t_alpha_df_1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t_stats</span><span class="p">)</span>
+
+        <span class="n">contour_values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">r2tu_w</span><span class="p">:</span>
+            <span class="n">contour</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">r2yu_tw</span><span class="p">:</span>
+                <span class="n">benchmarking_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_bias_adjusted</span><span class="p">(</span><span class="n">r2tu_w</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">r2yu_tw</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+                <span class="n">t_value</span> <span class="o">=</span> <span class="n">benchmarking_results</span><span class="p">[</span><span class="s2">&quot;bias_adjusted_t&quot;</span><span class="p">]</span>
+                <span class="n">contour</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t_value</span><span class="p">)</span>
+            <span class="n">contour_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">contour</span><span class="p">)</span>
+
+        <span class="n">t_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">benchmarking_results</span><span class="p">[</span><span class="s2">&quot;bias_adjusted_t&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">contour_values</span><span class="p">,</span> <span class="n">critical_t</span><span class="p">,</span> <span class="n">t_bounds</span></div>
+
+<div class="viewcode-block" id="LinearSensitivityAnalyzer.plot"><a class="viewcode-back" href="../../../dowhy.causal_refuters.html#dowhy.causal_refuters.linear_sensitivity_analyzer.LinearSensitivityAnalyzer.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;estimate&quot;</span><span class="p">,</span>
+        <span class="n">critical_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">x_limit</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+        <span class="n">y_limit</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+        <span class="n">num_points_per_contour</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+        <span class="n">plot_size</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
+        <span class="n">contours_color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span>
+        <span class="n">critical_contour_color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="n">label_fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
+        <span class="n">contour_linewidths</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span>
+        <span class="n">contour_linestyles</span><span class="o">=</span><span class="s2">&quot;solid&quot;</span><span class="p">,</span>
+        <span class="n">contours_label_color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+        <span class="n">critical_label_color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="n">unadjusted_estimate_marker</span><span class="o">=</span><span class="s2">&quot;D&quot;</span><span class="p">,</span>
+        <span class="n">unadjusted_estimate_color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+        <span class="n">adjusted_estimate_marker</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">,</span>
+        <span class="n">adjusted_estimate_color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="n">legend_position</span><span class="o">=</span><span class="p">(</span><span class="mf">1.6</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">),</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots and summarizes the sensitivity bounds as a contour plot, as they vary with the partial R^2 of the unobserved confounder(s) with the treatment and the outcome</span>
+<span class="sd">        Two types of plots can be generated, based on adjusted estimates or adjusted t-values</span>
+<span class="sd">        X-axis: Partial R^2 of treatment and unobserved confounder(s)</span>
+<span class="sd">        Y-axis: Partial R^2 of outcome and unobserved confounder(s)</span>
+<span class="sd">        We also plot bounds on the partial R^2 of the unobserved confounders obtained from observed covariates</span>
+
+<span class="sd">        :param plot_type: &quot;estimate&quot; or &quot;t-value&quot;</span>
+<span class="sd">        :param critical_value: special reference value of the estimate or t-value that will be highlighted in the plot</span>
+<span class="sd">        :param x_limit: plot&#39;s maximum x_axis value (default = 0.8)</span>
+<span class="sd">        :param y_limit: plot&#39;s minimum y_axis value (default = 0.8)</span>
+<span class="sd">        :param num_points_per_contour: number of points to calculate and plot each contour line (default = 200)</span>
+<span class="sd">        :param plot_size: tuple denoting the size of the plot (default = (7,7))</span>
+<span class="sd">        :param contours_color: color of contour line (default = blue)</span>
+<span class="sd">                               String or array. If array, lines will be plotted with the specific color in ascending order.</span>
+<span class="sd">        :param critical_contour_color: color of threshold line (default = red)</span>
+<span class="sd">        :param label_fontsize: fontsize for labelling contours (default = 9)</span>
+<span class="sd">        :param contour_linewidths: linewidths for contours (default = 0.75)</span>
+<span class="sd">        :param contour_linestyles: linestyles for contours (default = &quot;solid&quot;)</span>
+<span class="sd">                                   See : https://matplotlib.org/3.5.0/gallery/lines_bars_and_markers/linestyles.html for more examples</span>
+<span class="sd">        :param contours_label_color: color of contour line label (default = black)</span>
+<span class="sd">        :param critical_label_color: color of threshold line label (default = red)</span>
+<span class="sd">        :param unadjusted_estimate_marker: marker type for unadjusted estimate in the plot (default = &#39;D&#39;)</span>
+<span class="sd">                                           See: https://matplotlib.org/stable/api/markers_api.html</span>
+<span class="sd">        :parm unadjusted_estimate_color: marker color for unadjusted estimate in the plot (default = &quot;black&quot;)</span>
+<span class="sd">        :param adjusted_estimate_marker: marker type for bias adjusted estimates in the plot (default = &#39;^&#39;)</span>
+<span class="sd">        :parm adjusted_estimate_color: marker color for bias adjusted estimates in the plot (default = &quot;red&quot;)</span>
+<span class="sd">        :param legend_position:tuple denoting the position of the legend (default = (1.6, 0.6))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Plotting the contour plot</span>
+        <span class="k">if</span> <span class="n">plot_type</span> <span class="o">==</span> <span class="s2">&quot;estimate&quot;</span><span class="p">:</span>
+            <span class="n">critical_value</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># default value of estimate</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">critical_value</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># default t-value (usual approx for 95% CI)</span>
+
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">plot_size</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Sensitivity contour plot of </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">plot_type</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Partial R^2 of confounder with treatment&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Partial R^2 of confounder with outcome&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">r2tu_w</span><span class="p">)):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r2tu_w</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r2yu_tw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mf">0.8</span> <span class="ow">or</span> <span class="n">y</span> <span class="o">&gt;</span> <span class="mf">0.8</span><span class="p">:</span>
+                <span class="n">x_limit</span> <span class="o">=</span> <span class="mf">0.99</span>
+                <span class="n">y_limit</span> <span class="o">=</span> <span class="mf">0.99</span>
+                <span class="k">break</span>
+
+        <span class="n">r2tu_w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">x_limit</span><span class="p">,</span> <span class="n">x_limit</span> <span class="o">/</span> <span class="n">num_points_per_contour</span><span class="p">)</span>
+        <span class="n">r2yu_tw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y_limit</span><span class="p">,</span> <span class="n">y_limit</span> <span class="o">/</span> <span class="n">num_points_per_contour</span><span class="p">)</span>
+
+        <span class="n">unadjusted_point_estimate</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">plot_type</span> <span class="o">==</span> <span class="s2">&quot;estimate&quot;</span><span class="p">:</span>
+            <span class="n">contour_values</span><span class="p">,</span> <span class="n">critical_value</span><span class="p">,</span> <span class="n">bound_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_estimate</span><span class="p">(</span><span class="n">r2tu_w</span><span class="p">,</span> <span class="n">r2yu_tw</span><span class="p">)</span>
+            <span class="n">unadjusted_estimate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate</span>
+            <span class="n">unadjusted_point_estimate</span> <span class="o">=</span> <span class="n">unadjusted_estimate</span>
+        <span class="k">elif</span> <span class="n">plot_type</span> <span class="o">==</span> <span class="s2">&quot;t-value&quot;</span><span class="p">:</span>
+            <span class="n">contour_values</span><span class="p">,</span> <span class="n">critical_value</span><span class="p">,</span> <span class="n">bound_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_t</span><span class="p">(</span><span class="n">r2tu_w</span><span class="p">,</span> <span class="n">r2yu_tw</span><span class="p">)</span>
+            <span class="n">unadjusted_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_stats</span>
+            <span class="n">unadjusted_point_estimate</span> <span class="o">=</span> <span class="n">unadjusted_t</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Current plotting method only supports &#39;estimate&#39; and &#39;t-value&#39; &quot;</span><span class="p">)</span>
+
+        <span class="c1"># Adding contours</span>
+        <span class="n">contour_plot</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span>
+            <span class="n">r2tu_w</span><span class="p">,</span>
+            <span class="n">r2yu_tw</span><span class="p">,</span>
+            <span class="n">contour_values</span><span class="p">,</span>
+            <span class="n">colors</span><span class="o">=</span><span class="n">contours_color</span><span class="p">,</span>
+            <span class="n">linewidths</span><span class="o">=</span><span class="n">contour_linewidths</span><span class="p">,</span>
+            <span class="n">linestyles</span><span class="o">=</span><span class="n">contour_linestyles</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">clabel</span><span class="p">(</span><span class="n">contour_plot</span><span class="p">,</span> <span class="n">inline</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">label_fontsize</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="n">contours_label_color</span><span class="p">)</span>
+
+        <span class="c1"># Adding threshold contour line</span>
+        <span class="n">contour_plot</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span>
+            <span class="n">r2tu_w</span><span class="p">,</span>
+            <span class="n">r2yu_tw</span><span class="p">,</span>
+            <span class="n">contour_values</span><span class="p">,</span>
+            <span class="n">colors</span><span class="o">=</span><span class="n">critical_contour_color</span><span class="p">,</span>
+            <span class="n">linewidths</span><span class="o">=</span><span class="n">contour_linewidths</span><span class="p">,</span>
+            <span class="n">levels</span><span class="o">=</span><span class="p">[</span><span class="n">critical_value</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">clabel</span><span class="p">(</span><span class="n">contour_plot</span><span class="p">,</span> <span class="p">[</span><span class="n">critical_value</span><span class="p">],</span> <span class="n">inline</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">label_fontsize</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="n">critical_label_color</span><span class="p">)</span>
+
+        <span class="c1"># Adding unadjusted point estimate</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">marker</span><span class="o">=</span><span class="n">unadjusted_estimate_marker</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">unadjusted_estimate_color</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Unadjusted(</span><span class="si">{:1.2f}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">unadjusted_point_estimate</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Adding bounds to partial R^2 values for given strength of confounders</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frac_strength_treatment</span><span class="p">)):</span>
+            <span class="n">frac_strength_treatment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frac_strength_treatment</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">frac_strength_outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frac_strength_outcome</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">frac_strength_treatment</span> <span class="o">==</span> <span class="n">frac_strength_outcome</span><span class="p">:</span>
+                <span class="n">signs</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">frac_strength_treatment</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">signs</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">frac_strength_treatment</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">frac_strength_outcome</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s2">&quot;  &quot;</span>
+                <span class="o">+</span> <span class="n">signs</span>
+                <span class="o">+</span> <span class="s2">&quot; X &quot;</span>
+                <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original_benchmark_covariates</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s2">&quot; (</span><span class="si">{:1.2f}</span><span class="s2">) &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bound_values</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">r2tu_w</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">r2yu_tw</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">adjusted_estimate_color</span><span class="p">,</span>
+                <span class="n">marker</span><span class="o">=</span><span class="n">adjusted_estimate_marker</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">r2tu_w</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.005</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">r2yu_tw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.005</span><span class="p">))</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="n">legend_position</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Sensitivity Analysis to Unobserved Confounding using R^2 paramterization</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Unadjusted Estimates of Treatment </span><span class="si">{0}</span><span class="s2"> :</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original_treatment_name</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Coefficient Estimate : </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Degree of Freedom : </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">degree_of_freedom</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Standard Error : </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">standard_error</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;t-value : </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t_stats</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;F^2 value : </span><span class="si">{0}</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">partial_f2</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Sensitivity Statistics : </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Partial R2 of treatment with outcome : </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;r2yt_w&quot;</span><span class="p">])</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Robustness Value : </span><span class="si">{0}</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;robustness_value&quot;</span><span class="p">])</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Interpretation of results :</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;Any confounder explaining less than </span><span class="si">{0}</span><span class="s2">% percent of the residual variance of both the treatment and the outcome would not be strong enough to explain away the observed effect i.e bring down the estimate to 0 </span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;robustness_value&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;For a significance level of </span><span class="si">{0}</span><span class="s2">%, any confounder explaining more than </span><span class="si">{1}</span><span class="s2">% percent of the residual variance of both the treatment and the outcome would be strong enough to make the estimated effect not &#39;statistically significant&#39;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">significance_level</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;robustness_value_alpha&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;If confounders explained 100</span><span class="si">% o</span><span class="s2">f the residual variance of the outcome, they would need to explain at least </span><span class="si">{0}% o</span><span class="s2">f the residual variance of the treatment to bring down the estimated effect to 0</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;r2yt_w&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">s</span></div>
+</pre></div>
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, PyWhy contributors.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

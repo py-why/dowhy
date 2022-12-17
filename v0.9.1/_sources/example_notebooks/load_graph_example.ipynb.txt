@@ -1,0 +1,193 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Different ways to load an input graph\n",
+    "\n",
+    "We recommend using the GML graph format to load a graph. You can also use the DOT format, which requires additional dependencies (either pydot or pygraphviz). \n",
+    "\n",
+    "DoWhy supports both loading a graph as a string, or as a file (with the extensions 'gml' or 'dot').\n",
+    "\n",
+    "Below is an example showing the different ways of loading the same graph. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import os, sys\n",
+    "import random\n",
+    "sys.path.append(os.path.abspath(\"../../../\"))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "\n",
+    "import dowhy\n",
+    "from dowhy import CausalModel\n",
+    "from IPython.display import Image, display"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## I. Generating dummy data\n",
+    "We generate some dummy data for three variables: X, Y and Z. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "z=[i for i in range(10)]\n",
+    "random.shuffle(z)\n",
+    "df = pd.DataFrame(data = {'Z': z, 'X': range(0,10), 'Y': range(0,100,10)})\n",
+    "df"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## II. Loading GML or DOT graphs\n",
+    "### GML format"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# With GML string\n",
+    "model=CausalModel(\n",
+    "        data = df,\n",
+    "        treatment='X',\n",
+    "        outcome='Y',\n",
+    "        graph=\"\"\"graph[directed 1 node[id \"Z\" label \"Z\"]  \n",
+    "                    node[id \"X\" label \"X\"]\n",
+    "                    node[id \"Y\" label \"Y\"]      \n",
+    "                    edge[source \"Z\" target \"X\"]    \n",
+    "                    edge[source \"Z\" target \"Y\"]     \n",
+    "                    edge[source \"X\" target \"Y\"]]\"\"\"\n",
+    "                    \n",
+    "        )\n",
+    "model.view_model()\n",
+    "\n",
+    "\n",
+    "display(Image(filename=\"causal_model.png\"))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# With GML file\n",
+    "model=CausalModel(\n",
+    "        data = df,\n",
+    "        treatment='X',\n",
+    "        outcome='Y',\n",
+    "        graph=\"../example_graphs/simple_graph_example.gml\"\n",
+    "        )\n",
+    "model.view_model()\n",
+    "\n",
+    "\n",
+    "display(Image(filename=\"causal_model.png\"))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### DOT format"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# With DOT string\n",
+    "model=CausalModel(\n",
+    "        data = df,\n",
+    "        treatment='X',\n",
+    "        outcome='Y',\n",
+    "        graph=\"digraph {Z -> X;Z -> Y;X -> Y;}\"\n",
+    "        )\n",
+    "model.view_model()\n",
+    "\n",
+    "from IPython.display import Image, display\n",
+    "display(Image(filename=\"causal_model.png\"))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# With DOT file\n",
+    "model=CausalModel(\n",
+    "        data = df,\n",
+    "        treatment='X',\n",
+    "        outcome='Y',\n",
+    "        graph=\"../example_graphs/simple_graph_example.dot\"\n",
+    "        )\n",
+    "model.view_model()\n",
+    "\n",
+    "\n",
+    "display(Image(filename=\"causal_model.png\"))"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.5"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": false,
+   "sideBar": true,
+   "skip_h1_title": true,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
