@@ -18,6 +18,11 @@ class PredictionAlgorithm(pl.LightningModule):
         self.betas = betas
         self.momentum = momentum
 
+        # Check if the optimizer is currently supported
+        if self.optimizer not in ["Adam", "SGD"]:
+            error_msg = self.optimizer + " is not implemented currently. Try Adam or SGD."
+            raise Exception(error_msg)
+
     def training_step(self, train_batch, batch_idx):
         """
         Activate the training loop for the pl.LightningModule.

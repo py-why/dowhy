@@ -177,7 +177,7 @@ class CACM(PredictionAlgorithm):
                     tensors_list = []
                     for attr in overall_label_attr_vindices[y_val]:
                         attrs_list = []
-                        if overall_label_attr_vindices[y_val][attr] is not []:
+                        if overall_label_attr_vindices[y_val][attr] != []:
                             for il_ind, indices_list in enumerate(overall_label_attr_vindices[y_val][attr]):
                                 attrs_list.append(
                                     classifs[overall_label_attr_eindices[y_val][attr][il_ind]][indices_list]
