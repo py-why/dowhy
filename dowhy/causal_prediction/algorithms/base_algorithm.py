@@ -8,6 +8,13 @@ class PredictionAlgorithm(pl.LightningModule):
         """
         This class implements the default methods for a Pytorch lightning module `pl.LightningModule`.
         Its methods are called when the `fit()` method is called. To know more about these methods, refer to https://pytorch-lightning.readthedocs.io/en/stable/common/lightning_module.html.
+
+        :param model: Neural network modules used for training
+        :param optimizer: Optimization algorithm used for training. Currently supports "Adam" and "SGD".
+        :param lr: Value of learning rate
+        :param weight_decay: Value of weight decay for optimizer
+        :param betas: Adam configuration parameters (beta1, beta2), exponential decay rate for the first moment and second-moment estimates, respectively.
+        :param momentum: Value of momentum for SGD optimzer
         """
         super().__init__()
 
