@@ -217,7 +217,7 @@ class Econml(CausalEstimator):
         return estimator_class
 
     def estimate_effect(
-        self, data: pd.DataFrame, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+        self, data: pd.DataFrame, treatment_name: List[str], treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
     ):
         """
         data: dataframe containing the data on which treatment effect is to be estimated.
@@ -260,6 +260,7 @@ class Econml(CausalEstimator):
 
         estimate = CausalEstimate(
             data=data,
+            treatment_name=treatment_name,
             estimate=ate,
             control_value=control_value,
             treatment_value=treatment_value,
@@ -273,7 +274,7 @@ class Econml(CausalEstimator):
         estimate.add_estimator(self)
         return estimate
 
-    def _estimate_confidence_intervals(self, confidence_level=None, method=None):
+    def _estimate_confidence_intervals(self, treatment_name=None, confidence_level=None, method=None):
         """Returns None if the confidence interval has not been calculated."""
         return self.effect_intervals
 
@@ -360,7 +361,7 @@ class Econml(CausalEstimator):
 
         return self.apply_multitreatment(df, effect_inference_fun, *args, **kwargs)
 
-    def effect_tt(self, df: pd.DataFrame, *args, **kwargs):
+    def effect_tt(self, df: pd.DataFrame, treatment_name, treatment_value, *args, **kwargs):
         """
         Effect of the actual treatment that was applied to each unit
         ("effect of Treatment on the Treated")
@@ -372,8 +373,8 @@ class Econml(CausalEstimator):
         eff = self.effect(df, *args, **kwargs).reshape((len(df), len(self._treatment_value)))
 
         out = np.zeros(len(df))
-        treatment_value = parse_state(self._treatment_value)
-        treatment_name = parse_state(self._treatment_name)[0]
+        treatment_value = parse_state(treatment_value)
+        treatment_name = parse_state(treatment_name)[0]
 
         eff = np.reshape(eff, (len(df), len(treatment_value)))
 

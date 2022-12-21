@@ -232,7 +232,7 @@ class TestEconMLEstimator:
             },
         )
 
-        est_test = est_2.estimator.effect_tt(test_data)
+        est_test = est_2.estimator.effect_tt(test_data, ["T"], [1, 2])
 
         est_error = (est_test - test_data["T"].apply(lambda x: impact[x]).values).abs().max()
         assert est_error < 0.03

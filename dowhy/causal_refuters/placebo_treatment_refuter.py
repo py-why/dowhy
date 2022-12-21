@@ -161,6 +161,7 @@ def _refute_once(
     )
     new_effect = new_estimator.estimate_effect(
         new_data,
+        treatment_name=target_estimand.treatment_variable,
         control_value=estimate.control_value,
         treatment_value=estimate.treatment_value,
         target_units=estimate.estimator._target_units,
@@ -252,6 +253,7 @@ def refute_placebo_treatment(
     # relationship between the treatment and the outcome.
     dummy_estimator = CausalEstimate(
         data=data,
+        treatment_name=estimate._treatment_name,
         estimate=0,
         control_value=estimate.control_value,
         treatment_value=estimate.treatment_value,

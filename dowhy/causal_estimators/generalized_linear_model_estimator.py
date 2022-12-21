@@ -106,8 +106,8 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
         """
         return super().fit(data, treatment_name, outcome_name, effect_modifier_names=effect_modifier_names)
 
-    def _build_model(self, data: pd.DataFrame):
-        features = self._build_features(data)
+    def _build_model(self, data: pd.DataFrame, treatment_name: List[str]):
+        features = self._build_features(data, treatment_name)
         model = sm.GLM(self._outcome, features, family=self.family).fit()
         return (features, model)
 

@@ -270,6 +270,7 @@ class EValueSensitivityAnalyzer:
             # new effect estimate
             new_effect = new_estimator.estimate_effect(
                 self.data,
+                treatment_name=new_estimand.treatment_variable,
                 control_value=self.estimate.control_value,
                 treatment_value=self.estimate.treatment_value,
                 target_units=self.estimate.estimator._target_units,

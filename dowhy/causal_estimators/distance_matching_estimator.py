@@ -118,11 +118,11 @@ class DistanceMatchingEstimator(CausalEstimator):
         self._set_effect_modifiers(data, effect_modifier_names)
 
         # Check if the treatment is one-dimensional
-        if len(self._treatment_name) > 1:
+        if len(treatment_name) > 1:
             error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
             raise Exception(error_msg)
         # Checking if the treatment is binary
-        if not pd.api.types.is_bool_dtype(data[self._treatment_name[0]]):
+        if not pd.api.types.is_bool_dtype(data[treatment_name[0]]):
             error_msg = "Distance Matching method is applicable only for binary treatments"
             self.logger.error(error_msg)
             raise Exception(error_msg)
@@ -152,19 +152,19 @@ class DistanceMatchingEstimator(CausalEstimator):
         return self
 
     def estimate_effect(
-        self, data: pd.DataFrame, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+        self, data: pd.DataFrame, treatment_name: List[str], treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
     ):
         # this assumes a binary treatment regime
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
         updated_df = pd.concat(
-            [self._observed_common_causes, data[[self._outcome_name, self._treatment_name[0]]]], axis=1
+            [self._observed_common_causes, data[[self._outcome_name, treatment_name[0]]]], axis=1
         )
         if self.exact_match_cols is not None:
             updated_df = pd.concat([updated_df, data[self.exact_match_cols]], axis=1)
-        treated = updated_df.loc[data[self._treatment_name[0]] == 1]
-        control = updated_df.loc[data[self._treatment_name[0]] == 0]
+        treated = updated_df.loc[data[treatment_name[0]] == 1]
+        control = updated_df.loc[data[treatment_name[0]] == 0]
         numtreatedunits = treated.shape[0]
         numcontrolunits = control.shape[0]
 
@@ -216,8 +216,8 @@ class DistanceMatchingEstimator(CausalEstimator):
                 grouped = updated_df.groupby(self.exact_match_cols)
                 att = 0
                 for name, group in grouped:
-                    treated = group.loc[group[self._treatment_name[0]] == 1]
-                    control = group.loc[group[self._treatment_name[0]] == 0]
+                    treated = group.loc[group[treatment_name[0]] == 1]
+                    control = group.loc[group[treatment_name[0]] == 0]
                     if treated.shape[0] == 0:
                         continue
                     control_neighbors = NearestNeighbors(
@@ -277,6 +277,7 @@ class DistanceMatchingEstimator(CausalEstimator):
 
         estimate = CausalEstimate(
             data=data,
+            treatment_name=treatment_name,
             estimate=est,
             control_value=control_value,
             treatment_value=treatment_value,

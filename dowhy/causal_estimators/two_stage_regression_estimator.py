@@ -170,7 +170,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         self._set_data(data, treatment_name, outcome_name)
         self._set_effect_modifiers(data, effect_modifier_names)
 
-        if len(self._treatment_name) > 1:
+        if len(treatment_name) > 1:
             error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
             raise Exception(error_msg)
 
@@ -235,7 +235,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
             self._second_stage_model_nde._target_estimand.identifier_method = "backdoor"
             self._second_stage_model_nde.fit(
                 data,
-                self._treatment_name,
+                treatment_name,
                 parse_state(self._outcome_name),  # to convert it to array before passing to causal estimator)
                 effect_modifier_names=effect_modifier_names,
             )
@@ -243,7 +243,13 @@ class TwoStageRegressionEstimator(CausalEstimator):
         return self
 
     def estimate_effect(
-        self, data: pd.DataFrame, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+        self,
+        data: pd.DataFrame,
+        treatment_name: List[str],
+        treatment_value: Any = 1,
+        control_value: Any = 0,
+        target_units=None,
+        **_,
     ):
         self._target_units = target_units
         self._treatment_value = treatment_value
@@ -253,6 +259,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         # First stage
         first_stage_estimate = self._first_stage_model.estimate_effect(
             data,
+            treatment_name=treatment_name,
             control_value=control_value,
             treatment_value=treatment_value,
             target_units=target_units,
@@ -261,6 +268,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         # Second Stage
         second_stage_estimate = self._second_stage_model.estimate_effect(
             data,
+            treatment_name=treatment_name,
             control_value=control_value,
             treatment_value=treatment_value,
             target_units=target_units,
@@ -277,7 +285,11 @@ class TwoStageRegressionEstimator(CausalEstimator):
         if self._target_estimand.estimand_type == EstimandType.NONPARAMETRIC_NDE:
 
             total_effect_estimate = self._second_stage_model_nde.estimate_effect(
-                data, control_value=control_value, treatment_value=treatment_value, target_units=target_units
+                data,
+                treatment_name=treatment_name,
+                control_value=control_value,
+                treatment_value=treatment_value,
+                target_units=target_units,
             )
             natural_direct_effect = total_effect_estimate.value - natural_indirect_effect
             estimate_value = natural_direct_effect
@@ -289,6 +301,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
             )
         estimate = CausalEstimate(
             data=data,
+            treatment_name=treatment_name,
             estimate=estimate_value,
             control_value=control_value,
             treatment_value=treatment_value,
@@ -299,8 +312,8 @@ class TwoStageRegressionEstimator(CausalEstimator):
         estimate.add_estimator(self)
         return estimate
 
-    def build_first_stage_features(self, data_df: pd.DataFrame):
-        treatment_vals = data_df[self._treatment_name]
+    def build_first_stage_features(self, data_df: pd.DataFrame, treatment_name: List[str]):
+        treatment_vals = data_df[treatment_name]
         if len(self._observed_common_causes_names) > 0:
             observed_common_causes_vals = data_df[self._observed_common_causes_names]
             observed_common_causes_vals = pd.get_dummies(observed_common_causes_vals, drop_first=True)
@@ -313,8 +326,8 @@ class TwoStageRegressionEstimator(CausalEstimator):
             raise ValueError("Provided treatment values and dataframe should have the same length.")
         # Bulding the feature matrix
         n_samples = treatment_vals.shape[0]
-        self.logger.debug("Number of samples" + str(n_samples) + str(len(self._treatment_name)))
-        treatment_2d = treatment_vals.reshape((n_samples, len(self._treatment_name)))
+        self.logger.debug("Number of samples" + str(n_samples) + str(len(treatment_name)))
+        treatment_2d = treatment_vals.reshape((n_samples, len(treatment_name)))
         if len(self._observed_common_causes_names) > 0:
             features = np.concatenate((treatment_2d, observed_common_causes_vals), axis=1)
         else:

@@ -166,7 +166,13 @@ class Causalml(CausalEstimator):
         return estimator_class
 
     def estimate_effect(
-        self, data: pd.DataFrame, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+        self,
+        data: pd.DataFrame,
+        treatment_name: List[str],
+        treatment_value: Any = 1,
+        control_value: Any = 0,
+        target_units=None,
+        **_,
     ):
         """
         data: dataframe containing the data on which treatment effect is to be estimated.
@@ -183,7 +189,7 @@ class Causalml(CausalEstimator):
 
         # Both the outcome and the treatment have to be 1D arrays according to the CausalML API
         y_name = self._outcome_name
-        treatment_name = self._treatment_name[0]  # As we have only one treatment variable
+        treatment_name = treatment_name[0]  # As we have only one treatment variable
         # We want to pass 'v0' rather than ['v0'] to prevent a shape mismatch
 
         func_args = {"X": data[X_names], "y": data[y_name], "treatment": data[treatment_name]}
@@ -200,6 +206,7 @@ class Causalml(CausalEstimator):
 
         estimate = CausalEstimate(
             data=data,
+            treatment_name=treatment_name,
             estimate=value_tuple[0],
             control_value=control_value,
             treatment_value=treatment_value,

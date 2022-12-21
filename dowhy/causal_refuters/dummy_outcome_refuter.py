@@ -500,6 +500,7 @@ def refute_dummy_outcome(
             )
             new_effect = new_estimator.estimate_effect(
                 new_data,
+                treatment_name=identified_estimand.treatment_variable,
                 control_value=estimate.control_value,
                 treatment_value=estimate.treatment_value,
                 target_units=estimate.estimator._target_units,
@@ -582,6 +583,7 @@ def refute_dummy_outcome(
                 )
                 new_effect = new_estimator.estimate_effect(
                     new_data,
+                    treatment_name=identified_estimand.treatment_variable,
                     control_value=estimate.control_value,
                     treatment_value=estimate.treatment_value,
                     target_units=estimate.estimator._target_units,
@@ -606,6 +608,7 @@ def refute_dummy_outcome(
 
         dummy_estimate = CausalEstimate(
             data=None,
+            treatment_name=estimate._treatment_name,
             estimate=causal_effect_map[None],
             control_value=estimate.control_value,
             treatment_value=estimate.treatment_value,
@@ -628,6 +631,7 @@ def refute_dummy_outcome(
         for train_category in range(simulation_results.shape[1]):
             dummy_estimate = CausalEstimate(
                 data=None,
+                treatment_name=estimate._treatment_name,
                 estimate=causal_effect_list[train_category],
                 control_value=estimate.control_value,
                 treatment_value=estimate.treatment_value,

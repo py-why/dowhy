@@ -103,7 +103,7 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
         return self
 
     def estimate_effect(
-        self, data: pd.DataFrame, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+        self, data: pd.DataFrame, treatment_name: List[str], treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
     ):
         self._target_units = target_units
         self._treatment_value = treatment_value
@@ -112,8 +112,8 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
             self.estimate_propensity_score_column(data)
 
         # this assumes a binary treatment regime
-        treated = data.loc[data[self._treatment_name[0]] == 1]
-        control = data.loc[data[self._treatment_name[0]] == 0]
+        treated = data.loc[data[treatment_name[0]] == 1]
+        control = data.loc[data[treatment_name[0]] == 0]
 
         # TODO remove neighbors that are more than a given radius apart
 
@@ -159,6 +159,7 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
 
         estimate = CausalEstimate(
             data=data,
+            treatment_name=treatment_name,
             estimate=est,
             control_value=control_value,
             treatment_value=treatment_value,

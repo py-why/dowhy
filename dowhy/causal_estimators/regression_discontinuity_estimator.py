@@ -112,7 +112,7 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
         lower_limit = self.rd_threshold_value - self.rd_bandwidth
         rows_filter = np.s_[(self.rd_variable >= lower_limit) & (self.rd_variable <= upper_limit)]
         local_rd_variable = self.rd_variable[rows_filter]
-        local_treatment_variable = self._treatment[self._treatment_name[0]][
+        local_treatment_variable = self._treatment[treatment_name[0]][
             rows_filter
         ]  # indexing by treatment name again since this method assumes a single-dimensional treatment
         local_outcome_variable = self._outcome[rows_filter]
@@ -139,14 +139,24 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
         return self
 
     def estimate_effect(
-        self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+        self,
+        data: pd.DataFrame,
+        treatment_name: List[str],
+        treatment_value: Any = 1,
+        control_value: Any = 0,
+        target_units=None,
+        **_,
     ):
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
 
         est = self.iv_estimator.estimate_effect(
-            data, treatment_value=treatment_value, control_value=control_value, target_units=target_units
+            data,
+            treatment_name=["local_treatment"],
+            treatment_value=treatment_value,
+            control_value=control_value,
+            target_units=target_units,
         )
 
         est.add_estimator(self)
