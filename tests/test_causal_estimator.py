@@ -10,9 +10,7 @@ class MockEstimator(CausalEstimator):
 
 
 def test_causal_estimator_placeholder_methods():
-    estimator = MockEstimator(None, None, [None], [None], None)
-    with pytest.raises(NotImplementedError):
-        estimator._estimate_effect()
+    estimator = MockEstimator(None)
     with pytest.raises(NotImplementedError):
         estimator._do(None)
     with pytest.raises(NotImplementedError):

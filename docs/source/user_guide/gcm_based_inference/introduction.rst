@@ -10,17 +10,6 @@ The ``dowhy.gcm`` package provides a variety of ways to answer causal questions 
 section :doc:`answering_causal_questions/index`. However, before diving into them, let's understand
 the basic building blocks and usage patterns it is built upon.
 
-If you find the gcm package useful for your work, please cite us as follows:
-
-Bibtex::
-
-    @article{dowhy_gcm,
-      author = {Bl{\"o}baum, Patrick and G{\"o}tz, Peter and Budhathoki, Kailash and Mastakouri, Atalanti A. and Janzing, Dominik},
-      title = {DoWhy-GCM: An extension of DoWhy for causal inference in graphical causal models},
-      journal={arXiv preprint arXiv:2206.06821},
-      year={2022}
-    }
-
 The basic building blocks
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -180,6 +169,53 @@ This can be done via the ``interventional_samples`` function. Here's how:
 This intervention says: "I'll ignore any causal effects of X on Y, and set every value of Y
 to 2.34." So the distribution of X will remain unchanged, whereas values of Y will be at a fixed
 value and Z will respond according to its causal model.
+
+These are the basic steps that need to happen. While we can run these steps explicitly, often they get
+executed as part of other steps, e.g. when fitting and re-fitting as part of computing confidence
+intervals. The next section therefore dives into a more typical usage pattern of the ``dowhy.gcm`` package.
+
+Typical usage of the ``dowhy.gcm`` package
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In practice, we may not execute the steps we've learned above explicitly and in this order, but they
+get called by other abstractions. E.g. we usually want to use confidence intervals, when answering
+causal questions, to quantify our confidence in the results. In this case, ``fit`` will be called on
+behalf of us, but we won't call it directly.
+
+Modeling an SCM
+---------------
+
+The graph modeling is the same as in `Step 1: Modeling cause-effect relationships as a structural
+causal model (SCM)`_. First we construct the causal graph:
+
+>>> causal_model = gcm.StructuralCausalModel(nx.DiGraph([('X', 'Y'), ('Y', 'Z')])) # X → Y → Z
+
+Answering a causal query with confidence intervals
+--------------------------------------------------
+
+When we answer a causal query without computing its confidence intervals, what we effectively get,
+are point estimates. These are not very useful when trying to assess the confidence in our results.
+Instead of calling ``fit`` explicitly, we can achieve its execution by going through the API for
+confidence intervals. Let's say we wanted to understand the direct arrow strengths between nodes and
+quantify our confidence in those results. This is how we would do it:
+
+>>> strength_median, strength_intervals = gcm.confidence_intervals(
+>>>     gcm.bootstrap_training_and_sampling(gcm.direct_arrow_strength,
+>>>                                         causal_model,
+>>>                                         bootstrap_training_data=data,
+>>>                                         target_node='Y'))
+>>> strength_median, strength_intervals
+({('X', 'Y'): 45.90886398636573, ('Z', 'Y'): 15.47129383737619},
+{('X', 'Y'): array([42.88319632, 50.43890079]), ('Z', 'Y'): array([13.44202416, 17.74266107])})
+
+In this case, ``fit`` will be called within ``bootstrap_training_and_sampling``, so there is no need
+to do this ourselves.
+
+The calling sequence of ``confidence_intervals`` and ``bootstrap_training_and_sampling`` is not
+trivial, but exploits the fact our APIs are composable. If not everything makes sense
+to you yet, we recommend to simply treat this calling sequence as a ready-to-use construct. Read:
+"Get confidence intervals via bootstrapping training and sampling of direct arrow strength". For a
+deeper understanding of this construct, see section :doc:`estimating_confidence_intervals`.
 
 With this knowledge, we can now dive deep into the meaning and usages of causal queries in section
 :doc:`answering_causal_questions/index`.

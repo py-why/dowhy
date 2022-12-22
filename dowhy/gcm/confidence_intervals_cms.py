@@ -17,7 +17,7 @@ from dowhy.gcm.fitting_sampling import fit
 # results.
 # Note that this function does not re-fit the causal model(s) and only executes the provided query as it is. In order
 # to re-refit the graphical causal model on random subsets of the data before executing the query, consider using the
-# bootstrap_training_and_sampling function.
+# fit_and_compute function.
 #
 # **Example usage:**
 #
@@ -32,9 +32,9 @@ from dowhy.gcm.fitting_sampling import fit
 # lambda : gcm.arrow_strength(causal_model, target_node='Y').
 #
 # In order to incorporate uncertainties coming from fitting the causal model(s), we can use
-# gcm.bootstrap_training_and_sampling instead:
+# gcm.fit_and_compute instead:
 # >>>  strength_medians, strength_intervals = gcm.confidence_intervals(
-# >>>        gcm.bootstrap_training_and_sampling(gcm.arrow_strength,
+# >>>        gcm.fit_and_compute(gcm.arrow_strength,
 # >>>                                            causal_model,
 # >>>                                            bootstrap_training_data=data,
 # >>>                                            target_node='Y'))
@@ -43,7 +43,7 @@ from dowhy.gcm.fitting_sampling import fit
 bootstrap_sampling = partial
 
 
-def bootstrap_training_and_sampling(
+def fit_and_compute(
     f: Callable[
         [Union[ProbabilisticCausalModel, StructuralCausalModel, InvertibleStructuralCausalModel], Any],
         Dict[Any, Union[np.ndarray, float]],
@@ -60,10 +60,10 @@ def bootstrap_training_and_sampling(
     **Example usage:**
 
         >>> scores_median, scores_intervals = gcm.confidence_intervals(
-        >>>     gcm.bootstrap_training_and_sampling(gcm.arrow_strength,
-        >>>                                         causal_model,
-        >>>                                         bootstrap_training_data=data,
-        >>>                                         target_node='Y'))
+        >>>     gcm.fit_and_compute(gcm.arrow_strength,
+        >>>                         causal_model,
+        >>>                         bootstrap_training_data=data,
+        >>>                         target_node='Y'))
 
     :param f: The causal query to perform. A causal query is a function taking a graphical causal model as first
               parameter and an arbitrary number of remaining parameters. It must return a dictionary with

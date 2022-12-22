@@ -1,10 +1,15 @@
 import itertools
+import re
 
+import numpy as np
+import pandas as pd
 import pytest
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import PolynomialFeatures
 
+import dowhy
 from dowhy import CausalModel, datasets
 
 econml = pytest.importorskip("econml")
@@ -41,7 +46,7 @@ class TestEconMLEstimator:
         # Test LinearDML
         dml_estimate = model.estimate_effect(
             identified_estimand,
-            method_name="backdoor.econml.dml.LinearDML",
+            method_name="backdoor.econml.dml.dml.LinearDML",
             control_value=0,
             treatment_value=1,
             target_units=lambda df: df["X0"] > 1,  # condition used for CATE
@@ -57,7 +62,7 @@ class TestEconMLEstimator:
         # Test ContinuousTreatmentOrthoForest
         orthoforest_estimate = model.estimate_effect(
             identified_estimand,
-            method_name="backdoor.econml.ortho_forest.ContinuousTreatmentOrthoForest",
+            method_name="backdoor.econml.orf.DMLOrthoForest",
             target_units=lambda df: df["X0"] > 2,
             method_params={"init_params": {"n_trees": 10}, "fit_params": {}},
         )
@@ -81,7 +86,7 @@ class TestEconMLEstimator:
         identified_estimand_binary = model_binary.identify_effect(proceed_when_unidentifiable=True)
         drlearner_estimate = model_binary.estimate_effect(
             identified_estimand_binary,
-            method_name="backdoor.econml.drlearner.LinearDRLearner",
+            method_name="backdoor.econml.dr.LinearDRLearner",
             target_units=lambda df: df["X0"] > 1,
             confidence_intervals=False,
             method_params={
@@ -138,7 +143,7 @@ class TestEconMLEstimator:
         )
         deepiv_estimate = model.estimate_effect(
             identified_estimand,
-            method_name="iv.econml.deepiv.DeepIVEstimator",
+            method_name="iv.econml.iv.nnet.DeepIV",
             target_units=lambda df: df["X0"] > -1,
             confidence_intervals=False,
             method_params={
@@ -177,7 +182,7 @@ class TestEconMLEstimator:
         identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
         driv_estimate = model.estimate_effect(
             identified_estimand,
-            method_name="iv.econml.ortho_iv.LinearIntentToTreatDRIV",
+            method_name="iv.econml.iv.dr.LinearIntentToTreatDRIV",
             target_units=lambda df: df["X0"] > 1,
             confidence_intervals=False,
             method_params={
@@ -188,5 +193,97 @@ class TestEconMLEstimator:
                     "featurizer": PolynomialFeatures(degree=1, include_bias=False),
                 },
                 "fit_params": {},
+            },
+        )
+
+    def test_multivalue_treatment(self):
+        n_points = 100000
+        impact = {0: 0.0, 1: 2.0, 2: 1.0}
+        df = pd.DataFrame(
+            {
+                "X": np.random.normal(size=n_points),
+                "W": np.random.normal(size=n_points),
+                "T": np.random.choice(np.array(list(impact.keys())), size=n_points),
+            }
+        )
+        df["Y"] = df["W"] + df["T"].apply(lambda x: impact[x])
+
+        train_data, test_data = train_test_split(df, train_size=0.9)
+
+        causal_model = CausalModel(
+            data=train_data,
+            treatment="T",
+            outcome="Y",
+            common_causes="W",
+            effect_modifiers="X",
+        )
+        identified_estimand = causal_model.identify_effect(proceed_when_unidentifiable=True)
+
+        est_2 = causal_model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.econml.dml.dml.LinearDML",
+            control_value=0,
+            treatment_value=[1, 2],
+            target_units="ate",  # condition used for CATE
+            confidence_intervals=False,
+            method_params={
+                "init_params": {"discrete_treatment": True},
+                "fit_params": {},
+            },
+        )
+
+        est_test = est_2.estimator.effect_tt(test_data)
+
+        est_error = (est_test - test_data["T"].apply(lambda x: impact[x]).values).abs().max()
+        assert est_error < 0.03
+
+    def test_empty_effect_modifiers(self):
+        np.random.seed(101)
+        data = dowhy.datasets.partially_linear_dataset(
+            beta=10,
+            num_common_causes=7,
+            num_unobserved_common_causes=1,
+            strength_unobserved_confounding=10,
+            num_samples=1000,
+            num_treatments=1,
+            stddev_treatment_noise=10,
+            stddev_outcome_noise=5,
+        )
+
+        # Observed data
+        dropped_cols = ["W0"]
+        user_data = data["df"].drop(dropped_cols, axis=1)
+        # assumed graph
+        user_graph = data["gml_graph"]
+        for col in dropped_cols:
+            user_graph = user_graph.replace('node[ id "{0}" label "{0}"]'.format(col), "")
+            user_graph = re.sub('edge\[ source "{}" target "[vy][0]*"\]'.format(col), "", user_graph)
+
+        model = CausalModel(
+            data=user_data,
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=user_graph,
+            test_significance=None,
+        )
+
+        model._graph.get_effect_modifiers(model._treatment, model._outcome)
+
+        # Identify effect
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+
+        # Estimate effect
+        model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.econml.dml.dml.LinearDML",
+            method_params={
+                "init_params": {
+                    "model_y": GradientBoostingRegressor(),
+                    "model_t": GradientBoostingRegressor(),
+                    "linear_first_stages": False,
+                },
+                "fit_params": {
+                    "cache_values": True,
+                },
             },
         )

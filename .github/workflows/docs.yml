@@ -1,8 +1,14 @@
-name: Build Docs
+name: Build & Deploy Docs
 on:
   push:
     branches:
       - main
+    paths:
+      - ".github/workflows/docs.yml"
+      - "dowhy/**"
+      - "docs/**"
+      - "pyproject.toml"
+      - "poetry.lock"
   workflow_run:
     workflows: [ "Build Docker image (docs)" ]
     types:
@@ -14,21 +20,18 @@ jobs:
     container:
       image: "ghcr.io/${{ github.repository_owner }}/dowhy-docs-generation:latest"
     steps:
-      - uses: actions/checkout@main
+      - uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+          fetch-depth: 0
 
-      - name: Install Python Dependencies  
-        run: poetry install -E plotting -E causalml -E econml -E pydot --with docs
+      - name: Install Python Dependencies
+        run: poetry install -E plotting -E pydot -E pygraphviz --with docs
+
+      - run: git config --global --add safe.directory /__w/dowhy/dowhy
 
       - name: Build
-        run: |
-          # sphinx-multiversion invokes git internally. Its call to "git rev-parse --show-toplevel" throws the
-          # following error: "fatal: detected dubious ownership in repository at '/__w/dowhy/dowhy'"
-          # The following command avoids this.
-          git config --global --add safe.directory /__w/dowhy/dowhy
-          ./docs/generate_docs.sh
-          
+        run: ./docs/generate_docs.sh
+
       - name: Commit and push to gh-pages branch
         uses: peaceiris/actions-gh-pages@v3
         with:

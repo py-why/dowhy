@@ -7,6 +7,8 @@ from typing import Any
 import numpy as np
 import sklearn
 from packaging import version
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import PolynomialFeatures
 
 if version.parse(sklearn.__version__) < version.parse("1.0"):
     from sklearn.experimental import enable_hist_gradient_boosting  # noqa
@@ -51,7 +53,6 @@ class SklearnRegressionModel(PredictionModel):
     def clone(self):
         """
         Clones the prediction model using the same hyper parameters but not fitted.
-
         :return: An unfitted clone of the prediction model.
         """
         return SklearnRegressionModel(sklearn_mdl=sklearn.clone(self._sklearn_mdl))
@@ -115,8 +116,10 @@ def create_ada_boost_regressor(**kwargs) -> SklearnRegressionModel:
     return SklearnRegressionModel(AdaBoostRegressor(**kwargs))
 
 
-def create_product_regressor() -> PredictionModel:
-    return ProductRegressor()
+def create_polynom_regressor(degree: int = 3, **kwargs_linear_model) -> SklearnRegressionModel:
+    return SklearnRegressionModel(
+        make_pipeline(PolynomialFeatures(degree=degree, include_bias=False), LinearRegression(**kwargs_linear_model))
+    )
 
 
 class InvertibleIdentityFunction(InvertibleFunction):
@@ -141,15 +144,3 @@ class InvertibleLogarithmicFunction(InvertibleFunction):
 
     def evaluate_inverse(self, X: np.ndarray) -> np.ndarray:
         return np.exp(X)
-
-
-class ProductRegressor(PredictionModel):
-    def fit(self, X, Y):
-        # Nothing to fit here.
-        pass
-
-    def predict(self, X):
-        return np.prod(X, axis=1).reshape(-1, 1)
-
-    def clone(self):
-        return ProductRegressor()

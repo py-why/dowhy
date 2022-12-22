@@ -63,22 +63,27 @@ class TestEstimator(object):
         target_estimand = model.identify_effect()
         target_estimand.set_identifier_method(self._identifier_method)
         estimator_ate = self._Estimator(
-            data["df"],
             identified_estimand=target_estimand,
-            treatment=data["treatment_name"],
-            outcome=data["outcome_name"],
+            **method_params,
+        )
+
+        estimator_ate.fit(
+            data["df"],
+            data["treatment_name"],
+            data["outcome_name"],
+            effect_modifier_names=data["effect_modifier_names"],
+        )
+
+        true_ate = data["ate"]
+        ate_estimate = estimator_ate.estimate_effect(
             control_value=0,
             treatment_value=1,
             test_significance=test_significance,
             evaluate_effect_strength=False,
             confidence_intervals=confidence_intervals,
             target_units="ate",
-            effect_modifiers=data["effect_modifier_names"],
             **method_params,
         )
-
-        true_ate = data["ate"]
-        ate_estimate = estimator_ate.estimate_effect()
         str(ate_estimate)  # checking if str output is correctly created
         error = abs(ate_estimate.value - true_ate)
         print(
@@ -164,11 +169,13 @@ class TestEstimator(object):
         )
         target_estimand = model.identify_effect()
         estimator_ate = self._Estimator(
-            data["df"],
             identified_estimand=target_estimand,
+            test_significance=None,
+        )
+        estimator_ate.fit(
+            data["df"],
             treatment=data["treatment_name"],
             outcome=data["outcome_name"],
-            test_significance=None,
         )
         true_ate = data["ate"]
         ate_estimate = estimator_ate.estimate_effect()

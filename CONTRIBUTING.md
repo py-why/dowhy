@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-22-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-24-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Contributors ✨
@@ -41,11 +41,10 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
       <td align="center"><a href="https://jlgleason.github.io"><img src="https://avatars.githubusercontent.com/u/18729651?v=4?s=100" width="100px;" alt="Jeffrey Gleason"/><br /><sub><b>Jeffrey Gleason</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=jlgleason" title="Code">💻</a></td>
+      <td align="center"><a href="https://bandism.net/"><img src="https://avatars.githubusercontent.com/u/22633385?v=4?s=100" width="100px;" alt="Ikko Ashimine"/><br /><sub><b>Ikko Ashimine</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=eltociear" title="Documentation">📖</a></td>
+      <td align="center"><a href="http://eeulig.com"><img src="https://avatars.githubusercontent.com/u/87869465?v=4?s=100" width="100px;" alt="Elias"/><br /><sub><b>Elias</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=eeulig" title="Code">💻</a></td>
     </tr>
   </tbody>
-  <tfoot>
-    
-  </tfoot>
 </table>
 
 <!-- markdownlint-restore -->

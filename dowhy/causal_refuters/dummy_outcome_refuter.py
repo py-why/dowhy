@@ -13,6 +13,7 @@ from sklearn.svm import SVR
 from tqdm.auto import tqdm
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
+from dowhy.causal_estimators.econml import Econml
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 from dowhy.causal_refuter import CausalRefutation, CausalRefuter, choose_variables, test_significance
 
@@ -439,7 +440,7 @@ def refute_dummy_outcome(
         required_variables,
         target_estimand.get_backdoor_variables()
         + target_estimand.instrumental_variables
-        + estimate.params["effect_modifiers"],
+        + estimate.estimator._effect_modifier_names,
     )
 
     # The rationale behind ordering of the loops is the fact that we induce randomness everytime we create the
@@ -489,8 +490,19 @@ def refute_dummy_outcome(
 
             new_data = validation_df.assign(dummy_outcome=outcome_validation)
 
-            new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, estimate)
-            new_effect = new_estimator.estimate_effect()
+            new_estimator = estimate.estimator.get_new_estimator_object(identified_estimand)
+            new_estimator.fit(
+                new_data,
+                identified_estimand.treatment_variable,
+                identified_estimand.outcome_variable,
+                estimate.estimator._effect_modifier_names,
+                **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+            )
+            new_effect = new_estimator.estimate_effect(
+                control_value=estimate.control_value,
+                treatment_value=estimate.treatment_value,
+                target_units=estimate.estimator._target_units,
+            )
             estimates.append(new_effect.value)
 
         else:
@@ -559,8 +571,19 @@ def refute_dummy_outcome(
                 outcome_validation += causal_effect_map[key_train]
 
                 new_data = validation_df.assign(dummy_outcome=outcome_validation)
-                new_estimator = CausalEstimator.get_estimator_object(new_data, identified_estimand, estimate)
-                new_effect = new_estimator.estimate_effect()
+                new_estimator = estimate.estimator.get_new_estimator_object(identified_estimand)
+                new_estimator.fit(
+                    new_data,
+                    identified_estimand.treatment_variable,
+                    identified_estimand.outcome_variable,
+                    estimate.estimator._effect_modifier_names,
+                    **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+                )
+                new_effect = new_estimator.estimate_effect(
+                    control_value=estimate.control_value,
+                    treatment_value=estimate.treatment_value,
+                    target_units=estimate.estimator._target_units,
+                )
 
                 estimates.append(new_effect.value)
                 group_count += 1

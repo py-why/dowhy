@@ -4,6 +4,14 @@ dowhy.gcm.independence\_test package
 Submodules
 ----------
 
+dowhy.gcm.independence\_test.generalised\_cov\_measure module
+-------------------------------------------------------------
+
+.. automodule:: dowhy.gcm.independence_test.generalised_cov_measure
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.gcm.independence\_test.kernel module
 ------------------------------------------
 

@@ -190,6 +190,14 @@ dowhy.gcm.uncertainty module
    :undoc-members:
    :show-inheritance:
 
+dowhy.gcm.unit\_change module
+-----------------------------
+
+.. automodule:: dowhy.gcm.unit_change
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.gcm.validation module
 ---------------------------
 

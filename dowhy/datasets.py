@@ -92,6 +92,157 @@ def linear_dataset(
     stddev_outcome_noise=0.01,
     one_hot_encode=False,
 ):
+    """
+    Generate a synthetic dataset with a known effect size.
+
+    This function generates a pandas dataFrame with num_samples records. The variables follow a naming convention where the first letter indicates its role in the causality graph and then a sequence number.
+
+    :param beta: coefficient of the treatment(s) ('v?') in the generating equation of the outcome ('y').
+    :type beta: int or list/ndarray of length num_treatments of type int
+    :param num_common_causes: Number of variables affecting both the treatment and the outcome [w -> v; w -> y]
+    :type num_common_causes: int
+    :param num_samples: Number of records to generate
+    :type num_samples: int
+    :param num_instruments: Number of instrumental variables  [z -> v], defaults to 0
+    :type num_instruments: int
+    :param num_effect_modifiers: Number of effect modifiers, variables affecting only the outcome [x -> y], defaults to 0
+    :type num_effect_modifiers: int
+    :param num_treatments: Number of treatment variables [v], defaults to 1
+    :type num_treatments : int
+    :param num_frontdoor_variables : Number of frontdoor mediating variables [v -> FD -> y], defaults to  0
+    :type num_frontdoor_variables: int
+    :param treatment_is_binary: Cannot be True if treatment_is_category is True, defaults to True
+    :type treatment_is_binary: bool
+    :param treatment_is_category: Cannot be True if treatment_is_binary is True, defaults to False
+    :type treatment_is_category: bool
+    :param outcome_is_binary: defaults to False,
+    :type outcome_is_binary: bool
+    :param stochastic_discretization: if False, quartiles are used when discretised variables are specified. They can be hot encoded, defaults True
+    :type stochastic_discretization: bool
+    :param num_discrete_common_causes: Number of discrete common causes of the total num_common_causes, defaults to 0
+    :type num_discrete_common_causes: int
+    :param num_discrete_instruments: Number of discrete instrumental variables of the total num_instruments, defaults to 0
+    :type num_discrete_instruments  : int
+    :param num_discrete_effect_modifiers : Number of discrete effect modifiers of the total effect_modifiers, defaults to 0
+    :type num_discrete_effect_modifiers: int
+    :param stddev_treatment_noise : defaults to 1
+    :type stddev_treatment_noise : float
+    :param stddev_outcome_noise: defaults to 0.01
+    :type stddev_outcome_noise: float
+    :param one_hot_encode: defaults to False
+    :type one_hot_encode: bool
+
+    :returns: Dictionary with pandas dataFrame and few other metadata variables.
+                        "df": pd.dataFrame
+                        with num_samples records. The variables follow a naming convention were the first letter indicates its role in the causality graph and then a sequence number.
+
+                    v variables - are the treatments. They can be binary or continuous. In the case of continuous abs(*beta*) defines thier magnitude;
+
+                    y - is the outcome variable. The generating equation is,
+                     y = normal(0, stddev_outcome_noise) + t @ beta [where @ is a numpy matrix multiplication allowing for beta be a vector]
+
+                    W variables - commonly cause both the treatment and the outcome and are iid. if continuous, they are Norm(mu = Unif(-1,1), sigma = 1)
+
+                    Z variables - Instrument variables. Each one affects all treatments. i.e. if there is one instrument and two treatments then z0->v0, z0->v1
+
+                    X variables - effect modifiers. If continuous, they are Norm(mu = Unif(-1,1), sigma = 1)
+
+                    FD variables - Front door variables, v0->FD0->y
+
+            "treatment_name": str/list(str)
+            "outcome_name": str
+            "common_causes_names": str/list(str)
+            "instrument_names": str/list(str)
+            "effect_modifier_names": str/list(str)
+            "frontdoor_variables_names": str/list(str)
+            "dot_graph": dot_graph,
+            "gml_graph": gml_graph,
+            "ate": float, the true ate in the dataset
+    :rtype: dict
+
+    Examples
+    ********
+    .. code-block:: python
+            import networkx as nx
+            import matplotlib.pyplot as plt
+            import pandas as pd
+            import numpy as np
+            import dowhy.datasets
+
+            def plot_gml(gml_graph):
+                    G = nx.parse_gml(gml_graph)
+                    pos=nx.spring_layout(G)
+                    nx.draw_networkx(G, pos, with_labels=True, node_size=1000, node_color="darkorange")
+                    return(plt.show())
+
+            def describe_synthetic_data(synthetic_data):
+                    if (synthetic_data['gml_graph'] != None) :
+                    plot_gml(synthetic_data["gml_graph"])
+                    synthetic_data_df=synthetic_data["df"]
+                    print('------- Variables --------')
+                    print('Treatment vars:'      , synthetic_data['treatment_name'])
+                    print('Outcome vars:'        , synthetic_data['outcome_name'])
+                    print('Common causes vars:'  , synthetic_data['common_causes_names'])
+                    print('Instrument vars:'     , synthetic_data['instrument_names'])
+                    print('Effect Modifier vars:', synthetic_data['effect_modifier_names'])
+                    print('Frontdoor vars:'      , synthetic_data['frontdoor_variables_names'])
+                    print('Treatment vars:', synthetic_data['outcome_name'])
+                    print('-------- Corr -------')
+                    print(synthetic_data_df.corr())
+                    print('------- Head --------')
+                    return(synthetic_data_df)
+
+            # create a dataset with 10 observations one binary treatment and a continuous outcome affected by one common cause
+            synthetic_data = dowhy.datasets.linear_dataset(beta = 100,
+                    num_common_causes = 1,
+                    num_samples =10
+                    )
+            describe_synthetic_data(synthetic_data).head()
+
+            # Two continuous treatments, no common cause, an instrumental variable and two effect modifiers - linearly added appropriately
+            synthetic_data = dowhy.datasets.linear_dataset(
+                    beta                          = 100,
+                    num_common_causes             = 0,
+                    num_samples                   = 20,
+                    num_instruments               = 1,
+                    num_effect_modifiers          = 2,
+                    num_treatments                = 2,
+                    num_frontdoor_variables       = 0,
+                    treatment_is_binary           = False,
+                    treatment_is_category         = False,
+                    outcome_is_binary             = False,
+                    stochastic_discretization     = True,
+                    num_discrete_common_causes    = 0,
+                    num_discrete_instruments      = 0,
+                    num_discrete_effect_modifiers = 0,
+                    stddev_treatment_noise        = 1,
+                    stddev_outcome_noise          = 0.01,
+                    one_hot_encode                = False
+                    )
+            describe_synthetic_data(synthetic_data).head()
+
+            # One Hot Encoding
+            synthetic_data = dowhy.datasets.linear_dataset(
+                    beta                          = 100,
+                    num_common_causes             =   2,
+                    num_samples                   =  20,
+                    num_instruments               =   1,
+                    num_effect_modifiers          =   1,
+                    num_treatments                =   1,
+                    num_frontdoor_variables       =   1,
+                    treatment_is_binary           = False,
+                    treatment_is_category         = False,
+                    outcome_is_binary             = False,
+                    stochastic_discretization     = True,
+                    num_discrete_common_causes    = 1, #of the total num_common_causes
+                    num_discrete_instruments      = 1,
+                    num_discrete_effect_modifiers = 1,
+                    stddev_treatment_noise        = 1,
+                    stddev_outcome_noise          = 0.01,
+                    one_hot_encode                = True
+                    )
+                    describe_synthetic_data(synthetic_data).head()
+    """
     assert not (treatment_is_binary and treatment_is_category)
     W, X, Z, FD, c1, c2, ce, cz, cfd1, cfd2 = [None] * 10
     W_with_dummy, X_with_categorical = (None, None)
@@ -699,3 +850,40 @@ def partially_linear_dataset(
         "ate": ate,
     }
     return ret_dict
+
+
+def lalonde_dataset() -> pd.DataFrame:
+    """Downloads and returns the Lalonde dataset from https://users.nber.org/~rdehejia/nswdata2.html"""
+    # The following code for loading the Lalonde dataset was copied from
+    # https://github.com/wayfair/pylift/blob/5afc9088e96f25672423663f5c9b4bb889b4dfc0/examples/Lalonde/Lalonde_sample.ipynb?short_path=b1d451f#L94-L99).
+    #
+    # Copyright 2018, Wayfair, Inc.
+    #
+    # Redistribution and use in source and binary forms, with or without modification, are permitted provided that
+    # the following conditions are met:
+    #
+    # 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the
+    #    following disclaimer.
+    #
+    # 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+    #    following disclaimer in the documentation and/or other materials provided with the distribution.
+    #
+    # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
+    # WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+    # PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY
+    # DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+    # PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+    # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+    # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+    # DAMAGE.
+    cols = ["treat", "age", "educ", "black", "hisp", "married", "nodegr", "re74", "re75", "re78"]
+    control = pd.read_csv(
+        "https://www.nber.org/~rdehejia/data/nswre74_control.txt", sep="\\s+", header=None, names=cols
+    )
+    treated = pd.read_csv(
+        "https://www.nber.org/~rdehejia/data/nswre74_treated.txt", sep="\\s+", header=None, names=cols
+    )
+    lalonde = pd.concat([control, treated], ignore_index=True).astype({"treat": "bool"}, copy=False)
+    lalonde["u74"] = np.where(lalonde["re74"] == 0, 1.0, 0.0)
+    lalonde["u75"] = np.where(lalonde["re75"] == 0, 1.0, 0.0)
+    return lalonde
