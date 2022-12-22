@@ -103,7 +103,14 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
         return self
 
     def estimate_effect(
-        self, data: pd.DataFrame, treatment_name: List[str], treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+        self,
+        data: pd.DataFrame,
+        treatment_name: List[str],
+        outcome_name: List[str],
+        treatment_value: Any = 1,
+        control_value: Any = 0,
+        target_units=None,
+        **_,
     ):
         self._target_units = target_units
         self._treatment_value = treatment_value
@@ -128,8 +135,8 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
         att = 0
         numtreatedunits = treated.shape[0]
         for i in range(numtreatedunits):
-            treated_outcome = treated.iloc[i][self._outcome_name].item()
-            control_outcome = control.iloc[indices[i]][self._outcome_name].item()
+            treated_outcome = treated.iloc[i][outcome_name[0]].item()
+            control_outcome = control.iloc[indices[i]][outcome_name[0]].item()
             att += treated_outcome - control_outcome
 
         att /= numtreatedunits
@@ -142,8 +149,8 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
         atc = 0
         numcontrolunits = control.shape[0]
         for i in range(numcontrolunits):
-            control_outcome = control.iloc[i][self._outcome_name].item()
-            treated_outcome = treated.iloc[indices[i]][self._outcome_name].item()
+            control_outcome = control.iloc[i][outcome_name[0]].item()
+            treated_outcome = treated.iloc[indices[i]][outcome_name[0]].item()
             atc += treated_outcome - control_outcome
 
         atc /= numcontrolunits

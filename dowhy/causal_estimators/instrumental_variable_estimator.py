@@ -110,7 +110,9 @@ class InstrumentalVariableEstimator(CausalEstimator):
             )
         self._estimating_instruments = data[self.estimating_instrument_names]
 
-        self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand, treatment_name)
+        self.symbolic_estimator = self.construct_symbolic_estimator(
+            self._target_estimand, treatment_name, outcome_name[0]
+        )
         self.logger.info(self.symbolic_estimator)
 
         return self
@@ -119,6 +121,7 @@ class InstrumentalVariableEstimator(CausalEstimator):
         self,
         data: pd.DataFrame,
         treatment_name: List[str],
+        outcome_name: List[str],
         treatment_value: Any = 1,
         control_value: Any = 0,
         target_units=None,
@@ -177,7 +180,7 @@ class InstrumentalVariableEstimator(CausalEstimator):
         estimate.add_estimator(self)
         return estimate
 
-    def construct_symbolic_estimator(self, estimand, treatment_name):
+    def construct_symbolic_estimator(self, estimand, treatment_name, outcome_name):
         sym_outcome = spstats.Normal(",".join(estimand.outcome_variable), 0, 1)
         sym_treatment = spstats.Normal(",".join(estimand.treatment_variable), 0, 1)
         sym_instrument = sp.Symbol(",".join(self.estimating_instrument_names))
@@ -187,12 +190,11 @@ class InstrumentalVariableEstimator(CausalEstimator):
         estimator_assumptions = {
             "treatment_effect_homogeneity": (
                 "Each unit's treatment {0} is ".format(treatment_name) + "affected in the same way by common causes of "
-                "{0} and {1}".format(treatment_name, self._outcome_name)
+                "{0} and {1}".format(treatment_name, outcome_name)
             ),
             "outcome_effect_homogeneity": (
-                "Each unit's outcome {0} is ".format(self._outcome_name)
-                + "affected in the same way by common causes of "
-                "{0} and {1}".format(treatment_name, self._outcome_name)
+                "Each unit's outcome {0} is ".format(outcome_name) + "affected in the same way by common causes of "
+                "{0} and {1}".format(treatment_name, outcome_name)
             ),
         }
         sym_assumptions = {**estimand.estimands["iv"]["assumptions"], **estimator_assumptions}

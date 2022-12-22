@@ -227,7 +227,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         self._second_stage_model.fit(
             data,
             parse_state(self._second_stage_model._target_estimand.treatment_variable),
-            parse_state(self._outcome_name),  # to convert it to array before passing to causal estimator)
+            parse_state(outcome_name[0]),  # to convert it to array before passing to causal estimator)
             effect_modifier_names=effect_modifier_names,
         )
 
@@ -236,7 +236,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
             self._second_stage_model_nde.fit(
                 data,
                 treatment_name,
-                parse_state(self._outcome_name),  # to convert it to array before passing to causal estimator)
+                parse_state(outcome_name[0]),  # to convert it to array before passing to causal estimator)
                 effect_modifier_names=effect_modifier_names,
             )
 
@@ -246,6 +246,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         self,
         data: pd.DataFrame,
         treatment_name: List[str],
+        outcome_name: List[str],
         treatment_value: Any = 1,
         control_value: Any = 0,
         target_units=None,
@@ -260,6 +261,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         first_stage_estimate = self._first_stage_model.estimate_effect(
             data,
             treatment_name=treatment_name,
+            outcome_name=outcome_name,
             control_value=control_value,
             treatment_value=treatment_value,
             target_units=target_units,
@@ -269,6 +271,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         second_stage_estimate = self._second_stage_model.estimate_effect(
             data,
             treatment_name=treatment_name,
+            outcome_name=outcome_name,
             control_value=control_value,
             treatment_value=treatment_value,
             target_units=target_units,
@@ -287,6 +290,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
             total_effect_estimate = self._second_stage_model_nde.estimate_effect(
                 data,
                 treatment_name=treatment_name,
+                outcome_name=outcome_name,
                 control_value=control_value,
                 treatment_value=treatment_value,
                 target_units=target_units,

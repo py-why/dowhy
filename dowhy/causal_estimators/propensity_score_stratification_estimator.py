@@ -114,7 +114,14 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         return self
 
     def estimate_effect(
-        self, data: pd.DataFrame, treatment_name: List[str], treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+        self,
+        data: pd.DataFrame,
+        treatment_name: List[str],
+        outcome_name: List[str],
+        treatment_value: Any = 1,
+        control_value: Any = 0,
+        target_units=None,
+        **_,
     ):
         self._target_units = target_units
         self._treatment_value = treatment_value
@@ -134,7 +141,9 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
             while not strata_found:
                 self.logger.info("'num_strata' selected as {}".format(num_strata))
                 try:
-                    clipped = self._get_strata(data, treatment_name, num_strata, self.clipping_threshold)
+                    clipped = self._get_strata(
+                        data, treatment_name, outcome_name[0], num_strata, self.clipping_threshold
+                    )
                     num_ret_strata = clipped.groupby(["strata"]).count().reset_index()
                     # At least 90% of the strata should be included in analysis
                     if num_ret_strata.shape[0] >= 0.5 * num_strata:
@@ -160,7 +169,7 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
                             "Not enough data to generate at least two strata. This error may be due to a high value of 'clipping_threshold'."
                         )
         else:
-            clipped = self._get_strata(data, treatment_name, self.num_strata, self.clipping_threshold)
+            clipped = self._get_strata(data, treatment_name, outcome_name[0], self.num_strata, self.clipping_threshold)
 
         # sum weighted outcomes over all strata  (weight by treated population)
         weighted_outcomes = clipped.groupby("strata").agg(
@@ -212,17 +221,19 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         estimate.add_estimator(self)
         return estimate
 
-    def _get_strata(self, data: pd.DataFrame, treatment_name: List[str], num_strata, clipping_threshold):
+    def _get_strata(
+        self, data: pd.DataFrame, treatment_name: List[str], outcome_name: str, num_strata, clipping_threshold
+    ):
         # sort the dataframe by propensity score
         # create a column 'strata' for each element that marks what strata it belongs to
-        num_rows = data[self._outcome_name].shape[0]
+        num_rows = data[outcome_name].shape[0]
         data["strata"] = ((data[self.propensity_score_column].rank(ascending=True) / num_rows) * num_strata).round(0)
         # for each strata, count how many treated and control units there are
         # throw away strata that have insufficient treatment or control
 
         data["dbar"] = 1 - data[treatment_name[0]]  # 1-Treatment
-        data["d_y"] = data[treatment_name[0]] * data[self._outcome_name]
-        data["dbar_y"] = data["dbar"] * data[self._outcome_name]
+        data["d_y"] = data[treatment_name[0]] * data[outcome_name]
+        data["dbar_y"] = data["dbar"] * data[outcome_name]
         stratified = data.groupby("strata")
         clipped = stratified.filter(
             lambda strata: min(
@@ -233,7 +244,7 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         )
         self.logger.debug(
             "After using clipping_threshold={0}, here are the number of data points in each strata:\n {1}".format(
-                clipping_threshold, clipped.groupby(["strata", treatment_name[0]])[self._outcome_name].count()
+                clipping_threshold, clipped.groupby(["strata", treatment_name[0]])[outcome_name].count()
             )
         )
         if clipped.empty:

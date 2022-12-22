@@ -111,9 +111,9 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
         model = sm.GLM(self._outcome, features, family=self.family).fit()
         return (features, model)
 
-    def predict_fn(self, data: pd.DataFrame, model, features):
+    def predict_fn(self, data: pd.DataFrame, outcome_name: str, model, features):
         # Checking if Y is binary
-        outcome_values = data[self._outcome_name].astype(int).unique()
+        outcome_values = data[outcome_name].astype(int).unique()
         outcome_is_binary = all([v in [0, 1] for v in outcome_values])
 
         if outcome_is_binary:

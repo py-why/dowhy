@@ -182,14 +182,14 @@ class CausalEstimator:
 
         return new_estimator
 
-    def estimate_effect_naive(self, data: pd.DataFrame, treatment_name: List[str]):
+    def estimate_effect_naive(self, data: pd.DataFrame, treatment_name: List[str], outcome_name: str):
         """
         :param data: Pandas dataframe to estimate effect
         """
         # TODO Only works for binary treatment
         df_withtreatment = data.loc[data[treatment_name] == 1]
         df_notreatment = data.loc[data[treatment_name] == 0]
-        est = np.mean(df_withtreatment[self._outcome_name]) - np.mean(df_notreatment[self._outcome_name])
+        est = np.mean(df_withtreatment[outcome_name]) - np.mean(df_notreatment[outcome_name])
         return CausalEstimate(data, est, None, None, control_value=0, treatment_value=1)
 
     def _estimate_effect_fn(self, data_df):
@@ -311,7 +311,8 @@ class CausalEstimator:
             )
             new_effect = new_estimator.estimate_effect(
                 new_data,
-                treatment_name=treatment_name,
+                treatment_name=self._target_estimand.treatment_variable,
+                outcome_name=self._target_estimand.outcome_variable,
                 treatment_value=self._treatment_value,
                 control_value=self._control_value,
                 target_units=self._target_units,
@@ -539,7 +540,8 @@ class CausalEstimator:
 
                 new_effect = new_estimator.estimate_effect(
                     new_data,
-                    treatment_name=treatment_name,
+                    treatment_name=self._target_estimand.treatment_variable,
+                    outcome_name=("dummy_outcome",),
                     target_units=self._target_units,
                 )
                 null_estimates[i] = new_effect.value
@@ -615,9 +617,9 @@ class CausalEstimator:
                 signif_dict = self._test_significance(estimate_value, method, **kwargs)
         return signif_dict
 
-    def evaluate_effect_strength(self, data: pd.DataFrame, treatment_name, estimate):
+    def evaluate_effect_strength(self, data: pd.DataFrame, treatment_name, outcome_name, estimate):
         fraction_effect_explained = self._evaluate_effect_strength(
-            data, treatment_name, estimate, method="fraction-effect"
+            data, treatment_name, outcome_name, estimate, method="fraction-effect"
         )
         # Need to test r-squared before supporting
         # effect_r_squared = self._evaluate_effect_strength(estimate, method="r-squared")
@@ -628,13 +630,13 @@ class CausalEstimator:
         return strength_dict
 
     def _evaluate_effect_strength(
-        self, data: pd.DataFrame, treatment_name: List[str], estimate, method="fraction-effect"
+        self, data: pd.DataFrame, treatment_name: List[str], outcome_name: str, estimate, method="fraction-effect"
     ):
         supported_methods = ["fraction-effect"]
         if method not in supported_methods:
             raise NotImplementedError("This method is not supported for evaluating effect strength")
         if method == "fraction-effect":
-            naive_obs_estimate = self.estimate_effect_naive(data, treatment_name)
+            naive_obs_estimate = self.estimate_effect_naive(data, treatment_name, outcome_name)
             self.logger.debug(estimate.value, naive_obs_estimate.value)
             fraction_effect_explained = estimate.value / naive_obs_estimate.value
             return fraction_effect_explained
@@ -759,6 +761,7 @@ def estimate_effect(
     estimate = estimator.estimate_effect(
         data,
         treatment_name=treatment,
+        outcome_name=outcome,
         treatment_value=treatment_value,
         control_value=control_value,
         target_units=target_units,

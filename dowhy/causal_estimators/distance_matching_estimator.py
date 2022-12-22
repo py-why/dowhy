@@ -152,15 +152,20 @@ class DistanceMatchingEstimator(CausalEstimator):
         return self
 
     def estimate_effect(
-        self, data: pd.DataFrame, treatment_name: List[str], treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+        self,
+        data: pd.DataFrame,
+        treatment_name: List[str],
+        outcome_name: List[str],
+        treatment_value: Any = 1,
+        control_value: Any = 0,
+        target_units=None,
+        **_,
     ):
         # this assumes a binary treatment regime
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
-        updated_df = pd.concat(
-            [self._observed_common_causes, data[[self._outcome_name, treatment_name[0]]]], axis=1
-        )
+        updated_df = pd.concat([self._observed_common_causes, data[[outcome_name[0], treatment_name[0]]]], axis=1)
         if self.exact_match_cols is not None:
             updated_df = pd.concat([updated_df, data[self.exact_match_cols]], axis=1)
         treated = updated_df.loc[data[treatment_name[0]] == 1]
@@ -197,8 +202,8 @@ class DistanceMatchingEstimator(CausalEstimator):
                 att = 0
 
                 for i in range(numtreatedunits):
-                    treated_outcome = treated.iloc[i][self._outcome_name].item()
-                    control_outcome = np.mean(control.iloc[indices[i]][self._outcome_name].values)
+                    treated_outcome = treated.iloc[i][outcome_name[0]].item()
+                    control_outcome = np.mean(control.iloc[indices[i]][outcome_name[0]].values)
                     att += treated_outcome - control_outcome
 
                 att /= numtreatedunits
@@ -233,8 +238,8 @@ class DistanceMatchingEstimator(CausalEstimator):
                     self.logger.debug(distances)
 
                     for i in range(numtreatedunits):
-                        treated_outcome = treated.iloc[i][self._outcome_name].item()
-                        control_outcome = np.mean(control.iloc[indices[i]][self._outcome_name].values)
+                        treated_outcome = treated.iloc[i][outcome_name[0]].item()
+                        control_outcome = np.mean(control.iloc[indices[i]][outcome_name[0]].values)
                         att += treated_outcome - control_outcome
                         # self.matched_indices_att[treated_df_index[i]] = control.iloc[indices[i]].index.tolist()
 
@@ -257,8 +262,8 @@ class DistanceMatchingEstimator(CausalEstimator):
 
             atc = 0
             for i in range(numcontrolunits):
-                control_outcome = control.iloc[i][self._outcome_name].item()
-                treated_outcome = np.mean(treated.iloc[indices[i]][self._outcome_name].values)
+                control_outcome = control.iloc[i][outcome_name[0]].item()
+                treated_outcome = np.mean(treated.iloc[indices[i]][outcome_name[0]].values)
                 atc += treated_outcome - control_outcome
 
             atc /= numcontrolunits

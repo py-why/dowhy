@@ -831,7 +831,8 @@ def sensitivity_simulation(
         )
         new_effect = new_estimator.estimate_effect(
             new_data,
-            treatment_name=treatment_name,
+            target_estimand.treatment_variable,
+            target_estimand.outcome_variable,
             control_value=estimate.control_value,
             treatment_value=estimate.treatment_value,
             target_units=estimate.estimator._target_units,
@@ -882,7 +883,8 @@ def sensitivity_simulation(
                     )
                     new_effect = new_estimator.estimate_effect(
                         new_data,
-                        treatment_name=treatment_name,
+                        target_estimand.treatment_variable,
+                        target_estimand.outcome_variable,
                         control_value=estimate.control_value,
                         treatment_value=estimate.treatment_value,
                         target_units=estimate.estimator._target_units,
@@ -962,7 +964,8 @@ def sensitivity_simulation(
                 )
                 new_effect = new_estimator.estimate_effect(
                     new_data,
-                    treatment_name=treatment_name,
+                    target_estimand.treatment_variable,
+                    target_estimand.outcome_variable,
                     control_value=estimate.control_value,
                     treatment_value=estimate.treatment_value,
                     target_units=estimate.estimator._target_units,
@@ -1024,7 +1027,8 @@ def sensitivity_simulation(
                 )
                 new_effect = new_estimator.estimate_effect(
                     new_data,
-                    treatment_name=treatment_name,
+                    target_estimand.treatment_variable,
+                    target_estimand.outcome_variable,
                     control_value=estimate.control_value,
                     treatment_value=estimate.treatment_value,
                     target_units=estimate.estimator._target_units,

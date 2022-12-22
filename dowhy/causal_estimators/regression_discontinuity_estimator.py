@@ -142,6 +142,7 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
         self,
         data: pd.DataFrame,
         treatment_name: List[str],
+        outcome_name: List[str],
         treatment_value: Any = 1,
         control_value: Any = 0,
         target_units=None,
@@ -154,6 +155,7 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
         est = self.iv_estimator.estimate_effect(
             data,
             treatment_name=["local_treatment"],
+            outcome_name=outcome_name,
             treatment_value=treatment_value,
             control_value=control_value,
             target_units=target_units,

@@ -100,7 +100,7 @@ class LinearRegressionEstimator(RegressionEstimator):
             expr += "+" + "+".join(interaction_terms)
         return expr
 
-    def predict_fn(self, data, model, features):
+    def predict_fn(self, data, outcome_name, model, features):
         return model.predict(features)
 
     def _build_model(self, data: pd.DataFrame, treatment_name: List[str]):

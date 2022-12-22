@@ -112,6 +112,7 @@ class RegressionEstimator(CausalEstimator):
         self,
         data: pd.DataFrame,
         treatment_name: List[str],
+        outcome_name: List[str],
         treatment_value: Any = 1,
         control_value: Any = 0,
         target_units=None,
@@ -123,7 +124,9 @@ class RegressionEstimator(CausalEstimator):
         self._control_value = control_value
         # TODO make treatment_value and control value also as local parameters
         # All treatments are set to the same constant value
-        effect_estimate = self._do(data, treatment_name, treatment_value) - self._do(data, treatment_name, control_value)
+        effect_estimate = self._do(data, treatment_name, outcome_name[0], treatment_value) - self._do(
+            data, treatment_name, outcome_name[0], control_value
+        )
         conditional_effect_estimates = None
         if need_conditional_estimates:
             conditional_effect_estimates = self._estimate_conditional_effects(
@@ -184,7 +187,7 @@ class RegressionEstimator(CausalEstimator):
         features = sm.add_constant(features, has_constant="add")  # to add an intercept term
         return features
 
-    def _do(self, data_df: pd.DataFrame, treatment_name: List[str], treatment_val):
+    def _do(self, data_df: pd.DataFrame, treatment_name: List[str], outcome_name: str, treatment_val):
         if data_df is None:
             data_df = self._data
         if not self.model:
@@ -205,5 +208,5 @@ class RegressionEstimator(CausalEstimator):
         interventional_treatment_2d = interventional_treatment_2d[self._treatment.shape[0] :]
 
         new_features = self._build_features(data_df, treatment_name, treatment_values=interventional_treatment_2d)
-        interventional_outcomes = self.predict_fn(data_df, self.model, new_features)
+        interventional_outcomes = self.predict_fn(data_df, outcome_name, self.model, new_features)
         return interventional_outcomes.mean()

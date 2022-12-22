@@ -105,8 +105,8 @@ class Causalml(CausalEstimator):
     def fit(
         self,
         data: pd.DataFrame,
-        treatment_name: str,
-        outcome_name: str,
+        treatment_name: List[str],
+        outcome_name: List[str],
         effect_modifier_names: Optional[List[str]] = None,
     ):
         """
@@ -169,6 +169,7 @@ class Causalml(CausalEstimator):
         self,
         data: pd.DataFrame,
         treatment_name: List[str],
+        outcome_name: List[str],
         treatment_value: Any = 1,
         control_value: Any = 0,
         target_units=None,
@@ -188,7 +189,7 @@ class Causalml(CausalEstimator):
         X_names = self._observed_common_causes_names + self._effect_modifier_names
 
         # Both the outcome and the treatment have to be 1D arrays according to the CausalML API
-        y_name = self._outcome_name
+        y_name = outcome_name[0]
         treatment_name = treatment_name[0]  # As we have only one treatment variable
         # We want to pass 'v0' rather than ['v0'] to prevent a shape mismatch
 

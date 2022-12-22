@@ -78,6 +78,7 @@ class TestEstimator(object):
         ate_estimate = estimator_ate.estimate_effect(
             data["df"],
             treatment_name=data["treatment_name"],
+            outcome_name=data["outcome_name"],
             control_value=0,
             treatment_value=1,
             test_significance=test_significance,
@@ -180,7 +181,9 @@ class TestEstimator(object):
             outcome=data["outcome_name"],
         )
         true_ate = data["ate"]
-        ate_estimate = estimator_ate.estimate_effect(data["df"], treatment_name=target_estimand.treatment_variable)
+        ate_estimate = estimator_ate.estimate_effect(
+            data["df"], treatment_name=target_estimand.treatment_variable, outcome_name=target_estimand.outcome_variable
+        )
         error = ate_estimate.value - true_ate
         print(
             "Error in ATE estimate = {0} with tolerance {1}%. Estimated={2},True={3}".format(
