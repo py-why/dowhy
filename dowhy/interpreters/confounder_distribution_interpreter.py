@@ -69,9 +69,9 @@ class ConfounderDistributionInterpreter(VisualInterpreter):
         Shows distribution changes for confounding variables before and after applying inverse propensity weights.
         """
 
-        cols = self.estimator._observed_common_causes_names + self.estimator._treatment_name
+        cols = self.estimator._observed_common_causes_names + self.estimate._treatment_name
         df = data[cols].copy()
-        treated = self.estimator._treatment_name[0]
+        treated = self.estimate._treatment_name[0]
         propensity = self.estimate.propensity_scores
 
         # add weight column

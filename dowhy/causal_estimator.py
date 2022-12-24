@@ -111,17 +111,6 @@ class CausalEstimator:
         self._bootstrap_estimates = None
         self._bootstrap_null_estimates = None
 
-    def _set_data(self, data: pd.DataFrame, treatment_name: List[str], outcome_name: List[str]):
-        """Sets the data for the estimator
-        :param data: data frame containing the data
-        :param treatment_name: name of the treatment variable
-        :param outcome_name: name of the outcome variable
-        """
-        self._treatment_name = treatment_name
-        self._outcome_name = outcome_name[0]
-        self._treatment = data[treatment_name]
-        self._outcome = data[outcome_name[0]]
-
     def _set_effect_modifiers(self, data: pd.DataFrame, effect_modifier_names: Optional[List[str]] = None):
         """Sets the effect modifiers for the estimator
         Modifies need_conditional_estimates accordingly to effect modifiers value
@@ -190,7 +179,7 @@ class CausalEstimator:
         df_withtreatment = data.loc[data[treatment_name] == 1]
         df_notreatment = data.loc[data[treatment_name] == 0]
         est = np.mean(df_withtreatment[outcome_name]) - np.mean(df_notreatment[outcome_name])
-        return CausalEstimate(data, est, None, None, control_value=0, treatment_value=1)
+        return CausalEstimate(data, None, None, est, None, control_value=0, treatment_value=1)
 
     def _estimate_effect_fn(self, data_df):
         """Function used in conditional effect estimation. This function is to be overridden by each child estimator.
@@ -505,7 +494,7 @@ class CausalEstimator:
         return std_error
 
     def _test_significance_with_bootstrap(
-        self, data: pd.DataFrame, treatment_name, estimate_value, num_null_simulations=None
+        self, data: pd.DataFrame, treatment_name, outcome_name, estimate_value, num_null_simulations=None
     ):
         """Test statistical significance of an estimate using the bootstrap method.
 
@@ -522,7 +511,7 @@ class CausalEstimator:
         if do_retest:
             null_estimates = np.zeros(num_null_simulations)
             for i in range(num_null_simulations):
-                new_outcome = np.random.permutation(self._outcome)
+                new_outcome = np.random.permutation(data[outcome_name])
                 new_data = data.assign(dummy_outcome=new_outcome)
                 # self._outcome = self._data["dummy_outcome"]
                 new_estimator = self.get_new_estimator_object(
@@ -584,7 +573,7 @@ class CausalEstimator:
             ).format(self.__class__)
         )
 
-    def test_significance(self, data: pd.DataFrame, treatment_name, estimate_value, method=None, **kwargs):
+    def test_significance(self, data: pd.DataFrame, treatment_name, outcome_name, estimate_value, method=None, **kwargs):
         """Test statistical significance of obtained estimate.
 
         By default, uses resampling to create a non-parametric significance test.
@@ -609,10 +598,10 @@ class CausalEstimator:
             try:
                 signif_dict = self._test_significance(estimate_value, method, **kwargs)
             except NotImplementedError:
-                signif_dict = self._test_significance_with_bootstrap(data, treatment_name, estimate_value, **kwargs)
+                signif_dict = self._test_significance_with_bootstrap(data, treatment_name, outcome_name, estimate_value, **kwargs)
         else:
             if method == "bootstrap":
-                signif_dict = self._test_significance_with_bootstrap(data, treatment_name, estimate_value, **kwargs)
+                signif_dict = self._test_significance_with_bootstrap(data, treatment_name, outcome_name, estimate_value, **kwargs)
             else:
                 signif_dict = self._test_significance(estimate_value, method, **kwargs)
         return signif_dict
@@ -742,12 +731,12 @@ def estimate_effect(
     if identified_estimand.no_directed_path:
         logger.warning("No directed path from {0} to {1}.".format(treatment, outcome))
         return CausalEstimate(
-            None, 0, identified_estimand, None, control_value=control_value, treatment_value=treatment_value
+            None, None, None, 0, identified_estimand, None, control_value=control_value, treatment_value=treatment_value
         )
     # Check if estimator's target estimand is identified
     elif identified_estimand.estimands[identifier_name] is None:
         logger.error("No valid identified estimand available.")
-        return CausalEstimate(None, None, None, control_value=control_value, treatment_value=treatment_value)
+        return CausalEstimate(None, None, None, None, None, control_value=control_value, treatment_value=treatment_value)
 
     if fit_estimator:
         estimator.fit(
@@ -791,6 +780,7 @@ class CausalEstimate:
         self,
         data,
         treatment_name,
+        outcome_name,
         estimate,
         target_estimand,
         realized_estimand_expr,
@@ -799,12 +789,13 @@ class CausalEstimate:
         conditional_estimates=None,
         **kwargs,
     ):
-        # TODO: Remove _data from this object
-        # we save it here to enable the methods that required the data saved in the estimator
+        # TODO: Remove _data, _treatment_name and _outcome_name from this object
+        # we save them here to enable the methods that required these properties saved in the estimator
         # eventually we should call those methods and just save the results in this object
         # instead of having this object invoke the estimator methods with the data.
         self._data = data
         self._treatment_name = treatment_name
+        self._outcome_name = outcome_name
         self.value = estimate
         self.target_estimand = target_estimand
         self.realized_estimand_expr = realized_estimand_expr
@@ -880,7 +871,7 @@ class CausalEstimate:
         :returns: p-value from the significance test
         """
         signif_results = self.estimator.test_significance(
-            self._data, self._treatment_name, self.value, method=method, **kwargs
+            self._data, self._treatment_name, self._outcome_name, self.value, method=method, **kwargs
         )
         return {"p_value": signif_results["p_value"]}
 

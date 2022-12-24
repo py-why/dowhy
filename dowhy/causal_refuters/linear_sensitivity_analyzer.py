@@ -107,7 +107,7 @@ class LinearSensitivityAnalyzer:
         """
 
         features = self.estimator._observed_common_causes.copy()
-        treatment_df = self.estimator._treatment.copy()
+        treatment_df = self.data[self.original_treatment_name].copy()
         features = sm.tools.add_constant(features)
         features.rename(columns=self.common_causes_map, inplace=True)
         model = sm.OLS(treatment_df, features)

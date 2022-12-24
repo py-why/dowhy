@@ -123,7 +123,6 @@ class Econml(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        self._set_data(data, treatment_name, outcome_name)
         self._set_effect_modifiers(data, effect_modifier_names)
 
         # Save parameters for later refutter fitting
@@ -180,8 +179,8 @@ class Econml(CausalEstimator):
         X = None
         W = None  # common causes/ confounders
         Z = None  # Instruments
-        Y = self._outcome
-        T = self._treatment
+        Y = data[outcome_name[0]]
+        T = data[treatment_name]
         if self._effect_modifiers is not None and len(self._effect_modifiers) > 0:
             X = self._effect_modifiers
         if self._observed_common_causes_names:
@@ -238,7 +237,6 @@ class Econml(CausalEstimator):
         self._treatment_value = treatment_value
         self._control_value = control_value
 
-        n_samples = self._treatment.shape[0]
         X = None  # Effect modifiers
         if self._effect_modifiers is not None and len(self._effect_modifiers) > 0:
             X = self._effect_modifiers
@@ -268,6 +266,7 @@ class Econml(CausalEstimator):
         estimate = CausalEstimate(
             data=data,
             treatment_name=treatment_name,
+            outcome_name=outcome_name,
             estimate=ate,
             control_value=control_value,
             treatment_value=treatment_value,

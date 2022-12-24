@@ -118,7 +118,6 @@ class Causalml(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        self._set_data(data, treatment_name, outcome_name)
         self._set_effect_modifiers(data, effect_modifier_names)
 
         # Check the backdoor variables being used
@@ -208,6 +207,7 @@ class Causalml(CausalEstimator):
         estimate = CausalEstimate(
             data=data,
             treatment_name=treatment_name,
+            outcome_name=outcome_name,
             estimate=value_tuple[0],
             control_value=control_value,
             treatment_value=treatment_value,

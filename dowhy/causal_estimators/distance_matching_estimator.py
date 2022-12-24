@@ -112,7 +112,6 @@ class DistanceMatchingEstimator(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        self._set_data(data, treatment_name, outcome_name)
         self.exact_match_cols = exact_match_cols
 
         self._set_effect_modifiers(data, effect_modifier_names)
@@ -283,6 +282,7 @@ class DistanceMatchingEstimator(CausalEstimator):
         estimate = CausalEstimate(
             data=data,
             treatment_name=treatment_name,
+            outcome_name=outcome_name,
             estimate=est,
             control_value=control_value,
             treatment_value=treatment_value,

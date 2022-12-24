@@ -103,9 +103,9 @@ class LinearRegressionEstimator(RegressionEstimator):
     def predict_fn(self, data, outcome_name, model, features):
         return model.predict(features)
 
-    def _build_model(self, data: pd.DataFrame, treatment_name: List[str]):
+    def _build_model(self, data: pd.DataFrame, treatment_name: List[str], outcome_name: str):
         features = self._build_features(data, treatment_name)
-        model = sm.OLS(self._outcome, features).fit()
+        model = sm.OLS(data[outcome_name], features).fit()
         return (features, model)
 
     def _estimate_confidence_intervals(self, treatment_name, confidence_level, method=None):

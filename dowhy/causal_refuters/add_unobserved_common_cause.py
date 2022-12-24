@@ -702,8 +702,8 @@ def sensitivity_non_parametric_partial_r2(
         analyzer = PartialLinearSensitivityAnalyzer(
             estimator=estimate._estimator_object,
             observed_common_causes=estimate.estimator._observed_common_causes,
-            treatment=estimate.estimator._treatment,
-            outcome=estimate.estimator._outcome,
+            treatment=estimate._data[estimate._treatment_name],
+            outcome=estimate._data[estimate._outcome_name[0]],
             alpha_s_estimator_param_list=alpha_s_estimator_param_list,
             g_s_estimator_list=g_s_estimator_list,
             g_s_estimator_param_list=g_s_estimator_param_list,
@@ -719,8 +719,8 @@ def sensitivity_non_parametric_partial_r2(
     analyzer = NonParametricSensitivityAnalyzer(
         estimator=estimate.estimator,
         observed_common_causes=estimate.estimator._observed_common_causes,
-        treatment=estimate.estimator._treatment,
-        outcome=estimate.estimator._outcome,
+        treatment=estimate._data[estimate._treatment_name],
+        outcome=estimate._data[estimate._outcome_name[0]],
         alpha_s_estimator_list=alpha_s_estimator_list,
         alpha_s_estimator_param_list=alpha_s_estimator_param_list,
         g_s_estimator_list=g_s_estimator_list,

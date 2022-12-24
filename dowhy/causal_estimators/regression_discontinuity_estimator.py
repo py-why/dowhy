@@ -100,7 +100,6 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        self._set_data(data, treatment_name, outcome_name)
         self._set_effect_modifiers(data, effect_modifier_names)
 
         self.rd_variable = data[self.rd_variable_name]
@@ -112,18 +111,18 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
         lower_limit = self.rd_threshold_value - self.rd_bandwidth
         rows_filter = np.s_[(self.rd_variable >= lower_limit) & (self.rd_variable <= upper_limit)]
         local_rd_variable = self.rd_variable[rows_filter]
-        local_treatment_variable = self._treatment[treatment_name[0]][
+        local_treatment_variable = data[treatment_name[0]][
             rows_filter
         ]  # indexing by treatment name again since this method assumes a single-dimensional treatment
-        local_outcome_variable = self._outcome[rows_filter]
-        local_df = pd.DataFrame(
+        local_outcome_variable = data[outcome_name[0]][rows_filter]
+        self._local_df = pd.DataFrame(
             data={
                 "local_rd_variable": local_rd_variable,
                 "local_treatment": local_treatment_variable,
                 "local_outcome": local_outcome_variable,
             }
         )
-        self.logger.debug(local_df)
+        self.logger.debug(self._local_df)
         self.iv_estimator = InstrumentalVariableEstimator(
             self._target_estimand,
             test_significance=self._significance_test,
@@ -131,7 +130,7 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
         )
 
         self.iv_estimator.fit(
-            local_df,
+            self._local_df,
             ["local_treatment"],
             ["local_outcome"],
         )
@@ -153,9 +152,9 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
         self._control_value = control_value
 
         est = self.iv_estimator.estimate_effect(
-            data,
+            self._local_df,
             treatment_name=["local_treatment"],
-            outcome_name=outcome_name,
+            outcome_name=["local_outcome"],
             treatment_value=treatment_value,
             control_value=control_value,
             target_units=target_units,

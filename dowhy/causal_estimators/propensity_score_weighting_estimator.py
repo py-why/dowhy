@@ -228,6 +228,7 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
         estimate = CausalEstimate(
             data=data,
             treatment_name=treatment_name,
+            outcome_name=outcome_name,
             estimate=est,
             control_value=control_value,
             treatment_value=treatment_value,

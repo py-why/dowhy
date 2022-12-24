@@ -86,7 +86,6 @@ class RegressionEstimator(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        self._set_data(data, treatment_name, outcome_name)
         self._set_effect_modifiers(data, effect_modifier_names)
 
         self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
@@ -101,7 +100,7 @@ class RegressionEstimator(CausalEstimator):
         self.logger.info(self.symbolic_estimator)
 
         # The model is always built on the entire data
-        _, self.model = self._build_model(data, treatment_name)
+        _, self.model = self._build_model(data, treatment_name, outcome_name[0])
         coefficients = self.model.params[1:]  # first coefficient is the intercept
         self.logger.debug("Coefficients of the fitted model: " + ",".join(map(str, coefficients)))
         self.logger.debug(self.model.summary())
@@ -136,6 +135,7 @@ class RegressionEstimator(CausalEstimator):
         estimate = CausalEstimate(
             data=data,
             treatment_name=treatment_name,
+            outcome_name=outcome_name,
             estimate=effect_estimate,
             control_value=control_value,
             treatment_value=treatment_value,
@@ -192,20 +192,20 @@ class RegressionEstimator(CausalEstimator):
             data_df = self._data
         if not self.model:
             # The model is always built on the entire data
-            _, self.model = self._build_model(data_df, treatment_name)
+            _, self.model = self._build_model(data_df, treatment_name, outcome_name)
         # Replacing treatment values by given x
         # First, create interventional tensor in original space
         interventional_treatment_values = np.full((data_df.shape[0], len(treatment_name)), treatment_val)
         # Then, use pandas to ensure that the dummies are assigned correctly for a categorical treatment
         interventional_treatment_2d = pd.concat(
             [
-                self._treatment.copy(),
-                pd.DataFrame(data=interventional_treatment_values, columns=self._treatment.columns),
+                data_df[treatment_name].copy(),
+                pd.DataFrame(data=interventional_treatment_values, columns=data_df[treatment_name].columns),
             ],
             axis=0,
-        ).astype(self._treatment.dtypes, copy=False)
+        ).astype(data_df[treatment_name].dtypes, copy=False)
         interventional_treatment_2d = pd.get_dummies(interventional_treatment_2d, drop_first=True)
-        interventional_treatment_2d = interventional_treatment_2d[self._treatment.shape[0] :]
+        interventional_treatment_2d = interventional_treatment_2d[data_df[treatment_name].shape[0] :]
 
         new_features = self._build_features(data_df, treatment_name, treatment_values=interventional_treatment_2d)
         interventional_outcomes = self.predict_fn(data_df, outcome_name, self.model, new_features)

@@ -94,7 +94,6 @@ class InstrumentalVariableEstimator(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        self._set_data(data, treatment_name, outcome_name)
         self._set_effect_modifiers(data, effect_modifier_names)
 
         self.estimating_instrument_names = self._target_estimand.instrumental_variables
@@ -145,22 +144,22 @@ class InstrumentalVariableEstimator(CausalEstimator):
             instrument_is_binary = num_unique_values <= 2
             if instrument_is_binary:
                 # Obtain estimate by Wald Estimator
-                y1_z = np.mean(self._outcome[instrument == 1])
-                y0_z = np.mean(self._outcome[instrument == 0])
-                x1_z = np.mean(self._treatment[treatment_name[0]][instrument == 1])
-                x0_z = np.mean(self._treatment[treatment_name[0]][instrument == 0])
+                y1_z = np.mean(data[outcome_name[0]][instrument == 1])
+                y0_z = np.mean(data[outcome_name[0]][instrument == 0])
+                x1_z = np.mean(data[treatment_name[0]][instrument == 1])
+                x0_z = np.mean(data[treatment_name[0]][instrument == 0])
                 num = y1_z - y0_z
                 deno = x1_z - x0_z
                 iv_est = num / deno
             else:
                 # Obtain estimate by 2SLS estimator: Cov(y,z) / Cov(x,z)
-                num_yz = np.cov(self._outcome, instrument)[0, 1]
-                deno_xz = np.cov(self._treatment[treatment_name[0]], instrument)[0, 1]
+                num_yz = np.cov(data[outcome_name[0]], instrument)[0, 1]
+                deno_xz = np.cov(data[treatment_name[0]], instrument)[0, 1]
                 iv_est = num_yz / deno_xz
         else:
             # More than 1 instrument. Use 2sls.
-            est_treatment = self._treatment.astype(np.float32)
-            est_outcome = self._outcome.astype(np.float32)
+            est_treatment = data[treatment_name].astype(np.float32)
+            est_outcome = data[outcome_name[0]].astype(np.float32)
             ivmodel = IV2SLS(est_outcome, est_treatment, self._estimating_instruments)
             reg_results = ivmodel.fit()
             self.logger.debug(reg_results.summary())
@@ -170,6 +169,7 @@ class InstrumentalVariableEstimator(CausalEstimator):
         estimate = CausalEstimate(
             data=data,
             treatment_name=treatment_name,
+            outcome_name=outcome_name,
             estimate=iv_est,
             control_value=control_value,
             treatment_value=treatment_value,

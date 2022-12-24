@@ -15,12 +15,12 @@ class TextualEffectInterpreter(TextualInterpreter):
     def interpret(self, data: pd.DataFrame):
         """Interpret causal effect by showing how much a unit change in treatment will cause change in the outcome."""
         interpret_text = ""
-        treatments_str = ",".join(self.estimator._treatment_name)
-        if pd.api.types.is_numeric_dtype(self.estimator._outcome.dtypes):
+        treatments_str = ",".join(self.estimate._treatment_name)
+        if pd.api.types.is_numeric_dtype(data[self.estimate._outcome_name].dtypes):
             # Outcome is numeric
             if all(
                 pd.api.types.is_numeric_dtype(tr_dtype) or pd.api.types.is_bool_dtype(tr_dtype)
-                for tr_dtype in self.estimator._treatment.dtypes
+                for tr_dtype in data[self.estimate._treatment_name].dtypes
             ):
                 # Treatments are also numeric or binary
                 interpret_text += "Increasing the treatment variable(s) [{0}] from {1} to {2} causes an increase of {3} in the expected value of the outcome [{4}]".format(
@@ -28,7 +28,7 @@ class TextualEffectInterpreter(TextualInterpreter):
                     self.estimator._control_value,
                     self.estimator._treatment_value,
                     self.estimate.value,
-                    self.estimator._outcome_name,
+                    self.estimate._outcome_name,
                 )
             else:
                 raise NotImplementedError("Interpretation not supported yet for categorical treatments")
@@ -36,7 +36,7 @@ class TextualEffectInterpreter(TextualInterpreter):
             # Outcome is categorical
             if all(
                 pd.api.types.is_numeric_dtype(tr_dtype) or pd.api.types.is_bool_dtype(tr_dtype)
-                for tr_dtype in self.estimator._treatment.dtypes
+                for tr_dtype in data[self.estimate._treatment_name].dtypes
             ):
                 # Treatments are numeric or binary
                 interpret_text += "Increasing the treatment variable(s) [{0}] from {1} to {2} causes an increase of {3} in the expected value of the outcome [{4}]".format(
@@ -44,7 +44,7 @@ class TextualEffectInterpreter(TextualInterpreter):
                     self.estimator._control_value,
                     self.estimator._treatment_value,
                     self.estimate.value,
-                    self.estimator._outcome_name,
+                    self.estimate._outcome_name,
                 )
             else:
                 raise NotImplementedError("Interpretation not supported yet for categorical treatments")

@@ -97,7 +97,6 @@ class PropensityScoreEstimator(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        self._set_data(data, treatment_name, outcome_name)
         self._set_effect_modifiers(data, effect_modifier_names)
 
         self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
@@ -129,7 +128,7 @@ class PropensityScoreEstimator(CausalEstimator):
         if self.propensity_score_column not in data:
             if self.propensity_score_model is None:
                 self.propensity_score_model = linear_model.LogisticRegression()
-            treatment_reshaped = np.ravel(self._treatment)
+            treatment_reshaped = np.ravel(data[treatment_name])
             self.propensity_score_model.fit(self._observed_common_causes, treatment_reshaped)
 
         return self

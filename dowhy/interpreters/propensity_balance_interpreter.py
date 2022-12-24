@@ -30,7 +30,7 @@ class PropensityBalanceInterpreter(VisualInterpreter):
         """Balance plot that shows the change in standardized mean differences for each covariate after propensity score stratification."""
         cols = (
             self.estimator._observed_common_causes_names
-            + self.estimator._treatment_name
+            + self.estimate._treatment_name
             + ["strata", "propensity_score"]
         )
         df = data[cols]
@@ -41,7 +41,7 @@ class PropensityBalanceInterpreter(VisualInterpreter):
         )
 
         # First, calculating mean differences by strata
-        mean_diff = df_long.groupby(self.estimator._treatment_name + ["common_cause_id", "strata"]).agg(
+        mean_diff = df_long.groupby(self.estimate._treatment_name + ["common_cause_id", "strata"]).agg(
             mean_w=("W", np.mean)
         )
         mean_diff = (
@@ -65,13 +65,13 @@ class PropensityBalanceInterpreter(VisualInterpreter):
         )
 
         # Second, without strata
-        mean_diff_overall = df_long.groupby(self.estimator._treatment_name + ["common_cause_id"]).agg(
+        mean_diff_overall = df_long.groupby(self.estimate._treatment_name + ["common_cause_id"]).agg(
             mean_w=("W", np.mean)
         )
         mean_diff_overall = (
             mean_diff_overall.groupby("common_cause_id").transform(lambda x: x.max() - x.min()).reset_index()
         )
-        mean_diff_overall = mean_diff_overall[mean_diff_overall[self.estimator._treatment_name[0]] == True]  # TODO
+        mean_diff_overall = mean_diff_overall[mean_diff_overall[self.estimate._treatment_name[0]] == True]  # TODO
         stddev_overall = df_long.groupby(["common_cause_id"]).agg(stddev=("W", np.std)).reset_index()
         mean_diff_overall = pd.merge(mean_diff_overall, stddev_overall, on=["common_cause_id"])
         mean_diff_overall["std_mean_diff"] = mean_diff_overall["mean_w"] / mean_diff_overall["stddev"]

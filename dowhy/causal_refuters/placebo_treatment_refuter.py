@@ -255,6 +255,7 @@ def refute_placebo_treatment(
     dummy_estimator = CausalEstimate(
         data=data,
         treatment_name=estimate._treatment_name,
+        outcome_name=estimate._outcome_name,
         estimate=0,
         control_value=estimate.control_value,
         treatment_value=estimate.treatment_value,
