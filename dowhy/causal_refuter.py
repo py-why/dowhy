@@ -150,8 +150,7 @@ def perform_bootstrap_test(estimate, simulations: List):
     # This calculates a two-sided percentile p-value
     # See footnotes in https://journals.sagepub.com/doi/full/10.1177/2515245920911881
     half_p_value = np.mean([(x > estimate.value) + 0.5 * (x == estimate.value) for x in simulations])
-    return 2*min(half_p_value, 1-half_p_value)
-
+    return 2 * min(half_p_value, 1 - half_p_value)
 
 
 def perform_normal_distribution_test(estimate, simulations: List):
