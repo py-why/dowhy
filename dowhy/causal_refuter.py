@@ -147,27 +147,11 @@ def choose_variables(required_variables: Union[bool, int, list], variables_of_in
 
 
 def perform_bootstrap_test(estimate, simulations: List):
-    # Get the number of simulations
-    num_simulations = len(simulations)
-    # Sort the simulations
-    simulations.sort()
-    # Obtain the median value
-    median_refute_values = simulations[int(num_simulations / 2)]
+    # This calculates a two-sided percentile p-value
+    # See footnotes in https://journals.sagepub.com/doi/full/10.1177/2515245920911881
+    half_p_value = np.mean([(x > estimate.value) + 0.5 * (x == estimate.value) for x in simulations])
+    return 2*min(half_p_value, 1-half_p_value)
 
-    # Performing a two sided test
-    if estimate.value > median_refute_values:
-        # np.searchsorted tells us the index if it were a part of the array
-        # We select side to be left as we want to find the first value that matches
-        estimate_index = np.searchsorted(simulations, estimate.value, side="left")
-        # We subtact 1 as we are finding the value from the right tail
-        p_value = 1 - (estimate_index / num_simulations)
-    else:
-        # We take the side to be right as we want to find the last index that matches
-        estimate_index = np.searchsorted(simulations, estimate.value, side="right")
-        # We get the probability with respect to the left tail.
-        p_value = estimate_index / num_simulations
-    # return twice the determined quantile as this is a two sided test
-    return 2 * p_value
 
 
 def perform_normal_distribution_test(estimate, simulations: List):
