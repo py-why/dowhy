@@ -6,7 +6,7 @@ FROM ghcr.io/py-why/dowhy-example-notebooks-deps
 
 RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt install --yes --quiet curl
-RUN curl -sSL https://install.python-poetry.org | python3 - --version 1.2.2
+RUN curl -sSL https://install.python-poetry.org | python3 - --version 1.3.1
 ENV PATH=$PATH:/root/.local/share/pypoetry/venv/bin
 
 # Install Node for Documntation Tooling

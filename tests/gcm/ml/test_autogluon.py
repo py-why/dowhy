@@ -2,10 +2,12 @@ import tempfile
 
 import numpy as np
 from flaky import flaky
-from pytest import approx
+from pytest import approx, importorskip, mark
 from sklearn.model_selection import train_test_split
 
 from dowhy.gcm.fcms import AdditiveNoiseModel, ClassifierFCM
+
+autolguon = importorskip("dowhy.gcm.ml.autolguon")
 from dowhy.gcm.ml.autolguon import AutoGluonClassifier, AutoGluonRegressor
 from dowhy.gcm.util.general import shape_into_2d
 
