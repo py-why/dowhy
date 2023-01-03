@@ -891,7 +891,7 @@ class CausalEstimate:
             self.estimator._estimate_effect_fn, effect_modifiers, num_quantiles
         )
 
-    def interpret(self, data: pd.DataFrame, method_name=None, **kwargs):
+    def interpret(self, method_name=None, **kwargs):
         """Interpret the causal estimate.
 
         :param method_name: Method used (string) or a list of methods. If None, then the default for the specific estimator is used.
@@ -906,7 +906,7 @@ class CausalEstimate:
 
         for method in method_name_arr:
             interpreter = interpreters.get_class_object(method)
-            interpreter(self, **kwargs).interpret(data)
+            interpreter(self, **kwargs).interpret(self._data)
 
     def __str__(self):
         s = "*** Causal Estimate ***\n"
