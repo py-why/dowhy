@@ -573,7 +573,9 @@ class CausalEstimator:
             ).format(self.__class__)
         )
 
-    def test_significance(self, data: pd.DataFrame, treatment_name, outcome_name, estimate_value, method=None, **kwargs):
+    def test_significance(
+        self, data: pd.DataFrame, treatment_name, outcome_name, estimate_value, method=None, **kwargs
+    ):
         """Test statistical significance of obtained estimate.
 
         By default, uses resampling to create a non-parametric significance test.
@@ -598,10 +600,14 @@ class CausalEstimator:
             try:
                 signif_dict = self._test_significance(estimate_value, method, **kwargs)
             except NotImplementedError:
-                signif_dict = self._test_significance_with_bootstrap(data, treatment_name, outcome_name, estimate_value, **kwargs)
+                signif_dict = self._test_significance_with_bootstrap(
+                    data, treatment_name, outcome_name, estimate_value, **kwargs
+                )
         else:
             if method == "bootstrap":
-                signif_dict = self._test_significance_with_bootstrap(data, treatment_name, outcome_name, estimate_value, **kwargs)
+                signif_dict = self._test_significance_with_bootstrap(
+                    data, treatment_name, outcome_name, estimate_value, **kwargs
+                )
             else:
                 signif_dict = self._test_significance(estimate_value, method, **kwargs)
         return signif_dict
@@ -736,7 +742,9 @@ def estimate_effect(
     # Check if estimator's target estimand is identified
     elif identified_estimand.estimands[identifier_name] is None:
         logger.error("No valid identified estimand available.")
-        return CausalEstimate(None, None, None, None, None, control_value=control_value, treatment_value=treatment_value)
+        return CausalEstimate(
+            None, None, None, None, None, control_value=control_value, treatment_value=treatment_value
+        )
 
     if fit_estimator:
         estimator.fit(
@@ -756,6 +764,20 @@ def estimate_effect(
         target_units=target_units,
         confidence_intervals=estimator._confidence_intervals,
     )
+
+    if estimator._significance_test:
+        estimator.test_significance(data, treatment, outcome, estimate.value, method=estimator._significance_test)
+    if estimator._confidence_intervals:
+        estimator.estimate_confidence_intervals(
+            data,
+            treatment,
+            estimate.value,
+            confidence_level=estimator.confidence_level,
+            method=estimator._confidence_intervals,
+        )
+    if estimator._effect_strength_eval:
+        effect_strength_dict = estimator.evaluate_effect_strength(data, treatment, outcome, estimate)
+        estimate.add_effect_strength(effect_strength_dict)
 
     # Store parameters inside estimate object for refutation methods
     # TODO: This add_params needs to move to the estimator class
