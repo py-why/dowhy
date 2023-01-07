@@ -1,4 +1,5 @@
 import logging
+import warnings
 from typing import List, Optional
 
 from dowhy.causal_refuter import CausalRefuter
@@ -61,7 +62,7 @@ class AssessOverlap(CausalRefuter):
         :returns: object of class OverruleAnalyzer
         """
         if show_progress_bar:
-            raise NotImplementedError("No progress bar is available for OverRule")
+            warnings.warn("No progress bar is available for OverRule")
 
         return assess_support_and_overlap_overrule(
             data=self._data,
