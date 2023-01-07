@@ -16,7 +16,12 @@ class PricingInstance:
     """
     Instance of the pricing problem.
 
-    This is an internal function.
+    For more details, see:
+
+    Dash, S., Gunluk, O., and Wei, D. (2018). Boolean decision rules via column generation.
+    In Bengio, S., Wallach, H., Larochelle, H., Grauman, K., Cesa- Bianchi, N.,
+    and Garnett, R., editors, Advances in Neural Information Processing Systems 31,
+    pages 4660–4670. Curran Associates, Inc.
     """
 
     def __init__(self, rp, rn, Xp, Xn, v0, z0):
