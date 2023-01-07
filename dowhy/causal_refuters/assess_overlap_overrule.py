@@ -260,13 +260,18 @@ class OverruleAnalyzer:
         return_str = f"Rules cover {coverage:.1%} of all samples\n"
         if not self._support_only:
             return_str += (
-                f"Overall, {self.raw_overlap_set.mean():.1%} of samples meet the criteria for inclusion in the overlap set, "
-                "defined as: Covered by support rules and propensity score in "
-                f"({self.overlap_eps:.2f}, {1 - self.overlap_eps:.2f})\n"
+                f"Overall, {self.raw_overlap_set.mean():.1%} of samples meet the criteria for inclusion\n"
+                "in the overlap set, defined as (a) being covered by support rules and having propensity\n"
+                f"score in ({self.overlap_eps:.2f}, {1 - self.overlap_eps:.2f})\n"
             )
             true_positive = self.overlap_indicator * self.raw_overlap_set
             overlap_coverage = true_positive.sum() / self.raw_overlap_set.sum()
             return_str += f"Rules capture {overlap_coverage:.1%} of samples which meet these criteria\n"
+        # NOTE: The original paper implements both DNF and CNF rules, but for simplicity, this code only implements DNF rules
+        return_str += "\nHow to read rules: The following rules are given in Disjuntive Normal Form, \n"
+        return_str += "a series of AND clauses (e.g., X and Y and Z) joined by ORs. Hence, if a sample \n "
+        return_str += "satifies any of the clauses for the support rules, it is included in the support, \n"
+        return_str += "and likewise for the overlap rules."
         return_str += "\nDETAILED RULES:\n"
         return_str += self.describe_support_rules()
         return_str += self.describe_overlap_rules()
