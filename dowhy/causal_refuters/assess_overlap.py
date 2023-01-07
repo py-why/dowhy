@@ -58,6 +58,7 @@ class AssessOverlap(CausalRefuter):
         :param show_progress_bar: Not implemented, will raise error if set to True, defaults to False
         :type show_progress_bar: bool
         :raises NotImplementedError: Will raise this error if show_progress_bar=True
+        :returns: object of class OverruleAnalyzer
         """
         if show_progress_bar:
             raise NotImplementedError("No progress bar is available for OverRule")
