@@ -191,7 +191,7 @@ class OverruleAnalyzer:
 
         # Get the propensity scores out. Note that we perform cross-fitting here
         if self._support_only:
-            self.overla_indicator = supp
+            self.overlap_indicator = supp
         else:
             self.raw_overlap_set = self._predict_overlap(X_supp, t_supp)
             self.RS_overlap_estimator.fit(X_supp, self.raw_overlap_set)
