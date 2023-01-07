@@ -109,9 +109,9 @@ def assess_support_and_overlap_overrule(
     :param: overlap_only: bool: Only fit the overlap region
     :param: verbose: bool: Enable verbose logging of optimization output, defaults to False
     """
-    X = data[backdoor_vars]
-    t = data[treatment_name]
     analyzer = OverruleAnalyzer(
+        backdoor_vars=backdoor_vars,
+        treatment_name=treatment_name,
         cat_feats=cat_feats,
         overlap_config=overlap_config,
         support_config=support_config,
@@ -120,5 +120,5 @@ def assess_support_and_overlap_overrule(
         overlap_only=overlap_only,
         verbose=verbose,
     )
-    analyzer.fit(X, t)
+    analyzer.fit(data)
     return analyzer

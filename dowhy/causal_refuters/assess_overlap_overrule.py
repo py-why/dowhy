@@ -2,6 +2,7 @@ from dataclasses import asdict, dataclass
 from typing import Dict, List, Optional, Union
 
 import numpy as np
+import pandas as pd
 from sklearn.base import BaseEstimator
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV, cross_val_predict
@@ -107,6 +108,8 @@ class OverlapConfig:
 class OverruleAnalyzer:
     def __init__(
         self,
+        backdoor_vars: List[str],
+        treatment_name: str,
         cat_feats: Optional[List[str]] = None,
         support_config: Optional[SupportConfig] = None,
         overlap_config: Optional[OverlapConfig] = None,
@@ -119,6 +122,11 @@ class OverruleAnalyzer:
         """
         Learn support and overlap rules.
 
+        :param backdoor_vars: List of backdoor variables. Support and overlap rules will only be learned with respect to
+        these variables
+        :type backdoor_vars: List[str]
+        :param treatment_name: Treatment name
+        :type treatment_name: str
         :param: cat_feats: List[str]: List of categorical features, all others will be discretized
         :param: support_config: SupportConfig: DataClass with configuration options for learning support rules
         :param: overlap_config: OverlapConfig: DataClass with configuration options for learning overlap rules
@@ -134,6 +142,8 @@ class OverruleAnalyzer:
         :param verbose: Verbose optimization output, defaults to False
         :type verbose: bool, optional
         """
+        self.X_cols = backdoor_vars
+        self.t_col = treatment_name
         if support_config is None:
             support_config = SupportConfig()
         if overlap_config is None:
@@ -177,24 +187,27 @@ class OverruleAnalyzer:
         self.prop_estimator = prop_estimator
         self.is_fitted = False
 
-    def fit(self, X, t):
+    def fit(self, data: pd.DataFrame) -> None:
         # Do the support characterization
+        X = data[self.X_cols]
+        t = data[self.t_col]
+
         if self._overlap_only:
             supp = np.ones(X.shape[0]).astype(bool)
         else:
-            self.RS_support_estimator.fit(X)
+            self.RS_support_estimator.fit(X)  # type: ignore
             # Recover the samples that are in the support
-            supp = self.RS_support_estimator.predict(X).astype(bool)
+            supp = self.RS_support_estimator.predict(X).astype(bool)  # type: ignore
 
         self.support_indicator = supp
         X_supp, t_supp = X[supp], t[supp]
 
-        # Get the propensity scores out. Note that we perform cross-fitting here
         if self._support_only:
             self.overlap_indicator = supp
         else:
-            self.raw_overlap_set = self._predict_overlap(X_supp, t_supp)
-            # Check if all ones
+            # Assess overlap using propensity scores with cross-fitting
+            self.raw_overlap_set = self._assess_propensity_overlap(X_supp, t_supp)
+            # Check if all supported units are considered to be in the overlap set
             if np.all(self.raw_overlap_set):
                 print(
                     (
@@ -205,8 +218,8 @@ class OverruleAnalyzer:
                 self.overlap_indicator = supp
                 self._support_only = True
             else:
-                self.RS_overlap_estimator.fit(X_supp, self.raw_overlap_set)
-                self.overlap_indicator = self.RS_overlap_estimator.predict(X_supp)
+                self.RS_overlap_estimator.fit(X_supp, self.raw_overlap_set)  # type: ignore
+                self.overlap_indicator = self.RS_overlap_estimator.predict(X_supp)  # type: ignore
 
         self.is_fitted = True
         self.X = X
@@ -214,26 +227,35 @@ class OverruleAnalyzer:
         self.X_supp = X_supp
         self.t_supp = t_supp
 
-    def _predict_overlap(self, X, t):
-        prop_scores = cross_val_predict(self.prop_estimator, X, t.values.ravel(), method="predict_proba")
+    def _assess_propensity_overlap(self, X, t):
+        prop_scores = cross_val_predict(self.prop_estimator, X, t.values.ravel(), method="predict_proba", cv=2)
         prop_scores = prop_scores[:, 1]  # Probability of treatment
         overlap_set = np.logical_and(prop_scores < 1 - self.overlap_eps, prop_scores > self.overlap_eps).astype(int)
         return overlap_set
 
-    def predict(self, X):
+    def _predict_overlap_support(self, X):
         self._check_is_fitted()
         if self._overlap_only:
-            return self.RS_overlap_estimator.predict(X)
+            return self.RS_overlap_estimator.predict(X)  # type: ignore
+
         elif self._support_only:
-            return self.RS_support_estimator.predict(X)
+            return self.RS_support_estimator.predict(X)  # type: ignore
         else:
-            supp_ind = self.RS_support_estimator.predict(X)
-            overlap_ind = self.RS_overlap_estimator.predict(X)
+            supp_ind = self.RS_support_estimator.predict(X)  # type: ignore
+            overlap_ind = self.RS_overlap_estimator.predict(X)  # type: ignore
             return supp_ind * overlap_ind
+
+    def predict_overlap_support(self, data: pd.DataFrame):
+        self._check_is_fitted()
+        X = data[self.X_cols]
+        return self._predict_overlap_support(X).astype(bool)
+
+    def filter_dataframe(self, data: pd.DataFrame):
+        return data[self.predict_overlap_support(data)]
 
     def describe_all_rules(self):
         self._check_is_fitted()
-        coverage = self.predict(self.X).mean()
+        coverage = self._predict_overlap_support(self.X).mean()
         return_str = "SUMMARY:\n"
         return_str = f"Rules cover {coverage:.1%} of all samples\n"
         if not self._support_only:
