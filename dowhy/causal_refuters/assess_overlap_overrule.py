@@ -194,8 +194,19 @@ class OverruleAnalyzer:
             self.overlap_indicator = supp
         else:
             self.raw_overlap_set = self._predict_overlap(X_supp, t_supp)
-            self.RS_overlap_estimator.fit(X_supp, self.raw_overlap_set)
-            self.overlap_indicator = self.RS_overlap_estimator.predict(X_supp)
+            # Check if all ones
+            if np.all(self.raw_overlap_set):
+                print(
+                    (
+                        "All samples in the support region satisfy the overlap condition.\n"
+                        "No Overlap Rules will be learned."
+                    )
+                )
+                self.overlap_indicator = supp
+                self._support_only = True
+            else:
+                self.RS_overlap_estimator.fit(X_supp, self.raw_overlap_set)
+                self.overlap_indicator = self.RS_overlap_estimator.predict(X_supp)
 
         self.is_fitted = True
         self.X = X

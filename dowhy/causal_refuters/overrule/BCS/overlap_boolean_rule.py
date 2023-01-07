@@ -124,7 +124,11 @@ class OverlapBooleanRule:
         nU = len(U)
 
         # We should always have overlap samples, and either background or non-overlap samples
-        assert nO > 0 and (nU > 0 or nN > 0)
+        # This will throw an error if, for example, all samples are considered to
+        # be in the overlap region
+        assert nO > 0 and (
+            nU > 0 or nN > 0
+        ), "Recieved positive samples, but no negative samples for learning Boolean Rules"
         assert nU == 0 or nN == 0
 
         # Initialize with empty and singleton conjunctions, i.e. X plus all-ones feature
