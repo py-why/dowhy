@@ -217,28 +217,31 @@ class DistanceMatchingEstimator(CausalEstimator):
             else:
                 grouped = updated_df.groupby(self.exact_match_cols)
                 att = 0
+                self.matched_indices_att = {}
                 for name, group in grouped:
-                    treated = group.loc[group[self._treatment_name[0]] == 1]
-                    control = group.loc[group[self._treatment_name[0]] == 0]
-                    if treated.shape[0] == 0:
+                    treated_tmp = group.loc[group[self._treatment_name[0]] == 1]
+                    control_tmp = group.loc[group[self._treatment_name[0]] == 0]
+                    treated_df_index = treated_tmp.index.tolist()
+                    if treated_tmp.shape[0] == 0:
                         continue
                     control_neighbors = NearestNeighbors(
                         n_neighbors=self.num_matches_per_unit,
                         metric=self.distance_metric,
                         algorithm="ball_tree",
                         **self.distance_metric_params,
-                    ).fit(control[self._observed_common_causes.columns].values)
+                    ).fit(control_tmp[self._observed_common_causes.columns].values)
                     distances, indices = control_neighbors.kneighbors(
-                        treated[self._observed_common_causes.columns].values
+                        treated_tmp[self._observed_common_causes.columns].values
                     )
                     self.logger.debug("distances:")
                     self.logger.debug(distances)
 
-                    for i in range(numtreatedunits):
-                        treated_outcome = treated.iloc[i][self._outcome_name].item()
-                        control_outcome = np.mean(control.iloc[indices[i]][self._outcome_name].values)
+                    # for i in range(numtreatedunits):
+                    for i in range(treated_tmp.shape[0]):
+                        treated_outcome = treated_tmp.iloc[i][self._outcome_name].item()
+                        control_outcome = np.mean(control_tmp.iloc[indices[i]][self._outcome_name].values)
                         att += treated_outcome - control_outcome
-                        # self.matched_indices_att[treated_df_index[i]] = control.iloc[indices[i]].index.tolist()
+                        self.matched_indices_att[treated_df_index[i]] = control_tmp.iloc[indices[i]].index.tolist()
 
                 att /= numtreatedunits
 
