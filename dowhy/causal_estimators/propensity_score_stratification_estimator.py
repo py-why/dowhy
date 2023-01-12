@@ -138,7 +138,11 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
                 self.logger.info("'num_strata' selected as {}".format(num_strata))
                 try:
                     clipped = self._get_strata(
-                        data, self._target_estimand.treatment_variable, self._target_estimand.outcome_variable[0], num_strata, self.clipping_threshold
+                        data,
+                        self._target_estimand.treatment_variable,
+                        self._target_estimand.outcome_variable[0],
+                        num_strata,
+                        self.clipping_threshold,
                     )
                     num_ret_strata = clipped.groupby(["strata"]).count().reset_index()
                     # At least 90% of the strata should be included in analysis
@@ -165,7 +169,13 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
                             "Not enough data to generate at least two strata. This error may be due to a high value of 'clipping_threshold'."
                         )
         else:
-            clipped = self._get_strata(data, self._target_estimand.treatment_variable, self._target_estimand.outcome_variable[0], self.num_strata, self.clipping_threshold)
+            clipped = self._get_strata(
+                data,
+                self._target_estimand.treatment_variable,
+                self._target_estimand.outcome_variable[0],
+                self.num_strata,
+                self.clipping_threshold,
+            )
 
         # sum weighted outcomes over all strata  (weight by treated population)
         weighted_outcomes = clipped.groupby("strata").agg(

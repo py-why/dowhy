@@ -160,7 +160,13 @@ class DistanceMatchingEstimator(CausalEstimator):
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
-        updated_df = pd.concat([self._observed_common_causes, data[[self._target_estimand.outcome_variable[0], self._target_estimand.treatment_variable[0]]]], axis=1)
+        updated_df = pd.concat(
+            [
+                self._observed_common_causes,
+                data[[self._target_estimand.outcome_variable[0], self._target_estimand.treatment_variable[0]]],
+            ],
+            axis=1,
+        )
         if self.exact_match_cols is not None:
             updated_df = pd.concat([updated_df, data[self.exact_match_cols]], axis=1)
         treated = updated_df.loc[data[self._target_estimand.treatment_variable[0]] == 1]
@@ -198,7 +204,9 @@ class DistanceMatchingEstimator(CausalEstimator):
 
                 for i in range(numtreatedunits):
                     treated_outcome = treated.iloc[i][self._target_estimand.outcome_variable[0]].item()
-                    control_outcome = np.mean(control.iloc[indices[i]][self._target_estimand.outcome_variable[0]].values)
+                    control_outcome = np.mean(
+                        control.iloc[indices[i]][self._target_estimand.outcome_variable[0]].values
+                    )
                     att += treated_outcome - control_outcome
 
                 att /= numtreatedunits
@@ -234,7 +242,9 @@ class DistanceMatchingEstimator(CausalEstimator):
 
                     for i in range(numtreatedunits):
                         treated_outcome = treated.iloc[i][self._target_estimand.outcome_variable[0]].item()
-                        control_outcome = np.mean(control.iloc[indices[i]][self._target_estimand.outcome_variable[0]].values)
+                        control_outcome = np.mean(
+                            control.iloc[indices[i]][self._target_estimand.outcome_variable[0]].values
+                        )
                         att += treated_outcome - control_outcome
                         # self.matched_indices_att[treated_df_index[i]] = control.iloc[indices[i]].index.tolist()
 
