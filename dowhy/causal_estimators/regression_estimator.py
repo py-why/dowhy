@@ -73,8 +73,6 @@ class RegressionEstimator(CausalEstimator):
     def fit(
         self,
         data: pd.DataFrame,
-        treatment_name: str,
-        outcome_name: str,
         effect_modifier_names: Optional[List[str]] = None,
     ):
         """
@@ -100,7 +98,9 @@ class RegressionEstimator(CausalEstimator):
         self.logger.info(self.symbolic_estimator)
 
         # The model is always built on the entire data
-        _, self.model = self._build_model(data, treatment_name, outcome_name[0])
+        _, self.model = self._build_model(
+            data, self._target_estimand.treatment_variable, self._target_estimand.outcome_variable[0]
+        )
         coefficients = self.model.params[1:]  # first coefficient is the intercept
         self.logger.debug("Coefficients of the fitted model: " + ",".join(map(str, coefficients)))
         self.logger.debug(self.model.summary())
@@ -110,8 +110,6 @@ class RegressionEstimator(CausalEstimator):
     def estimate_effect(
         self,
         data: pd.DataFrame,
-        treatment_name: List[str],
-        outcome_name: List[str],
         treatment_value: Any = 1,
         control_value: Any = 0,
         target_units=None,
@@ -123,8 +121,10 @@ class RegressionEstimator(CausalEstimator):
         self._control_value = control_value
         # TODO make treatment_value and control value also as local parameters
         # All treatments are set to the same constant value
-        effect_estimate = self._do(data, treatment_name, outcome_name[0], treatment_value) - self._do(
-            data, treatment_name, outcome_name[0], control_value
+        effect_estimate = self._do(
+            data, self._target_estimand.treatment_variable, self._target_estimand.outcome_variable[0], treatment_value
+        ) - self._do(
+            data, self._target_estimand.treatment_variable, self._target_estimand.outcome_variable[0], control_value
         )
         conditional_effect_estimates = None
         if need_conditional_estimates:
@@ -134,8 +134,8 @@ class RegressionEstimator(CausalEstimator):
         intercept_parameter = self.model.params[0]
         estimate = CausalEstimate(
             data=data,
-            treatment_name=treatment_name,
-            outcome_name=outcome_name,
+            treatment_name=self._target_estimand.treatment_variable,
+            outcome_name=self._target_estimand.outcome_variable,
             estimate=effect_estimate,
             control_value=control_value,
             treatment_value=treatment_value,

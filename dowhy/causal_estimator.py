@@ -294,14 +294,10 @@ class CausalEstimator:
             )
             new_estimator.fit(
                 new_data,
-                self._target_estimand.treatment_variable,
-                self._target_estimand.outcome_variable,
                 effect_modifier_names=self._effect_modifier_names,
             )
             new_effect = new_estimator.estimate_effect(
                 new_data,
-                treatment_name=self._target_estimand.treatment_variable,
-                outcome_name=self._target_estimand.outcome_variable,
                 treatment_value=self._treatment_value,
                 control_value=self._control_value,
                 target_units=self._target_units,
@@ -522,15 +518,11 @@ class CausalEstimator:
                 )
                 new_estimator.fit(
                     data=new_data,
-                    treatment_name=self._target_estimand.treatment_variable,
-                    outcome_name=("dummy_outcome",),
                     effect_modifier_names=self._effect_modifier_names,
                 )
 
                 new_effect = new_estimator.estimate_effect(
                     new_data,
-                    treatment_name=self._target_estimand.treatment_variable,
-                    outcome_name=("dummy_outcome",),
                     target_units=self._target_units,
                 )
                 null_estimates[i] = new_effect.value
@@ -749,16 +741,12 @@ def estimate_effect(
     if fit_estimator:
         estimator.fit(
             data=data,
-            treatment_name=treatment,
-            outcome_name=outcome,
             effect_modifier_names=effect_modifiers,
             **method_params["fit_params"] if "fit_params" in method_params else {},
         )
 
     estimate = estimator.estimate_effect(
         data,
-        treatment_name=treatment,
-        outcome_name=outcome,
         treatment_value=treatment_value,
         control_value=control_value,
         target_units=target_units,

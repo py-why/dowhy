@@ -109,8 +109,6 @@ class Econml(CausalEstimator):
     def fit(
         self,
         data: pd.DataFrame,
-        treatment_name: str,
-        outcome_name: str,
         effect_modifier_names: Optional[List[str]] = None,
         **kwargs,
     ):
@@ -179,8 +177,8 @@ class Econml(CausalEstimator):
         X = None
         W = None  # common causes/ confounders
         Z = None  # Instruments
-        Y = data[outcome_name[0]]
-        T = data[treatment_name]
+        Y = data[self._target_estimand.outcome_variable[0]]
+        T = data[self._target_estimand.treatment_variable]
         if self._effect_modifiers is not None and len(self._effect_modifiers) > 0:
             X = self._effect_modifiers
         if self._observed_common_causes_names:
@@ -218,8 +216,6 @@ class Econml(CausalEstimator):
     def estimate_effect(
         self,
         data: pd.DataFrame,
-        treatment_name: List[str],
-        outcome_name: List[str],
         treatment_value: Any = 1,
         control_value: Any = 0,
         target_units=None,
@@ -265,8 +261,8 @@ class Econml(CausalEstimator):
 
         estimate = CausalEstimate(
             data=data,
-            treatment_name=treatment_name,
-            outcome_name=outcome_name,
+            treatment_name=self._target_estimand.treatment_variable,
+            outcome_name=self._target_estimand.outcome_variable,
             estimate=ate,
             control_value=control_value,
             treatment_value=treatment_value,

@@ -91,8 +91,6 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
     def fit(
         self,
         data: pd.DataFrame,
-        treatment_name: str,
-        outcome_name: str,
         effect_modifier_names: Optional[List[str]] = None,
     ):
         """
@@ -104,7 +102,10 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        return super().fit(data, treatment_name, outcome_name, effect_modifier_names=effect_modifier_names)
+        return super().fit(
+            data,
+            effect_modifier_names=effect_modifier_names,
+        )
 
     def _build_model(self, data: pd.DataFrame, treatment_name: List[str], outcome_name: str):
         features = self._build_features(data, treatment_name)

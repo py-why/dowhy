@@ -73,8 +73,6 @@ class LinearRegressionEstimator(RegressionEstimator):
     def fit(
         self,
         data: pd.DataFrame,
-        treatment_name: str,
-        outcome_name: str,
         effect_modifier_names: Optional[List[str]] = None,
     ):
         """
@@ -86,7 +84,7 @@ class LinearRegressionEstimator(RegressionEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        return super().fit(data, treatment_name, outcome_name, effect_modifier_names=effect_modifier_names)
+        return super().fit(data, effect_modifier_names=effect_modifier_names)
 
     def construct_symbolic_estimator(self, estimand):
         expr = "b: " + ",".join(estimand.outcome_variable) + "~"

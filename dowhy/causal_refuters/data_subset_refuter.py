@@ -76,15 +76,11 @@ def _refute_once(
     new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
     new_estimator.fit(
         new_data,
-        target_estimand.treatment_variable,
-        target_estimand.outcome_variable,
         estimate.estimator._effect_modifier_names,
         **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
     )
     new_effect = new_estimator.estimate_effect(
         new_data,
-        treatment_name=target_estimand.treatment_variable,
-        outcome_name=target_estimand.outcome_variable,
         control_value=estimate.control_value,
         treatment_value=estimate.treatment_value,
         target_units=estimate.estimator._target_units,

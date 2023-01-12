@@ -84,15 +84,11 @@ class PropensityScoreEstimator(CausalEstimator):
     def fit(
         self,
         data: pd.DataFrame,
-        treatment_name: str,
-        outcome_name: str,
         effect_modifier_names: Optional[List[str]] = None,
     ):
         """
         Fits the estimator with data for effect estimation
         :param data: data frame containing the data
-        :param treatment: name of the treatment variable
-        :param outcome: name of the outcome variable
         :param effect_modifiers: Variables on which to compute separate
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
@@ -115,11 +111,11 @@ class PropensityScoreEstimator(CausalEstimator):
             raise Exception(error_msg)
 
         # Check if the treatment is one-dimensional
-        if len(treatment_name) > 1:
+        if len(self._target_estimand.treatment_variable) > 1:
             error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
             raise Exception(error_msg)
         # Checking if the treatment is binary
-        treatment_values = data[treatment_name[0]].astype(int).unique()
+        treatment_values = data[self._target_estimand.treatment_variable[0]].astype(int).unique()
         if any([v not in [0, 1] for v in treatment_values]):
             error_msg = "Propensity score methods are applicable only for binary treatments"
             self.logger.error(error_msg)
@@ -128,7 +124,7 @@ class PropensityScoreEstimator(CausalEstimator):
         if self.propensity_score_column not in data:
             if self.propensity_score_model is None:
                 self.propensity_score_model = linear_model.LogisticRegression()
-            treatment_reshaped = np.ravel(data[treatment_name])
+            treatment_reshaped = np.ravel(data[self._target_estimand.treatment_variable])
             self.propensity_score_model.fit(self._observed_common_causes, treatment_reshaped)
 
         return self

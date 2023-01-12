@@ -69,16 +69,12 @@ class TestEstimator(object):
 
         estimator_ate.fit(
             data["df"],
-            data["treatment_name"],
-            data["outcome_name"],
             effect_modifier_names=data["effect_modifier_names"],
         )
 
         true_ate = data["ate"]
         ate_estimate = estimator_ate.estimate_effect(
             data["df"],
-            treatment_name=data["treatment_name"],
-            outcome_name=data["outcome_name"],
             control_value=0,
             treatment_value=1,
             test_significance=test_significance,
@@ -175,15 +171,9 @@ class TestEstimator(object):
             identified_estimand=target_estimand,
             test_significance=None,
         )
-        estimator_ate.fit(
-            data["df"],
-            treatment=data["treatment_name"],
-            outcome=data["outcome_name"],
-        )
+        estimator_ate.fit(data["df"])
         true_ate = data["ate"]
-        ate_estimate = estimator_ate.estimate_effect(
-            data["df"], treatment_name=target_estimand.treatment_variable, outcome_name=target_estimand.outcome_variable
-        )
+        ate_estimate = estimator_ate.estimate_effect(data["df"])
         error = ate_estimate.value - true_ate
         print(
             "Error in ATE estimate = {0} with tolerance {1}%. Estimated={2},True={3}".format(

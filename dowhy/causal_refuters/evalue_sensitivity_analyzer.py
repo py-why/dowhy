@@ -261,8 +261,6 @@ class EValueSensitivityAnalyzer:
             new_estimator = self.estimate.estimator.get_new_estimator_object(new_estimand)
             new_estimator.fit(
                 self.data,
-                new_estimand.treatment_variable,
-                new_estimand.outcome_variable,
                 self.estimate.estimator._effect_modifier_names,
                 **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
             )
@@ -270,8 +268,6 @@ class EValueSensitivityAnalyzer:
             # new effect estimate
             new_effect = new_estimator.estimate_effect(
                 self.data,
-                treatment_name=new_estimand.treatment_variable,
-                outcome_name=new_estimand.outcome_variable,
                 control_value=self.estimate.control_value,
                 treatment_value=self.estimate.treatment_value,
                 target_units=self.estimate.estimator._target_units,

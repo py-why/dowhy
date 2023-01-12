@@ -94,8 +94,6 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
     def fit(
         self,
         data: pd.DataFrame,
-        treatment_name: str,
-        outcome_name: str,
         effect_modifier_names: Optional[List[str]] = None,
     ):
         """
@@ -107,7 +105,7 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        super().fit(data, treatment_name, outcome_name, effect_modifier_names=effect_modifier_names)
+        super().fit(data, effect_modifier_names=effect_modifier_names)
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
 
@@ -116,8 +114,6 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
     def estimate_effect(
         self,
         data: pd.DataFrame,
-        treatment_name: List[str],
-        outcome_name: List[str],
         treatment_value: Any = 1,
         control_value: Any = 0,
         target_units=None,
@@ -142,7 +138,7 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
                 self.logger.info("'num_strata' selected as {}".format(num_strata))
                 try:
                     clipped = self._get_strata(
-                        data, treatment_name, outcome_name[0], num_strata, self.clipping_threshold
+                        data, self._target_estimand.treatment_variable, self._target_estimand.outcome_variable[0], num_strata, self.clipping_threshold
                     )
                     num_ret_strata = clipped.groupby(["strata"]).count().reset_index()
                     # At least 90% of the strata should be included in analysis
@@ -169,14 +165,14 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
                             "Not enough data to generate at least two strata. This error may be due to a high value of 'clipping_threshold'."
                         )
         else:
-            clipped = self._get_strata(data, treatment_name, outcome_name[0], self.num_strata, self.clipping_threshold)
+            clipped = self._get_strata(data, self._target_estimand.treatment_variable, self._target_estimand.outcome_variable[0], self.num_strata, self.clipping_threshold)
 
         # sum weighted outcomes over all strata  (weight by treated population)
         weighted_outcomes = clipped.groupby("strata").agg(
-            {treatment_name[0]: ["sum"], "dbar": ["sum"], "d_y": ["sum"], "dbar_y": ["sum"]}
+            {self._target_estimand.treatment_variable[0]: ["sum"], "dbar": ["sum"], "d_y": ["sum"], "dbar_y": ["sum"]}
         )
         weighted_outcomes.columns = ["_".join(x) for x in weighted_outcomes.columns.to_numpy().ravel()]
-        treatment_sum_name = treatment_name[0] + "_sum"
+        treatment_sum_name = self._target_estimand.treatment_variable[0] + "_sum"
         control_sum_name = "dbar_sum"
 
         weighted_outcomes["d_y_mean"] = weighted_outcomes["d_y_sum"] / weighted_outcomes[treatment_sum_name]
@@ -209,8 +205,8 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         #        such as how much clipping was done, or per-strata info for debugging?
         estimate = CausalEstimate(
             data=data,
-            treatment_name=treatment_name,
-            outcome_name=outcome_name,
+            treatment_name=self._target_estimand.treatment_variable,
+            outcome_name=self._target_estimand.outcome_variable,
             estimate=est,
             control_value=control_value,
             treatment_value=treatment_value,

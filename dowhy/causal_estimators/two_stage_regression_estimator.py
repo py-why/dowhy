@@ -149,8 +149,6 @@ class TwoStageRegressionEstimator(CausalEstimator):
     def fit(
         self,
         data: pd.DataFrame,
-        treatment_name: str,
-        outcome_name: str,
         effect_modifier_names: Optional[List[str]] = None,
         **_,
     ):
@@ -169,7 +167,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         """
         self._set_effect_modifiers(data, effect_modifier_names)
 
-        if len(treatment_name) > 1:
+        if len(self._target_estimand.treatment_variable) > 1:
             error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
             raise Exception(error_msg)
 
@@ -213,8 +211,6 @@ class TwoStageRegressionEstimator(CausalEstimator):
 
         self._first_stage_model.fit(
             data,
-            treatment_name,
-            parse_state(self._first_stage_model._target_estimand.outcome_variable),
             effect_modifier_names=effect_modifier_names,
         )
 
@@ -225,8 +221,6 @@ class TwoStageRegressionEstimator(CausalEstimator):
 
         self._second_stage_model.fit(
             data,
-            parse_state(self._second_stage_model._target_estimand.treatment_variable),
-            parse_state(outcome_name[0]),  # to convert it to array before passing to causal estimator)
             effect_modifier_names=effect_modifier_names,
         )
 
@@ -234,8 +228,6 @@ class TwoStageRegressionEstimator(CausalEstimator):
             self._second_stage_model_nde._target_estimand.identifier_method = "backdoor"
             self._second_stage_model_nde.fit(
                 data,
-                treatment_name,
-                parse_state(outcome_name[0]),  # to convert it to array before passing to causal estimator)
                 effect_modifier_names=effect_modifier_names,
             )
 
@@ -244,8 +236,6 @@ class TwoStageRegressionEstimator(CausalEstimator):
     def estimate_effect(
         self,
         data: pd.DataFrame,
-        treatment_name: List[str],
-        outcome_name: List[str],
         treatment_value: Any = 1,
         control_value: Any = 0,
         target_units=None,
@@ -259,8 +249,6 @@ class TwoStageRegressionEstimator(CausalEstimator):
         # First stage
         first_stage_estimate = self._first_stage_model.estimate_effect(
             data,
-            treatment_name=treatment_name,
-            outcome_name=outcome_name,
             control_value=control_value,
             treatment_value=treatment_value,
             target_units=target_units,
@@ -269,8 +257,6 @@ class TwoStageRegressionEstimator(CausalEstimator):
         # Second Stage
         second_stage_estimate = self._second_stage_model.estimate_effect(
             data,
-            treatment_name=treatment_name,
-            outcome_name=outcome_name,
             control_value=control_value,
             treatment_value=treatment_value,
             target_units=target_units,
@@ -288,8 +274,6 @@ class TwoStageRegressionEstimator(CausalEstimator):
 
             total_effect_estimate = self._second_stage_model_nde.estimate_effect(
                 data,
-                treatment_name=treatment_name,
-                outcome_name=outcome_name,
                 control_value=control_value,
                 treatment_value=treatment_value,
                 target_units=target_units,
@@ -304,8 +288,8 @@ class TwoStageRegressionEstimator(CausalEstimator):
             )
         estimate = CausalEstimate(
             data=data,
-            treatment_name=treatment_name,
-            outcome_name=outcome_name,
+            treatment_name=self._target_estimand.treatment_variable,
+            outcome_name=self._target_estimand.outcome_variable,
             estimate=estimate_value,
             control_value=control_value,
             treatment_value=treatment_value,
