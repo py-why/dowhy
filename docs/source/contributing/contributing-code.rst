@@ -25,7 +25,7 @@ The following steps allow you to contribute code to DoWhy.
 
       cd dowhy
       pip install --upgrade pip
-      poetry install -E "plotting causalml"
+      poetry install -E "plotting"
 
    .. note::
       Installing pygraphviz can cause problems on some platforms.
