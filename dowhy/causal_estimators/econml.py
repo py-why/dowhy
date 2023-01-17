@@ -382,5 +382,7 @@ class Econml(CausalEstimator):
         # For each unit, return the estimated effect of the treatment value
         # that was actually applied to the unit
         for c, col in enumerate(treatment_value):
-            out[df[self._target_estimand.treatment_variable[0]] == col] = eff[df[self._target_estimand.treatment_variable[0]] == col, c]
+            out[df[self._target_estimand.treatment_variable[0]] == col] = eff[
+                df[self._target_estimand.treatment_variable[0]] == col, c
+            ]
         return pd.Series(data=out, index=df.index)

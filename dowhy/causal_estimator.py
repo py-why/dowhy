@@ -851,9 +851,7 @@ class CausalEstimate:
 
         :returns: p-value from the significance test
         """
-        signif_results = self.estimator.test_significance(
-            self._data, self.value, method=method, **kwargs
-        )
+        signif_results = self.estimator.test_significance(self._data, self.value, method=method, **kwargs)
         return {"p_value": signif_results["p_value"]}
 
     def estimate_conditional_effects(
