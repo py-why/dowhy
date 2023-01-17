@@ -98,9 +98,7 @@ class RegressionEstimator(CausalEstimator):
         self.logger.info(self.symbolic_estimator)
 
         # The model is always built on the entire data
-        _, self.model = self._build_model(
-            data, self._target_estimand.treatment_variable, self._target_estimand.outcome_variable[0]
-        )
+        _, self.model = self._build_model(data)
         coefficients = self.model.params[1:]  # first coefficient is the intercept
         self.logger.debug("Coefficients of the fitted model: " + ",".join(map(str, coefficients)))
         self.logger.debug(self.model.summary())
@@ -121,11 +119,7 @@ class RegressionEstimator(CausalEstimator):
         self._control_value = control_value
         # TODO make treatment_value and control value also as local parameters
         # All treatments are set to the same constant value
-        effect_estimate = self._do(
-            data, self._target_estimand.treatment_variable, self._target_estimand.outcome_variable[0], treatment_value
-        ) - self._do(
-            data, self._target_estimand.treatment_variable, self._target_estimand.outcome_variable[0], control_value
-        )
+        effect_estimate = self._do(data, treatment_value) - self._do(data, control_value)
         conditional_effect_estimates = None
         if need_conditional_estimates:
             conditional_effect_estimates = self._estimate_conditional_effects(
@@ -152,8 +146,8 @@ class RegressionEstimator(CausalEstimator):
         est = self.estimate_effect(data=data_df, need_conditional_estimates=False)
         return est.value
 
-    def _build_features(self, data_df: pd.DataFrame, treatment_name: List[str], treatment_values=None):
-        treatment_vals = pd.get_dummies(data_df[treatment_name], drop_first=True)
+    def _build_features(self, data_df: pd.DataFrame, treatment_values=None):
+        treatment_vals = pd.get_dummies(data_df[self._target_estimand.treatment_variable], drop_first=True)
         if len(self._observed_common_causes_names) > 0:
             observed_common_causes_vals = data_df[self._observed_common_causes_names]
             observed_common_causes_vals = pd.get_dummies(observed_common_causes_vals, drop_first=True)
@@ -187,26 +181,37 @@ class RegressionEstimator(CausalEstimator):
         features = sm.add_constant(features, has_constant="add")  # to add an intercept term
         return features
 
-    def _do(self, data_df: pd.DataFrame, treatment_name: List[str], outcome_name: str, treatment_val):
+    def _do(self, data_df: pd.DataFrame, treatment_val):
         if data_df is None:
             data_df = self._data
         if not self.model:
             # The model is always built on the entire data
-            _, self.model = self._build_model(data_df, treatment_name, outcome_name)
+            _, self.model = self._build_model(data_df)
         # Replacing treatment values by given x
         # First, create interventional tensor in original space
-        interventional_treatment_values = np.full((data_df.shape[0], len(treatment_name)), treatment_val)
+        interventional_treatment_values = np.full(
+            (data_df.shape[0], len(self._target_estimand.treatment_variable)), treatment_val
+        )
         # Then, use pandas to ensure that the dummies are assigned correctly for a categorical treatment
         interventional_treatment_2d = pd.concat(
             [
-                data_df[treatment_name].copy(),
-                pd.DataFrame(data=interventional_treatment_values, columns=data_df[treatment_name].columns),
+                data_df[self._target_estimand.treatment_variable].copy(),
+                pd.DataFrame(
+                    data=interventional_treatment_values,
+                    columns=data_df[self._target_estimand.treatment_variable].columns,
+                ),
             ],
             axis=0,
-        ).astype(data_df[treatment_name].dtypes, copy=False)
+        ).astype(data_df[self._target_estimand.treatment_variable].dtypes, copy=False)
         interventional_treatment_2d = pd.get_dummies(interventional_treatment_2d, drop_first=True)
-        interventional_treatment_2d = interventional_treatment_2d[data_df[treatment_name].shape[0] :]
+        interventional_treatment_2d = interventional_treatment_2d[
+            data_df[self._target_estimand.treatment_variable].shape[0] :
+        ]
 
-        new_features = self._build_features(data_df, treatment_name, treatment_values=interventional_treatment_2d)
-        interventional_outcomes = self.predict_fn(data_df, outcome_name, self.model, new_features)
+        new_features = self._build_features(
+            data_df, treatment_values=interventional_treatment_2d
+        )
+        interventional_outcomes = self.predict_fn(
+            data_df, self.model, new_features
+        )
         return interventional_outcomes.mean()

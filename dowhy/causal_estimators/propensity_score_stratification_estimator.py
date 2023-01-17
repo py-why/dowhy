@@ -139,8 +139,6 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
                 try:
                     clipped = self._get_strata(
                         data,
-                        self._target_estimand.treatment_variable,
-                        self._target_estimand.outcome_variable[0],
                         num_strata,
                         self.clipping_threshold,
                     )
@@ -171,8 +169,6 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         else:
             clipped = self._get_strata(
                 data,
-                self._target_estimand.treatment_variable,
-                self._target_estimand.outcome_variable[0],
                 self.num_strata,
                 self.clipping_threshold,
             )
@@ -229,29 +225,29 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         return estimate
 
     def _get_strata(
-        self, data: pd.DataFrame, treatment_name: List[str], outcome_name: str, num_strata, clipping_threshold
+        self, data: pd.DataFrame, num_strata, clipping_threshold
     ):
         # sort the dataframe by propensity score
         # create a column 'strata' for each element that marks what strata it belongs to
-        num_rows = data[outcome_name].shape[0]
+        num_rows = data[self._target_estimand.outcome_variable[0]].shape[0]
         data["strata"] = ((data[self.propensity_score_column].rank(ascending=True) / num_rows) * num_strata).round(0)
         # for each strata, count how many treated and control units there are
         # throw away strata that have insufficient treatment or control
 
-        data["dbar"] = 1 - data[treatment_name[0]]  # 1-Treatment
-        data["d_y"] = data[treatment_name[0]] * data[outcome_name]
-        data["dbar_y"] = data["dbar"] * data[outcome_name]
+        data["dbar"] = 1 - data[self._target_estimand.treatment_variable[0]]  # 1-Treatment
+        data["d_y"] = data[self._target_estimand.treatment_variable[0]] * data[self._target_estimand.outcome_variable[0]]
+        data["dbar_y"] = data["dbar"] * data[self._target_estimand.outcome_variable[0]]
         stratified = data.groupby("strata")
         clipped = stratified.filter(
             lambda strata: min(
-                strata.loc[strata[treatment_name[0]] == 1].shape[0],
-                strata.loc[strata[treatment_name[0]] == 0].shape[0],
+                strata.loc[strata[self._target_estimand.treatment_variable[0]] == 1].shape[0],
+                strata.loc[strata[self._target_estimand.treatment_variable[0]] == 0].shape[0],
             )
             > clipping_threshold
         )
         self.logger.debug(
             "After using clipping_threshold={0}, here are the number of data points in each strata:\n {1}".format(
-                clipping_threshold, clipped.groupby(["strata", treatment_name[0]])[outcome_name].count()
+                clipping_threshold, clipped.groupby(["strata", self._target_estimand.treatment_variable[0]])[self._target_estimand.outcome_variable].count()
             )
         )
         if clipped.empty:

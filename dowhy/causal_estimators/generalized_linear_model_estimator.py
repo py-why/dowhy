@@ -107,14 +107,14 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
             effect_modifier_names=effect_modifier_names,
         )
 
-    def _build_model(self, data: pd.DataFrame, treatment_name: List[str], outcome_name: str):
-        features = self._build_features(data, treatment_name)
-        model = sm.GLM(data[outcome_name], features, family=self.family).fit()
+    def _build_model(self, data: pd.DataFrame):
+        features = self._build_features(data)
+        model = sm.GLM(data[self._target_estimand.outcome_variable], features, family=self.family).fit()
         return (features, model)
 
-    def predict_fn(self, data: pd.DataFrame, outcome_name: str, model, features):
+    def predict_fn(self, data: pd.DataFrame, model, features):
         # Checking if Y is binary
-        outcome_values = data[outcome_name].astype(int).unique()
+        outcome_values = data[self._target_estimand.outcome_variable[0]].astype(int).unique()
         outcome_is_binary = all([v in [0, 1] for v in outcome_values])
 
         if outcome_is_binary:

@@ -300,8 +300,8 @@ class TwoStageRegressionEstimator(CausalEstimator):
         estimate.add_estimator(self)
         return estimate
 
-    def build_first_stage_features(self, data_df: pd.DataFrame, treatment_name: List[str]):
-        treatment_vals = data_df[treatment_name]
+    def build_first_stage_features(self, data_df: pd.DataFrame):
+        treatment_vals = data_df[self._target_estimand.treatment_variable]
         if len(self._observed_common_causes_names) > 0:
             observed_common_causes_vals = data_df[self._observed_common_causes_names]
             observed_common_causes_vals = pd.get_dummies(observed_common_causes_vals, drop_first=True)
@@ -314,8 +314,8 @@ class TwoStageRegressionEstimator(CausalEstimator):
             raise ValueError("Provided treatment values and dataframe should have the same length.")
         # Bulding the feature matrix
         n_samples = treatment_vals.shape[0]
-        self.logger.debug("Number of samples" + str(n_samples) + str(len(treatment_name)))
-        treatment_2d = treatment_vals.reshape((n_samples, len(treatment_name)))
+        self.logger.debug("Number of samples" + str(n_samples) + str(len(self._target_estimand.treatment_variable)))
+        treatment_2d = treatment_vals.reshape((n_samples, len(self._target_estimand.treatment_variable)))
         if len(self._observed_common_causes_names) > 0:
             features = np.concatenate((treatment_2d, observed_common_causes_vals), axis=1)
         else:

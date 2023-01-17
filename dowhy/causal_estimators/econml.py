@@ -276,7 +276,7 @@ class Econml(CausalEstimator):
         estimate.add_estimator(self)
         return estimate
 
-    def _estimate_confidence_intervals(self, treatment_name=None, confidence_level=None, method=None):
+    def _estimate_confidence_intervals(self, confidence_level=None, method=None):
         """Returns None if the confidence interval has not been calculated."""
         return self.effect_intervals
 
@@ -363,7 +363,7 @@ class Econml(CausalEstimator):
 
         return self.apply_multitreatment(df, effect_inference_fun, *args, **kwargs)
 
-    def effect_tt(self, df: pd.DataFrame, treatment_name, treatment_value, *args, **kwargs):
+    def effect_tt(self, df: pd.DataFrame, treatment_value, *args, **kwargs):
         """
         Effect of the actual treatment that was applied to each unit
         ("effect of Treatment on the Treated")
@@ -376,12 +376,11 @@ class Econml(CausalEstimator):
 
         out = np.zeros(len(df))
         treatment_value = parse_state(treatment_value)
-        treatment_name = parse_state(treatment_name)[0]
 
         eff = np.reshape(eff, (len(df), len(treatment_value)))
 
         # For each unit, return the estimated effect of the treatment value
         # that was actually applied to the unit
         for c, col in enumerate(treatment_value):
-            out[df[treatment_name] == col] = eff[df[treatment_name] == col, c]
+            out[df[self._target_estimand.treatment_variable[0]] == col] = eff[df[self._target_estimand.treatment_variable[0]] == col, c]
         return pd.Series(data=out, index=df.index)
