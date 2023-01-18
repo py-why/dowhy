@@ -377,6 +377,42 @@
   </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-dowhy.causal_refuters.assess_overlap">
+   dowhy.causal_refuters.assess_overlap module
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#dowhy.causal_refuters.assess_overlap.AssessOverlap">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       AssessOverlap
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#dowhy.causal_refuters.assess_overlap.AssessOverlap.refute_estimate">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         AssessOverlap.refute_estimate()
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#dowhy.causal_refuters.assess_overlap.assess_support_and_overlap_overrule">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       assess_support_and_overlap_overrule()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#module-dowhy.causal_refuters.bootstrap_refuter">
    dowhy.causal_refuters.bootstrap_refuter module
   </a>
@@ -1632,6 +1668,109 @@ action.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>CausalRefuter: An object that contains the estimated effect and a new effect and the name of the refutation used.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-dowhy.causal_refuters.assess_overlap">
+<span id="dowhy-causal-refuters-assess-overlap-module"></span><h2>dowhy.causal_refuters.assess_overlap module<a class="headerlink" href="#module-dowhy.causal_refuters.assess_overlap" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="dowhy.causal_refuters.assess_overlap.AssessOverlap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_refuters.assess_overlap.</span></span><span class="sig-name descname"><span class="pre">AssessOverlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/assess_overlap.html#AssessOverlap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_refuters.assess_overlap.AssessOverlap" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="dowhy.html#dowhy.causal_refuter.CausalRefuter" title="dowhy.causal_refuter.CausalRefuter"><code class="xref py py-class docutils literal notranslate"><span class="pre">CausalRefuter</span></code></a></p>
+<p>Assess Overlap</p>
+<p>This class implements the OverRule algorithm for assessing support and overlap via Boolean Rulesets, from [1].</p>
+<p>[1] Oberst, M., Johansson, F., Wei, D., Gao, T., Brat, G., Sontag, D., &amp; Varshney, K. (2020). Characterization of
+Overlap in Observational Studies. In S. Chiappa &amp; R. Calandra (Eds.), Proceedings of the Twenty Third International
+Conference on Artificial Intelligence and Statistics (Vol. 108, pp. 788–798). PMLR. <a class="reference external" href="https://arxiv.org/abs/1907.04138">https://arxiv.org/abs/1907.04138</a></p>
+<p>Initialize the parameters required for the refuter.</p>
+<p>Arguments are passed through to the <cite>refute_estimate</cite> method. See dowhy.causal_refuters.assess_overlap_overrule
+for the definition of the <cite>SupportConfig</cite> and <cite>OverlapConfig</cite> dataclasses that define optimization
+hyperparameters.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This method is only compatible with estimators that use backdoor adjustment, and will attempt to acquire
+the set of backdoor variables via <cite>self._target_estimand.get_backdoor_variables()</cite>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>cat_feats: List[str]: List of categorical features, all others will be discretized</p>
+</dd>
+<dt class="field-even">Param</dt>
+<dd class="field-even"><p>support_config: SupportConfig: DataClass with configuration options for learning support rules</p>
+</dd>
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>overlap_config: OverlapConfig: DataClass with configuration options for learning overlap rules</p>
+</dd>
+<dt class="field-even">Param</dt>
+<dd class="field-even"><p>overlap_eps: float: Defines the range of propensity scores for a point to be considered in the overlap
+region, with the range defined as <cite>(overlap_eps, 1 - overlap_eps)</cite>, defaults to 0.1</p>
+</dd>
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>overrule_verbose: bool: Enable verbose logging of optimization output, defaults to False</p>
+</dd>
+<dt class="field-even">Param</dt>
+<dd class="field-even"><p>support_only: bool: Only fit rules to describe the support region (do not fit overlap rules), defaults to False</p>
+</dd>
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>overlap_only: bool: Only fit rules to describe the overlap region (do not fit support rules), defaults to False</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_refuters.assess_overlap.AssessOverlap.refute_estimate">
+<span class="sig-name descname"><span class="pre">refute_estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">show_progress_bar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/assess_overlap.html#AssessOverlap.refute_estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_refuters.assess_overlap.AssessOverlap.refute_estimate" title="Permalink to this definition"></a></dt>
+<dd><p>Learn overlap and support rules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>show_progress_bar</strong> (<em>bool</em>) – Not implemented, will raise error if set to True, defaults to False</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>NotImplementedError</strong> – Will raise this error if show_progress_bar=True</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>object of class OverruleAnalyzer</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dowhy.causal_refuters.assess_overlap.assess_support_and_overlap_overrule">
+<span class="sig-prename descclassname"><span class="pre">dowhy.causal_refuters.assess_overlap.</span></span><span class="sig-name descname"><span class="pre">assess_support_and_overlap_overrule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backdoor_vars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_feats</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">OverlapConfig</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">SupportConfig</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap_eps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_refuters/assess_overlap.html#assess_support_and_overlap_overrule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_refuters.assess_overlap.assess_support_and_overlap_overrule" title="Permalink to this definition"></a></dt>
+<dd><p>Learn support and overlap rules using OverRule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Data containing backdoor variables and treatment name</p></li>
+<li><p><strong>backdoor_vars</strong> – List of backdoor variables. Support and overlap rules will only be learned with respect to</p></li>
+</ul>
+</dd>
+</dl>
+<p>these variables
+:type backdoor_vars: List[str]
+:param treatment_name: Treatment name
+:type treatment_name: str
+:param cat_feats: Categorical features
+:type cat_feats: List[str]
+:param overlap_config: Configuration for learning overlap rules
+:type overlap_config: OverlapConfig
+:param support_config: Configuration for learning support rules
+:type support_config: SupportConfig
+:param: overlap_eps: float: Defines the range of propensity scores for a point to be considered in the overlap</p>
+<blockquote>
+<div><p>region, with the range defined as <cite>(overlap_eps, 1 - overlap_eps)</cite>, defaults to 0.1</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>support_only: bool: Only fit the support region</p>
+</dd>
+<dt class="field-even">Param</dt>
+<dd class="field-even"><p>overlap_only: bool: Only fit the overlap region</p>
+</dd>
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>verbose: bool: Enable verbose logging of optimization output, defaults to False</p>
 </dd>
 </dl>
 </dd></dl>

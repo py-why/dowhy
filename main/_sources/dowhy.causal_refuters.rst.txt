@@ -12,6 +12,15 @@ dowhy.causal\_refuters.add\_unobserved\_common\_cause module
    :undoc-members:
    :show-inheritance:
 
+dowhy.causal\_refuters.assess_overlap module
+-----------------------------------------------------------
+
+.. automodule:: dowhy.causal_refuters.assess_overlap
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
 dowhy.causal\_refuters.bootstrap\_refuter module
 ------------------------------------------------
 
