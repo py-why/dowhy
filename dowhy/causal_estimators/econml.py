@@ -41,7 +41,7 @@ class Econml(CausalEstimator):
         self,
         identified_estimand: IdentifiedEstimand,
         econml_estimator: Union[_EconmlEstimator, str],
-        test_significance: bool = False,
+        test_significance: Union[bool, str] = False,
         evaluate_effect_strength: bool = False,
         confidence_intervals: bool = False,
         num_null_simulations: int = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
@@ -109,8 +109,6 @@ class Econml(CausalEstimator):
     def fit(
         self,
         data: pd.DataFrame,
-        treatment_name: str,
-        outcome_name: str,
         effect_modifier_names: Optional[List[str]] = None,
         **kwargs,
     ):
@@ -123,8 +121,7 @@ class Econml(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        self._set_data(data, treatment_name, outcome_name)
-        self._set_effect_modifiers(effect_modifier_names)
+        self._set_effect_modifiers(data, effect_modifier_names)
 
         # Save parameters for later refutter fitting
         self._econml_fit_params = kwargs
@@ -152,12 +149,12 @@ class Econml(CausalEstimator):
                 # Override the effect_modifiers set in CausalEstimator.__init__()
                 # Also only update self._effect_modifiers, and create a copy of self._effect_modifier_names
                 # the latter can be used by other estimator methods later
-                self._effect_modifiers = self._data[effect_modifier_names]
+                self._effect_modifiers = data[effect_modifier_names]
                 self._effect_modifiers = pd.get_dummies(self._effect_modifiers, drop_first=True)
                 self._effect_modifier_names = effect_modifier_names
             self.logger.debug("Effect modifiers: " + ",".join(effect_modifier_names))
         if self._observed_common_causes_names:
-            self._observed_common_causes = self._data[self._observed_common_causes_names]
+            self._observed_common_causes = data[self._observed_common_causes_names]
             self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
         else:
             self._observed_common_causes = None
@@ -169,7 +166,7 @@ class Econml(CausalEstimator):
         else:
             self.estimating_instrument_names = parse_state(self.iv_instrument_name)
         if self.estimating_instrument_names:
-            self._estimating_instruments = self._data[self.estimating_instrument_names]
+            self._estimating_instruments = data[self.estimating_instrument_names]
             self._estimating_instruments = pd.get_dummies(self._estimating_instruments, drop_first=True)
         else:
             self._estimating_instruments = None
@@ -180,8 +177,8 @@ class Econml(CausalEstimator):
         X = None
         W = None  # common causes/ confounders
         Z = None  # Instruments
-        Y = self._outcome
-        T = self._treatment
+        Y = data[self._target_estimand.outcome_variable[0]]
+        T = data[self._target_estimand.treatment_variable]
         if self._effect_modifiers is not None and len(self._effect_modifiers) > 0:
             X = self._effect_modifiers
         if self._observed_common_causes_names:
@@ -217,7 +214,12 @@ class Econml(CausalEstimator):
         return estimator_class
 
     def estimate_effect(
-        self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+        self,
+        data: pd.DataFrame,
+        treatment_value: Any = 1,
+        control_value: Any = 0,
+        target_units=None,
+        **_,
     ):
         """
         data: dataframe containing the data on which treatment effect is to be estimated.
@@ -227,13 +229,10 @@ class Econml(CausalEstimator):
                      It can be a DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
                      It can also be a lambda function that can be used as an index for the data (pandas DataFrame) to select the required rows.
         """
-        if data is None:
-            data = self._data
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
 
-        n_samples = self._treatment.shape[0]
         X = None  # Effect modifiers
         if self._effect_modifiers is not None and len(self._effect_modifiers) > 0:
             X = self._effect_modifiers
@@ -261,6 +260,9 @@ class Econml(CausalEstimator):
             self.effect_intervals = None
 
         estimate = CausalEstimate(
+            data=data,
+            treatment_name=self._target_estimand.treatment_variable,
+            outcome_name=self._target_estimand.outcome_variable,
             estimate=ate,
             control_value=control_value,
             treatment_value=treatment_value,
@@ -361,7 +363,7 @@ class Econml(CausalEstimator):
 
         return self.apply_multitreatment(df, effect_inference_fun, *args, **kwargs)
 
-    def effect_tt(self, df: pd.DataFrame, *args, **kwargs):
+    def effect_tt(self, df: pd.DataFrame, treatment_value, *args, **kwargs):
         """
         Effect of the actual treatment that was applied to each unit
         ("effect of Treatment on the Treated")
@@ -373,13 +375,14 @@ class Econml(CausalEstimator):
         eff = self.effect(df, *args, **kwargs).reshape((len(df), len(self._treatment_value)))
 
         out = np.zeros(len(df))
-        treatment_value = parse_state(self._treatment_value)
-        treatment_name = parse_state(self._treatment_name)[0]
+        treatment_value = parse_state(treatment_value)
 
         eff = np.reshape(eff, (len(df), len(treatment_value)))
 
         # For each unit, return the estimated effect of the treatment value
         # that was actually applied to the unit
         for c, col in enumerate(treatment_value):
-            out[df[treatment_name] == col] = eff[df[treatment_name] == col, c]
+            out[df[self._target_estimand.treatment_variable[0]] == col] = eff[
+                df[self._target_estimand.treatment_variable[0]] == col, c
+            ]
         return pd.Series(data=out, index=df.index)

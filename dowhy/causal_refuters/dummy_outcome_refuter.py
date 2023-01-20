@@ -493,12 +493,11 @@ def refute_dummy_outcome(
             new_estimator = estimate.estimator.get_new_estimator_object(identified_estimand)
             new_estimator.fit(
                 new_data,
-                identified_estimand.treatment_variable,
-                identified_estimand.outcome_variable,
                 estimate.estimator._effect_modifier_names,
                 **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
             )
             new_effect = new_estimator.estimate_effect(
+                new_data,
                 control_value=estimate.control_value,
                 treatment_value=estimate.treatment_value,
                 target_units=estimate.estimator._target_units,
@@ -574,12 +573,11 @@ def refute_dummy_outcome(
                 new_estimator = estimate.estimator.get_new_estimator_object(identified_estimand)
                 new_estimator.fit(
                     new_data,
-                    identified_estimand.treatment_variable,
-                    identified_estimand.outcome_variable,
                     estimate.estimator._effect_modifier_names,
                     **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
                 )
                 new_effect = new_estimator.estimate_effect(
+                    new_data,
                     control_value=estimate.control_value,
                     treatment_value=estimate.treatment_value,
                     target_units=estimate.estimator._target_units,
@@ -603,6 +601,9 @@ def refute_dummy_outcome(
     if estimator_present == False:
 
         dummy_estimate = CausalEstimate(
+            data=None,
+            treatment_name=estimate._treatment_name,
+            outcome_name=estimate._outcome_name,
             estimate=causal_effect_map[None],
             control_value=estimate.control_value,
             treatment_value=estimate.treatment_value,
@@ -624,6 +625,9 @@ def refute_dummy_outcome(
         # Iterating through the refutation for each category
         for train_category in range(simulation_results.shape[1]):
             dummy_estimate = CausalEstimate(
+                data=None,
+                treatment_name=estimate._treatment_name,
+                outcome_name=estimate._outcome_name,
                 estimate=causal_effect_list[train_category],
                 control_value=estimate.control_value,
                 treatment_value=estimate.treatment_value,

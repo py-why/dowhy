@@ -20,7 +20,7 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
     def __init__(
         self,
         identified_estimand: IdentifiedEstimand,
-        test_significance: bool = False,
+        test_significance: Union[bool, str] = False,
         evaluate_effect_strength: bool = False,
         confidence_intervals: bool = False,
         num_null_simulations: int = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
@@ -91,8 +91,6 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
     def fit(
         self,
         data: pd.DataFrame,
-        treatment_name: str,
-        outcome_name: str,
         effect_modifier_names: Optional[List[str]] = None,
     ):
         """
@@ -104,16 +102,19 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        return super().fit(data, treatment_name, outcome_name, effect_modifier_names=effect_modifier_names)
+        return super().fit(
+            data,
+            effect_modifier_names=effect_modifier_names,
+        )
 
-    def _build_model(self):
-        features = self._build_features()
-        model = sm.GLM(self._outcome, features, family=self.family).fit()
+    def _build_model(self, data: pd.DataFrame):
+        features = self._build_features(data)
+        model = sm.GLM(data[self._target_estimand.outcome_variable], features, family=self.family).fit()
         return (features, model)
 
-    def predict_fn(self, model, features):
+    def predict_fn(self, data: pd.DataFrame, model, features):
         # Checking if Y is binary
-        outcome_values = self._data[self._outcome_name].astype(int).unique()
+        outcome_values = data[self._target_estimand.outcome_variable[0]].astype(int).unique()
         outcome_is_binary = all([v in [0, 1] for v in outcome_values])
 
         if outcome_is_binary:

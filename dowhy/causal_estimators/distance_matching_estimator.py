@@ -22,7 +22,7 @@ class DistanceMatchingEstimator(CausalEstimator):
     def __init__(
         self,
         identified_estimand: IdentifiedEstimand,
-        test_significance: bool = False,
+        test_significance: Union[bool, str] = False,
         evaluate_effect_strength: bool = False,
         confidence_intervals: bool = False,
         num_null_simulations: int = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
@@ -96,8 +96,6 @@ class DistanceMatchingEstimator(CausalEstimator):
     def fit(
         self,
         data: pd.DataFrame,
-        treatment_name: str,
-        outcome_name: str,
         exact_match_cols=None,
         effect_modifier_names: Optional[List[str]] = None,
     ):
@@ -112,17 +110,16 @@ class DistanceMatchingEstimator(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        self._set_data(data, treatment_name, outcome_name)
         self.exact_match_cols = exact_match_cols
 
-        self._set_effect_modifiers(effect_modifier_names)
+        self._set_effect_modifiers(data, effect_modifier_names)
 
         # Check if the treatment is one-dimensional
-        if len(self._treatment_name) > 1:
+        if len(self._target_estimand.treatment_variable) > 1:
             error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
             raise Exception(error_msg)
         # Checking if the treatment is binary
-        if not pd.api.types.is_bool_dtype(self._data[self._treatment_name[0]]):
+        if not pd.api.types.is_bool_dtype(data[self._target_estimand.treatment_variable[0]]):
             error_msg = "Distance Matching method is applicable only for binary treatments"
             self.logger.error(error_msg)
             raise Exception(error_msg)
@@ -135,7 +132,7 @@ class DistanceMatchingEstimator(CausalEstimator):
                 self._observed_common_causes_names = [
                     v for v in self._observed_common_causes_names if v not in self.exact_match_cols
                 ]
-            self._observed_common_causes = self._data[self._observed_common_causes_names]
+            self._observed_common_causes = data[self._observed_common_causes_names]
             # Convert the categorical variables into dummy/indicator variables
             # Basically, this gives a one hot encoding for each category
             # The first category is taken to be the base line.
@@ -152,21 +149,28 @@ class DistanceMatchingEstimator(CausalEstimator):
         return self
 
     def estimate_effect(
-        self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+        self,
+        data: pd.DataFrame,
+        treatment_value: Any = 1,
+        control_value: Any = 0,
+        target_units=None,
+        **_,
     ):
-        if data is None:
-            data = self._data
         # this assumes a binary treatment regime
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
         updated_df = pd.concat(
-            [self._observed_common_causes, data[[self._outcome_name, self._treatment_name[0]]]], axis=1
+            [
+                self._observed_common_causes,
+                data[[self._target_estimand.outcome_variable[0], self._target_estimand.treatment_variable[0]]],
+            ],
+            axis=1,
         )
         if self.exact_match_cols is not None:
             updated_df = pd.concat([updated_df, data[self.exact_match_cols]], axis=1)
-        treated = updated_df.loc[data[self._treatment_name[0]] == 1]
-        control = updated_df.loc[data[self._treatment_name[0]] == 0]
+        treated = updated_df.loc[data[self._target_estimand.treatment_variable[0]] == 1]
+        control = updated_df.loc[data[self._target_estimand.treatment_variable[0]] == 0]
         numtreatedunits = treated.shape[0]
         numcontrolunits = control.shape[0]
 
@@ -199,8 +203,10 @@ class DistanceMatchingEstimator(CausalEstimator):
                 att = 0
 
                 for i in range(numtreatedunits):
-                    treated_outcome = treated.iloc[i][self._outcome_name].item()
-                    control_outcome = np.mean(control.iloc[indices[i]][self._outcome_name].values)
+                    treated_outcome = treated.iloc[i][self._target_estimand.outcome_variable[0]].item()
+                    control_outcome = np.mean(
+                        control.iloc[indices[i]][self._target_estimand.outcome_variable[0]].values
+                    )
                     att += treated_outcome - control_outcome
 
                 att /= numtreatedunits
@@ -218,8 +224,8 @@ class DistanceMatchingEstimator(CausalEstimator):
                 grouped = updated_df.groupby(self.exact_match_cols)
                 att = 0
                 for name, group in grouped:
-                    treated = group.loc[group[self._treatment_name[0]] == 1]
-                    control = group.loc[group[self._treatment_name[0]] == 0]
+                    treated = group.loc[group[self._target_estimand.treatment_variable[0]] == 1]
+                    control = group.loc[group[self._target_estimand.treatment_variable[0]] == 0]
                     if treated.shape[0] == 0:
                         continue
                     control_neighbors = NearestNeighbors(
@@ -235,8 +241,10 @@ class DistanceMatchingEstimator(CausalEstimator):
                     self.logger.debug(distances)
 
                     for i in range(numtreatedunits):
-                        treated_outcome = treated.iloc[i][self._outcome_name].item()
-                        control_outcome = np.mean(control.iloc[indices[i]][self._outcome_name].values)
+                        treated_outcome = treated.iloc[i][self._target_estimand.outcome_variable[0]].item()
+                        control_outcome = np.mean(
+                            control.iloc[indices[i]][self._target_estimand.outcome_variable[0]].values
+                        )
                         att += treated_outcome - control_outcome
                         # self.matched_indices_att[treated_df_index[i]] = control.iloc[indices[i]].index.tolist()
 
@@ -259,8 +267,8 @@ class DistanceMatchingEstimator(CausalEstimator):
 
             atc = 0
             for i in range(numcontrolunits):
-                control_outcome = control.iloc[i][self._outcome_name].item()
-                treated_outcome = np.mean(treated.iloc[indices[i]][self._outcome_name].values)
+                control_outcome = control.iloc[i][self._target_estimand.outcome_variable[0]].item()
+                treated_outcome = np.mean(treated.iloc[indices[i]][self._target_estimand.outcome_variable[0]].values)
                 atc += treated_outcome - control_outcome
 
             atc /= numcontrolunits
@@ -278,6 +286,9 @@ class DistanceMatchingEstimator(CausalEstimator):
                 self.matched_indices_atc[control_df_index[i]] = treated.iloc[indices[i]].index.tolist()
 
         estimate = CausalEstimate(
+            data=data,
+            treatment_name=self._target_estimand.treatment_variable,
+            outcome_name=self._target_estimand.outcome_variable,
             estimate=est,
             control_value=control_value,
             treatment_value=treatment_value,

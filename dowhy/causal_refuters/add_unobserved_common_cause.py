@@ -702,8 +702,8 @@ def sensitivity_non_parametric_partial_r2(
         analyzer = PartialLinearSensitivityAnalyzer(
             estimator=estimate._estimator_object,
             observed_common_causes=estimate.estimator._observed_common_causes,
-            treatment=estimate.estimator._treatment,
-            outcome=estimate.estimator._outcome,
+            treatment=estimate._data[estimate._treatment_name],
+            outcome=estimate._data[estimate._outcome_name[0]],
             alpha_s_estimator_param_list=alpha_s_estimator_param_list,
             g_s_estimator_list=g_s_estimator_list,
             g_s_estimator_param_list=g_s_estimator_param_list,
@@ -719,8 +719,8 @@ def sensitivity_non_parametric_partial_r2(
     analyzer = NonParametricSensitivityAnalyzer(
         estimator=estimate.estimator,
         observed_common_causes=estimate.estimator._observed_common_causes,
-        treatment=estimate.estimator._treatment,
-        outcome=estimate.estimator._outcome,
+        treatment=estimate._data[estimate._treatment_name],
+        outcome=estimate._data[estimate._outcome_name[0]],
         alpha_s_estimator_list=alpha_s_estimator_list,
         alpha_s_estimator_param_list=alpha_s_estimator_param_list,
         g_s_estimator_list=g_s_estimator_list,
@@ -758,7 +758,7 @@ def sensitivity_e_value(
         treatment_name=treatment_name[0],
         outcome_name=outcome_name[0],
     )
-    analyzer.check_sensitivity(plot=plot_estimate)
+    analyzer.check_sensitivity(data, plot=plot_estimate)
     return analyzer
 
 
@@ -824,12 +824,11 @@ def sensitivity_simulation(
         new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
         new_estimator.fit(
             new_data,
-            target_estimand.treatment_variable,
-            target_estimand.outcome_variable,
             estimate.estimator._effect_modifier_names,
             **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
         )
         new_effect = new_estimator.estimate_effect(
+            new_data,
             control_value=estimate.control_value,
             treatment_value=estimate.treatment_value,
             target_units=estimate.estimator._target_units,
@@ -873,12 +872,11 @@ def sensitivity_simulation(
                     new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
                     new_estimator.fit(
                         new_data,
-                        target_estimand.treatment_variable,
-                        target_estimand.outcome_variable,
                         estimate.estimator._effect_modifier_names,
                         **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
                     )
                     new_effect = new_estimator.estimate_effect(
+                        new_data,
                         control_value=estimate.control_value,
                         treatment_value=estimate.treatment_value,
                         target_units=estimate.estimator._target_units,
@@ -951,12 +949,11 @@ def sensitivity_simulation(
                 new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
                 new_estimator.fit(
                     new_data,
-                    target_estimand.treatment_variable,
-                    target_estimand.outcome_variable,
                     estimate.estimator._effect_modifier_names,
                     **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
                 )
                 new_effect = new_estimator.estimate_effect(
+                    new_data,
                     control_value=estimate.control_value,
                     treatment_value=estimate.treatment_value,
                     target_units=estimate.estimator._target_units,
@@ -1011,12 +1008,11 @@ def sensitivity_simulation(
                 new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
                 new_estimator.fit(
                     new_data,
-                    target_estimand.treatment_variable,
-                    target_estimand.outcome_variable,
                     estimate.estimator._effect_modifier_names,
                     **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
                 )
                 new_effect = new_estimator.estimate_effect(
+                    new_data,
                     control_value=estimate.control_value,
                     treatment_value=estimate.treatment_value,
                     target_units=estimate.estimator._target_units,

@@ -21,7 +21,7 @@ class LinearRegressionEstimator(RegressionEstimator):
     def __init__(
         self,
         identified_estimand: IdentifiedEstimand,
-        test_significance: bool = False,
+        test_significance: Union[bool, str] = False,
         evaluate_effect_strength: bool = False,
         confidence_intervals: bool = False,
         num_null_simulations: int = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
@@ -73,8 +73,6 @@ class LinearRegressionEstimator(RegressionEstimator):
     def fit(
         self,
         data: pd.DataFrame,
-        treatment_name: str,
-        outcome_name: str,
         effect_modifier_names: Optional[List[str]] = None,
     ):
         """
@@ -86,7 +84,7 @@ class LinearRegressionEstimator(RegressionEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        return super().fit(data, treatment_name, outcome_name, effect_modifier_names=effect_modifier_names)
+        return super().fit(data, effect_modifier_names=effect_modifier_names)
 
     def construct_symbolic_estimator(self, estimand):
         expr = "b: " + ",".join(estimand.outcome_variable) + "~"
@@ -100,12 +98,12 @@ class LinearRegressionEstimator(RegressionEstimator):
             expr += "+" + "+".join(interaction_terms)
         return expr
 
-    def predict_fn(self, model, features):
+    def predict_fn(self, data, model, features):
         return model.predict(features)
 
-    def _build_model(self):
-        features = self._build_features()
-        model = sm.OLS(self._outcome, features).fit()
+    def _build_model(self, data: pd.DataFrame):
+        features = self._build_features(data)
+        model = sm.OLS(data[self._target_estimand.outcome_variable[0]], features).fit()
         return (features, model)
 
     def _estimate_confidence_intervals(self, confidence_level, method=None):
@@ -124,14 +122,14 @@ class LinearRegressionEstimator(RegressionEstimator):
             # variable. Hence, the model by default outputs the confidence interval corresponding to treatment=1 and control=0.
             # So for custom treatment and control values, we must multiply the confidence interval by the difference of the two.
             return (self._treatment_value - self._control_value) * conf_ints.to_numpy()[
-                1 : (len(self._treatment_name) + 1), :
+                1 : (len(self._target_estimand.treatment_variable) + 1), :
             ]
 
     def _estimate_std_error(self, method=None):
         if self._effect_modifier_names:
             raise NotImplementedError
         else:
-            std_error = self.model.bse[1 : (len(self._treatment_name) + 1)]
+            std_error = self.model.bse[1 : (len(self._target_estimand.treatment_variable) + 1)]
 
             # For a linear regression model, the causal effect of a variable is equal to the coefficient corresponding to the
             # variable. Hence, the model by default outputs the standard error corresponding to treatment=1 and control=0.
@@ -139,5 +137,5 @@ class LinearRegressionEstimator(RegressionEstimator):
             return (self._treatment_value - self._control_value) * std_error.to_numpy()
 
     def _test_significance(self, estimate_value, method=None):
-        pvalue = self.model.pvalues[1 : (len(self._treatment_name) + 1)]
+        pvalue = self.model.pvalues[1 : (len(self._target_estimand.treatment_variable) + 1)]
         return {"p_value": pvalue.to_numpy()}

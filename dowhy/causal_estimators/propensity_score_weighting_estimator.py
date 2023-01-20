@@ -21,7 +21,7 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
     def __init__(
         self,
         identified_estimand: IdentifiedEstimand,
-        test_significance: bool = False,
+        test_significance: Union[bool, str] = False,
         evaluate_effect_strength: bool = False,
         confidence_intervals: bool = False,
         num_null_simulations: int = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
@@ -103,8 +103,6 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
     def fit(
         self,
         data: pd.DataFrame,
-        treatment_name: str,
-        outcome_name: str,
         effect_modifier_names: Optional[List[str]] = None,
     ):
         """
@@ -116,7 +114,7 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        super().fit(data, treatment_name, outcome_name, effect_modifier_names=effect_modifier_names)
+        super().fit(data, effect_modifier_names=effect_modifier_names)
 
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
@@ -124,10 +122,13 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
         return self
 
     def estimate_effect(
-        self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+        self,
+        data: pd.DataFrame,
+        treatment_value: Any = 1,
+        control_value: Any = 0,
+        target_units=None,
+        **_,
     ):
-        if data is None:
-            data = self._data
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
@@ -142,69 +143,79 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
         # nips ==> ips / (sum of ips over all units)
         # icps ==> ps(y)/(1-ps(y)) / (sum of (ps(y)/(1-ps(y))) over all control units)
         # itps ==> ps(y)/(1-ps(y)) / (sum of (ps(y)/(1-ps(y))) over all treatment units)
-        ipst_sum = sum(data[self._treatment_name[0]] / data[self.propensity_score_column])
-        ipsc_sum = sum((1 - data[self._treatment_name[0]]) / (1 - data[self.propensity_score_column]))
-        num_units = len(data[self._treatment_name[0]])
-        num_treatment_units = sum(data[self._treatment_name[0]])
+        ipst_sum = sum(data[self._target_estimand.treatment_variable[0]] / data[self.propensity_score_column])
+        ipsc_sum = sum(
+            (1 - data[self._target_estimand.treatment_variable[0]]) / (1 - data[self.propensity_score_column])
+        )
+        num_units = len(data[self._target_estimand.treatment_variable[0]])
+        num_treatment_units = sum(data[self._target_estimand.treatment_variable[0]])
         num_control_units = num_units - num_treatment_units
 
         # Vanilla IPS estimator
-        data["ips_weight"] = data[self._treatment_name[0]] / data[self.propensity_score_column] + (
-            1 - data[self._treatment_name[0]]
+        data["ips_weight"] = data[self._target_estimand.treatment_variable[0]] / data[self.propensity_score_column] + (
+            1 - data[self._target_estimand.treatment_variable[0]]
         ) / (1 - data[self.propensity_score_column])
-        data["tips_weight"] = data[self._treatment_name[0]] + (1 - data[self._treatment_name[0]]) * data[
-            self.propensity_score_column
-        ] / (1 - data[self.propensity_score_column])
-        data["cips_weight"] = data[self._treatment_name[0]] * (1 - data[self.propensity_score_column]) / data[
-            self.propensity_score_column
-        ] + (1 - data[self._treatment_name[0]])
+        data["tips_weight"] = data[self._target_estimand.treatment_variable[0]] + (
+            1 - data[self._target_estimand.treatment_variable[0]]
+        ) * data[self.propensity_score_column] / (1 - data[self.propensity_score_column])
+        data["cips_weight"] = data[self._target_estimand.treatment_variable[0]] * (
+            1 - data[self.propensity_score_column]
+        ) / data[self.propensity_score_column] + (1 - data[self._target_estimand.treatment_variable[0]])
 
         # The Hajek estimator (or the self-normalized estimator)
         data["ips_normalized_weight"] = (
-            data[self._treatment_name[0]] / data[self.propensity_score_column] / ipst_sum
-            + (1 - data[self._treatment_name[0]]) / (1 - data[self.propensity_score_column]) / ipsc_sum
+            data[self._target_estimand.treatment_variable[0]] / data[self.propensity_score_column] / ipst_sum
+            + (1 - data[self._target_estimand.treatment_variable[0]])
+            / (1 - data[self.propensity_score_column])
+            / ipsc_sum
         )
-        ipst_for_att_sum = sum(data[self._treatment_name[0]])
+        ipst_for_att_sum = sum(data[self._target_estimand.treatment_variable[0]])
         ipsc_for_att_sum = sum(
-            (1 - data[self._treatment_name[0]])
+            (1 - data[self._target_estimand.treatment_variable[0]])
             / (1 - data[self.propensity_score_column])
             * data[self.propensity_score_column]
         )
         data["tips_normalized_weight"] = (
-            data[self._treatment_name[0]] / ipst_for_att_sum
-            + (1 - data[self._treatment_name[0]])
+            data[self._target_estimand.treatment_variable[0]] / ipst_for_att_sum
+            + (1 - data[self._target_estimand.treatment_variable[0]])
             * data[self.propensity_score_column]
             / (1 - data[self.propensity_score_column])
             / ipsc_for_att_sum
         )
         ipst_for_atc_sum = sum(
-            data[self._treatment_name[0]]
+            data[self._target_estimand.treatment_variable[0]]
             / data[self.propensity_score_column]
             * (1 - data[self.propensity_score_column])
         )
-        ipsc_for_atc_sum = sum((1 - data[self._treatment_name[0]]))
+        ipsc_for_atc_sum = sum((1 - data[self._target_estimand.treatment_variable[0]]))
         data["cips_normalized_weight"] = (
-            data[self._treatment_name[0]]
+            data[self._target_estimand.treatment_variable[0]]
             * (1 - data[self.propensity_score_column])
             / data[self.propensity_score_column]
             / ipst_for_atc_sum
-            + (1 - data[self._treatment_name[0]]) / ipsc_for_atc_sum
+            + (1 - data[self._target_estimand.treatment_variable[0]]) / ipsc_for_atc_sum
         )
 
         # Stabilized weights (from Robins, Hernan, Brumback (2000))
         # Paper: Marginal Structural Models and Causal Inference in Epidemiology
-        p_treatment = sum(data[self._treatment_name[0]]) / num_units
-        data["ips_stabilized_weight"] = data[self._treatment_name[0]] / data[
+        p_treatment = sum(data[self._target_estimand.treatment_variable[0]]) / num_units
+        data["ips_stabilized_weight"] = data[self._target_estimand.treatment_variable[0]] / data[
             self.propensity_score_column
-        ] * p_treatment + (1 - data[self._treatment_name[0]]) / (1 - data[self.propensity_score_column]) * (
+        ] * p_treatment + (1 - data[self._target_estimand.treatment_variable[0]]) / (
+            1 - data[self.propensity_score_column]
+        ) * (
             1 - p_treatment
         )
-        data["tips_stabilized_weight"] = data[self._treatment_name[0]] * p_treatment + (
-            1 - data[self._treatment_name[0]]
+        data["tips_stabilized_weight"] = data[self._target_estimand.treatment_variable[0]] * p_treatment + (
+            1 - data[self._target_estimand.treatment_variable[0]]
         ) * data[self.propensity_score_column] / (1 - data[self.propensity_score_column]) * (1 - p_treatment)
-        data["cips_stabilized_weight"] = data[self._treatment_name[0]] * (
+        data["cips_stabilized_weight"] = data[self._target_estimand.treatment_variable[0]] * (
             1 - data[self.propensity_score_column]
-        ) / data[self.propensity_score_column] * p_treatment + (1 - data[self._treatment_name[0]]) * (1 - p_treatment)
+        ) / data[self.propensity_score_column] * p_treatment + (
+            1 - data[self._target_estimand.treatment_variable[0]]
+        ) * (
+            1 - p_treatment
+        )
 
         if isinstance(target_units, pd.DataFrame) or target_units == "ate":
             weighting_scheme_name = self.weighting_scheme
@@ -216,15 +227,28 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
             raise ValueError(f"Target units value {target_units} not supported")
 
         # Calculating the effect
-        data["d_y"] = data[weighting_scheme_name] * data[self._treatment_name[0]] * data[self._outcome_name]
-        data["dbar_y"] = data[weighting_scheme_name] * (1 - data[self._treatment_name[0]]) * data[self._outcome_name]
-        sum_dy_weights = np.sum(data[self._treatment_name[0]] * data[weighting_scheme_name])
-        sum_dbary_weights = np.sum((1 - data[self._treatment_name[0]]) * data[weighting_scheme_name])
+        data["d_y"] = (
+            data[weighting_scheme_name]
+            * data[self._target_estimand.treatment_variable[0]]
+            * data[self._target_estimand.outcome_variable[0]]
+        )
+        data["dbar_y"] = (
+            data[weighting_scheme_name]
+            * (1 - data[self._target_estimand.treatment_variable[0]])
+            * data[self._target_estimand.outcome_variable[0]]
+        )
+        sum_dy_weights = np.sum(data[self._target_estimand.treatment_variable[0]] * data[weighting_scheme_name])
+        sum_dbary_weights = np.sum(
+            (1 - data[self._target_estimand.treatment_variable[0]]) * data[weighting_scheme_name]
+        )
         # Subtracting the weighted means
         est = data["d_y"].sum() / sum_dy_weights - data["dbar_y"].sum() / sum_dbary_weights
 
         # TODO - how can we add additional information into the returned estimate?
         estimate = CausalEstimate(
+            data=data,
+            treatment_name=self._target_estimand.treatment_variable,
+            outcome_name=self._target_estimand.outcome_variable,
             estimate=est,
             control_value=control_value,
             treatment_value=treatment_value,
