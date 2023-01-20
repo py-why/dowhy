@@ -64,7 +64,7 @@ class EValueSensitivityAnalyzer:
         self.benchmarking_results = None
         self.sd_outcome = np.std(self.data[outcome_name])
 
-    def check_sensitivity(self, plot=True):
+    def check_sensitivity(self, data: pd.DataFrame, plot=True):
         """
         Computes E-value for point estimate and confidence limits. Benchmarks E-values against
         measured confounders using Observed Covariate E-values. Plots E-values and Observed
@@ -88,7 +88,7 @@ class EValueSensitivityAnalyzer:
                 "Not benchmarking with Observed Covariate E-values. Confidence interval is already tipped."
             )
         else:
-            self.benchmark()
+            self.benchmark(data)
 
         if plot:
             self.plot()
@@ -237,7 +237,7 @@ class EValueSensitivityAnalyzer:
         )
         ax.plot(x_est, y_est, color=color)
 
-    def benchmark(self):
+    def benchmark(self, data: pd.DataFrame):
         """
         Benchmarks E-values against the measured confounders using McGowan and Greevy Jr.'s Observed
         Covariate E-value. This approach drops measured confounders and re-fits the estimator, measuring
@@ -261,14 +261,13 @@ class EValueSensitivityAnalyzer:
             new_estimator = self.estimate.estimator.get_new_estimator_object(new_estimand)
             new_estimator.fit(
                 self.data,
-                new_estimand.treatment_variable,
-                new_estimand.outcome_variable,
                 self.estimate.estimator._effect_modifier_names,
                 **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
             )
 
             # new effect estimate
             new_effect = new_estimator.estimate_effect(
+                self.data,
                 control_value=self.estimate.control_value,
                 treatment_value=self.estimate.treatment_value,
                 target_units=self.estimate.estimator._target_units,

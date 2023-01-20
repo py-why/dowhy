@@ -21,7 +21,7 @@ class PropensityScoreEstimator(CausalEstimator):
     def __init__(
         self,
         identified_estimand: IdentifiedEstimand,
-        test_significance: bool = False,
+        test_significance: Union[bool, str] = False,
         evaluate_effect_strength: bool = False,
         confidence_intervals: bool = False,
         num_null_simulations: int = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
@@ -84,27 +84,22 @@ class PropensityScoreEstimator(CausalEstimator):
     def fit(
         self,
         data: pd.DataFrame,
-        treatment_name: str,
-        outcome_name: str,
         effect_modifier_names: Optional[List[str]] = None,
     ):
         """
         Fits the estimator with data for effect estimation
         :param data: data frame containing the data
-        :param treatment: name of the treatment variable
-        :param outcome: name of the outcome variable
         :param effect_modifiers: Variables on which to compute separate
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        self._set_data(data, treatment_name, outcome_name)
-        self._set_effect_modifiers(effect_modifier_names)
+        self._set_effect_modifiers(data, effect_modifier_names)
 
         self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
         self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
 
         if self._observed_common_causes_names:
-            self._observed_common_causes = self._data[self._observed_common_causes_names]
+            self._observed_common_causes = data[self._observed_common_causes_names]
             # Convert the categorical variables into dummy/indicator variables
             # Basically, this gives a one hot encoding for each category
             # The first category is taken to be the base line.
@@ -116,20 +111,20 @@ class PropensityScoreEstimator(CausalEstimator):
             raise Exception(error_msg)
 
         # Check if the treatment is one-dimensional
-        if len(self._treatment_name) > 1:
+        if len(self._target_estimand.treatment_variable) > 1:
             error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
             raise Exception(error_msg)
         # Checking if the treatment is binary
-        treatment_values = self._data[self._treatment_name[0]].astype(int).unique()
+        treatment_values = data[self._target_estimand.treatment_variable[0]].astype(int).unique()
         if any([v not in [0, 1] for v in treatment_values]):
             error_msg = "Propensity score methods are applicable only for binary treatments"
             self.logger.error(error_msg)
             raise Exception(error_msg)
 
-        if self.propensity_score_column not in self._data:
+        if self.propensity_score_column not in data:
             if self.propensity_score_model is None:
                 self.propensity_score_model = linear_model.LogisticRegression()
-            treatment_reshaped = np.ravel(self._treatment)
+            treatment_reshaped = np.ravel(data[self._target_estimand.treatment_variable])
             self.propensity_score_model.fit(self._observed_common_causes, treatment_reshaped)
 
         return self

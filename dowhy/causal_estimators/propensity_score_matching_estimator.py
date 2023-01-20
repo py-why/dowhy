@@ -21,7 +21,7 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
     def __init__(
         self,
         identified_estimand: IdentifiedEstimand,
-        test_significance: bool = False,
+        test_significance: Union[bool, str] = False,
         evaluate_effect_strength: bool = False,
         confidence_intervals: bool = False,
         num_null_simulations: int = CausalEstimator.DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST,
@@ -83,8 +83,6 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
     def fit(
         self,
         data: pd.DataFrame,
-        treatment_name: str,
-        outcome_name: str,
         effect_modifier_names: Optional[List[str]] = None,
     ):
         """
@@ -96,17 +94,20 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
-        super().fit(data, treatment_name, outcome_name, effect_modifier_names=effect_modifier_names)
+        super().fit(data, effect_modifier_names=effect_modifier_names)
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
 
         return self
 
     def estimate_effect(
-        self, data: pd.DataFrame = None, treatment_value: Any = 1, control_value: Any = 0, target_units=None, **_
+        self,
+        data: pd.DataFrame,
+        treatment_value: Any = 1,
+        control_value: Any = 0,
+        target_units=None,
+        **_,
     ):
-        if data is None:
-            data = self._data
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
@@ -114,8 +115,8 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
             self.estimate_propensity_score_column(data)
 
         # this assumes a binary treatment regime
-        treated = data.loc[data[self._treatment_name[0]] == 1]
-        control = data.loc[data[self._treatment_name[0]] == 0]
+        treated = data.loc[data[self._target_estimand.treatment_variable[0]] == 1]
+        control = data.loc[data[self._target_estimand.treatment_variable[0]] == 0]
 
         # TODO remove neighbors that are more than a given radius apart
 
@@ -130,8 +131,8 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
         att = 0
         numtreatedunits = treated.shape[0]
         for i in range(numtreatedunits):
-            treated_outcome = treated.iloc[i][self._outcome_name].item()
-            control_outcome = control.iloc[indices[i]][self._outcome_name].item()
+            treated_outcome = treated.iloc[i][self._target_estimand.outcome_variable[0]].item()
+            control_outcome = control.iloc[indices[i]][self._target_estimand.outcome_variable[0]].item()
             att += treated_outcome - control_outcome
 
         att /= numtreatedunits
@@ -144,8 +145,8 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
         atc = 0
         numcontrolunits = control.shape[0]
         for i in range(numcontrolunits):
-            control_outcome = control.iloc[i][self._outcome_name].item()
-            treated_outcome = treated.iloc[indices[i]][self._outcome_name].item()
+            control_outcome = control.iloc[i][self._target_estimand.outcome_variable[0]].item()
+            treated_outcome = treated.iloc[indices[i]][self._target_estimand.outcome_variable[0]].item()
             atc += treated_outcome - control_outcome
 
         atc /= numcontrolunits
@@ -160,6 +161,9 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
             raise ValueError("Target units string value not supported")
 
         estimate = CausalEstimate(
+            data=data,
+            treatment_name=self._target_estimand.treatment_variable,
+            outcome_name=self._target_estimand.outcome_variable,
             estimate=est,
             control_value=control_value,
             treatment_value=treatment_value,
