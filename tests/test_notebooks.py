@@ -11,7 +11,6 @@ notebooks_list = [f.name for f in os.scandir(NOTEBOOKS_PATH) if f.name.endswith(
 advanced_notebooks = [
     # requires stdin input for identify in weighting sampler
     "do_sampler_demo.ipynb",
-    # requires Rpy2 for lalonde
     "dowhy_refutation_testing.ipynb",
     "dowhy_lalonde_example.ipynb",
     "lalonde_pandas_api.ipynb",
@@ -27,11 +26,10 @@ advanced_notebooks = [
     "dowhy_twins_example.ipynb",
 ]
 
+# TODO: should probably move more notebooks here to ignore, because
+#       most get tested by the documentation generation.
 ignore_notebooks = [
-    # requires Rpy2 for causal discovery
-    # daily tests of dowhy_causal_discovery_example.ipynb are failing due to cdt/rpy2 config.
-    # comment out, since we are switching causal discovery implementations
-    "dowhy_causal_discovery_example.ipynb"
+    "dowhy_causal_discovery_example.ipynb",  # This is being tested as part of documentation generation
 ]
 
 # Adding the dowhy root folder to the python path so that jupyter notebooks
