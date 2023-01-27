@@ -11,7 +11,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from tqdm.auto import tqdm
 
-from dowhy.causal_estimator import CausalEstimate, CausalEstimator
+from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_estimators.econml import Econml
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 from dowhy.causal_estimators.regression_estimator import RegressionEstimator
@@ -19,8 +19,6 @@ from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 from dowhy.causal_refuter import CausalRefutation, CausalRefuter, choose_variables
 from dowhy.causal_refuters.evalue_sensitivity_analyzer import EValueSensitivityAnalyzer
 from dowhy.causal_refuters.linear_sensitivity_analyzer import LinearSensitivityAnalyzer
-from dowhy.causal_refuters.non_parametric_sensitivity_analyzer import NonParametricSensitivityAnalyzer
-from dowhy.causal_refuters.partial_linear_sensitivity_analyzer import PartialLinearSensitivityAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -660,6 +658,7 @@ def sensitivity_linear_partial_r2(
     return analyzer
 
 
+# TODO (petergtz): This should introduce a Protocol defining the interface this returns instead of the concrete types
 def sensitivity_non_parametric_partial_r2(
     estimate: CausalEstimate,
     kappa_t: Optional[Union[float, np.ndarray]] = None,
@@ -673,7 +672,7 @@ def sensitivity_non_parametric_partial_r2(
     g_s_estimator_list: Optional[List] = None,
     g_s_estimator_param_list: Optional[List[Dict]] = None,
     plugin_reisz: bool = False,
-) -> Union[PartialLinearSensitivityAnalyzer, NonParametricSensitivityAnalyzer]:
+):  # -> Union[PartialLinearSensitivityAnalyzer, NonParametricSensitivityAnalyzer]
     """Add an unobserved confounder for refutation using Non-parametric partial R2 methond (Sensitivity Analysis for non-parametric models).
 
     :param estimate: CausalEstimate: Estimate to run the refutation
@@ -692,6 +691,8 @@ def sensitivity_non_parametric_partial_r2(
     """
 
     import dowhy.causal_estimators.econml
+    from dowhy.causal_refuters.non_parametric_sensitivity_analyzer import NonParametricSensitivityAnalyzer
+    from dowhy.causal_refuters.partial_linear_sensitivity_analyzer import PartialLinearSensitivityAnalyzer
 
     # If the estimator used is LinearDML, partially linear sensitivity analysis will be automatically chosen
     if (
@@ -894,7 +895,6 @@ def sensitivity_simulation(
             if plotmethod is None:
                 return refute
 
-            import matplotlib
             import matplotlib.pyplot as plt
 
             fig = plt.figure(figsize=(6, 5))
@@ -969,7 +969,6 @@ def sensitivity_simulation(
             if plotmethod is None:
                 return refute
 
-            import matplotlib
             import matplotlib.pyplot as plt
 
             fig = plt.figure(figsize=(6, 5))
@@ -1028,7 +1027,6 @@ def sensitivity_simulation(
             if plotmethod is None:
                 return refute
 
-            import matplotlib
             import matplotlib.pyplot as plt
 
             fig = plt.figure(figsize=(6, 5))

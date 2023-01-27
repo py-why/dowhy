@@ -4,14 +4,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy
-from sklearn.compose import ColumnTransformer, make_column_selector
-from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import Lasso, LinearRegression, Ridge, RidgeCV, SGDRegressor
 from sklearn.model_selection import KFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from dowhy.utils.regression import get_generic_regressor, get_numeric_features
+from dowhy.causal_refuters.reisz import get_generic_regressor
+from dowhy.utils.regression import get_numeric_features
 
 
 class PartialLinearSensitivityAnalyzer:

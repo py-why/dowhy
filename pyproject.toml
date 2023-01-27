@@ -58,7 +58,7 @@ scikit-learn = "<1.2.0"
 pydot = { version = "^1.4.2", optional = true }
 joblib = "^1.1.0"
 pygraphviz = { version = "^1.9", optional = true }
-econml = { version = "*" }
+econml = { version = "*", optional = true }
 tqdm = "^4.64.0"
 causal-learn = "^0.1.3.0"
 autogluon-tabular = { extras = [
@@ -75,6 +75,7 @@ pygraphviz = ["pygraphviz"]
 pydot = ["pydot"]
 plotting = ["matplotlib"]
 autogluon = ["autogluon-tabular"]
+econml = ["econml"]
 
 [tool.poetry.group.dev.dependencies]
 poethepoet = "^0.16.0"
@@ -122,6 +123,7 @@ nbconvert = { version = "7.0.0rc3", allow-prereleases = true }
 markers = [
     "advanced: not be to run each time. only on package updates.",
     "notebook: jupyter notebook tests",
+    "econml: a marker to mark tests requiring econml",
     "focused: a debug marker to focus on specific tests",
 ]
 
@@ -135,8 +137,9 @@ _black_check = 'black --check .'
 _isort_check = 'isort --check .'
 
 # testing tasks
-test = "pytest -v -m 'not advanced' --durations=0 --durations-min=60.0"
+test = "pytest -v -m 'not advanced and not econml' --durations=0 --durations-min=60.0"
 test_durations = "poetry run poe test --store-durations"
+test_econml = "pytest -v -m 'econml' --durations=0 --durations-min=60.0"
 test_advanced = "pytest -v"
 test_focused = "pytest -v -m 'focused'"
 

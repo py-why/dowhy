@@ -63,6 +63,13 @@ jobs:
     - name: Test
       run: poetry run poe test --splits 6 --group ${{ matrix.test-group }}
 
+    - name: Install EconML dependency
+      run: |
+        poetry install -E plotting -E pygraphviz -E econml
+
+    - name: Test EconML based functionality
+      run: poetry run poe test_econml
+
     - name: Notify Discord
       if: failure() && github.ref == 'refs/heads/main'
       uses: th0th/notify-discord@v0.4.1

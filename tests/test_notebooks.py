@@ -8,7 +8,7 @@ from pytest import mark
 
 NOTEBOOKS_PATH = "docs/source/example_notebooks/"
 notebooks_list = [f.name for f in os.scandir(NOTEBOOKS_PATH) if f.name.endswith(".ipynb")]
-advanced_notebooks = [
+advanced_notebooks = {
     # requires stdin input for identify in weighting sampler
     "do_sampler_demo.ipynb",
     "dowhy_refutation_testing.ipynb",
@@ -24,7 +24,13 @@ advanced_notebooks = [
     "dowhy-conditional-treatment-effects.ipynb",
     "dowhy_refuter_notebook.ipynb",
     "dowhy_twins_example.ipynb",
-]
+}
+
+econml_notebooks = {
+    "sensitivity_analysis_nonparametric_estimators.ipynb",
+    "tutorial-causalinference-machinelearning-using-dowhy-econml.ipynb",
+    "dowhy_functional_api.ipynb",
+}
 
 # TODO: should probably move more notebooks here to ignore, because
 #       most get tested by the documentation generation.
@@ -85,10 +91,13 @@ parameter_list = []
 for nb in notebooks_list:
     if nb in ignore_notebooks:
         continue
-    elif nb in advanced_notebooks:
-        param = pytest.param(nb, marks=[mark.advanced, mark.notebook], id=nb)
     else:
-        param = pytest.param(nb, marks=[mark.notebook], id=nb)
+        marks = [mark.notebook]
+        if nb in econml_notebooks:
+            marks.append(mark.econml)
+        if nb in advanced_notebooks:
+            marks.append(mark.advanced)
+        param = pytest.param(nb, marks=marks, id=nb)
     parameter_list.append(param)
 
 
