@@ -621,7 +621,7 @@ def generate_random_graph(n, max_iter=10):
 
 
 def dataset_from_random_graph(
-    num_vars, num_samples=1000, prob_edge=0.3, random_seed=100, prob_type_of_data=(0.333, 0.333, 0.334)
+    num_vars, num_samples=1000, prob_edge=0.3, random_seed=None, prob_type_of_data=(0.333, 0.333, 0.334)
 ):
     """
     This function generates a dataset with discrete and continuous kinds of variables.
@@ -635,7 +635,9 @@ def dataset_from_random_graph(
     :returns ret_dict : dictionary with information like dataframe, outcome, treatment, graph string and continuous, discrete and binary columns
     """
     assert sum(list(prob_type_of_data)) == 1.0
-    np.random.seed(100)
+    if random_seed is None: 
+        random_seed = np.random.randint(0,1e6)
+    np.random.seed(random_seed)
     DAG = generate_random_graph(n=num_vars)
     mapping = dict(zip(DAG, string.ascii_lowercase))
     DAG = nx.relabel_nodes(DAG, mapping)
