@@ -621,7 +621,7 @@ def generate_random_graph(n, max_iter=10):
 
 
 def dataset_from_random_graph(
-    num_vars, random_seed, num_samples=1000, prob_edge=0.3, prob_type_of_data=(0.333, 0.333, 0.334)
+    num_vars, random_seed=100, num_samples=1000, prob_edge=0.3, prob_type_of_data=(0.333, 0.333, 0.334)
 ):
     """
     This function generates a dataset with discrete and continuous kinds of variables.
