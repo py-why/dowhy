@@ -43,7 +43,7 @@ structure learning, diagnosis of causal structures, root cause analysis, interve
 
     .. grid-item-card:: User Guide
         :shadow: md
-        :link: user_guide/intro
+        :link: user_guide/index
         :link-type: doc
 
         :octicon:`book;2em;sd-text-info`
