@@ -25,7 +25,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: 'Launching advanced tests 🚀',
-            });          
+            });
       - name: Get PR SHA
         id: sha
         uses: actions/github-script@v4
@@ -38,7 +38,7 @@ jobs:
               repo,
               pull_number: number,
             });
-            return pr.data.head.sha      
+            return pr.data.head.sha
 
       - uses: actions/checkout@v2
         with:
@@ -62,7 +62,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           echo "installing poetry dependencies"
-          poetry install -E plotting -E pydot -E pygraphviz --with docs
+          poetry install -E plotting -E pydot -E pygraphviz -E econml --with docs
 
       - name: Run Advanced Tests
         run: poetry run poe test_advanced  --splits 4 --group ${{ matrix.test-group }}
@@ -77,7 +77,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: 'Advanced tests succeeded! ✅',
-            });          
+            });
       - name: Message failure
         if: ${{ failure() }}
         uses: actions/github-script@v4
@@ -88,4 +88,4 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: 'Advanced tests failed! ❌',
-            });          
+            });
