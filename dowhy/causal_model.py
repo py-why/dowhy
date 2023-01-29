@@ -309,6 +309,9 @@ class CausalModel:
             else:
                 causal_estimator = causal_estimator_class(
                     identified_estimand,
+                    test_significance=test_significance,
+                    evaluate_effect_strength=evaluate_effect_strength,
+                    confidence_intervals=confidence_intervals,
                     **method_params,
                     **extra_args,
                 )
