@@ -26,7 +26,9 @@ class CausalEstimator:
     # The default number of simulations for statistical testing
     DEFAULT_NUMBER_OF_SIMULATIONS_STAT_TEST = 1000
     # The default number of simulations to obtain confidence intervals
-    DEFAULT_NUMBER_OF_SIMULATIONS_CI = 100
+    # This should be at least 399 for a 5% error rate:
+    # https://www.econstor.eu/bitstream/10419/67820/1/587473266.pdf
+    DEFAULT_NUMBER_OF_SIMULATIONS_CI = 399
     # The portion of the total size that should be taken each time to find the confidence intervals
     # 1 is the recommended value
     # https://ocw.mit.edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings/MIT18_05S14_Reading24.pdf
