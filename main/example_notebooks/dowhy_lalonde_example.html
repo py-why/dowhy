@@ -227,6 +227,11 @@
   </a>
  </li>
  <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_discovery_example.html">
+   Causal Discovery example
+  </a>
+ </li>
+ <li class="toctree-l1">
   <a class="reference internal" href="dowhy-conditional-treatment-effects.html">
    Conditional Average Treatment Effects (CATE) with DoWhy and EconML
   </a>
@@ -691,9 +696,9 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import dowhy.datasets
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">dowhy.datasets</span>
 
-lalonde = dowhy.datasets.lalonde_dataset()
+<span class="n">lalonde</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">lalonde_dataset</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -704,26 +709,26 @@ lalonde = dowhy.datasets.lalonde_dataset()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from dowhy import CausalModel
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
 
 
-model=CausalModel(
-        data = lalonde,
-        treatment=&#39;treat&#39;,
-        outcome=&#39;re78&#39;,
-        common_causes=&#39;nodegr+black+hisp+age+educ+married&#39;.split(&#39;+&#39;))
-identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
-estimate = model.estimate_effect(identified_estimand,
-        method_name=&quot;backdoor.propensity_score_weighting&quot;,
-        target_units=&quot;ate&quot;,
-        method_params={&quot;weighting_scheme&quot;:&quot;ips_weight&quot;})
+<span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">lalonde</span><span class="p">,</span>
+        <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;treat&#39;</span><span class="p">,</span>
+        <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;re78&#39;</span><span class="p">,</span>
+        <span class="n">common_causes</span><span class="o">=</span><span class="s1">&#39;nodegr+black+hisp+age+educ+married&#39;</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">))</span>
+<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_weighting&quot;</span><span class="p">,</span>
+        <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;ate&quot;</span><span class="p">,</span>
+        <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;weighting_scheme&quot;</span><span class="p">:</span><span class="s2">&quot;ips_weight&quot;</span><span class="p">})</span>
 
-print(&quot;Causal Estimate is &quot; + str(estimate.value))
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
 
-import statsmodels.formula.api as smf
-reg=smf.wls(&#39;re78~1+treat&#39;, data=lalonde, weights=lalonde.ips_stabilized_weight)
-res=reg.fit()
-res.summary()
+<span class="kn">import</span> <span class="nn">statsmodels.formula.api</span> <span class="k">as</span> <span class="nn">smf</span>
+<span class="n">reg</span><span class="o">=</span><span class="n">smf</span><span class="o">.</span><span class="n">wls</span><span class="p">(</span><span class="s1">&#39;re78~1+treat&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">lalonde</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">lalonde</span><span class="o">.</span><span class="n">ips_stabilized_weight</span><span class="p">)</span>
+<span class="n">res</span><span class="o">=</span><span class="n">reg</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="n">res</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -732,7 +737,7 @@ res.summary()
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Causal Estimate is 1639.7957527621047
+Causal Estimate is 1639.7951464643838
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -752,10 +757,10 @@ Causal Estimate is 1639.7957527621047
   <th>Method:</th>             <td>Least Squares</td>  <th>  F-statistic:       </th> <td>   6.743</td>
 </tr>
 <tr>
-  <th>Date:</th>             <td>Fri, 27 Jan 2023</td> <th>  Prob (F-statistic):</th>  <td>0.00973</td>
+  <th>Date:</th>             <td>Wed, 01 Feb 2023</td> <th>  Prob (F-statistic):</th>  <td>0.00973</td>
 </tr>
 <tr>
-  <th>Time:</th>                 <td>10:13:37</td>     <th>  Log-Likelihood:    </th> <td> -4544.7</td>
+  <th>Time:</th>                 <td>21:51:03</td>     <th>  Log-Likelihood:    </th> <td> -4544.7</td>
 </tr>
 <tr>
   <th>No. Observations:</th>      <td>   445</td>      <th>  AIC:               </th> <td>   9093.</td>
@@ -775,10 +780,10 @@ Causal Estimate is 1639.7957527621047
         <td></td>           <th>coef</th>     <th>std err</th>      <th>t</th>      <th>P>|t|</th>  <th>[0.025</th>    <th>0.975]</th>
 </tr>
 <tr>
-  <th>Intercept</th>     <td> 4555.0765</td> <td>  406.703</td> <td>   11.200</td> <td> 0.000</td> <td> 3755.769</td> <td> 5354.384</td>
+  <th>Intercept</th>     <td> 4555.0766</td> <td>  406.703</td> <td>   11.200</td> <td> 0.000</td> <td> 3755.770</td> <td> 5354.384</td>
 </tr>
 <tr>
-  <th>treat[T.True]</th> <td> 1639.7958</td> <td>  631.495</td> <td>    2.597</td> <td> 0.010</td> <td>  398.698</td> <td> 2880.893</td>
+  <th>treat[T.True]</th> <td> 1639.7951</td> <td>  631.495</td> <td>    2.597</td> <td> 0.010</td> <td>  398.697</td> <td> 2880.893</td>
 </tr>
 </table>
 <table class="simpletable">
@@ -786,7 +791,7 @@ Causal Estimate is 1639.7957527621047
   <th>Omnibus:</th>       <td>303.261</td> <th>  Durbin-Watson:     </th> <td>   2.085</td>
 </tr>
 <tr>
-  <th>Prob(Omnibus):</th> <td> 0.000</td>  <th>  Jarque-Bera (JB):  </th> <td>4770.524</td>
+  <th>Prob(Omnibus):</th> <td> 0.000</td>  <th>  Jarque-Bera (JB):  </th> <td>4770.519</td>
 </tr>
 <tr>
   <th>Skew:</th>          <td> 2.709</td>  <th>  Prob(JB):          </th> <td>    0.00</td>
@@ -804,8 +809,8 @@ Causal Estimate is 1639.7957527621047
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>estimate.interpret(method_name=&quot;confounder_distribution_interpreter&quot;,var_type=&#39;discrete&#39;,
-                   var_name=&#39;married&#39;, fig_size = (10, 7), font_size = 12)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimate</span><span class="o">.</span><span class="n">interpret</span><span class="p">(</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;confounder_distribution_interpreter&quot;</span><span class="p">,</span><span class="n">var_type</span><span class="o">=</span><span class="s1">&#39;discrete&#39;</span><span class="p">,</span>
+                   <span class="n">var_name</span><span class="o">=</span><span class="s1">&#39;married&#39;</span><span class="p">,</span> <span class="n">fig_size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">font_size</span> <span class="o">=</span> <span class="mi">12</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -823,17 +828,17 @@ Causal Estimate is 1639.7957527621047
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>df = model._data
-ps = df[&#39;propensity_score&#39;]
-y = df[&#39;re78&#39;]
-z = df[&#39;treat&#39;]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_data</span>
+<span class="n">ps</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;propensity_score&#39;</span><span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;re78&#39;</span><span class="p">]</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;treat&#39;</span><span class="p">]</span>
 
-ey1 = z*y/ps / sum(z/ps)
-ey0 = (1-z)*y/(1-ps) / sum((1-z)/(1-ps))
-ate = ey1.sum()-ey0.sum()
-print(&quot;Causal Estimate is &quot; + str(ate))
+<span class="n">ey1</span> <span class="o">=</span> <span class="n">z</span><span class="o">*</span><span class="n">y</span><span class="o">/</span><span class="n">ps</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="n">z</span><span class="o">/</span><span class="n">ps</span><span class="p">)</span>
+<span class="n">ey0</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">z</span><span class="p">)</span><span class="o">*</span><span class="n">y</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">ps</span><span class="p">)</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">z</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">ps</span><span class="p">))</span>
+<span class="n">ate</span> <span class="o">=</span> <span class="n">ey1</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">-</span><span class="n">ey0</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ate</span><span class="p">))</span>
 
-# correct -&gt; Causal Estimate is 1634.9868359746906
+<span class="c1"># correct -&gt; Causal Estimate is 1634.9868359746906</span>
 </pre></div>
 </div>
 </div>
@@ -842,7 +847,7 @@ print(&quot;Causal Estimate is &quot; + str(ate))
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Causal Estimate is 1639.7957527621038
+Causal Estimate is 1639.7951464643838
 </pre></div></div>
 </div>
 </section>

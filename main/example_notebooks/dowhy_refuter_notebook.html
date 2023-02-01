@@ -227,6 +227,11 @@
   </a>
  </li>
  <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_discovery_example.html">
+   Causal Discovery example
+  </a>
+ </li>
+ <li class="toctree-l1">
   <a class="reference internal" href="dowhy-conditional-treatment-effects.html">
    Conditional Average Treatment Effects (CATE) with DoWhy and EconML
   </a>
@@ -741,27 +746,27 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from dowhy.datasets import linear_dataset
-from dowhy import CausalModel
-import econml
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dowhy.datasets</span> <span class="kn">import</span> <span class="n">linear_dataset</span>
+<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span> <span class="nn">econml</span>
 
-# Config dict to set the logging level
-import logging.config
-DEFAULT_LOGGING = {
-    &#39;version&#39;: 1,
-    &#39;disable_existing_loggers&#39;: False,
-    &#39;loggers&#39;: {
-        &#39;&#39;: {
-            &#39;level&#39;: &#39;WARN&#39;,
-        },
-    }
-}
+<span class="c1"># Config dict to set the logging level</span>
+<span class="kn">import</span> <span class="nn">logging.config</span>
+<span class="n">DEFAULT_LOGGING</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;disable_existing_loggers&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s1">&#39;loggers&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;WARN&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+<span class="p">}</span>
 
-logging.config.dictConfig(DEFAULT_LOGGING)
-# Disabling warnings output
-import warnings
-from sklearn.exceptions import DataConversionWarning
-warnings.filterwarnings(action=&#39;ignore&#39;, category=DataConversionWarning)
+<span class="n">logging</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="n">DEFAULT_LOGGING</span><span class="p">)</span>
+<span class="c1"># Disabling warnings output</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">sklearn.exceptions</span> <span class="kn">import</span> <span class="n">DataConversionWarning</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">DataConversionWarning</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -773,11 +778,11 @@ warnings.filterwarnings(action=&#39;ignore&#39;, category=DataConversionWarning)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>inspect_datasets = True
-inspect_models = True
-inspect_identified_estimands = True
-inspect_estimates = True
-inspect_refutations = True
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">inspect_datasets</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">inspect_models</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">inspect_identified_estimands</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">inspect_estimates</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">inspect_refutations</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
 </div>
 </div>
@@ -789,16 +794,16 @@ inspect_refutations = True
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from sklearn.preprocessing import PolynomialFeatures
-from sklearn.linear_model import LassoCV
-from sklearn.ensemble import GradientBoostingRegressor
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">PolynomialFeatures</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LassoCV</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostingRegressor</span>
 
-estimator_list = [&quot;backdoor.propensity_score_matching&quot;, &quot;backdoor.propensity_score_weighting&quot;, &quot;backdoor.econml.dml.DML&quot;]
-method_params= [ None, None, {&quot;init_params&quot;:{&#39;model_y&#39;:GradientBoostingRegressor(),
-                                                              &#39;model_t&#39;: GradientBoostingRegressor(),
-                                                              &quot;model_final&quot;:LassoCV(fit_intercept=False),
-                                                              &#39;featurizer&#39;:PolynomialFeatures(degree=1, include_bias=False)},
-                                               &quot;fit_params&quot;:{}} ]
+<span class="n">estimator_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;backdoor.propensity_score_matching&quot;</span><span class="p">,</span> <span class="s2">&quot;backdoor.propensity_score_weighting&quot;</span><span class="p">,</span> <span class="s2">&quot;backdoor.econml.dml.DML&quot;</span><span class="p">]</span>
+<span class="n">method_params</span><span class="o">=</span> <span class="p">[</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;init_params&quot;</span><span class="p">:{</span><span class="s1">&#39;model_y&#39;</span><span class="p">:</span><span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
+                                                              <span class="s1">&#39;model_t&#39;</span><span class="p">:</span> <span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
+                                                              <span class="s2">&quot;model_final&quot;</span><span class="p">:</span><span class="n">LassoCV</span><span class="p">(</span><span class="n">fit_intercept</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                                                              <span class="s1">&#39;featurizer&#39;</span><span class="p">:</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="n">degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">include_bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)},</span>
+                                               <span class="s2">&quot;fit_params&quot;</span><span class="p">:{}}</span> <span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -810,7 +815,7 @@ method_params= [ None, None, {&quot;init_params&quot;:{&#39;model_y&#39;:Gradien
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refuter_list = [&quot;bootstrap_refuter&quot;, &quot;data_subset_refuter&quot;]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refuter_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;bootstrap_refuter&quot;</span><span class="p">,</span> <span class="s2">&quot;data_subset_refuter&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -821,28 +826,28 @@ method_params= [ None, None, {&quot;init_params&quot;:{&#39;model_y&#39;:Gradien
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Parameters for creating the Dataset
-TREATMENT_IS_BINARY = True
-BETA = 10
-NUM_SAMPLES = 5000
-NUM_CONFOUNDERS = 5
-NUM_INSTRUMENTS = 3
-NUM_EFFECT_MODIFIERS = 2
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Parameters for creating the Dataset</span>
+<span class="n">TREATMENT_IS_BINARY</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">BETA</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">NUM_SAMPLES</span> <span class="o">=</span> <span class="mi">5000</span>
+<span class="n">NUM_CONFOUNDERS</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">NUM_INSTRUMENTS</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">NUM_EFFECT_MODIFIERS</span> <span class="o">=</span> <span class="mi">2</span>
 
-# Creating a Linear Dataset with the given parameters
-linear_data = linear_dataset(
-            beta = BETA,
-            num_common_causes = NUM_CONFOUNDERS,
-            num_instruments = NUM_INSTRUMENTS,
-            num_effect_modifiers = NUM_EFFECT_MODIFIERS,
-            num_samples = NUM_SAMPLES,
-            treatment_is_binary = True
-        )
-# Other datasets come here
+<span class="c1"># Creating a Linear Dataset with the given parameters</span>
+<span class="n">linear_data</span> <span class="o">=</span> <span class="n">linear_dataset</span><span class="p">(</span>
+            <span class="n">beta</span> <span class="o">=</span> <span class="n">BETA</span><span class="p">,</span>
+            <span class="n">num_common_causes</span> <span class="o">=</span> <span class="n">NUM_CONFOUNDERS</span><span class="p">,</span>
+            <span class="n">num_instruments</span> <span class="o">=</span> <span class="n">NUM_INSTRUMENTS</span><span class="p">,</span>
+            <span class="n">num_effect_modifiers</span> <span class="o">=</span> <span class="n">NUM_EFFECT_MODIFIERS</span><span class="p">,</span>
+            <span class="n">num_samples</span> <span class="o">=</span> <span class="n">NUM_SAMPLES</span><span class="p">,</span>
+            <span class="n">treatment_is_binary</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="p">)</span>
+<span class="c1"># Other datasets come here</span>
 
 
-# Append them together in an array
-datasets = [linear_data]
+<span class="c1"># Append them together in an array</span>
+<span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span><span class="n">linear_data</span><span class="p">]</span>
 <br/></pre></div>
 </div>
 </div>
@@ -853,13 +858,13 @@ datasets = [linear_data]
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>dataset_num = 1
-if inspect_datasets is True:
-    for data in datasets:
-        print(&quot;####### Dataset {}###########################################################################################&quot;.format(dataset_num))
-        print(data[&#39;df&#39;].head())
-        print(&quot;#############################################################################################################&quot;)
-        dataset_num += 1
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dataset_num</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">if</span> <span class="n">inspect_datasets</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;####### Dataset </span><span class="si">{}</span><span class="s2">###########################################################################################&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dataset_num</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#############################################################################################################&quot;</span><span class="p">)</span>
+        <span class="n">dataset_num</span> <span class="o">+=</span> <span class="mi">1</span>
 </pre></div>
 </div>
 </div>
@@ -892,15 +897,15 @@ if inspect_datasets is True:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>models = []
-for data in datasets:
-    model = CausalModel(
-                data = data[&#39;df&#39;],
-                treatment = data[&#39;treatment_name&#39;],
-                outcome = data[&#39;outcome_name&#39;],
-                graph = data[&#39;gml_graph&#39;]
-            )
-    models.append(model)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">models</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">:</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">],</span>
+                <span class="n">treatment</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;treatment_name&#39;</span><span class="p">],</span>
+                <span class="n">outcome</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;outcome_name&#39;</span><span class="p">],</span>
+                <span class="n">graph</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;gml_graph&#39;</span><span class="p">]</span>
+            <span class="p">)</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -911,9 +916,9 @@ for data in datasets:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model.view_model()
-from IPython.display import Image, display
-display(Image(filename=&quot;causal_model.png&quot;))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -931,10 +936,10 @@ display(Image(filename=&quot;causal_model.png&quot;))
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>identified_estimands = []
-for model in models:
-    identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
-    identified_estimands.append(identified_estimand)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">identified_estimands</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+    <span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">identified_estimands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -945,12 +950,12 @@ for model in models:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>estimand_count = 1
-for estimand in identified_estimands:
-    print(&quot;####### Identified Estimand {}#####################################################################################&quot;.format(estimand_count))
-    print(estimand)
-    print(&quot;###################################################################################################################&quot;)
-    estimand_count += 1
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimand_count</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">for</span> <span class="n">estimand</span> <span class="ow">in</span> <span class="n">identified_estimands</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;####### Identified Estimand </span><span class="si">{}</span><span class="s2">#####################################################################################&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">estimand_count</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">estimand</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;###################################################################################################################&quot;</span><span class="p">)</span>
+    <span class="n">estimand_count</span> <span class="o">+=</span> <span class="mi">1</span>
 </pre></div>
 </div>
 </div>
@@ -991,15 +996,15 @@ No such variable(s) found!
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>estimate_list = []
-for i in range(len(identified_estimands)):
-    for j in range(len(estimator_list)):
-        estimate = model.estimate_effect(
-                        identified_estimands[i],
-                        method_name=estimator_list[j],
-                        method_params=method_params[j]
-                  )
-        estimate_list.append(estimate)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimate_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">identified_estimands</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">estimator_list</span><span class="p">)):</span>
+        <span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span>
+                        <span class="n">identified_estimands</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                        <span class="n">method_name</span><span class="o">=</span><span class="n">estimator_list</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
+                        <span class="n">method_params</span><span class="o">=</span><span class="n">method_params</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                  <span class="p">)</span>
+        <span class="n">estimate_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1010,18 +1015,18 @@ for i in range(len(identified_estimands)):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>estimand_count = 1
-if inspect_estimates is True:
-    for estimand in estimate_list:
-        print(&quot;####### Estimand {}#######################################################################################&quot;.format(estimand_count))
-        print(&quot;*** Class Name ***&quot;)
-        print()
-        print(estimand.params[&#39;estimator_class&#39;])
-        print()
-        print(estimand)
-        print(&quot;########################################################################################################&quot;)
-        print()
-        estimand_count += 1
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimand_count</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">if</span> <span class="n">inspect_estimates</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">estimand</span> <span class="ow">in</span> <span class="n">estimate_list</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;####### Estimand </span><span class="si">{}</span><span class="s2">#######################################################################################&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">estimand_count</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;*** Class Name ***&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">estimand</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;estimator_class&#39;</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">estimand</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;########################################################################################################&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="n">estimand_count</span> <span class="o">+=</span> <span class="mi">1</span>
 </pre></div>
 </div>
 </div>
@@ -1122,12 +1127,12 @@ Effect estimates: [11.0297145   9.78699228 10.30838788 ...  9.46308525  9.647566
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refutation_list = []
-for estimand in identified_estimands:
-    for estimate in estimate_list:
-        for refuter in refuter_list:
-            ref = model.refute_estimate(estimand, estimate,method_name=refuter)
-            refutation_list.append(ref)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refutation_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">estimand</span> <span class="ow">in</span> <span class="n">identified_estimands</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">estimate</span> <span class="ow">in</span> <span class="n">estimate_list</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">refuter</span> <span class="ow">in</span> <span class="n">refuter_list</span><span class="p">:</span>
+            <span class="n">ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span><span class="n">method_name</span><span class="o">=</span><span class="n">refuter</span><span class="p">)</span>
+            <span class="n">refutation_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1138,18 +1143,18 @@ for estimand in identified_estimands:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refuter_count = 1
-if inspect_refutations is True:
-    for refutation in refutation_list:
-        print(&quot;####### Refutation {}#######################################################################################&quot;.format(refuter_count))
-        print(&quot;*** Class Name ***&quot;)
-        print()
-        print(refutation.refutation_type)
-        print()
-        print(refutation)
-        print(&quot;########################################################################################################&quot;)
-        print()
-        refuter_count += 1
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refuter_count</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">if</span> <span class="n">inspect_refutations</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">refutation</span> <span class="ow">in</span> <span class="n">refutation_list</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;####### Refutation </span><span class="si">{}</span><span class="s2">#######################################################################################&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">refuter_count</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;*** Class Name ***&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">refutation</span><span class="o">.</span><span class="n">refutation_type</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">refutation</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;########################################################################################################&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="n">refuter_count</span> <span class="o">+=</span> <span class="mi">1</span>
 </pre></div>
 </div>
 </div>

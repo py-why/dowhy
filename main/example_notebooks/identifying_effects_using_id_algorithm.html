@@ -227,6 +227,11 @@
   </a>
  </li>
  <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_discovery_example.html">
+   Causal Discovery example
+  </a>
+ </li>
+ <li class="toctree-l1">
   <a class="reference internal" href="dowhy-conditional-treatment-effects.html">
    Conditional Average Treatment Effects (CATE) with DoWhy and EconML
   </a>
@@ -705,10 +710,10 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from dowhy import CausalModel
-import pandas as pd
-import numpy as np
-from IPython.display import Image, display
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
 <br/></pre></div>
 </div>
 </div>
@@ -723,26 +728,26 @@ from IPython.display import Image, display
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Random data
-treatment = &quot;T&quot;
-outcome = &quot;Y&quot;
-causal_graph = &quot;digraph{T-&gt;Y;}&quot;
-columns = list(treatment) + list(outcome)
-df = pd.DataFrame(columns=columns)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Random data</span>
+<span class="n">treatment</span> <span class="o">=</span> <span class="s2">&quot;T&quot;</span>
+<span class="n">outcome</span> <span class="o">=</span> <span class="s2">&quot;Y&quot;</span>
+<span class="n">causal_graph</span> <span class="o">=</span> <span class="s2">&quot;digraph{T-&gt;Y;}&quot;</span>
+<span class="n">columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">treatment</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
 
-# Causal Model Initialization
-causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
+<span class="c1"># Causal Model Initialization</span>
+<span class="n">causal_model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">treatment</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">causal_graph</span><span class="p">)</span>
 
-# View graph
-causal_model.view_model()
-from IPython.display import Image, display
-print(&quot;Graph:&quot;)
-display(Image(filename=&quot;causal_model.png&quot;))
+<span class="c1"># View graph</span>
+<span class="n">causal_model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Graph:&quot;</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 
-# Causal Identification using the ID Algorithm
-identified_estimand = causal_model.identify_effect(method_name=&quot;id-algorithm&quot;)
-print(&quot;\nResult for identification using ID Algorithm:&quot;)
-print(identified_estimand)
+<span class="c1"># Causal Identification using the ID Algorithm</span>
+<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">causal_model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;id-algorithm&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Result for identification using ID Algorithm:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
 <br/></pre></div>
 </div>
 </div>
@@ -779,29 +784,29 @@ Predictor: P(Y|T)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Random data
-treatment = &quot;T&quot;
-outcome = &quot;Y&quot;
-causal_graph = &quot;digraph{T-&gt;Y; Y-&gt;T;}&quot;
-columns = list(treatment) + list(outcome)
-df = pd.DataFrame(columns=columns)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Random data</span>
+<span class="n">treatment</span> <span class="o">=</span> <span class="s2">&quot;T&quot;</span>
+<span class="n">outcome</span> <span class="o">=</span> <span class="s2">&quot;Y&quot;</span>
+<span class="n">causal_graph</span> <span class="o">=</span> <span class="s2">&quot;digraph{T-&gt;Y; Y-&gt;T;}&quot;</span>
+<span class="n">columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">treatment</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
 
-# Causal Model Initialization
-causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
+<span class="c1"># Causal Model Initialization</span>
+<span class="n">causal_model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">treatment</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">causal_graph</span><span class="p">)</span>
 
-# View graph
-causal_model.view_model()
-from IPython.display import Image, display
-print(&quot;Graph:&quot;)
-display(Image(filename=&quot;causal_model.png&quot;))
+<span class="c1"># View graph</span>
+<span class="n">causal_model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Graph:&quot;</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 
-try:
-    # Causal Identification using the ID Algorithm
-    identified_estimand = causal_model.identify_effect(method_name=&quot;id-algorithm&quot;)
-    print(&quot;\nResult for identification using ID Algorithm:&quot;)
-    print(identified_estimand)
-except:
-    print(&quot;Identification Failed: The graph must be a directed acyclic graph (DAG).&quot;)
+<span class="k">try</span><span class="p">:</span>
+    <span class="c1"># Causal Identification using the ID Algorithm</span>
+    <span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">causal_model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;id-algorithm&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Result for identification using ID Algorithm:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Identification Failed: The graph must be a directed acyclic graph (DAG).&quot;</span><span class="p">)</span>
 <br/></pre></div>
 </div>
 </div>
@@ -836,27 +841,27 @@ Identification Failed: The graph must be a directed acyclic graph (DAG).
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Random data
-treatment = &quot;T&quot;
-outcome = &quot;Y&quot;
-variables = [&quot;X1&quot;]
-causal_graph = &quot;digraph{T-&gt;X1;X1-&gt;Y;}&quot;
-columns = list(treatment) + list(outcome) + list(variables)
-df = pd.DataFrame(columns=columns)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Random data</span>
+<span class="n">treatment</span> <span class="o">=</span> <span class="s2">&quot;T&quot;</span>
+<span class="n">outcome</span> <span class="o">=</span> <span class="s2">&quot;Y&quot;</span>
+<span class="n">variables</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;X1&quot;</span><span class="p">]</span>
+<span class="n">causal_graph</span> <span class="o">=</span> <span class="s2">&quot;digraph{T-&gt;X1;X1-&gt;Y;}&quot;</span>
+<span class="n">columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">treatment</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
 
-# Causal Model Initialization
-causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
+<span class="c1"># Causal Model Initialization</span>
+<span class="n">causal_model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">treatment</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">causal_graph</span><span class="p">)</span>
 
-# View graph
-causal_model.view_model()
-from IPython.display import Image, display
-print(&quot;Graph:&quot;)
-display(Image(filename=&quot;causal_model.png&quot;))
+<span class="c1"># View graph</span>
+<span class="n">causal_model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Graph:&quot;</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 
-# Causal Identification using the ID Algorithm
-identified_estimand = causal_model.identify_effect(method_name=&quot;id-algorithm&quot;)
-print(&quot;\nResult for identification using ID Algorithm:&quot;)
-print(identified_estimand)
+<span class="c1"># Causal Identification using the ID Algorithm</span>
+<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">causal_model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;id-algorithm&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Result for identification using ID Algorithm:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
 <br/></pre></div>
 </div>
 </div>
@@ -895,27 +900,27 @@ Sum over {X1}:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Random data
-treatment = &quot;T&quot;
-outcome = &quot;Y&quot;
-variables = [&quot;X1&quot;]
-causal_graph = &quot;digraph{T-&gt;Y;T-&gt;X1;X1-&gt;Y;}&quot;
-columns = list(treatment) + list(outcome) + list(variables)
-df = pd.DataFrame(columns=columns)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Random data</span>
+<span class="n">treatment</span> <span class="o">=</span> <span class="s2">&quot;T&quot;</span>
+<span class="n">outcome</span> <span class="o">=</span> <span class="s2">&quot;Y&quot;</span>
+<span class="n">variables</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;X1&quot;</span><span class="p">]</span>
+<span class="n">causal_graph</span> <span class="o">=</span> <span class="s2">&quot;digraph{T-&gt;Y;T-&gt;X1;X1-&gt;Y;}&quot;</span>
+<span class="n">columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">treatment</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
 
-# Causal Model Initialization
-causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
+<span class="c1"># Causal Model Initialization</span>
+<span class="n">causal_model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">treatment</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">causal_graph</span><span class="p">)</span>
 
-# View graph
-causal_model.view_model()
-from IPython.display import Image, display
-print(&quot;Graph:&quot;)
-display(Image(filename=&quot;causal_model.png&quot;))
+<span class="c1"># View graph</span>
+<span class="n">causal_model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Graph:&quot;</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 
-# Causal Identification using the ID Algorithm
-identified_estimand = causal_model.identify_effect(method_name=&quot;id-algorithm&quot;)
-print(&quot;\nResult for identification using ID Algorithm:&quot;)
-print(identified_estimand)
+<span class="c1"># Causal Identification using the ID Algorithm</span>
+<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">causal_model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;id-algorithm&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Result for identification using ID Algorithm:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
 <br/></pre></div>
 </div>
 </div>
@@ -954,27 +959,27 @@ Sum over {X1}:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Random data
-treatment = &quot;T&quot;
-outcome = &quot;Y&quot;
-variables = [&quot;X1&quot;, &quot;X2&quot;]
-causal_graph = &quot;digraph{T-&gt;Y;X1-&gt;T;X1-&gt;Y;X2-&gt;T;}&quot;
-columns = list(treatment) + list(outcome) + list(variables)
-df = pd.DataFrame(columns=columns)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Random data</span>
+<span class="n">treatment</span> <span class="o">=</span> <span class="s2">&quot;T&quot;</span>
+<span class="n">outcome</span> <span class="o">=</span> <span class="s2">&quot;Y&quot;</span>
+<span class="n">variables</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;X1&quot;</span><span class="p">,</span> <span class="s2">&quot;X2&quot;</span><span class="p">]</span>
+<span class="n">causal_graph</span> <span class="o">=</span> <span class="s2">&quot;digraph{T-&gt;Y;X1-&gt;T;X1-&gt;Y;X2-&gt;T;}&quot;</span>
+<span class="n">columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">treatment</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
 
-# Causal Model Initialization
-causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
+<span class="c1"># Causal Model Initialization</span>
+<span class="n">causal_model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">treatment</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">causal_graph</span><span class="p">)</span>
 
-# View graph
-causal_model.view_model()
-from IPython.display import Image, display
-print(&quot;Graph:&quot;)
-display(Image(filename=&quot;causal_model.png&quot;))
+<span class="c1"># View graph</span>
+<span class="n">causal_model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Graph:&quot;</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 
-# Causal Identification using the ID Algorithm
-identified_estimand = causal_model.identify_effect(method_name=&quot;id-algorithm&quot;)
-print(&quot;\nResult for identification using ID Algorithm:&quot;)
-print(identified_estimand)
+<span class="c1"># Causal Identification using the ID Algorithm</span>
+<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">causal_model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;id-algorithm&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Result for identification using ID Algorithm:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
 <br/></pre></div>
 </div>
 </div>
@@ -1013,27 +1018,27 @@ Sum over {X1}:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Random data
-treatment = &quot;T&quot;
-outcome = &quot;Y&quot;
-variables = [&quot;X1&quot;]
-causal_graph = &quot;digraph{T;X1-&gt;Y;}&quot;
-columns = list(treatment) + list(outcome) + list(variables)
-df = pd.DataFrame(columns=columns)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Random data</span>
+<span class="n">treatment</span> <span class="o">=</span> <span class="s2">&quot;T&quot;</span>
+<span class="n">outcome</span> <span class="o">=</span> <span class="s2">&quot;Y&quot;</span>
+<span class="n">variables</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;X1&quot;</span><span class="p">]</span>
+<span class="n">causal_graph</span> <span class="o">=</span> <span class="s2">&quot;digraph{T;X1-&gt;Y;}&quot;</span>
+<span class="n">columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">treatment</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
 
-# Causal Model Initialization
-causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
+<span class="c1"># Causal Model Initialization</span>
+<span class="n">causal_model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">treatment</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">causal_graph</span><span class="p">)</span>
 
-# View graph
-causal_model.view_model()
-from IPython.display import Image, display
-print(&quot;Graph:&quot;)
-display(Image(filename=&quot;causal_model.png&quot;))
+<span class="c1"># View graph</span>
+<span class="n">causal_model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Graph:&quot;</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 
-# Causal Identification using the ID Algorithm
-identified_estimand = causal_model.identify_effect(method_name=&quot;id-algorithm&quot;)
-print(&quot;\nResult for identification using ID Algorithm:&quot;)
-print(identified_estimand)
+<span class="c1"># Causal Identification using the ID Algorithm</span>
+<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">causal_model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;id-algorithm&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Result for identification using ID Algorithm:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
 <br/></pre></div>
 </div>
 </div>

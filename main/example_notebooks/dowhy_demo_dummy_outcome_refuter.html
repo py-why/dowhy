@@ -227,6 +227,11 @@
   </a>
  </li>
  <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_discovery_example.html">
+   Causal Discovery example
+  </a>
+ </li>
+ <li class="toctree-l1">
   <a class="reference internal" href="dowhy-conditional-treatment-effects.html">
    Conditional Average Treatment Effects (CATE) with DoWhy and EconML
   </a>
@@ -711,24 +716,24 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from dowhy import CausalModel
-import dowhy.datasets
-import pandas as pd
-import numpy as np
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-# Config dict to set the logging level
-import logging.config
-DEFAULT_LOGGING = {
-    &#39;version&#39;: 1,
-    &#39;disable_existing_loggers&#39;: False,
-    &#39;loggers&#39;: {
-        &#39;&#39;: {
-            &#39;level&#39;: &#39;WARN&#39;,
-        },
-    }
-}
+<span class="c1"># Config dict to set the logging level</span>
+<span class="kn">import</span> <span class="nn">logging.config</span>
+<span class="n">DEFAULT_LOGGING</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;disable_existing_loggers&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s1">&#39;loggers&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;WARN&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+<span class="p">}</span>
 
-logging.config.dictConfig(DEFAULT_LOGGING)
+<span class="n">logging</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="n">DEFAULT_LOGGING</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -771,22 +776,22 @@ logging.config.dictConfig(DEFAULT_LOGGING)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Value of the coefficient [BETA]
-BETA = 10
-# Number of Common Causes
-NUM_COMMON_CAUSES = 2
-# Number of Instruments
-NUM_INSTRUMENTS = 1
-# Number of Samples
-NUM_SAMPLES = 100000
-# Treatment is Binary
-TREATMENT_IS_BINARY = False
-data = dowhy.datasets.linear_dataset(beta=BETA,
-                                 num_common_causes=NUM_COMMON_CAUSES,
-                                 num_instruments=NUM_INSTRUMENTS,
-                                 num_samples=NUM_SAMPLES,
-                                 treatment_is_binary=TREATMENT_IS_BINARY)
-data[&#39;df&#39;].head()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Value of the coefficient [BETA]</span>
+<span class="n">BETA</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="c1"># Number of Common Causes</span>
+<span class="n">NUM_COMMON_CAUSES</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="c1"># Number of Instruments</span>
+<span class="n">NUM_INSTRUMENTS</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="c1"># Number of Samples</span>
+<span class="n">NUM_SAMPLES</span> <span class="o">=</span> <span class="mi">100000</span>
+<span class="c1"># Treatment is Binary</span>
+<span class="n">TREATMENT_IS_BINARY</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">linear_dataset</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">BETA</span><span class="p">,</span>
+                                 <span class="n">num_common_causes</span><span class="o">=</span><span class="n">NUM_COMMON_CAUSES</span><span class="p">,</span>
+                                 <span class="n">num_instruments</span><span class="o">=</span><span class="n">NUM_INSTRUMENTS</span><span class="p">,</span>
+                                 <span class="n">num_samples</span><span class="o">=</span><span class="n">NUM_SAMPLES</span><span class="p">,</span>
+                                 <span class="n">treatment_is_binary</span><span class="o">=</span><span class="n">TREATMENT_IS_BINARY</span><span class="p">)</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -823,43 +828,43 @@ data[&#39;df&#39;].head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>1.0</td>
-      <td>0.276922</td>
-      <td>-0.050155</td>
-      <td>12.919571</td>
-      <td>129.043223</td>
+      <td>0.0</td>
+      <td>-1.792652</td>
+      <td>1.182038</td>
+      <td>-2.523478</td>
+      <td>-27.503338</td>
     </tr>
     <tr>
       <th>1</th>
       <td>0.0</td>
-      <td>-0.019213</td>
-      <td>-1.371616</td>
-      <td>-5.314607</td>
-      <td>-59.025378</td>
+      <td>1.218442</td>
+      <td>-0.857466</td>
+      <td>1.055546</td>
+      <td>11.855891</td>
     </tr>
     <tr>
       <th>2</th>
       <td>1.0</td>
-      <td>0.371015</td>
-      <td>-0.277663</td>
-      <td>10.582408</td>
-      <td>104.718009</td>
+      <td>-0.091108</td>
+      <td>-0.877683</td>
+      <td>8.591988</td>
+      <td>81.597639</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.0</td>
-      <td>0.230333</td>
-      <td>-1.166349</td>
-      <td>-6.070686</td>
-      <td>-65.667665</td>
+      <td>1.0</td>
+      <td>0.056560</td>
+      <td>-0.126074</td>
+      <td>10.054803</td>
+      <td>100.227410</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>1.0</td>
-      <td>-0.502102</td>
-      <td>0.483578</td>
-      <td>12.260125</td>
-      <td>124.566235</td>
+      <td>0.0</td>
+      <td>-0.900997</td>
+      <td>1.873224</td>
+      <td>1.889347</td>
+      <td>23.523032</td>
     </tr>
   </tbody>
 </table>
@@ -872,13 +877,13 @@ data[&#39;df&#39;].head()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model = CausalModel(
-    data = data[&#39;df&#39;],
-    treatment = data[&#39;treatment_name&#39;],
-    outcome = data[&#39;outcome_name&#39;],
-    graph = data[&#39;gml_graph&#39;],
-    instruments = data[&#39;instrument_names&#39;]
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">],</span>
+    <span class="n">treatment</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;treatment_name&#39;</span><span class="p">],</span>
+    <span class="n">outcome</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;outcome_name&#39;</span><span class="p">],</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;gml_graph&#39;</span><span class="p">],</span>
+    <span class="n">instruments</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;instrument_names&#39;</span><span class="p">]</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -886,7 +891,7 @@ data[&#39;df&#39;].head()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model.view_model()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -898,8 +903,8 @@ data[&#39;df&#39;].head()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
-print(identified_estimand)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -914,9 +919,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W1])
+─────(E[y|W1,W0])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W1,U) = P(y|v0,W0,W1)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W0,U) = P(y|v0,W1,W0)
 
 ### Estimand : 2
 Estimand name: iv
@@ -941,11 +946,11 @@ No such variable(s) found!
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>causal_estimate = model.estimate_effect( identified_estimand,
-                                       method_name=&quot;iv.instrumental_variable&quot;,
-                                       method_params={&#39;iv_instrument_name&#39;:&#39;Z0&#39;}
-                                       )
-print(causal_estimate)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">causal_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span> <span class="n">identified_estimand</span><span class="p">,</span>
+                                       <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;iv.instrumental_variable&quot;</span><span class="p">,</span>
+                                       <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;iv_instrument_name&#39;</span><span class="p">:</span><span class="s1">&#39;Z0&#39;</span><span class="p">}</span>
+                                       <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -984,7 +989,7 @@ Estimand assumption 4, outcome_effect_homogeneity: Each unit&#39;s outcome [&#39
 Target units: ate
 
 ## Estimate
-Mean value: 9.996627507238976
+Mean value: 10.003430000476868
 
 </pre></div></div>
 </div>
@@ -998,11 +1003,11 @@ Mean value: 9.996627507238976
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ref = model.refute_estimate(identified_estimand,
-                           causal_estimate,
-                           method_name=&quot;dummy_outcome_refuter&quot;
-                           )
-print(ref[0])
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+                           <span class="n">causal_estimate</span><span class="p">,</span>
+                           <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;dummy_outcome_refuter&quot;</span>
+                           <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ref</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -1013,8 +1018,8 @@ print(ref[0])
 <div class="highlight"><pre>
 Refute: Use a Dummy Outcome
 Estimated effect:0
-New effect:1.0163583856866944e-05
-p value:0.8799999999999999
+New effect:1.7201747440147278e-05
+p value:0.98
 
 </pre></div></div>
 </div>
@@ -1027,11 +1032,11 @@ p value:0.8799999999999999
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>coefficients = np.array([1,2])
-bias = 3
-def linear_gen(df):
-    y_new = np.dot(df[[&#39;W0&#39;,&#39;W1&#39;]].values,coefficients) + 3
-    return y_new
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">bias</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="k">def</span> <span class="nf">linear_gen</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="n">y_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;W0&#39;</span><span class="p">,</span><span class="s1">&#39;W1&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span><span class="n">coefficients</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span>
+    <span class="k">return</span> <span class="n">y_new</span>
 </pre></div>
 </div>
 </div>
@@ -1041,13 +1046,13 @@ def linear_gen(df):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ref = model.refute_estimate(identified_estimand,
-                           causal_estimate,
-                           method_name=&quot;dummy_outcome_refuter&quot;,
-                           outcome_function=linear_gen
-                           )
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+                           <span class="n">causal_estimate</span><span class="p">,</span>
+                           <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;dummy_outcome_refuter&quot;</span><span class="p">,</span>
+                           <span class="n">outcome_function</span><span class="o">=</span><span class="n">linear_gen</span>
+                           <span class="p">)</span>
 
-print(ref[0])
+<span class="nb">print</span><span class="p">(</span><span class="n">ref</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -1058,8 +1063,8 @@ print(ref[0])
 <div class="highlight"><pre>
 Refute: Use a Dummy Outcome
 Estimated effect:0
-New effect:-7.410058061978309e-05
-p value:0.84
+New effect:-2.5988872999709827e-05
+p value:0.94
 
 </pre></div></div>
 </div>

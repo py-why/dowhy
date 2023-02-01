@@ -620,18 +620,18 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
-import pandas as pd
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-import dowhy.datasets
-from dowhy import CausalModel
-# Functional API
-from dowhy.causal_refuters.assess_overlap import assess_support_and_overlap_overrule
+<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="c1"># Functional API</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_refuters.assess_overlap</span> <span class="kn">import</span> <span class="n">assess_support_and_overlap_overrule</span>
 
-# Data classes to configure ruleset optimization
-from dowhy.causal_refuters.assess_overlap_overrule import SupportConfig, OverlapConfig
+<span class="c1"># Data classes to configure ruleset optimization</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_refuters.assess_overlap_overrule</span> <span class="kn">import</span> <span class="n">SupportConfig</span><span class="p">,</span> <span class="n">OverlapConfig</span>
 
-import matplotlib.pyplot as plt
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 </pre></div>
 </div>
 </div>
@@ -647,18 +647,18 @@ import matplotlib.pyplot as plt
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>test_data = pd.DataFrame(
-        np.array(
-            [
-                [0, 0, 1, 1],
-                [0, 0, 0, 0],
-                [0, 1, 1, 0],
-                [1, 0, 0, 0],
-            ]
-            * 50
-        ),
-        columns=[&quot;X1&quot;, &quot;X2&quot;, &quot;T&quot;, &quot;Y&quot;],
-    )
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">test_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">]</span>
+            <span class="o">*</span> <span class="mi">50</span>
+        <span class="p">),</span>
+        <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;X1&quot;</span><span class="p">,</span> <span class="s2">&quot;X2&quot;</span><span class="p">,</span> <span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -667,18 +667,18 @@ import matplotlib.pyplot as plt
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rng = np.random.default_rng(0)
-jitter_data = test_data.copy()
-jitter_data[&#39;X1&#39;] = jitter_data[&#39;X1&#39;] + rng.normal(0, 0.05, size=(200,))
-jitter_data[&#39;X2&#39;] = jitter_data[&#39;X2&#39;] + rng.normal(0, 0.05, size=(200,))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">jitter_data</span> <span class="o">=</span> <span class="n">test_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">jitter_data</span><span class="p">[</span><span class="s1">&#39;X1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">jitter_data</span><span class="p">[</span><span class="s1">&#39;X1&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">200</span><span class="p">,))</span>
+<span class="n">jitter_data</span><span class="p">[</span><span class="s1">&#39;X2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">jitter_data</span><span class="p">[</span><span class="s1">&#39;X2&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">200</span><span class="p">,))</span>
 
-fig, ax = plt.subplots(1, 1, figsize=(5, 5))
-for t in [0, 1]:
-    this_data = jitter_data.query(&#39;T == @t&#39;)
-    ax.scatter(this_data[&#39;X1&#39;], this_data[&#39;X2&#39;], label=f&#39;T = {t}&#39;, edgecolor=&#39;w&#39;, linewidths=0.5)
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]:</span>
+    <span class="n">this_data</span> <span class="o">=</span> <span class="n">jitter_data</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;T == @t&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">this_data</span><span class="p">[</span><span class="s1">&#39;X1&#39;</span><span class="p">],</span> <span class="n">this_data</span><span class="p">[</span><span class="s1">&#39;X2&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;T = </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 
-plt.legend()
-plt.show()
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -702,12 +702,12 @@ plt.show()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model = CausalModel(
-    data=test_data,
-    treatment=&quot;T&quot;,
-    outcome=&quot;Y&quot;,
-    common_causes=[&#39;X1&#39;, &#39;X2&#39;]
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">test_data</span><span class="p">,</span>
+    <span class="n">treatment</span><span class="o">=</span><span class="s2">&quot;T&quot;</span><span class="p">,</span>
+    <span class="n">outcome</span><span class="o">=</span><span class="s2">&quot;Y&quot;</span><span class="p">,</span>
+    <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;X1&#39;</span><span class="p">,</span> <span class="s1">&#39;X2&#39;</span><span class="p">]</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -715,9 +715,9 @@ plt.show()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-estimate = model.estimate_effect(identified_estimand, method_name=&quot;backdoor.linear_regression&quot;)
+<span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -725,9 +725,9 @@ estimate = model.estimate_effect(identified_estimand, method_name=&quot;backdoor
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># We disucss configuration in more depth below.
-support_config = SupportConfig(seed=0)
-overlap_config = OverlapConfig()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># We disucss configuration in more depth below.</span>
+<span class="n">support_config</span> <span class="o">=</span> <span class="n">SupportConfig</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">overlap_config</span> <span class="o">=</span> <span class="n">OverlapConfig</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -735,13 +735,13 @@ overlap_config = OverlapConfig()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute = model.refute_estimate(
-    identified_estimand,
-    estimate,
-    method_name=&#39;assess_overlap&#39;,
-    support_config=support_config,
-    overlap_config=overlap_config,
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span>
+    <span class="n">identified_estimand</span><span class="p">,</span>
+    <span class="n">estimate</span><span class="p">,</span>
+    <span class="n">method_name</span><span class="o">=</span><span class="s1">&#39;assess_overlap&#39;</span><span class="p">,</span>
+    <span class="n">support_config</span><span class="o">=</span><span class="n">support_config</span><span class="p">,</span>
+    <span class="n">overlap_config</span><span class="o">=</span><span class="n">overlap_config</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -749,7 +749,7 @@ overlap_config = OverlapConfig()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(refute)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">refute</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -791,13 +791,13 @@ OVERLAP Rules: Found 1 rule(s), covering 50.0% of samples
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute = assess_support_and_overlap_overrule(
-    data=test_data,
-    backdoor_vars=[&#39;X1&#39;, &#39;X2&#39;],
-    treatment_name=&#39;T&#39;,
-    support_config=support_config,
-    overlap_config=overlap_config
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span> <span class="o">=</span> <span class="n">assess_support_and_overlap_overrule</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">test_data</span><span class="p">,</span>
+    <span class="n">backdoor_vars</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;X1&#39;</span><span class="p">,</span> <span class="s1">&#39;X2&#39;</span><span class="p">],</span>
+    <span class="n">treatment_name</span><span class="o">=</span><span class="s1">&#39;T&#39;</span><span class="p">,</span>
+    <span class="n">support_config</span><span class="o">=</span><span class="n">support_config</span><span class="p">,</span>
+    <span class="n">overlap_config</span><span class="o">=</span><span class="n">overlap_config</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -809,13 +809,13 @@ OVERLAP Rules: Found 1 rule(s), covering 50.0% of samples
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute = model.refute_estimate(
-    identified_estimand,
-    estimate,
-    method_name=&#39;assess_overlap&#39;,
-    support_only=True,
-    support_config=support_config,
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span>
+    <span class="n">identified_estimand</span><span class="p">,</span>
+    <span class="n">estimate</span><span class="p">,</span>
+    <span class="n">method_name</span><span class="o">=</span><span class="s1">&#39;assess_overlap&#39;</span><span class="p">,</span>
+    <span class="n">support_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">support_config</span><span class="o">=</span><span class="n">support_config</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -823,7 +823,7 @@ OVERLAP Rules: Found 1 rule(s), covering 50.0% of samples
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(refute)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">refute</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -853,13 +853,13 @@ No Overlap Rules Fitted (support_only=True).
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute = model.refute_estimate(
-    identified_estimand,
-    estimate,
-    method_name=&#39;assess_overlap&#39;,
-    overlap_only=True,
-    overlap_config=overlap_config
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span>
+    <span class="n">identified_estimand</span><span class="p">,</span>
+    <span class="n">estimate</span><span class="p">,</span>
+    <span class="n">method_name</span><span class="o">=</span><span class="s1">&#39;assess_overlap&#39;</span><span class="p">,</span>
+    <span class="n">overlap_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">overlap_config</span><span class="o">=</span><span class="n">overlap_config</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -867,7 +867,7 @@ No Overlap Rules Fitted (support_only=True).
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(refute)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">refute</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -932,8 +932,8 @@ because X2 = 1</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>support_config = SupportConfig()
-print(support_config)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">support_config</span> <span class="o">=</span> <span class="n">SupportConfig</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">support_config</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -949,8 +949,8 @@ SupportConfig(n_ref_multiplier=1.0, seed=None, alpha=0.98, lambda0=0.01, lambda1
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>overlap_config = OverlapConfig()
-print(overlap_config)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">overlap_config</span> <span class="o">=</span> <span class="n">OverlapConfig</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">overlap_config</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -992,25 +992,25 @@ conjunction with the original experimental dataset. This is loaded from <code cl
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import pandas as pd
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-import dowhy.datasets
-from dowhy.causal_refuters.assess_overlap import assess_support_and_overlap_overrule
-from dowhy.causal_refuters.assess_overlap_overrule import OverlapConfig, SupportConfig
+<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_refuters.assess_overlap</span> <span class="kn">import</span> <span class="n">assess_support_and_overlap_overrule</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_refuters.assess_overlap_overrule</span> <span class="kn">import</span> <span class="n">OverlapConfig</span><span class="p">,</span> <span class="n">SupportConfig</span>
 
-# Experimental sample from Lalonde
-experiment_data = dowhy.datasets.lalonde_dataset()
+<span class="c1"># Experimental sample from Lalonde</span>
+<span class="n">experiment_data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">lalonde_dataset</span><span class="p">()</span>
 
-# Observational sample
-observational_controls = dowhy.datasets.psid_dataset()
+<span class="c1"># Observational sample</span>
+<span class="n">observational_controls</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">psid_dataset</span><span class="p">()</span>
 
-experiment_data[&quot;exp_samp&quot;] = True
-observational_controls[&quot;exp_samp&quot;] = False
+<span class="n">experiment_data</span><span class="p">[</span><span class="s2">&quot;exp_samp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">observational_controls</span><span class="p">[</span><span class="s2">&quot;exp_samp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
 
-data = pd.concat([experiment_data, observational_controls], axis=0, ignore_index=True)
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">experiment_data</span><span class="p">,</span> <span class="n">observational_controls</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-support_config = SupportConfig(seed=0, lambda0=0.01, lambda1=0.01)
-overlap_config = OverlapConfig(lambda0=0.01, lambda1=0.01)
+<span class="n">support_config</span> <span class="o">=</span> <span class="n">SupportConfig</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">lambda0</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">lambda1</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+<span class="n">overlap_config</span> <span class="o">=</span> <span class="n">OverlapConfig</span><span class="p">(</span><span class="n">lambda0</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">lambda1</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1021,16 +1021,16 @@ overlap_config = OverlapConfig(lambda0=0.01, lambda1=0.01)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute_experiment = assess_support_and_overlap_overrule(
-    data=experiment_data,
-    backdoor_vars=&quot;nodegr+black+hisp+age+educ+married+re74+re75&quot;.split(&quot;+&quot;),
-    treatment_name=&quot;treat&quot;,
-    support_config=support_config,
-    overlap_config=overlap_config,
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute_experiment</span> <span class="o">=</span> <span class="n">assess_support_and_overlap_overrule</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">experiment_data</span><span class="p">,</span>
+    <span class="n">backdoor_vars</span><span class="o">=</span><span class="s2">&quot;nodegr+black+hisp+age+educ+married+re74+re75&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">),</span>
+    <span class="n">treatment_name</span><span class="o">=</span><span class="s2">&quot;treat&quot;</span><span class="p">,</span>
+    <span class="n">support_config</span><span class="o">=</span><span class="n">support_config</span><span class="p">,</span>
+    <span class="n">overlap_config</span><span class="o">=</span><span class="n">overlap_config</span><span class="p">,</span>
+<span class="p">)</span>
 
-# Observe how everyone is in the overlap set, so we do not learn any overlap rules
-print(refute_experiment)
+<span class="c1"># Observe how everyone is in the overlap set, so we do not learn any overlap rules</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">refute_experiment</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1078,15 +1078,15 @@ No Overlap Rules Fitted (support_only=True).
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>var_list = &quot;nodegr+black+hisp+age+educ+married+re74+re75&quot;.split(&quot;+&quot;)
-refute = assess_support_and_overlap_overrule(
-    data=data,
-    backdoor_vars=var_list,
-    treatment_name=&quot;treat&quot;,
-    support_config=support_config,
-    overlap_config=overlap_config,
-)
-print(refute)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">var_list</span> <span class="o">=</span> <span class="s2">&quot;nodegr+black+hisp+age+educ+married+re74+re75&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">)</span>
+<span class="n">refute</span> <span class="o">=</span> <span class="n">assess_support_and_overlap_overrule</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+    <span class="n">backdoor_vars</span><span class="o">=</span><span class="n">var_list</span><span class="p">,</span>
+    <span class="n">treatment_name</span><span class="o">=</span><span class="s2">&quot;treat&quot;</span><span class="p">,</span>
+    <span class="n">support_config</span><span class="o">=</span><span class="n">support_config</span><span class="p">,</span>
+    <span class="n">overlap_config</span><span class="o">=</span><span class="n">overlap_config</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">refute</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1141,12 +1141,12 @@ OVERLAP Rules: Found 5 rule(s), covering 35.3% of samples
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[56]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>bool_mask = refute.predict_overlap_support(data)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bool_mask</span> <span class="o">=</span> <span class="n">refute</span><span class="o">.</span><span class="n">predict_overlap_support</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-# This is a simple wrapper around refute.predict_overlap_support
-filtered_df = refute.filter_dataframe(data).copy()
+<span class="c1"># This is a simple wrapper around refute.predict_overlap_support</span>
+<span class="n">filtered_df</span> <span class="o">=</span> <span class="n">refute</span><span class="o">.</span><span class="n">filter_dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-assert np.array_equal(data[bool_mask], filtered_df)
+<span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">bool_mask</span><span class="p">],</span> <span class="n">filtered_df</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1154,7 +1154,7 @@ assert np.array_equal(data[bool_mask], filtered_df)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>bool_mask.mean()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bool_mask</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1174,21 +1174,21 @@ $\displaystyle 0.345826235093697$</div></div>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Note that we are using the filtered_df here
-model = CausalModel(
-        data = filtered_df,
-        treatment=&#39;treat&#39;,
-        outcome=&#39;re78&#39;,
-        common_causes=&quot;nodegr+black+hisp+age+educ+married+re74+re75&quot;.split(&quot;+&quot;)
-)
-identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Note that we are using the filtered_df here</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">filtered_df</span><span class="p">,</span>
+        <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;treat&#39;</span><span class="p">,</span>
+        <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;re78&#39;</span><span class="p">,</span>
+        <span class="n">common_causes</span><span class="o">=</span><span class="s2">&quot;nodegr+black+hisp+age+educ+married+re74+re75&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-estimate = model.estimate_effect(identified_estimand,
-        method_name=&quot;backdoor.propensity_score_weighting&quot;,
-        target_units=&quot;ate&quot;,
-        method_params={&quot;weighting_scheme&quot;:&quot;ips_weight&quot;})
+<span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_weighting&quot;</span><span class="p">,</span>
+        <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;ate&quot;</span><span class="p">,</span>
+        <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;weighting_scheme&quot;</span><span class="p">:</span><span class="s2">&quot;ips_weight&quot;</span><span class="p">})</span>
 
-print(&quot;Causal Estimate is &quot; + str(estimate.value))
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>

@@ -227,6 +227,11 @@
   </a>
  </li>
  <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_discovery_example.html">
+   Causal Discovery example
+  </a>
+ </li>
+ <li class="toctree-l1">
   <a class="reference internal" href="dowhy-conditional-treatment-effects.html">
    Conditional Average Treatment Effects (CATE) with DoWhy and EconML
   </a>
@@ -678,8 +683,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%load_ext autoreload
-%autoreload 2
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
 </pre></div>
 </div>
 </div>
@@ -687,13 +692,13 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
-import pandas as pd
-import patsy as ps
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">patsy</span> <span class="k">as</span> <span class="nn">ps</span>
 
-from statsmodels.sandbox.regression.gmm import IV2SLS
-import os, sys
-from dowhy import CausalModel
+<span class="kn">from</span> <span class="nn">statsmodels.sandbox.regression.gmm</span> <span class="kn">import</span> <span class="n">IV2SLS</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
 </pre></div>
 </div>
 </div>
@@ -704,30 +709,30 @@ from dowhy import CausalModel
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>n_points = 1000
-education_abilty = 1
-education_voucher = 2
-income_abilty = 2
-income_education = 4
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_points</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">education_abilty</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">education_voucher</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">income_abilty</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">income_education</span> <span class="o">=</span> <span class="mi">4</span>
 
 
-# confounder
-ability = np.random.normal(0, 3, size=n_points)
+<span class="c1"># confounder</span>
+<span class="n">ability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_points</span><span class="p">)</span>
 
-# instrument
-voucher = np.random.normal(2, 1, size=n_points)
+<span class="c1"># instrument</span>
+<span class="n">voucher</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_points</span><span class="p">)</span>
 
-# treatment
-education = np.random.normal(5, 1, size=n_points) + education_abilty * ability +\
-            education_voucher * voucher
+<span class="c1"># treatment</span>
+<span class="n">education</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_points</span><span class="p">)</span> <span class="o">+</span> <span class="n">education_abilty</span> <span class="o">*</span> <span class="n">ability</span> <span class="o">+</span>\
+            <span class="n">education_voucher</span> <span class="o">*</span> <span class="n">voucher</span>
 
-# outcome
-income = np.random.normal(10, 3, size=n_points) +\
-         income_abilty * ability + income_education * education
+<span class="c1"># outcome</span>
+<span class="n">income</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_points</span><span class="p">)</span> <span class="o">+</span>\
+         <span class="n">income_abilty</span> <span class="o">*</span> <span class="n">ability</span> <span class="o">+</span> <span class="n">income_education</span> <span class="o">*</span> <span class="n">education</span>
 
-# build dataset (exclude confounder `ability` which we assume to be unobserved)
-data = np.stack([education, income, voucher]).T
-df = pd.DataFrame(data, columns = [&#39;education&#39;, &#39;income&#39;, &#39;voucher&#39;])
+<span class="c1"># build dataset (exclude confounder `ability` which we assume to be unobserved)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">education</span><span class="p">,</span> <span class="n">income</span><span class="p">,</span> <span class="n">voucher</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;education&#39;</span><span class="p">,</span> <span class="s1">&#39;income&#39;</span><span class="p">,</span> <span class="s1">&#39;voucher&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -744,17 +749,17 @@ df = pd.DataFrame(data, columns = [&#39;education&#39;, &#39;income&#39;, &#39;v
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>#Step 1: Model
-model=CausalModel(
-        data = df,
-        treatment=&#39;education&#39;,
-        outcome=&#39;income&#39;,
-        common_causes=[&#39;U&#39;],
-        instruments=[&#39;voucher&#39;]
-        )
-model.view_model()
-from IPython.display import Image, display
-display(Image(filename=&quot;causal_model.png&quot;))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Step 1: Model</span>
+<span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
+        <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;education&#39;</span><span class="p">,</span>
+        <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;income&#39;</span><span class="p">,</span>
+        <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;U&#39;</span><span class="p">],</span>
+        <span class="n">instruments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;voucher&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -769,9 +774,9 @@ display(Image(filename=&quot;causal_model.png&quot;))
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Step 2: Identify
-identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
-print(identified_estimand)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Step 2: Identify</span>
+<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -806,12 +811,12 @@ No such variable(s) found!
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Step 3: Estimate
-#Choose the second estimand: using IV
-estimate = model.estimate_effect(identified_estimand,
-        method_name=&quot;iv.instrumental_variable&quot;, test_significance=True)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Step 3: Estimate</span>
+<span class="c1">#Choose the second estimand: using IV</span>
+<span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;iv.instrumental_variable&quot;</span><span class="p">,</span> <span class="n">test_significance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-print(estimate)
+<span class="nb">print</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -850,7 +855,7 @@ Estimand assumption 4, outcome_effect_homogeneity: Each unit&#39;s outcome [&#39
 Target units: ate
 
 ## Estimate
-Mean value: 4.070921618617851
+Mean value: 3.8592663536066434
 
 </pre></div></div>
 </div>
@@ -860,9 +865,9 @@ Mean value: 4.070921618617851
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Step 4: Refute
-ref = model.refute_estimate(identified_estimand, estimate, method_name=&quot;placebo_treatment_refuter&quot;, placebo_type=&quot;permute&quot;) # only permute placebo_type works with IV estimate
-print(ref)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Step 4: Refute</span>
+<span class="n">ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;placebo_treatment_refuter&quot;</span><span class="p">,</span> <span class="n">placebo_type</span><span class="o">=</span><span class="s2">&quot;permute&quot;</span><span class="p">)</span> <span class="c1"># only permute placebo_type works with IV estimate</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -872,9 +877,9 @@ print(ref)
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:4.070921618617851
-New effect:0.015577715183862537
-p value:0.9
+Estimated effect:3.8592663536066434
+New effect:-0.02358404187612441
+p value:0.88
 
 </pre></div></div>
 </div>
@@ -885,11 +890,11 @@ p value:0.9
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>income_vec, endog = ps.dmatrices(&quot;income ~ education&quot;, data=df)
-exog = ps.dmatrix(&quot;voucher&quot;, data=df)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">income_vec</span><span class="p">,</span> <span class="n">endog</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">dmatrices</span><span class="p">(</span><span class="s2">&quot;income ~ education&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="n">exog</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">dmatrix</span><span class="p">(</span><span class="s2">&quot;voucher&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
 
-m = IV2SLS(income_vec, endog, exog).fit()
-m.summary()
+<span class="n">m</span> <span class="o">=</span> <span class="n">IV2SLS</span><span class="p">(</span><span class="n">income_vec</span><span class="p">,</span> <span class="n">endog</span><span class="p">,</span> <span class="n">exog</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="n">m</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -901,22 +906,22 @@ m.summary()
 <table class="simpletable">
 <caption>IV2SLS Regression Results</caption>
 <tr>
-  <th>Dep. Variable:</th>         <td>income</td>      <th>  R-squared:         </th> <td>   0.895</td>
+  <th>Dep. Variable:</th>         <td>income</td>      <th>  R-squared:         </th> <td>   0.876</td>
 </tr>
 <tr>
-  <th>Model:</th>                 <td>IV2SLS</td>      <th>  Adj. R-squared:    </th> <td>   0.895</td>
+  <th>Model:</th>                 <td>IV2SLS</td>      <th>  Adj. R-squared:    </th> <td>   0.876</td>
 </tr>
 <tr>
-  <th>Method:</th>               <td>Two Stage</td>    <th>  F-statistic:       </th> <td>   1652.</td>
+  <th>Method:</th>               <td>Two Stage</td>    <th>  F-statistic:       </th> <td>   1124.</td>
 </tr>
 <tr>
-  <th></th>                    <td>Least Squares</td>  <th>  Prob (F-statistic):</th> <td>7.70e-214</td>
+  <th></th>                    <td>Least Squares</td>  <th>  Prob (F-statistic):</th> <td>1.08e-165</td>
 </tr>
 <tr>
-  <th>Date:</th>             <td>Fri, 27 Jan 2023</td> <th>                     </th>     <td> </td>
+  <th>Date:</th>             <td>Wed, 01 Feb 2023</td> <th>                     </th>     <td> </td>
 </tr>
 <tr>
-  <th>Time:</th>                 <td>10:11:28</td>     <th>                     </th>     <td> </td>
+  <th>Time:</th>                 <td>21:48:07</td>     <th>                     </th>     <td> </td>
 </tr>
 <tr>
   <th>No. Observations:</th>      <td>  1000</td>      <th>                     </th>     <td> </td>
@@ -933,24 +938,24 @@ m.summary()
       <td></td>         <th>coef</th>     <th>std err</th>      <th>t</th>      <th>P>|t|</th>  <th>[0.025</th>    <th>0.975]</th>
 </tr>
 <tr>
-  <th>Intercept</th> <td>    9.3197</td> <td>    0.922</td> <td>   10.106</td> <td> 0.000</td> <td>    7.510</td> <td>   11.129</td>
+  <th>Intercept</th> <td>   11.1862</td> <td>    1.039</td> <td>   10.763</td> <td> 0.000</td> <td>    9.147</td> <td>   13.226</td>
 </tr>
 <tr>
-  <th>education</th> <td>    4.0709</td> <td>    0.100</td> <td>   40.642</td> <td> 0.000</td> <td>    3.874</td> <td>    4.267</td>
+  <th>education</th> <td>    3.8593</td> <td>    0.115</td> <td>   33.530</td> <td> 0.000</td> <td>    3.633</td> <td>    4.085</td>
 </tr>
 </table>
 <table class="simpletable">
 <tr>
-  <th>Omnibus:</th>       <td> 0.279</td> <th>  Durbin-Watson:     </th> <td>   1.990</td>
+  <th>Omnibus:</th>       <td> 2.433</td> <th>  Durbin-Watson:     </th> <td>   1.996</td>
 </tr>
 <tr>
-  <th>Prob(Omnibus):</th> <td> 0.870</td> <th>  Jarque-Bera (JB):  </th> <td>   0.325</td>
+  <th>Prob(Omnibus):</th> <td> 0.296</td> <th>  Jarque-Bera (JB):  </th> <td>   2.446</td>
 </tr>
 <tr>
-  <th>Skew:</th>          <td> 0.038</td> <th>  Prob(JB):          </th> <td>   0.850</td>
+  <th>Skew:</th>          <td> 0.120</td> <th>  Prob(JB):          </th> <td>   0.294</td>
 </tr>
 <tr>
-  <th>Kurtosis:</th>      <td> 2.955</td> <th>  Cond. No.          </th> <td>    25.3</td>
+  <th>Kurtosis:</th>      <td> 2.969</td> <th>  Cond. No.          </th> <td>    25.0</td>
 </tr>
 </table></div>
 </div>

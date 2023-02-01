@@ -560,66 +560,66 @@ E-values against measured confounders using Observed Covariate E-values. Plots E
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Functional API imports
-from dowhy.causal_identifier import (
-    BackdoorAdjustment,
-    EstimandType,
-    identify_effect,
-    identify_effect_auto,
-    identify_effect_id,
-)  # import effect identifier
-from dowhy.causal_refuters import (
-    refute_bootstrap,
-    refute_data_subset,
-    refute_random_common_cause,
-    refute_placebo_treatment,
-    sensitivity_e_value,
-    sensitivity_linear_partial_r2,
-    sensitivity_non_parametric_partial_r2,
-    sensitivity_simulation,
-    refute_dummy_outcome,
-    refute_estimate,
-)  # import refuters
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Functional API imports</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_identifier</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BackdoorAdjustment</span><span class="p">,</span>
+    <span class="n">EstimandType</span><span class="p">,</span>
+    <span class="n">identify_effect</span><span class="p">,</span>
+    <span class="n">identify_effect_auto</span><span class="p">,</span>
+    <span class="n">identify_effect_id</span><span class="p">,</span>
+<span class="p">)</span>  <span class="c1"># import effect identifier</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_refuters</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">refute_bootstrap</span><span class="p">,</span>
+    <span class="n">refute_data_subset</span><span class="p">,</span>
+    <span class="n">refute_random_common_cause</span><span class="p">,</span>
+    <span class="n">refute_placebo_treatment</span><span class="p">,</span>
+    <span class="n">sensitivity_e_value</span><span class="p">,</span>
+    <span class="n">sensitivity_linear_partial_r2</span><span class="p">,</span>
+    <span class="n">sensitivity_non_parametric_partial_r2</span><span class="p">,</span>
+    <span class="n">sensitivity_simulation</span><span class="p">,</span>
+    <span class="n">refute_dummy_outcome</span><span class="p">,</span>
+    <span class="n">refute_estimate</span><span class="p">,</span>
+<span class="p">)</span>  <span class="c1"># import refuters</span>
 
-from dowhy.causal_estimators.propensity_score_matching_estimator import PropensityScoreMatchingEstimator
-from dowhy.causal_estimators.econml import Econml
+<span class="kn">from</span> <span class="nn">dowhy.causal_estimators.propensity_score_matching_estimator</span> <span class="kn">import</span> <span class="n">PropensityScoreMatchingEstimator</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_estimators.econml</span> <span class="kn">import</span> <span class="n">Econml</span>
 
-from dowhy.utils.api import parse_state
+<span class="kn">from</span> <span class="nn">dowhy.utils.api</span> <span class="kn">import</span> <span class="n">parse_state</span>
 
-from dowhy.causal_estimator import estimate_effect  # Estimate effect function
+<span class="kn">from</span> <span class="nn">dowhy.causal_estimator</span> <span class="kn">import</span> <span class="n">estimate_effect</span>  <span class="c1"># Estimate effect function</span>
 
-from dowhy.causal_graph import CausalGraph
+<span class="kn">from</span> <span class="nn">dowhy.causal_graph</span> <span class="kn">import</span> <span class="n">CausalGraph</span>
 
-# Other imports required
-from dowhy.datasets import linear_dataset
-from dowhy import CausalModel  # We still need this as we haven&#39;t created the functional API for effect estimation
-import econml
+<span class="c1"># Other imports required</span>
+<span class="kn">from</span> <span class="nn">dowhy.datasets</span> <span class="kn">import</span> <span class="n">linear_dataset</span>
+<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>  <span class="c1"># We still need this as we haven&#39;t created the functional API for effect estimation</span>
+<span class="kn">import</span> <span class="nn">econml</span>
 
-# Config dict to set the logging level
-import logging.config
+<span class="c1"># Config dict to set the logging level</span>
+<span class="kn">import</span> <span class="nn">logging.config</span>
 
-DEFAULT_LOGGING = {
-    &quot;version&quot;: 1,
-    &quot;disable_existing_loggers&quot;: False,
-    &quot;loggers&quot;: {
-        &quot;&quot;: {
-            &quot;level&quot;: &quot;WARN&quot;,
-        },
-    },
-}
+<span class="n">DEFAULT_LOGGING</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">&quot;disable_existing_loggers&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">&quot;loggers&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="s2">&quot;WARN&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">}</span>
 
 
-# set random seed for deterministic dataset generation
-# and avoid problems when running tests
-import numpy as np
-np.random.seed(1)
+<span class="c1"># set random seed for deterministic dataset generation</span>
+<span class="c1"># and avoid problems when running tests</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-logging.config.dictConfig(DEFAULT_LOGGING)
-# Disabling warnings output
-import warnings
-from sklearn.exceptions import DataConversionWarning
+<span class="n">logging</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="n">DEFAULT_LOGGING</span><span class="p">)</span>
+<span class="c1"># Disabling warnings output</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">sklearn.exceptions</span> <span class="kn">import</span> <span class="n">DataConversionWarning</span>
 
-warnings.filterwarnings(action=&quot;ignore&quot;, category=DataConversionWarning)
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">DataConversionWarning</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -630,46 +630,46 @@ warnings.filterwarnings(action=&quot;ignore&quot;, category=DataConversionWarnin
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Parameters for creating the Dataset
-TREATMENT_IS_BINARY = True
-BETA = 10
-NUM_SAMPLES = 500
-NUM_CONFOUNDERS = 3
-NUM_INSTRUMENTS = 2
-NUM_EFFECT_MODIFIERS = 2
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Parameters for creating the Dataset</span>
+<span class="n">TREATMENT_IS_BINARY</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">BETA</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">NUM_SAMPLES</span> <span class="o">=</span> <span class="mi">500</span>
+<span class="n">NUM_CONFOUNDERS</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">NUM_INSTRUMENTS</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">NUM_EFFECT_MODIFIERS</span> <span class="o">=</span> <span class="mi">2</span>
 
-# Creating a Linear Dataset with the given parameters
-data = linear_dataset(
-    beta=BETA,
-    num_common_causes=NUM_CONFOUNDERS,
-    num_instruments=NUM_INSTRUMENTS,
-    num_effect_modifiers=NUM_EFFECT_MODIFIERS,
-    num_samples=NUM_SAMPLES,
-    treatment_is_binary=True,
-)
+<span class="c1"># Creating a Linear Dataset with the given parameters</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">linear_dataset</span><span class="p">(</span>
+    <span class="n">beta</span><span class="o">=</span><span class="n">BETA</span><span class="p">,</span>
+    <span class="n">num_common_causes</span><span class="o">=</span><span class="n">NUM_CONFOUNDERS</span><span class="p">,</span>
+    <span class="n">num_instruments</span><span class="o">=</span><span class="n">NUM_INSTRUMENTS</span><span class="p">,</span>
+    <span class="n">num_effect_modifiers</span><span class="o">=</span><span class="n">NUM_EFFECT_MODIFIERS</span><span class="p">,</span>
+    <span class="n">num_samples</span><span class="o">=</span><span class="n">NUM_SAMPLES</span><span class="p">,</span>
+    <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
 
-data_2 = linear_dataset(
-    beta=BETA,
-    num_common_causes=NUM_CONFOUNDERS,
-    num_instruments=NUM_INSTRUMENTS,
-    num_effect_modifiers=NUM_EFFECT_MODIFIERS,
-    num_samples=NUM_SAMPLES,
-    treatment_is_binary=True,
-)
+<span class="n">data_2</span> <span class="o">=</span> <span class="n">linear_dataset</span><span class="p">(</span>
+    <span class="n">beta</span><span class="o">=</span><span class="n">BETA</span><span class="p">,</span>
+    <span class="n">num_common_causes</span><span class="o">=</span><span class="n">NUM_CONFOUNDERS</span><span class="p">,</span>
+    <span class="n">num_instruments</span><span class="o">=</span><span class="n">NUM_INSTRUMENTS</span><span class="p">,</span>
+    <span class="n">num_effect_modifiers</span><span class="o">=</span><span class="n">NUM_EFFECT_MODIFIERS</span><span class="p">,</span>
+    <span class="n">num_samples</span><span class="o">=</span><span class="n">NUM_SAMPLES</span><span class="p">,</span>
+    <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
 
-treatment_name = data[&quot;treatment_name&quot;]
-print(treatment_name)
-outcome_name = data[&quot;outcome_name&quot;]
-print(outcome_name)
+<span class="n">treatment_name</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">treatment_name</span><span class="p">)</span>
+<span class="n">outcome_name</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">outcome_name</span><span class="p">)</span>
 
-graph = CausalGraph(
-    treatment_name=treatment_name,
-    outcome_name=outcome_name,
-    graph=data[&quot;gml_graph&quot;],
-    effect_modifier_names=data[&quot;effect_modifier_names&quot;],
-    common_cause_names=data[&quot;common_causes_names&quot;],
-    observed_node_names=data[&quot;df&quot;].columns.tolist(),
-)
+<span class="n">graph</span> <span class="o">=</span> <span class="n">CausalGraph</span><span class="p">(</span>
+    <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span>
+    <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span>
+    <span class="n">graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;gml_graph&quot;</span><span class="p">],</span>
+    <span class="n">effect_modifier_names</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;effect_modifier_names&quot;</span><span class="p">],</span>
+    <span class="n">common_cause_names</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;common_causes_names&quot;</span><span class="p">],</span>
+    <span class="n">observed_node_names</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -689,24 +689,24 @@ y
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Default identify_effect call example:
-identified_estimand = identify_effect(graph, treatment_name, outcome_name)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Default identify_effect call example:</span>
+<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">identify_effect</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="p">)</span>
 
-# auto_identify_effect example with extra parameters:
-identified_estimand_auto = identify_effect_auto(
-    graph,
-    treatment_name,
-    outcome_name,
-    estimand_type=EstimandType.NONPARAMETRIC_ATE,
-    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_EFFICIENT,
-)
+<span class="c1"># auto_identify_effect example with extra parameters:</span>
+<span class="n">identified_estimand_auto</span> <span class="o">=</span> <span class="n">identify_effect_auto</span><span class="p">(</span>
+    <span class="n">graph</span><span class="p">,</span>
+    <span class="n">treatment_name</span><span class="p">,</span>
+    <span class="n">outcome_name</span><span class="p">,</span>
+    <span class="n">estimand_type</span><span class="o">=</span><span class="n">EstimandType</span><span class="o">.</span><span class="n">NONPARAMETRIC_ATE</span><span class="p">,</span>
+    <span class="n">backdoor_adjustment</span><span class="o">=</span><span class="n">BackdoorAdjustment</span><span class="o">.</span><span class="n">BACKDOOR_EFFICIENT</span><span class="p">,</span>
+<span class="p">)</span>
 
-# id_identify_effect example:
-identified_estimand_id = identify_effect_id(
-    graph, treatment_name, outcome_name
-)  # Note that the return type for id_identify_effect is IDExpression and not IdentifiedEstimand
+<span class="c1"># id_identify_effect example:</span>
+<span class="n">identified_estimand_id</span> <span class="o">=</span> <span class="n">identify_effect_id</span><span class="p">(</span>
+    <span class="n">graph</span><span class="p">,</span> <span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span>
+<span class="p">)</span>  <span class="c1"># Note that the return type for id_identify_effect is IDExpression and not IdentifiedEstimand</span>
 
-print(identified_estimand)
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -721,9 +721,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W1,W0,W2])
+─────(E[y|W1,W2,W0])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W0,W2,U) = P(y|v0,W1,W0,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W2,W0,U) = P(y|v0,W1,W2,W0)
 
 ### Estimand : 2
 Estimand name: iv
@@ -748,35 +748,35 @@ No such variable(s) found!
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Basic Estimate Effect function
-estimator = PropensityScoreMatchingEstimator(
-    identified_estimand=identified_estimand,
-    test_significance=None,
-    evaluate_effect_strength=False,
-    confidence_intervals=False,
-).fit(
-    data=data[&quot;df&quot;],
-    effect_modifier_names=graph.get_effect_modifiers(treatment_name, outcome_name),
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Basic Estimate Effect function</span>
+<span class="n">estimator</span> <span class="o">=</span> <span class="n">PropensityScoreMatchingEstimator</span><span class="p">(</span>
+    <span class="n">identified_estimand</span><span class="o">=</span><span class="n">identified_estimand</span><span class="p">,</span>
+    <span class="n">test_significance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">evaluate_effect_strength</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span>
+    <span class="n">effect_modifier_names</span><span class="o">=</span><span class="n">graph</span><span class="o">.</span><span class="n">get_effect_modifiers</span><span class="p">(</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="p">),</span>
+<span class="p">)</span>
 
-estimate = estimator.estimate_effect(
-    data=data[&quot;df&quot;],
-    control_value=0,
-    treatment_value=1,
-    target_units=&quot;ate&quot;,
-)
+<span class="n">estimate</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span>
+    <span class="n">control_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">treatment_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;ate&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 
-# Using same estimator with different data
-second_estimate = estimator.estimate_effect(
-    data=data_2[&quot;df&quot;],
-    control_value=0,
-    treatment_value=1,
-    target_units=&quot;ate&quot;,
-)
+<span class="c1"># Using same estimator with different data</span>
+<span class="n">second_estimate</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">data_2</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span>
+    <span class="n">control_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">treatment_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;ate&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 
-print(estimate)
-print(&quot;-----------&quot;)
-print(second_estimate)
+<span class="nb">print</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-----------&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">second_estimate</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -791,7 +791,7 @@ print(second_estimate)
 Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ## Realized estimand
-b: y~v0+W1+W0+W2
+b: y~v0+W1+W2+W0
 Target units: ate
 
 ## Estimate
@@ -804,7 +804,7 @@ Mean value: 11.326873255880667
 Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ## Realized estimand
-b: y~v0+W1+W0+W2
+b: y~v0+W1+W2+W0
 Target units: ate
 
 ## Estimate
@@ -816,34 +816,34 @@ Mean value: 15.620265231373276
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># EconML estimator example
-from econml.dml import DML
-from sklearn.linear_model import LassoCV
-from sklearn.preprocessing import PolynomialFeatures
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># EconML estimator example</span>
+<span class="kn">from</span> <span class="nn">econml.dml</span> <span class="kn">import</span> <span class="n">DML</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LassoCV</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">PolynomialFeatures</span>
 
-from sklearn.ensemble import GradientBoostingRegressor
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostingRegressor</span>
 
-estimator = Econml(
-    identified_estimand=identified_estimand,
-    econml_estimator=DML(
-        model_y=GradientBoostingRegressor(),
-        model_t=GradientBoostingRegressor(),
-        model_final=LassoCV(fit_intercept=False),
-        featurizer=PolynomialFeatures(degree=1, include_bias=True),
-    ),
-).fit(
-    data=data[&quot;df&quot;],
-    effect_modifier_names=graph.get_effect_modifiers(treatment_name, outcome_name),
-)
+<span class="n">estimator</span> <span class="o">=</span> <span class="n">Econml</span><span class="p">(</span>
+    <span class="n">identified_estimand</span><span class="o">=</span><span class="n">identified_estimand</span><span class="p">,</span>
+    <span class="n">econml_estimator</span><span class="o">=</span><span class="n">DML</span><span class="p">(</span>
+        <span class="n">model_y</span><span class="o">=</span><span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
+        <span class="n">model_t</span><span class="o">=</span><span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
+        <span class="n">model_final</span><span class="o">=</span><span class="n">LassoCV</span><span class="p">(</span><span class="n">fit_intercept</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+        <span class="n">featurizer</span><span class="o">=</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="n">degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">include_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="p">),</span>
+<span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span>
+    <span class="n">effect_modifier_names</span><span class="o">=</span><span class="n">graph</span><span class="o">.</span><span class="n">get_effect_modifiers</span><span class="p">(</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="p">),</span>
+<span class="p">)</span>
 
-estimate_econml = estimator.estimate_effect(
-    data=data[&quot;df&quot;],
-    control_value=0,
-    treatment_value=1,
-    target_units=&quot;ate&quot;,
-)
+<span class="n">estimate_econml</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span>
+    <span class="n">control_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">treatment_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;ate&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 
-print(estimate)
+<span class="nb">print</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -858,7 +858,7 @@ print(estimate)
 Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ## Realized estimand
-b: y~v0+W1+W0+W2
+b: y~v0+W1+W2+W0
 Target units: ate
 
 ## Estimate
@@ -873,28 +873,28 @@ Mean value: 11.326873255880667
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># You can call the refute_estimate function for executing several refuters using default parameters
-# Currently this function does not support sensitivity_* functions
-refutation_results = refute_estimate(
-    data[&quot;df&quot;],
-    identified_estimand,
-    estimate,
-    treatment_name=treatment_name,
-    outcome_name=outcome_name,
-    refuters=[refute_bootstrap, refute_data_subset],
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># You can call the refute_estimate function for executing several refuters using default parameters</span>
+<span class="c1"># Currently this function does not support sensitivity_* functions</span>
+<span class="n">refutation_results</span> <span class="o">=</span> <span class="n">refute_estimate</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span>
+    <span class="n">identified_estimand</span><span class="p">,</span>
+    <span class="n">estimate</span><span class="p">,</span>
+    <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span>
+    <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span>
+    <span class="n">refuters</span><span class="o">=</span><span class="p">[</span><span class="n">refute_bootstrap</span><span class="p">,</span> <span class="n">refute_data_subset</span><span class="p">],</span>
+<span class="p">)</span>
 
-for result in refutation_results:
-    print(result)
+<span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">refutation_results</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
-# Or you can execute refute methods directly
-# You can change the refute_bootstrap - refute_data_subset for any of the other refuters and add the missing parameters
+<span class="c1"># Or you can execute refute methods directly</span>
+<span class="c1"># You can change the refute_bootstrap - refute_data_subset for any of the other refuters and add the missing parameters</span>
 
-bootstrap_refutation = refute_bootstrap(data[&quot;df&quot;], identified_estimand, estimate)
-print(bootstrap_refutation)
+<span class="n">bootstrap_refutation</span> <span class="o">=</span> <span class="n">refute_bootstrap</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span> <span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bootstrap_refutation</span><span class="p">)</span>
 
-data_subset_refutation = refute_data_subset(data[&quot;df&quot;], identified_estimand, estimate)
-print(data_subset_refutation)
+<span class="n">data_subset_refutation</span> <span class="o">=</span> <span class="n">refute_data_subset</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span> <span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data_subset_refutation</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -934,8 +934,8 @@ p value:0.56
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Create Causal Model
-causal_model = CausalModel(data=data[&quot;df&quot;], treatment=treatment_name, outcome=outcome_name, graph=data[&quot;gml_graph&quot;])
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create Causal Model</span>
+<span class="n">causal_model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span> <span class="n">treatment</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;gml_graph&quot;</span><span class="p">])</span>
 <br/></pre></div>
 </div>
 </div>
@@ -945,11 +945,11 @@ causal_model = CausalModel(data=data[&quot;df&quot;], treatment=treatment_name, 
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>identified_estimand_causal_model_api = (
-    causal_model.identify_effect()
-)  # graph, treatment and outcome comes from the causal_model object
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">identified_estimand_causal_model_api</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">causal_model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">()</span>
+<span class="p">)</span>  <span class="c1"># graph, treatment and outcome comes from the causal_model object</span>
 
-print(identified_estimand_causal_model_api)
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand_causal_model_api</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -964,9 +964,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W1,W0,W2])
+─────(E[y|W1,W2,W0])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W0,W2,U) = P(y|v0,W1,W0,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W2,W0,U) = P(y|v0,W1,W2,W0)
 
 ### Estimand : 2
 Estimand name: iv
@@ -991,11 +991,11 @@ No such variable(s) found!
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>estimate_causal_model_api = causal_model.estimate_effect(
-    identified_estimand_causal_model_api, method_name=&quot;backdoor.propensity_score_matching&quot;
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimate_causal_model_api</span> <span class="o">=</span> <span class="n">causal_model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span>
+    <span class="n">identified_estimand_causal_model_api</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_matching&quot;</span>
+<span class="p">)</span>
 
-print(estimate_causal_model_api)
+<span class="nb">print</span><span class="p">(</span><span class="n">estimate_causal_model_api</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1013,12 +1013,12 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W1,W0,W2])
+─────(E[y|W1,W2,W0])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W0,W2,U) = P(y|v0,W1,W0,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W2,W0,U) = P(y|v0,W1,W2,W0)
 
 ## Realized estimand
-b: y~v0+W1+W0+W2
+b: y~v0+W1+W2+W0
 Target units: ate
 
 ## Estimate
@@ -1033,14 +1033,14 @@ Mean value: 11.326873255880667
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>bootstrap_refutation_causal_model_api = causal_model.refute_estimate(identified_estimand_causal_model_api, estimate_causal_model_api, &quot;bootstrap_refuter&quot;)
-print(bootstrap_refutation_causal_model_api)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bootstrap_refutation_causal_model_api</span> <span class="o">=</span> <span class="n">causal_model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand_causal_model_api</span><span class="p">,</span> <span class="n">estimate_causal_model_api</span><span class="p">,</span> <span class="s2">&quot;bootstrap_refuter&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bootstrap_refutation_causal_model_api</span><span class="p">)</span>
 
-data_subset_refutation_causal_model_api = causal_model.refute_estimate(
-    identified_estimand_causal_model_api, estimate_causal_model_api, &quot;data_subset_refuter&quot;
-)
+<span class="n">data_subset_refutation_causal_model_api</span> <span class="o">=</span> <span class="n">causal_model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span>
+    <span class="n">identified_estimand_causal_model_api</span><span class="p">,</span> <span class="n">estimate_causal_model_api</span><span class="p">,</span> <span class="s2">&quot;data_subset_refuter&quot;</span>
+<span class="p">)</span>
 
-print(data_subset_refutation_causal_model_api)
+<span class="nb">print</span><span class="p">(</span><span class="n">data_subset_refutation_causal_model_api</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

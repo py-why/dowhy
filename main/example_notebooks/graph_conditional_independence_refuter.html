@@ -227,6 +227,11 @@
   </a>
  </li>
  <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_discovery_example.html">
+   Causal Discovery example
+  </a>
+ </li>
+ <li class="toctree-l1">
   <a class="reference internal" href="dowhy-conditional-treatment-effects.html">
    Conditional Average Treatment Effects (CATE) with DoWhy and EconML
   </a>
@@ -702,8 +707,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%load_ext autoreload
-%autoreload 2
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
 </pre></div>
 </div>
 </div>
@@ -711,13 +716,13 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
-import pandas as pd
-import os, sys
-sys.path.append(os.path.abspath(&quot;../../../&quot;))
-import dowhy
-from dowhy import CausalModel
-import dowhy.datasets
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
+<span class="kn">import</span> <span class="nn">dowhy</span>
+<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
 </pre></div>
 </div>
 </div>
@@ -729,14 +734,14 @@ generating random graph - prob_type_of_data : 3-element tuple containing the pro
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>data = dowhy.datasets.dataset_from_random_graph(num_vars = 10,
-                                                num_samples = 5000,
-                                                prob_edge = 0.3,
-                                                random_seed = 100,
-                                                prob_type_of_data = (0.333, 0.333, 0.334))
-df = data[&quot;df&quot;] #Insert dataset here
-print(data[&quot;discrete_columns&quot;], data[&quot;continuous_columns&quot;], data[&quot;binary_columns&quot;])
-print(df.head())
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">dataset_from_random_graph</span><span class="p">(</span><span class="n">num_vars</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                                                <span class="n">num_samples</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
+                                                <span class="n">prob_edge</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+                                                <span class="n">random_seed</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+                                                <span class="n">prob_type_of_data</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.333</span><span class="p">,</span> <span class="mf">0.333</span><span class="p">,</span> <span class="mf">0.334</span><span class="p">))</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">]</span> <span class="c1">#Insert dataset here</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;discrete_columns&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;continuous_columns&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;binary_columns&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
@@ -763,99 +768,99 @@ print(df.head())
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>graph_string = &quot;&quot;&quot;graph [
-  directed 1
-  node [
-    id 0
-    label &quot;a&quot;
-  ]
-  node [
-    id 1
-    label &quot;b&quot;
-  ]
-  node [
-    id 2
-    label &quot;c&quot;
-  ]
-  node [
-    id 3
-    label &quot;d&quot;
-  ]
-  node [
-    id 4
-    label &quot;e&quot;
-  ]
-  node [
-    id 5
-    label &quot;f&quot;
-  ]
-  node [
-    id 6
-    label &quot;g&quot;
-  ]
-  node [
-    id 7
-    label &quot;h&quot;
-  ]
-  node [
-    id 8
-    label &quot;i&quot;
-  ]
-  node [
-    id 9
-    label &quot;j&quot;
-  ]
-  edge [
-    source 0
-    target 1
-  ]
-  edge [
-    source 0
-    target 8
-  ]
-  edge [
-    source 1
-    target 2
-  ]
-  edge [
-    source 1
-    target 5
-  ]
-  edge [
-    source 2
-    target 3
-  ]
-  edge [
-    source 2
-    target 4
-  ]
-  edge [
-    source 3
-    target 4
-  ]
-  edge [
-    source 4
-    target 5
-  ]
-  edge [
-    source 5
-    target 6
-  ]
-  edge [
-    source 6
-    target 7
-  ]
-  edge [
-    source 7
-    target 8
-  ]
-  edge [
-    source 8
-    target 9
-  ]
-]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">graph_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;graph [</span>
+<span class="s2">  directed 1</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 0</span>
+<span class="s2">    label &quot;a&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 1</span>
+<span class="s2">    label &quot;b&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 2</span>
+<span class="s2">    label &quot;c&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 3</span>
+<span class="s2">    label &quot;d&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 4</span>
+<span class="s2">    label &quot;e&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 5</span>
+<span class="s2">    label &quot;f&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 6</span>
+<span class="s2">    label &quot;g&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 7</span>
+<span class="s2">    label &quot;h&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 8</span>
+<span class="s2">    label &quot;i&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 9</span>
+<span class="s2">    label &quot;j&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 0</span>
+<span class="s2">    target 1</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 0</span>
+<span class="s2">    target 8</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 1</span>
+<span class="s2">    target 2</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 1</span>
+<span class="s2">    target 5</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 2</span>
+<span class="s2">    target 3</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 2</span>
+<span class="s2">    target 4</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 3</span>
+<span class="s2">    target 4</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 4</span>
+<span class="s2">    target 5</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 5</span>
+<span class="s2">    target 6</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 6</span>
+<span class="s2">    target 7</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 7</span>
+<span class="s2">    target 8</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 8</span>
+<span class="s2">    target 9</span>
+<span class="s2">  ]</span>
+<span class="s2">]</span>
 
-&quot;&quot;&quot;
+<span class="s2">&quot;&quot;&quot;</span>
 </pre></div>
 </div>
 </div>
@@ -866,12 +871,12 @@ print(df.head())
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model=CausalModel(
-        data = df,
-        treatment=data[&quot;treatment_name&quot;],
-        outcome=data[&quot;outcome_name&quot;],
-        graph=graph_string
-        )
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
+        <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
+        <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
+        <span class="n">graph</span><span class="o">=</span><span class="n">graph_string</span>
+        <span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -879,7 +884,7 @@ print(df.head())
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model.view_model()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -887,8 +892,8 @@ print(df.head())
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from IPython.display import Image, display
-display(Image(filename=&quot;causal_model.png&quot;))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -908,7 +913,7 @@ display(Image(filename=&quot;causal_model.png&quot;))
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refuter_object = model.refute_graph(k=1, independence_test = {&#39;test_for_continuous&#39;: &#39;partial_correlation&#39;, &#39;test_for_discrete&#39; : &#39;conditional_mutual_information&#39;}) #Change k parameter to test conditional independence given different number of variables
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refuter_object</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_graph</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">independence_test</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;test_for_continuous&#39;</span><span class="p">:</span> <span class="s1">&#39;partial_correlation&#39;</span><span class="p">,</span> <span class="s1">&#39;test_for_discrete&#39;</span> <span class="p">:</span> <span class="s1">&#39;conditional_mutual_information&#39;</span><span class="p">})</span> <span class="c1">#Change k parameter to test conditional independence given different number of variables</span>
 </pre></div>
 </div>
 </div>
@@ -916,7 +921,7 @@ display(Image(filename=&quot;causal_model.png&quot;))
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(refuter_object)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">refuter_object</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -940,15 +945,15 @@ Test passed:True
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refuter_object = model.refute_graph(independence_constraints = [(&#39;c&#39;, &#39;e&#39; , (&#39;g&#39;,)), # c and e - binary, g - continuous
-                                                                (&#39;f&#39;, &#39;h&#39; , (&#39;b&#39;,)), # f and h - discrete, b - continuous
-                                                                (&#39;e&#39;, &#39;g&#39; , (&#39;h&#39;,)), # e - binary, g - continuous, h - discrete
-                                                                (&#39;c&#39;, &#39;a&#39; , (&#39;b&#39;,)), # c and a - discrete, b - continuous
-                                                                (&#39;d&#39;, &#39;i&#39; , (&#39;c&#39;,)), # d and i - continuous, c - binary
-                                                                (&#39;a&#39;, &#39;j&#39; , ())      # a - discrete, j - continuous
-                                                               ],
-                         independence_test = {&#39;test_for_continuous&#39;: &#39;partial_correlation&#39;, &#39;test_for_discrete&#39; : &#39;conditional_mutual_information&#39;}
-                        )
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refuter_object</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_graph</span><span class="p">(</span><span class="n">independence_constraints</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;g&#39;</span><span class="p">,)),</span> <span class="c1"># c and e - binary, g - continuous</span>
+                                                                <span class="p">(</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;h&#39;</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,)),</span> <span class="c1"># f and h - discrete, b - continuous</span>
+                                                                <span class="p">(</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;h&#39;</span><span class="p">,)),</span> <span class="c1"># e - binary, g - continuous, h - discrete</span>
+                                                                <span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,)),</span> <span class="c1"># c and a - discrete, b - continuous</span>
+                                                                <span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,)),</span> <span class="c1"># d and i - continuous, c - binary</span>
+                                                                <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span> <span class="p">,</span> <span class="p">())</span>      <span class="c1"># a - discrete, j - continuous</span>
+                                                               <span class="p">],</span>
+                         <span class="n">independence_test</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;test_for_continuous&#39;</span><span class="p">:</span> <span class="s1">&#39;partial_correlation&#39;</span><span class="p">,</span> <span class="s1">&#39;test_for_discrete&#39;</span> <span class="p">:</span> <span class="s1">&#39;conditional_mutual_information&#39;</span><span class="p">}</span>
+                        <span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -956,7 +961,7 @@ Test passed:True
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(refuter_object)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">refuter_object</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -981,98 +986,98 @@ Test passed:True
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>graph_string = &quot;&quot;&quot;graph [
-        directed 1
-        node [
-            id 0
-            label &quot;a&quot;
-        ]
-        node [
-            id 1
-            label &quot;b&quot;
-        ]
-        node [
-            id 2
-            label &quot;c&quot;
-        ]
-        node [
-            id 3
-            label &quot;d&quot;
-        ]
-        node [
-            id 4
-            label &quot;e&quot;
-        ]
-        node [
-            id 5
-            label &quot;f&quot;
-        ]
-        node [
-            id 6
-            label &quot;g&quot;
-        ]
-        node [
-            id 7
-            label &quot;h&quot;
-        ]
-        node [
-            id 8
-            label &quot;i&quot;
-        ]
-        node [
-            id 9
-            label &quot;j&quot;
-        ]
-        edge [
-            source 0
-            target 1
-        ]
-        edge [
-            source 0
-            target 2
-        ]
-        edge [
-            source 0
-            target 3
-        ]
-        edge [
-            source 1
-            target 4
-        ]
-        edge [
-            source 1
-            target 5
-        ]
-        edge [
-            source 2
-            target 3
-        ]
-        edge [
-            source 4
-            target 2
-        ]
-        edge [
-            source 4
-            target 5
-        ]
-        edge [
-            source 4
-            target 6
-        ]
-        edge [
-            source 4
-            target 7
-        ]
-        edge [
-            source 8
-            target 6
-        ]
-        edge
-        [
-        source 9
-        target 0
-        ]
-        ]&quot;&quot;&quot;
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">graph_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;graph [</span>
+<span class="s2">        directed 1</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 0</span>
+<span class="s2">            label &quot;a&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 1</span>
+<span class="s2">            label &quot;b&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 2</span>
+<span class="s2">            label &quot;c&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 3</span>
+<span class="s2">            label &quot;d&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 4</span>
+<span class="s2">            label &quot;e&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 5</span>
+<span class="s2">            label &quot;f&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 6</span>
+<span class="s2">            label &quot;g&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 7</span>
+<span class="s2">            label &quot;h&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 8</span>
+<span class="s2">            label &quot;i&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 9</span>
+<span class="s2">            label &quot;j&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 0</span>
+<span class="s2">            target 1</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 0</span>
+<span class="s2">            target 2</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 0</span>
+<span class="s2">            target 3</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 1</span>
+<span class="s2">            target 4</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 1</span>
+<span class="s2">            target 5</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 2</span>
+<span class="s2">            target 3</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 4</span>
+<span class="s2">            target 2</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 4</span>
+<span class="s2">            target 5</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 4</span>
+<span class="s2">            target 6</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 4</span>
+<span class="s2">            target 7</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 8</span>
+<span class="s2">            target 6</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge</span>
+<span class="s2">        [</span>
+<span class="s2">        source 9</span>
+<span class="s2">        target 0</span>
+<span class="s2">        ]</span>
+<span class="s2">        ]&quot;&quot;&quot;</span>
 </pre></div>
 </div>
 </div>
@@ -1080,12 +1085,12 @@ Test passed:True
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model = CausalModel(
-            data=df,
-            treatment=data[&quot;treatment_name&quot;],
-            outcome=data[&quot;outcome_name&quot;],
-            graph=graph_string,
-        )
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+            <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
+            <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
+            <span class="n">graph</span><span class="o">=</span><span class="n">graph_string</span><span class="p">,</span>
+        <span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1093,7 +1098,7 @@ Test passed:True
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model.view_model()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1101,8 +1106,8 @@ Test passed:True
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from IPython.display import Image, display
-display(Image(filename=&quot;causal_model.png&quot;))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -1117,7 +1122,7 @@ display(Image(filename=&quot;causal_model.png&quot;))
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refuter_object = model.refute_graph(k=2)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refuter_object</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_graph</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1126,7 +1131,7 @@ display(Image(filename=&quot;causal_model.png&quot;))
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(refuter_object)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">refuter_object</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

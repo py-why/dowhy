@@ -227,6 +227,11 @@
   </a>
  </li>
  <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_discovery_example.html">
+   Causal Discovery example
+  </a>
+ </li>
+ <li class="toctree-l1">
   <a class="reference internal" href="dowhy-conditional-treatment-effects.html">
    Conditional Average Treatment Effects (CATE) with DoWhy and EconML
   </a>
@@ -674,13 +679,13 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import dowhy.datasets
-import dowhy.api
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+<span class="kn">import</span> <span class="nn">dowhy.api</span>
 
-import numpy as np
-import pandas as pd
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-from statsmodels.api import OLS
+<span class="kn">from</span> <span class="nn">statsmodels.api</span> <span class="kn">import</span> <span class="n">OLS</span>
 </pre></div>
 </div>
 </div>
@@ -688,19 +693,19 @@ from statsmodels.api import OLS
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>data = dowhy.datasets.linear_dataset(beta=5,
-        num_common_causes=1,
-        num_instruments = 0,
-        num_samples=1000,
-        treatment_is_binary=True)
-df = data[&#39;df&#39;]
-df[&#39;y&#39;] = df[&#39;y&#39;] + np.random.normal(size=len(df)) # Adding noise to data. Without noise, the variance in Y|X, Z is zero, and mcmc fails.
-#data[&#39;dot_graph&#39;] = &#39;digraph { v -&gt;y;X0-&gt; v;X0-&gt; y;}&#39;
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">linear_dataset</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">num_common_causes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">num_instruments</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">num_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span> <span class="c1"># Adding noise to data. Without noise, the variance in Y|X, Z is zero, and mcmc fails.</span>
+<span class="c1">#data[&#39;dot_graph&#39;] = &#39;digraph { v -&gt;y;X0-&gt; v;X0-&gt; y;}&#39;</span>
 
-treatment= data[&quot;treatment_name&quot;][0]
-outcome = data[&quot;outcome_name&quot;][0]
-common_cause = data[&quot;common_causes_names&quot;][0]
-df
+<span class="n">treatment</span><span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">outcome</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">common_cause</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;common_causes_names&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">df</span>
 </pre></div>
 </div>
 </div>
@@ -735,33 +740,33 @@ df
   <tbody>
     <tr>
       <th>0</th>
-      <td>1.411968</td>
-      <td>True</td>
-      <td>5.571138</td>
+      <td>0.202682</td>
+      <td>False</td>
+      <td>1.194169</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.926950</td>
+      <td>-2.930046</td>
       <td>False</td>
-      <td>-0.308466</td>
+      <td>-0.099378</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.406126</td>
-      <td>True</td>
-      <td>6.133473</td>
+      <td>-0.176946</td>
+      <td>False</td>
+      <td>-0.365583</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.785537</td>
+      <td>0.664866</td>
       <td>False</td>
-      <td>0.788221</td>
+      <td>-1.211488</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-0.901640</td>
+      <td>-1.080623</td>
       <td>True</td>
-      <td>4.671783</td>
+      <td>5.223693</td>
     </tr>
     <tr>
       <th>...</th>
@@ -771,33 +776,33 @@ df
     </tr>
     <tr>
       <th>995</th>
-      <td>-0.187916</td>
+      <td>0.054760</td>
       <td>False</td>
-      <td>-0.289938</td>
+      <td>1.203307</td>
     </tr>
     <tr>
       <th>996</th>
-      <td>-0.451700</td>
+      <td>1.668404</td>
       <td>True</td>
-      <td>4.442594</td>
+      <td>2.324630</td>
     </tr>
     <tr>
       <th>997</th>
-      <td>-1.573600</td>
+      <td>-1.940459</td>
       <td>True</td>
-      <td>4.154750</td>
+      <td>3.175455</td>
     </tr>
     <tr>
       <th>998</th>
-      <td>-1.478435</td>
-      <td>False</td>
-      <td>-2.002814</td>
+      <td>0.160570</td>
+      <td>True</td>
+      <td>3.610299</td>
     </tr>
     <tr>
       <th>999</th>
-      <td>0.748938</td>
-      <td>True</td>
-      <td>6.180573</td>
+      <td>-1.551905</td>
+      <td>False</td>
+      <td>0.634346</td>
     </tr>
   </tbody>
 </table>
@@ -808,12 +813,12 @@ df
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># data[&#39;df&#39;] is just a regular pandas.DataFrame
-df.causal.do(x=treatment,
-                     variable_types={treatment: &#39;b&#39;, outcome: &#39;c&#39;, common_cause: &#39;c&#39;},
-                     outcome=outcome,
-                     common_causes=[common_cause],
-                     proceed_when_unidentifiable=True).groupby(treatment).mean().plot(y=outcome, kind=&#39;bar&#39;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># data[&#39;df&#39;] is just a regular pandas.DataFrame</span>
+<span class="n">df</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">treatment</span><span class="p">,</span>
+                     <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">outcome</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">common_cause</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
+                     <span class="n">outcome</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span>
+                     <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="n">common_cause</span><span class="p">],</span>
+                     <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">treatment</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -837,12 +842,12 @@ df.causal.do(x=treatment,
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>df.causal.do(x={treatment: 1},
-              variable_types={treatment:&#39;b&#39;, outcome: &#39;c&#39;, common_cause: &#39;c&#39;},
-              outcome=outcome,
-              method=&#39;weighting&#39;,
-              common_causes=[common_cause],
-              proceed_when_unidentifiable=True).groupby(treatment).mean().plot(y=outcome, kind=&#39;bar&#39;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+              <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">outcome</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">common_cause</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
+              <span class="n">outcome</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span>
+              <span class="n">method</span><span class="o">=</span><span class="s1">&#39;weighting&#39;</span><span class="p">,</span>
+              <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="n">common_cause</span><span class="p">],</span>
+              <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">treatment</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -866,17 +871,17 @@ df.causal.do(x=treatment,
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>cdf_1 = df.causal.do(x={treatment: 1},
-              variable_types={treatment: &#39;b&#39;, outcome: &#39;c&#39;, common_cause: &#39;c&#39;},
-              outcome=outcome,
-              dot_graph=data[&#39;dot_graph&#39;],
-              proceed_when_unidentifiable=True)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cdf_1</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+              <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">outcome</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">common_cause</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
+              <span class="n">outcome</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span>
+              <span class="n">dot_graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dot_graph&#39;</span><span class="p">],</span>
+              <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-cdf_0 = df.causal.do(x={treatment: 0},
-              variable_types={treatment: &#39;b&#39;, outcome: &#39;c&#39;, common_cause: &#39;c&#39;},
-              outcome=outcome,
-              dot_graph=data[&#39;dot_graph&#39;],
-              proceed_when_unidentifiable=True)
+<span class="n">cdf_0</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+              <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">outcome</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">common_cause</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
+              <span class="n">outcome</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span>
+              <span class="n">dot_graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dot_graph&#39;</span><span class="p">],</span>
+              <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <br/></pre></div>
 </div>
 </div>
@@ -884,7 +889,7 @@ cdf_0 = df.causal.do(x={treatment: 0},
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>cdf_0
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cdf_0</span>
 </pre></div>
 </div>
 </div>
@@ -921,43 +926,43 @@ cdf_0 = df.causal.do(x={treatment: 0},
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.467549</td>
+      <td>-0.225989</td>
       <td>False</td>
-      <td>-1.514155</td>
-      <td>0.570977</td>
-      <td>1.751383</td>
+      <td>-1.094190</td>
+      <td>0.557757</td>
+      <td>1.792894</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-1.614698</td>
+      <td>1.029895</td>
       <td>False</td>
-      <td>-2.017867</td>
-      <td>0.740546</td>
-      <td>1.350354</td>
+      <td>0.213633</td>
+      <td>0.258945</td>
+      <td>3.861820</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.814400</td>
+      <td>-1.701127</td>
       <td>False</td>
-      <td>-2.162784</td>
-      <td>0.626336</td>
-      <td>1.596587</td>
+      <td>0.441389</td>
+      <td>0.850645</td>
+      <td>1.175579</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-1.626279</td>
+      <td>-1.121474</td>
       <td>False</td>
-      <td>-0.155668</td>
-      <td>0.742024</td>
-      <td>1.347666</td>
+      <td>0.882492</td>
+      <td>0.759010</td>
+      <td>1.317506</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0.215773</td>
+      <td>-0.514958</td>
       <td>False</td>
-      <td>0.967871</td>
-      <td>0.457940</td>
-      <td>2.183692</td>
+      <td>-1.160197</td>
+      <td>0.628875</td>
+      <td>1.590141</td>
     </tr>
     <tr>
       <th>...</th>
@@ -969,43 +974,43 @@ cdf_0 = df.causal.do(x={treatment: 0},
     </tr>
     <tr>
       <th>995</th>
-      <td>-1.613703</td>
+      <td>0.350265</td>
       <td>False</td>
-      <td>-1.445127</td>
-      <td>0.740419</td>
-      <td>1.350587</td>
+      <td>-0.753401</td>
+      <td>0.411717</td>
+      <td>2.428852</td>
     </tr>
     <tr>
       <th>996</th>
-      <td>-1.614698</td>
+      <td>-0.980396</td>
       <td>False</td>
-      <td>-2.017867</td>
-      <td>0.740546</td>
-      <td>1.350354</td>
+      <td>-0.095021</td>
+      <td>0.731663</td>
+      <td>1.366750</td>
     </tr>
     <tr>
       <th>997</th>
-      <td>0.658785</td>
+      <td>0.587032</td>
       <td>False</td>
-      <td>0.308634</td>
-      <td>0.386207</td>
-      <td>2.589288</td>
+      <td>-0.097019</td>
+      <td>0.354607</td>
+      <td>2.820023</td>
     </tr>
     <tr>
       <th>998</th>
-      <td>-0.441217</td>
+      <td>-1.291168</td>
       <td>False</td>
-      <td>-0.480947</td>
-      <td>0.566682</td>
-      <td>1.764658</td>
+      <td>-1.162009</td>
+      <td>0.789296</td>
+      <td>1.266952</td>
     </tr>
     <tr>
       <th>999</th>
-      <td>-0.114467</td>
+      <td>0.151185</td>
       <td>False</td>
-      <td>-0.899311</td>
-      <td>0.512748</td>
-      <td>1.950274</td>
+      <td>1.126948</td>
+      <td>0.461723</td>
+      <td>2.165802</td>
     </tr>
   </tbody>
 </table>
@@ -1016,7 +1021,7 @@ cdf_0 = df.causal.do(x={treatment: 0},
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>cdf_1
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cdf_1</span>
 </pre></div>
 </div>
 </div>
@@ -1053,43 +1058,43 @@ cdf_0 = df.causal.do(x={treatment: 0},
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.007495</td>
+      <td>-1.148805</td>
       <td>True</td>
-      <td>5.951584</td>
-      <td>0.507528</td>
-      <td>1.970336</td>
+      <td>4.019603</td>
+      <td>0.235918</td>
+      <td>4.238760</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.884924</td>
+      <td>0.024571</td>
       <td>True</td>
-      <td>4.141081</td>
-      <td>0.362753</td>
-      <td>2.756699</td>
+      <td>3.417077</td>
+      <td>0.506002</td>
+      <td>1.976276</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.691429</td>
+      <td>-1.238566</td>
       <td>True</td>
-      <td>6.173487</td>
-      <td>0.618927</td>
-      <td>1.615699</td>
+      <td>4.151297</td>
+      <td>0.219784</td>
+      <td>4.549923</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-1.110933</td>
+      <td>-1.354740</td>
       <td>True</td>
-      <td>3.942882</td>
-      <td>0.328770</td>
-      <td>3.041643</td>
+      <td>4.243690</td>
+      <td>0.200102</td>
+      <td>4.997451</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-1.871376</td>
+      <td>-1.059235</td>
       <td>True</td>
-      <td>1.902019</td>
-      <td>0.228020</td>
-      <td>4.385583</td>
+      <td>3.403043</td>
+      <td>0.252816</td>
+      <td>3.955444</td>
     </tr>
     <tr>
       <th>...</th>
@@ -1101,43 +1106,43 @@ cdf_0 = df.causal.do(x={treatment: 0},
     </tr>
     <tr>
       <th>995</th>
-      <td>1.026728</td>
+      <td>0.448819</td>
       <td>True</td>
-      <td>6.510864</td>
-      <td>0.669960</td>
-      <td>1.492626</td>
+      <td>3.788769</td>
+      <td>0.612443</td>
+      <td>1.632805</td>
     </tr>
     <tr>
       <th>996</th>
-      <td>-2.689902</td>
+      <td>-2.110718</td>
       <td>True</td>
-      <td>2.425737</td>
-      <td>0.146299</td>
-      <td>6.835316</td>
+      <td>4.682417</td>
+      <td>0.103561</td>
+      <td>9.656168</td>
     </tr>
     <tr>
       <th>997</th>
-      <td>-2.293895</td>
+      <td>0.373775</td>
       <td>True</td>
-      <td>1.269438</td>
-      <td>0.182344</td>
-      <td>5.484129</td>
+      <td>4.807342</td>
+      <td>0.594090</td>
+      <td>1.683247</td>
     </tr>
     <tr>
       <th>998</th>
-      <td>-0.666987</td>
+      <td>-1.502645</td>
       <td>True</td>
-      <td>3.907619</td>
-      <td>0.396879</td>
-      <td>2.519659</td>
+      <td>5.453215</td>
+      <td>0.176998</td>
+      <td>5.649767</td>
     </tr>
     <tr>
       <th>999</th>
-      <td>-1.871376</td>
+      <td>-1.632047</td>
       <td>True</td>
-      <td>1.902019</td>
-      <td>0.228020</td>
-      <td>4.385583</td>
+      <td>4.863576</td>
+      <td>0.158549</td>
+      <td>6.307213</td>
     </tr>
   </tbody>
 </table>
@@ -1151,7 +1156,7 @@ cdf_0 = df.causal.do(x={treatment: 0},
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>(cdf_1[&#39;y&#39;] - cdf_0[&#39;y&#39;]).mean()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">cdf_1</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">cdf_0</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1161,13 +1166,13 @@ cdf_0 = df.causal.do(x={treatment: 0},
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 5.1342913489746$</div></div>
+$\displaystyle 4.86419497753035$</div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>1.96*(cdf_1[&#39;y&#39;] - cdf_0[&#39;y&#39;]).std() / np.sqrt(len(df))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="mf">1.96</span><span class="o">*</span><span class="p">(</span><span class="n">cdf_1</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">cdf_0</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -1177,16 +1182,16 @@ $\displaystyle 5.1342913489746$</div></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 0.11965138526202$</div></div>
+$\displaystyle 0.0871034499126021$</div></div>
 </div>
 <p>Comparing to the estimate from OLS.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model = OLS(np.asarray(df[outcome]), np.asarray(df[[common_cause, treatment]], dtype=np.float64))
-result = model.fit()
-result.summary()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">OLS</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">outcome</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="n">common_cause</span><span class="p">,</span> <span class="n">treatment</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="n">result</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1198,25 +1203,25 @@ result.summary()
 <table class="simpletable">
 <caption>OLS Regression Results</caption>
 <tr>
-  <th>Dep. Variable:</th>            <td>y</td>        <th>  R-squared (uncentered):</th>      <td>   0.905</td>
+  <th>Dep. Variable:</th>            <td>y</td>        <th>  R-squared (uncentered):</th>      <td>   0.896</td>
 </tr>
 <tr>
-  <th>Model:</th>                   <td>OLS</td>       <th>  Adj. R-squared (uncentered):</th> <td>   0.905</td>
+  <th>Model:</th>                   <td>OLS</td>       <th>  Adj. R-squared (uncentered):</th> <td>   0.896</td>
 </tr>
 <tr>
-  <th>Method:</th>             <td>Least Squares</td>  <th>  F-statistic:       </th>          <td>   4753.</td>
+  <th>Method:</th>             <td>Least Squares</td>  <th>  F-statistic:       </th>          <td>   4298.</td>
 </tr>
 <tr>
-  <th>Date:</th>             <td>Fri, 27 Jan 2023</td> <th>  Prob (F-statistic):</th>           <td>  0.00</td>
+  <th>Date:</th>             <td>Wed, 01 Feb 2023</td> <th>  Prob (F-statistic):</th>           <td>  0.00</td>
 </tr>
 <tr>
-  <th>Time:</th>                 <td>10:11:32</td>     <th>  Log-Likelihood:    </th>          <td> -1400.7</td>
+  <th>Time:</th>                 <td>21:48:12</td>     <th>  Log-Likelihood:    </th>          <td> -1406.6</td>
 </tr>
 <tr>
-  <th>No. Observations:</th>      <td>  1000</td>      <th>  AIC:               </th>          <td>   2805.</td>
+  <th>No. Observations:</th>      <td>  1000</td>      <th>  AIC:               </th>          <td>   2817.</td>
 </tr>
 <tr>
-  <th>Df Residuals:</th>          <td>   998</td>      <th>  BIC:               </th>          <td>   2815.</td>
+  <th>Df Residuals:</th>          <td>   998</td>      <th>  BIC:               </th>          <td>   2827.</td>
 </tr>
 <tr>
   <th>Df Model:</th>              <td>     2</td>      <th>                     </th>              <td> </td>
@@ -1230,24 +1235,24 @@ result.summary()
    <td></td>     <th>coef</th>     <th>std err</th>      <th>t</th>      <th>P>|t|</th>  <th>[0.025</th>    <th>0.975]</th>
 </tr>
 <tr>
-  <th>x1</th> <td>    0.9971</td> <td>    0.024</td> <td>   41.035</td> <td> 0.000</td> <td>    0.949</td> <td>    1.045</td>
+  <th>x1</th> <td>    0.0233</td> <td>    0.025</td> <td>    0.936</td> <td> 0.350</td> <td>   -0.026</td> <td>    0.072</td>
 </tr>
 <tr>
-  <th>x2</th> <td>    5.0670</td> <td>    0.053</td> <td>   95.944</td> <td> 0.000</td> <td>    4.963</td> <td>    5.171</td>
+  <th>x2</th> <td>    4.9038</td> <td>    0.053</td> <td>   92.476</td> <td> 0.000</td> <td>    4.800</td> <td>    5.008</td>
 </tr>
 </table>
 <table class="simpletable">
 <tr>
-  <th>Omnibus:</th>       <td> 0.013</td> <th>  Durbin-Watson:     </th> <td>   2.083</td>
+  <th>Omnibus:</th>       <td> 3.843</td> <th>  Durbin-Watson:     </th> <td>   1.963</td>
 </tr>
 <tr>
-  <th>Prob(Omnibus):</th> <td> 0.994</td> <th>  Jarque-Bera (JB):  </th> <td>   0.047</td>
+  <th>Prob(Omnibus):</th> <td> 0.146</td> <th>  Jarque-Bera (JB):  </th> <td>   3.783</td>
 </tr>
 <tr>
-  <th>Skew:</th>          <td>-0.003</td> <th>  Prob(JB):          </th> <td>   0.977</td>
+  <th>Skew:</th>          <td> 0.150</td> <th>  Prob(JB):          </th> <td>   0.151</td>
 </tr>
 <tr>
-  <th>Kurtosis:</th>      <td> 2.967</td> <th>  Cond. No.          </th> <td>    2.28</td>
+  <th>Kurtosis:</th>      <td> 3.022</td> <th>  Cond. No.          </th> <td>    2.14</td>
 </tr>
 </table><br/><br/>Notes:<br/>[1] R² is computed without centering (uncentered) since the model does not contain a constant.<br/>[2] Standard Errors assume that the covariance matrix of the errors is correctly specified.</div>
 </div>

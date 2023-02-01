@@ -227,6 +227,11 @@
   </a>
  </li>
  <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_discovery_example.html">
+   Causal Discovery example
+  </a>
+ </li>
+ <li class="toctree-l1">
   <a class="reference internal" href="dowhy-conditional-treatment-effects.html">
    Conditional Average Treatment Effects (CATE) with DoWhy and EconML
   </a>
@@ -695,10 +700,10 @@ there are many positive reviews for option 1. Nevertheless, she decides to use o
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import pandas as pd
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-medical_data = pd.read_csv(&#39;patients_database.csv&#39;)
-medical_data.head()
+<span class="n">medical_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;patients_database.csv&#39;</span><span class="p">)</span>
+<span class="n">medical_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -769,7 +774,7 @@ medical_data.head()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>medical_data.iloc[0:100].plot(figsize=(15, 10))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">medical_data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">100</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -800,15 +805,15 @@ and data, we can then fit the causal model and start answering counterfactual qu
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import networkx as nx
-import dowhy.gcm as gcm
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">import</span> <span class="nn">dowhy.gcm</span> <span class="k">as</span> <span class="nn">gcm</span>
 
-causal_model = gcm.InvertibleStructuralCausalModel(nx.DiGraph([(&#39;Treatment&#39;, &#39;Vision&#39;), (&#39;Condition&#39;, &#39;Vision&#39;)]))
-gcm.auto.assign_causal_mechanisms(causal_model, medical_data)
+<span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">InvertibleStructuralCausalModel</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;Treatment&#39;</span><span class="p">,</span> <span class="s1">&#39;Vision&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Condition&#39;</span><span class="p">,</span> <span class="s1">&#39;Vision&#39;</span><span class="p">)]))</span>
+<span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">assign_causal_mechanisms</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">medical_data</span><span class="p">)</span>
 
-gcm.util.plot(causal_model.graph)
+<span class="n">gcm</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
 
-gcm.fit(causal_model, medical_data)
+<span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">medical_data</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -824,7 +829,7 @@ gcm.fit(causal_model, medical_data)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Condition: 100%|██████████| 3/3 [00:00&lt;00:00, 208.82it/s]
+Fitting causal mechanism of node Condition: 100%|██████████| 3/3 [00:00&lt;00:00, 248.72it/s]
 </pre></div></div>
 </div>
 <p>Now returning to our original problem, let’s load Alice’s data, who happens to have a rare allergy (Condition = 1).</p>
@@ -832,8 +837,8 @@ Fitting causal mechanism of node Condition: 100%|██████████|
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>specific_patient_data = pd.read_csv(&#39;newly_come_patients.csv&#39;)
-specific_patient_data.head()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">specific_patient_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;newly_come_patients.csv&#39;</span><span class="p">)</span>
+<span class="n">specific_patient_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -885,26 +890,26 @@ specific_patient_data.head()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>counterfactual_data1 = gcm.counterfactual_samples(causal_model,
-                                                  {&#39;Treatment&#39;: lambda x: 1},
-                                                  observed_data = specific_patient_data)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">counterfactual_data1</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">counterfactual_samples</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span>
+                                                  <span class="p">{</span><span class="s1">&#39;Treatment&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+                                                  <span class="n">observed_data</span> <span class="o">=</span> <span class="n">specific_patient_data</span><span class="p">)</span>
 
-counterfactual_data2 = gcm.counterfactual_samples(causal_model,
-                                                  {&#39;Treatment&#39;: lambda x: 0},
-                                                  observed_data = specific_patient_data)
+<span class="n">counterfactual_data2</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">counterfactual_samples</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span>
+                                                  <span class="p">{</span><span class="s1">&#39;Treatment&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+                                                  <span class="n">observed_data</span> <span class="o">=</span> <span class="n">specific_patient_data</span><span class="p">)</span>
 
 
-import matplotlib.pyplot as plt
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
-df_plot2 = pd.DataFrame()
-df_plot2[&#39;Vision after option 2&#39;] = specific_patient_data[&#39;Vision&#39;]
-df_plot2[&#39;Counterfactual vision (option 1)&#39;] = counterfactual_data1[&#39;Vision&#39;]
-df_plot2[&#39;Counterfactual vision (No treatment)&#39;] = counterfactual_data2[&#39;Vision&#39;]
+<span class="n">df_plot2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+<span class="n">df_plot2</span><span class="p">[</span><span class="s1">&#39;Vision after option 2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">specific_patient_data</span><span class="p">[</span><span class="s1">&#39;Vision&#39;</span><span class="p">]</span>
+<span class="n">df_plot2</span><span class="p">[</span><span class="s1">&#39;Counterfactual vision (option 1)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counterfactual_data1</span><span class="p">[</span><span class="s1">&#39;Vision&#39;</span><span class="p">]</span>
+<span class="n">df_plot2</span><span class="p">[</span><span class="s1">&#39;Counterfactual vision (No treatment)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counterfactual_data2</span><span class="p">[</span><span class="s1">&#39;Vision&#39;</span><span class="p">]</span>
 
-df_plot2.plot.bar(title=&quot;Counterfactual outputs&quot;)
-plt.xlabel(&#39;Alice&#39;)
-plt.ylabel(&#39;Eyesight quality&#39;)
-plt.legend()
+<span class="n">df_plot2</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Counterfactual outputs&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Alice&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Eyesight quality&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -914,7 +919,7 @@ plt.legend()
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7fc251ab4880&gt;
+&lt;matplotlib.legend.Legend at 0x7f64a8aec6d0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -946,27 +951,27 @@ than with option 2 that she took.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from scipy.stats import bernoulli, norm, uniform
-import numpy as np
-from random import randint
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">bernoulli</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">uniform</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span>
 
-n_unobserved = 10000
-unobserved_data = {
-   &#39;N_T&#39;: np.array([randint(0, 2) for p in range(n_unobserved)]),
-   &#39;N_vision&#39;: np.random.uniform(0.4, 0.6, size=(n_unobserved,)),
-   &#39;N_C&#39;: bernoulli.rvs(0.01, size=n_unobserved)
-}
-P_1 = 0.2
-P_2 = 0.15
+<span class="n">n_unobserved</span> <span class="o">=</span> <span class="mi">10000</span>
+<span class="n">unobserved_data</span> <span class="o">=</span> <span class="p">{</span>
+   <span class="s1">&#39;N_T&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_unobserved</span><span class="p">)]),</span>
+   <span class="s1">&#39;N_vision&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n_unobserved</span><span class="p">,)),</span>
+   <span class="s1">&#39;N_C&#39;</span><span class="p">:</span> <span class="n">bernoulli</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_unobserved</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="n">P_1</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">P_2</span> <span class="o">=</span> <span class="mf">0.15</span>
 
-def create_observed_medical_data(unobserved_data):
-    observed_medical_data = {}
-    observed_medical_data[&#39;Condition&#39;] = unobserved_data[&#39;N_C&#39;]
-    observed_medical_data[&#39;Treatment&#39;] = unobserved_data[&#39;N_T&#39;]
-    observed_medical_data[&#39;Vision&#39;] = unobserved_data[&#39;N_vision&#39;] + (-P_1)*(1 - observed_medical_data[&#39;Condition&#39;])*(1 - observed_medical_data[&#39;Treatment&#39;])*(2 - observed_medical_data[&#39;Treatment&#39;]) + (2*P_2)*(1 - observed_medical_data[&#39;Condition&#39;])*(observed_medical_data[&#39;Treatment&#39;])*(2 - observed_medical_data[&#39;Treatment&#39;]) + (P_2)*(1 - observed_medical_data[&#39;Condition&#39;])*(observed_medical_data[&#39;Treatment&#39;])*(1 - observed_medical_data[&#39;Treatment&#39;])*(3 - observed_medical_data[&#39;Treatment&#39;]) + 0*(observed_medical_data[&#39;Condition&#39;])*(1 - observed_medical_data[&#39;Treatment&#39;])*(2 - observed_medical_data[&#39;Treatment&#39;]) + (-2*P_2)*(unobserved_data[&#39;N_C&#39;])*(observed_medical_data[&#39;Treatment&#39;])*(2 - observed_medical_data[&#39;Treatment&#39;]) + (-P_2)*(observed_medical_data[&#39;Condition&#39;])*(observed_medical_data[&#39;Treatment&#39;])*(1 - observed_medical_data[&#39;Treatment&#39;])*(3 - observed_medical_data[&#39;Treatment&#39;])
-    return pd.DataFrame(observed_medical_data)
+<span class="k">def</span> <span class="nf">create_observed_medical_data</span><span class="p">(</span><span class="n">unobserved_data</span><span class="p">):</span>
+    <span class="n">observed_medical_data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Condition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unobserved_data</span><span class="p">[</span><span class="s1">&#39;N_C&#39;</span><span class="p">]</span>
+    <span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Treatment&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unobserved_data</span><span class="p">[</span><span class="s1">&#39;N_T&#39;</span><span class="p">]</span>
+    <span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Vision&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unobserved_data</span><span class="p">[</span><span class="s1">&#39;N_vision&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">P_1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Condition&#39;</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Treatment&#39;</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Treatment&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">P_2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Condition&#39;</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Treatment&#39;</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Treatment&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">P_2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Condition&#39;</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Treatment&#39;</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Treatment&#39;</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="mi">3</span> <span class="o">-</span> <span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Treatment&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="mi">0</span><span class="o">*</span><span class="p">(</span><span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Condition&#39;</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Treatment&#39;</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Treatment&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">P_2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">unobserved_data</span><span class="p">[</span><span class="s1">&#39;N_C&#39;</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Treatment&#39;</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Treatment&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">P_2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Condition&#39;</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Treatment&#39;</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Treatment&#39;</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="mi">3</span> <span class="o">-</span> <span class="n">observed_medical_data</span><span class="p">[</span><span class="s1">&#39;Treatment&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">observed_medical_data</span><span class="p">)</span>
 
-medical_data = create_observed_medical_data(unobserved_data)
+<span class="n">medical_data</span> <span class="o">=</span> <span class="n">create_observed_medical_data</span><span class="p">(</span><span class="n">unobserved_data</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -975,16 +980,16 @@ medical_data = create_observed_medical_data(unobserved_data)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span>num_samples = 1
-original_vision = np.random.uniform(0.4, 0.6, size=num_samples)
-def generate_specific_patient_data(num_samples):
-    return create_observed_medical_data({
-    &#39;N_T&#39;: np.full((num_samples,), 2),
-    &#39;N_C&#39;: bernoulli.rvs(1, size=num_samples),
-    &#39;N_vision&#39;: original_vision,
-})
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="n">num_samples</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">original_vision</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">generate_specific_patient_data</span><span class="p">(</span><span class="n">num_samples</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">create_observed_medical_data</span><span class="p">({</span>
+    <span class="s1">&#39;N_T&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">num_samples</span><span class="p">,),</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="s1">&#39;N_C&#39;</span><span class="p">:</span> <span class="n">bernoulli</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">),</span>
+    <span class="s1">&#39;N_vision&#39;</span><span class="p">:</span> <span class="n">original_vision</span><span class="p">,</span>
+<span class="p">})</span>
 
-specific_patient_data = generate_specific_patient_data(num_samples)
+<span class="n">specific_patient_data</span> <span class="o">=</span> <span class="n">generate_specific_patient_data</span><span class="p">(</span><span class="n">num_samples</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

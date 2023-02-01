@@ -555,8 +555,8 @@ explanatory power conditioned on some variables <span class="math notranslate no
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%load_ext autoreload
-%autoreload 2
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
 </pre></div>
 </div>
 </div>
@@ -564,13 +564,13 @@ explanatory power conditioned on some variables <span class="math notranslate no
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Required libraries
-import re
-import numpy as np
-import dowhy
-from dowhy import CausalModel
-import dowhy.datasets
-from dowhy.utils.regression import create_polynomial_function
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Required libraries</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">dowhy</span>
+<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+<span class="kn">from</span> <span class="nn">dowhy.utils.regression</span> <span class="kn">import</span> <span class="n">create_polynomial_function</span>
 </pre></div>
 </div>
 </div>
@@ -579,17 +579,17 @@ from dowhy.utils.regression import create_polynomial_function
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>np.random.seed(101)
-data = dowhy.datasets.partially_linear_dataset(beta = 10,
-                                               num_common_causes = 7,
-                                               num_unobserved_common_causes=1,
-                                               strength_unobserved_confounding=10,
-                                               num_samples = 1000,
-                                               num_treatments = 1,
-                                               stddev_treatment_noise = 10,
-                                               stddev_outcome_noise = 5
-                                                )
-display(data)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">101</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">partially_linear_dataset</span><span class="p">(</span><span class="n">beta</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                                               <span class="n">num_common_causes</span> <span class="o">=</span> <span class="mi">7</span><span class="p">,</span>
+                                               <span class="n">num_unobserved_common_causes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                               <span class="n">strength_unobserved_confounding</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                                               <span class="n">num_samples</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+                                               <span class="n">num_treatments</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                                               <span class="n">stddev_treatment_noise</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                                               <span class="n">stddev_outcome_noise</span> <span class="o">=</span> <span class="mi">5</span>
+                                                <span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -638,7 +638,7 @@ display(data)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>data[&quot;ate&quot;]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;ate&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -655,15 +655,15 @@ $\displaystyle 10.085246711267$</div></div>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Observed data
-dropped_cols=[&quot;W0&quot;]
-user_data = data[&quot;df&quot;].drop(dropped_cols, axis = 1)
-# assumed graph
-user_graph = data[&quot;gml_graph&quot;]
-for col in dropped_cols:
-    user_graph = user_graph.replace(&#39;node[ id &quot;{0}&quot; label &quot;{0}&quot;]&#39;.format(col), &#39;&#39;)
-    user_graph = re.sub(&#39;edge\[ source &quot;{}&quot; target &quot;[vy][0]*&quot;\]&#39;.format(col), &quot;&quot;, user_graph)
-user_data
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Observed data</span>
+<span class="n">dropped_cols</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;W0&quot;</span><span class="p">]</span>
+<span class="n">user_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">dropped_cols</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+<span class="c1"># assumed graph</span>
+<span class="n">user_graph</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;gml_graph&quot;</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">dropped_cols</span><span class="p">:</span>
+    <span class="n">user_graph</span> <span class="o">=</span> <span class="n">user_graph</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;node[ id &quot;</span><span class="si">{0}</span><span class="s1">&quot; label &quot;</span><span class="si">{0}</span><span class="s1">&quot;]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">col</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">user_graph</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;edge\[ source &quot;</span><span class="si">{}</span><span class="s1">&quot; target &quot;[vy][0]*&quot;\]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">col</span><span class="p">),</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">user_graph</span><span class="p">)</span>
+<span class="n">user_data</span>
 </pre></div>
 </div>
 </div>
@@ -835,16 +835,16 @@ user_data
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model = CausalModel(
-            data=user_data,
-            treatment=data[&quot;treatment_name&quot;],
-            outcome=data[&quot;outcome_name&quot;],
-            graph=user_graph,
-            test_significance=None,
-        )
-model.view_model()
-from IPython.display import Image, display
-display(Image(filename=&quot;causal_model.png&quot;))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">user_data</span><span class="p">,</span>
+            <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
+            <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
+            <span class="n">graph</span><span class="o">=</span><span class="n">user_graph</span><span class="p">,</span>
+            <span class="n">test_significance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -859,9 +859,9 @@ display(Image(filename=&quot;causal_model.png&quot;))
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Identify effect
-identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
-print(identified_estimand)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Identify effect</span>
+<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -876,9 +876,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W3,W1,W4,W2,W6,W5])
+─────(E[y|W2,W4,W1,W6,W3,W5])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W1,W4,W2,W6,W5,U) = P(y|v0,W3,W1,W4,W2,W6,W5)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W4,W1,W6,W3,W5,U) = P(y|v0,W2,W4,W1,W6,W3,W5)
 
 ### Estimand : 2
 Estimand name: iv
@@ -894,19 +894,19 @@ No such variable(s) found!
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Estimate effect
-import econml
-from sklearn.ensemble import GradientBoostingRegressor
-linear_dml_estimate = model.estimate_effect(identified_estimand,
-                                    method_name=&quot;backdoor.econml.dml.dml.LinearDML&quot;,
-                                    method_params={
-                                        &#39;init_params&#39;: {&#39;model_y&#39;:GradientBoostingRegressor(),
-                                                        &#39;model_t&#39;: GradientBoostingRegressor(),
-                                                        &#39;linear_first_stages&#39;: False
-                                                       },
-                                        &#39;fit_params&#39;: {&#39;cache_values&#39;: True,}
-                                     })
-print(linear_dml_estimate)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Estimate effect</span>
+<span class="kn">import</span> <span class="nn">econml</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostingRegressor</span>
+<span class="n">linear_dml_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+                                    <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.econml.dml.dml.LinearDML&quot;</span><span class="p">,</span>
+                                    <span class="n">method_params</span><span class="o">=</span><span class="p">{</span>
+                                        <span class="s1">&#39;init_params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;model_y&#39;</span><span class="p">:</span><span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
+                                                        <span class="s1">&#39;model_t&#39;</span><span class="p">:</span> <span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
+                                                        <span class="s1">&#39;linear_first_stages&#39;</span><span class="p">:</span> <span class="kc">False</span>
+                                                       <span class="p">},</span>
+                                        <span class="s1">&#39;fit_params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;cache_values&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,}</span>
+                                     <span class="p">})</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">linear_dml_estimate</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -933,17 +933,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W3,W1,W4,W2,W6,W5])
+─────(E[y|W2,W4,W1,W6,W3,W5])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W1,W4,W2,W6,W5,U) = P(y|v0,W3,W1,W4,W2,W6,W5)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W4,W1,W6,W3,W5,U) = P(y|v0,W2,W4,W1,W6,W3,W5)
 
 ## Realized estimand
-b: y~v0+W3+W1+W4+W2+W6+W5 |
+b: y~v0+W2+W4+W1+W6+W3+W5 |
 Target units: ate
 
 ## Estimate
-Mean value: 11.698031274808141
-Effect estimates: [[11.69803127]]
+Mean value: 11.735736854987284
+Effect estimates: [[11.73573685]]
 
 </pre></div></div>
 </div>
@@ -962,13 +962,13 @@ Effect estimates: [[11.69803127]]
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute = model.refute_estimate(identified_estimand, linear_dml_estimate ,
-                               method_name = &quot;add_unobserved_common_cause&quot;,
-                               simulation_method = &quot;non-parametric-partial-R2&quot;,
-                               partial_r2_confounder_treatment = np.arange(0, 0.8, 0.1),
-                               partial_r2_confounder_outcome = np.arange(0, 0.8, 0.1)
-                              )
-print(refute)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">linear_dml_estimate</span> <span class="p">,</span>
+                               <span class="n">method_name</span> <span class="o">=</span> <span class="s2">&quot;add_unobserved_common_cause&quot;</span><span class="p">,</span>
+                               <span class="n">simulation_method</span> <span class="o">=</span> <span class="s2">&quot;non-parametric-partial-R2&quot;</span><span class="p">,</span>
+                               <span class="n">partial_r2_confounder_treatment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">),</span>
+                               <span class="n">partial_r2_confounder_outcome</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+                              <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">refute</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -986,7 +986,7 @@ print(refute)
 <div class="highlight"><pre>
 Sensitivity Analysis to Unobserved Confounding using partial R^2 parameterization
 
-Original Effect Estimate : 11.698031274808141
+Original Effect Estimate : 11.735736854987284
 Robustness Value : 0.45
 
 Robustness Value (alpha=0.05) : 0.41000000000000003
@@ -1005,7 +1005,7 @@ For a significance level of 5.0%, any confounder explaining more than 41.0% perc
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute.RV
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">RV</span>
 </pre></div>
 </div>
 </div>
@@ -1025,13 +1025,13 @@ changed even by the presence of weak confounders whereas a robustness value clos
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute_bm = model.refute_estimate(identified_estimand, linear_dml_estimate ,
-                               method_name = &quot;add_unobserved_common_cause&quot;,
-                               simulation_method = &quot;non-parametric-partial-R2&quot;,
-                               benchmark_common_causes = [&quot;W1&quot;],
-                               effect_fraction_on_treatment = 0.2,
-                               effect_fraction_on_outcome = 0.2
-                              )
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute_bm</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">linear_dml_estimate</span> <span class="p">,</span>
+                               <span class="n">method_name</span> <span class="o">=</span> <span class="s2">&quot;add_unobserved_common_cause&quot;</span><span class="p">,</span>
+                               <span class="n">simulation_method</span> <span class="o">=</span> <span class="s2">&quot;non-parametric-partial-R2&quot;</span><span class="p">,</span>
+                               <span class="n">benchmark_common_causes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;W1&quot;</span><span class="p">],</span>
+                               <span class="n">effect_fraction_on_treatment</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+                               <span class="n">effect_fraction_on_outcome</span> <span class="o">=</span> <span class="mf">0.2</span>
+                              <span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1049,8 +1049,8 @@ effect without considering the significance level * <code class="docutils litera
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute_bm.plot(plot_type = &quot;upper_confidence_bound&quot;)
-refute_bm.plot(plot_type = &quot;bias&quot;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute_bm</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_type</span> <span class="o">=</span> <span class="s2">&quot;upper_confidence_bound&quot;</span><span class="p">)</span>
+<span class="n">refute_bm</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_type</span> <span class="o">=</span> <span class="s2">&quot;bias&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1073,7 +1073,7 @@ refute_bm.plot(plot_type = &quot;bias&quot;)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute_bm.results
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute_bm</span><span class="o">.</span><span class="n">results</span>
 </pre></div>
 </div>
 </div>
@@ -1113,14 +1113,14 @@ refute_bm.plot(plot_type = &quot;bias&quot;)
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.048754</td>
-      <td>0.052719</td>
-      <td>11.698031</td>
-      <td>1.033974</td>
-      <td>10.664057</td>
-      <td>12.732005</td>
-      <td>9.51621</td>
-      <td>13.853082</td>
+      <td>0.048468</td>
+      <td>0.0538</td>
+      <td>11.735737</td>
+      <td>1.042368</td>
+      <td>10.693368</td>
+      <td>12.778105</td>
+      <td>9.544347</td>
+      <td>13.900078</td>
     </tr>
   </tbody>
 </table>
@@ -1135,16 +1135,16 @@ refute_bm.plot(plot_type = &quot;bias&quot;)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Estimate effect using a non-parametric estimator
-from sklearn.ensemble import GradientBoostingRegressor
-estimate_npar = model.estimate_effect(identified_estimand,
-                                    method_name=&quot;backdoor.econml.dml.KernelDML&quot;,
-                                    method_params={
-                                        &#39;init_params&#39;: {&#39;model_y&#39;:GradientBoostingRegressor(),
-                                                        &#39;model_t&#39;: GradientBoostingRegressor(),                                                       },
-                                        &#39;fit_params&#39;: {},
-                                     })
-print(estimate_npar)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Estimate effect using a non-parametric estimator</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostingRegressor</span>
+<span class="n">estimate_npar</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+                                    <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.econml.dml.KernelDML&quot;</span><span class="p">,</span>
+                                    <span class="n">method_params</span><span class="o">=</span><span class="p">{</span>
+                                        <span class="s1">&#39;init_params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;model_y&#39;</span><span class="p">:</span><span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
+                                                        <span class="s1">&#39;model_t&#39;</span><span class="p">:</span> <span class="n">GradientBoostingRegressor</span><span class="p">(),</span>                                                       <span class="p">},</span>
+                                        <span class="s1">&#39;fit_params&#39;</span><span class="p">:</span> <span class="p">{},</span>
+                                     <span class="p">})</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">estimate_npar</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1171,17 +1171,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W3,W1,W4,W2,W6,W5])
+─────(E[y|W2,W4,W1,W6,W3,W5])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W1,W4,W2,W6,W5,U) = P(y|v0,W3,W1,W4,W2,W6,W5)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W4,W1,W6,W3,W5,U) = P(y|v0,W2,W4,W1,W6,W3,W5)
 
 ## Realized estimand
-b: y~v0+W3+W1+W4+W2+W6+W5 |
+b: y~v0+W2+W4+W1+W6+W3+W5 |
 Target units: ate
 
 ## Estimate
-Mean value: 11.796844882628154
-Effect estimates: [[11.79684488]]
+Mean value: 11.816114358621443
+Effect estimates: [[11.81611436]]
 
 </pre></div></div>
 </div>
@@ -1190,15 +1190,15 @@ Effect estimates: [[11.79684488]]
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute_npar = model.refute_estimate(identified_estimand, estimate_npar,
-                               method_name = &quot;add_unobserved_common_cause&quot;,
-                               simulation_method = &quot;non-parametric-partial-R2&quot;,
-                               benchmark_common_causes = [&quot;W1&quot;],
-                               effect_fraction_on_treatment = 0.2,
-                               effect_fraction_on_outcome = 0.2,
-                               plugin_reisz=True
-                              )
-print(refute_npar)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute_npar</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate_npar</span><span class="p">,</span>
+                               <span class="n">method_name</span> <span class="o">=</span> <span class="s2">&quot;add_unobserved_common_cause&quot;</span><span class="p">,</span>
+                               <span class="n">simulation_method</span> <span class="o">=</span> <span class="s2">&quot;non-parametric-partial-R2&quot;</span><span class="p">,</span>
+                               <span class="n">benchmark_common_causes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;W1&quot;</span><span class="p">],</span>
+                               <span class="n">effect_fraction_on_treatment</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+                               <span class="n">effect_fraction_on_outcome</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+                               <span class="n">plugin_reisz</span><span class="o">=</span><span class="kc">True</span>
+                              <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">refute_npar</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1216,7 +1216,7 @@ print(refute_npar)
 <div class="highlight"><pre>
 Sensitivity Analysis to Unobserved Confounding using partial R^2 parameterization
 
-Original Effect Estimate : 11.796844882628154
+Original Effect Estimate : 11.816114358621443
 Robustness Value : 0.66
 
 Robustness Value (alpha=0.05) : 0.64

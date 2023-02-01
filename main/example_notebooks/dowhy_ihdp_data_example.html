@@ -227,6 +227,11 @@
   </a>
  </li>
  <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_discovery_example.html">
+   Causal Discovery example
+  </a>
+ </li>
+ <li class="toctree-l1">
   <a class="reference internal" href="dowhy-conditional-treatment-effects.html">
    Conditional Average Treatment Effects (CATE) with DoWhy and EconML
   </a>
@@ -722,11 +727,11 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># importing required libraries
-import dowhy
-from dowhy import CausalModel
-import pandas as pd
-import numpy as np
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># importing required libraries</span>
+<span class="kn">import</span> <span class="nn">dowhy</span>
+<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 </pre></div>
 </div>
 </div>
@@ -736,13 +741,13 @@ import numpy as np
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>data= pd.read_csv(&quot;https://raw.githubusercontent.com/AMLab-Amsterdam/CEVAE/master/datasets/IHDP/csv/ihdp_npci_1.csv&quot;, header = None)
-col =  [&quot;treatment&quot;, &quot;y_factual&quot;, &quot;y_cfactual&quot;, &quot;mu0&quot;, &quot;mu1&quot; ,]
-for i in range(1,26):
-    col.append(&quot;x&quot;+str(i))
-data.columns = col
-data = data.astype({&quot;treatment&quot;:&#39;bool&#39;}, copy=False)
-data.head()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;https://raw.githubusercontent.com/AMLab-Amsterdam/CEVAE/master/datasets/IHDP/csv/ihdp_npci_1.csv&quot;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
+<span class="n">col</span> <span class="o">=</span>  <span class="p">[</span><span class="s2">&quot;treatment&quot;</span><span class="p">,</span> <span class="s2">&quot;y_factual&quot;</span><span class="p">,</span> <span class="s2">&quot;y_cfactual&quot;</span><span class="p">,</span> <span class="s2">&quot;mu0&quot;</span><span class="p">,</span> <span class="s2">&quot;mu1&quot;</span> <span class="p">,]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">26</span><span class="p">):</span>
+    <span class="n">col</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+<span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">col</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="s2">&quot;treatment&quot;</span><span class="p">:</span><span class="s1">&#39;bool&#39;</span><span class="p">},</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -925,16 +930,16 @@ data.head()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Create a causal model from the data and given common causes.
-model=CausalModel(
-        data = data,
-        treatment=&#39;treatment&#39;,
-        outcome=&#39;y_factual&#39;,
-        common_causes=[&quot;x&quot;+str(i) for  i in range(1,26)]
-        )
-model.view_model()
-from IPython.display import Image, display
-display(Image(filename=&quot;causal_model.png&quot;))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a causal model from the data and given common causes.</span>
+<span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">,</span>
+        <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;treatment&#39;</span><span class="p">,</span>
+        <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;y_factual&#39;</span><span class="p">,</span>
+        <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span>  <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">26</span><span class="p">)]</span>
+        <span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -952,9 +957,9 @@ display(Image(filename=&quot;causal_model.png&quot;))
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>#Identify the causal effect
-identified_estimand = model.identify_effect(proceed_when_unidentifiable=True, method_name=&quot;maximal-adjustment&quot;)
-print(identified_estimand)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Identify the causal effect</span>
+<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;maximal-adjustment&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -969,13 +974,13 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
      d
-────────────(E[y_factual|x1,x13,x5,x7,x22,x4,x9,x2,x25,x24,x16,x17,x14,x10,x19
+────────────(E[y_factual|x22,x24,x12,x19,x25,x5,x6,x16,x13,x21,x11,x20,x7,x15,
 d[treatment]
 
 
-,x21,x3,x23,x11,x18,x12,x20,x8,x6,x15])
+x3,x1,x17,x2,x10,x9,x18,x8,x14,x23,x4])
 
-Estimand assumption 1, Unconfoundedness: If U→{treatment} and U→y_factual then P(y_factual|treatment,x1,x13,x5,x7,x22,x4,x9,x2,x25,x24,x16,x17,x14,x10,x19,x21,x3,x23,x11,x18,x12,x20,x8,x6,x15,U) = P(y_factual|treatment,x1,x13,x5,x7,x22,x4,x9,x2,x25,x24,x16,x17,x14,x10,x19,x21,x3,x23,x11,x18,x12,x20,x8,x6,x15)
+Estimand assumption 1, Unconfoundedness: If U→{treatment} and U→y_factual then P(y_factual|treatment,x22,x24,x12,x19,x25,x5,x6,x16,x13,x21,x11,x20,x7,x15,x3,x1,x17,x2,x10,x9,x18,x8,x14,x23,x4,U) = P(y_factual|treatment,x22,x24,x12,x19,x25,x5,x6,x16,x13,x21,x11,x20,x7,x15,x3,x1,x17,x2,x10,x9,x18,x8,x14,x23,x4)
 
 ### Estimand : 2
 Estimand name: iv
@@ -996,18 +1001,18 @@ No such variable(s) found!
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Estimate the causal effect and compare it with Average Treatment Effect
-estimate = model.estimate_effect(identified_estimand,
-        method_name=&quot;backdoor.linear_regression&quot;, test_significance=True
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Estimate the causal effect and compare it with Average Treatment Effect</span>
+<span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">,</span> <span class="n">test_significance</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
 
-print(estimate)
+<span class="nb">print</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
 
-print(&quot;Causal Estimate is &quot; + str(estimate.value))
-data_1 = data[data[&quot;treatment&quot;]==1]
-data_0 = data[data[&quot;treatment&quot;]==0]
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+<span class="n">data_1</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment&quot;</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">data_0</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment&quot;</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span>
 
-print(&quot;ATE&quot;, np.mean(data_1[&quot;y_factual&quot;])- np.mean(data_0[&quot;y_factual&quot;]))
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ATE&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_1</span><span class="p">[</span><span class="s2">&quot;y_factual&quot;</span><span class="p">])</span><span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_0</span><span class="p">[</span><span class="s2">&quot;y_factual&quot;</span><span class="p">]))</span>
 <br/></pre></div>
 </div>
 </div>
@@ -1025,22 +1030,22 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
      d
-────────────(E[y_factual|x1,x13,x5,x7,x22,x4,x9,x2,x25,x24,x16,x17,x14,x10,x19
+────────────(E[y_factual|x22,x24,x12,x19,x25,x5,x6,x16,x13,x21,x11,x20,x7,x15,
 d[treatment]
 
 
-,x21,x3,x23,x11,x18,x12,x20,x8,x6,x15])
+x3,x1,x17,x2,x10,x9,x18,x8,x14,x23,x4])
 
-Estimand assumption 1, Unconfoundedness: If U→{treatment} and U→y_factual then P(y_factual|treatment,x1,x13,x5,x7,x22,x4,x9,x2,x25,x24,x16,x17,x14,x10,x19,x21,x3,x23,x11,x18,x12,x20,x8,x6,x15,U) = P(y_factual|treatment,x1,x13,x5,x7,x22,x4,x9,x2,x25,x24,x16,x17,x14,x10,x19,x21,x3,x23,x11,x18,x12,x20,x8,x6,x15)
+Estimand assumption 1, Unconfoundedness: If U→{treatment} and U→y_factual then P(y_factual|treatment,x22,x24,x12,x19,x25,x5,x6,x16,x13,x21,x11,x20,x7,x15,x3,x1,x17,x2,x10,x9,x18,x8,x14,x23,x4,U) = P(y_factual|treatment,x22,x24,x12,x19,x25,x5,x6,x16,x13,x21,x11,x20,x7,x15,x3,x1,x17,x2,x10,x9,x18,x8,x14,x23,x4)
 
 ## Realized estimand
-b: y_factual~treatment+x1+x13+x5+x7+x22+x4+x9+x2+x25+x24+x16+x17+x14+x10+x19+x21+x3+x23+x11+x18+x12+x20+x8+x6+x15
+b: y_factual~treatment+x22+x24+x12+x19+x25+x5+x6+x16+x13+x21+x11+x20+x7+x15+x3+x1+x17+x2+x10+x9+x18+x8+x14+x23+x4
 Target units: ate
 
 ## Estimate
-Mean value: 3.9286717508727134
+Mean value: 3.9286717508727182
 
-Causal Estimate is 3.9286717508727134
+Causal Estimate is 3.9286717508727182
 ATE 4.021121012430829
 </pre></div></div>
 </div>
@@ -1051,13 +1056,13 @@ ATE 4.021121012430829
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>estimate = model.estimate_effect(identified_estimand,
-        method_name=&quot;backdoor.propensity_score_matching&quot;
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_matching&quot;</span>
+<span class="p">)</span>
 
-print(&quot;Causal Estimate is &quot; + str(estimate.value))
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
 
-print(&quot;ATE&quot;, np.mean(data_1[&quot;y_factual&quot;])- np.mean(data_0[&quot;y_factual&quot;]))
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ATE&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_1</span><span class="p">[</span><span class="s2">&quot;y_factual&quot;</span><span class="p">])</span><span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_0</span><span class="p">[</span><span class="s2">&quot;y_factual&quot;</span><span class="p">]))</span>
 <br/></pre></div>
 </div>
 </div>
@@ -1077,12 +1082,12 @@ ATE 4.021121012430829
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>estimate = model.estimate_effect(identified_estimand,
-        method_name=&quot;backdoor.propensity_score_stratification&quot;, method_params={&#39;num_strata&#39;:50, &#39;clipping_threshold&#39;:5}
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_stratification&quot;</span><span class="p">,</span> <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;num_strata&#39;</span><span class="p">:</span><span class="mi">50</span><span class="p">,</span> <span class="s1">&#39;clipping_threshold&#39;</span><span class="p">:</span><span class="mi">5</span><span class="p">}</span>
+<span class="p">)</span>
 
-print(&quot;Causal Estimate is &quot; + str(estimate.value))
-print(&quot;ATE&quot;, np.mean(data_1[&quot;y_factual&quot;])- np.mean(data_0[&quot;y_factual&quot;]))
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ATE&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_1</span><span class="p">[</span><span class="s2">&quot;y_factual&quot;</span><span class="p">])</span><span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_0</span><span class="p">[</span><span class="s2">&quot;y_factual&quot;</span><span class="p">]))</span>
 <br/><br/></pre></div>
 </div>
 </div>
@@ -1102,13 +1107,13 @@ ATE 4.021121012430829
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>estimate = model.estimate_effect(identified_estimand,
-        method_name=&quot;backdoor.propensity_score_weighting&quot;
-)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_weighting&quot;</span>
+<span class="p">)</span>
 
-print(&quot;Causal Estimate is &quot; + str(estimate.value))
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
 
-print(&quot;ATE&quot;, np.mean(data_1[&quot;y_factual&quot;])- np.mean(data_0[&quot;y_factual&quot;]))
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ATE&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_1</span><span class="p">[</span><span class="s2">&quot;y_factual&quot;</span><span class="p">])</span><span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_0</span><span class="p">[</span><span class="s2">&quot;y_factual&quot;</span><span class="p">]))</span>
 <br/></pre></div>
 </div>
 </div>
@@ -1117,7 +1122,7 @@ print(&quot;ATE&quot;, np.mean(data_1[&quot;y_factual&quot;])- np.mean(data_0[&q
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Causal Estimate is 4.0287482183898025
+Causal Estimate is 4.028748218390058
 ATE 4.021121012430829
 </pre></div></div>
 </div>
@@ -1129,9 +1134,9 @@ ATE 4.021121012430829
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>refute_results=model.refute_estimate(identified_estimand, estimate,
-        method_name=&quot;random_common_cause&quot;)
-print(refute_results)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute_results</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;random_common_cause&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">refute_results</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1141,8 +1146,8 @@ print(refute_results)
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a random common cause
-Estimated effect:4.0287482183898025
-New effect:4.028748218389802
+Estimated effect:4.028748218390058
+New effect:4.0287482183900565
 p value:1.0
 
 </pre></div></div>
@@ -1151,9 +1156,9 @@ p value:1.0
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>res_placebo=model.refute_estimate(identified_estimand, estimate,
-        method_name=&quot;placebo_treatment_refuter&quot;, placebo_type=&quot;permute&quot;)
-print(res_placebo)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">res_placebo</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;placebo_treatment_refuter&quot;</span><span class="p">,</span> <span class="n">placebo_type</span><span class="o">=</span><span class="s2">&quot;permute&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">res_placebo</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1163,9 +1168,9 @@ print(res_placebo)
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:4.0287482183898025
-New effect:-0.4445006613803732
-p value:0.06
+Estimated effect:4.028748218390058
+New effect:-0.4742635278950585
+p value:0.0
 
 </pre></div></div>
 </div>
@@ -1175,9 +1180,9 @@ p value:0.06
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>res_subset=model.refute_estimate(identified_estimand, estimate,
-        method_name=&quot;data_subset_refuter&quot;, subset_fraction=0.9)
-print(res_subset)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">res_subset</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;data_subset_refuter&quot;</span><span class="p">,</span> <span class="n">subset_fraction</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">res_subset</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1187,9 +1192,9 @@ print(res_subset)
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a subset of data
-Estimated effect:4.0287482183898025
-New effect:4.0304914559367715
-p value:0.98
+Estimated effect:4.028748218390058
+New effect:4.0267173955452265
+p value:0.92
 
 </pre></div></div>
 </div>
