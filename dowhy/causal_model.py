@@ -48,15 +48,12 @@ class CausalModel:
         At least one of graph, common_causes or instruments must be provided. If
         none of these variables are provided, then learn_graph() can be used later.
 
-        :param data: a pandas dataframe containing treatment, outcome and other
-        variables.
+        :param data: a pandas dataframe containing treatment, outcome and other variables.
         :param treatment: name of the treatment variable
         :param outcome: name of the outcome variable
-        :param graph: path to DOT file containing a DAG or a string containing
-        a DAG specification in DOT format
+        :param graph: path to DOT file containing a DAG or a string containing a DAG specification in DOT format
         :param common_causes: names of common causes of treatment and _outcome. Only used when graph is None.
-        :param instruments: names of instrumental variables for the effect of
-        treatment on outcome. Only used when graph is None.
+        :param instruments: names of instrumental variables for the effect of treatment on outcome. Only used when graph is None.
         :param effect_modifiers: names of variables that can modify the treatment effect. If not provided, then the causal graph is used to find the effect modifiers. Estimators will return multiple different estimates based on each value of effect_modifiers.
         :param estimand_type: the type of estimand requested (currently only "nonparametric-ate" is supported). In the future, may support other specific parametric forms of identification.
         :param proceed_when_unidentifiable: does the identification proceed by ignoring potential unobserved confounders. Binary flag.
