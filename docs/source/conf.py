@@ -94,7 +94,6 @@ exclude_patterns = [
     ".DS_Store",
     ".ipynb_checkpoints",
     "example_notebooks/dowhy_ranking_methods.ipynb",
-    "example_notebooks/dowhy_causal_discovery_example.ipynb",  # need to check why str_to_dot fails here
     "example_notebooks/dowhy_twins_example.ipynb",
 ]
 
