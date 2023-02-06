@@ -560,43 +560,27 @@ E-values against measured confounders using Observed Covariate E-values. Plots E
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Functional API imports</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Config dict to set the logging level</span>
+<span class="kn">import</span> <span class="nn">logging.config</span>
+
+<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>  <span class="c1"># We still need this as we haven&#39;t created the functional API for effect estimation</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_estimators.econml</span> <span class="kn">import</span> <span class="n">Econml</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_estimators.propensity_score_matching_estimator</span> <span class="kn">import</span> <span class="n">PropensityScoreMatchingEstimator</span>
+<span class="kn">from</span> <span class="nn">dowhy.causal_graph</span> <span class="kn">import</span> <span class="n">CausalGraph</span>
+<span class="c1"># Functional API imports</span>
 <span class="kn">from</span> <span class="nn">dowhy.causal_identifier</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">BackdoorAdjustment</span><span class="p">,</span>
     <span class="n">EstimandType</span><span class="p">,</span>
     <span class="n">identify_effect</span><span class="p">,</span>
     <span class="n">identify_effect_auto</span><span class="p">,</span>
     <span class="n">identify_effect_id</span><span class="p">,</span>
-<span class="p">)</span>  <span class="c1"># import effect identifier</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">dowhy.causal_refuters</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">refute_bootstrap</span><span class="p">,</span>
     <span class="n">refute_data_subset</span><span class="p">,</span>
-    <span class="n">refute_random_common_cause</span><span class="p">,</span>
-    <span class="n">refute_placebo_treatment</span><span class="p">,</span>
-    <span class="n">sensitivity_e_value</span><span class="p">,</span>
-    <span class="n">sensitivity_linear_partial_r2</span><span class="p">,</span>
-    <span class="n">sensitivity_non_parametric_partial_r2</span><span class="p">,</span>
-    <span class="n">sensitivity_simulation</span><span class="p">,</span>
-    <span class="n">refute_dummy_outcome</span><span class="p">,</span>
     <span class="n">refute_estimate</span><span class="p">,</span>
-<span class="p">)</span>  <span class="c1"># import refuters</span>
-
-<span class="kn">from</span> <span class="nn">dowhy.causal_estimators.propensity_score_matching_estimator</span> <span class="kn">import</span> <span class="n">PropensityScoreMatchingEstimator</span>
-<span class="kn">from</span> <span class="nn">dowhy.causal_estimators.econml</span> <span class="kn">import</span> <span class="n">Econml</span>
-
-<span class="kn">from</span> <span class="nn">dowhy.utils.api</span> <span class="kn">import</span> <span class="n">parse_state</span>
-
-<span class="kn">from</span> <span class="nn">dowhy.causal_estimator</span> <span class="kn">import</span> <span class="n">estimate_effect</span>  <span class="c1"># Estimate effect function</span>
-
-<span class="kn">from</span> <span class="nn">dowhy.causal_graph</span> <span class="kn">import</span> <span class="n">CausalGraph</span>
-
-<span class="c1"># Other imports required</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">dowhy.datasets</span> <span class="kn">import</span> <span class="n">linear_dataset</span>
-<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>  <span class="c1"># We still need this as we haven&#39;t created the functional API for effect estimation</span>
-<span class="kn">import</span> <span class="nn">econml</span>
-
-<span class="c1"># Config dict to set the logging level</span>
-<span class="kn">import</span> <span class="nn">logging.config</span>
 
 <span class="n">DEFAULT_LOGGING</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
@@ -721,9 +705,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W0,W1])
+─────(E[y|W0,W1,W2])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W0,W1,U) = P(y|v0,W2,W0,W1)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W1,W2,U) = P(y|v0,W0,W1,W2)
 
 ### Estimand : 2
 Estimand name: iv
@@ -791,7 +775,7 @@ No such variable(s) found!
 Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ## Realized estimand
-b: y~v0+W2+W0+W1
+b: y~v0+W0+W1+W2
 Target units: ate
 
 ## Estimate
@@ -804,7 +788,7 @@ Mean value: 11.326873255880667
 Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ## Realized estimand
-b: y~v0+W2+W0+W1
+b: y~v0+W0+W1+W2
 Target units: ate
 
 ## Estimate
@@ -858,7 +842,7 @@ Mean value: 15.620265231373276
 Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ## Realized estimand
-b: y~v0+W2+W0+W1
+b: y~v0+W0+W1+W2
 Target units: ate
 
 ## Estimate
@@ -964,9 +948,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W0,W1])
+─────(E[y|W0,W1,W2])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W0,W1,U) = P(y|v0,W2,W0,W1)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W1,W2,U) = P(y|v0,W0,W1,W2)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1013,12 +997,12 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W0,W1])
+─────(E[y|W0,W1,W2])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W0,W1,U) = P(y|v0,W2,W0,W1)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W1,W2,U) = P(y|v0,W0,W1,W2)
 
 ## Realized estimand
-b: y~v0+W2+W0+W1
+b: y~v0+W0+W1+W2
 Target units: ate
 
 ## Estimate
