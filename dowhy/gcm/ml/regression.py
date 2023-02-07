@@ -116,7 +116,7 @@ def create_ada_boost_regressor(**kwargs) -> SklearnRegressionModel:
     return SklearnRegressionModel(AdaBoostRegressor(**kwargs))
 
 
-def create_polynom_regressor(degree: int = 3, **kwargs_linear_model) -> SklearnRegressionModel:
+def create_polynom_regressor(degree: int = 2, **kwargs_linear_model) -> SklearnRegressionModel:
     return SklearnRegressionModel(
         make_pipeline(PolynomialFeatures(degree=degree, include_bias=False), LinearRegression(**kwargs_linear_model))
     )
