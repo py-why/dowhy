@@ -173,7 +173,7 @@ def test_significance(
     estimate,
     simulations: List,
     test_type: SignificanceTestType = SignificanceTestType.AUTO,
-    significance_level: float = 0.85,
+    significance_level: float = 0.95,
 ):
     """Tests the statistical significance of the estimate obtained to the simulations produced by a refuter.
 

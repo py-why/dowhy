@@ -68,7 +68,6 @@ class LinearRegressionEstimator(RegressionEstimator):
             **kwargs,
         )
         self.logger.info("INFO: Using Linear Regression Estimator")
-        self._linear_model = self.model
 
     def fit(
         self,
