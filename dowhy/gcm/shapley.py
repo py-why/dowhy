@@ -428,7 +428,7 @@ def _create_subsets_and_weights_exact(num_players: int, high_weight: float) -> T
                 scipy.special.binom(num_players, subset_size) * subset_size * (num_players - subset_size)
             )
 
-    return np.array(all_subsets, dtype=np.int), weights.astype(np.float)
+    return np.array(all_subsets, dtype=np.int32), weights.astype(np.float)
 
 
 def _create_subsets_and_weights_approximation(
@@ -468,11 +468,11 @@ def _create_subsets_and_weights_approximation(
 
     weights = np.array([weights[tuple(x)] for x in all_subsets])
 
-    return np.array(all_subsets, dtype=np.int), weights.astype(np.float)
+    return np.array(all_subsets, dtype=np.int32), weights.astype(np.float)
 
 
 def _convert_list_of_indices_to_binary_vector_as_tuple(list_of_indices: List[int], num_players: int) -> Tuple[int]:
-    subset = np.zeros(num_players, dtype=np.int)
+    subset = np.zeros(num_players, dtype=np.int32)
     subset[list_of_indices] = 1
 
     return tuple(subset)
@@ -511,7 +511,7 @@ def _evaluate_set_function(
 def _estimate_full_and_emtpy_subset_results(
     set_func: Callable[[np.ndarray], Union[float, np.ndarray]], num_players: int
 ) -> Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]:
-    return set_func(np.ones(num_players, dtype=np.int)), set_func(np.zeros(num_players, dtype=np.int))
+    return set_func(np.ones(num_players, dtype=np.int32)), set_func(np.zeros(num_players, dtype=np.int32))
 
 
 def _create_index_order_and_subset_tuples(permutation: List[int]) -> List[Tuple[int]]:
