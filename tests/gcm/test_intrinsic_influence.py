@@ -14,7 +14,7 @@ from dowhy.gcm.util.general import apply_one_hot_encoding, fit_one_hot_encoders
 
 
 @flaky(max_runs=3)
-def test_intrinsic_causal_influence_variance_linear():
+def test_given_linear_data_when_estimate_intrinsic_causal_influence_with_variance_then_returns_expected_results():
     causal_model = StructuralCausalModel(nx.DiGraph([("X0", "X1"), ("X1", "X2"), ("X2", "X3")]))
 
     X0 = np.random.normal(0, 1, 10000)
@@ -42,7 +42,7 @@ def test_intrinsic_causal_influence_variance_linear():
 
 
 @flaky(max_runs=3)
-def test_intrinsic_causal_influence_categorical():
+def test_given_categorical_data_when_estimate_intrinsic_causal_influence_then_returns_expected_results():
     causal_model = StructuralCausalModel(nx.DiGraph([("X0", "X1"), ("X1", "X2"), ("X2", "X3")]))
 
     N1 = np.random.normal(0, 0.001, 10000)
@@ -85,7 +85,7 @@ def test_intrinsic_causal_influence_categorical():
 
 
 @flaky(max_runs=3)
-def test_intrinsic_causal_influence_categorical_2():
+def test_given_more_complex_categorical_data_when_estimate_intrinsic_causal_influence_then_returns_expected_results():
     causal_model = StructuralCausalModel(nx.DiGraph([("X0", "X1"), ("X1", "X2"), ("X2", "X3")]))
     N1 = np.random.normal(0, 0.001, 10000)
     N2 = np.random.normal(0, 2, 10000)
