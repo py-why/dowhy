@@ -306,7 +306,7 @@ class Econml(CausalEstimator):
         if df is None:
             filtered_df = None
         else:
-            filtered_df = df[self._effect_modifier_names].values
+            filtered_df = df.values
 
         for tv in self._treatment_value:
             ests.append(
@@ -372,7 +372,7 @@ class Econml(CausalEstimator):
         :param kwargs: passed through to estimator.effect()
         """
 
-        eff = self.effect(df, *args, **kwargs).reshape((len(df), len(self._treatment_value)))
+        eff = self.effect(df[self._effect_modifier_names], *args, **kwargs).reshape((len(df), len(treatment_value)))
 
         out = np.zeros(len(df))
         treatment_value = parse_state(treatment_value)
