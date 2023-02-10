@@ -23,7 +23,7 @@ def _generate_simple_non_linear_data() -> pd.DataFrame:
 
 
 @flaky(max_runs=5)
-def test_refute_causal_structure_collider():
+def test_given_collider_when_refuting_causal_structure_then_not_rejected():
     # collider: X->Z<-Y
     collider_dag = nx.DiGraph([("X", "Z"), ("Y", "Z")])
     X = np.random.normal(size=500)
@@ -43,7 +43,7 @@ def test_refute_causal_structure_collider():
 
 
 @flaky(max_runs=5)
-def test_refute_causal_structure_chain():
+def test_given_chain_when_refuting_causal_structure_then_not_rejected():
     # chain: X->Z->Y
     chain_dag = nx.DiGraph([("X", "Z"), ("Z", "Y")])
     X = np.random.normal(size=500)
@@ -62,7 +62,7 @@ def test_refute_causal_structure_chain():
 
 
 @flaky(max_runs=5)
-def test_refute_causal_structure_fork():
+def test_given_fork_when_refuting_causal_structure_then_not_rejected():
     # fork: X<-Z->Y
     fork_dag = nx.DiGraph([("Z", "X"), ("Z", "Y")])
     Z = np.random.normal(size=500)
@@ -81,7 +81,7 @@ def test_refute_causal_structure_fork():
 
 
 @flaky(max_runs=5)
-def test_refute_causal_structure_general():
+def test_given_general_dag_when_refuting_causal_structure_then_not_rejected():
     # general DAG: X<-Z->Y, X->Y
     general_dag = nx.DiGraph([("Z", "X"), ("Z", "Y"), ("X", "Y")])
     Z = np.random.normal(size=500)
@@ -101,7 +101,7 @@ def test_refute_causal_structure_general():
 
 
 @flaky(max_runs=5)
-def test_refute_causal_structure_adjusted_p_values():
+def test_given_fdr_bh_when_refuting_causal_structure_then_return_correct_adjusted_p_values():
     # fork: X<-Z->Y
     fork_dag = nx.DiGraph([("Z", "X"), ("Z", "Y")])
     Z = np.random.normal(size=500)
