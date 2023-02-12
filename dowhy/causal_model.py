@@ -2,6 +2,8 @@
 
 """
 import logging
+import typing
+import warnings
 from itertools import combinations
 
 from sympy import init_printing
@@ -116,6 +118,21 @@ class CausalModel:
 
         self._other_variables = kwargs
         self.summary()
+
+        # Emit a `UserWarning` if there are any unobserved graph variables and
+        # and log a message highlighting data variables that are not part of the graph.
+        graph_variable_names = set(self._graph.get_all_nodes(include_unobserved=True))
+        data_variable_names = set(self._data.columns)
+        _warn_if_unobserved_graph_variables(
+            graph_variable_names=graph_variable_names,
+            data_variable_names=data_variable_names,
+            logger=self.logger,
+        )
+        _warn_if_unused_data_variables(
+            graph_variable_names=graph_variable_names,
+            data_variable_names=data_variable_names,
+            logger=self.logger,
+        )
 
     def init_graph(self, graph, identify_vars):
         """
@@ -520,3 +537,57 @@ class CausalModel:
         self.logger.info(refuter._refutation_passed)
 
         return res
+
+
+def _warn_if_unobserved_graph_variables(
+    graph_variable_names: typing.Set[str],
+    data_variable_names: typing.Set[str],
+    logger: logging.Logger,
+):
+    """Emits a warning if there are any graph variables that are not observed in the data."""
+    unobserved_graph_variable_names = graph_variable_names.difference(data_variable_names)
+
+    if unobserved_graph_variable_names:
+        observed_graph_variable_names = graph_variable_names.intersection(data_variable_names)
+
+        num_graph_variables = len(graph_variable_names)
+        num_unobserved_graph_variables = len(unobserved_graph_variable_names)
+        num_observed_graph_variables = len(observed_graph_variable_names)
+
+        warnings.warn(
+            f"{num_unobserved_graph_variables} variables are assumed "
+            "unobserved because they are not in the dataset. "
+            "Configure the logging level to `logging.WARNING` or higher for additional details."
+        )
+        logger.warn(
+            "The graph defines %d variables. %d were found in the dataset "
+            "and will be analyzed as observed variables. %d were not found "
+            "in the dataset and will be analyzed as unobserved variables. "
+            "The observed variables are: '%s'. "
+            "The unobserved variables are: '%s'. "
+            "If this matches your expectations for observations, please continue. "
+            "If you expected any of the unobserved variables to be in the "
+            "dataframe, please check for typos.",
+            num_graph_variables,
+            num_observed_graph_variables,
+            num_unobserved_graph_variables,
+            sorted(observed_graph_variable_names),
+            sorted(unobserved_graph_variable_names),
+        )
+
+
+def _warn_if_unused_data_variables(
+    data_variable_names: typing.Set[str],
+    graph_variable_names: typing.Set[str],
+    logger: logging.Logger,
+):
+    """Logs a warning message if there are any data variables that are not used in the graph."""
+    unused_data_variable_names = data_variable_names.difference(graph_variable_names)
+
+    if unused_data_variable_names:
+        logger.warn(
+            "There are an additional %d variables in the dataset that are "
+            "not in the graph. Variable names are: '%s'",
+            len(unused_data_variable_names),
+            sorted(unused_data_variable_names),
+        )
