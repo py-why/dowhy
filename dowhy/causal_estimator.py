@@ -394,24 +394,16 @@ class CausalEstimator:
                 method = self._confidence_intervals  # this is either True or methodname
             else:
                 method = "default"
-        confidence_intervals = None
         if confidence_level is None:
             confidence_level = self.confidence_level
-        if method == "default" or method is True:  # user has not provided any method
-            try:
-                confidence_intervals = self._estimate_confidence_intervals(confidence_level, method=method, **kwargs)
-            except NotImplementedError:
-                confidence_intervals = self._estimate_confidence_intervals_with_bootstrap(
-                    data, estimate_value, confidence_level, **kwargs
-                )
-        else:
-            if method == "bootstrap":
-                confidence_intervals = self._estimate_confidence_intervals_with_bootstrap(
-                    data, estimate_value, confidence_level, **kwargs
-                )
-            else:
-                confidence_intervals = self._estimate_confidence_intervals(confidence_level, method=method, **kwargs)
-        return confidence_intervals
+
+        if method == "bootstrap":
+            return self._estimate_confidence_intervals_with_bootstrap(data, estimate_value, confidence_level, **kwargs)
+
+        try:
+            return self._estimate_confidence_intervals(confidence_level, method=method, **kwargs)
+        except NotImplementedError:
+            return self._estimate_confidence_intervals_with_bootstrap(data, estimate_value, confidence_level, **kwargs)
 
     def _estimate_std_error_with_bootstrap(self, data: pd.DataFrame, num_simulations=None, sample_size_fraction=None):
         """Compute standard error using the bootstrap method. Standard error
