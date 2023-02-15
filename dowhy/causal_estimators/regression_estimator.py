@@ -118,33 +118,28 @@ class RegressionEstimator(CausalEstimator):
         self._treatment_value = treatment_value
         self._control_value = control_value
         # TODO make treatment_value and control value also as local parameters
-        # All treatments are set to the same constant value
-        effect_estimate = self._do(data, treatment_value) - self._do(data, control_value)
         conditional_effect_estimates = None
         if need_conditional_estimates:
             conditional_effect_estimates = self._estimate_conditional_effects(
                 data, self._estimate_effect_fn, effect_modifier_names=self._effect_modifier_names
             )
-        intercept_parameter = self.model.params[0]
-        estimate = CausalEstimate(
+        return CausalEstimate(
             data=data,
             treatment_name=self._target_estimand.treatment_variable,
             outcome_name=self._target_estimand.outcome_variable,
-            estimate=effect_estimate,
+            # All treatments are set to the same constant value
+            estimate=self._do(data, treatment_value) - self._do(data, control_value),
             control_value=control_value,
             treatment_value=treatment_value,
             conditional_estimates=conditional_effect_estimates,
             target_estimand=self._target_estimand,
             realized_estimand_expr=self.symbolic_estimator,
-            intercept=intercept_parameter,
+            intercept=(self.model.params[0]),
+            estimator_instance=self,
         )
 
-        estimate.add_estimator(self)
-        return estimate
-
     def _estimate_effect_fn(self, data_df):
-        est = self.estimate_effect(data=data_df, need_conditional_estimates=False)
-        return est.value
+        return self.estimate_effect(data=data_df, need_conditional_estimates=False).value
 
     def _build_features(self, data_df: pd.DataFrame, treatment_values=None):
         treatment_vals = pd.get_dummies(data_df[self._target_estimand.treatment_variable], drop_first=True)

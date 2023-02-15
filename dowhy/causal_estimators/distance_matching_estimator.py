@@ -285,7 +285,7 @@ class DistanceMatchingEstimator(CausalEstimator):
             for i in range(numcontrolunits):
                 self.matched_indices_atc[control_df_index[i]] = treated.iloc[indices[i]].index.tolist()
 
-        estimate = CausalEstimate(
+        return CausalEstimate(
             data=data,
             treatment_name=self._target_estimand.treatment_variable,
             outcome_name=self._target_estimand.outcome_variable,
@@ -294,10 +294,8 @@ class DistanceMatchingEstimator(CausalEstimator):
             treatment_value=treatment_value,
             target_estimand=self._target_estimand,
             realized_estimand_expr=self.symbolic_estimator,
+            estimator_instance=self,
         )
-
-        estimate.add_estimator(self)
-        return estimate
 
     def construct_symbolic_estimator(self, estimand):
         expr = "b: " + ", ".join(estimand.outcome_variable) + "~"

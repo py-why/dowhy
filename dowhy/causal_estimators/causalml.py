@@ -200,7 +200,7 @@ class Causalml(CausalEstimator):
         matched_args = {arg: func_args[arg] for arg in func_args.keys() if arg in arg_names}
         cate_estimates = self.estimator.fit_predict(**matched_args)
 
-        estimate = CausalEstimate(
+        return CausalEstimate(
             data=data,
             treatment_name=treatment_name,
             outcome_name=self._target_estimand.outcome_variable[0],
@@ -212,10 +212,8 @@ class Causalml(CausalEstimator):
             cate_estimates=cate_estimates,
             effect_intervals=(value_tuple[1], value_tuple[2]),
             _estimator_object=self.estimator,
+            estimator_instance=self,
         )
-
-        estimate.add_estimator(self)
-        return estimate
 
     def construct_symbolic_estimator(self, estimand):
         expr = "b: " + ",".join(estimand.outcome_variable) + "~"

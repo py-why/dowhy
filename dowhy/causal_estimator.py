@@ -763,6 +763,7 @@ class CausalEstimate:
         control_value,
         treatment_value,
         conditional_estimates=None,
+        estimator_instance=None,
         **kwargs,
     ):
         # TODO: Remove _data, _treatment_name and _outcome_name from this object
@@ -778,15 +779,13 @@ class CausalEstimate:
         self.control_value = control_value
         self.treatment_value = treatment_value
         self.conditional_estimates = conditional_estimates
+        self.estimator = estimator_instance
         self.params = kwargs
         if self.params is not None:
             for key, value in self.params.items():
                 setattr(self, key, value)
 
         self.effect_strength = None
-
-    def add_estimator(self, estimator_instance):
-        self.estimator = estimator_instance
 
     def add_effect_strength(self, strength_dict):
         self.effect_strength = strength_dict

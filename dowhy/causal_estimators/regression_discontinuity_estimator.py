@@ -83,6 +83,11 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
         self.rd_variable_name = rd_variable_name
         self.rd_threshold_value = rd_threshold_value
         self.rd_bandwidth = rd_bandwidth
+        self.iv_estimator = InstrumentalVariableEstimator(
+            self._target_estimand,
+            test_significance=self._significance_test,
+            iv_instrument_name="local_rd_variable",
+        )
 
     def fit(
         self,
@@ -92,44 +97,29 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
         """
         Fits the estimator with data for effect estimation
         :param data: data frame containing the data
-        :param treatment: name of the treatment variable
-        :param outcome: name of the outcome variable
-        :param effect_modifiers: Variables on which to compute separate
+        :param effect_modifier_names: Variables on which to compute separate
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
         self._set_effect_modifiers(data, effect_modifier_names)
 
-        self.rd_variable = data[self.rd_variable_name]
-
-        self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
-        self.logger.info(self.symbolic_estimator)
-
         upper_limit = self.rd_threshold_value + self.rd_bandwidth
         lower_limit = self.rd_threshold_value - self.rd_bandwidth
-        rows_filter = np.s_[(self.rd_variable >= lower_limit) & (self.rd_variable <= upper_limit)]
-        local_rd_variable = self.rd_variable[rows_filter]
+        rows_filter = np.s_[(data[self.rd_variable_name] >= lower_limit) & (data[self.rd_variable_name] <= upper_limit)]
         local_treatment_variable = data[self._target_estimand.treatment_variable[0]][
             rows_filter
         ]  # indexing by treatment name again since this method assumes a single-dimensional treatment
         local_outcome_variable = data[self._target_estimand.outcome_variable[0]][rows_filter]
         self._local_df = pd.DataFrame(
             data={
-                "local_rd_variable": local_rd_variable,
+                "local_rd_variable": (data[self.rd_variable_name][rows_filter]),
                 self._target_estimand.treatment_variable[0]: local_treatment_variable,
                 self._target_estimand.outcome_variable[0]: local_outcome_variable,
             }
         )
         self.logger.debug(self._local_df)
-        self.iv_estimator = InstrumentalVariableEstimator(
-            self._target_estimand,
-            test_significance=self._significance_test,
-            iv_instrument_name="local_rd_variable",
-        )
 
-        self.iv_estimator.fit(self._local_df)
-
-        return self
+        return self.iv_estimator.fit(self._local_df)
 
     def estimate_effect(
         self,
@@ -139,19 +129,13 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
         target_units=None,
         **_,
     ):
-        self._target_units = target_units
-        self._treatment_value = treatment_value
-        self._control_value = control_value
-
         est = self.iv_estimator.estimate_effect(
             self._local_df,
             treatment_value=treatment_value,
             control_value=control_value,
             target_units=target_units,
         )
-
-        est.add_estimator(self)
+        # This is a somewhat special case as this estimator is a thin wrapper around
+        # InstrumentalVariableEstimator. Maybe we can find a better way to do this in the future
+        est.estimator = self
         return est
-
-    def construct_symbolic_estimator(self, estimand):
-        return ""

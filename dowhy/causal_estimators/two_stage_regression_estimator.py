@@ -286,7 +286,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
                 total_effect_estimate.realized_estimand_expr,
                 estimand_type=self._target_estimand.estimand_type,
             )
-        estimate = CausalEstimate(
+        return CausalEstimate(
             data=data,
             treatment_name=self._target_estimand.treatment_variable,
             outcome_name=self._target_estimand.outcome_variable,
@@ -295,10 +295,8 @@ class TwoStageRegressionEstimator(CausalEstimator):
             treatment_value=treatment_value,
             target_estimand=self._target_estimand,
             realized_estimand_expr=self.symbolic_estimator,
+            estimator_instance=self,
         )
-
-        estimate.add_estimator(self)
-        return estimate
 
     def build_first_stage_features(self, data_df: pd.DataFrame):
         treatment_vals = data_df[self._target_estimand.treatment_variable]

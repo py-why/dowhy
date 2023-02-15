@@ -259,7 +259,7 @@ class Econml(CausalEstimator):
         else:
             self.effect_intervals = None
 
-        estimate = CausalEstimate(
+        return CausalEstimate(
             data=data,
             treatment_name=self._target_estimand.treatment_variable,
             outcome_name=self._target_estimand.outcome_variable,
@@ -271,10 +271,8 @@ class Econml(CausalEstimator):
             cate_estimates=est,
             effect_intervals=self.effect_intervals,
             _estimator_object=self.estimator,
+            estimator_instance=self,
         )
-
-        estimate.add_estimator(self)
-        return estimate
 
     def _estimate_confidence_intervals(self, confidence_level=None, method=None):
         """Returns None if the confidence interval has not been calculated."""

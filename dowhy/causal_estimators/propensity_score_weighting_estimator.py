@@ -245,7 +245,7 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
         est = data["d_y"].sum() / sum_dy_weights - data["dbar_y"].sum() / sum_dbary_weights
 
         # TODO - how can we add additional information into the returned estimate?
-        estimate = CausalEstimate(
+        return CausalEstimate(
             data=data,
             treatment_name=self._target_estimand.treatment_variable,
             outcome_name=self._target_estimand.outcome_variable,
@@ -255,10 +255,8 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
             target_estimand=self._target_estimand,
             realized_estimand_expr=self.symbolic_estimator,
             propensity_scores=data[self.propensity_score_column],
+            estimator_instance=self,
         )
-
-        estimate.add_estimator(self)
-        return estimate
 
     def construct_symbolic_estimator(self, estimand):
         expr = "b: " + ",".join(estimand.outcome_variable) + "~"
