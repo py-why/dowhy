@@ -258,12 +258,12 @@ def test_given_categorical_dependent_data_when_perform_approx_kernel_based_test_
     assert approx_kernel_based(x, y) < 0.05
 
 
-@flaky(max_runs=2)
+@flaky(max_runs=3)
 def test_given_random_seed_when_perform_pairwise_approx_kernel_based_test_then_return_deterministic_result(
     _preserve_random_generator_state,
 ):
-    w = np.random.randn(1000, 1)
-    x = w + np.random.rand(1000, 1)
+    w = np.random.randn(100, 1)
+    x = w + np.random.rand(100, 1)
 
     assert approx_kernel_based(
         x,

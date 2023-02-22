@@ -435,6 +435,66 @@ class TestCausalModel(object):
         )
         assert graph_refutation_object.refutation_result == False
 
+    def test_unobserved_graph_variables_log_warning(self, caplog):
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=3,
+            num_instruments=1,
+            num_effect_modifiers=1,
+            num_samples=3,
+            treatment_is_binary=True,
+            stddev_treatment_noise=2,
+            num_discrete_common_causes=1,
+        )
+
+        df = data["df"]
+        # Remove graph variable with name "W0" from observed data.
+        df = df.drop(columns=["W0"])
+
+        expected_warning_message_regex = (
+            "1 variables are assumed unobserved because they are not in the "
+            "dataset. Configure the logging level to `logging.WARNING` or "
+            "higher for additional details."
+        )
+
+        with pytest.warns(
+            UserWarning,
+            match=expected_warning_message_regex,
+        ):
+            _ = CausalModel(
+                data=df,
+                treatment=data["treatment_name"],
+                outcome=data["outcome_name"],
+                graph=data["gml_graph"],
+            )
+
+        # Ensure that a log record exists that provides a more detailed view
+        # of observed and unobserved graph variables (counts and variable names.)
+        expected_logging_message = (
+            "The graph defines 7 variables. 6 were found in the dataset "
+            "and will be analyzed as observed variables. 1 were not found "
+            "in the dataset and will be analyzed as unobserved variables. "
+            "The observed variables are: '['W1', 'W2', 'X0', 'Z0', 'v0', 'y']'. "
+            "The unobserved variables are: '['W0']'. "
+            "If this matches your expectations for observations, please continue. "
+            "If you expected any of the unobserved variables to be in the "
+            "dataframe, please check for typos."
+        )
+        assert any(
+            log_record
+            for log_record in caplog.records
+            if (
+                (log_record.name == "dowhy.causal_model")
+                and (log_record.levelname == "WARNING")
+                and (log_record.message == expected_logging_message)
+            )
+        ), (
+            "Expected logging message informing about unobserved graph variables  "
+            "was not found. Expected a logging message to be emitted in module `dowhy.causal_model` "
+            f"and with level `logging.WARNING` and this content '{expected_logging_message}'. "
+            f"Only the following log records were emitted instead: '{caplog.records}'."
+        )
+
 
 if __name__ == "__main__":
     pytest.main([__file__])

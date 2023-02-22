@@ -12,8 +12,8 @@ from dowhy.gcm import ProbabilisticCausalModel
 from dowhy.gcm.auto import AssignmentQuality, assign_causal_mechanisms
 
 
-def _generate_linear_regression_data():
-    X = np.random.normal(0, 1, (1000, 5))
+def _generate_linear_regression_data(num_samples=1000):
+    X = np.random.normal(0, 1, (num_samples, 5))
     Y = np.sum(X * np.random.uniform(-5, 5, X.shape[1]), axis=1)
 
     return X, Y
@@ -56,7 +56,7 @@ def test_given_linear_regression_problem_when_auto_assign_causal_models_with_goo
 
 @flaky(max_runs=3)
 def test_given_linear_regression_problem_when_auto_assign_causal_models_with_better_quality_returns_linear_model():
-    X, Y = _generate_linear_regression_data()
+    X, Y = _generate_linear_regression_data(5000)
 
     causal_model = ProbabilisticCausalModel(
         nx.DiGraph([("X0", "Y"), ("X1", "Y"), ("X2", "Y"), ("X3", "Y"), ("X4", "Y")])

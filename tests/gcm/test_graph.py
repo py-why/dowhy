@@ -17,7 +17,7 @@ from dowhy.gcm.ml import create_linear_regressor
 
 
 @flaky(max_runs=2)
-def test_fit_and_draw_samples():
+def test_given_probabilistic_causal_model_when_samples_are_drawn_then_they_have_correct_mean_and_standard_deviation():
     X0 = np.random.uniform(-1, 1, 1000)
     X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
     X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
@@ -45,12 +45,12 @@ def test_fit_and_draw_samples():
     assert np.std(generated_samples["X3"]) == approx(np.std(X3), abs=0.2)
 
 
-def test_set_causal_model_raises_error():
+def test_when_trying_to_set_causal_mechanism_of_non_existing_node_then_raises_error():
     with pytest.raises(ValueError):
         ProbabilisticCausalModel().set_causal_mechanism("X0", EmpiricalDistribution())
 
 
-def test_is_root_node():
+def test_given_a_directed_graph_when_checking_if_a_node_is_root_then_returns_true_for_root_nodes_and_false_for_non_root_nodes():
     graph = nx.DiGraph([("X", "Z"), ("Y", "Z")])
     assert is_root_node(graph, "X") == True
     assert is_root_node(graph, "Y") == True

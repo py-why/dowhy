@@ -19,7 +19,7 @@ def preserve_random_generator_state():
 
 
 @flaky(max_runs=5)
-def test_regression_based_conditional_independence_test_independent():
+def test_given_independent_variables_when_perform_regression_based_conditional_independence_test_then_p_value_is_greater_than_05():
     z = np.random.randn(1000, 1)
     x = np.exp(z + np.random.rand(1000, 1))
     y = np.exp(z + np.random.rand(1000, 1))
@@ -28,7 +28,7 @@ def test_regression_based_conditional_independence_test_independent():
 
 
 @flaky(max_runs=5)
-def test_regression_based_conditional_independence_test_dependent():
+def test_given_dependent_variables_when_perform_regression_based_conditional_independence_test_then_p_value_is_less_than_05():
     z = np.random.randn(1000, 1)
     w = np.random.randn(1000, 1)
     x = np.exp(z + np.random.rand(1000, 1))
@@ -38,21 +38,21 @@ def test_regression_based_conditional_independence_test_dependent():
 
 
 @flaky(max_runs=5)
-def test_regression_based_conditional_independence_test_categorical_independent():
+def test_given_independent_categorical_variables_when_preform_regression_based_conditional_independence_test_then_p_value_is_greater_than_05():
     x, y, z = _generate_categorical_data()
 
     assert regression_based(x, y, z) > 0.05
 
 
 @flaky(max_runs=5)
-def test_regression_based_conditional_independence_test_categorical_dependent():
+def test_regression_based_contest_given_dependent_categorical_variables_when_perform_regression_based_conditional_independence_test_then_p_value_is_less_than_05():
     x, y, z = _generate_categorical_data()
 
     assert regression_based(x, z, y) < 0.05
 
 
 @flaky(max_runs=5)
-def test_regression_based_pairwise_independence_test_independent():
+def test_given_independent_variables_when_perform_regression_based_pairwise_independence_test_then_p_value_is_greater_than_05():
     z = np.random.randn(1000, 1)
     w = np.random.randn(1000, 1)
     x = np.exp(z + np.random.rand(1000, 1))
@@ -61,7 +61,7 @@ def test_regression_based_pairwise_independence_test_independent():
 
 
 @flaky(max_runs=5)
-def test_regression_based_pairwise_independence_test_dependent():
+def test_given_dependent_variables_when_perform_regression_based_pairwise_independence_test_then_p_value_is_less_than_05():
     z = np.random.randn(1000, 1)
     x = np.exp(z + np.random.rand(1000, 1))
     y = np.exp(z + np.random.rand(1000, 1))
@@ -70,7 +70,7 @@ def test_regression_based_pairwise_independence_test_dependent():
 
 
 @flaky(max_runs=5)
-def test_regression_based_pairwise_independence_test_categorical_independent():
+def test_given_independent_categorical_variables_when_perform_regression_based_pairwise_independence_test_then_p_value_is_greater_than_05():
     x = np.random.normal(0, 1, 1000)
     y = np.random.choice(2, 1000).astype(str)
 
@@ -78,7 +78,7 @@ def test_regression_based_pairwise_independence_test_categorical_independent():
 
 
 @flaky(max_runs=5)
-def test_regression_based_pairwise_independence_test_categorical_dependent():
+def test_given_dependent_categorical_variables_when_perform_regression_based_pairwise_independence_test_then_p_value_is_less_than_05():
     x = np.random.normal(0, 1, 1000)
     y = []
 
@@ -92,7 +92,9 @@ def test_regression_based_pairwise_independence_test_categorical_dependent():
     assert regression_based(x, y, num_components_all_inputs=10) < 0.05
 
 
-def test_regression_based_conditional_independence_parallelization(preserve_random_generator_state):
+def test_given_parallelization_is_enabled_when_perform_regression_based_conditional_independence_test_then_p_value_remains_the_same(
+    preserve_random_generator_state,
+):
     z = np.random.randn(1000, 1)
     x = np.exp(z + np.random.rand(1000, 1))
     y = np.exp(z + np.random.rand(1000, 1))
@@ -103,10 +105,3 @@ def test_regression_based_conditional_independence_parallelization(preserve_rand
     p_value_2 = regression_based(x, y, z)
 
     assert p_value_1 == p_value_2
-
-
-@flaky(max_runs=5)
-def test_regression_based_conditional_independence_test_categorical_dependent():
-    x, y, z = _generate_categorical_data()
-
-    assert regression_based(x, z, y) < 0.05

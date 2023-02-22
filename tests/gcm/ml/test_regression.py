@@ -10,7 +10,7 @@ def test_when_fit_and_predict_polynom_regressor_then_returns_accurate_results():
     X = np.random.normal(0, 1, (100, 2))
     Y = X[:, 0] * X[:, 1]
 
-    mdl = create_polynom_regressor()
+    mdl = create_polynom_regressor(degree=2)
     mdl.fit(X, Y)
 
     X_test = np.random.normal(0, 1, (100, 2))
@@ -33,7 +33,7 @@ def test_when_given_categorical_training_data_when_fit_and_predict_polynom_regre
 
     X_training, Y_training = _generate_data()
     X_test, Y_test = _generate_data()
-    mdl = create_polynom_regressor()
+    mdl = create_polynom_regressor(degree=3)
     mdl.fit(X_training, Y_training)
 
     assert mdl.predict(X_test).reshape(-1) == approx(Y_test, abs=1e-10)

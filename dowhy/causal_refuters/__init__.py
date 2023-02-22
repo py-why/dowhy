@@ -5,8 +5,6 @@ from dowhy.causal_refuter import CausalRefuter
 from dowhy.causal_refuters.add_unobserved_common_cause import (
     AddUnobservedCommonCause,
     sensitivity_e_value,
-    sensitivity_linear_partial_r2,
-    sensitivity_non_parametric_partial_r2,
     sensitivity_simulation,
 )
 from dowhy.causal_refuters.bootstrap_refuter import BootstrapRefuter, refute_bootstrap
@@ -44,8 +42,6 @@ __all__ = [
     "refute_random_common_cause",
     "refute_placebo_treatment",
     "sensitivity_simulation",
-    "sensitivity_linear_partial_r2",
-    "sensitivity_non_parametric_partial_r2",
     "sensitivity_e_value",
     "refute_dummy_outcome",
     "refute_estimate",

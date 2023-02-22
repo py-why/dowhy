@@ -7,7 +7,7 @@ from dowhy.gcm.ml import SklearnClassificationModel, create_linear_regressor, cr
 
 
 @flaky(max_runs=5)
-def test_categorical_features():
+def test_given_categorical_input_feature_when_fit_regression_model_then_use_it_correctly():
     X0 = np.random.normal(0, 1, 1000)
     X1 = np.random.choice(3, 1000).astype(str)
     X2 = []
@@ -35,7 +35,7 @@ def test_categorical_features():
     assert mdl.predict(inputs) == approx(X2.reshape(-1, 1))
 
 
-def test_categorical_inputs():
+def test_given_categorical_input_and_output_features_when_fit_classification_model_then_use_it_correctly():
     X0 = np.random.normal(0, 1, 1000)
     X1 = np.random.choice(3, 1000).astype(str)
     X2 = []
