@@ -9,6 +9,7 @@ import pandas as pd
 import sympy as sp
 from sklearn.utils import resample
 from tqdm import tqdm
+import random
 
 import dowhy.interpreters as interpreters
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
@@ -44,7 +45,7 @@ class CausalEstimator:
     # Bootstrap settings
     DEFAULT_NUMBER_OF_BOOTSTRAP_SAMPLES = 999
     # Default seed for bootstrap
-    DEFAULT_BOOTSTRAP_SEED = 1
+    DEFAULT_BOOTSTRAP_SEED = 12345
     # Progress Bar
     PROGRESS_BAR_COLOR = "green"
 
@@ -71,6 +72,7 @@ class CausalEstimator:
         num_quantiles_to_discretize_cont_cols: int = NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
         num_bootstrap_samples: int = DEFAULT_NUMBER_OF_BOOTSTRAP_SAMPLES,
         seed: int = DEFAULT_BOOTSTRAP_SEED,
+        progressbarcolor: str = PROGRESS_BAR_COLOR,
         **_,
     ):
         """Initializes an estimator with data and names of relevant variables.
@@ -98,6 +100,7 @@ class CausalEstimator:
             estimation of conditional treatment effect over it.
         :param num_bootstrap_samples: Specifies the number of bootstrap samples used for testing. Default: 999 samples.
         :param seed: set a seed for reproducibility
+        :param progressbarcolor: defines the color of the progress bar.
         :param kwargs: (optional) Additional estimator-specific parameters
         :returns: an instance of the estimator class.
         """
@@ -120,6 +123,10 @@ class CausalEstimator:
         self.num_quantiles_to_discretize_cont_cols = num_quantiles_to_discretize_cont_cols
         # Estimate conditional estimates by default
         self.need_conditional_estimates = need_conditional_estimates
+
+        self.num_bootstrap_samples = num_bootstrap_samples
+        self.seed = seed
+        self.progressbarcolor = progressbarcolor
 
         self._bootstrap_estimates = None
         self._bootstrap_null_estimates = None
@@ -488,7 +495,14 @@ class CausalEstimator:
         return std_error
 
     def _test_significance_with_bootstrap(
-        self, data: pd.DataFrame, estimate_value, num_null_simulations=None, show_progress_bar: bool = True
+        self,
+        data: pd.DataFrame,
+        estimate_value,
+        num_null_simulations: int = None,
+        num_bootstrap_samples: int = None,
+        seed: int = None,
+        progressbarcolor: str = None,
+        show_progress_bar: bool = True,
     ):
         """Test statistical significance of an estimate using the bootstrap method.
 
@@ -499,35 +513,31 @@ class CausalEstimator:
         # Use existing params, if new user defined params are not present
         if num_null_simulations is None:
             num_null_simulations = self.num_null_simulations
+            num_bootstrap_samples = self.num_bootstrap_samples
+            seed = self.seed
+            progressbarcolor = self.progressbarcolor
         do_retest = self._bootstrap_null_estimates is None or CausalEstimator.is_bootstrap_parameter_changed(
             self._bootstrap_null_estimates.params, locals()
         )
         if do_retest:
             null_estimates = np.zeros(num_null_simulations)
+
+            # set seed for replicability
+            np.random.seed(seed=seed)
+
             for i in tqdm(
                 range(num_null_simulations),
                 disable=not show_progress_bar,
-                colour=CausalEstimator.PROGRESS_BAR_COLOR,
+                colour=progressbarcolor,
                 desc="Bootstrapping:",
             ):
 
-                # If the bootstrap samples are >= observations, use full randomization
-                # If the bootstrap samples are < observations, draw random samples
-                # replace = True
-                if CausalEstimator.DEFAULT_NUMBER_OF_BOOTSTRAP_SAMPLES >= len(data):
-                    new_outcome = np.random.permutation(data[self._target_estimand.outcome_variable])
-                else:
-                    new_outcome = data[self._target_estimand.outcome_variable].sample(
-                        n=CausalEstimator.DEFAULT_NUMBER_OF_BOOTSTRAP_SAMPLES,
-                        replace=True,
-                        random_state=CausalEstimator.DEFAULT_BOOTSTRAP_SEED,
-                        ignore_index=True,
-                    )
-
-                # Copy data first
-                new_data = data
-                # override the outcome variable with the new outcome
-                new_data[self._target_estimand.outcome_variable] = new_outcome
+                # Generate a new data set by sampling the dataset
+                new_data = data.sample(
+                    n=num_bootstrap_samples,
+                    replace=True,
+                    ignore_index=True,
+                )
 
                 new_estimator = self.get_new_estimator_object(
                     self._target_estimand,
@@ -549,24 +559,13 @@ class CausalEstimator:
                 null_estimates, {"num_null_simulations": num_null_simulations, "sample_size_fraction": 1}
             )
 
-        # Processing the null hypothesis estimates
-        sorted_null_estimates = np.sort(self._bootstrap_null_estimates.estimates)
-        self.logger.debug("Null estimates: {0}".format(sorted_null_estimates))
-        median_estimate = sorted_null_estimates[int(num_null_simulations / 2)]
-        # Doing a two-sided test
-        if estimate_value > median_estimate:
-            # Being conservative with the p-value reported
-            estimate_index = np.searchsorted(sorted_null_estimates, estimate_value, side="left")
-            p_value = 1 - (estimate_index / num_null_simulations)
-        if estimate_value <= median_estimate:
-            # Being conservative with the p-value reported
-            estimate_index = np.searchsorted(sorted_null_estimates, estimate_value, side="right")
-            p_value = estimate_index / num_null_simulations
-        # If the estimate_index is 0, it depends on the number of simulations
-        if p_value == 0:
-            p_value = (0, 1 / len(sorted_null_estimates))  # a tuple determining the range.
-        elif p_value == 1:
-            p_value = (1 - 1 / len(sorted_null_estimates), 1)
+        # This calculates a two-sided percentile p-value
+        # See footnotes in https://journals.sagepub.com/doi/full/10.1177/2515245920911881
+        half_p_value = np.mean(
+            [(x > estimate_value) + 0.5 * (x == estimate_value) for x in self._bootstrap_null_estimates.estimates]
+        )
+        p_value = 2 * min(half_p_value, 1 - half_p_value)
+
         signif_dict = {"p_value": p_value}
         return signif_dict
 
