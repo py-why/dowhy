@@ -1,5 +1,6 @@
 import copy
 import logging
+import random
 from collections import namedtuple
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -9,7 +10,6 @@ import pandas as pd
 import sympy as sp
 from sklearn.utils import resample
 from tqdm import tqdm
-import random
 
 import dowhy.interpreters as interpreters
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
