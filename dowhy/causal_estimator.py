@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import sympy as sp
 from sklearn.utils import resample
+from tqdm import tqdm
 
 import dowhy.interpreters as interpreters
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
@@ -40,6 +41,12 @@ class CausalEstimator:
     NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS = 5
     # Prefix to add to temporary categorical variables created after discretization
     TEMP_CAT_COLUMN_PREFIX = "__categorical__"
+    # Bootstrap settings
+    DEFAULT_NUMBER_OF_BOOTSTRAP_SAMPLES = 999
+    # Default seed for bootstrap
+    DEFAULT_BOOTSTRAP_SEED = 1
+    # Progress Bar
+    PROGRESS_BAR_COLOR = "green"
 
     DEFAULT_NOTIMPLEMENTEDERROR_MSG = "not yet implemented for {0}. If you would this to be implemented in the next version, please raise an issue at https://github.com/microsoft/dowhy/issues"
 
@@ -62,6 +69,8 @@ class CausalEstimator:
         confidence_level: float = DEFAULT_CONFIDENCE_LEVEL,
         need_conditional_estimates: Union[bool, str] = "auto",
         num_quantiles_to_discretize_cont_cols: int = NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
+        num_bootstrap_samples: int = DEFAULT_NUMBER_OF_BOOTSTRAP_SAMPLES,
+        seed: int = DEFAULT_BOOTSTRAP_SEED,
         **_,
     ):
         """Initializes an estimator with data and names of relevant variables.
@@ -87,6 +96,8 @@ class CausalEstimator:
         :param num_quantiles_to_discretize_cont_cols: The number of quantiles
             into which a numeric effect modifier is split, to enable
             estimation of conditional treatment effect over it.
+        :param num_bootstrap_samples: Specifies the number of bootstrap samples used for testing. Default: 999 samples.
+        :param seed: set a seed for reproducibility
         :param kwargs: (optional) Additional estimator-specific parameters
         :returns: an instance of the estimator class.
         """
@@ -476,7 +487,9 @@ class CausalEstimator:
                 std_error = self._estimate_std_error(method, **kwargs)
         return std_error
 
-    def _test_significance_with_bootstrap(self, data: pd.DataFrame, estimate_value, num_null_simulations=None):
+    def _test_significance_with_bootstrap(
+        self, data: pd.DataFrame, estimate_value, num_null_simulations=None, show_progress_bar: bool = True
+    ):
         """Test statistical significance of an estimate using the bootstrap method.
 
         :param estimate_value: Obtained estimate's value
@@ -491,10 +504,31 @@ class CausalEstimator:
         )
         if do_retest:
             null_estimates = np.zeros(num_null_simulations)
-            for i in range(num_null_simulations):
-                new_outcome = np.random.permutation(data[self._target_estimand.outcome_variable])
-                new_data = data.assign(dummy_outcome=new_outcome)
-                # self._outcome = self._data["dummy_outcome"]
+            for i in tqdm(
+                range(num_null_simulations),
+                disable=not show_progress_bar,
+                colour=CausalEstimator.PROGRESS_BAR_COLOR,
+                desc="Bootstrapping:",
+            ):
+
+                # If the bootstrap samples are >= observations, use full randomization
+                # If the bootstrap samples are < observations, draw random samples
+                # replace = True
+                if CausalEstimator.DEFAULT_NUMBER_OF_BOOTSTRAP_SAMPLES >= len(data):
+                    new_outcome = np.random.permutation(data[self._target_estimand.outcome_variable])
+                else:
+                    new_outcome = data[self._target_estimand.outcome_variable].sample(
+                        n=CausalEstimator.DEFAULT_NUMBER_OF_BOOTSTRAP_SAMPLES,
+                        replace=True,
+                        random_state=CausalEstimator.DEFAULT_BOOTSTRAP_SEED,
+                        ignore_index=True,
+                    )
+
+                # Copy data first
+                new_data = data
+                # override the outcome variable with the new outcome
+                new_data[self._target_estimand.outcome_variable] = new_outcome
+
                 new_estimator = self.get_new_estimator_object(
                     self._target_estimand,
                     test_significance=False,
