@@ -6,51 +6,64 @@ By quantifying intrinsic causal influence, we answer the question:
     How strong is the causal influence of a source node to a target node
     that is not inherited from the parents of the source node?
 
-Naturally, descendants will have a zero intrinsic influence on the target node.
+Naturally, descendants will have a zero intrinsic causal influence on the target node. This method is based on the paper:
+
+    Dominik Janzing, Patrick Blöbaum, Lenon Minorics, Philipp Faller, Atalanti Mastakouri. `Quantifying intrinsic causal contributions via structure preserving interventions <https://arxiv.org/abs/2007.00714>`_
+    arXiv:2007.00714, 2021
+
+Let's consider an example from the paper to understand the type of influence being measured here. Imagine a schedule of
+three trains, ``Train A, Train B`` and ``Train C``, where the departure time of ``Train C`` depends on the arrival time of ``Train B``,
+and the departure time of ``Train B`` depends on the arrival time of ``Train A``. Suppose ``Train A`` typically experiences much
+longer delays than ``Train B`` and ``Train C``. The question we want to answer is: How strong is the influence of each train
+on the delay of ``Train C``?
+
+While there are various definitions of influence in the literature, we are interested in the *intrinsic causal influence*,
+which measures the influence of a node that has not been inherited from its parents, that is, the influence of the noise
+of a node. The reason for this is that, while ``Train C`` has to wait for ``Train B``, ``Train B`` mostly inherits the delay from
+``Train A``. Thus, ``Train A`` should be identified as the node that contributes the most to the delay of ``Train C``.
+
+See the :ref:`Understanding the method <understand-method>` section for another example and more details.
 
 How to use it
 ^^^^^^^^^^^^^^
 
-To see how the method works, let us generate some data.
+To see how the method works, let us generate some data following the example above:
 
 >>> import numpy as np, pandas as pd, networkx as nx
 >>> from dowhy import gcm
->>> from dowhy.gcm.uncertainty import estimate_variance
->>> np.random.seed(10)  # to reproduce these results
 
->>> X = np.random.normal(loc=0, scale=1, size=1000)
->>> Y = 2*X + np.random.normal(loc=0, scale=1, size=1000)
->>> Z = 3*Y + np.random.normal(loc=0, scale=1, size=1000)
+>>> X = abs(np.random.normal(loc=0, scale=5, size=1000))
+>>> Y = X + abs(np.random.normal(loc=0, scale=1, size=1000))
+>>> Z = Y + abs(np.random.normal(loc=0, scale=1, size=1000))
 >>> data = pd.DataFrame(data=dict(X=X, Y=Y, Z=Z))
 
-Next, we will model cause-effect relationships as a structural causal model and fit it to the data.
+Note the larger standard deviation of the 'noise' in :math:`X`.
+
+Next, we will model cause-effect relationships as a structural causal model and fit it to the data. Here, we are using
+the auto module to automatically assign causal mechanisms:
 
 >>> causal_model = gcm.StructuralCausalModel(nx.DiGraph([('X', 'Y'), ('Y', 'Z')])) # X -> Y -> Z
->>> causal_model.set_causal_mechanism('X', gcm.EmpiricalDistribution())
->>> causal_model.set_causal_mechanism('Y', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
->>> causal_model.set_causal_mechanism('Z', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
+>>> gcm.auto.assign_causal_mechanisms(causal_model, data)
 >>> gcm.fit(causal_model, data)
-
-..
-    Todo: Use auto module for automatic assignment!
 
 Finally, we can ask for the intrinsic causal influences of ancestors to a node of interest (e.g., :math:`Z`).
 
->>> contributions = gcm.intrinsic_causal_influence(causal_model, 'Z',
->>>                                               gcm.ml.create_linear_regressor(),
->>>                                               lambda x, _: estimate_variance(x))
+>>> contributions = gcm.intrinsic_causal_influence(causal_model, 'Z')
 >>> contributions
-    {'X': 33.34300732332951, 'Y': 9.599478688607254, 'Z': 0.9750701113403872}
+    {'X': 8.736841722582117, 'Y': 0.4491606897202768, 'Z': 0.35377942123477574}
 
-**Interpreting the results:** We estimated the intrinsic influence of ancestors of
-:math:`Z`, including itself, to its variance. These contributions sum up to the variance of :math:`Z`.
-We observe that ~76% of the variance of :math:`Z` comes from :math:`X`.
+Note that, although we use a linear relationship here, the method can also handle arbitrary non-linear relationships.
+
+**Interpreting the results:** We estimated the intrinsic causal influence of ancestors of
+:math:`Z`, including itself, to its variance (the default measure). These contributions sum up to the variance of :math:`Z`.
+As we see here, we observe that ~92% of the variance of :math:`Z` comes from :math:`X`.
+
+.. _understand-method:
 
 Understanding the method
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Consider the following example to get the intuition behind the notion of "intrinsic"
-causal influence we seek to measure here.
+Let's look at a different example to explain the intuition behind the notion of "intrinsic" causal influence further:
 
    A charity event is organised to collect funds to help an orphanage. At the end of the event,
    a donation box is passed around to each participant. Since the donation is voluntary, some may
@@ -59,12 +72,12 @@ causal influence we seek to measure here.
    anything to the collective donation after all. Each person's contribution then is simply the
    amount they donated.
 
-To measure the `intrinsic causal influence <https://arxiv.org/pdf/2007.00714.pdf>`_ of a source
-node to a target node, we need a functional causal model. In particular, we assume that the
+To measure the intrinsic causal influence of a source
+node to a target node, we need a functional causal model. For instance, we can assume that the
 causal model of each node follows an additive noise model (ANM), i.e. :math:`X_j := f_j
 (\textrm{PA}_j) + N_j`, where :math:`\textrm{PA}_j` are the parents of node :math:`X_j` in the causal graph,
 and :math:`N_j` is the independent unobserved noise term. To compute the "intrinsic" contribution of ancestors of :math:`X_n` to
-some property (e.g. entropy, variance) of the marginal distribution of :math:`X_n`, we first
+some property (e.g. variance or entropy) of the marginal distribution of :math:`X_n`, we first
 have to set up our causal graph, and learn the causal model of each node from the dataset.
 
 Consider a causal graph :math:`X \rightarrow Y \rightarrow Z` as in the code example above,
@@ -94,40 +107,36 @@ quantify the intrinsic causal influence of :math:`X, Y` and :math:`Z` to
 >>> from dowhy.gcm.uncertainty import estimate_variance
 >>> prediction_model_from_noises_to_target = gcm.ml.create_linear_regressor()
 >>> node_to_contribution = gcm.intrinsic_causal_influence(causal_model, 'Z',
->>>                                                      prediction_model_from_noises_to_target,
->>>                                                      lambda x, _: estimate_variance(x))
+>>>                                                       prediction_model_from_noises_to_target,
+>>>                                                       attribution_func=lambda x, _: estimate_variance(x))
+
+Here, we explicitly defined the variance in the parameter ``attribution_func`` as the property we are interested in.
 
 .. note::
 
   While using variance as uncertainty estimator gives valuable information about the
   contribution of nodes to the squared deviations in the target, one might be rather interested
   in other quantities, such as absolute deviations. This can also be simply computed by replacing
-  the uncertainty estimator with a custom function:
+  the ``attribution_func`` with a custom function:
 
   >>> mean_absolute_deviation_estimator = lambda x: np.mean(abs(x))
   >>> node_to_contribution = gcm.intrinsic_causal_influence(causal_model, 'Z',
   >>>                                                      prediction_model_from_noises_to_target,
-  >>>                                                      mean_absolute_deviation_estimator)
+  >>>                                                      attribution_func=mean_absolute_deviation_estimator)
 
   If the choice of a prediction model is unclear, the prediction model parameter can also be set
   to "auto".
 
-..
-    Todo: Add this once confidence intervals is added!
-    Above, we report point estimates of Shapley values from a sample drawn from the estimated joint
-    distribution :math:`\hat{P}_{X, Y, Z}`. To quantify the uncertainty of those point estimates, we
-    now compute their `bootstrap confidence intervals <https://ocw.mit
-    .edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings
-    /MIT18_05S14_Reading24.pdf>`_ by simply running the above a number of times, and aggregating the
-    results.
+  **Remark on using the mean for the attribution:** Although the ``attribution_func`` can be customized for a given use
+  case, not all definitions make sense. For instance,
+  using the **mean** does not provide any meaningful results. This is because the way influences are estimated is based
+  on the concept of Shapley values. To understand this better, we can look at a general property of Shapley values, which
+  states that the sum of Shapley values, in our case the sum of the attributions, adds up to :math:`\nu(T) - \nu(\{\})`.
+  Here, :math:`\nu` is a set function (in our case, the expectation of the ``attribution_func``), and :math:`T` is the full
+  set of all players (in our case, all noise variables).
 
-    >>> from gcm import confidence_intervals, bootstrap_sampling
-    >>>
-    >>> node_to_mean_contrib, node_to_contrib_conf = confidence_intervals(
-    >>>     bootstrap_sampling(gcm.intrinsic_causal_influence, causal_model, 'Z',
-    >>>                        prediction_model_from_noises_to_target, lambda x, _: estimate_variance(x)),
-    >>>     confidence_level=0.95,
-    >>>     num_bootstrap_resamples=200)
-
-    Note that the higher the number of repetitions, the better we are able to approximate the
-    sampling distribution of Shapley values.
+  Now, if we use the mean, :math:`\nu(T)` becomes :math:`\mathbb{E}_\mathbf{N}[\mathbb{E}[Y | \mathbf{N}]] = \mathbb{E}[Y]`,
+  because the target variable :math:`Y` depends deterministically on all noise variables :math:`\mathbf{N}` in the graphical
+  causal model. Similarly, :math:`\nu(\{\})` becomes :math:`\mathbb{E}[Y | \{\}] = \mathbb{E}[Y]`. This would result in
+  :math:`\mathbb{E}_\mathbb{N}[\mathbb{E}[Y | \mathbb{N}]] - \mathbb{E}[Y | \{\}] = 0`, i.e. the resulting attributions
+  are close to 0. For more details, see Section 3.3 of the paper.
