@@ -14,7 +14,7 @@ from dowhy.gcm import (
     confidence_intervals,
     fit,
 )
-from dowhy.gcm.feature import feature_relevance_distribution, feature_relevance_sample, parent_relevance
+from dowhy.gcm.feature_relevance import feature_relevance_distribution, feature_relevance_sample, parent_relevance
 from dowhy.gcm.ml import create_linear_regressor, create_logistic_regression_classifier
 from dowhy.gcm.shapley import ShapleyApproximationMethods, ShapleyConfig
 from dowhy.gcm.uncertainty import estimate_entropy_of_probabilities
