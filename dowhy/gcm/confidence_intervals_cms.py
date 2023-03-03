@@ -4,11 +4,12 @@ Functions in this module should be considered experimental, meaning there might 
 """
 
 from functools import partial
-from typing import Any, Callable, Dict, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 import numpy as np
 import pandas as pd
 
+from dowhy.gcm import auto
 from dowhy.gcm.cms import InvertibleStructuralCausalModel, ProbabilisticCausalModel, StructuralCausalModel
 from dowhy.gcm.fitting_sampling import fit
 
@@ -51,6 +52,7 @@ def fit_and_compute(
     causal_model: Union[ProbabilisticCausalModel, StructuralCausalModel, InvertibleStructuralCausalModel],
     bootstrap_training_data: pd.DataFrame,
     bootstrap_data_subset_size_fraction: float = 0.75,
+    auto_assign_quality: Optional[auto.AssignmentQuality] = None,
     *args,
     **kwargs,
 ):
@@ -73,6 +75,9 @@ def fit_and_compute(
                                     in every iteration when calling fit.
     :param bootstrap_data_subset_size_fraction: The fraction defines the fractional size of the subset compared to
                                                 the total training data.
+    :param auto_assign_quality: If a quality is provided, then the existing causal mechanisms in the given causal_model
+                                are overridden by new automatically inferred mechanisms based on the provided
+                                AssignmentQuality. If None is given, the existing assigned mechanisms are used.
     :param args: Args passed through verbatim to the causal queries.
     :param kwargs: Keyword args passed through verbatim to the causal queries.
     :return: A tuple containing (1) the median of causal query results and (2) the confidence intervals.
@@ -87,6 +92,10 @@ def fit_and_compute(
                 replace=False,
             )
         ]
+
+        if auto_assign_quality is not None:
+            auto.assign_causal_mechanisms(causal_model_copy, sampled_data, auto_assign_quality, override_models=True)
+
         fit(causal_model_copy, sampled_data)
         return f(causal_model_copy, *args, **kwargs)
 
