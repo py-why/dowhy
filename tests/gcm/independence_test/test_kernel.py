@@ -328,6 +328,31 @@ def test_given_constant_data_when_perform_approx_kernel_based_test_then_returns_
     assert not np.isnan(approx_kernel_based(np.random.normal(0, 1, 100), np.random.normal(0, 1, 100), np.zeros(100)))
 
 
+def test_given_almost_constant_data_when_perform_kernel_based_test_then_does_not_return_nans():
+    almost_const = np.concatenate((np.ones(1), np.zeros(99)), axis=0)
+    assert not np.isnan(
+        kernel_based(almost_const, np.random.normal(0, 1, 100), bootstrap_num_runs=2, bootstrap_num_samples_per_run=10)
+    )
+    assert not np.isnan(
+        kernel_based(
+            almost_const,
+            np.random.normal(0, 1, 100),
+            np.random.normal(0, 1, 100),
+            bootstrap_num_runs=2,
+            bootstrap_num_samples_per_run=10,
+        )
+    )
+    assert not np.isnan(
+        kernel_based(
+            np.random.normal(0, 1, 100),
+            np.random.normal(0, 1, 100),
+            almost_const,
+            bootstrap_num_runs=2,
+            bootstrap_num_samples_per_run=10,
+        )
+    )
+
+
 def _generate_categorical_data():
     x = np.random.normal(0, 1, 1000)
     z = []

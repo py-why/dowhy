@@ -63,19 +63,6 @@ def kernel_based(
     """
     bootstrap_n_jobs = config.default_n_jobs if bootstrap_n_jobs is None else bootstrap_n_jobs
 
-    X = _remove_constant_columns(X)
-    Y = _remove_constant_columns(Y)
-
-    if X.shape[1] == 0 or Y.shape[1] == 0:
-        # Either X and/or Y is constant.
-        return 1.0
-
-    if Z is not None:
-        Z = _remove_constant_columns(Z)
-        if Z.shape[1] == 0:
-            # If Z is empty, we are in the pairwise setting.
-            Z = None
-
     if "est_width" not in kwargs:
         kwargs["est_width"] = "median"
 
@@ -83,6 +70,19 @@ def kernel_based(
         X: np.ndarray, Y: np.ndarray, Z: np.ndarray, parallel_random_seed: int
     ) -> float:
         set_random_seed(parallel_random_seed)
+
+        X = _remove_constant_columns(X)
+        Y = _remove_constant_columns(Y)
+
+        if X.shape[1] == 0 or Y.shape[1] == 0:
+            # Either X and/or Y is constant.
+            return 1.0
+
+        if Z is not None:
+            Z = _remove_constant_columns(Z)
+            if Z.shape[1] == 0:
+                # If Z is empty, we are in the pairwise setting.
+                Z = None
 
         if Z is None:
             X, Y = _convert_to_numeric(*shape_into_2d(X, Y))
