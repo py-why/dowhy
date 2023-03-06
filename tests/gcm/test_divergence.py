@@ -7,6 +7,7 @@ from dowhy.gcm.divergence import (
     estimate_kl_divergence_categorical,
     estimate_kl_divergence_continuous,
     estimate_kl_divergence_of_probabilities,
+    is_probability_matrix,
 )
 
 
@@ -60,3 +61,10 @@ def test_given_probability_vectors_when_auto_estimate_kl_divergence_then_correct
         np.array([[0.25, 0.5, 0.125, 0.125], [0.5, 0.25, 0.125, 0.125]]),
         np.array([[0.5, 0.25, 0.125, 0.125], [0.25, 0.5, 0.125, 0.125]]),
     ) == approx(0.25 * np.log(0.25 / 0.5) + 0.5 * np.log(0.5 / 0.25), abs=0.01)
+
+
+def test_given_valid_and_invalid_probability_vectors_when_apply_is_probabilities_then_return_expected_results():
+    assert is_probability_matrix(np.array([0.5, 0.3, 0.2]))
+    assert not is_probability_matrix(np.array([0.1, 0.3, 0.2]))
+    assert is_probability_matrix(np.array([[0.5, 0.3, 0.2], [0.1, 0.2, 0.7]]))
+    assert not is_probability_matrix(np.random.normal(0, 1, (5, 3)))

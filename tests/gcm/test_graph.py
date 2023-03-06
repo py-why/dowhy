@@ -55,3 +55,15 @@ def test_given_a_directed_graph_when_checking_if_a_node_is_root_then_returns_tru
     assert is_root_node(graph, "X") == True
     assert is_root_node(graph, "Y") == True
     assert is_root_node(graph, "Z") == False
+
+
+def test_when_set_and_get_causal_model_then_the_set_model_is_returned():
+    causal_dag = nx.DiGraph()
+    causal_dag.add_node("X0")
+    causal_model = ProbabilisticCausalModel(causal_dag)
+
+    mdl = EmpiricalDistribution()
+
+    causal_model.set_causal_mechanism("X0", mdl)
+
+    assert causal_model.causal_mechanism("X0") == mdl
