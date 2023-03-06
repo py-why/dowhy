@@ -1,6 +1,7 @@
 import networkx as nx
 import numpy as np
 import pandas as pd
+from _pytest.python_api import approx
 from flaky import flaky
 from pytest import mark
 from sklearn.ensemble import HistGradientBoostingClassifier, HistGradientBoostingRegressor
@@ -8,8 +9,8 @@ from sklearn.linear_model import ElasticNetCV, LassoCV, LinearRegression, Logist
 from sklearn.naive_bayes import GaussianNB
 from sklearn.pipeline import Pipeline
 
-from dowhy.gcm import ProbabilisticCausalModel
-from dowhy.gcm.auto import AssignmentQuality, assign_causal_mechanisms
+from dowhy.gcm import ProbabilisticCausalModel, draw_samples, fit
+from dowhy.gcm.auto import AssignmentQuality, assign_causal_mechanisms, has_linear_relationship
 
 
 def _generate_linear_regression_data(num_samples=1000):
@@ -219,3 +220,92 @@ def test_when_using_best_quality_then_returns_auto_gluon_model():
         causal_model, pd.DataFrame({"X": [1], "Y": ["Class 1"]}), quality=AssignmentQuality.BEST, override_models=True
     )
     assert isinstance(causal_model.causal_mechanism("Y").classifier_model, AutoGluonClassifier)
+
+
+@flaky(max_runs=3)
+def test_given_linear_gaussian_data_when_fit_scm_with_auto_assigned_models_with_default_parameters_then_generate_samples_with_correct_statistics():
+    X0 = np.random.normal(0, 1, 2000)
+    X1 = 2 * X0 + np.random.normal(0, 0.2, 2000)
+    X2 = 0.5 * X0 + np.random.normal(0, 0.2, 2000)
+    X3 = 0.5 * X2 + np.random.normal(0, 0.2, 2000)
+
+    original_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
+
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([("X0", "X1"), ("X0", "X2"), ("X2", "X3")]))
+
+    assign_causal_mechanisms(causal_model, original_observations)
+
+    fit(causal_model, original_observations)
+    generated_samples = draw_samples(causal_model, 2000)
+
+    assert np.mean(generated_samples["X0"]) == approx(np.mean(X0), abs=0.1)
+    assert np.std(generated_samples["X0"]) == approx(np.std(X0), abs=0.1)
+    assert np.mean(generated_samples["X1"]) == approx(np.mean(X1), abs=0.1)
+    assert np.std(generated_samples["X1"]) == approx(np.std(X1), abs=0.1)
+    assert np.mean(generated_samples["X2"]) == approx(np.mean(X2), abs=0.1)
+    assert np.std(generated_samples["X2"]) == approx(np.std(X2), abs=0.1)
+    assert np.mean(generated_samples["X3"]) == approx(np.mean(X3), abs=0.1)
+    assert np.std(generated_samples["X3"]) == approx(np.std(X3), abs=0.1)
+
+
+@flaky(max_runs=3)
+def test_given_nonlinear_gaussian_data_when_fit_scm_with_auto_assigned_models_with_default_parameters_then_generate_samples_with_correct_statistics():
+    X0 = np.random.normal(0, 1, 2000)
+    X1 = np.sin(2 * X0) + np.random.normal(0, 0.2, 2000)
+    X2 = 0.5 * X0**2 + np.random.normal(0, 0.2, 2000)
+    X3 = 0.5 * X2 + np.random.normal(0, 0.2, 2000)
+
+    original_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
+
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([("X0", "X1"), ("X0", "X2"), ("X2", "X3")]))
+
+    assign_causal_mechanisms(causal_model, original_observations)
+
+    fit(causal_model, original_observations)
+    generated_samples = draw_samples(causal_model, 2000)
+
+    assert np.mean(generated_samples["X0"]) == approx(np.mean(X0), abs=0.1)
+    assert np.std(generated_samples["X0"]) == approx(np.std(X0), abs=0.1)
+    assert np.mean(generated_samples["X1"]) == approx(np.mean(X1), abs=0.1)
+    assert np.std(generated_samples["X1"]) == approx(np.std(X1), abs=0.1)
+    assert np.mean(generated_samples["X2"]) == approx(np.mean(X2), abs=0.1)
+    assert np.std(generated_samples["X2"]) == approx(np.std(X2), abs=0.1)
+    assert np.mean(generated_samples["X3"]) == approx(np.mean(X3), abs=0.1)
+    assert np.std(generated_samples["X3"]) == approx(np.std(X3), abs=0.1)
+
+
+def test_givne_simple_data_when_apply_has_linear_relationship_then_returns_expected_results():
+    X = np.random.random(1000)
+
+    assert has_linear_relationship(X, 2 * X)
+    assert not has_linear_relationship(X, X**2)
+
+
+@flaky(max_runs=3)
+def test_given_categorical_data_when_calling_has_linear_relationship_then_returns_correct_results():
+    X1 = np.random.normal(0, 1, 1000)
+    X2 = np.random.normal(0, 1, 1000)
+
+    assert has_linear_relationship(np.column_stack([X1, X2]), (X1 + X2 > 0).astype(str))
+    assert not has_linear_relationship(np.column_stack([X1, X2]), (X1 * X2 > 0).astype(str))
+
+
+def test_given_imbalanced_categorical_data_when_calling_has_linear_relationship_then_does_not_raise_exception():
+    X = np.random.normal(0, 1, 1000)
+    Y = np.array(["OneClass"] * 1000)
+
+    assert has_linear_relationship(np.append(X, 0), np.append(Y, "RareClass"))
+
+    X = np.random.normal(0, 1, 100000)
+    Y = np.array(["OneClass"] * 100000)
+
+    assert has_linear_relationship(
+        np.append(X, np.random.normal(0, 0.000001, 100)), np.append(Y, np.array(["RareClass"] * 100))
+    )
+
+
+def test_given_data_with_rare_categorical_features_when_calling_has_linear_relationship_then_does_not_raise_exception():
+    X = np.array(["Feature" + str(i) for i in range(20)])
+    Y = np.append(np.array(["Class1"] * 10), np.array(["Class2"] * 10))
+
+    assert has_linear_relationship(X, Y)

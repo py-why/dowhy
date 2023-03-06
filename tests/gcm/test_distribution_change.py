@@ -13,6 +13,7 @@ from dowhy.gcm import (
     fit,
 )
 from dowhy.gcm.auto import AssignmentQuality
+from dowhy.gcm.distribution_change import mechanism_change_test
 from dowhy.gcm.ml import create_linear_regressor
 from dowhy.gcm.shapley import ShapleyConfig
 
@@ -152,3 +153,36 @@ def _generate_data():
     outlier_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
 
     return original_observations, outlier_observations
+
+
+@flaky(max_runs=3)
+def test_given_data_where_mechanism_changed_when_apply_mechanism_change_test_then_returns_correct_p_values():
+    X0_org = np.random.uniform(-1, 1, 500)
+    X1_org = 0.5 * X0_org + np.random.normal(0, 0.1, 500)
+
+    X0_new = np.random.uniform(-1, 1, 500)
+    X1_new = 2 * X0_new + np.random.normal(0, 0.1, 500)
+
+    assert mechanism_change_test(X1_org, X1_new, X0_org, X0_new) <= 0.05
+    assert mechanism_change_test(X1_org, X1_org, X0_org, X0_org) > 0.05
+
+
+@flaky(max_runs=3)
+def test_given_data_where_root_node_changed_when_apply_mechanism_change_test_then_returns_correct_p_values():
+    X0_org = np.random.uniform(-1, 1, 500)
+    X0_new = np.random.uniform(-2, 2, 500)
+
+    assert mechanism_change_test(X0_org, X0_new) <= 0.05
+    assert mechanism_change_test(X0_org, X0_org) > 0.05
+
+
+@flaky(max_runs=3)
+def test_given_data_where_noise_changed_when_apply_mechanism_change_test_then_returns_correct_p_values():
+    X0_org = np.random.uniform(-1, 1, 500)
+    X1_org = 2 * X0_org + np.random.normal(0, 0.1, 500)
+
+    X0_new = np.random.uniform(-1, 1, 500)
+    X1_new = 2 * X0_new + np.random.normal(0, 1, 500)
+
+    assert mechanism_change_test(X1_org, X1_new, X0_org, X0_new) <= 0.05
+    assert mechanism_change_test(X1_org, X1_org, X0_org, X0_org) > 0.05
