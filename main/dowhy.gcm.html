@@ -3784,148 +3784,23 @@ method.</p>
 </section>
 <section id="module-dowhy.gcm.feature">
 <span id="dowhy-gcm-feature-module"></span><h2>dowhy.gcm.feature module<a class="headerlink" href="#module-dowhy.gcm.feature" title="Permalink to this heading"></a></h2>
-<p>This module allows to estimate the feature relevance of inputs with respect to a given model. While these models can
-be blackbox prediction models, it is also possible to explain causal mechanisms with respect to the direct parents.
-In these cases, it would be possible to incorporate the noise to represent the part of the generation process that
-cannot be explained by the parents.</p>
-<p>Functions in this module should be considered experimental, meaning there might be breaking API changes in the future.</p>
+<p>This module is deprecated! All functions are moved into the feature_relevance.py module.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.gcm.feature.feature_relevance_distribution">
 <span class="sig-prename descclassname"><span class="pre">dowhy.gcm.feature.</span></span><span class="sig-name descname"><span class="pre">feature_relevance_distribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset_scoring_func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_samples_randomization</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_baseline_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">randomize_features_jointly</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shapley_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#dowhy.gcm.shapley.ShapleyConfig" title="dowhy.gcm.shapley.ShapleyConfig"><span class="pre">ShapleyConfig</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/dowhy/gcm/feature.html#feature_relevance_distribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.feature.feature_relevance_distribution" title="Permalink to this definition"></a></dt>
-<dd><p>Estimates the population based feature relevance of the input features for the given prediction_method. This
-method uses all samples given in feature_samples by comparing the output of the prediction_method given certain
-features are randomized with the outputs when no features are randomized. The subset_scoring_func defines
-how these predictions are compared. For instance, the variance of deviations.</p>
-<p>If the randomized predictions should rather be compared to the original data, this has (and can) be defined via
-the set function by ignoring the second input parameter (the predicted values using all feauters). Instead, the
-original data can be used.</p>
-<p>Note: The distribution level relevance is estimated by taking the expectation of the outcome of the set functions
-when applied to multiple samples. Due to the linearity of the Shapley value estimation, this is equivalent to taking
-the expectation over the Shapley values.</p>
-<p>Related paper:
-Janzing, D., Minorics, L., &amp; Bloebaum, P. (2020).
-Feature relevance quantification in explainable AI: A causal problem.
-In International Conference on Artificial Intelligence and Statistics (pp. 2907-2916). PMLR.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>prediction_method</strong> – A callable that is expected to return a prediction for given samples.</p></li>
-<li><p><strong>feature_samples</strong> – Samples from the joint distribution.</p></li>
-<li><p><strong>subset_scoring_func</strong> – Set function for estimating the quantity of interest based on the model outcomes. This function
-expects two inputs; the outcome of the prediction model for some samples if certain features are permuted and the
-outcome of the model for the same samples when no features were permuted. The set functions represents the
-comparison between the samples, for instance, the variance of deviations. This is then used as the ‘characteristic function’
-in coalition games when estimating the Shapley values.</p></li>
-<li><p><strong>max_num_samples_randomization</strong> – Maximum number of samples used for randomizing the feature that are not in the susbet. Consider increasing this
-number for more accurate results (if enough samples are available) or reducing it for less memory consumption and
-faster runtime.</p></li>
-<li><p><strong>max_num_baseline_samples</strong> – Maximum number of samples on which the set function is evaluated on. These samples are used as fixed observations for
-features that are in the subset. For instance, in case of taking the mean as set_function_summary_func, this defines the maximum number
-of samples used to estimate the mean. Consider increasing this number for more accurate results (if enough samples are
-available) or reducing it for less memory consumption and faster runtime.</p></li>
-<li><p><strong>max_batch_size</strong> – Maximum batch size for a estimating the predictions. This has a significant influence on the
-overall memory usage. If set to -1, all samples are used in one batch.</p></li>
-<li><p><strong>randomize_features_jointly</strong> – If set to True, features that are not in a subset are jointly permuted.
-Note that this still represents an interventional distribution. If set to False, features that are not in a subset
-are independently permuted. Note: The theory in the linked publication assumes that this is set to True.</p></li>
-<li><p><strong>shapley_config</strong> – Config for the Shapley estimator.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A numpy array with the feature relevance of each input feature.</p>
-</dd>
-</dl>
+<dd><p>Deprecated, please use feature_relevance_distribution from the feature_relevance.py module instead.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.gcm.feature.feature_relevance_sample">
 <span class="sig-prename descclassname"><span class="pre">dowhy.gcm.feature.</span></span><span class="sig-name descname"><span class="pre">feature_relevance_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baseline_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset_scoring_func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baseline_target_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average_set_function</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">randomize_features_jointly</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shapley_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#dowhy.gcm.shapley.ShapleyConfig" title="dowhy.gcm.shapley.ShapleyConfig"><span class="pre">ShapleyConfig</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/dowhy/gcm/feature.html#feature_relevance_sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.feature.feature_relevance_sample" title="Permalink to this definition"></a></dt>
-<dd><p>Estimates the feature relevance of the prediction_method for each sample in baseline_noise_samples. This
-method uses all samples given in feature_samples as ‘background’ samples. This is, they should represent samples
-from the joint distribution of the input features. The subset_scoring_func defines the comparison between the
-output of the prediction_method when certain features are randomized and the outputs when no features are
-randomized. The most common function would be the difference between the expectations.</p>
-<p>If the randomized predictions should rather be compared to the original data, this has (and can) be defined via
-the set function by ignoring the second input parameter (the predicted values using all feauters). Instead, the
-original data can be used.</p>
-<p>Related paper:
-Janzing, D., Minorics, L., &amp; Bloebaum, P. (2020).
-Feature relevance quantification in explainable AI: A causal problem.
-In International Conference on Artificial Intelligence and Statistics (pp. 2907-2916). PMLR.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>prediction_method</strong> – A callable that is expected to return a prediction for given samples.</p></li>
-<li><p><strong>feature_samples</strong> – Samples from the joint distribution. These are used as ‘background samples’ to randomize features that are not in a subset.</p></li>
-<li><p><strong>baseline_samples</strong> – Samples for which the feature relevance should be estimated.</p></li>
-<li><p><strong>subset_scoring_func</strong> – Set function for estimating the quantity of interest based on the model outcomes. This function
-expects two inputs; the outcome of the prediction model for some samples if certain features are permuted and the
-outcome of the model for the same samples when no features were permuted. A typical choice for regression models
-would be the difference between expectations. This is then used as the ‘characteristic function’
-in coalition games when estimating the Shapley values.</p></li>
-<li><p><strong>baseline_target_values</strong> – These baseline values are compared with the subset specific outcomes of the prediction method. If set to None (default),
-the baseline values are the outcomes of the given prediction_method applied to the baseline_noise_samples, i.e. the outcome of the empty subset.</p></li>
-<li><p><strong>max_batch_size</strong> – Maximum batch size for a estimating the predictions. This has a significant influence on the
-overall memory usage. If set to -1, all samples are used in one batch.</p></li>
-<li><p><strong>average_set_function</strong> – If set to True, the averaged result of the set function applied to each sample of
-interest is used for estimating the Shapley values. If set to False, Shapley values for each sample of interest
-are estimated separately.</p></li>
-<li><p><strong>randomize_features_jointly</strong> – If set to True, features that are not in a subset are jointly permuted.
-Note that this still represents an interventional distribution. If set to False, features that are not in a subset
-are independently permuted. Note: The theory in the linked publication assumes that this is set to True.</p></li>
-<li><p><strong>shapley_config</strong> – Config for the Shapley estimator.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A numpy array with the feature relevance for each sample in baseline_noise_samples.</p>
-</dd>
-</dl>
+<dd><p>Deprecated, please use feature_relevance_sample from the feature_relevance.py module instead.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.gcm.feature.parent_relevance">
 <span class="sig-prename descclassname"><span class="pre">dowhy.gcm.feature.</span></span><span class="sig-name descname"><span class="pre">parent_relevance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">causal_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#dowhy.gcm.cms.StructuralCausalModel" title="dowhy.gcm.cms.StructuralCausalModel"><span class="pre">StructuralCausalModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">DataFrame</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset_scoring_func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_samples_randomization</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_samples_baseline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shapley_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#dowhy.gcm.shapley.ShapleyConfig" title="dowhy.gcm.shapley.ShapleyConfig"><span class="pre">ShapleyConfig</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/dowhy/gcm/feature.html#parent_relevance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.feature.parent_relevance" title="Permalink to this definition"></a></dt>
-<dd><p>Estimates the distribution based relevance of the direct parents of the given target_node. This is, the
-relevance of direct parents as input features of the the underlying causal model of target_node. Here, the
-unobserved noise is considered as a direct parent (input) as well. Samples utilized for the estimation are drawn
-from the given causal graph.</p>
-<p>By default, the used subset_scoring_func is based on the variance between Y and Y’, where Y is the outputs of
-the causal model and Y’ the outputs of the models when certain features are randomized. In case of continuous data,
-the feature relevance adds up to Var(Y - Y’).</p>
-<p>Note: The feature relevance based on the distribution cannot be directly compared with the feature relevance for
-single samples. If this is desired, the set function needs to be defined accordingly.</p>
-<p>Related paper:
-Janzing, D., Minorics, L., &amp; Bloebaum, P. (2020).
-Feature relevance quantification in explainable AI: A causal problem.
-In International Conference on Artificial Intelligence and Statistics (pp. 2907-2916). PMLR.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>causal_model</strong> – The fitted structural causal model.</p></li>
-<li><p><strong>target_node</strong> – Node with the causal model of interest.</p></li>
-<li><p><strong>parent_samples</strong> – Samples for the parents of the given target_node. If None is given, new samples are
-generated based on the graph. These samples are used for randomizing features that are not in the subset.</p></li>
-<li><p><strong>subset_scoring_func</strong> – Set function for estimating the quantity of interest based on the model outcomes. This function
-expects two inputs; the outcome of the causal model for some samples if certain features are permuted and the
-outcome of the model for the same samples when no features were permuted. The set functions represents the
-comparison between the samples, for instance, the variance of deviations. This is then used as the ‘characteristic function’
-in coalition games when estimating the Shapley values.</p></li>
-<li><p><strong>num_samples_randomization</strong> – Number of samples used as background parent samples for evaluating the set function.
-If no parent_samples are given, this represents the number of generated samples from
-the joint distribution of the parents and are used for randomizing features that are
-not in the subset. Consider increasing this number for more accurate results or reducing it for less memory consumption and faster runtime.</p></li>
-<li><p><strong>num_samples_baseline</strong> – Number of samples on which the set functions are evaluated on. These samples are used as fixed observations for
-parents that are in the subset. Consider increasing this number for more accurate results or reducing it for less memory consumption and faster runtime.</p></li>
-<li><p><strong>max_batch_size</strong> – Maximum batch size for estimating multiple predictions at once. This has a significant influence on the
-overall memory usage. If set to -1, all samples are used in one batch.</p></li>
-<li><p><strong>shapley_config</strong> – <a class="reference internal" href="#dowhy.gcm.shapley.ShapleyConfig" title="dowhy.gcm.shapley.ShapleyConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShapleyConfig</span></code></a> for the Shapley estimator.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>There are two return vales. A dictionary with the feature relevance for each direct parent of the given
-target_node and the feature relevance of noise.</p>
-</dd>
-</dl>
+<dd><p>Deprecated, please use parent_relevance from the feature_relevance.py module instead.</p>
 </dd></dl>
 
 </section>
