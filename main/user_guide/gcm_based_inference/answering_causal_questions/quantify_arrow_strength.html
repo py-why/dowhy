@@ -357,8 +357,8 @@
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#measuring-arrow-strengths-in-different-units">
-   Measuring arrow strengths in different units
+  <a class="reference internal nav-link" href="#customize-the-distance-measure">
+   Customize the distance measure
   </a>
  </li>
 </ul>
@@ -384,11 +384,18 @@
 <h1>Quantifying Arrow Strength<a class="headerlink" href="#quantifying-arrow-strength" title="Permalink to this heading"></a></h1>
 <p>By quantifying the strength of an arrow, we answer the question:</p>
 <blockquote>
-<div><p>How strong is the causal influence from a cause to its direct effect?</p>
+<div><p><strong>How strong is the causal influence from a cause to its direct effect?</strong></p>
+</div></blockquote>
+<p>While there are different definitions for measuring causal influences in the literature, DoWhy offers an
+implementation for measuring the <em>direct</em> influence of a parent node on a child, where influences through paths over
+other nodes are ignored. This method is based on the paper:</p>
+<blockquote>
+<div><p>Dominik Janzing, David Balduzzi, Moritz Grosse-Wentrup, Bernhard Schölkopf. <a class="reference external" href="https://www.jstor.org/stable/23566552">Quantifying causal influences</a>
+The Annals of Statistics, Vol. 41, No. 5, 2324-2358, 2013.</p>
 </div></blockquote>
 <section id="how-to-use-it">
 <h2>How to use it<a class="headerlink" href="#how-to-use-it" title="Permalink to this heading"></a></h2>
-<p>To see how the method works, let us generate some data.</p>
+<p>To see how to use the method, let us generate some data.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span><span class="o">,</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span><span class="o">,</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">gcm</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># to reproduce these results</span>
@@ -417,7 +424,7 @@
 </div>
 <p><strong>Interpreting the results:</strong>
 By default, the measurement unit of the scalar values for arrow strengths is variance for a
-continuous real-valued target, and the number of bits for a categorical target.
+continuous real-valued target, and the number of bits for a categorical target (i.e., KL divergence).
 Above, we observe that the direct influence from <span class="math notranslate nohighlight">\(X\)</span> to <span class="math notranslate nohighlight">\(Y\)</span> (~41.32) is stronger (by ~2.7 times)
 than the direct influence from <span class="math notranslate nohighlight">\(Z\)</span> to <span class="math notranslate nohighlight">\(Y\)</span> (~14.73). Roughly speaking, “removing” the arrow
 from <span class="math notranslate nohighlight">\(X\)</span> to <span class="math notranslate nohighlight">\(Y\)</span> increases the variance of <span class="math notranslate nohighlight">\(Y\)</span> by ~41.32 units,
@@ -427,31 +434,30 @@ In particular, we briefly explain the science behind our method for quantifying 
 </section>
 <section id="understanding-the-method">
 <h2>Understanding the method<a class="headerlink" href="#understanding-the-method" title="Permalink to this heading"></a></h2>
-<p>We will use the causal graph below to illustrate the key idea behind our method.</p>
+<p>We will use the causal graph below to illustrate the key idea behind the method.</p>
 <img alt="../../../_images/arrow_strength_example.png" src="../../../_images/arrow_strength_example.png" />
-<p>Recall that we can obtain the joint distribution of variables <span class="math notranslate nohighlight">\(P\)</span> from their causal graph via a product of
-conditional distributions of each variable given its parents.
-To quantify the strength of an arrow from <span class="math notranslate nohighlight">\(Z\)</span> to <span class="math notranslate nohighlight">\(Y\)</span>, we define a new joint
-distribution <span class="math notranslate nohighlight">\(P_{Z \to Y}\)</span>, also called post-cutting distribution, obtained by
-removing the edge <span class="math notranslate nohighlight">\(Z \to Y\)</span>, and then feeding <span class="math notranslate nohighlight">\(Y\)</span> with an i.i.d. copy of <span class="math notranslate nohighlight">\(Z\)</span>.
-The i.i.d. copy can be simulated, in practice, by applying random permutation to samples of
-<span class="math notranslate nohighlight">\(Z\)</span>. The strength of an arrow from <span class="math notranslate nohighlight">\(Z\)</span> to <span class="math notranslate nohighlight">\(Y\)</span>, denoted <span class="math notranslate nohighlight">\(C_{Z \to
-Y}\)</span>, is then the distance (e.g., KL divergence) between the post-cutting distribution <span class="math notranslate nohighlight">\(P_{Z \to Y}\)</span> and
-the original joint distribution <span class="math notranslate nohighlight">\(P\)</span>.</p>
+<p>Here, we want to measure the strength of the arrow from node <span class="math notranslate nohighlight">\(Z\)</span> to node <span class="math notranslate nohighlight">\(Y\)</span>, while disregarding any indirect effects
+via <span class="math notranslate nohighlight">\(X\)</span>. To achieve this, first recall that we can obtain the joint distribution of variables <span class="math notranslate nohighlight">\(P\)</span> from their causal graph via a product of
+conditional distributions of each variable given its parents.</p>
+<p>We then create a new joint distribution <span class="math notranslate nohighlight">\(P_{Z \to Y}\)</span> by cutting the edge from <span class="math notranslate nohighlight">\(Z\)</span> to <span class="math notranslate nohighlight">\(Y\)</span> and
+using an i.i.d. copy of <span class="math notranslate nohighlight">\(Z\)</span> (denoted as <span class="math notranslate nohighlight">\(Z'\)</span> in the figure) instead as input to <span class="math notranslate nohighlight">\(Y\)</span>. The distribution of <span class="math notranslate nohighlight">\(Z'\)</span> can be practically
+simulated by randomly shuffling the observed values of <span class="math notranslate nohighlight">\(Z\)</span>. The strength of the arrow from <span class="math notranslate nohighlight">\(Z\)</span> to <span class="math notranslate nohighlight">\(Y\)</span>,
+represented as <span class="math notranslate nohighlight">\(C_{Z \to Y}\)</span>, is then calculated as the distance between the post-cutting distribution:math:<cite>P_{Z to Y}</cite> and the
+original joint distribution <span class="math notranslate nohighlight">\(P\)</span>:</p>
 <div class="math notranslate nohighlight">
-\[C_{Z \to Y} := D_{\mathrm{KL}}(P\; || P_{Z \to Y})\]</div>
-<p>Note that only the causal mechanism of the target variable (<span class="math notranslate nohighlight">\(P_{Y \mid X, Z}\)</span> in the above
-example) changes between the original and the post-cutting joint distribution. Therefore, any
-change in the marginal distribution of the target (obtained by marginalising the joint
-distribution) is due to the change in the causal mechanism of the target variable. This means, we
-can also quantify the arrow strength in terms of the change in the property of the marginal distribution (e.g. mean,
-variance) of the target when we remove an edge.</p>
+\[C_{Z \to Y} := D(P\; || P_{Z \to Y})\]</div>
+<p>The distance metric <span class="math notranslate nohighlight">\(D\)</span> utilized to calculate the arrow strength can be any suitable measure, such as the difference of variances or KL divergence.
+By default, the library uses a specific measure depending on the data type, but this can be fully customized to the use case.</p>
+<p>Note that when cutting the edge, only the causal mechanism of the target variable changes between the original and
+post-cutting joint distribution. As a result, any change in the marginal distribution of the target is due to the change
+in the causal mechanism of the target. This allows us to also quantify the arrow strength in terms of the change in
+the property (e.g., variance) of the marginal distribution of the target when we remove an edge.</p>
 </section>
-<section id="measuring-arrow-strengths-in-different-units">
-<h2>Measuring arrow strengths in different units<a class="headerlink" href="#measuring-arrow-strengths-in-different-units" title="Permalink to this heading"></a></h2>
-<p>By default, <cite>arrow_strength</cite> employs KL divergence for measuring the arrow strength for categorical target, and
-difference in variance for continuous real-valued target. But we can also plug in our choice of measure, using the
-<code class="docutils literal notranslate"><span class="pre">difference_estimation_func</span></code> parameter. To measure the arrow strength in terms of the change in the mean, we could
+<section id="customize-the-distance-measure">
+<h2>Customize the distance measure<a class="headerlink" href="#customize-the-distance-measure" title="Permalink to this heading"></a></h2>
+<p>By default, <cite>arrow_strength</cite> uses the difference of variances for measuring the arrow strength for a continuous real-valued target and employs
+KL divergence for measuring the arrow strength for a categorical target. But, we can also plug in our own choice of measure, using the
+<code class="docutils literal notranslate"><span class="pre">difference_estimation_func</span></code> parameter. For instance, to measure the arrow strength in terms of the change in the mean, we could
 define:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">mean_diff</span><span class="p">(</span><span class="n">Y_old</span><span class="p">,</span> <span class="n">Y_new</span><span class="p">):</span> <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Y_new</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Y_old</span><span class="p">)</span>
 </pre></div>
@@ -462,8 +468,8 @@ define:</p>
 <span class="go">     (&#39;Z&#39;, &#39;Y&#39;): 0.07811542095834415}</span>
 </pre></div>
 </div>
-<p>This is expected; in our example, the mean value of <span class="math notranslate nohighlight">\(Y\)</span> remains <span class="math notranslate nohighlight">\(0\)</span> regardless of whether we remove an incoming arrow.
-As such, the strength of incoming arrows to <span class="math notranslate nohighlight">\(Y\)</span> should be negligible.</p>
+<p>These small results here are expected; in our example, the mean value of <span class="math notranslate nohighlight">\(Y\)</span> remains <span class="math notranslate nohighlight">\(0\)</span> regardless of whether we remove an incoming arrow.
+As such, the strength of incoming arrows to <span class="math notranslate nohighlight">\(Y\)</span> with respect to their influence on the mean should be negligible.</p>
 <p>In summary, arrow strength can be measured in different units (e.g., mean, variance, bits). Therefore, we advise users
 to pick a meaningful unit—based on data and interpretation—to apply this method in practice.</p>
 </section>

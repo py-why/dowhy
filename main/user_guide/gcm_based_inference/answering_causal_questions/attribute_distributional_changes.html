@@ -351,6 +351,11 @@
    How to use it
   </a>
  </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#understanding-the-method">
+   Understanding the method
+  </a>
+ </li>
 </ul>
 
 </nav>
@@ -374,14 +379,21 @@
 <h1>Attributing Distributional Changes<a class="headerlink" href="#attributing-distributional-changes" title="Permalink to this heading"></a></h1>
 <p>When attributing distribution changes, we answer the question:</p>
 <blockquote>
-<div><p>What mechanism in my system changed between two sets of data?</p>
+<div><p><strong>What mechanism in my system changed between two sets of data? Or in other words, which node in my data behaves differently?</strong></p>
 </div></blockquote>
-<p>For example, in a distributed computing system, we want to know why an important system metric changed in a negative way.</p>
+<p>Here we want to identify the node or nodes in the graph where the causal mechanism has changed. For example, if we detect
+an uptick in latency of our application within a microservice architecture, we aim to identify the node/component whose behavior has altered.
+has changed. DoWhy implements a method to identify and attribute changes in a distribution to changes in causal mechanisms
+of upstream nodes following the paper:</p>
+<blockquote>
+<div><p>Kailash Budhathoki, Dominik Janzing, Patrick Blöbaum, Hoiyi Ng. <a class="reference external" href="http://proceedings.mlr.press/v130/budhathoki21a/budhathoki21a.pdf">Why did the distribution change?</a>
+Proceedings of The 24th International Conference on Artificial Intelligence and Statistics, PMLR 130:1666-1674, 2021.</p>
+</div></blockquote>
 <section id="how-to-use-it">
 <h2>How to use it<a class="headerlink" href="#how-to-use-it" title="Permalink to this heading"></a></h2>
-<p>To see how the method works, let’s take the example from above and assume we have a system of three services X, Y, Z,
-producing latency numbers. The first dataset <code class="docutils literal notranslate"><span class="pre">data_old</span></code> is before the deployment, <code class="docutils literal notranslate"><span class="pre">data_new</span></code> is after the
-deployment:</p>
+<p>To see how to use the method, let’s take the microservice example from above and assume we have a system of four services <span class="math notranslate nohighlight">\(X, Y, Z, W\)</span>,
+each of which monitors latencies. Suppose we plan to carry out a new deployment and record the latencies before and after the deployment.
+We will refer to the latency data gathered prior to the deployment as <code class="docutils literal notranslate"><span class="pre">data_old</span></code> and the data gathered after the deployment as <code class="docutils literal notranslate"><span class="pre">data_new</span></code>:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span><span class="o">,</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span><span class="o">,</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">gcm</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">halfnorm</span>
@@ -389,37 +401,59 @@ deployment:</p>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Y</span> <span class="o">=</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">data_old</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">W</span> <span class="o">=</span> <span class="n">Z</span> <span class="o">+</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data_old</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="n">W</span><span class="p">))</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Y</span> <span class="o">=</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">Z</span> <span class="o">=</span> <span class="n">X</span> <span class="o">+</span> <span class="n">Y</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">data_new</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Z</span> <span class="o">=</span> <span class="n">X</span> <span class="o">+</span> <span class="n">Y</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">W</span> <span class="o">=</span> <span class="n">Z</span> <span class="o">+</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data_new</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="n">W</span><span class="p">))</span>
 </pre></div>
 </div>
-<p>The change here simulates an accidental conversion of multi-threaded code into sequential one (waiting for X and Y in
-parallel vs. waiting for them sequentially).</p>
+<p>Here, we change the behaviour of <span class="math notranslate nohighlight">\(Z\)</span>, which simulates an accidental conversion of multi-threaded code into sequential
+one (waiting for <span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(Y\)</span> in parallel vs. waiting for them sequentially). This will change the distribution of
+<span class="math notranslate nohighlight">\(Z\)</span> and subsequently <span class="math notranslate nohighlight">\(W\)</span>.</p>
 <p>Next, we’ll model cause-effect relationships as a probabilistic causal model:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">ProbabilisticCausalModel</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">)]))</span>  <span class="c1"># X -&gt; Z &lt;- Y</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">EmpiricalDistribution</span><span class="p">())</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">EmpiricalDistribution</span><span class="p">())</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">ProbabilisticCausalModel</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="s1">&#39;W&#39;</span><span class="p">)]))</span>  <span class="c1"># (X, Y) -&gt; Z -&gt; W</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">assign_causal_mechanisms</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data_old</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Finally, we attribute changes in distributions to changes in causal mechanisms:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">attributions</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">distribution_change</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data_old</span><span class="p">,</span> <span class="n">data_new</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">)</span>
+<p>Finally, we attribute changes in distributions of <span class="math notranslate nohighlight">\(W\)</span> to changes in causal mechanisms:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">attributions</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">distribution_change</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data_old</span><span class="p">,</span> <span class="n">data_new</span><span class="p">,</span> <span class="s1">&#39;W&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">attributions</span>
-<span class="go">{&#39;X&#39;: -0.0066425020480165905, &#39;Y&#39;: 0.009816959724738061, &#39;Z&#39;: 0.21957816956354193}</span>
+<span class="go">{&#39;W&#39;: 0.012553173521649849, &#39;X&#39;: -0.007493424287710609, &#39;Y&#39;: 0.0013256550695736396, &#39;Z&#39;: 0.7396701922473544}</span>
 </pre></div>
 </div>
-<p>As we can see, <span class="math notranslate nohighlight">\(Z\)</span> got the highest attribution score here, which matches what we would
-expect, given that we changed the mechanism for variable <span class="math notranslate nohighlight">\(Z\)</span> in our data generation.</p>
+<p>Although the distribution of <span class="math notranslate nohighlight">\(W\)</span> has changed as well, the method attributes the change almost completely to <span class="math notranslate nohighlight">\(Z\)</span>
+with negligible scores for the other variables. This is in line with our expectations since we only altered the mechanism of
+<span class="math notranslate nohighlight">\(Z\)</span>. Note that the unit of the scores depends on the used measure (see the next section).</p>
 <p>As the reader may have noticed, there is no fitting step involved when using this method. The
 reason is, that this function will call <code class="docutils literal notranslate"><span class="pre">fit</span></code> internally. To be precise, this function will
 make two copies of the causal graph and fit one graph to the first dataset and the second graph
 to the second dataset.</p>
+</section>
+<section id="understanding-the-method">
+<h2>Understanding the method<a class="headerlink" href="#understanding-the-method" title="Permalink to this heading"></a></h2>
+<p>The idea behind this method is to <em>systematically</em> replace the causal mechanism learned based on the old dataset with
+the mechanism learned based on the new dataset. After each replacement, new samples are generated for the target node,
+where the data generation process is a mixture of old and new mechanisms. Our goal is to identify the mechanisms that
+have changed, which would lead to a different marginal distribution of the target, while unchanged mechanisms would result
+in the same marginal distribution. To achieve this, we employ the idea of a Shapley symmetrization to systematically
+replace the mechanisms. This enables us to identify which nodes have changed and to estimate an attribution score with
+respect to some measure. Note that a change in the mechanism could be due to a functional change in the underlying model
+or a change in the (unobserved) noise distribution. However, both changes would lead to a change in the mechanism.</p>
+<p>The steps here are as follows:</p>
+<img alt="../../../_images/dist_change.png" src="../../../_images/dist_change.png" />
+<ol class="arabic simple">
+<li><p>Estimate the conditional distributions from ‘old’ data (e.g., latencies before deployment): <span class="math notranslate nohighlight">\(P_{X_1, ..., X_n} = \prod_j P_{X_j | PA_j}\)</span>, where <span class="math notranslate nohighlight">\(P_{X_j | PA_j}\)</span> is the causal mechanism of node <span class="math notranslate nohighlight">\(X_j\)</span> and <span class="math notranslate nohighlight">\(PA_j\)</span> the parents of node <span class="math notranslate nohighlight">\(X_j\)</span></p></li>
+<li><p>Estimate the conditional distributions from ‘new’ data (e.g., latencies after deployment): <span class="math notranslate nohighlight">\(\tilde P_{X_1, ..., X_n} = \prod_j \tilde P_{X_j | PA_j}\)</span></p></li>
+<li><p>Replace mechanisms based on the ‘old’ data with mechanisms based on the ‘new’ data systematically, one by one. For this, replace <span class="math notranslate nohighlight">\(P_{X_j | PA_j}\)</span> by <span class="math notranslate nohighlight">\(\tilde P_{X_j | PA_j}\)</span> for each <span class="math notranslate nohighlight">\(j\)</span>. If nodes in <span class="math notranslate nohighlight">\(T \subseteq \{1, ..., n\}\)</span> have been replaced before, we get <span class="math notranslate nohighlight">\(\tilde P^{X_n}_T = \sum_{x_1, ..., x_{n-1}} \prod_{j \in T} \tilde P_{X_j | PA_j} \prod_{j \notin T} P_{X_j | PA_j}\)</span>, a new marginal for node <span class="math notranslate nohighlight">\(n\)</span>.</p></li>
+<li><p>Attribute the change in the marginal given <span class="math notranslate nohighlight">\(T\)</span> to <span class="math notranslate nohighlight">\(X_j\)</span> using Shapley values by comparing <span class="math notranslate nohighlight">\(P^{X_n}_{T \bigcup \{j\}}\)</span> and <span class="math notranslate nohighlight">\(P^{X_n}_{T}\)</span>. Here, we can use different measures to capture the change, such as KL divergence to the original distribution or difference in variances etc.</p></li>
+</ol>
+<p>For more detailed explanation, see the corresponding paper: <a class="reference external" href="http://proceedings.mlr.press/v130/budhathoki21a/budhathoki21a.pdf">Why did the distribution change?</a></p>
 </section>
 </section>
 
