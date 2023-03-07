@@ -379,34 +379,29 @@
 <h1>Computing Counterfactuals<a class="headerlink" href="#computing-counterfactuals" title="Permalink to this heading"></a></h1>
 <p>By computing counterfactuals, we answer the question:</p>
 <blockquote>
-<div><p>I observed a certain outcome <span class="math notranslate nohighlight">\(z\)</span> for a variable <span class="math notranslate nohighlight">\(Z\)</span> where variable <span class="math notranslate nohighlight">\(X\)</span> was set to a value <span class="math notranslate nohighlight">\(x\)</span>. What
-would have happened to the value of <span class="math notranslate nohighlight">\(Z\)</span>, had I intervened on <span class="math notranslate nohighlight">\(X\)</span> to assign it a different value <span class="math notranslate nohighlight">\(x'\)</span>?</p>
+<div><p>I observed a certain outcome z for a variable Z where variable X was set to a value x. What
+would have happened to the value of Z, had I intervened on X to assign it a different value x’?</p>
 </div></blockquote>
 <p>As a concrete example, we can imagine the following:</p>
 <blockquote>
-<div><p>I’m seeing unhealthy high levels of my <a class="reference external" href="https://www.google.com/search?q=cholesterol+ldl">cholesterol LDL</a> (<span class="math notranslate nohighlight">\(Z = 10\)</span>). I didn’t take any medication
-against it in recent months (<span class="math notranslate nohighlight">\(x = 0\)</span>). What would have happened to my cholesterol LDL level (<span class="math notranslate nohighlight">\(Z\)</span>),
-had I taken a medication dosage of 5g a day (<span class="math notranslate nohighlight">\(X := 5\)</span>)?</p>
+<div><p>I’m seeing unhealthy high levels of my <a class="reference external" href="https://www.google.com/search?q=cholesterol+ldl">cholesterol LDL</a> (Z=10). I didn’t take any medication
+against it in recent months (X=0). What would have happened to my cholesterol LDL level (Z),
+had I taken a medication dosage of 5g a day (X := 5)?</p>
 </div></blockquote>
-<p>Note that the estimation of counterfactuals based on Pearl’s graphical causal model framework requires stronger assumptions than the generation of interventional samples
-(see the <a class="reference internal" href="quantify_intrinsic_causal_influence.html#understand-method"><span class="std std-ref">Understanding the method</span></a> section for more details).</p>
 <section id="how-to-use-it">
 <h2>How to use it<a class="headerlink" href="#how-to-use-it" title="Permalink to this heading"></a></h2>
-<p>To see how we can use this method, let’s generate some data:</p>
+<p>To see how the method works, let’s generate some data:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span><span class="o">,</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span><span class="o">,</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">gcm</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">Y</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">X</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">Z</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">Y</span> <span class="o">+</span> <span class="mi">80</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Y</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">X</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Z</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">Y</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">training_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">))</span>
 </pre></div>
 </div>
-<p>If we think of the cholesterol example, one could think of <span class="math notranslate nohighlight">\(Y\)</span> here as some kind of body measurement that affects
-the cholesterol LDL level, such as a derivative of the body’s ability to absorb the medication or its metabolism.</p>
-<p>Next, we’ll model cause-effect relationships and fit the models to the data. Estimating counterfactuals requires an
-invertible SCM that can be represented by additive noise models:</p>
+<p>Next, we’ll model cause-effect relationships as an invertible SCM and fit it to the data:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">InvertibleStructuralCausalModel</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">)]))</span> <span class="c1"># X -&gt; Y -&gt; Z</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">EmpiricalDistribution</span><span class="p">())</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
@@ -416,70 +411,51 @@ invertible SCM that can be represented by additive noise models:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">training_data</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Suppose we have observed the values <span class="math notranslate nohighlight">\(x=0, y=5, z=110\)</span>. We are interested in knowing if taking medication, e.g.,
-setting <span class="math notranslate nohighlight">\(x:=5\)</span>, would have led to a smaller value for <span class="math notranslate nohighlight">\(z\)</span>. The counterfactual value of <span class="math notranslate nohighlight">\(z\)</span> for this
-scenario can be estimated in the following way:</p>
+<p>Finally, let’s compute the counterfactual when intervening on X:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">counterfactual_samples</span><span class="p">(</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">causal_model</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">observed_data</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Y</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">Z</span><span class="o">=</span><span class="p">[</span><span class="mi">110</span><span class="p">])))</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">observed_data</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">Y</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">Z</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">])))</span>
 <span class="go">   X         Y         Z</span>
-<span class="go">0  5 -4.82026  80.62051</span>
+<span class="go">0  2  4.034229  9.073294</span>
 </pre></div>
 </div>
-<p>As we can see, <span class="math notranslate nohighlight">\(X\)</span> takes our treatment-/intervention-value of 5, and <span class="math notranslate nohighlight">\(Y\)</span> and <span class="math notranslate nohighlight">\(Z\)</span>
-take deterministic values that are <em>based on our trained causal models</em> and the fixed observation. For example, if <span class="math notranslate nohighlight">\(X\)</span> were 0
-and <span class="math notranslate nohighlight">\(Y\)</span> were 5, we would expect <span class="math notranslate nohighlight">\(Z\)</span> to be 95 based on the data generation process. However, we observed <span class="math notranslate nohighlight">\(Z\)</span> to be 110,
-indicating a noise value of approximately ~15 in this <em>particular</em> sample. With knowledge of this hidden noise factor,
-we can estimate the counterfactual value of <span class="math notranslate nohighlight">\(Z\)</span> had we set <span class="math notranslate nohighlight">\(X\)</span> to 5, which is approximately ~80 as shown in the result above.</p>
-<p>We can also provide these noise values directly to the function:</p>
+<p>As we can see, <span class="math notranslate nohighlight">\(X\)</span> takes our treatment-/intervention-value of 2, and <span class="math notranslate nohighlight">\(Y\)</span> and <span class="math notranslate nohighlight">\(Z\)</span>
+take deterministic values, based on our trained causal models and fixed observed data. I.e., based
+on the data generation process, if <span class="math notranslate nohighlight">\(X = 1\)</span>, <span class="math notranslate nohighlight">\(Y = 2\)</span>, we would expect <span class="math notranslate nohighlight">\(Z\)</span> to
+be 6, but we <em>observed</em> <span class="math notranslate nohighlight">\(Z = 3\)</span>, which means the particular noise value for <span class="math notranslate nohighlight">\(Z\)</span> in this
+particular sample is approximately -2.98. Now, given that we know this hidden noise factor, we can
+estimate the counterfactual value of <span class="math notranslate nohighlight">\(Z\)</span>, had we set <span class="math notranslate nohighlight">\(X := 2\)</span>, which is approximately
+9.07 (as can be seen in the result above).</p>
+<p>This shows that the observed data is used to calculate the noise data in the system. We can also
+provide these noise values directly, via:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">counterfactual_samples</span><span class="p">(</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">causal_model</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">noise_data</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Y</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">Z</span><span class="o">=</span><span class="p">[</span><span class="mi">15</span><span class="p">])))</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">noise_data</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Y</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.007913</span><span class="p">],</span> <span class="n">Z</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">2.97568</span><span class="p">])))</span>
 <span class="go">   X         Y         Z</span>
-<span class="go">0  5 -4.845684  80.431559</span>
+<span class="go">0  2  4.034229  9.073293</span>
 </pre></div>
 </div>
-<p>As we see, with <span class="math notranslate nohighlight">\(X\)</span> set to 5 and <span class="math notranslate nohighlight">\(y = -2 \cdot x + 5 = -5\)</span>, <span class="math notranslate nohighlight">\(z\)</span> should be approximately ~65. But
-we know the hidden noise for <span class="math notranslate nohighlight">\(Z\)</span> is approximately ~15. So the counterfactual outcome is again
-<span class="math notranslate nohighlight">\(z = 3*y + 80 + 15 = 80\)</span>.</p>
-<p>It’s important to note that the estimated values we obtained are not exact as we see in the results,
-since the model parameters were not learned
-perfectly. Specifically, the learned coefficients for <span class="math notranslate nohighlight">\(Y\)</span> and <span class="math notranslate nohighlight">\(Z\)</span> are not precisely -2 and 3, respectively,
-as suggested by the data generation process. As usual in machine learning, more data or fine-tuning models can help to
-improve accuracy.</p>
+<p>As we see, with <span class="math notranslate nohighlight">\(X = 2\)</span> and <span class="math notranslate nohighlight">\(Y \approx 4.03\)</span>, <span class="math notranslate nohighlight">\(Z\)</span> should be approximately 12. But
+we know the hidden noise for this sample, approximately -2.98. So the counterfactual outcome
+is again <span class="math notranslate nohighlight">\(Z \approx 9.07\)</span>.</p>
 </section>
 <section id="understanding-the-method">
-<span id="understand-method"></span><h2>Understanding the method<a class="headerlink" href="#understanding-the-method" title="Permalink to this heading"></a></h2>
-<p>Counterfactuals in graphical causal models are very similar to <a class="reference internal" href="simulate_impact_of_interventions.html"><span class="doc">Simulating the Impact of Interventions</span></a>, with an important
+<h2>Understanding the method<a class="headerlink" href="#understanding-the-method" title="Permalink to this heading"></a></h2>
+<p>Counterfactuals are very similar to <a class="reference internal" href="simulate_impact_of_interventions.html"><span class="doc">Simulating the Impact of Interventions</span></a>, with an important
 difference: when performing interventions, we look into the future, for counterfactuals we look into
-an alternative past. To reflect this in the computation, when performing interventions, we first recreate all noise values
-for a specific observation and then estimate the counterfactual outcome. However, this requires stronger modeling
-assumptions than generating interventional samples.</p>
-<p>Recall that the causal mechanism of a node <span class="math notranslate nohighlight">\(Y\)</span> is represented as <span class="math notranslate nohighlight">\(Y := f(X, N)\)</span>, where <span class="math notranslate nohighlight">\(X\)</span> are the parents of <span class="math notranslate nohighlight">\(Y\)</span> and <span class="math notranslate nohighlight">\(N\)</span> is the noise.
-To generate interventional samples for <span class="math notranslate nohighlight">\(Y\)</span>, we can take any random value from <span class="math notranslate nohighlight">\(N\)</span>, but for counterfactuals,
-we need to first reconstruct the specific noise value (based on the model) that led to our observation. This requires the
-causal mechanism to be invertible with respect to <span class="math notranslate nohighlight">\(N\)</span>, although it does not need to be invertible with respect to <span class="math notranslate nohighlight">\(X\)</span>.
-A common modeling assumptions that ensures this are additive noise models of the form
-<span class="math notranslate nohighlight">\(Y := f(X) + N\)</span>, where the noise can be reconstructed by <span class="math notranslate nohighlight">\(N = Y - f(X)\)</span>. Note that currently only continuous
-data is supported for counterfactual estimation, while there is no restriction on the data type for generating interventional
-samples.</p>
-<p>To further clarify the role of the noise here, let’s revisit the example in the introduction about high levels of
-cholesterol LDL. Seeing that there are many unobserved factors that can impact cholesterol levels, such as exercise and
-genetics, the question arises: If I had taken medication, would my LDL levels have been reduced? To answer this, we can use interventions where
-we keep the subject specific unobserved factors (i.e., noise) constant and only change the amount of hypothetically taken medicine.
-In practice this can be achieved by first reconstructing the noise and then use that specific value
-to estimate the LDL levels after intervening on the amount of medicine. Here it is crucial to use the reconstructed noise value rather
-than randomly sampling it from the noise distribution. Otherwise, one may see a reduction in LDL levels, not because of
-the medication itself, but because of the generated noise value that coincidentally causes low levels. Assuming the modeling
-assumptions are approximately correct, we can then analyze whether the medication would have helped in the counterfactual scenario.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><strong>Remark on invertible mechanisms</strong>: Generally, mechanisms that are invertible with respect to <span class="math notranslate nohighlight">\(N\)</span> allow us to estimate point
-counterfactuals. However, it is also possible to allow some mechanisms to be non-invertible. In this case, however, we would
-obtain a counterfactual <em>distribution</em> based on the observational evidence, which may not necessarily be point-wise.</p>
-</div>
+an alternative past. To reflect this in the computation, when performing interventions, we generate
+all noise using our causal models. For counterfactuals, we use the noise from actual observed data.</p>
+<p>To expand on our example above, we assume there are other factors that contribute to cholesterol
+levels, e.g. exercising or genetic predisposition. While we <em>assume</em> medication helps against high
+LDL levels, it’s important to take into account all other factors that could also help against it.
+We want to prove <em>what</em> has helped. Hence, it’s important to use the noise from the real data,
+not some generated noise from our generative models. Otherwise, I may be able to reduce my
+cholesterol LDL level in the counterfactual world, where I take medication (X := 5), but not because
+I took the medication, but because the <em>generated noise</em> of Z also just happened to be low and so
+caused a low value for Z. By taking the <em>real</em> noise value of Z (derived from the observed data of
+Z), I can prove that it was the medication that helped.</p>
 </section>
 </section>
 
