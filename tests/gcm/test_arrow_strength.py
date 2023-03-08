@@ -88,7 +88,7 @@ def test_given_categorical_target_node_when_estimate_arrow_strength_of_model_cla
     assert arrow_strength_of_model(classifier_sem, X) == approx(np.array([0.3, 0.3, 0, 0, 0]), abs=0.1)
 
 
-def test_given_fixed_random_seed_when_estimate_arrow_strength_then_return_deterministid_result(
+def test_given_fixed_random_seed_when_estimate_arrow_strength_then_return_deterministic_result(
     preserve_random_generator_state,
 ):
     causal_model = ProbabilisticCausalModel(nx.DiGraph([("X1", "X2"), ("X0", "X2")]))
@@ -179,6 +179,20 @@ def test_given_gcm_with_misspecified_mechanism_when_evaluate_arrow_strength_with
     )
     assert causal_strengths[("X0", "X2")] == approx(4, abs=0.5)
     assert causal_strengths[("X1", "X2")] == approx(1, abs=0.1)
+
+
+def test_given_less_samples_than_num_conditionals_specified_when_evaluate_arrow_strength_with_observational_data_then_does_not_throw_error():
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([("X0", "X1")]))
+    causal_model.set_causal_mechanism("X0", ScipyDistribution(stats.norm, loc=0, scale=1))
+    causal_model.set_causal_mechanism("X1", AdditiveNoiseModel(prediction_model=create_linear_regressor()))
+
+    X0 = np.random.normal(0, 1, 10)
+    X1 = np.random.normal(0, 1, 10)
+
+    test_data = pd.DataFrame({"X0": X0, "X1": X1})
+    fit(causal_model, test_data)
+
+    arrow_strength(causal_model, "X1", parent_samples=test_data, num_samples_conditional=10000)
 
 
 def _create_causal_model():
