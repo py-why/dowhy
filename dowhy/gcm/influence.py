@@ -14,7 +14,6 @@ from numpy.matlib import repmat
 import dowhy.gcm.auto as auto
 from dowhy.gcm._noise import compute_data_from_noise, noise_samples_of_ancestors
 from dowhy.gcm.cms import ProbabilisticCausalModel, StructuralCausalModel
-from dowhy.gcm.constant import EPS
 from dowhy.gcm.divergence import estimate_kl_divergence_of_probabilities
 from dowhy.gcm.fcms import ClassificationModel, ClassifierFCM, PredictionModel, ProbabilityEstimatorModel
 from dowhy.gcm.fitting_sampling import draw_samples
@@ -38,10 +37,10 @@ def arrow_strength(
     causal_model: ProbabilisticCausalModel,
     target_node: Any,
     parent_samples: Optional[pd.DataFrame] = None,
-    num_samples_conditional: int = 1000,
+    num_samples_conditional: int = 2000,
     max_num_runs: int = 5000,
-    tolerance: float = 10**-4,
-    n_jobs: int = 1,
+    tolerance: float = 0.01,
+    n_jobs: int = -1,
     difference_estimation_func: Optional[Callable[[np.ndarray, np.ndarray], Union[np.ndarray, float]]] = None,
 ) -> Dict[Tuple[Any, Any], float]:
     """Computes the causal strength of each edge directed to the target node.
@@ -61,11 +60,15 @@ def arrow_strength(
                            based on the provided causal model. Providing observational data can help to mitigate
                            misspecifications in the graph, such as missing interactions between root nodes or
                            confounders.
-    :param num_samples_conditional: Sample size to use for estimating the distance between distributions.
+    :param num_samples_conditional: Sample size to use for estimating the distance between distributions. The more
+                                    more samples, the higher the accuracy.
     :param max_num_runs: The maximum number of times to resample and estimate the strength to report the average
                          strength.
-    :param tolerance: The difference in average strength between two successive runs to terminate early without
-                      running it max_num_runs times.
+    :param tolerance: If the percentage change in the estimated strength between two consecutive runs falls below the
+                      specified tolerance, the algorithm will terminate before reaching the maximum number of runs.
+                      A value of 0.01 would indicate a change of less than 1%. However, in order to minimize the impact
+                      of randomness, there must be at least three consecutive runs where the change is below the
+                      threshold.
     :param n_jobs: The number of jobs to run in parallel. Set it to -1 to use all processors.
     :param difference_estimation_func: Optional: How to measure the distance between two distributions. By default,
                                        the difference of the variance is estimated for a continuous target node
@@ -84,7 +87,7 @@ def arrow_strength(
     ordered_predecessors = get_ordered_predecessors(sub_causal_model.graph, target_node)
 
     if parent_samples is None:
-        parent_samples = draw_samples(sub_causal_model, num_samples_conditional * 10)[ordered_predecessors]
+        parent_samples = draw_samples(sub_causal_model, num_samples_conditional * 20)[ordered_predecessors]
 
     direct_influences = arrow_strength_of_model(
         sub_causal_model.causal_mechanism(target_node),
@@ -101,10 +104,10 @@ def arrow_strength(
 def arrow_strength_of_model(
     conditional_stochastic_model: ConditionalStochasticModel,
     input_samples: np.ndarray,
-    num_samples_from_conditional: int = 1000,
+    num_samples_from_conditional: int = 2000,
     max_num_runs: int = 5000,
-    tolerance: float = 10**-4,
-    n_jobs: int = 1,
+    tolerance: float = 0.01,
+    n_jobs: int = -1,
     difference_estimation_func: Optional[Callable[[np.ndarray, np.ndarray], Union[np.ndarray, float]]] = None,
     input_subsets: Optional[List[List[int]]] = None,
 ) -> np.ndarray:
@@ -167,6 +170,8 @@ def _estimate_direct_strength(
 ) -> float:
     distribution_samples = shape_into_2d(distribution_samples)
 
+    num_samples_conditional = min(num_samples_conditional, distribution_samples.shape[0])
+
     aggregated_conditional_difference_result = 0
     average_difference_result = 0
     converged_run = 0
@@ -196,9 +201,11 @@ def _estimate_direct_strength(
             break
         elif run > 0:
             if old_average_difference_result == 0:
-                old_average_difference_result = EPS
+                converging = average_difference_result == 0
+            else:
+                converging = abs(1 - average_difference_result / old_average_difference_result) < tolerance
 
-            if abs(1 - average_difference_result / old_average_difference_result) < tolerance:
+            if converging:
                 converged_run += 1
                 if converged_run >= 3:
                     break
