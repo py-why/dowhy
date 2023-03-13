@@ -1,16 +1,19 @@
 import random
 
+import networkx as nx
 import numpy as np
 import pandas as pd
 import pytest
 from _pytest.python_api import approx
 
+from dowhy import gcm
 from dowhy.gcm.util.general import (
     apply_one_hot_encoding,
     fit_one_hot_encoders,
     has_categorical,
     is_categorical,
     set_random_seed,
+    setdiff2d,
     shape_into_2d,
 )
 
@@ -81,3 +84,35 @@ def test_when_set_random_seed_then_expect_same_random_values(preserve_random_gen
 
     assert numpy_vals1 == approx(numpy_vals2)
     assert random_vals1 == approx(random_vals2)
+
+
+def test_when_calling_setdiff2d_then_returns_expected_arrays():
+    assert setdiff2d(np.array([[1, 2], [1, 4], [1, 2], [2, 3]]), np.array([[1, 4], [2, 3], [2, 4]])) == approx(
+        np.array([[1, 2]])
+    )
+    assert setdiff2d(
+        np.array([[1, 2], [1, 4], [1, 2], [2, 3]]), np.array([[1, 4], [2, 3], [2, 4]]), assume_unique=True
+    ) == approx(np.array([[1, 2], [1, 2]]))
+    assert setdiff2d(np.array([[1, 4], [2, 3], [2, 4]]), np.array([[1, 2], [1, 4], [1, 2], [2, 3]])) == approx(
+        np.array([[2, 4]])
+    )
+    assert setdiff2d(np.array([[1, 2], [1, 4], [1, 2], [2, 3]]), np.array([[1, 3], [2, 5], [2, 4]])) == approx(
+        np.array([[1, 2], [1, 4], [2, 3]])
+    )
+    assert setdiff2d(
+        np.array([[1, 2], [1, 4], [1, 2], [2, 3]]), np.array([[1, 3], [2, 5], [2, 4]]), assume_unique=True
+    ) == approx(np.array([[1, 2], [1, 4], [1, 2], [2, 3]]))
+
+
+def test_given_non_contiguous_data_when_calling_setdiff2d_then_does_not_raise_error():
+    X = np.random.normal(loc=0, scale=1, size=1000)
+    Y = X + np.random.normal(loc=0, scale=1, size=1000)
+    data = pd.DataFrame(data=dict(X=X, Y=Y))
+
+    causal_model = gcm.StructuralCausalModel(nx.DiGraph([("X", "Y")]))
+    gcm.auto.assign_causal_mechanisms(causal_model, data)
+    gcm.fit(causal_model, data)
+
+    generated_data = gcm.draw_samples(causal_model, num_samples=100000)
+
+    setdiff2d(data.to_numpy(), generated_data.to_numpy())
