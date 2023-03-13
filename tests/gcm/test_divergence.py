@@ -72,3 +72,14 @@ def test_given_valid_and_invalid_probability_vectors_when_apply_is_probabilities
 
 def test_given_numpy_array_with_object_dtype_when_check_is_probability_matrix_then_does_not_raise_error():
     assert not is_probability_matrix(np.array([0, 1, 2], dtype=object))
+
+
+@flaky(max_runs=3)
+def test_given_simple_gaussian_data_with_overlap_when_estimate_kl_divergence_continuous_then_does_not_return_inf():
+    X = np.random.normal(0, 1, 10000)
+    Y = np.random.normal(1, 1, 10000)
+
+    Y[:10] = X[:10]
+
+    assert estimate_kl_divergence_continuous(X, X) == approx(0, abs=0.001)
+    assert estimate_kl_divergence_continuous(X, Y) == approx(0.5, abs=0.1)

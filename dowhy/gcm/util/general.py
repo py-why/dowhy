@@ -134,6 +134,29 @@ def has_categorical(X: np.ndarray) -> bool:
     return False
 
 
+def setdiff2d(ar1: np.ndarray, ar2: np.ndarray, assume_unique: bool = False) -> np.ndarray:
+    """This method generalizes numpy's setdiff1d to 2d, i.e., it compares vectors for arbitrary length. See
+    https://numpy.org/doc/stable/reference/generated/numpy.setdiff1d.html for more details."""
+    if ar1.ndim == ar2.ndim != 2:
+        raise ValueError("Only support 2D arrays!")
+
+    if ar1.shape[1] != ar2.shape[1]:
+        return ar1
+
+    dtype = {"names": ["f{}".format(i) for i in range(ar1.shape[1])], "formats": ar1.shape[1] * [ar1.dtype]}
+
+    if not ar1.flags["C_CONTIGUOUS"]:
+        ar1 = np.ascontiguousarray(ar1)
+    if not ar2.flags["C_CONTIGUOUS"]:
+        ar2 = np.ascontiguousarray(ar2)
+
+    return (
+        np.setdiff1d(ar1.view(dtype), ar2.view(dtype), assume_unique=assume_unique)
+        .view(ar1.dtype)
+        .reshape(-1, ar1.shape[1])
+    )
+
+
 def means_difference(randomized_predictions: np.ndarray, baseline_values: np.ndarray) -> np.ndarray:
     return np.mean(randomized_predictions).squeeze() - np.mean(baseline_values).squeeze()
 
