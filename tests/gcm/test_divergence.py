@@ -68,3 +68,7 @@ def test_given_valid_and_invalid_probability_vectors_when_apply_is_probabilities
     assert not is_probability_matrix(np.array([0.1, 0.3, 0.2]))
     assert is_probability_matrix(np.array([[0.5, 0.3, 0.2], [0.1, 0.2, 0.7]]))
     assert not is_probability_matrix(np.random.normal(0, 1, (5, 3)))
+
+
+def test_given_numpy_array_with_object_dtype_when_check_is_probability_matrix_then_does_not_raise_error():
+    assert not is_probability_matrix(np.array([0, 1, 2], dtype=object))

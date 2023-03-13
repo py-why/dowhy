@@ -92,6 +92,6 @@ def estimate_kl_divergence_of_probabilities(X: np.ndarray, Y: np.ndarray) -> flo
 
 def is_probability_matrix(X: np.ndarray) -> bool:
     if X.ndim == 1:
-        return np.all(np.isclose(np.sum(abs(X), axis=0), 1))
+        return np.all(np.isclose(np.sum(abs(X.astype(np.float64)), axis=0), 1))
     else:
-        return np.all(np.isclose(np.sum(abs(X), axis=1), 1))
+        return np.all(np.isclose(np.sum(abs(X.astype(np.float64)), axis=1), 1))
