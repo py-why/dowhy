@@ -1,11 +1,14 @@
+import itertools
+import math
 import random
+from collections import Counter
 
 import numpy as np
 import pytest
 from flaky import flaky
 from pytest import approx
 
-from dowhy.gcm.shapley import ShapleyApproximationMethods, ShapleyConfig, estimate_shapley_values
+from dowhy.gcm.shapley import ShapleyApproximationMethods, ShapleyConfig, _get_permutation_at, estimate_shapley_values
 from dowhy.gcm.stats import permute_features
 from dowhy.gcm.util.general import means_difference
 
@@ -219,6 +222,16 @@ def test_given_specific_random_seed_when_estimate_shapley_values_with_early_stop
     )
 
     assert shapley_values_1 == approx(shapley_values_2, abs=0)
+
+
+def test_given_all_indices_when_calling_get_permutation_at_then_returns_all_possible_permutations():
+    n_minus_one = math.factorial(7)
+    players = list(range(8))
+    all_permutations = []
+    for i in range(math.factorial(8)):
+        all_permutations.append(_get_permutation_at(players, i, n_minus_one))
+
+    assert Counter(map(tuple, list(itertools.permutations(players)))) == Counter(map(tuple, all_permutations))
 
 
 def _generate_data(num_vars):
