@@ -5,6 +5,8 @@ the future.
 """
 
 import itertools
+import math
+import warnings
 from enum import Enum
 from typing import Callable, Dict, List, Optional, Set, Tuple, Union
 
@@ -12,6 +14,7 @@ import numpy as np
 import scipy
 from joblib import Parallel, delayed
 from scipy.special import comb
+from scipy.stats._qmc import Sobol
 from sklearn.linear_model import LinearRegression
 from tqdm import tqdm
 
@@ -29,7 +32,7 @@ class ShapleyApproximationMethods(Enum):
     SUBSET_SAMPLING: Randomly samples subsets and estimate Shapley values via weighed least squares regression. Here,
                      only a certain number of randomly drawn subsets are used.
     EARLY_STOPPING: Estimate Shapley values based on a few randomly generated permutations. Stop the estimation process
-                    when the the Shapley values do not change much on average anymore between runs.
+                    when the Shapley values do not change much on average anymore between runs.
     PERMUTATION: Estimates Shapley values based on a fixed number of randomly generated permutations. By fine tuning
                  hyperparameters, this can be potentially faster than the early stopping approach due to a better
                  utilization of the parallelization.
@@ -40,34 +43,39 @@ class ShapleyApproximationMethods(Enum):
     EXACT_FAST = (2,)
     EARLY_STOPPING = (3,)
     PERMUTATION = (4,)
-    SUBSET_SAMPLING = 5
+    SUBSET_SAMPLING = (5,)
 
 
 class ShapleyConfig:
     def __init__(
         self,
         approximation_method: ShapleyApproximationMethods = ShapleyApproximationMethods.AUTO,
-        num_samples: int = 5000,
-        min_percentage_change_threshold: float = 0.01,
+        num_permutations: int = 2000,
+        num_subset_samples: int = 5000,
+        min_percentage_change_threshold: float = 0.05,
         n_jobs: Optional[int] = None,
     ) -> None:
         """Config for estimating Shapley values.
 
         :param approximation_method: Type of approximation methods (see :py:class:`ShapleyApproximationMethods <dowhy.gcm.shapley.ShapleyApproximationMethods>`).
-        :param num_samples: Number of samples used for approximating the Shapley values. Depending on the approximation
-                            method, this can either represent the number of drawn subsets (in SUBSET_SAMPLING) or the
-                            number of drawn permutations (in EARLY_STOPPING and PERMUTATION). In case of EARLY_STOPPING,
-                            this also represents a limit on the evaluation runs.
+        :param num_permutations: Number of permutations used for approximating the Shapley values. This value is only
+                                 used for PERMUTATION and EARLY_STOPPING. In both cases, it indicates the maximum
+                                 number of permutations that are evaluated. Note that EARLY_STOPPING might stop before
+                                 reaching the number of permutations if the change in Shapley values fall below
+                                 min_percentage_change_threshold.
+        :param num_subset_samples: Number of subsets used for the SUBSET_SAMPLING method. This value is not used
+                                   otherwise.
         :param min_percentage_change_threshold: This parameter is only relevant for EARLY_STOPPING and indicates the
-                                                minimum required change of the Shapley values between two runs
-                                                (i.e. evaluation of permutations) before the estimation stops.
-                                                For instance, if the Shapley value changes less than the given value for
-                                                a certain number of consecutive runs, the algorithm stops and returns
-                                                the current result.
+                                                minimum required change in percentage of the Shapley values between two
+                                                runs before the estimation stops. For instance, with a value of 0.01
+                                                the estimation would stop if all Shapley values change less than 0.01
+                                                per run. To mitigate the impact of randomness, the changes need to stay
+                                                below the threshold for at least 2 consecutive runs.
         :param n_jobs: Number of parallel jobs.
         """
         self.approximation_method = approximation_method
-        self.num_samples = num_samples
+        self.num_permutations = num_permutations
+        self.num_subset_samples = num_subset_samples
         self.min_percentage_change_threshold = min_percentage_change_threshold
         self.n_jobs = config.default_n_jobs if n_jobs is None else n_jobs
 
@@ -116,14 +124,14 @@ def estimate_shapley_values(
         return _approximate_shapley_values_via_permutation_sampling(
             set_func=set_func,
             num_players=num_players,
-            num_permutations=max(1, shapley_config.num_samples // num_players),
+            num_permutations=shapley_config.num_permutations,
             n_jobs=shapley_config.n_jobs,
         )
     elif approximation_method == ShapleyApproximationMethods.EARLY_STOPPING:
         return _approximate_shapley_values_via_early_stopping(
             set_func=set_func,
             num_players=num_players,
-            max_runs=shapley_config.num_samples,
+            max_num_permutations=shapley_config.num_permutations,
             min_percentage_change_threshold=shapley_config.min_percentage_change_threshold,
             n_jobs=shapley_config.n_jobs,
         )
@@ -132,7 +140,7 @@ def estimate_shapley_values(
             set_func=set_func,
             num_players=num_players,
             use_subset_approximation=True,
-            num_samples_for_approximation=shapley_config.num_samples,
+            num_samples_for_approximation=shapley_config.num_subset_samples,
             n_jobs=shapley_config.n_jobs,
         )
     elif approximation_method == ShapleyApproximationMethods.EXACT_FAST:
@@ -140,7 +148,7 @@ def estimate_shapley_values(
             set_func=set_func,
             num_players=num_players,
             use_subset_approximation=False,
-            num_samples_for_approximation=shapley_config.num_samples,
+            num_samples_for_approximation=-1,
             n_jobs=shapley_config.n_jobs,
         )
     else:
@@ -232,19 +240,66 @@ def _approximate_shapley_values_via_least_squares_regression(
     return LinearRegression().fit(all_subsets, np.array(set_function_results), sample_weight=weights).coef_
 
 
+def _get_permutation_at(players: List[int], permutation_index: int, factorial_n_minus_one: int):
+    """Returns the permutation at the given index. This is used in combination with a quasi-random sequence generator
+    to access a certain index of all possible permutations without actually initializing them first. This method is
+    significantly more efficient than itertools while ensuring that all possible permutations are generated exactly
+    once if one iterates from 0 to n! indices.
+    """
+    num_players = len(players)
+    perm = [0] * num_players
+    tmp_players = players.copy()
+
+    for j in range(num_players - 1, 0, -1):
+        perm[num_players - j - 1] = tmp_players.pop(permutation_index // factorial_n_minus_one)
+        permutation_index %= factorial_n_minus_one
+        factorial_n_minus_one //= j
+
+    perm[num_players - 1] = tmp_players[0]
+
+    return perm
+
+
 def _approximate_shapley_values_via_permutation_sampling(
-    set_func: Callable[[np.ndarray], Union[float, np.ndarray]], num_players: int, num_permutations: int, n_jobs: int
+    set_func: Callable[[np.ndarray], Union[float, np.ndarray]],
+    num_players: int,
+    num_permutations: int,
+    n_jobs: int,
+    use_sobol_sequence: bool = True,
 ) -> np.ndarray:
     """For more details about this approximation, see
     Strumbelj, E., Kononenko, I. (2014).
     Explaining prediction models and individual predictions with feature contributions.
-    In Knowledge and information systems, 41(3):647–665"""
+    In Knowledge and information systems, 41(3):647–665
+
+    When use_sobol_sequence is true, a Sobol sequence is used to fill the sample space more uniformly than randomly
+    generating a permutation. This can improve convergence seeing that the sampling aims at maximizing the information
+    gain.
+    """
     full_subset_result, empty_subset_result = _estimate_full_and_emtpy_subset_results(set_func, num_players)
+
+    total_num_permutations = math.factorial(num_players)
+    factorial_n_minus_one = math.factorial(num_players - 1)
+    list_all_players = list(range(num_players))
+    sobol_generator = None
+    indices = None
+
+    num_permutations = min(total_num_permutations, num_permutations)
+
+    if use_sobol_sequence:
+        sobol_generator = Sobol(num_players, seed=np.random.randint(np.iinfo(np.int32).max))
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore")
+            indices = [int(i * total_num_permutations) for i in sobol_generator.random(num_permutations)[:, 0]]
 
     subsets_to_evaluate = set()
     all_permutations = []
     for i in range(num_permutations):
-        permutation = np.random.choice(num_players, num_players, replace=False)
+        if sobol_generator is None:
+            permutation = np.random.choice(num_players, num_players, replace=False)
+        else:
+            permutation = _get_permutation_at(list_all_players, indices[i], factorial_n_minus_one)
+
         all_permutations.append(permutation)
 
         subsets_to_evaluate.update(_create_index_order_and_subset_tuples(permutation))
@@ -266,10 +321,11 @@ def _approximate_shapley_values_via_permutation_sampling(
 def _approximate_shapley_values_via_early_stopping(
     set_func: Callable[[np.ndarray], Union[float, np.ndarray]],
     num_players: int,
-    max_runs: int,
+    max_num_permutations: int,
     min_percentage_change_threshold: float,
     n_jobs: int,
     num_permutations_per_run: int = 5,
+    use_sobol_sequence: bool = True,
 ) -> np.ndarray:
     """Combines the approximation method described in
 
@@ -279,6 +335,10 @@ def _approximate_shapley_values_via_early_stopping(
 
     with an early stopping criteria. This is, if the Shapley values change less than a certain threshold on average
     between two runs, then stop the estimation.
+
+    When use_sobol_sequence is true, a Sobol sequence is used to fill the sample space more uniformly than randomly
+    generating a permutation. This can improve convergence seeing that the sampling aims at maximizing the information
+    gain.
     """
     full_subset_result, empty_subset_result = _estimate_full_and_emtpy_subset_results(set_func, num_players)
 
@@ -288,6 +348,15 @@ def _approximate_shapley_values_via_early_stopping(
     num_generated_permutations = 0
     run_counter = 0
     converged_run = 0
+    total_num_permutations = math.factorial(num_players)
+    factorial_n_minus_one = math.factorial(num_players - 1)
+    list_all_players = list(range(num_players))
+    sobol_generator = None
+
+    max_num_permutations = min(total_num_permutations, max_num_permutations)
+
+    if use_sobol_sequence:
+        sobol_generator = Sobol(num_players, seed=np.random.randint(np.iinfo(np.int32).max))
 
     if config.show_progress_bars:
         pbar = tqdm(total=1)
@@ -301,9 +370,18 @@ def _approximate_shapley_values_via_early_stopping(
 
             # In each run, we create one random permutation of players. For instance, given 4 players, a permutation
             # could be [3,1,4,2].
-            permutations = [
-                np.random.choice(num_players, num_players, replace=False) for _ in range(num_permutations_per_run)
-            ]
+            if sobol_generator is None:
+                permutations = [
+                    np.random.choice(num_players, num_players, replace=False) for _ in range(num_permutations_per_run)
+                ]
+            else:
+                with warnings.catch_warnings():
+                    warnings.filterwarnings("ignore")
+                    indices = [
+                        int(i * total_num_permutations) for i in sobol_generator.random(num_permutations_per_run)[:, 0]
+                    ]
+                permutations = [_get_permutation_at(list_all_players, i, factorial_n_minus_one) for i in indices]
+
             for permutation in permutations:
                 num_generated_permutations += 1
                 # Create all subsets belonging to the generated permutation. This is, if we have [3,1,4,2], then the
@@ -331,7 +409,7 @@ def _approximate_shapley_values_via_early_stopping(
                         permutation, evaluated_subsets, full_subset_result, empty_subset_result
                     )
 
-            if run_counter > max_runs:
+            if run_counter > max_num_permutations:
                 break
 
             new_shap_proxy = np.array(shapley_values)
@@ -341,7 +419,7 @@ def _approximate_shapley_values_via_early_stopping(
             new_shap_proxy /= num_generated_permutations
 
             if run_counter > 1:
-                percentage_changes = 1 - new_shap_proxy / old_shap_proxy
+                percentage_changes = abs(1 - new_shap_proxy / old_shap_proxy)
                 if config.show_progress_bars:
                     pbar.set_description(
                         f"Estimating Shapley Values. "
@@ -350,7 +428,7 @@ def _approximate_shapley_values_via_early_stopping(
                         f"{np.mean(percentage_changes) * 100}%"
                     )
 
-                if np.mean(percentage_changes) < min_percentage_change_threshold:
+                if np.all(percentage_changes < min_percentage_change_threshold):
                     # Here, the change between two runs is below the minimum threshold, but to reduce the likelihood
                     # that this just happened by chance, we require that this happens at least for two runs in a row.
                     converged_run += 1
