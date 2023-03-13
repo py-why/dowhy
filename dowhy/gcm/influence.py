@@ -214,9 +214,9 @@ def intrinsic_causal_influence(
     prediction_model: Union[PredictionModel, ClassificationModel, str] = "approx",
     attribution_func: Optional[Callable[[np.ndarray, np.ndarray], float]] = None,
     num_training_samples: int = 100000,
-    num_samples_randomization: int = 7500,
+    num_samples_randomization: int = 1000,
     num_samples_baseline: int = 1000,
-    max_batch_size: int = 100,
+    max_batch_size: int = 250,
     auto_assign_quality: auto.AssignmentQuality = auto.AssignmentQuality.GOOD,
     shapley_config: Optional[ShapleyConfig] = None,
 ) -> Dict[Any, float]:
