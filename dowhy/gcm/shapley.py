@@ -19,7 +19,6 @@ from sklearn.linear_model import LinearRegression
 from tqdm import tqdm
 
 import dowhy.gcm.config as config
-from dowhy.gcm.constant import EPS
 from dowhy.gcm.util.general import set_random_seed
 
 
@@ -352,6 +351,7 @@ def _approximate_shapley_values_via_early_stopping(
     factorial_n_minus_one = math.factorial(num_players - 1)
     list_all_players = list(range(num_players))
     sobol_generator = None
+    convergence_tracker = None
 
     max_num_permutations = min(total_num_permutations, max_num_permutations)
 
@@ -413,22 +413,43 @@ def _approximate_shapley_values_via_early_stopping(
                 break
 
             new_shap_proxy = np.array(shapley_values)
-            new_shap_proxy[new_shap_proxy == 0] = EPS
             # The current Shapley values are the average of the estimated values, i.e. we need to divide by the number
             # of generated permutations here.
             new_shap_proxy /= num_generated_permutations
 
             if run_counter > 1:
-                percentage_changes = abs(1 - new_shap_proxy / old_shap_proxy)
+                mean_percentage_change = 0
+
+                # In case Shapley values are estimated for multiple samples, e.g., in feature relevance. So, we have a
+                # matrix of Shapley values instead of a vector.
+                if new_shap_proxy.ndim == 2:
+                    if convergence_tracker is None:
+                        convergence_tracker = np.array([True] * new_shap_proxy.shape[0])
+
+                    for i in range(new_shap_proxy.shape[0]):
+                        converging, tmp_mean_percentage_change = _check_convergence(
+                            new_shap_proxy[i], old_shap_proxy[i], min_percentage_change_threshold
+                        )
+                        convergence_tracker[i] &= np.all(converging)
+                        mean_percentage_change += tmp_mean_percentage_change
+
+                    mean_percentage_change /= new_shap_proxy.shape[0]
+                else:
+                    converging, tmp_mean_percentage_change = _check_convergence(
+                        new_shap_proxy, old_shap_proxy, min_percentage_change_threshold
+                    )
+                    convergence_tracker = np.array([np.all(converging)])
+                    mean_percentage_change = tmp_mean_percentage_change
+
                 if config.show_progress_bars:
                     pbar.set_description(
                         f"Estimating Shapley Values. "
                         f"Average change of Shapley values in run {run_counter} "
                         f"({num_generated_permutations} evaluated permutations): "
-                        f"{np.mean(percentage_changes) * 100}%"
+                        f"{mean_percentage_change * 100}%"
                     )
 
-                if np.all(percentage_changes < min_percentage_change_threshold):
+                if np.all(convergence_tracker):
                     # Here, the change between two runs is below the minimum threshold, but to reduce the likelihood
                     # that this just happened by chance, we require that this happens at least for two runs in a row.
                     converged_run += 1
@@ -444,6 +465,28 @@ def _approximate_shapley_values_via_early_stopping(
         pbar.close()
 
     return shapley_values / num_generated_permutations
+
+
+def _check_convergence(
+    new_shap_proxy: np.ndarray, old_shap_proxy: np.ndarray, min_percentage_change_threshold: float
+) -> Tuple[np.ndarray, float]:
+    converging = np.array([True] * new_shap_proxy.shape[0])
+    percentages = []
+
+    for i in range(new_shap_proxy.shape[0]):
+        if old_shap_proxy[i] == 0:
+            converging[i] = new_shap_proxy[i] == 0
+        else:
+            percentage = abs(1 - new_shap_proxy[i] / old_shap_proxy[i])
+            percentages.append(percentage)
+            converging[i] = percentage < min_percentage_change_threshold
+
+    if len(percentages) > 0:
+        mean_percentage_change = np.mean(percentages)
+    else:
+        mean_percentage_change = 1
+
+    return converging, mean_percentage_change
 
 
 def _create_subsets_and_weights_exact(num_players: int, high_weight: float) -> Tuple[np.ndarray, np.ndarray]:
