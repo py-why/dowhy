@@ -6,7 +6,6 @@ the future.
 
 import itertools
 import math
-import warnings
 from enum import Enum
 from typing import Callable, Dict, List, Optional, Set, Tuple, Union
 
@@ -14,7 +13,7 @@ import numpy as np
 import scipy
 from joblib import Parallel, delayed
 from scipy.special import comb
-from scipy.stats._qmc import Sobol
+from scipy.stats._qmc import Halton
 from sklearn.linear_model import LinearRegression
 from tqdm import tqdm
 
@@ -239,65 +238,39 @@ def _approximate_shapley_values_via_least_squares_regression(
     return LinearRegression().fit(all_subsets, np.array(set_function_results), sample_weight=weights).coef_
 
 
-def _get_permutation_at(players: List[int], permutation_index: int, factorial_n_minus_one: int):
-    """Returns the permutation at the given index. This is used in combination with a quasi-random sequence generator
-    to access a certain index of all possible permutations without actually initializing them first. This method is
-    significantly more efficient than itertools while ensuring that all possible permutations are generated exactly
-    once if one iterates from 0 to n! indices.
-    """
-    num_players = len(players)
-    perm = [0] * num_players
-    tmp_players = players.copy()
-
-    for j in range(num_players - 1, 0, -1):
-        perm[num_players - j - 1] = tmp_players.pop(permutation_index // factorial_n_minus_one)
-        permutation_index %= factorial_n_minus_one
-        factorial_n_minus_one //= j
-
-    perm[num_players - 1] = tmp_players[0]
-
-    return perm
-
-
 def _approximate_shapley_values_via_permutation_sampling(
     set_func: Callable[[np.ndarray], Union[float, np.ndarray]],
     num_players: int,
     num_permutations: int,
     n_jobs: int,
-    use_sobol_sequence: bool = True,
+    use_halton_sequence: bool = True,
 ) -> np.ndarray:
     """For more details about this approximation, see
     Strumbelj, E., Kononenko, I. (2014).
     Explaining prediction models and individual predictions with feature contributions.
     In Knowledge and information systems, 41(3):647–665
 
-    When use_sobol_sequence is true, a Sobol sequence is used to fill the sample space more uniformly than randomly
+    When use_halton_sequence is true, a Sobol sequence is used to fill the sample space more uniformly than randomly
     generating a permutation. This can improve convergence seeing that the sampling aims at maximizing the information
     gain.
     """
     full_subset_result, empty_subset_result = _estimate_full_and_emtpy_subset_results(set_func, num_players)
 
     total_num_permutations = math.factorial(num_players)
-    factorial_n_minus_one = math.factorial(num_players - 1)
-    list_all_players = list(range(num_players))
-    sobol_generator = None
-    indices = None
+    halton_generator = None
 
     num_permutations = min(total_num_permutations, num_permutations)
 
-    if use_sobol_sequence:
-        sobol_generator = Sobol(num_players, seed=np.random.randint(np.iinfo(np.int32).max))
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore")
-            indices = [int(i * total_num_permutations) for i in sobol_generator.random(num_permutations)[:, 0]]
+    if use_halton_sequence:
+        halton_generator = Halton(num_players, seed=np.random.randint(np.iinfo(np.int32).max))
 
     subsets_to_evaluate = set()
     all_permutations = []
     for i in range(num_permutations):
-        if sobol_generator is None:
+        if halton_generator is None:
             permutation = np.random.choice(num_players, num_players, replace=False)
         else:
-            permutation = _get_permutation_at(list_all_players, indices[i], factorial_n_minus_one)
+            permutation = np.argsort(halton_generator.random(1))[0]
 
         all_permutations.append(permutation)
 
@@ -324,7 +297,7 @@ def _approximate_shapley_values_via_early_stopping(
     min_percentage_change_threshold: float,
     n_jobs: int,
     num_permutations_per_run: int = 5,
-    use_sobol_sequence: bool = True,
+    use_halton_sequence: bool = True,
 ) -> np.ndarray:
     """Combines the approximation method described in
 
@@ -335,7 +308,7 @@ def _approximate_shapley_values_via_early_stopping(
     with an early stopping criteria. This is, if the Shapley values change less than a certain threshold on average
     between two runs, then stop the estimation.
 
-    When use_sobol_sequence is true, a Sobol sequence is used to fill the sample space more uniformly than randomly
+    When use_halton_sequence is true, a Halton sequence is used to fill the sample space more uniformly than randomly
     generating a permutation. This can improve convergence seeing that the sampling aims at maximizing the information
     gain.
     """
@@ -347,16 +320,11 @@ def _approximate_shapley_values_via_early_stopping(
     num_generated_permutations = 0
     run_counter = 0
     converged_run = 0
-    total_num_permutations = math.factorial(num_players)
-    factorial_n_minus_one = math.factorial(num_players - 1)
-    list_all_players = list(range(num_players))
-    sobol_generator = None
+    halton_generator = None
     convergence_tracker = None
 
-    max_num_permutations = min(total_num_permutations, max_num_permutations)
-
-    if use_sobol_sequence:
-        sobol_generator = Sobol(num_players, seed=np.random.randint(np.iinfo(np.int32).max))
+    if use_halton_sequence:
+        halton_generator = Halton(num_players, seed=np.random.randint(np.iinfo(np.int32).max))
 
     if config.show_progress_bars:
         pbar = tqdm(total=1)
@@ -370,17 +338,13 @@ def _approximate_shapley_values_via_early_stopping(
 
             # In each run, we create one random permutation of players. For instance, given 4 players, a permutation
             # could be [3,1,4,2].
-            if sobol_generator is None:
+            if halton_generator is None:
                 permutations = [
                     np.random.choice(num_players, num_players, replace=False) for _ in range(num_permutations_per_run)
                 ]
             else:
-                with warnings.catch_warnings():
-                    warnings.filterwarnings("ignore")
-                    indices = [
-                        int(i * total_num_permutations) for i in sobol_generator.random(num_permutations_per_run)[:, 0]
-                    ]
-                permutations = [_get_permutation_at(list_all_players, i, factorial_n_minus_one) for i in indices]
+                # Generate k random permutations by sorting the indices of the Halton sequence
+                permutations = np.argsort(halton_generator.random(num_permutations_per_run), axis=1)
 
             for permutation in permutations:
                 num_generated_permutations += 1
