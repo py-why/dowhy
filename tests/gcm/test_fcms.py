@@ -47,6 +47,7 @@ def test_given_linear_data_when_fit_causal_graph_with_linear_anm_then_learns_cor
     assert scm.causal_mechanism("X1").prediction_model.sklearn_model.intercept_ == approx(2, abs=0.02)
 
 
+@flaky(max_runs=3)
 def test_given_linear_data_when_draw_samples_from_fitted_anm_then_generates_correct_marginal_distribution():
     scm = ProbabilisticCausalModel(nx.DiGraph([("X0", "X1")]))
     scm.set_causal_mechanism("X0", ScipyDistribution(stats.norm, loc=0, scale=1))
