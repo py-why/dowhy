@@ -25,7 +25,7 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import SVR
 
 from dowhy.gcm.fcms import InvertibleFunction, PredictionModel
-from dowhy.gcm.util.general import apply_one_hot_encoding, fit_one_hot_encoders, shape_into_2d
+from dowhy.gcm.util.general import auto_apply_encoders, auto_fit_encoders, shape_into_2d
 
 
 class SklearnRegressionModel(PredictionModel):
@@ -35,16 +35,16 @@ class SklearnRegressionModel(PredictionModel):
 
     def __init__(self, sklearn_mdl: Any) -> None:
         self._sklearn_mdl = sklearn_mdl
-        self._one_hot_encoders = {}
+        self._encoders = {}
 
     def fit(self, X: np.ndarray, Y: np.ndarray) -> None:
-        self._one_hot_encoders = fit_one_hot_encoders(X)
-        X = apply_one_hot_encoding(X, self._one_hot_encoders)
+        self._encoders = auto_fit_encoders(X, Y)
+        X = auto_apply_encoders(X, self._encoders)
 
         self._sklearn_mdl.fit(X=X, y=Y.squeeze())
 
     def predict(self, X: np.array) -> np.ndarray:
-        return shape_into_2d(self._sklearn_mdl.predict(apply_one_hot_encoding(X, self._one_hot_encoders)))
+        return shape_into_2d(self._sklearn_mdl.predict(auto_apply_encoders(X, self._encoders)))
 
     @property
     def sklearn_model(self) -> Any:

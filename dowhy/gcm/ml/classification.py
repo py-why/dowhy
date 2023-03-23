@@ -27,12 +27,12 @@ from sklearn.svm import SVC
 
 from dowhy.gcm.fcms import ClassificationModel
 from dowhy.gcm.ml.regression import SklearnRegressionModel
-from dowhy.gcm.util.general import apply_one_hot_encoding, shape_into_2d
+from dowhy.gcm.util.general import auto_apply_encoders, shape_into_2d
 
 
 class SklearnClassificationModel(SklearnRegressionModel, ClassificationModel):
     def predict_probabilities(self, X: np.array) -> np.ndarray:
-        return shape_into_2d(self._sklearn_mdl.predict_proba(apply_one_hot_encoding(X, self._one_hot_encoders)))
+        return shape_into_2d(self._sklearn_mdl.predict_proba(auto_apply_encoders(X, self._encoders)))
 
     @property
     def classes(self) -> List[str]:

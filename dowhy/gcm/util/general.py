@@ -3,11 +3,13 @@ future.
 """
 
 import random
-from typing import Dict
+from typing import Dict, Optional, Union
 
 import numpy as np
 from scipy.optimize import minimize
 from sklearn.preprocessing import OneHotEncoder
+
+from dowhy.gcm.util.catboost_encoder import CatBoostEncoder
 
 
 def shape_into_2d(*args):
@@ -49,6 +51,39 @@ def set_random_seed(random_seed: int) -> None:
     random.seed(random_seed)
 
 
+def auto_fit_encoders(
+    X: np.ndarray, Y: Optional[np.ndarray] = None, catboost_threshold: int = 7
+) -> Dict[int, Union[OneHotEncoder, CatBoostEncoder]]:
+    if Y is None:
+        return fit_one_hot_encoders(X)
+
+    X = shape_into_2d(X)
+
+    total_num_categories = 0
+    for column in range(X.shape[1]):
+        if is_categorical(X[:, column]):
+            total_num_categories += len(np.unique(X[:, column]))
+
+    if total_num_categories > catboost_threshold:
+        return fit_catboost_encoders(X, Y)
+    else:
+        return fit_one_hot_encoders(X)
+
+
+def auto_apply_encoders(
+    X: np.ndarray, encoder_map: Dict[int, Union[OneHotEncoder, CatBoostEncoder]], Y: Optional[np.ndarray] = None
+) -> np.ndarray:
+    X = shape_into_2d(X)
+
+    if not encoder_map:
+        return X
+
+    if isinstance(list(encoder_map.values())[0], OneHotEncoder):
+        return apply_one_hot_encoding(X, encoder_map)
+    else:
+        return apply_catboost_encoding(X, encoder_map, Y)
+
+
 def fit_one_hot_encoders(X: np.ndarray) -> Dict[int, OneHotEncoder]:
     """Fits one-hot encoders to each categorical column in X. A categorical input needs to be a string, i.e. a
     categorical column consists only of strings.
@@ -60,7 +95,7 @@ def fit_one_hot_encoders(X: np.ndarray) -> Dict[int, OneHotEncoder]:
 
     one_hot_encoders = {}
     for column in range(X.shape[1]):
-        if isinstance(X[0, column], str):
+        if is_categorical(X[:, column]):
             one_hot_encoders[column] = OneHotEncoder(handle_unknown="ignore")
             one_hot_encoders[column].fit(X[:, column].reshape(-1, 1))
 
@@ -78,6 +113,37 @@ def apply_one_hot_encoding(X: np.ndarray, one_hot_encoder_map: Dict[int, OneHotE
     for column in range(X.shape[1]):
         if column in one_hot_encoder_map:
             one_hot_features.append(one_hot_encoder_map[column].transform(X[:, column].reshape(-1, 1)).toarray())
+        else:
+            one_hot_features.append(X[:, column].reshape(-1, 1))
+
+    return np.hstack(one_hot_features).astype(float)
+
+
+def fit_catboost_encoders(X: np.ndarray, Y: np.ndarray) -> Dict[int, CatBoostEncoder]:
+    X = shape_into_2d(X)
+
+    catboost_encoders = {}
+    for column in range(X.shape[1]):
+        if is_categorical(X[:, column]):
+            catboost_encoders[column] = CatBoostEncoder()
+            catboost_encoders[column].fit(X[:, column], Y)
+
+    return catboost_encoders
+
+
+def apply_catboost_encoding(
+    X: np.ndarray, catboost_encoder_map: Dict[int, CatBoostEncoder], Y: Optional[np.ndarray] = None
+) -> np.ndarray:
+    X = shape_into_2d(X)
+
+    if not catboost_encoder_map:
+        return X
+
+    one_hot_features = []
+
+    for column in range(X.shape[1]):
+        if column in catboost_encoder_map:
+            one_hot_features.append(catboost_encoder_map[column].transform(X[:, column], Y).reshape(-1, 1))
         else:
             one_hot_features.append(X[:, column].reshape(-1, 1))
 

@@ -8,7 +8,7 @@ from sklearn.kernel_approximation import Nystroem
 from sklearn.preprocessing import scale
 
 from dowhy.gcm.stats import estimate_ftest_pvalue, quantile_based_fwer
-from dowhy.gcm.util.general import apply_one_hot_encoding, fit_one_hot_encoders, shape_into_2d
+from dowhy.gcm.util.general import auto_apply_encoders, auto_fit_encoders, shape_into_2d
 
 
 def regression_based(
@@ -66,12 +66,12 @@ def regression_based(
 
     X, Y = shape_into_2d(X, Y)
 
-    X = scale(apply_one_hot_encoding(X, fit_one_hot_encoders(X)))
-    Y = scale(apply_one_hot_encoding(Y, fit_one_hot_encoders(Y)))
+    X = scale(auto_apply_encoders(X, auto_fit_encoders(X)))
+    Y = scale(auto_apply_encoders(Y, auto_fit_encoders(Y)))
 
     if Z is not None:
         Z = shape_into_2d(Z)
-        Z = scale(apply_one_hot_encoding(Z, fit_one_hot_encoders(Z)))
+        Z = scale(auto_apply_encoders(Z, auto_fit_encoders(Z)))
 
     org_X = X
     org_Y = Y
