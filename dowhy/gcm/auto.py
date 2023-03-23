@@ -43,8 +43,8 @@ from dowhy.gcm.ml.regression import (
 )
 from dowhy.gcm.stochastic_models import EmpiricalDistribution
 from dowhy.gcm.util.general import (
-    apply_one_hot_encoding,
-    fit_one_hot_encoders,
+    auto_apply_encoders,
+    auto_fit_encoders,
     is_categorical,
     set_random_seed,
     shape_into_2d,
@@ -174,7 +174,7 @@ def select_model(
     else:
         raise ValueError("Invalid model selection quality.")
 
-    if apply_one_hot_encoding(X, fit_one_hot_encoders(X)).shape[1] <= 5:
+    if auto_apply_encoders(X, auto_fit_encoders(X)).shape[1] <= 5:
         # Avoid too many features
         list_of_regressor += [create_polynom_regressor]
         list_of_classifier += [partial(create_polynom_logistic_regression_classifier, max_iter=1000)]
@@ -210,9 +210,9 @@ def has_linear_relationship(X: np.ndarray, Y: np.ndarray, max_num_samples: int =
             X, Y, train_size=num_trainings_samples, test_size=num_test_samples
         )
 
-    one_hot_encoder = fit_one_hot_encoders(np.row_stack([x_train, x_test]))
-    x_train = apply_one_hot_encoding(x_train, one_hot_encoder)
-    x_test = apply_one_hot_encoding(x_test, one_hot_encoder)
+    encoders = auto_fit_encoders(x_train, y_train)
+    x_train = auto_apply_encoders(x_train, encoders)
+    x_test = auto_apply_encoders(x_test, encoders)
 
     if target_is_categorical:
         linear_mdl = LogisticRegression(max_iter=1000)

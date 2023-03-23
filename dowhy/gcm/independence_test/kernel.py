@@ -13,7 +13,7 @@ from sklearn.preprocessing import scale
 import dowhy.gcm.config as config
 from dowhy.gcm.independence_test.kernel_operation import approximate_rbf_kernel_features
 from dowhy.gcm.stats import quantile_based_fwer
-from dowhy.gcm.util.general import apply_one_hot_encoding, fit_one_hot_encoders, set_random_seed, shape_into_2d
+from dowhy.gcm.util.general import auto_apply_encoders, auto_fit_encoders, set_random_seed, shape_into_2d
 
 
 def kernel_based(
@@ -378,7 +378,7 @@ def _convert_to_numeric(*args) -> List[np.ndarray]:
             if isinstance(X[0, col], bool):
                 X[:, col] = X[:, col].astype(str)
 
-        result.append(apply_one_hot_encoding(X, fit_one_hot_encoders(X)))
+        result.append(auto_apply_encoders(X, auto_fit_encoders(X)))
 
     return result
 

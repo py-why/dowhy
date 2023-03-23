@@ -8,7 +8,11 @@ from _pytest.python_api import approx
 
 from dowhy import gcm
 from dowhy.gcm.util.general import (
+    apply_catboost_encoding,
     apply_one_hot_encoding,
+    auto_apply_encoders,
+    auto_fit_encoders,
+    fit_catboost_encoders,
     fit_one_hot_encoders,
     has_categorical,
     is_categorical,
@@ -116,3 +120,90 @@ def test_given_non_contiguous_data_when_calling_setdiff2d_then_does_not_raise_er
     generated_data = gcm.draw_samples(causal_model, num_samples=100000)
 
     setdiff2d(data.to_numpy(), generated_data.to_numpy())
+
+
+def test_given_categorical_data_when_fit_catboost_encoders_and_apply_catboost_encoding_then_returns_expected_feature_vector():
+    X = np.array(["A", "B", "A", "D", "C", "C", "C", "A"])
+    Y = np.array([1, 2, 3, 4, 2, 3, 4, 2])
+
+    assert apply_catboost_encoding(X, fit_catboost_encoders(X, Y), Y).reshape(-1) == approx(
+        np.array([2.625, 2.625, 1.8125, 2.625, 2.625, 2.3125, 2.54166667, 2.20833333])
+    )
+
+    assert apply_catboost_encoding(X, fit_catboost_encoders(X, Y)).reshape(-1) == approx(
+        np.array([2.15625, 2.625, 2.15625, 2.625, 2.90625, 2.90625, 2.90625, 2.15625])
+    )
+
+    X = np.array([["A", 0], ["B", 1], ["A", 2], ["D", 3], ["C", 4], ["C", 5], ["C", 6], ["A", 7]], dtype=object)
+
+    assert apply_catboost_encoding(X, fit_catboost_encoders(X, Y), Y) == approx(
+        np.array(
+            [[2.625, 0], [2.625, 1], [1.8125, 2], [2.625, 3], [2.625, 4], [2.3125, 5], [2.54166667, 6], [2.20833333, 7]]
+        )
+    )
+
+
+def test_given_categorical_input_and_target_data_when_fit_catboost_encoders_and_apply_catboost_encoding_then_returns_expected_feature_vector():
+    X = np.array(["A", "B", "A", "C", "A"])
+    Y = np.array(["C1", "C1", "C1", "C2", "C1"])
+
+    assert apply_catboost_encoding(X, fit_catboost_encoders(X, Y), Y).reshape(-1) == approx(
+        np.array(
+            [
+                0.2,  # Data mean when converting labels to 0...n
+                0.2,  # Data mean when converting labels to 0...n
+                0.1,  # (0 + 0 (label "C1") + 0.2 (data mean)) / 2
+                0.2,  # Data mean when converting labels to 0...n
+                0.2 / 3,  # (0 + 0 + 0 (label "C1") + 0.2 (data mean)) / 3
+            ]
+        )
+    )
+
+    Y = np.array(["C1", "C1", "C2", "C2", "C1"])
+
+    assert apply_catboost_encoding(X, fit_catboost_encoders(X, Y), Y).reshape(-1) == approx(
+        np.array(
+            [
+                0.4,  # Data mean when converting labels to 0...n
+                0.4,  # Data mean when converting labels to 0...n
+                0.2,  # (0 (label "C1") + 1 (label "C2") + 0.4 (data mean)) / 2
+                0.4,  # Data mean when converting labels to 0...n
+                1.4 / 3,  # (0 (label "C1") + 1 (label "C2") + 0 + 0.4 (data mean)) / 3
+            ]
+        )
+    )
+
+
+def test_given_categorical_data_when_using_auto_fit_and_apply_encoder_then_returns_expected_feature_vector():
+    X = np.array(["A", "B", "A", "D", "C", "C", "C", "A"])
+    Y = np.array([1, 2, 3, 4, 2, 3, 4, 2])
+
+    assert auto_apply_encoders(X, auto_fit_encoders(X, Y, catboost_threshold=3), Y).reshape(-1) == approx(
+        np.array([2.625, 2.625, 1.8125, 2.625, 2.625, 2.3125, 2.54166667, 2.20833333])
+    )
+
+    assert auto_apply_encoders(X, auto_fit_encoders(X, Y, catboost_threshold=5), Y) == approx(
+        np.array(
+            [
+                [1, 0, 0, 0],
+                [0, 1, 0, 0],
+                [1, 0, 0, 0],
+                [0, 0, 0, 1],
+                [0, 0, 1, 0],
+                [0, 0, 1, 0],
+                [0, 0, 1, 0],
+                [1, 0, 0, 0],
+            ]
+        )
+    )
+
+    X = np.array([["A", "A"], ["B", "B"], ["A", "A"], ["D", "D"], ["C", "C"], ["C", "C"], ["C", "C"], ["A", "A"]])
+
+    assert auto_apply_encoders(X, auto_fit_encoders(X, Y, catboost_threshold=5), Y) == approx(
+        np.array(
+            [
+                [2.625, 2.625, 1.8125, 2.625, 2.625, 2.3125, 2.54166667, 2.20833333],
+                [2.625, 2.625, 1.8125, 2.625, 2.625, 2.3125, 2.54166667, 2.20833333],
+            ]
+        ).T
+    )
