@@ -298,6 +298,7 @@ def _approximate_shapley_values_via_early_stopping(
     n_jobs: int,
     num_permutations_per_run: int = 5,
     use_halton_sequence: bool = True,
+    num_consecutive_converged_runs: int = 2,
 ) -> np.ndarray:
     """Combines the approximation method described in
 
@@ -319,7 +320,6 @@ def _approximate_shapley_values_via_early_stopping(
     evaluated_subsets = {}
     num_generated_permutations = 0
     run_counter = 0
-    converged_run = 0
     halton_generator = None
     convergence_tracker = None
 
@@ -381,20 +381,28 @@ def _approximate_shapley_values_via_early_stopping(
             # of generated permutations here.
             new_shap_proxy /= num_generated_permutations
 
+            if convergence_tracker is None:
+                if new_shap_proxy.ndim == 2:
+                    convergence_tracker = np.zeros(new_shap_proxy.shape[0])
+                else:
+                    convergence_tracker = np.array([0])
+
             if run_counter > 1:
                 mean_percentage_change = 0
 
                 # In case Shapley values are estimated for multiple samples, e.g., in feature relevance. So, we have a
                 # matrix of Shapley values instead of a vector.
                 if new_shap_proxy.ndim == 2:
-                    if convergence_tracker is None:
-                        convergence_tracker = np.array([True] * new_shap_proxy.shape[0])
-
                     for i in range(new_shap_proxy.shape[0]):
                         converging, tmp_mean_percentage_change = _check_convergence(
                             new_shap_proxy[i], old_shap_proxy[i], min_percentage_change_threshold
                         )
-                        convergence_tracker[i] &= np.all(converging)
+
+                        if np.all(converging):
+                            convergence_tracker[i] += 1
+                        elif convergence_tracker[i] < num_consecutive_converged_runs:
+                            convergence_tracker[i] = 0
+
                         mean_percentage_change += tmp_mean_percentage_change
 
                     mean_percentage_change /= new_shap_proxy.shape[0]
@@ -402,7 +410,11 @@ def _approximate_shapley_values_via_early_stopping(
                     converging, tmp_mean_percentage_change = _check_convergence(
                         new_shap_proxy, old_shap_proxy, min_percentage_change_threshold
                     )
-                    convergence_tracker = np.array([np.all(converging)])
+
+                    if np.all(converging):
+                        convergence_tracker[0] += 1
+                    elif convergence_tracker[0] < num_consecutive_converged_runs:
+                        convergence_tracker[0] = 0
                     mean_percentage_change = tmp_mean_percentage_change
 
                 if config.show_progress_bars:
@@ -413,14 +425,11 @@ def _approximate_shapley_values_via_early_stopping(
                         f"{mean_percentage_change * 100}%"
                     )
 
-                if np.all(convergence_tracker):
-                    # Here, the change between two runs is below the minimum threshold, but to reduce the likelihood
-                    # that this just happened by chance, we require that this happens at least for two runs in a row.
-                    converged_run += 1
-                    if converged_run >= 2:
-                        break
-                else:
-                    converged_run = 0
+                if np.all(convergence_tracker >= num_consecutive_converged_runs):
+                    # Here, the change between consecutive runs is below the minimum threshold, but to reduce the
+                    # likelihood that this just happened by chance, we require that this happens at least for
+                    # num_consecutive_converged_runs times in a row.
+                    break
 
             old_shap_proxy = new_shap_proxy
 
@@ -434,21 +443,21 @@ def _approximate_shapley_values_via_early_stopping(
 def _check_convergence(
     new_shap_proxy: np.ndarray, old_shap_proxy: np.ndarray, min_percentage_change_threshold: float
 ) -> Tuple[np.ndarray, float]:
+    non_zero_indices = old_shap_proxy != 0
     converging = np.array([True] * new_shap_proxy.shape[0])
-    percentages = []
 
-    for i in range(new_shap_proxy.shape[0]):
-        if old_shap_proxy[i] == 0:
-            converging[i] = new_shap_proxy[i] == 0
-        else:
-            percentage = abs(1 - new_shap_proxy[i] / old_shap_proxy[i])
-            percentages.append(percentage)
-            converging[i] = percentage < min_percentage_change_threshold
+    percentages = abs(1 - new_shap_proxy[non_zero_indices] / old_shap_proxy[non_zero_indices])
 
-    if len(percentages) > 0:
-        mean_percentage_change = np.mean(percentages)
-    else:
+    # Check if change in percentage is below threshold
+    converging[non_zero_indices] = percentages < min_percentage_change_threshold
+
+    # Check for values that are exactly zero. If they don't change between two runs, we consider it as converging.
+    converging[~non_zero_indices] = new_shap_proxy[~non_zero_indices] == old_shap_proxy[~non_zero_indices]
+
+    if np.all(~non_zero_indices):
         mean_percentage_change = 1
+    else:
+        mean_percentage_change = np.mean(percentages)
 
     return converging, mean_percentage_change
 
