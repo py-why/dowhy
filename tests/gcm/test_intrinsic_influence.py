@@ -3,14 +3,25 @@ import numpy as np
 import pandas as pd
 from flaky import flaky
 from pytest import approx
+from scipy import stats
 from sklearn.linear_model import LogisticRegression
 
-from dowhy.gcm import StructuralCausalModel, auto, fit, intrinsic_causal_influence
+from dowhy.gcm import (
+    AdditiveNoiseModel,
+    InvertibleStructuralCausalModel,
+    ScipyDistribution,
+    StructuralCausalModel,
+    auto,
+    fit,
+    intrinsic_causal_influence,
+)
 from dowhy.gcm._noise import noise_samples_of_ancestors
 from dowhy.gcm.graph import node_connected_subgraph_view
-from dowhy.gcm.ml import create_hist_gradient_boost_classifier
+from dowhy.gcm.influence import intrinsic_causal_influence_sample
+from dowhy.gcm.ml import create_hist_gradient_boost_classifier, create_linear_regressor_with_given_parameters
 from dowhy.gcm.uncertainty import estimate_entropy_of_probabilities, estimate_variance
 from dowhy.gcm.util.general import apply_one_hot_encoding, fit_one_hot_encoders
+from tests.gcm.test_noise import _persist_parents
 
 
 @flaky(max_runs=3)
@@ -196,3 +207,43 @@ def test_when_calling_intrinsic_causal_influence_then_the_shape_of_inputs_in_the
         return 0
 
     intrinsic_causal_influence(causal_model, "X1", attribution_func=my_attr_func)
+
+
+@flaky(max_runs=3)
+def test_given_linear_gaussian_data_when_estimate_sample_wise_intrinsic_causal_influence_then_returns_expected_values():
+    causal_model = InvertibleStructuralCausalModel(nx.DiGraph([("X0", "X1"), ("X1", "X2"), ("X2", "X3")]))
+
+    causal_model.set_causal_mechanism("X0", ScipyDistribution(stats.norm, loc=0, scale=1))
+    causal_model.set_causal_mechanism(
+        "X1",
+        AdditiveNoiseModel(
+            create_linear_regressor_with_given_parameters(np.array([2])), ScipyDistribution(stats.norm, loc=0, scale=1)
+        ),
+    )
+    causal_model.set_causal_mechanism(
+        "X2",
+        AdditiveNoiseModel(
+            create_linear_regressor_with_given_parameters(np.array([1])), ScipyDistribution(stats.norm, loc=0, scale=1)
+        ),
+    )
+    causal_model.set_causal_mechanism(
+        "X3",
+        AdditiveNoiseModel(
+            create_linear_regressor_with_given_parameters(np.array([1])), ScipyDistribution(stats.norm, loc=0, scale=1)
+        ),
+    )
+    _persist_parents(causal_model.graph)
+
+    shapley_values = intrinsic_causal_influence_sample(
+        causal_model, "X3", pd.DataFrame({"X0": [0, 1], "X1": [0.5, 2.5], "X2": [1.5, 4.5], "X3": [1.5, 5.5]})
+    )
+
+    assert shapley_values[0][("X0", "X3")] == approx(0, abs=0.1)
+    assert shapley_values[0][("X1", "X3")] == approx(0.5, abs=0.1)
+    assert shapley_values[0][("X2", "X3")] == approx(1, abs=0.1)
+    assert shapley_values[0][("X3", "X3")] == approx(0, abs=0.1)
+
+    assert shapley_values[1][("X0", "X3")] == approx(2, abs=0.1)
+    assert shapley_values[1][("X1", "X3")] == approx(0.5, abs=0.1)
+    assert shapley_values[1][("X2", "X3")] == approx(2, abs=0.1)
+    assert shapley_values[1][("X3", "X3")] == approx(1, abs=0.1)
