@@ -89,7 +89,7 @@ def test_given_dependent_categorical_variables_when_perform_regression_based_pai
             y.append(1)
     y = np.array(y).astype(str)
 
-    assert regression_based(x, y, num_components_all_inputs=10) < 0.05
+    assert regression_based(x, y) < 0.05
 
 
 def test_given_parallelization_is_enabled_when_perform_regression_based_conditional_independence_test_then_p_value_remains_the_same(
