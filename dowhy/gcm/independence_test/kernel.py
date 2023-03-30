@@ -1,7 +1,6 @@
 """Functions in this module should be considered experimental, meaning there might be breaking API changes in the
 future.
 """
-
 from typing import Callable, List, Optional, Union
 
 import numpy as np
@@ -20,9 +19,9 @@ def kernel_based(
     X: np.ndarray,
     Y: np.ndarray,
     Z: Optional[np.ndarray] = None,
-    use_bootstrap: bool = True,
+    use_bootstrap: bool = False,
     bootstrap_num_runs: int = 10,
-    bootstrap_num_samples_per_run: int = 2000,
+    max_num_samples_run: int = 2000,
     bootstrap_n_jobs: Optional[int] = None,
     p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float] = quantile_based_fwer,
     **kwargs,
@@ -54,14 +53,17 @@ def kernel_based(
     :param use_bootstrap: If True, the independence tests are performed on multiple subsets of the data and the final
                           p-value is constructed based on the provided p_value_adjust_func function.
     :param bootstrap_num_runs: Number of bootstrap runs (only relevant if use_bootstrap is True).
-    :param bootstrap_num_samples_per_run: Number of samples used in a bootstrap run (only relevant if use_bootstrap is
-                                          True).
+    :param max_num_samples_run: Maximum number of samples used in an evaluation. If use_bootstrap is True, then
+                                different samples but at most max_num_samples_run are used.
     :param bootstrap_n_jobs: Number of parallel jobs for the bootstrap runs.
     :param p_value_adjust_func: A callable that expects a numpy array of multiple p-values and returns one p-value. This
                                 is typically used a family wise error rate control method.
     :return: The p-value for the null hypothesis that X and Y are independent (given Z).
     """
     bootstrap_n_jobs = config.default_n_jobs if bootstrap_n_jobs is None else bootstrap_n_jobs
+
+    if not use_bootstrap:
+        bootstrap_num_runs = 1
 
     if "est_width" not in kwargs:
         kwargs["est_width"] = "median"
@@ -91,23 +93,20 @@ def kernel_based(
             X, Y, Z = _convert_to_numeric(*shape_into_2d(X, Y, Z))
             return KCI_CInd(**kwargs).compute_pvalue(X, Y, Z)[0]
 
-    if use_bootstrap and X.shape[0] > bootstrap_num_samples_per_run:
-        random_indices = [
-            np.random.choice(X.shape[0], min(X.shape[0], bootstrap_num_samples_per_run), replace=False)
-            for run in range(bootstrap_num_runs)
-        ]
+    random_indices = [
+        np.random.choice(X.shape[0], min(X.shape[0], max_num_samples_run), replace=False)
+        for run in range(bootstrap_num_runs)
+    ]
 
-        random_seeds = np.random.randint(np.iinfo(np.int32).max, size=len(random_indices))
-        p_values = Parallel(n_jobs=bootstrap_n_jobs)(
-            delayed(evaluate_kernel_test_on_samples)(
-                X[indices], Y[indices], Z[indices] if Z is not None else None, random_seed
-            )
-            for indices, random_seed in zip(random_indices, random_seeds)
+    random_seeds = np.random.randint(np.iinfo(np.int32).max, size=len(random_indices))
+    p_values = Parallel(n_jobs=bootstrap_n_jobs)(
+        delayed(evaluate_kernel_test_on_samples)(
+            X[indices], Y[indices], Z[indices] if Z is not None else None, random_seed
         )
+        for indices, random_seed in zip(random_indices, random_seeds)
+    )
 
-        return p_value_adjust_func(p_values)
-    else:
-        return evaluate_kernel_test_on_samples(X, Y, Z, np.random.randint(np.iinfo(np.int32).max, size=1)[0])
+    return p_value_adjust_func(p_values)
 
 
 def approx_kernel_based(
