@@ -534,7 +534,7 @@ is typically used a family wise error rate control method.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.gcm.independence_test.kernel.kernel_based">
-<span class="sig-prename descclassname"><span class="pre">dowhy.gcm.independence_test.kernel.</span></span><span class="sig-name descname"><span class="pre">kernel_based</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">X:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">Y:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">Z:</span> <span class="pre">~typing.Optional[~numpy.ndarray]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">use_bootstrap:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True,</span> <span class="pre">bootstrap_num_runs:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">10,</span> <span class="pre">bootstrap_num_samples_per_run:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">2000,</span> <span class="pre">bootstrap_n_jobs:</span> <span class="pre">~typing.Optional[int]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">p_value_adjust_func:</span> <span class="pre">~typing.Callable[[~typing.Union[~numpy.ndarray,</span> <span class="pre">~typing.List[float]]],</span> <span class="pre">float]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">quantile_based_fwer&gt;,</span> <span class="pre">**kwargs</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/dowhy/gcm/independence_test/kernel.html#kernel_based"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.independence_test.kernel.kernel_based" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.gcm.independence_test.kernel.</span></span><span class="sig-name descname"><span class="pre">kernel_based</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">X:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">Y:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">Z:</span> <span class="pre">~typing.Optional[~numpy.ndarray]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">use_bootstrap:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False,</span> <span class="pre">bootstrap_num_runs:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">10,</span> <span class="pre">max_num_samples_run:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">2000,</span> <span class="pre">bootstrap_n_jobs:</span> <span class="pre">~typing.Optional[int]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">p_value_adjust_func:</span> <span class="pre">~typing.Callable[[~typing.Union[~numpy.ndarray,</span> <span class="pre">~typing.List[float]]],</span> <span class="pre">float]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">quantile_based_fwer&gt;,</span> <span class="pre">**kwargs</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/dowhy/gcm/independence_test/kernel.html#kernel_based"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.independence_test.kernel.kernel_based" title="Permalink to this definition"></a></dt>
 <dd><p>Prepares the data and uses kernel (conditional) independence test. The independence test estimates a p-value
 for the null hypothesis that X and Y are independent (given Z). Depending whether Z is given, a conditional or
 pairwise independence test is performed.</p>
@@ -559,8 +559,8 @@ If Z is not given: Using KCI as pairwise independence test, i.e. we use <a class
 <li><p><strong>use_bootstrap</strong> – If True, the independence tests are performed on multiple subsets of the data and the final
 p-value is constructed based on the provided p_value_adjust_func function.</p></li>
 <li><p><strong>bootstrap_num_runs</strong> – Number of bootstrap runs (only relevant if use_bootstrap is True).</p></li>
-<li><p><strong>bootstrap_num_samples_per_run</strong> – Number of samples used in a bootstrap run (only relevant if use_bootstrap is
-True).</p></li>
+<li><p><strong>max_num_samples_run</strong> – Maximum number of samples used in an evaluation. If use_bootstrap is True, then
+different samples but at most max_num_samples_run are used.</p></li>
 <li><p><strong>bootstrap_n_jobs</strong> – Number of parallel jobs for the bootstrap runs.</p></li>
 <li><p><strong>p_value_adjust_func</strong> – A callable that expects a numpy array of multiple p-values and returns one p-value. This
 is typically used a family wise error rate control method.</p></li>
@@ -668,21 +668,18 @@ where N is the number of samples in X and D the number of components.</p>
 information about another variable, then they are dependent.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.gcm.independence_test.regression.regression_based">
-<span class="sig-prename descclassname"><span class="pre">dowhy.gcm.independence_test.regression.</span></span><span class="sig-name descname"><span class="pre">regression_based</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">X:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">Y:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">Z:</span> <span class="pre">~typing.Optional[~numpy.ndarray]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">num_components_all_inputs:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">40,</span> <span class="pre">num_runs:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">20,</span> <span class="pre">p_value_adjust_func:</span> <span class="pre">~typing.Callable[[~typing.Union[~numpy.ndarray,</span> <span class="pre">~typing.List[float]]],</span> <span class="pre">float]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">quantile_based_fwer&gt;,</span> <span class="pre">f_test_samples_ratio:</span> <span class="pre">~typing.Optional[float]</span> <span class="pre">=</span> <span class="pre">0.3,</span> <span class="pre">max_samples_per_run:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">10000</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/dowhy/gcm/independence_test/regression.html#regression_based"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.independence_test.regression.regression_based" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.gcm.independence_test.regression.</span></span><span class="sig-name descname"><span class="pre">regression_based</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">X:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">Y:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">Z:</span> <span class="pre">~typing.Optional[~numpy.ndarray]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">max_num_components_all_inputs:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">1000,</span> <span class="pre">num_target_components_factor:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">3,</span> <span class="pre">k_folds:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">3,</span> <span class="pre">p_value_adjust_func:</span> <span class="pre">~typing.Callable[[~typing.Union[~numpy.ndarray,</span> <span class="pre">~typing.List[float]]],</span> <span class="pre">float]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">quantile_based_fwer&gt;,</span> <span class="pre">max_samples_per_fold:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">-1,</span> <span class="pre">n_jobs:</span> <span class="pre">~typing.Optional[int]</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/dowhy/gcm/independence_test/regression.html#regression_based"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.independence_test.regression.regression_based" title="Permalink to this definition"></a></dt>
 <dd><p>The main idea is that if X and Y are dependent, then X should help in predicting Y. If there is no dependency,
 then X should not help. When Z is given, the idea remains the same, but here X and Y are conditionally independent
 given Z if X does not help in predicting Y when knowing Z. This is, X has not additional information about Y given
 Z. In the pairwise case (Z is not given), the performances (in terms of squared error) between predicting Y based
 on X and predicting Y by returning its mean (the best estimator without any inputs) are compared. Note that
-categorical inputs are transformed via the sklearn one-hot-encoder.</p>
+categorical inputs are transformed via encoders.</p>
 <p>Here, we use the <code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.kernel_approximation.Nystroem</span></code> approach to approximate a kernel map of the inputs that serves as new input features.
 These new features allow to model complex non-linear relationships. In case of categorical data, we first apply an
-one-hot-encoding and then map it into the kernel feature space. Afterwards, we use linear regression as a prediction
-model based on the non-linear input features. The idea is then the same as in Granger causality, where we
-apply a f-test to see if the additional input features significantly help in predicting the target or not.</p>
-<p>Note: As compared to <code class="xref py py-func docutils literal notranslate"><span class="pre">kernel_based()</span></code>, this method is quite fast and provides reasonably well results. However, there
-are types of dependencies that this test cannot detect. For instance, if X determines the variance of Y, then this
-cannot be captured. For these more complex dependencies, consider using the <code class="xref py py-func docutils literal notranslate"><span class="pre">kernel_based()</span></code> independence test instead.</p>
+encoding and then map it into the kernel feature space. Afterwards, we use linear regression as a prediction
+model based on the non-linear input features. The idea is then to apply a f-test to see if the additional input
+features significantly help in predicting the target or not.</p>
 <dl class="simple">
 <dt>This test is motivated by Granger causality, the approx_kernel_based test and the following paper:</dt><dd><p>K Chalupka, P Perona, F. Eberhardt. <em>Fast Conditional Independence Test for Vector Variables with Large Sample Sizes</em>. arXiv:1804.02747, 2018.</p>
 </dd>
@@ -693,18 +690,18 @@ cannot be captured. For these more complex dependencies, consider using the <cod
 <li><p><strong>X</strong> – Input data for X.</p></li>
 <li><p><strong>Y</strong> – Input data for Y.</p></li>
 <li><p><strong>Z</strong> – Input data for Z. The set of variables to (optionally) condition on.</p></li>
-<li><p><strong>num_components_all_inputs</strong> – Number of kernel features when combining X and Z. If Z is not given, it will be
+<li><p><strong>max_num_components_all_inputs</strong> – Maximum number of kernel features when combining X and Z. If Z is not given, it will be
 replaced with an empty array. If Z is given, half of the number is used to
-generate features for Z.</p></li>
-<li><p><strong>num_runs</strong> – Number of runs. This equals the number of estimated p-values, which get adjusted by the
+generate features for Z. Note that the actual number of components is 1/10 of the
+number of samples, but at most max_num_components_all_inputs.</p></li>
+<li><p><strong>num_target_components_factor</strong> – The factor indicates how many components are used for the target variable. This is,
+num_target_components_factor * dimension of the target many components.</p></li>
+<li><p><strong>k_folds</strong> – Number of folds for training and test set. This equals the number of estimated p-values, which get adjusted by the
 p_value_adjust_func.</p></li>
 <li><p><strong>p_value_adjust_func</strong> – A callable that expects a numpy array of multiple p-values and returns one p-value. This
 is typically used a family wise error rate control method.</p></li>
-<li><p><strong>f_test_samples_ratio</strong> – Ratio for splitting the data into test and training data sets for calculating
-the f-statistic. A ratio of 0.3 means that 30% of the samples are used for the f-test (test samples) and 70% are
-used for training the prediction model (training samples). If set to None, training and test data set are the same,
-which could help in settings where only a few samples are available.</p></li>
-<li><p><strong>max_samples_per_run</strong> – Maximum number of samples used per run.</p></li>
+<li><p><strong>max_samples_per_fold</strong> – Maximum number of samples used per fold for training and testing. If -1, it uses all data.</p></li>
+<li><p><strong>n_jobs</strong> – Number of parallel jobs for the evaluation of the folds.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
