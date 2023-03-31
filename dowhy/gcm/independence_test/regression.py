@@ -18,8 +18,7 @@ def regression_based(
     X: np.ndarray,
     Y: np.ndarray,
     Z: Optional[np.ndarray] = None,
-    max_num_components_all_inputs: int = 1000,
-    num_target_components_factor: int = 3,
+    max_num_components_all_inputs: int = 40,
     k_folds: int = 3,
     p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float] = quantile_based_fwer,
     max_samples_per_fold: int = -1,
@@ -84,7 +83,7 @@ def regression_based(
 
     def estimate_p_value(training_indices, test_indices, parallel_random_seed: int) -> float:
         set_random_seed(parallel_random_seed)
-        adaptive_num_components = max(min(max_num_components_all_inputs, training_indices.shape[0] // 10), 2)
+        adaptive_num_components = max(min(max_num_components_all_inputs, training_indices.shape[0] // 3), 2)
 
         if X.shape[0] > max_samples_per_fold:
             training_indices = training_indices[:max_samples_per_fold]
@@ -108,9 +107,8 @@ def regression_based(
 
             training_Z = test_Z = np.array([]).reshape(1, -1)
 
-        transformer_target = Nystroem(n_components=Y.shape[1] * num_target_components_factor)
-        training_target = transformer_target.fit_transform(Y[training_indices])
-        test_target = transformer_target.transform(Y[test_indices])
+        training_target = Y[training_indices]
+        test_target = Y[test_indices]
 
         return estimate_ftest_pvalue(
             training_all_inputs,
