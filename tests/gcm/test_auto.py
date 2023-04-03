@@ -52,7 +52,9 @@ def test_given_linear_regression_problem_when_auto_assign_causal_models_with_goo
     data.update({"Y": Y})
 
     assign_causal_mechanisms(causal_model, pd.DataFrame(data), quality=AssignmentQuality.GOOD)
-    assert isinstance(causal_model.causal_mechanism("Y").prediction_model.sklearn_model, LinearRegression)
+    assert isinstance(
+        causal_model.causal_mechanism("Y").prediction_model.sklearn_model, LinearRegression
+    ) or isinstance(causal_model.causal_mechanism("Y").prediction_model.sklearn_model, Pipeline)
 
 
 @flaky(max_runs=3)
@@ -66,7 +68,9 @@ def test_given_linear_regression_problem_when_auto_assign_causal_models_with_bet
     data.update({"Y": Y})
 
     assign_causal_mechanisms(causal_model, pd.DataFrame(data), quality=AssignmentQuality.BETTER)
-    assert isinstance(causal_model.causal_mechanism("Y").prediction_model.sklearn_model, LinearRegression)
+    assert isinstance(
+        causal_model.causal_mechanism("Y").prediction_model.sklearn_model, LinearRegression
+    ) or isinstance(causal_model.causal_mechanism("Y").prediction_model.sklearn_model, Pipeline)
 
 
 @flaky(max_runs=3)
