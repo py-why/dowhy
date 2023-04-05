@@ -1,8 +1,10 @@
 import networkx as nx
 import numpy as np
 import pandas as pd
+from _pytest.python_api import approx
 
-from dowhy.gcm.util import plot, plot_adjacency_matrix
+from dowhy.utils import plot, plot_adjacency_matrix
+from dowhy.utils.plotting import _calc_arrow_width
 
 
 def test_when_plot_does_not_raise_exception():
@@ -37,3 +39,12 @@ def test_given_colors_when_plot_graph_then_does_not_modify_input_object():
     plot(nx.DiGraph([("X", "Y"), ("Y", "Z")]), colors=colors)
 
     assert colors == {("X", "Y"): "red", "X": "blue"}
+
+
+def test_calc_arrow_width():
+    assert _calc_arrow_width(0.4, max_strength=0.5) == approx(3.3, abs=0.01)
+    assert _calc_arrow_width(0.2, max_strength=0.5) == approx(1.7, abs=0.01)
+    assert _calc_arrow_width(-0.2, max_strength=0.5) == approx(1.7, abs=0.01)
+    assert _calc_arrow_width(0.5, max_strength=0.5) == approx(4.1, abs=0.01)
+    assert _calc_arrow_width(0.35, max_strength=0.5) == approx(2.9, abs=0.01)
+    assert _calc_arrow_width(100, max_strength=101) == approx(4.06, abs=0.01)
