@@ -152,7 +152,7 @@ def select_model(
 ) -> Union[PredictionModel, ClassificationModel]:
     if model_selection_quality == AssignmentQuality.BEST:
         try:
-            from dowhy.gcm.ml.autolguon import AutoGluonClassifier, AutoGluonRegressor
+            from dowhy.gcm.ml.autogluon import AutoGluonClassifier, AutoGluonRegressor
 
             if is_categorical(Y):
                 return AutoGluonClassifier()
