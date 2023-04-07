@@ -27,8 +27,8 @@ class ERM(PredictionAlgorithm):
 
         """
 
-        x = torch.cat([x for x, y, _, _ in train_batch])
-        y = torch.cat([y for x, y, _, _ in train_batch])
+        x = torch.cat([x for x, y, _ in train_batch])
+        y = torch.cat([y for x, y, _ in train_batch])
 
         out = self.model(x)
         loss = F.cross_entropy(out, y)

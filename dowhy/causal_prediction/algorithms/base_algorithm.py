@@ -45,8 +45,8 @@ class PredictionAlgorithm(pl.LightningModule):
         """
 
         if isinstance(batch[0], list):
-            x = torch.cat([x for x, y, _, _ in batch])
-            y = torch.cat([y for x, y, _, _ in batch])
+            x = torch.cat([x for x, y, _ in batch])
+            y = torch.cat([y for x, y, _ in batch])
         else:
             x = batch[0]
             y = batch[1]
@@ -67,8 +67,8 @@ class PredictionAlgorithm(pl.LightningModule):
         """
 
         if isinstance(batch[0], list):
-            x = torch.cat([x for x, y, _, _ in batch])
-            y = torch.cat([y for x, y, _, _ in batch])
+            x = torch.cat([x for x, y, _ in batch])
+            y = torch.cat([y for x, y, _ in batch])
         else:
             x = batch[0]
             y = batch[1]
