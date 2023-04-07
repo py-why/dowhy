@@ -103,8 +103,10 @@ class MNISTCausalAttribute(MultipleDomainDataset):
 
         x = images.float().div_(255.0)
         y = labels.view(-1).long()
+        a = torch.unsqueeze(colors, 1)
+        print('colors', colors, colors.shape, 'a', a, a.shape)
 
-        return TensorDataset(x, y, colors, colors)
+        return TensorDataset(x, y, a)
 
     def torch_bernoulli_(self, p, size):
         return (torch.rand(size) < p).float()
