@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 
 from dowhy.gcm.fcms import AdditiveNoiseModel, ClassifierFCM
 
-autolguon = importorskip("dowhy.gcm.ml.autogluon")
+autogluon = importorskip("dowhy.gcm.ml.autogluon")
 from dowhy.gcm.ml.autogluon import AutoGluonClassifier, AutoGluonRegressor
 from dowhy.gcm.util.general import shape_into_2d
 
