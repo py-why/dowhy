@@ -125,113 +125,56 @@ class Regularization:
             }`
         
         """
-        
-        print("condirioning", len(conditioning_subset), len(conditioning_subset[0]), conditioning_subset[0][0].shape)
-        
-        grouping_data = torch.cat(conditioning_subset, 1) # list?
-        assert grouping_data.min() >= 0, "Group numbers cannot be negative."
-        cardinality = 1 + torch.max(grouping_data, dim=0)[0]
-        cumprod = torch.cumprod(cardinality, dim=0)
-        n_groups = cumprod[-1].item()
-        factors_np = np.concatenate(([1], cumprod[:-1]))
-        factors = torch.from_numpy(factors_np)
-        group_indices = grouping_data @ factors
-
+                
         penalty = 0
         
         if E_eq_A:  # Environment (E) and attribute (A) coincide
             if self.E_conditioned is False:  # there is no correlation between E and X_c 
-                # TODO
-                for i in range(num_envs):
-                    for j in range(i + 1, num_envs):
-                        penalty += self.mmd(classifs[i], classifs[j])
-
-        else:
-            if self.E_conditioned:
-                for i in range(num_envs):
-                    conditioning_subset_i = [subset_var[i] for subset_var in conditioning_subset]
                 
-        
-        # if self.E_conditioned:
-            
-        # else:
-            
-        # if "causal" in self.attr_types:
-        #     if self.E_conditioned:
-                for i in range(nmb):
-                    unique_labels = torch.unique(targets[i])  # find distinct labels in environment
-                    unique_label_indices = []
-                    for label in unique_labels:
-                        label_ind = [ind for ind, j in enumerate(targets[i]) if j == label]
-                        unique_label_indices.append(label_ind)
-
-                    nulabels = unique_labels.shape[0]
-                    for idx in range(nulabels):
-                        unique_attrs = torch.unique(
-                            causal_attribute_labels[i][unique_label_indices[idx]]
-                        )                             # find distinct attributes in environment with same label
+                overall_group_vindices = {}  # storing group indices
+                overall_group_eindices = {}  # storing corresponding environment indices
+                
+                for i in range(num_envs):        
+                    conditioning_subset_i = [subset_var[i] for subset_var in conditioning_subset]
+                    conditioning_subset_i_uniform = [ele.unsqueeze(1) if ele.dim()==1 else ele for ele in conditioning_subset_i]
+                    grouping_data = torch.cat(conditioning_subset_i_uniform, 1) 
+                    assert grouping_data.min() >= 0, "Group numbers cannot be negative."
+                    cardinality = 1 + torch.max(grouping_data, dim=0)[0]
+                    cumprod = torch.cumprod(cardinality, dim=0)
+                    n_groups = cumprod[-1].item()
+                    factors_np = np.concatenate(([1], cumprod[:-1]))
+                    factors = torch.from_numpy(factors_np)
+                    group_indices = grouping_data @ factors
+                    
+                    for group_idx in range(n_groups):
+                        group_idx_indices = [gp_idx for gp_idx in range(len(group_indices)) if group_indices[gp_idx] == group_idx]
+                        
+                        if group_idx not in overall_group_vindices:
+                            overall_group_vindices[group_idx] = {}
+                            overall_group_eindices[group_idx] = {}
+                            
+                        unique_attrs = torch.unique(attribute_labels[i][group_idx_indices])  # find distinct attributes in environment with same group_idx_indices
                         unique_attr_indices = []
-                        for attr in unique_attrs:
+                        for attr in unique_attrs:  # storing indices with same attribute value and group label
+                            if attr not in overall_group_vindices[group_idx]:
+                                overall_group_vindices[group_idx][attr] = []
+                                overall_group_eindices[group_idx][attr] = []
                             single_attr = []
-                            for y_attr_idx in unique_label_indices[idx]:
-                                if causal_attribute_labels[i][y_attr_idx] == attr:
-                                    single_attr.append(y_attr_idx)
+                            for group_idx_indices_attr in group_idx_indices:
+                                if attribute_labels[i][group_idx_indices_attr] == attr:
+                                    single_attr.append(group_idx_indices_attr)
+                            overall_group_vindices[group_idx][attr].append(single_attr)
+                            overall_group_eindices[group_idx][attr].append(i)
                             unique_attr_indices.append(single_attr)
-
-                        nuattr = unique_attrs.shape[0]
-                        for aidx in range(nuattr):
-                            for bidx in range(aidx + 1, nuattr):
-                                penalty_causal += self.mmd(
-                                    classifs[i][unique_attr_indices[aidx]], classifs[i][unique_attr_indices[bidx]]
-                                )
-
-            else:
-                overall_label_attr_vindices = {}  # storing attribute indices
-                overall_label_attr_eindices = {}  # storing corresponding environment indices
-
-                for i in range(num_envs):
-                    unique_labels = torch.unique(targets[i])  # find distinct labels in environment
-                    unique_label_indices = []
-                    for label in unique_labels:
-                        label_ind = [ind for ind, j in enumerate(targets[i]) if j == label]
-                        unique_label_indices.append(label_ind)
-
-                    nulabels = unique_labels.shape[0]
-                    for idx in range(nulabels):
-                        label = unique_labels[idx]
-                        if label not in overall_label_attr_vindices:
-                            overall_label_attr_vindices[label] = {}
-                            overall_label_attr_eindices[label] = {}
-
-                        unique_attrs = torch.unique(
-                            causal_attribute_labels[i][unique_label_indices[idx]]
-                        )  # find distinct attributes in environment with same label
-                        unique_attr_indices = []
-                        for attr in unique_attrs:  # storing indices with same attribute value and label
-                            if attr not in overall_label_attr_vindices[label]:
-                                overall_label_attr_vindices[label][attr] = []
-                                overall_label_attr_eindices[label][attr] = []
-                            single_attr = []
-                            for y_attr_idx in unique_label_indices[idx]:
-                                if causal_attribute_labels[i][y_attr_idx] == attr:
-                                    single_attr.append(y_attr_idx)
-                            overall_label_attr_vindices[label][attr].append(single_attr)
-                            overall_label_attr_eindices[label][attr].append(i)
-                            unique_attr_indices.append(single_attr)
-
-                for (
-                    y_val
-                ) in (
-                    overall_label_attr_vindices
-                ):  # applying MMD penalty between distributions P(φ(x)|ai, y), P(φ(x)|aj, y) i.e samples with different attribute values but same label
+                            
+                
+                for group_label in overall_group_vindices:  # applying MMD penalty between distributions P(φ(x)|ai, g), P(φ(x)|aj, g) i.e samples with different attribute labelues but same group label
                     tensors_list = []
-                    for attr in overall_label_attr_vindices[y_val]:
+                    for attr in overall_group_vindices[group_label]:
                         attrs_list = []
-                        if overall_label_attr_vindices[y_val][attr] != []:
-                            for il_ind, indices_list in enumerate(overall_label_attr_vindices[y_val][attr]):
-                                attrs_list.append(
-                                    classifs[overall_label_attr_eindices[y_val][attr][il_ind]][indices_list]
-                                )
+                        if overall_group_vindices[group_label][attr] != []:
+                            for il_ind, indices_list in enumerate(overall_group_vindices[group_label][attr]):
+                                attrs_list.append(classifs[overall_group_eindices[group_label][attr][il_ind]][indices_list])
                         if len(attrs_list) > 0:
                             tensor_attrs = torch.cat(attrs_list, 0)
                             tensors_list.append(tensor_attrs)
@@ -239,49 +182,93 @@ class Regularization:
                     nuattr = len(tensors_list)
                     for aidx in range(nuattr):
                         for bidx in range(aidx + 1, nuattr):
-                            penalty_causal += self.mmd(tensors_list[aidx], tensors_list[bidx])
+                            penalty += self.mmd(tensors_list[aidx], tensors_list[bidx])
 
-        # Aind regularization
-        if "ind" in self.attr_types:
-            if self.E_eq_Aind:  # Environment (E) and Independent attribute (Aind) coincide
-                for i in range(nmb):
-                    for j in range(i + 1, nmb):
-                        penalty_ind += self.mmd(classifs[i], classifs[j])
-
-            else:
-                if self.E_conditioned:
-                    for i in range(nmb):
-                        unique_aind_labels = torch.unique(ind_attribute_labels[i])
-                        unique_aind_label_indices = []
-                        for label in unique_aind_labels:
-                            label_ind = [ind for ind, j in enumerate(ind_attribute_labels[i]) if j == label]
-                            unique_aind_label_indices.append(label_ind)
-
-                        nulabels = unique_aind_labels.shape[0]
-                        for aidx in range(nulabels):
-                            for bidx in range(aidx + 1, nulabels):
-                                penalty_ind += self.mmd(
-                                    classifs[i][unique_aind_label_indices[aidx]],
-                                    classifs[i][unique_aind_label_indices[bidx]],
-                                )
-
-                else:  # this currently assumes we have a disjoint set of attributes (Aind) across environments i.e., environment is defined by multiple closely related values of the attribute
-                    overall_nmb_indices, nmb_id = [], []
-                    for i in range(nmb):
-                        unique_attrs = torch.unique(ind_attribute_labels[i])
+        else:
+            if self.E_conditioned:
+                for i in range(num_envs):
+                    conditioning_subset_i = [subset_var[i] for subset_var in conditioning_subset]
+                    conditioning_subset_i_uniform = [ele.unsqueeze(1) if ele.dim()==1 else ele for ele in conditioning_subset_i]
+                    grouping_data = torch.cat(conditioning_subset_i_uniform, 1) 
+                    assert grouping_data.min() >= 0, "Group numbers cannot be negative."
+                    cardinality = 1 + torch.max(grouping_data, dim=0)[0]
+                    cumprod = torch.cumprod(cardinality, dim=0)
+                    n_groups = cumprod[-1].item()
+                    factors_np = np.concatenate(([1], cumprod[:-1]))
+                    factors = torch.from_numpy(factors_np)
+                    group_indices = grouping_data @ factors
+                    
+                    for group_idx in range(n_groups):
+                        group_idx_indices = [gp_idx for gp_idx in range(len(group_indices)) if group_indices[gp_idx] == group_idx]
+                        unique_attrs = torch.unique(attribute_labels[i][group_idx_indices])  # find distinct attributes in environment with same group_idx_indices
                         unique_attr_indices = []
                         for attr in unique_attrs:
-                            attr_ind = [ind for ind, j in enumerate(ind_attribute_labels[i]) if j == attr]
-                            unique_attr_indices.append(attr_ind)
-                            overall_nmb_indices.append(attr_ind)
-                            nmb_id.append(i)
+                            single_attr = []
+                            for group_idx_indices_attr in group_idx_indices:
+                                if attribute_labels[i][group_idx_indices_attr] == attr:
+                                    single_attr.append(group_idx_indices_attr)
+                            unique_attr_indices.append(single_attr)
 
-                    nuattr = len(overall_nmb_indices)
+                        nuattr = unique_attrs.shape[0]
+                        for aidx in range(nuattr):
+                            for bidx in range(aidx + 1, nuattr):
+                                penalty += self.mmd(
+                                    classifs[i][unique_attr_indices[aidx]], classifs[i][unique_attr_indices[bidx]]
+                                )
+
+            else:
+                overall_group_vindices = {}  # storing group indices
+                overall_group_eindices = {}  # storing corresponding environment indices
+                
+                for i in range(num_envs):        
+                    conditioning_subset_i = [subset_var[i] for subset_var in conditioning_subset]
+                    conditioning_subset_i_uniform = [ele.unsqueeze(1) if ele.dim()==1 else ele for ele in conditioning_subset_i]
+                    grouping_data = torch.cat(conditioning_subset_i_uniform, 1) 
+                    assert grouping_data.min() >= 0, "Group numbers cannot be negative."
+                    cardinality = 1 + torch.max(grouping_data, dim=0)[0]
+                    cumprod = torch.cumprod(cardinality, dim=0)
+                    n_groups = cumprod[-1].item()
+                    factors_np = np.concatenate(([1], cumprod[:-1]))
+                    factors = torch.from_numpy(factors_np)
+                    group_indices = grouping_data @ factors
+                    
+                    for group_idx in range(n_groups):
+                        group_idx_indices = [gp_idx for gp_idx in range(len(group_indices)) if group_indices[gp_idx] == group_idx]
+                        
+                        if group_idx not in overall_group_vindices:
+                            overall_group_vindices[group_idx] = {}
+                            overall_group_eindices[group_idx] = {}
+                            
+                        unique_attrs = torch.unique(attribute_labels[i][group_idx_indices])  # find distinct attributes in environment with same group_idx_indices
+                        unique_attr_indices = []
+                        for attr in unique_attrs:  # storing indices with same attribute value and group label
+                            if attr not in overall_group_vindices[group_idx]:
+                                overall_group_vindices[group_idx][attr] = []
+                                overall_group_eindices[group_idx][attr] = []
+                            single_attr = []
+                            for group_idx_indices_attr in group_idx_indices:
+                                if attribute_labels[i][group_idx_indices_attr] == attr:
+                                    single_attr.append(group_idx_indices_attr)
+                            overall_group_vindices[group_idx][attr].append(single_attr)
+                            overall_group_eindices[group_idx][attr].append(i)
+                            unique_attr_indices.append(single_attr)
+                            
+                
+                for group_label in overall_group_vindices:  # applying MMD penalty between distributions P(φ(x)|ai, g), P(φ(x)|aj, g) i.e samples with different attribute labelues but same group label
+                    tensors_list = []
+                    for attr in overall_group_vindices[group_label]:
+                        attrs_list = []
+                        if overall_group_vindices[group_label][attr] != []:
+                            for il_ind, indices_list in enumerate(overall_group_vindices[group_label][attr]):
+                                attrs_list.append(classifs[overall_group_eindices[group_label][attr][il_ind]][indices_list])
+                        if len(attrs_list) > 0:
+                            tensor_attrs = torch.cat(attrs_list, 0)
+                            tensors_list.append(tensor_attrs)
+
+                    nuattr = len(tensors_list)
                     for aidx in range(nuattr):
                         for bidx in range(aidx + 1, nuattr):
-                            a_nmb_id = nmb_id[aidx]
-                            b_nmb_id = nmb_id[bidx]
-                            penalty_ind += self.mmd(
-                                classifs[a_nmb_id][overall_nmb_indices[aidx]],
-                                classifs[b_nmb_id][overall_nmb_indices[bidx]],
-                            )
+                            penalty += self.mmd(tensors_list[aidx], tensors_list[bidx])
+                            
+        return penalty
+        

@@ -1,6 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 
 import torch
+import torchvision
 from PIL import Image
 from torch.utils.data import Subset, TensorDataset
 from torchvision import transforms
@@ -22,10 +23,9 @@ from dowhy.causal_prediction.datasets.base_dataset import MultipleDomainDataset
     * datasets initialized from torchvision.datasets.MNIST
     * We assume causal attribute (Acause) = color, independent attribute (Aind) = rotation
     * Environments/domains stored in list self.datasets (required for all datasets)
-    * Default env structure is TensorDataset(x, y, Acause, Aind)
-        * We do not need Aind (rotation) explicitly here since E=Aind
-        * In Aind case, we return (x, y, _, _)
-        * '_' is replaced by any dummy vector (this is because the training loop assumes 4 inputs in TensorDataset)
+    * Default env structure is TensorDataset(x, y, a)
+        * a is a combined tensor for all attributes (metadata) a1, a2, ..., ak
+        * a's shape is (n, k) where n is the number of samples in the environment
 """
 
 # single-attribute Causal
@@ -104,7 +104,6 @@ class MNISTCausalAttribute(MultipleDomainDataset):
         x = images.float().div_(255.0)
         y = labels.view(-1).long()
         a = torch.unsqueeze(colors, 1)
-        print('colors', colors, colors.shape, 'a', a, a.shape)
 
         return TensorDataset(x, y, a)
 
@@ -150,21 +149,21 @@ class MNISTIndAttribute(MultipleDomainDataset):
         for i, env in enumerate(angles[:-1]):
             images = original_images[:50000][i::2]
             labels = original_labels[:50000][i::2]
-            self.datasets.append(self.rotate_dataset(images, labels, angles[i]))
+            self.datasets.append(self.rotate_dataset(images, labels, i, angles[i]))
         images = original_images[50000:]
         labels = original_labels[50000:]
-        self.datasets.append(self.rotate_dataset(images, labels, angles[-1]))
+        self.datasets.append(self.rotate_dataset(images, labels, len(angles)-1, angles[-1]))
 
         # test environment
         original_dataset_te = MNIST(root, train=False, download=download)
         original_images = original_dataset_te.data
         original_labels = original_dataset_te.targets
-        self.datasets.append(self.rotate_dataset(original_images, original_labels, angles[-1]))
+        self.datasets.append(self.rotate_dataset(original_images, original_labels, len(angles)-1, angles[-1]))
 
         self.input_shape = self.INPUT_SHAPE
         self.num_classes = 2
 
-    def rotate_dataset(self, images, labels, angle):
+    def rotate_dataset(self, images, labels, env_id, angle):
         """
         Transform MNIST dataset by applying rotation to images.
         Attribute (rotation angle) is independent of label Y.
@@ -172,12 +171,12 @@ class MNISTIndAttribute(MultipleDomainDataset):
         :param images: original MNIST images
         :param labels: original MNIST labels
         :param angle: Value of rotation angle used for transforming the image
-        :returns: TensorDataset containing transformed images and labels
+        :returns: TensorDataset containing transformed images, labels, and attributes (angle)
         """
         rotation = transforms.Compose(
             [
                 transforms.ToPILImage(),
-                transforms.Lambda(lambda x: rotate(x, int(angle), fill=(0,), resample=Image.BICUBIC)),
+                transforms.Lambda(lambda x: rotate(x, int(angle), fill=(0,), interpolation=torchvision.transforms.InterpolationMode.BILINEAR)),
                 transforms.ToTensor(),
             ]
         )
@@ -194,8 +193,10 @@ class MNISTIndAttribute(MultipleDomainDataset):
             x[i] = rotation(images[i].float().div_(255.0))
 
         y = labels.view(-1).long()
+        a = torch.full((y.shape[0], ), env_id, dtype=torch.float32)
+        a = torch.unsqueeze(a, 1)
 
-        return TensorDataset(x, y, y, y)
+        return TensorDataset(x, y, a)
 
     def torch_bernoulli_(self, p, size):
         return (torch.rand(size) < p).float()
@@ -240,21 +241,21 @@ class MNISTCausalIndAttribute(MultipleDomainDataset):
         for i, env in enumerate(environments[:-1]):
             images = original_images[:50000][i::2]
             labels = original_labels[:50000][i::2]
-            self.datasets.append(self.color_rot_dataset(images, labels, env, angles[i]))
+            self.datasets.append(self.color_rot_dataset(images, labels, env, i, angles[i]))
         images = original_images[50000:]
         labels = original_labels[50000:]
-        self.datasets.append(self.color_rot_dataset(images, labels, environments[-1], angles[-1]))
+        self.datasets.append(self.color_rot_dataset(images, labels, environments[-1], len(angles)-1, angles[-1]))
 
         # test environment
         original_dataset_te = MNIST(root, train=False, download=download)
         original_images = original_dataset_te.data
         original_labels = original_dataset_te.targets
-        self.datasets.append(self.color_rot_dataset(original_images, original_labels, environments[-1], angles[-1]))
+        self.datasets.append(self.color_rot_dataset(original_images, original_labels, environments[-1], len(angles)-1, angles[-1]))
 
         self.input_shape = self.INPUT_SHAPE
         self.num_classes = 2
 
-    def color_rot_dataset(self, images, labels, environment, angle):
+    def color_rot_dataset(self, images, labels, environment, env_id, angle):
         """
         Transform MNIST dataset by (i) applying rotation to images, then (ii) introducing correlation between attribute (color) and label.
         Attribute (rotation angle) is independent of label Y; there is a direct-causal relationship between label Y and color.
@@ -263,7 +264,7 @@ class MNISTCausalIndAttribute(MultipleDomainDataset):
         :param labels: original MNIST labels
         :param environment: Value of correlation between color and label
         :param angle: Value of rotation angle used for transforming the image
-        :returns: TensorDataset containing transformed images, labels, and attributes (color)
+        :returns: TensorDataset containing transformed images, labels, and attributes (color, angle)
         """
         # Subsample 2x for computational convenience
         images = images.reshape((-1, 28, 28))[:, ::2, ::2]
@@ -274,8 +275,10 @@ class MNISTCausalIndAttribute(MultipleDomainDataset):
 
         x = images  # .float().div_(255.0)
         y = labels.view(-1).long()
+        angles = torch.full((y.shape[0], ), env_id, dtype=torch.float32)
+        a = torch.stack((colors, angles), 1)
 
-        return TensorDataset(x, y, colors, colors)
+        return TensorDataset(x, y, a)
 
     def color_dataset(self, images, labels, environment):
         """

@@ -104,27 +104,25 @@ class CACM(PredictionAlgorithm):
             
             for attr_type_idx, attr_type in enumerate(self.attr_types):
             
-                print('len minib', len(minibatches), 'minib', minibatches[0], 'minnn', minibatches[0][2])
                 attribute_labels = [ai for _, _, ai in minibatches]  # [(batch_size, num_attrs)_1, batch_size, num_attrs)_2, ..., (batch_size, num_attrs)_(num_environments)]
-                print('attr labels', attribute_labels, len(attribute_labels), attribute_labels[0].shape)
                 
                 E_eq_A_attr = attr_type_idx in self.E_eq_A
                 
                 # Acause regularization
                 if attr_type == "causal":
-                    penalty_causal += self.CACMRegularization.conditional_reg(classifs, attribute_labels, [targets], nmb, E_eq_A_attr) 
+                    penalty_causal += self.CACMRegularization.conditional_reg(classifs, [a[:, attr_type_idx] for a in attribute_labels], [targets], nmb, E_eq_A_attr) 
                     
                 # Aconf regularization
                 elif attr_type == "conf":
-                    penalty_conf += self.CACMRegularization.unconditional_reg(classifs, attribute_labels, nmb, E_eq_A_attr) 
+                    penalty_conf += self.CACMRegularization.unconditional_reg(classifs, [a[:, attr_type_idx] for a in attribute_labels], nmb, E_eq_A_attr) 
                     
                 # Aind regularization
                 elif attr_type == "ind":
-                    penalty_ind += self.CACMRegularization.unconditional_reg(classifs, attribute_labels, nmb, E_eq_A_attr) 
+                    penalty_ind += self.CACMRegularization.unconditional_reg(classifs, [a[:, attr_type_idx] for a in attribute_labels], nmb, E_eq_A_attr) 
                     
                 # Asel regularization
                 elif attr_type == "sel":
-                    penalty_sel += self.CACMRegularization.conditional_reg(classifs, attribute_labels, [targets], nmb, E_eq_A_attr) 
+                    penalty_sel += self.CACMRegularization.conditional_reg(classifs, [a[:, attr_type_idx] for a in attribute_labels], [targets], nmb, E_eq_A_attr) 
                     
             if nmb > 1:
                 penalty_causal /= nmb * (nmb - 1) / 2
