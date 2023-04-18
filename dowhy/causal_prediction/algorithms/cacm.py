@@ -26,7 +26,6 @@ class CACM(PredictionAlgorithm):
         lambda_ind=1.0,
         lambda_sel=1.0,
     ):
-
         """Class for Causally Adaptive Constraint Minimization (CACM) Algorithm.
             @article{Kaur2022ModelingTD,
              title={Modeling the Data-Generating Process is Necessary for Out-of-Distribution Generalization},
@@ -45,7 +44,7 @@ class CACM(PredictionAlgorithm):
         :param momentum: Value of momentum for SGD optimzer
         :param kernel_type: Kernel type for MMD penalty. Currently, supports "gaussian" (RBF). If None, distance between mean and second-order statistics (covariances) is used.
         :param ci_test: Conditional independence metric used for regularization penalty. Currently, MMD is supported.
-        :param attr_types: list of attribute types (based on relationship with label Y); should be ordered according to attribute order in loaded dataset. 
+        :param attr_types: list of attribute types (based on relationship with label Y); should be ordered according to attribute order in loaded dataset.
             Currently, 'causal' (Causal), 'conf' (Confounded), 'ind' (Independent) and 'sel' (Selected) are supported.
             For single-shift datasets, use: ['causal'], ['ind']
             For multi-shift datasets, use: ['causal', 'ind']
@@ -63,14 +62,13 @@ class CACM(PredictionAlgorithm):
         super().__init__(model, optimizer, lr, weight_decay, betas, momentum)
 
         self.CACMRegularization = Regularization(E_conditioned, ci_test, kernel_type, gamma)
-        
+
         self.attr_types = attr_types
         self.E_eq_A = E_eq_A
         self.lambda_causal = lambda_causal
         self.lambda_conf = lambda_conf
         self.lambda_ind = lambda_ind
         self.lambda_sel = lambda_sel
-
 
     def training_step(self, train_batch, batch_idx):
         """
@@ -99,31 +97,39 @@ class CACM(PredictionAlgorithm):
 
         objective /= nmb
         loss = objective
-         
+
         if self.attr_types != []:
-            
             for attr_type_idx, attr_type in enumerate(self.attr_types):
-            
-                attribute_labels = [ai for _, _, ai in minibatches]  # [(batch_size, num_attrs)_1, batch_size, num_attrs)_2, ..., (batch_size, num_attrs)_(num_environments)]
-                
+                attribute_labels = [
+                    ai for _, _, ai in minibatches
+                ]  # [(batch_size, num_attrs)_1, batch_size, num_attrs)_2, ..., (batch_size, num_attrs)_(num_environments)]
+
                 E_eq_A_attr = attr_type_idx in self.E_eq_A
-                
+
                 # Acause regularization
                 if attr_type == "causal":
-                    penalty_causal += self.CACMRegularization.conditional_reg(classifs, [a[:, attr_type_idx] for a in attribute_labels], [targets], nmb, E_eq_A_attr) 
-                    
+                    penalty_causal += self.CACMRegularization.conditional_reg(
+                        classifs, [a[:, attr_type_idx] for a in attribute_labels], [targets], nmb, E_eq_A_attr
+                    )
+
                 # Aconf regularization
                 elif attr_type == "conf":
-                    penalty_conf += self.CACMRegularization.unconditional_reg(classifs, [a[:, attr_type_idx] for a in attribute_labels], nmb, E_eq_A_attr) 
-                    
+                    penalty_conf += self.CACMRegularization.unconditional_reg(
+                        classifs, [a[:, attr_type_idx] for a in attribute_labels], nmb, E_eq_A_attr
+                    )
+
                 # Aind regularization
                 elif attr_type == "ind":
-                    penalty_ind += self.CACMRegularization.unconditional_reg(classifs, [a[:, attr_type_idx] for a in attribute_labels], nmb, E_eq_A_attr) 
-                    
+                    penalty_ind += self.CACMRegularization.unconditional_reg(
+                        classifs, [a[:, attr_type_idx] for a in attribute_labels], nmb, E_eq_A_attr
+                    )
+
                 # Asel regularization
                 elif attr_type == "sel":
-                    penalty_sel += self.CACMRegularization.conditional_reg(classifs, [a[:, attr_type_idx] for a in attribute_labels], [targets], nmb, E_eq_A_attr) 
-                    
+                    penalty_sel += self.CACMRegularization.conditional_reg(
+                        classifs, [a[:, attr_type_idx] for a in attribute_labels], [targets], nmb, E_eq_A_attr
+                    )
+
             if nmb > 1:
                 penalty_causal /= nmb * (nmb - 1) / 2
                 penalty_conf /= nmb * (nmb - 1) / 2
@@ -148,10 +154,10 @@ class CACM(PredictionAlgorithm):
             if torch.is_tensor(penalty_sel):
                 penalty_sel = penalty_sel.item()
                 self.log("penalty_sel", penalty_sel, on_step=False, on_epoch=True, prog_bar=True)
-                
+
         elif self.graph is not None:
-            pass #TODO
-        
+            pass  # TODO
+
         else:
             raise ValueError("No attribute types or graph provided.")
 
@@ -161,4 +167,3 @@ class CACM(PredictionAlgorithm):
         self.log_dict(metrics, on_step=False, on_epoch=True, prog_bar=True)
 
         return loss
-        

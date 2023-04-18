@@ -28,6 +28,7 @@ from dowhy.causal_prediction.datasets.base_dataset import MultipleDomainDataset
         * a's shape is (n, k) where n is the number of samples in the environment
 """
 
+
 # single-attribute Causal
 class MNISTCausalAttribute(MultipleDomainDataset):
     N_STEPS = 5001
@@ -152,13 +153,13 @@ class MNISTIndAttribute(MultipleDomainDataset):
             self.datasets.append(self.rotate_dataset(images, labels, i, angles[i]))
         images = original_images[50000:]
         labels = original_labels[50000:]
-        self.datasets.append(self.rotate_dataset(images, labels, len(angles)-1, angles[-1]))
+        self.datasets.append(self.rotate_dataset(images, labels, len(angles) - 1, angles[-1]))
 
         # test environment
         original_dataset_te = MNIST(root, train=False, download=download)
         original_images = original_dataset_te.data
         original_labels = original_dataset_te.targets
-        self.datasets.append(self.rotate_dataset(original_images, original_labels, len(angles)-1, angles[-1]))
+        self.datasets.append(self.rotate_dataset(original_images, original_labels, len(angles) - 1, angles[-1]))
 
         self.input_shape = self.INPUT_SHAPE
         self.num_classes = 2
@@ -176,7 +177,11 @@ class MNISTIndAttribute(MultipleDomainDataset):
         rotation = transforms.Compose(
             [
                 transforms.ToPILImage(),
-                transforms.Lambda(lambda x: rotate(x, int(angle), fill=(0,), interpolation=torchvision.transforms.InterpolationMode.BILINEAR)),
+                transforms.Lambda(
+                    lambda x: rotate(
+                        x, int(angle), fill=(0,), interpolation=torchvision.transforms.InterpolationMode.BILINEAR
+                    )
+                ),
                 transforms.ToTensor(),
             ]
         )
@@ -193,7 +198,7 @@ class MNISTIndAttribute(MultipleDomainDataset):
             x[i] = rotation(images[i].float().div_(255.0))
 
         y = labels.view(-1).long()
-        a = torch.full((y.shape[0], ), env_id, dtype=torch.float32)
+        a = torch.full((y.shape[0],), env_id, dtype=torch.float32)
         a = torch.unsqueeze(a, 1)
 
         return TensorDataset(x, y, a)
@@ -244,13 +249,15 @@ class MNISTCausalIndAttribute(MultipleDomainDataset):
             self.datasets.append(self.color_rot_dataset(images, labels, env, i, angles[i]))
         images = original_images[50000:]
         labels = original_labels[50000:]
-        self.datasets.append(self.color_rot_dataset(images, labels, environments[-1], len(angles)-1, angles[-1]))
+        self.datasets.append(self.color_rot_dataset(images, labels, environments[-1], len(angles) - 1, angles[-1]))
 
         # test environment
         original_dataset_te = MNIST(root, train=False, download=download)
         original_images = original_dataset_te.data
         original_labels = original_dataset_te.targets
-        self.datasets.append(self.color_rot_dataset(original_images, original_labels, environments[-1], len(angles)-1, angles[-1]))
+        self.datasets.append(
+            self.color_rot_dataset(original_images, original_labels, environments[-1], len(angles) - 1, angles[-1])
+        )
 
         self.input_shape = self.INPUT_SHAPE
         self.num_classes = 2
@@ -275,7 +282,7 @@ class MNISTCausalIndAttribute(MultipleDomainDataset):
 
         x = images  # .float().div_(255.0)
         y = labels.view(-1).long()
-        angles = torch.full((y.shape[0], ), env_id, dtype=torch.float32)
+        angles = torch.full((y.shape[0],), env_id, dtype=torch.float32)
         a = torch.stack((colors, angles), 1)
 
         return TensorDataset(x, y, a)
