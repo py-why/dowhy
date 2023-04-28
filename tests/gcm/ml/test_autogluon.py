@@ -5,7 +5,7 @@ from flaky import flaky
 from pytest import approx, importorskip, mark
 from sklearn.model_selection import train_test_split
 
-from dowhy.gcm.fcms import AdditiveNoiseModel, ClassifierFCM
+from dowhy.gcm.causal_mechanisms import AdditiveNoiseModel, ClassifierFCM
 
 autogluon = importorskip("dowhy.gcm.ml.autogluon")
 from dowhy.gcm.ml.autogluon import AutoGluonClassifier, AutoGluonRegressor

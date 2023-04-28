@@ -9,13 +9,13 @@ from dowhy.gcm import (
     InverseDensityScorer,
     InvertibleStructuralCausalModel,
     MedianCDFQuantileScorer,
-    PredictionModel,
     attribute_anomalies,
     auto,
     fit,
 )
 from dowhy.gcm.anomaly import _relative_frequency, attribute_anomaly_scores
 from dowhy.gcm.density_estimators import GaussianMixtureDensityEstimator
+from dowhy.gcm.ml import PredictionModel
 
 
 @flaky(max_runs=3)

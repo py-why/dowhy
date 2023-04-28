@@ -1,9 +1,10 @@
-"""This module defines implementations of :class:`~dowhy.gcm.fcms.PredictionModel` used by the different
-:class:`~dowhy.gcm.graph.FunctionalCausalModel` implementations, such as :class:`~dowhy.gcm.fcms.PostNonlinearModel` or
-:class:`~dowhy.gcm.fcms.AdditiveNoiseModel`.
+"""This module defines implementations of :class:`~dowhy.gcm.ml.PredictionModel` used by the different
+:class:`~dowhy.gcm.graph.FunctionalCausalModel` implementations, such as :class:`~dowhy.gcm.causal_mechanisms.PostNonlinearModel` or
+:class:`~dowhy.gcm.causal_mechanisms.AdditiveNoiseModel`.
 """
 
 from .classification import (
+    ClassificationModel,
     SklearnClassificationModel,
     create_gaussian_process_classifier,
     create_hist_gradient_boost_classifier,
@@ -11,7 +12,9 @@ from .classification import (
     create_polynom_logistic_regression_classifier,
     create_random_forest_classifier,
 )
+from .prediction_model import PredictionModel
 from .regression import (
+    InvertibleFunction,
     SklearnRegressionModel,
     create_elastic_net_regressor,
     create_gaussian_process_regressor,

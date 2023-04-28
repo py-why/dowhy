@@ -16,11 +16,11 @@ from dowhy.gcm import (
     intrinsic_causal_influence,
 )
 from dowhy.gcm._noise import noise_samples_of_ancestors
-from dowhy.gcm.graph import node_connected_subgraph_view
 from dowhy.gcm.influence import intrinsic_causal_influence_sample
 from dowhy.gcm.ml import create_hist_gradient_boost_classifier, create_linear_regressor_with_given_parameters
 from dowhy.gcm.uncertainty import estimate_entropy_of_probabilities, estimate_variance
 from dowhy.gcm.util.general import apply_one_hot_encoding, fit_one_hot_encoders
+from dowhy.graph import node_connected_subgraph_view
 from tests.gcm.test_noise import _persist_parents
 
 

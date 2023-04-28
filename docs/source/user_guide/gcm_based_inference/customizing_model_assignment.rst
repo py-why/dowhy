@@ -18,13 +18,13 @@ distinguishes between these two types of nodes.
 
 For root nodes such as :math:`X`, the distribution :math:`P_x` is modeled using a stochastic model.
 Non-root nodes such as :math:`Y` are modelled using a *conditional* stochastic model. DoWhy's gcm package
-defines corresponding interfaces for both, namely :class:`~dowhy.gcm.graph.StochasticModel` and
-:class:`~dowhy.gcm.graph.ConditionalStochasticModel`.
+defines corresponding interfaces for both, namely :class:`~dowhy.gcm.causal_mechanisms.StochasticModel` and
+:class:`~dowhy.gcm.causal_mechanisms.ConditionalStochasticModel`.
 
 The gcm package also provides ready-to-use implementations, such as :class:`~dowhy.gcm.stochastic_models
 .ScipyDistribution` or :class:`~dowhy.gcm.stochastic_models.BayesianGaussianMixtureDistribution` for
-:class:`~dowhy.gcm.graph.StochasticModel`, and :class:`~dowhy.gcm.fcms.AdditiveNoiseModel` for
-:class:`~dowhy.gcm.graph.ConditionalStochasticModel`.
+:class:`~dowhy.gcm.causal_mechanisms.StochasticModel`, and :class:`~dowhy.gcm.causal_mechanisms.AdditiveNoiseModel` for
+:class:`~dowhy.gcm.causal_mechanisms.ConditionalStochasticModel`.
 
 Knowing that, we can now start to manually assign causal models to nodes according to our needs.
 Say, we know from domain knowledge, that our root node X follows a normal distribution. In this
@@ -38,7 +38,7 @@ case, we can explicitly assign this:
 >>> causal_model.set_causal_mechanism('X', gcm.ScipyDistribution(norm))
 
 For the non-root node Y, let's use an additive noise model (ANM), represented by the
-:class:`~dowhy.gcm.fcms.AdditiveNoiseModel` class. It has a
+:class:`~dowhy.gcm.causal_mechanisms.AdditiveNoiseModel` class. It has a
 structural assignment of the form: :math:`Y := f(X) + N`. Here, f is a deterministic prediction
 function, whereas N is a noise term. Let's put all of this together:
 
@@ -48,7 +48,7 @@ function, whereas N is a noise term. Let's put all of this together:
 
 The rather interesting part here is the ``prediction_model``, which corresponds to our function
 :math:`f` above. This prediction model must satisfy the contract defined by
-:class:`~dowhy.gcm.fcms.PredictionModel`, i.e. it must implement the methods::
+:class:`~dowhy.gcm.ml.PredictionModel`, i.e. it must implement the methods::
 
     def fit(self, X: np.ndarray, Y: np.ndarray) -> None: ...
     def predict(self, X: np.ndarray) -> np.ndarray: ...
@@ -79,9 +79,9 @@ Using ground truth models
 In some scenarios the ground truth models might be known and should be used instead. Let's
 assume, we know that our relationship are linear with coefficients :math:`\alpha = 2` and
 :math:`\beta = 3`. Let's make use of this knowledge by creating a custom prediction model that
-implements the :class:`~dowhy.gcm.fcms.PredictionModel` interface:
+implements the :class:`~dowhy.gcm.ml.PredictionModel` interface:
 
->>> class MyCustomModel(gcm.PredictionModel):
+>>>import dowhy.gcm.ml.prediction_model class MyCustomModel(gcm.ml.PredictionModel):
 >>>     def __init__(self, coefficient):
 >>>         self.coefficient = coefficient
 >>>

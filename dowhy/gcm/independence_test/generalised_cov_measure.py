@@ -4,7 +4,7 @@ import numpy as np
 from scipy import stats
 
 from dowhy.gcm.auto import AssignmentQuality, select_model
-from dowhy.gcm.fcms import PredictionModel
+from dowhy.gcm.ml import PredictionModel
 from dowhy.gcm.util.general import is_categorical, shape_into_2d
 
 

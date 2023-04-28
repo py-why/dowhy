@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from dowhy.gcm import feature_relevance
-from dowhy.gcm.cms import StructuralCausalModel
+from dowhy.gcm.causal_models import StructuralCausalModel
 from dowhy.gcm.shapley import ShapleyConfig
 
 

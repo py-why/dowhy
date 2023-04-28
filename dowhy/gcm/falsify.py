@@ -16,11 +16,11 @@ from joblib import Parallel, delayed
 from tqdm import tqdm
 
 import dowhy.gcm.config as config
-from dowhy.gcm.graph import DirectedGraph, get_ordered_predecessors
 from dowhy.gcm.independence_test import kernel_based
 from dowhy.gcm.util import plot
 from dowhy.gcm.util.general import set_random_seed
 from dowhy.gcm.validation import _get_non_descendants
+from dowhy.graph import DirectedGraph, get_ordered_predecessors
 
 COLORS = list(mcolors.TABLEAU_COLORS.values())
 

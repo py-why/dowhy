@@ -1,7 +1,7 @@
 """Functions and classes in this module should be considered experimental, meaning there might be breaking API changes
 in the future.
 """
-
+from abc import abstractmethod
 from typing import Any
 
 import numpy as np
@@ -24,7 +24,7 @@ from sklearn.linear_model import ElasticNetCV, LassoCV, LassoLarsIC, LinearRegre
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import SVR
 
-from dowhy.gcm.fcms import InvertibleFunction, PredictionModel
+from dowhy.gcm.ml.prediction_model import PredictionModel
 from dowhy.gcm.util.general import auto_apply_encoders, auto_fit_encoders, shape_into_2d
 
 
@@ -120,6 +120,18 @@ def create_polynom_regressor(degree: int = 2, **kwargs_linear_model) -> SklearnR
     return SklearnRegressionModel(
         make_pipeline(PolynomialFeatures(degree=degree, include_bias=False), LinearRegression(**kwargs_linear_model))
     )
+
+
+class InvertibleFunction:
+    @abstractmethod
+    def evaluate(self, X: np.ndarray) -> np.ndarray:
+        """Applies the function on the input."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def evaluate_inverse(self, X: np.ndarray) -> np.ndarray:
+        """Returns the outcome of applying the inverse of the function on the inputs."""
+        raise NotImplementedError
 
 
 class InvertibleIdentityFunction(InvertibleFunction):

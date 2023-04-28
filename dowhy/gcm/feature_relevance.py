@@ -10,13 +10,13 @@ from typing import Any, Callable, Dict, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 
-from dowhy.gcm.cms import StructuralCausalModel
-from dowhy.gcm.fcms import ProbabilityEstimatorModel
+from dowhy.gcm.causal_mechanisms import ProbabilityEstimatorModel
+from dowhy.gcm.causal_models import StructuralCausalModel, validate_node
 from dowhy.gcm.fitting_sampling import draw_samples
-from dowhy.gcm.graph import get_ordered_predecessors, is_root_node, validate_node
 from dowhy.gcm.shapley import ShapleyConfig, estimate_shapley_values
 from dowhy.gcm.stats import marginal_expectation
 from dowhy.gcm.util.general import shape_into_2d, variance_of_deviations, variance_of_matching_values
+from dowhy.graph import get_ordered_predecessors, is_root_node
 
 
 def parent_relevance(
