@@ -7,15 +7,26 @@ from typing import Any, Callable, Optional, Union
 
 import networkx as nx
 
-from dowhy.gcm.graph import (
-    CAUSAL_MECHANISM,
+from dowhy.gcm.causal_mechanisms import (
     ConditionalStochasticModel,
-    DirectedGraph,
     FunctionalCausalModel,
     InvertibleFunctionalCausalModel,
     StochasticModel,
-    clone_causal_models,
 )
+from dowhy.graph import (
+    DirectedGraph,
+    HasNodes,
+    get_ordered_predecessors,
+    is_root_node,
+    validate_acyclic,
+    validate_node_in_graph,
+)
+
+# This constant is used as key when storing/accessing models as causal mechanisms in graph node attributes
+CAUSAL_MECHANISM = "causal_mechanism"
+# This constant is used as key when storing the parents of a node during fitting. It's used for validation purposes
+# afterwards.
+PARENTS_DURING_FIT = "parents_during_fit"
 
 
 class ProbabilisticCausalModel:
@@ -83,7 +94,7 @@ class InvertibleStructuralCausalModel(StructuralCausalModel):
     :func:`~dowhy.gcm.whatif.counterfactual_samples`. This is a subclass of
     :class:`~dowhy.gcm.cms.StructuralCausalModel` and has further restrictions on the class of causal mechanisms.
     Here, the mechanisms of non-root nodes need to be invertible with respect to the noise,
-    such as :class:`~dowhy.gcm.fcms.PostNonlinearModel`.
+    such as :class:`~dowhy.gcm.causal_mechanisms.PostNonlinearModel`.
     """
 
     def set_causal_mechanism(
@@ -93,3 +104,60 @@ class InvertibleStructuralCausalModel(StructuralCausalModel):
 
     def causal_mechanism(self, node: Any) -> Union[StochasticModel, InvertibleFunctionalCausalModel]:
         return super().causal_mechanism(node)
+
+
+def validate_causal_dag(causal_graph: DirectedGraph) -> None:
+    validate_acyclic(causal_graph)
+    validate_causal_graph(causal_graph)
+
+
+def validate_causal_graph(causal_graph: DirectedGraph) -> None:
+    for node in causal_graph.nodes:
+        validate_node(causal_graph, node)
+
+
+def validate_node(causal_graph: DirectedGraph, node: Any) -> None:
+    validate_causal_model_assignment(causal_graph, node)
+    validate_local_structure(causal_graph, node)
+
+
+def validate_causal_model_assignment(causal_graph: DirectedGraph, target_node: Any) -> None:
+    validate_node_has_causal_model(causal_graph, target_node)
+
+    causal_model = causal_graph.nodes[target_node][CAUSAL_MECHANISM]
+
+    if is_root_node(causal_graph, target_node):
+        if not isinstance(causal_model, StochasticModel):
+            raise RuntimeError(
+                "Node %s is a root node and, thus, requires a StochasticModel, "
+                "but a %s was found!" % (target_node, causal_model)
+            )
+    elif not isinstance(causal_model, ConditionalStochasticModel):
+        raise RuntimeError(
+            "Node %s has parents and, thus, requires a ConditionalStochasticModel, "
+            "but a %s was found!" % (target_node, causal_model)
+        )
+
+
+def validate_local_structure(causal_graph: DirectedGraph, node: Any) -> None:
+    if PARENTS_DURING_FIT not in causal_graph.nodes[node] or causal_graph.nodes[node][
+        PARENTS_DURING_FIT
+    ] != get_ordered_predecessors(causal_graph, node):
+        raise RuntimeError(
+            "The causal mechanism of node %s is not fitted to the graphical structure! Fit all"
+            "causal models in the graph first. If the mechanism is already fitted based on the causal"
+            "parents, consider to update the persisted parents for that node manually." % node
+        )
+
+
+def validate_node_has_causal_model(causal_graph: HasNodes, node: Any) -> None:
+    validate_node_in_graph(causal_graph, node)
+
+    if CAUSAL_MECHANISM not in causal_graph.nodes[node]:
+        raise ValueError("Node %s has no assigned causal mechanism!" % node)
+
+
+def clone_causal_models(source: HasNodes, destination: HasNodes):
+    for node in destination.nodes:
+        if CAUSAL_MECHANISM in source.nodes[node]:
+            destination.nodes[node][CAUSAL_MECHANISM] = source.nodes[node][CAUSAL_MECHANISM].clone()

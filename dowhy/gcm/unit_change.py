@@ -9,7 +9,7 @@ import pandas as pd
 from sklearn.linear_model._base import LinearModel
 from sklearn.utils.validation import check_is_fitted
 
-from dowhy.gcm.fcms import PredictionModel
+from dowhy.gcm.ml.prediction_model import PredictionModel
 from dowhy.gcm.ml.regression import SklearnRegressionModel
 from dowhy.gcm.shapley import ShapleyConfig, estimate_shapley_values
 

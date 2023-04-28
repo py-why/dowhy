@@ -1,5 +1,4 @@
-"""This module defines multiple implementations of the abstract class :class:`~dowhy.gcm.graph.FunctionalCausalModel`
-(FCM)
+"""This module implements different causal mechanisms.
 
 Classes in this module should be considered experimental, meaning there might be breaking API changes in the future.
 """
@@ -10,52 +9,69 @@ from typing import List, Optional
 
 import numpy as np
 
-from dowhy.gcm.graph import FunctionalCausalModel, InvertibleFunctionalCausalModel, StochasticModel
+from dowhy.gcm.ml import ClassificationModel, PredictionModel
+from dowhy.gcm.ml.regression import InvertibleFunction
 from dowhy.gcm.util.general import is_categorical, shape_into_2d
 
 
-class PredictionModel:
-    """Represents general prediction model implementations. Each prediction model should provide a fit and a predict
-    method."""
+class StochasticModel(ABC):
+    """A stochastic model represents a model used for causal mechanisms for root nodes in a graphical causal model."""
 
     @abstractmethod
-    def fit(self, X: np.ndarray, Y: np.ndarray) -> None:
+    def fit(self, X: np.ndarray) -> None:
+        """Fits the model according to the data."""
         raise NotImplementedError
 
     @abstractmethod
-    def predict(self, X: np.ndarray) -> np.ndarray:
+    def draw_samples(self, num_samples: int) -> np.ndarray:
+        """Draws samples for the fitted model."""
         raise NotImplementedError
 
     @abstractmethod
     def clone(self):
-        """
-        Clones the prediction model using the same hyper parameters but not fitted.
-
-        :return: An unfitted clone of the prediction model.
-        """
         raise NotImplementedError
 
 
-class ClassificationModel(PredictionModel):
-    @abstractmethod
-    def predict_probabilities(self, X: np.array) -> np.ndarray:
-        raise NotImplementedError
+class ConditionalStochasticModel(ABC):
+    """A conditional stochastic model represents a model used for causal mechanisms for non-root nodes in a graphical
+    causal model."""
 
-    @property
     @abstractmethod
-    def classes(self) -> List[str]:
-        raise NotImplementedError
-
-
-class InvertibleFunction:
-    @abstractmethod
-    def evaluate(self, X: np.ndarray) -> np.ndarray:
-        """Applies the function on the input."""
+    def fit(self, X: np.ndarray, Y: np.ndarray) -> None:
+        """Fits the model according to the data."""
         raise NotImplementedError
 
     @abstractmethod
-    def evaluate_inverse(self, X: np.ndarray) -> np.ndarray:
-        """Returns the outcome of applying the inverse of the function on the inputs."""
+    def draw_samples(self, parent_samples: np.ndarray) -> np.ndarray:
+        """Draws samples for the fitted model."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def clone(self):
+        raise NotImplementedError
+
+
+class FunctionalCausalModel(ConditionalStochasticModel):
+    """Represents a Functional Causal Model (FCM), a specific type of conditional stochastic model, that is defined
+    as:
+        Y := f(X, N), N: Noise
+    """
+
+    def draw_samples(self, parent_samples: np.ndarray) -> np.ndarray:
+        return self.evaluate(parent_samples, self.draw_noise_samples(parent_samples.shape[0]))
+
+    @abstractmethod
+    def draw_noise_samples(self, num_samples: int) -> np.ndarray:
+        raise NotImplementedError
+
+    @abstractmethod
+    def evaluate(self, parent_samples: np.ndarray, noise_samples: np.ndarray) -> np.ndarray:
+        raise NotImplementedError
+
+
+class InvertibleFunctionalCausalModel(FunctionalCausalModel, ABC):
+    @abstractmethod
+    def estimate_noise(self, target_samples: np.ndarray, parent_samples: np.ndarray) -> np.ndarray:
         raise NotImplementedError
 
 

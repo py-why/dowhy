@@ -4,10 +4,15 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 
-from dowhy.gcm.cms import InvertibleStructuralCausalModel, ProbabilisticCausalModel, StructuralCausalModel
-from dowhy.gcm.fcms import PredictionModel
-from dowhy.gcm.graph import get_ordered_predecessors, is_root_node, node_connected_subgraph_view, validate_causal_dag
+from dowhy.gcm.causal_models import (
+    InvertibleStructuralCausalModel,
+    ProbabilisticCausalModel,
+    StructuralCausalModel,
+    validate_causal_dag,
+)
+from dowhy.gcm.ml.prediction_model import PredictionModel
 from dowhy.gcm.util.general import shape_into_2d
+from dowhy.graph import get_ordered_predecessors, is_root_node, node_connected_subgraph_view
 
 
 def compute_data_from_noise(causal_model: StructuralCausalModel, noise_data: pd.DataFrame) -> pd.DataFrame:

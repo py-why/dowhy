@@ -13,10 +13,11 @@ from sklearn.model_selection import KFold, train_test_split
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from dowhy.gcm import config
-from dowhy.gcm.cms import ProbabilisticCausalModel
-from dowhy.gcm.fcms import AdditiveNoiseModel, ClassificationModel, ClassifierFCM, PredictionModel
-from dowhy.gcm.graph import CAUSAL_MECHANISM, get_ordered_predecessors, is_root_node, validate_causal_model_assignment
+from dowhy.gcm.causal_mechanisms import AdditiveNoiseModel, ClassifierFCM
+from dowhy.gcm.causal_models import CAUSAL_MECHANISM, ProbabilisticCausalModel, validate_causal_model_assignment
 from dowhy.gcm.ml import (
+    ClassificationModel,
+    PredictionModel,
     create_hist_gradient_boost_classifier,
     create_hist_gradient_boost_regressor,
     create_lasso_regressor,
@@ -49,6 +50,7 @@ from dowhy.gcm.util.general import (
     set_random_seed,
     shape_into_2d,
 )
+from dowhy.graph import get_ordered_predecessors, is_root_node
 
 _LIST_OF_POTENTIAL_CLASSIFIERS_GOOD = [
     partial(create_logistic_regression_classifier, max_iter=1000),

@@ -13,8 +13,8 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 from sklearn.mixture import BayesianGaussianMixture
 
+from dowhy.gcm.causal_mechanisms import StochasticModel
 from dowhy.gcm.divergence import estimate_kl_divergence_continuous
-from dowhy.gcm.graph import StochasticModel
 from dowhy.gcm.util.general import shape_into_2d
 
 _CONTINUOUS_DISTRIBUTIONS = [

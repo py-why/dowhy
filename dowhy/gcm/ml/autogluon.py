@@ -6,7 +6,7 @@ from autogluon import tabular
 from autogluon.tabular.configs.hyperparameter_configs import get_hyperparameter_config
 from packaging import version
 
-from dowhy.gcm.fcms import ClassificationModel, PredictionModel
+from dowhy.gcm.ml import ClassificationModel, PredictionModel
 from dowhy.gcm.util.general import shape_into_2d
 
 

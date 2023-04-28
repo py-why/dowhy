@@ -11,14 +11,13 @@ import pandas as pd
 from tqdm import tqdm
 
 from dowhy.gcm import config
-from dowhy.gcm.cms import ProbabilisticCausalModel
-from dowhy.gcm.graph import (
+from dowhy.gcm.causal_models import (
     PARENTS_DURING_FIT,
-    get_ordered_predecessors,
-    is_root_node,
+    ProbabilisticCausalModel,
     validate_causal_dag,
     validate_causal_model_assignment,
 )
+from dowhy.graph import get_ordered_predecessors, is_root_node
 
 
 def fit(causal_model: ProbabilisticCausalModel, data: pd.DataFrame):

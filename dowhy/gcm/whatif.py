@@ -10,15 +10,19 @@ import numpy as np
 import pandas as pd
 
 from dowhy.gcm._noise import compute_noise_from_data
-from dowhy.gcm.cms import InvertibleStructuralCausalModel, ProbabilisticCausalModel, StructuralCausalModel
-from dowhy.gcm.fcms import ClassifierFCM
+from dowhy.gcm.causal_mechanisms import ClassifierFCM
+from dowhy.gcm.causal_models import (
+    InvertibleStructuralCausalModel,
+    ProbabilisticCausalModel,
+    StructuralCausalModel,
+    validate_causal_dag,
+)
 from dowhy.gcm.fitting_sampling import draw_samples
-from dowhy.gcm.graph import (
+from dowhy.graph import (
     DirectedGraph,
     get_ordered_predecessors,
     is_root_node,
     node_connected_subgraph_view,
-    validate_causal_dag,
     validate_node_in_graph,
 )
 

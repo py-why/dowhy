@@ -5,15 +5,9 @@ import pytest
 from flaky import flaky
 from pytest import approx
 
-from dowhy.gcm import (
-    AdditiveNoiseModel,
-    EmpiricalDistribution,
-    ProbabilisticCausalModel,
-    draw_samples,
-    fit,
-    is_root_node,
-)
+from dowhy.gcm import AdditiveNoiseModel, EmpiricalDistribution, ProbabilisticCausalModel, draw_samples, fit
 from dowhy.gcm.ml import create_linear_regressor
+from dowhy.graph import is_root_node
 
 
 @flaky(max_runs=2)

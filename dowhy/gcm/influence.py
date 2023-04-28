@@ -14,22 +14,22 @@ from numpy.matlib import repmat
 import dowhy.gcm.auto as auto
 from dowhy.gcm import feature_relevance_sample
 from dowhy.gcm._noise import compute_data_from_noise, compute_noise_from_data, noise_samples_of_ancestors
-from dowhy.gcm.cms import InvertibleStructuralCausalModel, ProbabilisticCausalModel, StructuralCausalModel
-from dowhy.gcm.divergence import estimate_kl_divergence_of_probabilities
-from dowhy.gcm.fcms import ClassificationModel, ClassifierFCM, PredictionModel, ProbabilityEstimatorModel
-from dowhy.gcm.fitting_sampling import draw_samples
-from dowhy.gcm.graph import (
-    ConditionalStochasticModel,
-    get_ordered_predecessors,
-    is_root_node,
-    node_connected_subgraph_view,
+from dowhy.gcm.causal_mechanisms import ClassifierFCM, ConditionalStochasticModel, ProbabilityEstimatorModel
+from dowhy.gcm.causal_models import (
+    InvertibleStructuralCausalModel,
+    ProbabilisticCausalModel,
+    StructuralCausalModel,
     validate_causal_dag,
     validate_node,
 )
+from dowhy.gcm.divergence import estimate_kl_divergence_of_probabilities
+from dowhy.gcm.fitting_sampling import draw_samples
+from dowhy.gcm.ml import ClassificationModel, PredictionModel
 from dowhy.gcm.shapley import ShapleyConfig, estimate_shapley_values
 from dowhy.gcm.stats import marginal_expectation
 from dowhy.gcm.uncertainty import estimate_entropy_of_probabilities, estimate_variance
 from dowhy.gcm.util.general import has_categorical, is_categorical, means_difference, set_random_seed, shape_into_2d
+from dowhy.graph import get_ordered_predecessors, is_root_node, node_connected_subgraph_view
 
 _logger = logging.getLogger(__name__)
 

@@ -6,7 +6,6 @@ from flaky import flaky
 
 from dowhy.gcm import (
     AdditiveNoiseModel,
-    DirectedGraph,
     EmpiricalDistribution,
     InvertibleStructuralCausalModel,
     StructuralCausalModel,
@@ -14,12 +13,13 @@ from dowhy.gcm import (
 )
 from dowhy.gcm._noise import compute_data_from_noise, compute_noise_from_data, get_noise_dependent_function
 from dowhy.gcm.auto import assign_causal_mechanisms
-from dowhy.gcm.graph import PARENTS_DURING_FIT, get_ordered_predecessors
+from dowhy.gcm.causal_models import PARENTS_DURING_FIT
 from dowhy.gcm.ml import (
     create_linear_regressor,
     create_linear_regressor_with_given_parameters,
     create_logistic_regression_classifier,
 )
+from dowhy.graph import DirectedGraph, get_ordered_predecessors
 
 
 def test_given_data_with_known_noise_values_when_compute_data_from_noise_then_returns_correct_values():

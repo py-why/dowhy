@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 from dowhy.gcm import auto
-from dowhy.gcm.cms import InvertibleStructuralCausalModel, ProbabilisticCausalModel, StructuralCausalModel
+from dowhy.gcm.causal_models import InvertibleStructuralCausalModel, ProbabilisticCausalModel, StructuralCausalModel
 from dowhy.gcm.fitting_sampling import fit
 
 # A convenience function when computing confidence intervals specifically for non-deterministic causal queries. This

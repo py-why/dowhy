@@ -11,9 +11,9 @@ import numpy as np
 import pandas as pd
 from statsmodels.stats.multitest import multipletests
 
-from dowhy.gcm.cms import InvertibleStructuralCausalModel
-from dowhy.gcm.graph import DirectedGraph, get_ordered_predecessors, is_root_node, validate_causal_graph
+from dowhy.gcm.causal_models import InvertibleStructuralCausalModel, validate_causal_graph
 from dowhy.gcm.independence_test import kernel_based
+from dowhy.graph import DirectedGraph, get_ordered_predecessors, is_root_node
 
 
 class RejectionResult(Enum):

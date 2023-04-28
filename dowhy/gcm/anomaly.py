@@ -9,11 +9,12 @@ from dowhy.gcm import config
 from dowhy.gcm._noise import compute_noise_from_data, get_noise_dependent_function, noise_samples_of_ancestors
 from dowhy.gcm.anomaly_scorer import AnomalyScorer
 from dowhy.gcm.anomaly_scorers import MedianCDFQuantileScorer, RescaledMedianCDFQuantileScorer
-from dowhy.gcm.cms import InvertibleStructuralCausalModel, ProbabilisticCausalModel
-from dowhy.gcm.graph import ConditionalStochasticModel, get_ordered_predecessors, is_root_node, validate_causal_dag
+from dowhy.gcm.causal_mechanisms import ConditionalStochasticModel
+from dowhy.gcm.causal_models import InvertibleStructuralCausalModel, ProbabilisticCausalModel, validate_causal_dag
 from dowhy.gcm.shapley import ShapleyConfig, estimate_shapley_values
 from dowhy.gcm.stats import permute_features
 from dowhy.gcm.util.general import shape_into_2d
+from dowhy.graph import get_ordered_predecessors, is_root_node
 
 
 def conditional_anomaly_scores(

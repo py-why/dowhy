@@ -1,7 +1,7 @@
 """Functions and classes in this module should be considered experimental, meaning there might be breaking API changes
 in the future.
 """
-
+from abc import abstractmethod
 from typing import List
 
 import numpy as np
@@ -9,6 +9,8 @@ import sklearn
 from packaging import version
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import PolynomialFeatures
+
+from dowhy.gcm.ml.prediction_model import PredictionModel
 
 if version.parse(sklearn.__version__) < version.parse("1.0"):
     from sklearn.experimental import enable_hist_gradient_boosting  # noqa
@@ -25,9 +27,19 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 
-from dowhy.gcm.fcms import ClassificationModel
 from dowhy.gcm.ml.regression import SklearnRegressionModel
 from dowhy.gcm.util.general import auto_apply_encoders, shape_into_2d
+
+
+class ClassificationModel(PredictionModel):
+    @abstractmethod
+    def predict_probabilities(self, X: np.array) -> np.ndarray:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def classes(self) -> List[str]:
+        raise NotImplementedError
 
 
 class SklearnClassificationModel(SklearnRegressionModel, ClassificationModel):
