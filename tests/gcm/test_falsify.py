@@ -38,7 +38,7 @@ def _generate_simple_non_linear_data() -> pd.DataFrame:
 
 @flaky(max_runs=1)
 def test_given_exclude_original_order_when_generating_permutations_then_return_correct_permutations():
-    num_nodes = np.random.randint(10)
+    num_nodes = np.random.randint(1, 10)
     perms = set()
     G = generate_random_graph(n=num_nodes)
     perm_gen = _PermuteNodes(G, exclude_original_order=True, n_permutations=-1)
@@ -51,7 +51,7 @@ def test_given_exclude_original_order_when_generating_permutations_then_return_c
 
 @flaky(max_runs=1)
 def test_given_not_exclude_original_order_when_generating_permutations_then_return_correct_permutations():
-    num_nodes = np.random.randint(10)
+    num_nodes = np.random.randint(1, 10)
     found_orig_perm = False
     perms = set()
     G = generate_random_graph(n=num_nodes)
