@@ -15,23 +15,33 @@ import pandas as pd
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
-from dowhy.gcm.constant import (
-    FALSIFY_GIVEN_VIOLATIONS,
-    FALSIFY_LOCAL_VIOLATION_INSIGHT,
-    FALSIFY_METHODS,
-    FALSIFY_N_TESTS,
-    FALSIFY_N_VIOLATIONS,
-    FALSIFY_P_VALUE,
-    FALSIFY_P_VALUES,
-    FALSIFY_PERM_VIOLATIONS,
-    FALSIFY_VIOLATION_COLOR,
-)
+import dowhy.gcm.config as config
 from dowhy.gcm.graph import DirectedGraph, get_ordered_predecessors
 from dowhy.gcm.independence_test import kernel_based
 from dowhy.gcm.util import plot
+from dowhy.gcm.util.general import set_random_seed
 from dowhy.gcm.validation import _get_non_descendants
 
 COLORS = list(mcolors.TABLEAU_COLORS.values())
+
+# Constants for falsification of a given graph
+FALSIFY_N_VIOLATIONS = "n_violations"
+FALSIFY_N_TESTS = "n_tests"
+FALSIFY_P_VALUE = "p_value"
+FALSIFY_P_VALUES = "p_values"
+
+FALSIFY_GIVEN_VIOLATIONS = FALSIFY_N_VIOLATIONS + " g_given"
+FALSIFY_PERM_VIOLATIONS = FALSIFY_N_VIOLATIONS + " permutations"
+FALSIFY_LOCAL_VIOLATION_INSIGHT = "local violations"
+
+FALSIFY_METHODS = {
+    "validate_lmc": "LMC",
+    "validate_pd": "Faithfulness",
+    "validate_parental_dsep": "tPa",
+    "validate_causal_minimality": "Causal Minimality",
+}
+
+FALSIFY_VIOLATION_COLOR = "red"
 
 
 @dataclass
@@ -85,67 +95,15 @@ class _PValuesMemory:
         return (X, Y, Z) in self.p_values or (Y, X, Z) in self.p_values
 
 
-def _set2list(x):
-    if isinstance(x, set):
-        return list(x)
-    return x
-
-
-def _compute_p_value(
-    data: pd.DataFrame,
-    X: Union[Set, List, str],
-    Y: Union[Set, List, str],
-    Z: Optional[Union[Set, List, str]] = None,
-    independence_test: Callable[[np.ndarray, np.ndarray], float] = kernel_based,
-    conditional_independence_test: Callable[[np.ndarray, np.ndarray, np.ndarray], float] = kernel_based,
-) -> float:
-    """Perform (conditional) independence test and report p-value.
-
-    :param data: Observations of variables in the DAG.
-    :param X: Variable to test (conditional) independence with Y
-    :param Y: Variable to test (conditional) independence with X
-    :param Z: Set to condition independence test on. Can be empty (None, empty set, or empty list).
-    :param independence_test: independence test to use.
-    :param conditional_independence_test: Conditional independence test to use.
-    :return: p-value
-    """
-
-    X = _set2list(X)
-    Y = _set2list(Y)
-    Z = _set2list(Z)
-
-    if Z:
-        p_value = conditional_independence_test(data[X].values, data[Y].values, data[Z].values)
-    else:
-        p_value = independence_test(data[X].values, data[Y].values)
-    return p_value
-
-
-def _get_parental_triples(causal_graph: DirectedGraph, include_unconditional: bool):
-    """
-    For a given graph collect all parental triples, that is, the triple (X, Y, Z) is a parental triple iff
-        Y is non-descendant of X, and
-        Z are the parents of X (can be empty if include_unconditional=True)
-    """
-    triples = []
-    for node in causal_graph.nodes:
-        parents = get_ordered_predecessors(causal_graph, node)
-        non_descendants = _get_non_descendants(causal_graph, node, exclude_parents=True)
-        if (parents or include_unconditional) and non_descendants:
-            for non_desc in non_descendants:
-                triples.append((node, non_desc, parents))
-    return triples
-
-
 def validate_lmc(
     causal_graph: DirectedGraph,
     data: pd.DataFrame,
-    p_values_memory: _PValuesMemory,
+    p_values_memory: Optional[_PValuesMemory] = None,
     independence_test: Callable[[np.ndarray, np.ndarray], float] = kernel_based,
     conditional_independence_test: Callable[[np.ndarray, np.ndarray, np.ndarray], float] = kernel_based,
     significance_level: float = 0.05,
     include_unconditional: bool = True,
-    n_jobs: int = -1,
+    n_jobs: Optional[int] = None,
     **kwargs,
 ) -> Dict[str, Union[int, Dict[str, float]]]:
     """
@@ -163,6 +121,11 @@ def validate_lmc(
     :return: Outcome of validation containing number of violations in the graph and p values/violation for each tuple
         (node, non_desc)
     """
+    n_jobs = config.default_n_jobs if n_jobs is None else n_jobs
+
+    if p_values_memory is None:
+        p_values_memory = _PValuesMemory()
+
     validation_summary = {FALSIFY_N_VIOLATIONS: 0, FALSIFY_N_TESTS: 0, FALSIFY_P_VALUES: dict()}
 
     # Find out which tests to do
@@ -174,6 +137,7 @@ def validate_lmc(
             p_values_memory.add_p_value(-1, node, non_desc, parents)  # Placeholder
 
     # Parallelize over tests
+    random_seeds = np.random.randint(np.iinfo(np.int32).max, size=len(to_test))
     p_values = Parallel(n_jobs=n_jobs)(
         delayed(_compute_p_value)(
             data=data,
@@ -182,8 +146,9 @@ def validate_lmc(
             Z=parents,
             independence_test=independence_test,
             conditional_independence_test=conditional_independence_test,
+            seed=seed,
         )
-        for (node, non_desc, parents) in to_test
+        for (node, non_desc, parents), seed in zip(to_test, random_seeds)
     )
 
     # Gather results
@@ -205,15 +170,16 @@ def validate_parental_dsep(
     causal_graph: DirectedGraph, causal_graph_reference: DirectedGraph, include_unconditional: bool = True, **kwargs
 ) -> Dict[str, int]:
     """
-    Graphical criterion to evaluate which pairwise parental d-separations are violated in one graph w.r.t. another,
-    reference graph.
+    Graphical criterion to evaluate which pairwise parental d-separations in `causal_graph` are violated, assuming
+    `causal_graph_reference` is the ground truth graph. If none are violated, then both graphs lie in the same Markov
+    equivalence class.
     Specifically we test:
         X _|_G' Y | Z and X _/|_G Y | Z for Y \in ND{X}^G', Z = PA{X}^G
     :param causal_graph: Causal graph for which to evaluate parental d-separations (G')
     :param causal_graph_reference: Causal graph where we test if d-separation holds (G)
     :param include_unconditional: Test also unconditional independencies of root nodes.
-    :return: Validation summary with number of d-separations implied by causal_graph and number of times these are
-        violated in causal_graph_reference
+    :return: Validation summary with number of d-separations implied by `causal_graph` and number of times these are
+        violated in the graph `causal_graph_reference`.
     """
     validation_summary = {FALSIFY_N_VIOLATIONS: 0, FALSIFY_N_TESTS: 0}
 
@@ -228,12 +194,12 @@ def validate_parental_dsep(
 def validate_pd(
     causal_graph: DirectedGraph,
     data: pd.DataFrame,
-    p_values_memory: _PValuesMemory,
+    p_values_memory: Optional[_PValuesMemory] = None,
     n_pairs: int = -1,
     independence_test: Callable[[np.ndarray, np.ndarray], float] = kernel_based,
     significance_level: float = 0.05,
     adjacent_only: bool = False,
-    n_jobs: int = -1,
+    n_jobs: Optional[int] = None,
     **kwargs,
 ) -> Dict[str, Union[int, Dict[tuple, float]]]:
     """
@@ -251,6 +217,10 @@ def validate_pd(
     :param n_jobs: Number of jobs to use for parallel execution of (conditional) independence tests.
     :return: Summary dict: {n_violations: int, n_tests: int, p_values: {(ancestor, node): float, ...}}
     """
+    n_jobs = config.default_n_jobs if n_jobs is None else n_jobs
+
+    if p_values_memory is None:
+        p_values_memory = _PValuesMemory()
 
     pairs = [(ancestor, node) for node in causal_graph.nodes for ancestor in nx.ancestors(causal_graph, node)]
     if adjacent_only:
@@ -276,14 +246,18 @@ def validate_pd(
             p_values_memory.add_p_value(-1, ancestor, node)  # Placeholder
 
     # Parallelize over tests
+    random_seeds = np.random.randint(np.iinfo(np.int32).max, size=len(to_test))
     p_values = Parallel(n_jobs=n_jobs)(
         delayed(_compute_p_value)(
             data=data,
             X=ancestor,
             Y=node,
+            Z=None,
             independence_test=independence_test,
+            conditional_independence_test=None,
+            seed=seed,
         )
-        for (ancestor, node) in to_test
+        for (ancestor, node), seed in zip(to_test, random_seeds)
     )
 
     # Gather results
@@ -305,11 +279,11 @@ def validate_pd(
 def validate_causal_minimality(
     causal_graph: DirectedGraph,
     data: pd.DataFrame,
-    p_values_memory: _PValuesMemory,
+    p_values_memory: Optional[_PValuesMemory] = None,
     independence_test: Callable[[np.ndarray, np.ndarray], float] = kernel_based,
     conditional_independence_test: Callable[[np.ndarray, np.ndarray, np.ndarray], float] = kernel_based,
     significance_level: float = 0.05,
-    n_jobs: int = -1,
+    n_jobs: Optional[int] = None,
     **kwargs,
 ) -> Dict[str, Union[int, Dict[tuple, float]]]:
     """
@@ -325,6 +299,11 @@ def validate_causal_minimality(
     :param n_jobs: Number of jobs to use for parallel execution of (conditional) independence tests.
     :return: Validation summary as dict.
     """
+    n_jobs = config.default_n_jobs if n_jobs is None else n_jobs
+
+    if p_values_memory is None:
+        p_values_memory = _PValuesMemory()
+
     validation_summary = {FALSIFY_N_VIOLATIONS: 0, FALSIFY_N_TESTS: 0, FALSIFY_P_VALUES: dict()}
 
     # Find out which tests to do
@@ -341,16 +320,18 @@ def validate_causal_minimality(
                     p_values_memory.add_p_value(-1, node, p, other_parents)  # Placeholder
 
     # Parallelize over tests
+    random_seeds = np.random.randint(np.iinfo(np.int32).max, size=len(to_test))
     p_values = Parallel(n_jobs=n_jobs)(
         delayed(_compute_p_value)(
             data=data,
             X=node,
             Y=p,
-            Z=other_parents,
+            Z=list(other_parents),
             independence_test=independence_test,
             conditional_independence_test=conditional_independence_test,
+            seed=seed,
         )
-        for (node, p, other_parents) in to_test
+        for (node, p, other_parents), seed in zip(to_test, random_seeds)
     )
 
     # Gather results
@@ -377,7 +358,7 @@ def validate_graph(
     conditional_independence_test: Callable[[np.ndarray, np.ndarray, np.ndarray], float] = kernel_based,
     significance_level: float = 0.05,
     p_values_memory: Optional[_PValuesMemory] = None,
-    n_jobs: int = -1,
+    n_jobs: Optional[int] = None,
     **kwargs,
 ) -> Dict[str, Dict]:
     """
@@ -390,8 +371,10 @@ def validate_graph(
     :param significance_level: Significance level for (conditional) independence tests.
     :param p_values_memory: Optional _PValuesMemory object, where results of previously performed tests are stored.
     :param n_jobs: Number of jobs to use for parallel execution of (conditional) independence tests.
-    :return:
+    :return: Validation summary as dict.
     """
+    n_jobs = config.default_n_jobs if n_jobs is None else n_jobs
+
     if p_values_memory is None:
         p_values_memory = _PValuesMemory()
 
@@ -418,143 +401,25 @@ def validate_graph(
     return validation_summary
 
 
-def _permutation_based(
-    causal_graph: DirectedGraph,
-    data: pd.DataFrame,
-    p_values_memory: _PValuesMemory,
-    exclude_original_order: bool = False,
-    n_permutations: int = -1,
-    methods: Union[Callable, Tuple[Callable, ...], List[Callable]] = (validate_lmc, validate_pd),
-    independence_test: Callable[[np.ndarray, np.ndarray], float] = kernel_based,
-    conditional_independence_test: Callable[[np.ndarray, np.ndarray, np.ndarray], float] = kernel_based,
-    significance_level: float = 0.05,
-    disable_progress_bar: bool = False,
-    **method_kwargs,
-) -> Dict[str, List[Union[DirectedGraph, Dict]]]:
-    """
-    Generate baseline for node permutations.
-
-    :param causal_graph: A directed acyclic graph (DAG).
-    :param data: Observations of variables in the DAG.
-    :param p_values_memory: _PValuesMemory object, where results of previously performed tests are stored.
-    :param exclude_original_order: Exclude the original ordering of the nodes (default=False)
-    :param n_permutations: Number of permutations to perform. If -1 use all n_nodes! - int(exclude_orig) permutations
-    :param methods: Validation methods to perform. Supported are: validate_lmc, validate_ed.
-    :param independence_test: Independence test to use for checking edge dependencies.
-    :param conditional_independence_test: Conditional independence test to use for checking local Markov condition.
-    :param significance_level: Significance level for (conditional) independence tests.
-    :param disable_progress_bar: Disable the progress bar
-    :return: Dictionary containing summary of validation for each individual graph as well as the permuted graphs
-    """
-
-    if not isinstance(methods, (tuple, list)):
-        methods = (methods,)
-
-    perm_gen = _PermuteNodes(causal_graph, n_permutations=n_permutations, exclude_original_order=exclude_original_order)
-    validation_summary = {"permuted_graphs": [], **{m.__name__: [] for m in methods}}
-    for permuted_graph in tqdm(perm_gen, desc="Validate permutations of assumption", disable=disable_progress_bar):
-        res = validate_graph(
-            causal_graph=permuted_graph,
-            data=data,
-            p_values_memory=p_values_memory,
-            causal_graph_reference=causal_graph,
-            methods=methods,
-            independence_test=independence_test,
-            conditional_independence_test=conditional_independence_test,
-            significance_level=significance_level,
-            **method_kwargs,
-        )
-        validation_summary["permuted_graphs"].append(permuted_graph)
-        for m in methods:
-            validation_summary[m.__name__].append(res[m.__name__])
-
-    return validation_summary
-
-
-class _PermuteNodes:
-    def __init__(self, causal_graph: DirectedGraph, exclude_original_order: bool = False, n_permutations: int = -1):
-        """
-        Randomly permute the nodes of a given causal graph while keeping the underlying graph structure the same.
-        :param causal_graph: A directed acyclic graph (DAG).
-        :param exclude_original_order: Do not return the original order.
-        :param n_permutations: Return a generator with n_permutations permutations. If n_permutations = -1 (default),
-                we return all n_nodes! - int(exclude_orig) permutations.
-        :return: Copy of causal_graph with nodes randomly permuted.
-        """
-        self.causal_graph = causal_graph
-        self.exclude_original_order = exclude_original_order
-        self.n_permutations = n_permutations
-        self.max_perms = np.math.factorial(self.causal_graph.number_of_nodes()) - int(self.exclude_original_order)
-
-        if n_permutations == -1 or n_permutations > self.max_perms:
-            self.it = self.iter_all_permutations()
-            self.length = self.max_perms
-            if self.length > 2**63 - 1:
-                raise ValueError(
-                    f"Too many permutations specified. Did you accidently set 'n_permutations'=-1 for a "
-                    f"large (>20 nodes) graph? "
-                    f"Given graph has {causal_graph.number_of_nodes()} nodes."
-                )
-        else:
-            self.it = self.iter_random_permutations()
-            self.length = self.n_permutations
-
-    def iter_all_permutations(self):
-        for i, perm in enumerate(permutations(self.causal_graph.nodes)):
-            if self.exclude_original_order and i == 0:
-                continue
-            mapping = {node: perm[i] for i, node in enumerate(self.causal_graph.nodes)}
-            yield nx.relabel_nodes(self.causal_graph, mapping, copy=True)
-
-    def iter_random_permutations(self):
-        for _ in range(self.n_permutations):
-            if self.exclude_original_order:
-                is_orig = True
-                while is_orig:
-                    perm = list(np.random.permutation(self.causal_graph.nodes))
-                    if perm != list(self.causal_graph.nodes):
-                        is_orig = False
-            else:
-                perm = list(np.random.permutation(self.causal_graph.nodes))
-
-            mapping = {node: perm[i] for i, node in enumerate(self.causal_graph.nodes)}
-            yield nx.relabel_nodes(self.causal_graph, mapping, copy=True)
-
-    def __iter__(self):
-        yield from self.it
-
-    def __len__(self):
-        return self.length
-
-
-def _to_frozenset(x: Union[Set, List, str]):
-    """Converts a set, list or string into a hashable frozenset"""
-    assert (
-        isinstance(x, Set) or isinstance(x, List) or isinstance(x, str)
-    ), f"{x} must be list, set or str. Got {type(x)} instead!"
-
-    if isinstance(x, str):
-        return frozenset({x})
-    return frozenset(x)
-
-
 @dataclass
 class EvaluationResult:
     """
-    Dataset class containing the evaluation result using of a node-permutation baseline.
+    Dataset class containing the evaluation result of falsifying a graph using a node-permutation test.
 
     ...
 
     Attributes
     ----------
     methods : tuple
-        Tuple containing the methods used for the node permutation baseline
+        Tuple containing the methods used for the node permutation test
     summary : dict
         Dictionary containing the summary of the evaluation.
     significance_level : float
-        Significance level based on which we reject the given DAG
-    reject : bool
-        Whether the given DAG is rejected.
+        Significance level based on which we falsify the given DAG
+    falsifiable : bool
+        Whether the given DAG is falsifiable.
+    falsified : bool
+        Whether the given DAG is falsified.
 
     """
 
@@ -565,7 +430,7 @@ class EvaluationResult:
 
     def update_significance_level(self, significance_level: float):
         """
-        Update the significance level to decide if we reject a given DAG.
+        Update the significance level to decide if we falsify a given DAG.
         """
         self.significance_level = significance_level
         self.__post_init__()
@@ -573,27 +438,27 @@ class EvaluationResult:
     def __post_init__(self):
         self.can_evaluate = self._can_evaluate()
         if not self.can_evaluate:
-            self.reject = None
-            self.inconclusive = None
+            self.falsified = None
+            self.falsifiable = None
         elif (
             self.summary["validate_lmc"][FALSIFY_P_VALUE]
             > self.significance_level
             > self.summary["validate_parental_dsep"][FALSIFY_P_VALUE]
         ):
-            self.reject = True
-            self.inconclusive = False
+            self.falsified = True
+            self.falsifiable = True
         elif self.significance_level < self.summary["validate_parental_dsep"][FALSIFY_P_VALUE]:
-            self.reject = False
-            self.inconclusive = True
+            self.falsified = False
+            self.falsifiable = False
         else:
-            self.reject = False
-            self.inconclusive = False
+            self.falsified = False
+            self.falsifiable = True
 
     def __repr__(self):
         # DAG Evaluation
         if self.can_evaluate:
-            decision = " " if self.reject else " do not "
-            informative = " " if not self.inconclusive else " not "
+            decision = " " if self.falsified else " do not "
+            informative = " " if self.falsifiable else " not "
             frac_MEC = (
                 f"{len(self.summary['MEC'])} / {len(self.summary['validate_parental_dsep'][FALSIFY_PERM_VIOLATIONS])}"
             )
@@ -629,41 +494,68 @@ class EvaluationResult:
         return can_evaluate
 
 
-def evaluate_graph(
+def falsify_graph(
     causal_graph: DirectedGraph,
     data: pd.DataFrame,
-    n_permutations: int = 1000,
     methods: Union[Callable, Tuple[Callable, ...]] = (validate_lmc, validate_parental_dsep),
     suggestion_methods: Union[Callable, Tuple[Callable, ...]] = (validate_causal_minimality),
     suggestions: bool = False,
     independence_test: Callable[[np.ndarray, np.ndarray], float] = kernel_based,
     conditional_independence_test: Callable[[np.ndarray, np.ndarray, np.ndarray], float] = kernel_based,
-    significance_baseline: float = 0.05,
+    significance_level: float = 0.05,
     significance_ci: float = 0.05,
-    disable_progress_bar: bool = False,
-    n_jobs: int = -1,
-    plot: bool = False,
+    n_permutations: Optional[int] = None,
+    show_progress_bar: Optional[bool] = None,
+    n_jobs: Optional[int] = None,
+    plot_histogram: bool = False,
     plot_kwargs: Optional[Dict] = None,
 ) -> EvaluationResult:
     """
-    Evaluate a given DAG using observational data.
+    Falsify a given DAG using observational data.
+
+    This method returns the result of a permutation-test to falsify a user-given DAG using observational data. To this
+    end we construct the test statistics by testing the violations of local Markov conditions (LMC) implied by
+    the graph using conditional independence (CI) tests. The null is the number of LMC violations of a random
+    node-permutation of the given graph. Our test can be interpreted as whether the given graph is significantly better
+    than random in terms of the CIs it entails.
+    To determine whether a given graph is falsifiable by our metric, we implement a second test, which reports whether
+    given graph is "characteristic" enough in terms of the CIs it entails. For this, we compute how many of the random
+    node permutations lie in the same Markov equivalence class (MEC) as the given graph and conclude that the given
+    graph is falsifiable only if the fraction of permuted DAGs in the same MEC as the given graph is "reasonably" small.
+
+    The returned EvaluationResult object has two attributes: `falsified` and `falsifiable`:
+        `falsifiable`: The given graph lies in a different MEC than >= 1-`significance_level` of the permuted DAGs
+        `falsified`: The given graph is falsifiable and violates fewer LMCs than >= 1-`significance_level` of the
+                        permuted DAGs
+
+    By default, we only run 1 / `significance_level` permutations as those are enough to falsify a graph with type I
+    error probability `significance_level` at some given `significance_level`. If you are interested in a more exact
+    estimate of the p-value of whish to plot a histogram to see how the given DAG compares to random node permutations,
+    you should set `n_permutations` to some larger value (e.g. 100 or 1000). If `n_permutations=-1` we test on all
+    n_nodes! permutations.
 
     :param causal_graph: A directed acyclic graph (DAG).
     :param data: Observations of variables in the DAG.
-    :param n_permutations: Number of permutations to perform. If -1 use all n_nodes! permutations.
     :param methods: Validation methods to perform.
     :param suggestion_methods: Methods to run on the given graph to provide additional suggestions.
     :param suggestions: Provide suggestions generated using the `suggestion_methods`.
     :param independence_test: Independence test to use for checking pairwise independencies.
     :param conditional_independence_test: Conditional independence test to use.
-    :param significance_baseline: Significance level for accepting or rejecting the DAG.
+    :param significance_level: Significance level for the permutation test.
     :param significance_ci: Significance level for (conditional) independence tests.
-    :param disable_progress_bar: Disable the progress bar.
+    :param n_permutations: Number of permutations to perform. If -1 use all n_nodes! permutations.
+    :param show_progress_bar: Whether to show progress bar over permutations.
     :param n_jobs: Number of jobs to use for parallel execution of (conditional) independence tests.
-    :param plot: Plot histogram of results from permutation baseline.
+    :param plot_histogram: Plot histogram of results from permutation baseline.
     :param plot_kwargs: Additional plot arguments to be passed to plot_evaluation_results.
     :return: EvaluationResult
     """
+    n_jobs = config.default_n_jobs if n_jobs is None else n_jobs
+    show_progress_bar = config.show_progress_bars if show_progress_bar is None else show_progress_bar
+
+    if n_permutations is None:
+        n_permutations = int(1 / significance_level) if not plot_histogram else -1
+
     if not plot_kwargs:
         plot_kwargs = {}
     if isinstance(methods, Callable):
@@ -690,12 +582,13 @@ def evaluate_graph(
         causal_graph,
         data=data,
         p_values_memory=p_values_memory,
+        exclude_original_order=False,
         n_permutations=n_permutations,
         methods=methods,
         independence_test=independence_test,
         conditional_independence_test=conditional_independence_test,
-        disable_progress_bar=disable_progress_bar,
         significance_level=significance_ci,
+        show_progress_bar=show_progress_bar,
         n_jobs=n_jobs,
     )
 
@@ -723,10 +616,10 @@ def evaluate_graph(
     result = EvaluationResult(
         methods=methods,
         summary=summary,
-        significance_level=significance_baseline,
+        significance_level=significance_level,
         suggestions={m.__name__: summary_given[m.__name__] for m in suggestion_methods},
     )
-    if plot:
+    if plot_histogram:
         plot_evaluation_results(result, **plot_kwargs)
     return result
 
@@ -847,7 +740,7 @@ def plot_local_insights(
 
 
 def _generate_table(
-    validation_repr, suggestion_repr, width=105, validation_name="Validation Summary", suggestion_name="Suggestions"
+    validation_repr, suggestion_repr, width=105, validation_name="Test Summary", suggestion_name="Suggestions"
 ):
     # Create Validation header
     _repr = [
@@ -883,3 +776,168 @@ def _generate_table(
         _repr += ["+" + "-" * (width - 2) + "+\n"]
 
     return "".join(_repr)[:-1]
+
+
+def _compute_p_value(
+    data: pd.DataFrame,
+    X: Union[List, str],
+    Y: Union[List, str],
+    Z: Optional[Union[Set, List, str]],
+    independence_test: Optional[Callable[[np.ndarray, np.ndarray], float]],
+    conditional_independence_test: Optional[Callable[[np.ndarray, np.ndarray, np.ndarray], float]],
+    seed: int,
+) -> float:
+    """Perform (conditional) independence test and report p-value.
+
+    :param data: Observations of variables in the DAG.
+    :param X: Variable to test (conditional) independence with Y
+    :param Y: Variable to test (conditional) independence with X
+    :param Z: Set to condition independence test on. Can be empty (None, empty set, or empty list).
+    :param independence_test: independence test to use.
+    :param conditional_independence_test: Conditional independence test to use.
+    :param seed: Random seed
+    :return: p-value
+    """
+    set_random_seed(seed)
+
+    if Z:
+        p_value = conditional_independence_test(data[X].values, data[Y].values, data[Z].values)
+    else:
+        p_value = independence_test(data[X].values, data[Y].values)
+    return p_value
+
+
+def _get_parental_triples(causal_graph: DirectedGraph, include_unconditional: bool):
+    """
+    For a given graph collect all parental triples, that is, the triple (X, Y, Z) is a parental triple iff
+        Y is non-descendant of X, and
+        Z are the parents of X (can be empty if include_unconditional=True)
+    """
+    triples = []
+    for node in causal_graph.nodes:
+        parents = get_ordered_predecessors(causal_graph, node)
+        non_descendants = _get_non_descendants(causal_graph, node, exclude_parents=True)
+        if (parents or include_unconditional) and non_descendants:
+            for non_desc in non_descendants:
+                triples.append((node, non_desc, parents))
+    return triples
+
+
+def _permutation_based(
+    causal_graph: DirectedGraph,
+    data: pd.DataFrame,
+    p_values_memory: _PValuesMemory,
+    exclude_original_order: bool,
+    n_permutations: int,
+    methods: Union[Callable, Tuple[Callable, ...], List[Callable]],
+    independence_test: Callable[[np.ndarray, np.ndarray], float],
+    conditional_independence_test: Callable[[np.ndarray, np.ndarray, np.ndarray], float],
+    significance_level: float,
+    show_progress_bar: bool,
+    **method_kwargs,
+) -> Dict[str, List[Union[DirectedGraph, Dict]]]:
+    """
+    Generate baseline for node permutations.
+
+    :param causal_graph: A directed acyclic graph (DAG).
+    :param data: Observations of variables in the DAG.
+    :param p_values_memory: _PValuesMemory object, where results of previously performed tests are stored.
+    :param exclude_original_order: Exclude the original ordering of the nodes (default=False)
+    :param n_permutations: Number of permutations to perform. If -1 use all n_nodes! - int(exclude_orig) permutations
+    :param methods: Validation methods to perform. Supported are: validate_lmc, validate_ed.
+    :param independence_test: Independence test to use for checking edge dependencies.
+    :param conditional_independence_test: Conditional independence test to use for checking local Markov condition.
+    :param significance_level: Significance level for (conditional) independence tests.
+    :param disable_progress_bar: Disable the progress bar
+    :return: Dictionary containing summary of validation for each individual graph as well as the permuted graphs
+    """
+
+    if not isinstance(methods, (tuple, list)):
+        methods = (methods,)
+
+    perm_gen = _PermuteNodes(causal_graph, n_permutations=n_permutations, exclude_original_order=exclude_original_order)
+    validation_summary = {"permuted_graphs": [], **{m.__name__: [] for m in methods}}
+    for permuted_graph in tqdm(perm_gen, desc="Test permutations of given graph", disable=not show_progress_bar):
+        res = validate_graph(
+            causal_graph=permuted_graph,
+            data=data,
+            p_values_memory=p_values_memory,
+            causal_graph_reference=causal_graph,
+            methods=methods,
+            independence_test=independence_test,
+            conditional_independence_test=conditional_independence_test,
+            significance_level=significance_level,
+            **method_kwargs,
+        )
+        validation_summary["permuted_graphs"].append(permuted_graph)
+        for m in methods:
+            validation_summary[m.__name__].append(res[m.__name__])
+
+    return validation_summary
+
+
+class _PermuteNodes:
+    def __init__(self, causal_graph: DirectedGraph, exclude_original_order: bool, n_permutations: int):
+        """
+        Randomly permute the nodes of a given causal graph while keeping the underlying graph structure the same.
+        :param causal_graph: A directed acyclic graph (DAG).
+        :param exclude_original_order: Do not return the original order.
+        :param n_permutations: Return a generator with n_permutations permutations. If n_permutations = -1 (default),
+                we return all n_nodes! - int(exclude_orig) permutations.
+        :return: Copy of causal_graph with nodes randomly permuted.
+        """
+        self.causal_graph = causal_graph
+        self.exclude_original_order = exclude_original_order
+        self.n_permutations = n_permutations
+        self.max_perms = np.math.factorial(self.causal_graph.number_of_nodes()) - int(self.exclude_original_order)
+
+        if n_permutations == -1 or n_permutations > self.max_perms:
+            self.it = self.iter_all_permutations()
+            self.length = self.max_perms
+            if self.length > 2**63 - 1:
+                raise ValueError(
+                    f"Too many permutations specified. Did you accidently set 'n_permutations'=-1 for a "
+                    f"large (>20 nodes) graph? "
+                    f"Given graph has {causal_graph.number_of_nodes()} nodes."
+                )
+        else:
+            self.it = self.iter_random_permutations()
+            self.length = self.n_permutations
+
+    def iter_all_permutations(self):
+        for i, perm in enumerate(permutations(self.causal_graph.nodes)):
+            if self.exclude_original_order and i == 0:
+                continue
+            mapping = {node: perm[i] for i, node in enumerate(self.causal_graph.nodes)}
+            yield nx.relabel_nodes(self.causal_graph, mapping, copy=True)
+
+    def iter_random_permutations(self):
+        for _ in range(self.n_permutations):
+            if self.exclude_original_order:
+                is_orig = True
+                while is_orig:
+                    perm = list(np.random.permutation(self.causal_graph.nodes))
+                    if perm != list(self.causal_graph.nodes):
+                        is_orig = False
+            else:
+                perm = list(np.random.permutation(self.causal_graph.nodes))
+
+            mapping = {node: perm[i] for i, node in enumerate(self.causal_graph.nodes)}
+            yield nx.relabel_nodes(self.causal_graph, mapping, copy=True)
+
+    def __iter__(self):
+        yield from self.it
+
+    def __len__(self):
+        return self.length
+
+
+def _to_frozenset(x: Union[Set, List, str]):
+    """Converts a set, list or string into a hashable frozenset"""
+    assert (
+        isinstance(x, Set) or isinstance(x, List) or isinstance(x, str)
+    ), f"{x} must be list, set or str. Got {type(x)} instead!"
+
+    if isinstance(x, str):
+        return frozenset({x})
+    return frozenset(x)
