@@ -11,7 +11,6 @@ from sympy import init_printing
 import dowhy.causal_estimators as causal_estimators
 import dowhy.causal_refuters as causal_refuters
 import dowhy.graph_learners as graph_learners
-import dowhy.utils.cli_helpers as cli
 from dowhy.causal_estimator import CausalEstimate, estimate_effect
 from dowhy.causal_graph import CausalGraph
 from dowhy.causal_identifier import AutoIdentifier, BackdoorAdjustment, IDIdentifier
@@ -216,12 +215,14 @@ class CausalModel:
             identifier = AutoIdentifier(
                 estimand_type=estimand_type,
                 backdoor_adjustment=BackdoorAdjustment(method_name),
-                proceed_when_unidentifiable=proceed_when_unidentifiable,
                 optimize_backdoor=optimize_backdoor,
             )
 
         identified_estimand = identifier.identify_effect(
-            graph=self._graph, treatment_name=self._treatment, outcome_name=self._outcome
+            graph=self._graph._graph,
+            observed_nodes=list(self._graph.get_all_nodes(include_unobserved=False)),
+            action_nodes=self._treatment,
+            outcome_nodes=self._outcome,
         )
 
         self.identifier = identifier

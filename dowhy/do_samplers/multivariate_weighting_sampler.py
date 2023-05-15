@@ -1,3 +1,8 @@
+from typing import List
+
+import networkx as nx
+
+from dowhy import EstimandType
 from dowhy.do_sampler import DoSampler
 from dowhy.utils.propensity_score import state_propensity_score
 
@@ -5,26 +10,32 @@ from dowhy.utils.propensity_score import state_propensity_score
 class MultivariateWeightingSampler(DoSampler):
     def __init__(
         self,
+        graph: nx.DiGraph,
+        observed_nodes: List[str],
+        action_nodes: List[str],
+        outcome_nodes: List[str],
         data,
-        *args,
         params=None,
         variable_types=None,
         num_cores=1,
         keep_original_treatment=False,
-        causal_model=None,
-        **kwargs,
+        estimand_type=EstimandType.NONPARAMETRIC_ATE,
     ):
         """
         g, df, data_types
 
         """
         super().__init__(
-            data,
+            graph=graph,
+            observed_nodes=observed_nodes,
+            action_nodes=action_nodes,
+            outcome_nodes=outcome_nodes,
+            data=data,
             params=params,
             variable_types=variable_types,
             num_cores=num_cores,
             keep_original_treatment=keep_original_treatment,
-            causal_model=causal_model,
+            estimand_type=estimand_type,
         )
 
         self.logger.info("Using MultivariateWeightingSampler for do sampling.")

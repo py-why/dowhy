@@ -3,12 +3,24 @@ import logging
 from enum import Enum
 from typing import Dict, List, Optional, Union
 
+import networkx as nx
 import sympy as sp
 import sympy.stats as spstats
 
-from dowhy.causal_graph import CausalGraph
 from dowhy.causal_identifier.efficient_backdoor import EfficientBackdoor
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
+from dowhy.graph import (
+    check_dseparation,
+    check_valid_backdoor_set,
+    check_valid_frontdoor_set,
+    check_valid_mediation_set,
+    do_surgery,
+    get_all_directed_paths,
+    get_backdoor_paths,
+    get_descendants,
+    get_instruments,
+    has_directed_path,
+)
 from dowhy.utils.api import parse_state
 
 logger = logging.getLogger(__name__)
@@ -26,7 +38,6 @@ class EstimandType(Enum):
 
 
 class BackdoorAdjustment(Enum):
-
     # Backdoor method names
     BACKDOOR_DEFAULT = "default"
     BACKDOOR_EXHAUSTIVE = "exhaustive-search"
@@ -70,36 +81,33 @@ class AutoIdentifier:
         self,
         estimand_type: EstimandType,
         backdoor_adjustment: BackdoorAdjustment = BackdoorAdjustment.BACKDOOR_DEFAULT,
-        proceed_when_unidentifiable: bool = False,
         optimize_backdoor: bool = False,
         costs: Optional[List] = None,
     ):
         self.estimand_type = estimand_type
         self.backdoor_adjustment = backdoor_adjustment
-        self._proceed_when_unidentifiable = proceed_when_unidentifiable
         self.optimize_backdoor = optimize_backdoor
         self.costs = costs
         self.logger = logging.getLogger(__name__)
 
     def identify_effect(
         self,
-        graph: CausalGraph,
-        treatment_name: Union[str, List[str]],
-        outcome_name: Union[str, List[str]],
+        graph: nx.DiGraph,
+        observed_nodes: Union[str, List[str]],
+        action_nodes: Union[str, List[str]],
+        outcome_nodes: Union[str, List[str]],
         conditional_node_names: List[str] = None,
-        **kwargs,
     ):
         estimand = identify_effect_auto(
             graph,
-            treatment_name,
-            outcome_name,
+            observed_nodes,
+            action_nodes,
+            outcome_nodes,
             self.estimand_type,
             conditional_node_names,
             self.backdoor_adjustment,
-            self._proceed_when_unidentifiable,
             self.optimize_backdoor,
             self.costs,
-            **kwargs,
         )
 
         estimand.identifier = self
@@ -108,17 +116,19 @@ class AutoIdentifier:
 
     def identify_backdoor(
         self,
-        graph: CausalGraph,
-        treatment_name: List[str],
-        outcome_name: str,
+        graph: nx.DiGraph,
+        observed_nodes: List[str],
+        action_nodes: List[str],
+        outcome_nodes: List[str],
         include_unobserved: bool = False,
         dseparation_algo: str = "default",
         direct_effect: bool = False,
     ):
         return identify_backdoor(
             graph,
-            treatment_name,
-            outcome_name,
+            observed_nodes,
+            action_nodes,
+            outcome_nodes,
             self.backdoor_adjustment,
             include_unobserved,
             dseparation_algo,
@@ -127,16 +137,15 @@ class AutoIdentifier:
 
 
 def identify_effect_auto(
-    graph: CausalGraph,
-    treatment_name: Union[str, List[str]],
-    outcome_name: Union[str, List[str]],
+    graph: nx.DiGraph,
+    observed_nodes: Union[str, List[str]],
+    action_nodes: Union[str, List[str]],
+    outcome_nodes: Union[str, List[str]],
     estimand_type: EstimandType,
     conditional_node_names: List[str] = None,
     backdoor_adjustment: BackdoorAdjustment = BackdoorAdjustment.BACKDOOR_DEFAULT,
-    proceed_when_unidentifiable: bool = False,
     optimize_backdoor: bool = False,
     costs: Optional[List] = None,
-    **kwargs,
 ) -> IdentifiedEstimand:
     """Main method that returns an identified estimand (if one exists).
 
@@ -152,41 +161,42 @@ def identify_effect_auto(
     :returns:  target estimand, an instance of the IdentifiedEstimand class
     """
 
-    treatment_name = parse_state(treatment_name)
-    outcome_name = parse_state(outcome_name)
+    observed_nodes = parse_state(observed_nodes)
+    action_nodes = parse_state(action_nodes)
+    outcome_nodes = parse_state(outcome_nodes)
 
     # First, check if there is a directed path from action to outcome
-    if not graph.has_directed_path(treatment_name, outcome_name):
+    if not has_directed_path(graph, action_nodes, outcome_nodes):
         logger.warn("No directed path from treatment to outcome. Causal Effect is zero.")
         return IdentifiedEstimand(
             None,
-            treatment_variable=treatment_name,
-            outcome_variable=outcome_name,
+            treatment_variable=action_nodes,
+            outcome_variable=outcome_nodes,
             no_directed_path=True,
         )
     if estimand_type == EstimandType.NONPARAMETRIC_ATE:
         return identify_ate_effect(
             graph,
-            treatment_name,
-            outcome_name,
+            observed_nodes,
+            action_nodes,
+            outcome_nodes,
             backdoor_adjustment,
             optimize_backdoor,
             estimand_type,
             costs,
             conditional_node_names,
-            proceed_when_unidentifiable,
         )
     elif estimand_type == EstimandType.NONPARAMETRIC_NDE:
         return identify_nde_effect(
-            graph, treatment_name, outcome_name, backdoor_adjustment, estimand_type, proceed_when_unidentifiable
+            graph, observed_nodes, action_nodes, outcome_nodes, backdoor_adjustment, estimand_type
         )
     elif estimand_type == EstimandType.NONPARAMETRIC_NIE:
         return identify_nie_effect(
-            graph, treatment_name, outcome_name, backdoor_adjustment, estimand_type, proceed_when_unidentifiable
+            graph, observed_nodes, action_nodes, outcome_nodes, backdoor_adjustment, estimand_type
         )
     elif estimand_type == EstimandType.NONPARAMETRIC_CDE:
         return identify_cde_effect(
-            graph, treatment_name, outcome_name, backdoor_adjustment, estimand_type, proceed_when_unidentifiable
+            graph, observed_nodes, action_nodes, outcome_nodes, backdoor_adjustment, estimand_type
         )
     else:
         raise ValueError(
@@ -200,15 +210,15 @@ def identify_effect_auto(
 
 
 def identify_ate_effect(
-    graph: CausalGraph,
-    treatment_name: List[str],
-    outcome_name: str,
+    graph: nx.DiGraph,
+    observed_nodes: List[str],
+    action_nodes: List[str],
+    outcome_nodes: List[str],
     backdoor_adjustment: BackdoorAdjustment,
     optimize_backdoor: bool,
     estimand_type: EstimandType,
     costs: List,
     conditional_node_names: List[str] = None,
-    proceed_when_unidentifiable: bool = False,
 ):
     estimands_dict = {}
     mediation_first_stage_confounders = None
@@ -218,21 +228,27 @@ def identify_ate_effect(
     if backdoor_adjustment not in EFFICIENT_METHODS:
         # First, checking if there are any valid backdoor adjustment sets
         if optimize_backdoor == False:
-            backdoor_sets = identify_backdoor(graph, treatment_name, outcome_name, backdoor_adjustment)
+            backdoor_sets = identify_backdoor(graph, observed_nodes, action_nodes, outcome_nodes, backdoor_adjustment)
         else:
             from dowhy.causal_identifier.backdoor import Backdoor
 
-            path = Backdoor(graph._graph, treatment_name, outcome_name)
+            path = Backdoor(graph, action_nodes, outcome_nodes)
             backdoor_sets = path.get_backdoor_vars()
     elif backdoor_adjustment in EFFICIENT_METHODS:
         backdoor_sets = identify_efficient_backdoor(
-            graph, backdoor_adjustment, costs, conditional_node_names=conditional_node_names
+            graph,
+            observed_nodes,
+            action_nodes,
+            outcome_nodes,
+            backdoor_adjustment,
+            costs,
+            conditional_node_names=conditional_node_names,
         )
     estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
-        graph, treatment_name, outcome_name, backdoor_sets, estimands_dict
+        observed_nodes, action_nodes, outcome_nodes, backdoor_sets, estimands_dict
     )
     # Setting default "backdoor" identification adjustment set
-    default_backdoor_id = get_default_backdoor_set_id(graph, treatment_name, outcome_name, backdoor_variables_dict)
+    default_backdoor_id = get_default_backdoor_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
     if len(backdoor_variables_dict) > 0:
         estimands_dict["backdoor"] = estimands_dict.get(str(default_backdoor_id), None)
         backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
@@ -240,12 +256,12 @@ def identify_ate_effect(
         estimands_dict["backdoor"] = None
     ### 2. INSTRUMENTAL VARIABLE IDENTIFICATION
     # Now checking if there is also a valid iv estimand
-    instrument_names = graph.get_instruments(treatment_name, outcome_name)
+    instrument_names = get_instruments(graph, action_nodes, outcome_nodes)
     logger.info("Instrumental variables for treatment and outcome:" + str(instrument_names))
     if len(instrument_names) > 0:
         iv_estimand_expr = construct_iv_estimand(
-            treatment_name,
-            outcome_name,
+            action_nodes,
+            outcome_nodes,
             instrument_names,
         )
         logger.debug("Identified expression = " + str(iv_estimand_expr))
@@ -255,21 +271,21 @@ def identify_ate_effect(
 
     ### 3. FRONTDOOR IDENTIFICATION
     # Now checking if there is a valid frontdoor variable
-    frontdoor_variables_names = identify_frontdoor(graph, treatment_name, outcome_name)
+    frontdoor_variables_names = identify_frontdoor(graph, action_nodes, outcome_nodes)
     logger.info("Frontdoor variables for treatment and outcome:" + str(frontdoor_variables_names))
     if len(frontdoor_variables_names) > 0:
         frontdoor_estimand_expr = construct_frontdoor_estimand(
-            treatment_name,
-            outcome_name,
+            action_nodes,
+            outcome_nodes,
             frontdoor_variables_names,
         )
         logger.debug("Identified expression = " + str(frontdoor_estimand_expr))
         estimands_dict["frontdoor"] = frontdoor_estimand_expr
         mediation_first_stage_confounders = identify_mediation_first_stage_confounders(
-            graph, treatment_name, outcome_name, frontdoor_variables_names, backdoor_adjustment
+            graph, observed_nodes, action_nodes, outcome_nodes, frontdoor_variables_names, backdoor_adjustment
         )
         mediation_second_stage_confounders = identify_mediation_second_stage_confounders(
-            graph, treatment_name, frontdoor_variables_names, outcome_name, backdoor_adjustment
+            graph, observed_nodes, action_nodes, frontdoor_variables_names, outcome_nodes, backdoor_adjustment
         )
     else:
         estimands_dict["frontdoor"] = None
@@ -277,8 +293,8 @@ def identify_ate_effect(
     # Finally returning the estimand object
     estimand = IdentifiedEstimand(
         None,
-        treatment_variable=treatment_name,
-        outcome_variable=outcome_name,
+        treatment_variable=action_nodes,
+        outcome_variable=outcome_nodes,
         estimand_type=estimand_type,
         estimands=estimands_dict,
         backdoor_variables=backdoor_variables_dict,
@@ -292,12 +308,12 @@ def identify_ate_effect(
 
 
 def identify_cde_effect(
-    graph: CausalGraph,
-    treatment_name: List[str],
-    outcome_name: str,
+    graph: nx.DiGraph,
+    observed_nodes: List[str],
+    action_nodes: List[str],
+    outcome_nodes: List[str],
     backdoor_adjustment: BackdoorAdjustment,
     estimand_type: EstimandType,
-    proceed_when_unidentifiable: bool = False,
 ):
     """Identify controlled direct effect. For a definition, see Vanderwheele (2011).
     Controlled direct and mediated effects: definition, identification and bounds.
@@ -310,12 +326,14 @@ def identify_cde_effect(
     """
     estimands_dict = {}
     # Pick algorithm to compute backdoor sets according to method chosen
-    backdoor_sets = identify_backdoor(graph, treatment_name, outcome_name, backdoor_adjustment, direct_effect=True)
+    backdoor_sets = identify_backdoor(
+        graph, observed_nodes, action_nodes, outcome_nodes, backdoor_adjustment, direct_effect=True
+    )
     estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
-        graph, treatment_name, outcome_name, backdoor_sets, estimands_dict
+        observed_nodes, action_nodes, outcome_nodes, backdoor_sets, estimands_dict
     )
     # Setting default "backdoor" identification adjustment set
-    default_backdoor_id = get_default_backdoor_set_id(graph, treatment_name, outcome_name, backdoor_variables_dict)
+    default_backdoor_id = get_default_backdoor_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
     if len(backdoor_variables_dict) > 0:
         estimands_dict["backdoor"] = estimands_dict.get(str(default_backdoor_id), None)
         backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
@@ -325,8 +343,8 @@ def identify_cde_effect(
     # Finally returning the estimand object
     estimand = IdentifiedEstimand(
         None,
-        treatment_variable=treatment_name,
-        outcome_variable=outcome_name,
+        treatment_variable=action_nodes,
+        outcome_variable=outcome_nodes,
         estimand_type=estimand_type,
         estimands=estimands_dict,
         backdoor_variables=backdoor_variables_dict,
@@ -340,22 +358,22 @@ def identify_cde_effect(
 
 
 def identify_nie_effect(
-    graph: CausalGraph,
-    treatment_name: List[str],
-    outcome_name: str,
+    graph: nx.DiGraph,
+    observed_nodes: List[str],
+    action_nodes: List[str],
+    outcome_nodes: List[str],
     backdoor_adjustment: BackdoorAdjustment,
     estimand_type: EstimandType,
-    proceed_when_unidentifiable: bool = False,
 ):
     estimands_dict = {}
     ### 1. FIRST DOING BACKDOOR IDENTIFICATION
     # First, checking if there are any valid backdoor adjustment sets
-    backdoor_sets = identify_backdoor(graph, treatment_name, outcome_name, backdoor_adjustment)
+    backdoor_sets = identify_backdoor(graph, observed_nodes, action_nodes, outcome_nodes, backdoor_adjustment)
     estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
-        graph, treatment_name, outcome_name, backdoor_sets, estimands_dict
+        observed_nodes, action_nodes, outcome_nodes, backdoor_sets, estimands_dict
     )
     # Setting default "backdoor" identification adjustment set
-    default_backdoor_id = get_default_backdoor_set_id(graph, treatment_name, outcome_name, backdoor_variables_dict)
+    default_backdoor_id = get_default_backdoor_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
     backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
 
     ### 2. SECOND, CHECKING FOR MEDIATORS
@@ -363,30 +381,30 @@ def identify_nie_effect(
     estimands_dict = {}  # Need to reinitialize this dictionary to avoid including the backdoor sets
     mediation_first_stage_confounders = None
     mediation_second_stage_confounders = None
-    mediators_names = identify_mediation(graph, treatment_name, outcome_name)
+    mediators_names = identify_mediation(graph, action_nodes, outcome_nodes)
     logger.info("Mediators for treatment and outcome:" + str(mediators_names))
     if len(mediators_names) > 0:
         mediation_estimand_expr = construct_mediation_estimand(
             estimand_type,
-            treatment_name,
-            outcome_name,
+            action_nodes,
+            outcome_nodes,
             mediators_names,
         )
         logger.debug("Identified expression = " + str(mediation_estimand_expr))
         estimands_dict["mediation"] = mediation_estimand_expr
         mediation_first_stage_confounders = identify_mediation_first_stage_confounders(
-            graph, treatment_name, outcome_name, mediators_names, backdoor_adjustment
+            graph, observed_nodes, action_nodes, outcome_nodes, mediators_names, backdoor_adjustment
         )
         mediation_second_stage_confounders = identify_mediation_second_stage_confounders(
-            graph, treatment_name, mediators_names, outcome_name, backdoor_adjustment
+            graph, observed_nodes, action_nodes, mediators_names, outcome_nodes, backdoor_adjustment
         )
     else:
         estimands_dict["mediation"] = None
     # Finally returning the estimand object
     estimand = IdentifiedEstimand(
         None,
-        treatment_variable=treatment_name,
-        outcome_variable=outcome_name,
+        treatment_variable=action_nodes,
+        outcome_variable=outcome_nodes,
         estimand_type=estimand_type,
         estimands=estimands_dict,
         backdoor_variables=backdoor_variables_dict,
@@ -401,22 +419,22 @@ def identify_nie_effect(
 
 
 def identify_nde_effect(
-    graph: CausalGraph,
-    treatment_name: List[str],
-    outcome_name: str,
+    graph: nx.DiGraph,
+    observed_nodes: List[str],
+    action_nodes: List[str],
+    outcome_nodes: List[str],
     backdoor_adjustment: BackdoorAdjustment,
     estimand_type: EstimandType,
-    proceed_when_unidentifiable: bool = False,
 ):
     estimands_dict = {}
     ### 1. FIRST DOING BACKDOOR IDENTIFICATION
     # First, checking if there are any valid backdoor adjustment sets
-    backdoor_sets = identify_backdoor(graph, treatment_name, outcome_name, backdoor_adjustment)
+    backdoor_sets = identify_backdoor(graph, observed_nodes, action_nodes, outcome_nodes, backdoor_adjustment)
     estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
-        graph, treatment_name, outcome_name, backdoor_sets, estimands_dict
+        observed_nodes, action_nodes, outcome_nodes, backdoor_sets, estimands_dict
     )
     # Setting default "backdoor" identification adjustment set
-    default_backdoor_id = get_default_backdoor_set_id(graph, treatment_name, outcome_name, backdoor_variables_dict)
+    default_backdoor_id = get_default_backdoor_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
     backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
 
     ### 2. SECOND, CHECKING FOR MEDIATORS
@@ -424,30 +442,30 @@ def identify_nde_effect(
     estimands_dict = {}
     mediation_first_stage_confounders = None
     mediation_second_stage_confounders = None
-    mediators_names = identify_mediation(graph, treatment_name, outcome_name)
+    mediators_names = identify_mediation(graph, action_nodes, outcome_nodes)
     logger.info("Mediators for treatment and outcome:" + str(mediators_names))
     if len(mediators_names) > 0:
         mediation_estimand_expr = construct_mediation_estimand(
             estimand_type,
-            treatment_name,
-            outcome_name,
+            action_nodes,
+            outcome_nodes,
             mediators_names,
         )
         logger.debug("Identified expression = " + str(mediation_estimand_expr))
         estimands_dict["mediation"] = mediation_estimand_expr
         mediation_first_stage_confounders = identify_mediation_first_stage_confounders(
-            graph, treatment_name, outcome_name, mediators_names, backdoor_adjustment
+            graph, observed_nodes, action_nodes, outcome_nodes, mediators_names, backdoor_adjustment
         )
         mediation_second_stage_confounders = identify_mediation_second_stage_confounders(
-            graph, treatment_name, mediators_names, outcome_name, backdoor_adjustment
+            graph, observed_nodes, action_nodes, mediators_names, outcome_nodes, backdoor_adjustment
         )
     else:
         estimands_dict["mediation"] = None
     # Finally returning the estimand object
     estimand = IdentifiedEstimand(
         None,
-        treatment_variable=treatment_name,
-        outcome_variable=outcome_name,
+        treatment_variable=action_nodes,
+        outcome_variable=outcome_nodes,
         estimand_type=estimand_type,
         estimands=estimands_dict,
         backdoor_variables=backdoor_variables_dict,
@@ -462,9 +480,10 @@ def identify_nde_effect(
 
 
 def identify_backdoor(
-    graph: CausalGraph,
-    treatment_name: List[str],
-    outcome_name: str,
+    graph: nx.DiGraph,
+    observed_nodes: List[str],
+    action_nodes: List[str],
+    outcome_nodes: List[str],
     backdoor_adjustment: BackdoorAdjustment,
     include_unobserved: bool = False,
     dseparation_algo: str = "default",
@@ -473,12 +492,14 @@ def identify_backdoor(
     backdoor_sets = []
     backdoor_paths = None
     bdoor_graph = None
+    observed_nodes = set(observed_nodes)
     if dseparation_algo == "naive":
-        backdoor_paths = graph.get_backdoor_paths(treatment_name, outcome_name)
+        backdoor_paths = get_backdoor_paths(graph, action_nodes, outcome_nodes)
     elif dseparation_algo == "default":
-        bdoor_graph = graph.do_surgery(
-            treatment_name,
-            target_node_names=outcome_name,
+        bdoor_graph = do_surgery(
+            graph,
+            action_nodes,
+            target_node_names=outcome_nodes,
             remove_outgoing_edges=True,
             remove_only_direct_edges_to_target=direct_effect,
         )
@@ -490,9 +511,10 @@ def identify_backdoor(
 
     # First, checking if empty set is a valid backdoor set
     empty_set = set()
-    check = graph.check_valid_backdoor_set(
-        treatment_name,
-        outcome_name,
+    check = check_valid_backdoor_set(
+        graph,
+        action_nodes,
+        outcome_nodes,
         empty_set,
         backdoor_paths=backdoor_paths,
         new_graph=bdoor_graph,
@@ -506,28 +528,32 @@ def identify_backdoor(
 
     # Second, checking for all other sets of variables. If include_unobserved is false, then only observed variables are eligible.
     eligible_variables = (
-        graph.get_all_nodes(include_unobserved=include_unobserved) - set(treatment_name) - set(outcome_name)
+        set([node for node in graph.nodes if include_unobserved or node in observed_nodes])
+        - set(action_nodes)
+        - set(outcome_nodes)
     )
+
     if direct_effect:
         # only remove descendants of Y
         # also allow any causes of Y that are not caused by T (for lower variance)
-        eligible_variables -= graph.get_descendants(outcome_name)
+        eligible_variables -= get_descendants(graph, outcome_nodes)
     else:
         # remove descendants of T (mediators) and descendants of Y
-        eligible_variables -= graph.get_descendants(treatment_name)
+        eligible_variables -= get_descendants(graph, action_nodes)
     # If var is d-separated from both treatment or outcome, it cannot
     # be a part of the backdoor set
     filt_eligible_variables = set()
     for var in eligible_variables:
-        dsep_treat_var = graph.check_dseparation(treatment_name, parse_state(var), set())
-        dsep_outcome_var = graph.check_dseparation(outcome_name, parse_state(var), set())
+        dsep_treat_var = check_dseparation(graph, action_nodes, parse_state(var), set())
+        dsep_outcome_var = check_dseparation(graph, outcome_nodes, parse_state(var), set())
         if not dsep_outcome_var or not dsep_treat_var:
             filt_eligible_variables.add(var)
     if backdoor_adjustment in METHOD_NAMES:
         backdoor_sets, found_valid_adjustment_set = find_valid_adjustment_sets(
             graph,
-            treatment_name,
-            outcome_name,
+            observed_nodes,
+            action_nodes,
+            outcome_nodes,
             backdoor_paths,
             bdoor_graph,
             dseparation_algo,
@@ -540,8 +566,9 @@ def identify_backdoor(
             # repeat the above search with BACKDOOR_MIN
             backdoor_sets, _ = find_valid_adjustment_sets(
                 graph,
-                treatment_name,
-                outcome_name,
+                observed_nodes,
+                action_nodes,
+                outcome_nodes,
                 backdoor_paths,
                 bdoor_graph,
                 dseparation_algo,
@@ -558,7 +585,10 @@ def identify_backdoor(
 
 
 def identify_efficient_backdoor(
-    graph: CausalGraph,
+    graph: nx.DiGraph,
+    observed_nodes: List[str],
+    action_nodes: List[str],
+    outcome_nodes: List[str],
     backdoor_adjustment: BackdoorAdjustment,
     costs: List,
     conditional_node_names: List[str] = None,
@@ -606,6 +636,9 @@ def identify_efficient_backdoor(
         logger.warning("No costs were passed, so they will be assumed to be constant and equal to 1.")
     efficient_bd = EfficientBackdoor(
         graph=graph,
+        observed_nodes=observed_nodes,
+        action_nodes=action_nodes,
+        outcome_nodes=outcome_nodes,
         conditional_node_names=conditional_node_names,
         costs=costs,
     )
@@ -622,11 +655,12 @@ def identify_efficient_backdoor(
 
 
 def find_valid_adjustment_sets(
-    graph: CausalGraph,
-    treatment_name: List,
-    outcome_name: List,
+    graph: nx.DiGraph,
+    observed_nodes: List[str],
+    action_nodes: List[str],
+    outcome_nodes: List[str],
     backdoor_paths: List,
-    bdoor_graph: CausalGraph,
+    bdoor_graph: nx.DiGraph,
     dseparation_algo: str,
     backdoor_sets: List,
     filt_eligible_variables: List,
@@ -635,7 +669,7 @@ def find_valid_adjustment_sets(
 ):
     num_iterations = 0
     found_valid_adjustment_set = False
-    all_nodes_observed = graph.all_observed(graph.get_all_nodes())
+    is_all_observed = set(graph.nodes) == set(observed_nodes)
     # If `minimal-adjustment` method is specified, start the search from the set with minimum size. Otherwise, start from the largest.
     set_sizes = (
         range(1, len(filt_eligible_variables) + 1, 1)
@@ -644,9 +678,10 @@ def find_valid_adjustment_sets(
     )
     for size_candidate_set in set_sizes:
         for candidate_set in itertools.combinations(filt_eligible_variables, size_candidate_set):
-            check = graph.check_valid_backdoor_set(
-                treatment_name,
-                outcome_name,
+            check = check_valid_backdoor_set(
+                graph,
+                action_nodes,
+                outcome_nodes,
                 candidate_set,
                 backdoor_paths=backdoor_paths,
                 new_graph=bdoor_graph,
@@ -677,7 +712,7 @@ def find_valid_adjustment_sets(
         # does not satisfy backdoor, then none of its subsets will.
         if (
             backdoor_adjustment in {BackdoorAdjustment.BACKDOOR_DEFAULT, BackdoorAdjustment.BACKDOOR_MAX}
-            and all_nodes_observed
+            and is_all_observed
         ):
             break
         if num_iterations > max_iterations:
@@ -687,14 +722,14 @@ def find_valid_adjustment_sets(
 
 
 def get_default_backdoor_set_id(
-    graph: CausalGraph, treatment_name: List[str], outcome_name: List[str], backdoor_sets_dict: Dict
+    graph: nx.DiGraph, action_nodes: List[str], outcome_nodes: List[str], backdoor_sets_dict: Dict
 ):
     # Adding a None estimand if no backdoor set found
     if len(backdoor_sets_dict) == 0:
         return None
 
     # Default set contains minimum possible number of instrumental variables, to prevent lowering variance in the treatment variable.
-    instrument_names = set(graph.get_instruments(treatment_name, outcome_name))
+    instrument_names = set(get_instruments(graph, action_nodes, outcome_nodes))
     iv_count_dict = {
         key: len(set(bdoor_set).intersection(instrument_names)) for key, bdoor_set in backdoor_sets_dict.items()
     }
@@ -713,27 +748,28 @@ def get_default_backdoor_set_id(
 
 
 def build_backdoor_estimands_dict(
-    graph: CausalGraph,
-    treatment_name: List[str],
-    outcome_name: List[str],
+    observed_nodes: List[str],
+    treatment_names: List[str],
+    outcome_names: List[str],
     backdoor_sets: List[str],
     estimands_dict: Dict,
 ):
     """Build the final dict for backdoor sets by filtering unobserved variables if needed."""
     backdoor_variables_dict = {}
-    is_identified = [graph.all_observed(bset["backdoor_set"]) for bset in backdoor_sets]
+    observed_nodes = set(observed_nodes)
+    is_identified = [set(bset["backdoor_set"]).issubset(observed_nodes) for bset in backdoor_sets]
 
     if any(is_identified):
         logger.info("Causal effect can be identified.")
         backdoor_sets_arr = [
-            list(bset["backdoor_set"]) for bset in backdoor_sets if graph.all_observed(bset["backdoor_set"])
+            list(bset["backdoor_set"]) for bset in backdoor_sets if set(bset["backdoor_set"]).issubset(observed_nodes)
         ]
     else:  # there is unobserved confounding
         logger.warning("Backdoor identification failed.")
         backdoor_sets_arr = []
 
     for i in range(len(backdoor_sets_arr)):
-        backdoor_estimand_expr = construct_backdoor_estimand(treatment_name, outcome_name, backdoor_sets_arr[i])
+        backdoor_estimand_expr = construct_backdoor_estimand(treatment_names, outcome_names, backdoor_sets_arr[i])
         logger.debug("Identified expression = " + str(backdoor_estimand_expr))
         estimands_dict["backdoor" + str(i + 1)] = backdoor_estimand_expr
         backdoor_variables_dict["backdoor" + str(i + 1)] = backdoor_sets_arr[i]
@@ -741,7 +777,7 @@ def build_backdoor_estimands_dict(
 
 
 def identify_frontdoor(
-    graph: CausalGraph, treatment_name: List[str], outcome_name: List[str], dseparation_algo: str = "default"
+    graph: nx.DiGraph, action_nodes: List[str], outcome_nodes: List[str], dseparation_algo: str = "default"
 ):
     """Find a valid frontdoor variable if it exists.
 
@@ -751,22 +787,23 @@ def identify_frontdoor(
     frontdoor_paths = None
     fdoor_graph = None
     if dseparation_algo == "default":
-        cond1_graph = graph.do_surgery(treatment_name, remove_incoming_edges=True)
-        bdoor_graph1 = graph.do_surgery(treatment_name, remove_outgoing_edges=True)
+        cond1_graph = do_surgery(graph, action_nodes, remove_incoming_edges=True)
+        bdoor_graph1 = do_surgery(graph, action_nodes, remove_outgoing_edges=True)
     elif dseparation_algo == "naive":
-        frontdoor_paths = graph.get_all_directed_paths(treatment_name, outcome_name)
+        frontdoor_paths = get_all_directed_paths(graph, action_nodes, outcome_nodes)
     else:
         raise ValueError(f"d-separation algorithm {dseparation_algo} is not supported")
 
     eligible_variables = (
-        graph.get_descendants(treatment_name) - set(outcome_name) - set(graph.get_descendants(outcome_name))
+        get_descendants(graph, action_nodes) - set(outcome_nodes) - set(get_descendants(graph, outcome_nodes))
     )
     # For simplicity, assuming a one-variable frontdoor set
     for candidate_var in eligible_variables:
         # Cond 1: All directed paths intercepted by candidate_var
-        cond1 = graph.check_valid_frontdoor_set(
-            treatment_name,
-            outcome_name,
+        cond1 = check_valid_frontdoor_set(
+            graph,
+            action_nodes,
+            outcome_nodes,
             parse_state(candidate_var),
             frontdoor_paths=frontdoor_paths,
             new_graph=cond1_graph,
@@ -776,8 +813,9 @@ def identify_frontdoor(
         if not cond1:
             continue
         # Cond 2: No confounding between treatment and candidate var
-        cond2 = graph.check_valid_backdoor_set(
-            treatment_name,
+        cond2 = check_valid_backdoor_set(
+            graph,
+            action_nodes,
             parse_state(candidate_var),
             set(),
             backdoor_paths=None,
@@ -787,11 +825,12 @@ def identify_frontdoor(
         if not cond2:
             continue
         # Cond 3: treatment blocks all confounding between candidate_var and outcome
-        bdoor_graph2 = graph.do_surgery(candidate_var, remove_outgoing_edges=True)
-        cond3 = graph.check_valid_backdoor_set(
+        bdoor_graph2 = do_surgery(graph, candidate_var, remove_outgoing_edges=True)
+        cond3 = check_valid_backdoor_set(
+            graph,
             parse_state(candidate_var),
-            outcome_name,
-            treatment_name,
+            outcome_nodes,
+            action_nodes,
             backdoor_paths=None,
             new_graph=bdoor_graph2,
             dseparation_algo=dseparation_algo,
@@ -803,19 +842,20 @@ def identify_frontdoor(
     return parse_state(frontdoor_var)
 
 
-def identify_mediation(graph: CausalGraph, treatment_name: List[str], outcome_name: List[str]):
+def identify_mediation(graph: nx.DiGraph, action_nodes: List[str], outcome_nodes: List[str]):
     """Find a valid mediator if it exists.
 
     Currently only supports a single variable mediator set.
     """
     mediation_var = None
-    mediation_paths = graph.get_all_directed_paths(treatment_name, outcome_name)
-    eligible_variables = graph.get_descendants(treatment_name) - set(outcome_name)
+    mediation_paths = get_all_directed_paths(graph, action_nodes, outcome_nodes)
+    eligible_variables = get_descendants(graph, action_nodes) - set(outcome_nodes)
     # For simplicity, assuming a one-variable mediation set
     for candidate_var in eligible_variables:
-        is_valid_mediation = graph.check_valid_mediation_set(
-            treatment_name,
-            outcome_name,
+        is_valid_mediation = check_valid_mediation_set(
+            graph,
+            action_nodes,
+            outcome_nodes,
             parse_state(candidate_var),
             mediation_paths=mediation_paths,
         )
@@ -827,48 +867,50 @@ def identify_mediation(graph: CausalGraph, treatment_name: List[str], outcome_na
 
 
 def identify_mediation_first_stage_confounders(
-    graph: CausalGraph,
-    treatment_name: List[str],
-    outcome_name: List[str],
-    mediators_names: List[str],
+    graph: nx.DiGraph,
+    observed_nodes: List[str],
+    action_nodes: List[str],
+    outcome_nodes: List[str],
+    mediator_nodes: List[str],
     backdoor_adjustment: BackdoorAdjustment,
 ):
     # Create estimands dict as per the API for backdoor, but do not return it
     estimands_dict = {}
-    backdoor_sets = identify_backdoor(graph, treatment_name, mediators_names, backdoor_adjustment)
+    backdoor_sets = identify_backdoor(graph, observed_nodes, action_nodes, mediator_nodes, backdoor_adjustment)
     estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
-        graph,
-        treatment_name,
-        mediators_names,
+        observed_nodes,
+        action_nodes,
+        mediator_nodes,
         backdoor_sets,
         estimands_dict,
     )
     # Setting default "backdoor" identification adjustment set
-    default_backdoor_id = get_default_backdoor_set_id(graph, treatment_name, outcome_name, backdoor_variables_dict)
+    default_backdoor_id = get_default_backdoor_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
     estimands_dict["backdoor"] = estimands_dict.get(str(default_backdoor_id), None)
     backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
     return backdoor_variables_dict
 
 
 def identify_mediation_second_stage_confounders(
-    graph: CausalGraph,
-    treatment_name: List[str],
-    mediators_names: List[str],
-    outcome_name: List[str],
+    graph: nx.DiGraph,
+    observed_nodes: List[str],
+    action_nodes: List[str],
+    mediator_nodes: List[str],
+    outcome_nodes: List[str],
     backdoor_adjustment: BackdoorAdjustment,
 ):
     # Create estimands dict as per the API for backdoor, but do not return it
     estimands_dict = {}
-    backdoor_sets = identify_backdoor(graph, mediators_names, outcome_name, backdoor_adjustment)
+    backdoor_sets = identify_backdoor(graph, observed_nodes, mediator_nodes, outcome_nodes, backdoor_adjustment)
     estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
-        graph,
-        mediators_names,
-        outcome_name,
+        observed_nodes,
+        mediator_nodes,
+        outcome_nodes,
         backdoor_sets,
         estimands_dict,
     )
     # Setting default "backdoor" identification adjustment set
-    default_backdoor_id = get_default_backdoor_set_id(graph, treatment_name, outcome_name, backdoor_variables_dict)
+    default_backdoor_id = get_default_backdoor_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
     estimands_dict["backdoor"] = estimands_dict.get(str(default_backdoor_id), None)
     backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
     return backdoor_variables_dict
@@ -966,7 +1008,7 @@ def construct_frontdoor_estimand(
 
 
 def construct_mediation_estimand(
-    estimand_type: EstimandType, treatment_name: List[str], outcome_name: List[str], mediators_names: List[str]
+    estimand_type: EstimandType, action_nodes: List[str], outcome_nodes: List[str], mediator_nodes: List[str]
 ):
     # TODO: support multivariate treatments better.
     expr = None
@@ -974,18 +1016,18 @@ def construct_mediation_estimand(
         EstimandType.NONPARAMETRIC_NDE,
         EstimandType.NONPARAMETRIC_NIE,
     ):
-        outcome_name = outcome_name[0]
-        sym_outcome = spstats.Normal(outcome_name, 0, 1)
-        sym_treatment_symbols = [spstats.Normal(t, 0, 1) for t in treatment_name]
+        outcome_nodes = outcome_nodes[0]
+        sym_outcome = spstats.Normal(outcome_nodes, 0, 1)
+        sym_treatment_symbols = [spstats.Normal(t, 0, 1) for t in action_nodes]
         sym_treatment = sp.Array(sym_treatment_symbols)
-        sym_mediators_symbols = [sp.Symbol(inst) for inst in mediators_names]
+        sym_mediators_symbols = [sp.Symbol(inst) for inst in mediator_nodes]
         sym_mediators = sp.Array(sym_mediators_symbols)
         sym_outcome_derivative = sp.Derivative(sym_outcome, sym_mediators)
         sym_treatment_derivative = sp.Derivative(sym_mediators, sym_treatment)
         # For direct effect
-        num_expr_str = outcome_name
-        if len(mediators_names) > 0:
-            num_expr_str += "|" + ",".join(mediators_names)
+        num_expr_str = outcome_nodes
+        if len(mediator_nodes) > 0:
+            num_expr_str += "|" + ",".join(mediator_nodes)
         sym_mu = sp.Symbol("mu")
         sym_sigma = sp.Symbol("sigma", positive=True)
         sym_conditional_outcome = spstats.Normal(num_expr_str, sym_mu, sym_sigma)
@@ -998,17 +1040,17 @@ def construct_mediation_estimand(
             "Mediation": (
                 "{2} intercepts (blocks) all directed paths from {0} to {1} except the path {{{0}}}\N{RIGHTWARDS ARROW}{{{1}}}."
             ).format(
-                ",".join(treatment_name),
-                ",".join(outcome_name),
-                ",".join(mediators_names),
+                ",".join(action_nodes),
+                ",".join(outcome_nodes),
+                ",".join(mediator_nodes),
             ),
             "First-stage-unconfoundedness": (
                 "If U\N{RIGHTWARDS ARROW}{{{0}}} and U\N{RIGHTWARDS ARROW}{{{1}}}" " then P({1}|{0},U) = P({1}|{0})"
-            ).format(",".join(treatment_name), ",".join(mediators_names)),
+            ).format(",".join(action_nodes), ",".join(mediator_nodes)),
             "Second-stage-unconfoundedness": (
                 "If U\N{RIGHTWARDS ARROW}{{{2}}} and U\N{RIGHTWARDS ARROW}{1}"
                 " then P({1}|{2}, {0}, U) = P({1}|{2}, {0})"
-            ).format(",".join(treatment_name), outcome_name, ",".join(mediators_names)),
+            ).format(",".join(action_nodes), outcome_nodes, ",".join(mediator_nodes)),
         }
     else:
         raise ValueError(

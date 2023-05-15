@@ -1,6 +1,7 @@
 from typing import List, Protocol, Union
 
-from dowhy.causal_graph import CausalGraph
+import networkx as nx
+
 from dowhy.causal_identifier.auto_identifier import BackdoorAdjustment, EstimandType, identify_effect_auto
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 
@@ -15,12 +16,12 @@ class CausalIdentifier(Protocol):
     """
 
     def identify_effect(
-        self, graph: CausalGraph, treatment_name: Union[str, List[str]], outcome_name: Union[str, List[str]], **kwargs
+        self, graph: nx.DiGraph, action_nodes: Union[str, List[str]], outcome_nodes: Union[str, List[str]], **kwargs
     ):
-        """Identify the causal effect to be estimated based on a CausalGraph
-        :param graph: CausalGraph to be analyzed
-        :param treatment_name: name of the treatment
-        :param outcome_name: name of the outcome
+        """Identify the causal effect to be estimated based on a causal graph
+        :param graph: Causal graph to be analyzed
+        :param action_nodes: name of the treatment
+        :param outcome_nodes: name of the outcome
         :param **kwargs: Additional parameters required by the identify_effect of a specific CausalIdentifier
         for example: conditional_node_names in AutoIdentifier or node_names in IDIdentifier
         :returns: a probability expression (estimand) for the causal effect if identified, else NULL
@@ -29,23 +30,24 @@ class CausalIdentifier(Protocol):
 
 
 def identify_effect(
-    graph: CausalGraph,
-    treatment_name: Union[str, List[str]],
-    outcome_name: Union[str, List[str]],
+    graph: nx.DiGraph,
+    observed_nodes: Union[str, List[str]],
+    action_nodes: Union[str, List[str]],
+    outcome_nodes: Union[str, List[str]],
 ) -> IdentifiedEstimand:
-    """Identify the causal effect to be estimated based on a CausalGraph
+    """Identify the causal effect to be estimated based on a causal graph
 
-    :param graph: CausalGraph to be analyzed
+    :param graph: Causal graph to be analyzed
     :param treatment: name of the treatment
     :param outcome: name of the outcome
     :returns: a probability expression (estimand) for the causal effect if identified, else NULL
     """
     return identify_effect_auto(
         graph,
-        treatment_name,
-        outcome_name,
+        observed_nodes,
+        action_nodes,
+        outcome_nodes,
         EstimandType.NONPARAMETRIC_ATE,
         backdoor_adjustment=BackdoorAdjustment.BACKDOOR_DEFAULT,
-        proceed_when_unidentifiable=True,
         optimize_backdoor=False,
     )

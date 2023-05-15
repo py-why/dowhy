@@ -1,40 +1,49 @@
+from typing import List
+
 import networkx as nx
 import numpy as np
 import pymc3 as pm
 
+from dowhy import EstimandType
 from dowhy.do_sampler import DoSampler
 
 
 class McmcSampler(DoSampler):
     def __init__(
         self,
+        graph: nx.DiGraph,
+        observed_nodes: List[str],
+        action_nodes: List[str],
+        outcome_nodes: List[str],
         data,
-        *args,
         params=None,
         variable_types=None,
         num_cores=1,
         keep_original_treatment=False,
-        causal_model=None,
-        **kwargs,
+        estimand_type=EstimandType.NONPARAMETRIC_ATE,
     ):
         """
         g, df, data_types
 
         """
         super().__init__(
-            data,
+            graph=graph,
+            observed_nodes=observed_nodes,
+            action_nodes=action_nodes,
+            outcome_nodes=outcome_nodes,
+            data=data,
             params=params,
             variable_types=variable_types,
-            causal_model=causal_model,
             num_cores=num_cores,
             keep_original_treatment=keep_original_treatment,
+            estimand_type=estimand_type,
         )
 
         self.logger.info("Using McmcSampler for do sampling.")
         self.point_sampler = False
         self.sampler = self._construct_sampler()
 
-        self.g = causal_model._graph.get_unconfounded_observed_subgraph()
+        self.g = graph.subgraph(observed_nodes)
         g_fit = nx.DiGraph(self.g)
         _, self.fit_trace = self.fit_causal_model(g_fit, self._data, self._variable_types)
 

@@ -4,7 +4,7 @@
 """
 
 import hashlib
-from collections import Counter, OrderedDict
+from collections import Counter
 
 import numpy as np
 import torch

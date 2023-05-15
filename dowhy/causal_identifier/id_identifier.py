@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Set, Union
 import networkx as nx
 import numpy as np
 
-from dowhy.causal_graph import CausalGraph
+from dowhy.graph import get_adjacency_matrix
 from dowhy.utils.api import parse_state
 from dowhy.utils.graph_operations import find_ancestor, find_c_components, induced_graph
 from dowhy.utils.ordered_set import OrderedSet
@@ -96,21 +96,18 @@ class IDIdentifier:
 
     def identify_effect(
         self,
-        graph: CausalGraph,
-        treatment_name: Union[str, List[str]],
-        outcome_name: Union[str, List[str]],
-        node_names: Optional[Union[str, List[str]]] = None,
-        **kwargs,
+        graph: nx.DiGraph,
+        observed_nodes: Union[str, List[str]],
+        action_nodes: Union[str, List[str]],
+        outcome_nodes: Union[str, List[str]],
     ):
-        return identify_effect_id(graph, treatment_name, outcome_name, node_names, **kwargs)
+        return identify_effect_id(graph, action_nodes, outcome_nodes)
 
 
 def identify_effect_id(
-    graph: CausalGraph,
-    treatment_name: Union[str, List[str]],
-    outcome_name: Union[str, List[str]],
-    node_names: Optional[Union[str, List[str]]] = None,
-    **kwargs,
+    graph: nx.DiGraph,
+    action_nodes: Union[str, List[str]],
+    outcome_nodes: Union[str, List[str]],
 ) -> IDExpression:
     """
     Implementation of the ID algorithm.
@@ -119,25 +116,22 @@ def identify_effect_id(
 
     :param treatment_names: OrderedSet comprising names of treatment variables.
     :param outcome_names:OrderedSet comprising names of outcome variables.
-    :param node_names: OrderedSet comprising names of all nodes in the graph
 
     :returns: target estimand, an instance of the IDExpression class.
     """
+    node_names = OrderedSet(graph.nodes)
 
-    if node_names is None:
-        node_names = OrderedSet(graph._graph.nodes)
-
-    adjacency_matrix = graph.get_adjacency_matrix()
+    adjacency_matrix = get_adjacency_matrix(graph)
 
     try:
-        tsort_node_names = OrderedSet(list(nx.topological_sort(graph._graph)))  # topological sorting of graph nodes
+        tsort_node_names = OrderedSet(list(nx.topological_sort(graph)))  # topological sorting of graph nodes
     except:
         raise Exception("The graph must be a directed acyclic graph (DAG).")
 
     return __adjacency_matrix_identify_effect(
         adjacency_matrix,
-        OrderedSet(parse_state(treatment_name)),
-        OrderedSet(parse_state(outcome_name)),
+        OrderedSet(parse_state(action_nodes)),
+        OrderedSet(parse_state(outcome_nodes)),
         tsort_node_names,
         node_names,
     )

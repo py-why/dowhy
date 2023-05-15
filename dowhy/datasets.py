@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import scipy.stats as ss
 from numpy.random import choice
-from scipy.stats import bernoulli, halfnorm, poisson, uniform
+from scipy.stats import bernoulli, halfnorm, poisson, uniform)
 from sklearn.neural_network import MLPRegressor
 
 from dowhy.utils.graph_operations import add_edge, del_edge, get_random_node_pair, get_simple_ordered_tree

@@ -1,16 +1,28 @@
 import logging
+from typing import List
 
+import networkx as nx
 import numpy as np
 import pandas as pd
 
-from dowhy.utils.api import parse_state
+from dowhy import EstimandType, identify_effect_auto
 
 
 class DoSampler:
     """Base class for a sampler from the interventional distribution."""
 
     def __init__(
-        self, data, params=None, variable_types=None, num_cores=1, causal_model=None, keep_original_treatment=False
+        self,
+        graph: nx.DiGraph,
+        observed_nodes: List[str],
+        action_nodes: List[str],
+        outcome_nodes: List[str],
+        data,
+        params=None,
+        variable_types=None,
+        num_cores=1,
+        keep_original_treatment=False,
+        estimand_type=EstimandType.NONPARAMETRIC_ATE,
     ):
         """
         Initializes a do sampler with data and names of relevant variables.
@@ -50,11 +62,12 @@ class DoSampler:
 
         """
         self._data = data.copy()
-        self._causal_model = causal_model
-        self._target_estimand = self._causal_model.identify_effect()
+        self._target_estimand = identify_effect_auto(
+            graph, observed_nodes, action_nodes, outcome_nodes, estimand_type=estimand_type
+        )
         self._target_estimand.set_identifier_method("backdoor")
-        self._treatment_names = parse_state(self._causal_model._treatment)
-        self._outcome_names = parse_state(self._causal_model._outcome)
+        self._treatment_names = action_nodes
+        self._outcome_names = outcome_nodes
         self._estimate = None
         self._variable_types = variable_types
         self.num_cores = num_cores
@@ -71,6 +84,7 @@ class DoSampler:
         if not self._variable_types:
             self._infer_variable_types()
         self.dep_type = [self._variable_types[var] for var in self._outcome_names]
+
         self.indep_type = [
             self._variable_types[var] for var in self._treatment_names + self._target_estimand.get_backdoor_variables()
         ]
