@@ -1,0 +1,1134 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Falsification of User-Given Directed Acyclic Graphs &#8212; DoWhy  documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="DoWhy example on ihdp (Infant Health and Development Program) dataset" href="dowhy_ihdp_data_example.html" />
+    <link rel="prev" title="Counterfactual Analysis in a Medical Case" href="gcm_counterfactual_medical_dry_eyes.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="Logo image">
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../user_guide/index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="nb_index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../dowhy.html">
+  API reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../contributing.html">
+  Contributing
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../code_repo.html">
+  Release notes
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+      <div class="navbar-end-item">
+        <div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        main
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Introductory examples
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_simple_example.html">
+   Basic Example for Calculating the Causal Effect
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_basic_example.html">
+   Basic Example for Graphical Causal Model-Based Intervention
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_confounder_example.html">
+   Confounding Example: Finding causal effects from observed data
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_estimation_methods.html">
+   DoWhy: Different estimation methods for causal inference
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_interpreter.html">
+   DoWhy: Interpreters for Causal Estimators
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_discovery_example.html">
+   Causal Discovery example
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy-conditional-treatment-effects.html">
+   Conditional Average Treatment Effects (CATE) with DoWhy and EconML
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_mediation_analysis.html">
+   Mediation analysis with DoWhy: Direct and Indirect Effects
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refuter_notebook.html">
+   Iterating over multiple refutation tests
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_api.html">
+   Demo for the DoWhy causal API
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="do_sampler_demo.html">
+   Do-sampler Introduction
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Real world-inspired examples
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">
+   Exploring Causes of Hotel Booking Cancellations
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_example_effect_of_memberrewards_program.html">
+   Estimating the Effect of a Member Rewards Program
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_rca_microservice_architecture.html">
+   Finding the Root Cause of Elevated Latencies in a Microservice Architecture
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_401k_analysis.html">
+   Impact of 401(k) eligibility on net financial assets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_supply_chain_dist_change.html">
+   Finding Root Causes of Changes in a Supply Chain
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_counterfactual_medical_dry_eyes.html">
+   Counterfactual Analysis in a Medical Case
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Falsification of User-Given Directed Acyclic Graphs
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Examples on benchmarks datasets
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_ihdp_data_example.html">
+   DoWhy example on ihdp (Infant Health and Development Program) dataset
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_lalonde_example.html">
+   DoWhy example on the Lalonde dataset
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refutation_testing.html">
+   Applying refutation tests to the Lalonde and IHDP datasets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_401k_analysis.html">
+   Impact of 401(k) eligibility on net financial assets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="lalonde_pandas_api.html">
+   Lalonde Pandas API Example
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Miscellaneous
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="load_graph_example.html">
+   Different ways to load an input graph
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_draw_samples.html">
+   Basic Example for generating samples from a GCM
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy-simple-iv-example.html">
+   Simple example on using Instrumental Variables method for estimation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="graph_conditional_independence_refuter.html">
+   Testing Assumptions in model with DoWhy: A simple example
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">
+   A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_multiple_treatments.html">
+   Estimating effect of multiple treatments
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="identifying_effects_using_id_algorithm.html">
+   Identifying Effect using ID Algorithm
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Synthetic-Data">
+   Synthetic Data
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Real-Data-(Protein-Network-dataset-by-Sachs-et-al.,-2005)">
+   Real Data (Protein Network dataset by Sachs et al., 2005)
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Edge-Suggestions">
+   Edge Suggestions
+  </a>
+ </li>
+</ul>
+
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars and line breaks on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+    white-space: pre;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.jp-RenderedHTMLCommon thead,
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+.jp-RenderedHTMLCommon th,
+div.rendered_html th {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+.jp-RenderedHTMLCommon tbody tr:hover,
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<section id="Falsification-of-User-Given-Directed-Acyclic-Graphs">
+<h1>Falsification of User-Given Directed Acyclic Graphs<a class="headerlink" href="#Falsification-of-User-Given-Directed-Acyclic-Graphs" title="Permalink to this heading"></a></h1>
+<p>This notebook demonstrates a tool on falsifying a user-given DAG using observational data. The main function is <code class="docutils literal notranslate"><span class="pre">falsify_graph()</span></code>, which takes as input a DAG and data and returns an evaluation result.</p>
+<p>Let’s start with importing the necessary libraries and functions for this demo:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostingRegressor</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.falsify</span> <span class="kn">import</span> <span class="n">falsify_graph</span><span class="p">,</span> <span class="n">plot_local_insights</span><span class="p">,</span> <span class="n">validate_graph</span><span class="p">,</span> <span class="n">validate_causal_minimality</span><span class="p">,</span> <span class="n">apply_suggestions</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.independence_test.generalised_cov_measure</span> <span class="kn">import</span> <span class="n">generalised_cov_based</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.util</span> <span class="kn">import</span> <span class="n">plot</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.util.general</span> <span class="kn">import</span> <span class="n">set_random_seed</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.ml</span> <span class="kn">import</span> <span class="n">SklearnRegressionModel</span>
+
+<span class="c1"># Set random seed</span>
+<span class="n">set_random_seed</span><span class="p">(</span><span class="mi">1332</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="Synthetic-Data">
+<h2>Synthetic Data<a class="headerlink" href="#Synthetic-Data" title="Permalink to this heading"></a></h2>
+<p>We will first demonstrate the tool on synthetic data. To this end we generated a random DAG with 5 nodes <code class="docutils literal notranslate"><span class="pre">falsify_g_true.gml</span></code> and some data from a random SCM with nonlinear conditionals (<code class="docutils literal notranslate"><span class="pre">falsify_data_nonlinear.csv</span></code>).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load example graph and data</span>
+<span class="n">g_true</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">read_gml</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;falsify_g_true.gml&quot;</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;falsify_data_nonlinear.csv&quot;</span><span class="p">)</span>
+
+<span class="c1"># Plot true DAG</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;True DAG&quot;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">g_true</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+True DAG
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_falsify_dag_3_1.png" src="../_images/example_notebooks_gcm_falsify_dag_3_1.png" />
+</div>
+</div>
+<p>Let’s first evaluate the true DAG on that data (the following cell will take approximately 20s to run)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">falsify_graph</span><span class="p">(</span><span class="n">g_true</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">plot_histogram</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># Summarize the result</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Test permutations of given graph: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 120/120 [00:24&lt;00:00,  4.87it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_falsify_dag_5_1.png" src="../_images/example_notebooks_gcm_falsify_dag_5_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++-------------------------------------------------------------------------------------------------------+
+|                                             Test Summary                                              |
++-------------------------------------------------------------------------------------------------------+
+| The given DAG is informative because 2 / 120 of the permutations lie in the Markov                    |
+| equivalence class of the given DAG (p-value: 0.02).                                                   |
+| The given DAG violates 0/11 LMCs and is better than 96.7% of the permuted DAGs (p-value: 0.03).       |
+| Based on the provided significance level (0.05) and because the DAG is informative,                   |
+| we do not reject the DAG.                                                                             |
++-------------------------------------------------------------------------------------------------------+
+</pre></div></div>
+</div>
+<p>As expected, we do not reject the true DAG. Let’s understand what <code class="docutils literal notranslate"><span class="pre">falsify_graph()</span></code> does exactly: When we provide a given DAG to <code class="docutils literal notranslate"><span class="pre">falsify_graph()</span></code>, we test violations of local Markov conditions (LMC) by running conditional independence tests (CIs). I.e. for each node in the graph we test if</p>
+<div class="math notranslate nohighlight">
+\[X_i \perp \!\!\! \perp_P X_j \in \text{NonDesc}_{X_i} \ | \ \text{PA}_{X_i}\]</div>
+<p>We then randomly permute the nodes of the given DAG and test violations of LMC again. We can do this for either a fixed amount of permutations or for all <span class="math notranslate nohighlight">\(n!,n:\)</span> Number of nodes in the given DAG. We can then use the probability of a random node permutation (the null) having as few or fewer violations as the given DAG (the test statistic) as a measure to validate the given DAG (the p-value reported in the upper-right corner in the plot above).</p>
+<p>Similarly, we can run an oracle test for each permutation w.r.t. the given DAG, i.e. if the given DAG were the true DAG, how many violations of LMCs do we expect for some permutation. Note, that asking about the number of permutations violating zero LMCs is identical to asking about how many DAGs lie in the same Markov equivalence class (MEC) as the given DAG. In our method we use the number of permuted DAGs lying in the same MEC as the given DAG (with 0 #Violations of tPA) as a measure of how
+informative the given DAG is. Only if few permutations lie in the same MEC, the independences entailed by the given DAG are ‘characteristic’ in the sense that the given DAG is falsifiable by testing implied CIs.</p>
+<p>In the plot above we see histograms of the LMC violations of permuted DAGs (blue) and d-separation (oracle, orange) violations of the permuted DAGs. The dashed orange and blue line indicate the number of violations of LMC (blue) / d-separation (orange) of the given DAG. As expected for the true DAG, both histograms are broadly overlapping (except for statistical errors in the CI tests).</p>
+<p>If we are not interested in the plot and just wish to know whether a given is falsified using our test we can use the <code class="docutils literal notranslate"><span class="pre">falsified</span></code> attribute of the returned <code class="docutils literal notranslate"><span class="pre">EvaluationResult</span></code> object of <code class="docutils literal notranslate"><span class="pre">falsify_graph()</span></code> instead.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">falsify_graph</span><span class="p">(</span><span class="n">g_true</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Graph is falsifiable: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">falsifiable</span><span class="si">}</span><span class="s2">, Graph is falsified: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">falsified</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Graph is falsifiable: True, Graph is falsified: False
+</pre></div></div>
+</div>
+<p>Now, let’s modify the true DAG to simulate a DAG where a domain expert knows some of the edges but removes a true one and introduces a wrong one.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Simulate a domain expert with knowledge over some of the edges in the system</span>
+<span class="n">g_given</span> <span class="o">=</span> <span class="n">g_true</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">g_given</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">(([(</span><span class="s1">&#39;X4&#39;</span><span class="p">,</span> <span class="s1">&#39;X1&#39;</span><span class="p">)]))</span>  <span class="c1"># Add wrong edge from X4 -&gt; X1</span>
+<span class="n">g_given</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="s1">&#39;X2&#39;</span><span class="p">,</span> <span class="s1">&#39;X0&#39;</span><span class="p">)</span>  <span class="c1"># Remove true edge from X2 -&gt; X0</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">g_given</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_falsify_dag_9_0.png" src="../_images/example_notebooks_gcm_falsify_dag_9_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run evaluation and plot the result using `plot=True`</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">falsify_graph</span><span class="p">(</span><span class="n">g_given</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">plot_histogram</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># Summarize the result</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Test permutations of given graph: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 120/120 [00:28&lt;00:00,  4.20it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_falsify_dag_10_1.png" src="../_images/example_notebooks_gcm_falsify_dag_10_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++-------------------------------------------------------------------------------------------------------+
+|                                             Test Summary                                              |
++-------------------------------------------------------------------------------------------------------+
+| The given DAG is informative because 1 / 120 of the permutations lie in the Markov                    |
+| equivalence class of the given DAG (p-value: 0.01).                                                   |
+| The given DAG violates 2/11 LMCs and is better than 91.7% of the permuted DAGs (p-value: 0.08).       |
+| Based on the provided significance level (0.05) and because the DAG is informative,                   |
+| we reject the DAG.                                                                                    |
++-------------------------------------------------------------------------------------------------------+
+</pre></div></div>
+</div>
+<p>Here, we observe two things. First, the given DAG violates 2 more LMCs than the true DAG. Second, there are many permuted DAGs that violate as many or less LMCs as the given DAG. This is reflected in the p-value LMC, which is much higher than before. Based on the default significance level of 0.05 we would therefore reject the given DAG.</p>
+<p>We can gain additional insight by highlighting the nodes for which the violations of LMCs occurred in the given DAG.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot nodes for which violations of LMCs occured</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Violations of LMCs&#39;</span><span class="p">)</span>
+<span class="n">plot_local_insights</span><span class="p">(</span><span class="n">g_given</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;validate_lmc&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Violations of LMCs
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_falsify_dag_12_1.png" src="../_images/example_notebooks_gcm_falsify_dag_12_1.png" />
+</div>
+</div>
+</section>
+<section id="Real-Data-(Protein-Network-dataset-by-Sachs-et-al.,-2005)">
+<h2>Real Data (Protein Network dataset by Sachs et al., 2005)<a class="headerlink" href="#Real-Data-(Protein-Network-dataset-by-Sachs-et-al.,-2005)" title="Permalink to this heading"></a></h2>
+<div class="line-block">
+<div class="line">Let’s try our evaluation method on some real data, the protein network data from Sachs et al., 2005 [1]. This dataset contains quantitative measurements of the expression levels of <span class="math notranslate nohighlight">\(n=11\)</span> phosphorylated proteins and phospholipids in the human primary T cell signaling network. The <span class="math notranslate nohighlight">\(N=7,466\)</span> measurements, corresponding to individual cells, were acquired via intracellular multicolor flow cytometry. The consensus network contains 19 directed edges with no cycles.</div>
+<div class="line">[1] <a class="reference external" href="https://www.science.org/doi/abs/10.1126/science.1105809">https://www.science.org/doi/abs/10.1126/science.1105809</a></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load the data and consensus DAG</span>
+<span class="n">data_url</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/FenTechSolutions/CausalDiscoveryToolbox/master/cdt/data/resources/cyto_full_data.csv&quot;</span>
+<span class="n">data_sachs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">data_url</span><span class="p">)</span>
+<span class="n">g_sachs</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">read_gml</span><span class="p">(</span><span class="s1">&#39;falsify_sachs.gml&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot</span><span class="p">(</span><span class="n">g_sachs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_falsify_dag_15_0.png" src="../_images/example_notebooks_gcm_falsify_dag_15_0.png" />
+</div>
+</div>
+<p>Because of the large number of samples, evaluation using the kernel test above takes too long for this demo. Therefore, we’ll use a test based on the generalized covariance measure (GCM) instead. We’ll use sklearns gradient boosted decision trees as regressors.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define independence test based on the generalised covariance measure with gradient boosted decision trees as models</span>
+<span class="k">def</span> <span class="nf">create_gradient_boost_regressor</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SklearnRegressionModel</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">SklearnRegressionModel</span><span class="p">(</span><span class="n">GradientBoostingRegressor</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">gcm</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">generalised_cov_based</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">,</span> <span class="n">prediction_model_X</span><span class="o">=</span><span class="n">create_gradient_boost_regressor</span><span class="p">,</span>
+                                 <span class="n">prediction_model_Y</span><span class="o">=</span><span class="n">create_gradient_boost_regressor</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>It is infeasible (and unnecessary) to run our baseline on all 11! node-permutations of the graph. We therefore set <code class="docutils literal notranslate"><span class="pre">n_permutations=100</span></code> to evaluate using 100 random permutations. To use the GCM test defined above we’ll use the parameters <code class="docutils literal notranslate"><span class="pre">independence_test=gcm</span></code> (unconditional independence testing) and <code class="docutils literal notranslate"><span class="pre">conditional_independence_test=gcm</span></code> (conditional independence testing).</p>
+<p>The following cell will take about 3min to run.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run evaluation for consensus graph and data.</span>
+<span class="n">result_sachs</span> <span class="o">=</span> <span class="n">falsify_graph</span><span class="p">(</span><span class="n">g_sachs</span><span class="p">,</span> <span class="n">data_sachs</span><span class="p">,</span> <span class="n">n_permutations</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                              <span class="n">independence_test</span><span class="o">=</span><span class="n">gcm</span><span class="p">,</span>
+                              <span class="n">conditional_independence_test</span><span class="o">=</span><span class="n">gcm</span><span class="p">,</span>
+                              <span class="n">plot_histogram</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result_sachs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Test permutations of given graph: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [03:25&lt;00:00,  2.05s/it]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_falsify_dag_19_1.png" src="../_images/example_notebooks_gcm_falsify_dag_19_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++-------------------------------------------------------------------------------------------------------+
+|                                             Test Summary                                              |
++-------------------------------------------------------------------------------------------------------+
+| The given DAG is informative because 0 / 100 of the permutations lie in the Markov                    |
+| equivalence class of the given DAG (p-value: 0.00).                                                   |
+| The given DAG violates 21/49 LMCs and is better than 98.0% of the permuted DAGs (p-value: 0.02).      |
+| Based on the provided significance level (0.05) and because the DAG is informative,                   |
+| we do not reject the DAG.                                                                             |
++-------------------------------------------------------------------------------------------------------+
+</pre></div></div>
+</div>
+<p>We observe that the consensus DAG is both informative (0/100 permutations lie in the same MEC) and significantly better than random in terms of CI it entails. Note, that the number of LMC violations of the given DAG are much more than the expected type I error rate of the CI tests for the default significance level <code class="docutils literal notranslate"><span class="pre">significance_ci=0.05</span></code> used here. The naive approach of rejecting a DAG with more than 5% violations of LMC would thus falsly reject this DAG.</p>
+</section>
+<section id="Edge-Suggestions">
+<h2>Edge Suggestions<a class="headerlink" href="#Edge-Suggestions" title="Permalink to this heading"></a></h2>
+<p>Beyond falsification of a given DAG shown above we can also run additional tests using <code class="docutils literal notranslate"><span class="pre">suggestions=True</span></code> and report those back to the user. To demonstrate this we will use the synthetic DAG and data from before.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">falsify_graph</span><span class="p">(</span><span class="n">g_given</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span>  <span class="n">plot_histogram</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suggestions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Test permutations of given graph: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 120/120 [00:26&lt;00:00,  4.51it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_falsify_dag_22_1.png" src="../_images/example_notebooks_gcm_falsify_dag_22_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++-------------------------------------------------------------------------------------------------------+
+|                                             Test Summary                                              |
++-------------------------------------------------------------------------------------------------------+
+| The given DAG is informative because 1 / 120 of the permutations lie in the Markov                    |
+| equivalence class of the given DAG (p-value: 0.01).                                                   |
+| The given DAG violates 2/11 LMCs and is better than 91.7% of the permuted DAGs (p-value: 0.08).       |
+| Based on the provided significance level (0.05) and because the DAG is informative,                   |
+| we reject the DAG.                                                                                    |
++-------------------------------------------------------------------------------------------------------+
+|                                              Suggestions                                              |
++-------------------------------------------------------------------------------------------------------+
+| Causal Minimality | - Remove edge X4 --&gt; X1                                                           |
++-------------------------------------------------------------------------------------------------------+
+</pre></div></div>
+</div>
+<p>Compared to the output above we now see the additional row <code class="docutils literal notranslate"><span class="pre">Suggestions</span></code> in the print representation of the evaluation summary. We used a test of causal minimality to report suggestions to the user and would correctly suggest the removal of the edge <span class="math notranslate nohighlight">\(X4 \to X1\)</span>, which was wrongly added by the domain expert. We can also plot those suggestions using <code class="docutils literal notranslate"><span class="pre">plot_local_insights</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot suggestions</span>
+<span class="n">plot_local_insights</span><span class="p">(</span><span class="n">g_given</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;validate_causal_minimality&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_falsify_dag_24_0.png" src="../_images/example_notebooks_gcm_falsify_dag_24_0.png" />
+</div>
+</div>
+<p>We can apply those suggestions using <code class="docutils literal notranslate"><span class="pre">apply_suggestions</span></code>. If there is an edge we do not want to remove we can use the additional parameter <code class="docutils literal notranslate"><span class="pre">edges_to_keep</span></code> to specify which edges we would not want to be removed.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Apply all suggestions (we could exclude suggestions via `edges_to_keep=[(&#39;X3&#39;, &#39;X4&#39;)])`)</span>
+<span class="n">g_given_pruned</span> <span class="o">=</span> <span class="n">apply_suggestions</span><span class="p">(</span><span class="n">g_given</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+<span class="c1"># Plot pruned DAG</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">g_given_pruned</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_falsify_dag_26_0.png" src="../_images/example_notebooks_gcm_falsify_dag_26_0.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="gcm_counterfactual_medical_dry_eyes.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Counterfactual Analysis in a Medical Case</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="dowhy_ihdp_data_example.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">DoWhy example on ihdp (Infant Health and Development Program) dataset</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, PyWhy contributors.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>
