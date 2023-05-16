@@ -83,6 +83,11 @@ Real world-inspired examples
         | **Level:** Advanced
         | **Task:** Counterfactuals via GCM
 
+    .. card:: :doc:`gcm_falsify_dag`
+
+        +++
+        | **Level:** Advanced
+        | **Task:** Falsifying User-Given DAGs
 
 Examples on benchmarks datasets
 -------------------------------
@@ -196,6 +201,7 @@ Miscellaneous
    gcm_401k_analysis
    gcm_supply_chain_dist_change
    gcm_counterfactual_medical_dry_eyes
+   gcm_falsify_dag
 
 .. toctree::
    :maxdepth: 1
