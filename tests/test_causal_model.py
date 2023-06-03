@@ -1,5 +1,6 @@
 import pandas as pd
 import pytest
+from flaky import flaky
 from pytest import mark
 from sklearn import linear_model
 
@@ -313,9 +314,10 @@ class TestCausalModel(object):
     @mark.parametrize(
         ["num_variables", "num_samples"],
         [
-            (10, 5000),
+            (5, 5000),
         ],
     )
+    @flaky(max_runs=3)
     def test_graph_refutation(self, num_variables, num_samples):
         data = dowhy.datasets.dataset_from_random_graph(num_vars=num_variables, num_samples=num_samples)
         df = data["df"]

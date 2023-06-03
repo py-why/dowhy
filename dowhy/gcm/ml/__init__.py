@@ -27,6 +27,6 @@ from .regression import (
 )
 
 try:
-    from dowhy.gcm.ml.autolguon import AutoGluonClassifier, AutoGluonRegressor
+    from dowhy.gcm.ml.autogluon import AutoGluonClassifier, AutoGluonRegressor
 except ImportError:
     pass

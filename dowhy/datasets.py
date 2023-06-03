@@ -79,7 +79,7 @@ def linear_dataset(
     num_samples,
     num_instruments=0,
     num_effect_modifiers=0,
-    num_treatments=1,
+    num_treatments=None,
     num_frontdoor_variables=0,
     treatment_is_binary=True,
     treatment_is_category=False,
@@ -107,8 +107,8 @@ def linear_dataset(
     :type num_instruments: int
     :param num_effect_modifiers: Number of effect modifiers, variables affecting only the outcome [x -> y], defaults to 0
     :type num_effect_modifiers: int
-    :param num_treatments: Number of treatment variables [v], defaults to 1
-    :type num_treatments : int
+    :param num_treatments: Number of treatment variables [v]. By default inferred from the beta argument. When provided, beta is recycled to match num_treatments.
+    :type num_treatments : Union[None, int]
     :param num_frontdoor_variables : Number of frontdoor mediating variables [v -> FD -> y], defaults to  0
     :type num_frontdoor_variables: int
     :param treatment_is_binary: Cannot be True if treatment_is_category is True, defaults to True
@@ -246,16 +246,16 @@ def linear_dataset(
     assert not (treatment_is_binary and treatment_is_category)
     W, X, Z, FD, c1, c2, ce, cz, cfd1, cfd2 = [None] * 10
     W_with_dummy, X_with_categorical = (None, None)
-    beta = float(beta)
-    # Making beta an array
-    if type(beta) not in [list, np.ndarray]:
-        beta = np.repeat(beta, num_treatments)
+    beta = np.array(beta, dtype=np.float64, ndmin=1)
+    if num_treatments is None:
+        num_treatments = beta.size
+    else:
+        beta = np.resize(beta, num_treatments)
     num_cont_common_causes = num_common_causes - num_discrete_common_causes
-    num_cont_instruments = num_instruments - num_discrete_instruments
     num_cont_effect_modifiers = num_effect_modifiers - num_discrete_effect_modifiers
     if num_common_causes > 0:
-        range_c1 = 0.5 + max(abs(beta)) * 0.5
-        range_c2 = 0.5 + max(abs(beta)) * 0.5
+        range_c1 = 0.5 + np.max(np.absolute(beta)) * 0.5
+        range_c2 = 0.5 + np.max(np.absolute(beta)) * 0.5
         means = np.random.uniform(-1, 1, num_common_causes)
         cov_mat = np.diag(np.ones(num_common_causes))
         W = np.random.multivariate_normal(means, cov_mat, num_samples)
@@ -266,7 +266,7 @@ def linear_dataset(
         c2 = np.random.uniform(0, range_c2, W_with_dummy.shape[1])
 
     if num_instruments > 0:
-        range_cz = 1 + max(abs(beta))
+        range_cz = 1 + np.max(np.absolute(beta))
         p = np.random.uniform(0, 1, num_instruments)
         Z = np.zeros((num_samples, num_instruments))
         for i in range(num_instruments):
@@ -279,7 +279,7 @@ def linear_dataset(
             range_cz - (range_cz * 0.05), range_cz + (range_cz * 0.05), (num_instruments, num_treatments)
         )
     if num_effect_modifiers > 0:
-        range_ce = 0.5 + max(abs(beta)) * 0.5
+        range_ce = 0.5 + np.max(np.absolute(beta)) * 0.5
         means = np.random.uniform(-1, 1, num_effect_modifiers)
         cov_mat = np.diag(np.ones(num_effect_modifiers))
         X = np.random.multivariate_normal(means, cov_mat, num_samples)
@@ -306,8 +306,8 @@ def linear_dataset(
 
     # Generating frontdoor variables if asked for
     if num_frontdoor_variables > 0:
-        range_cfd1 = max(abs(beta)) * 0.5
-        range_cfd2 = max(abs(beta)) * 0.5
+        range_cfd1 = np.max(np.absolute(beta)) * 0.5
+        range_cfd2 = np.max(np.absolute(beta)) * 0.5
         cfd1 = np.random.uniform(0, range_cfd1, (num_treatments, num_frontdoor_variables))
         cfd2 = np.random.uniform(0, range_cfd2, num_frontdoor_variables)
         FD_noise = np.random.normal(0, 1, (num_samples, num_frontdoor_variables))
@@ -410,19 +410,21 @@ def linear_dataset(
     return ret_dict
 
 
-def simple_iv_dataset(beta, num_samples, num_treatments=1, treatment_is_binary=True, outcome_is_binary=False):
+def simple_iv_dataset(beta, num_samples, num_treatments=None, treatment_is_binary=True, outcome_is_binary=False):
     """Simple instrumental variable dataset with a single IV and a single confounder."""
     W, Z, c1, c2, cz = [None] * 5
     num_instruments = 1
     num_common_causes = 1
-    beta = float(beta)
-    # Making beta an array
-    if type(beta) not in [list, np.ndarray]:
-        beta = np.repeat(beta, num_treatments)
+
+    beta = np.array(beta, dtype=np.float64, ndmin=1)
+    if num_treatments is None:
+        num_treatments = beta.size
+    else:
+        beta = np.resize(beta, num_treatments)
 
     c1 = np.random.uniform(0, 1, (num_common_causes, num_treatments))
     c2 = np.random.uniform(0, 1, num_common_causes)
-    range_cz = 1 + max(abs(beta))  # cz is much higher than c1 and c2
+    range_cz = 1 + np.max(np.absolute(beta))  # cz is much higher than c1 and c2
     cz = np.random.uniform(
         range_cz - (range_cz * 0.05), range_cz + (range_cz * 0.05), (num_instruments, num_treatments)
     )
@@ -743,7 +745,7 @@ def partially_linear_dataset(
     num_unobserved_common_causes=0,
     strength_unobserved_confounding=1,
     num_samples=500,
-    num_treatments=1,
+    num_treatments=None,
     treatment_is_binary=True,
     treatment_is_category=False,
     outcome_is_binary=False,
@@ -757,15 +759,15 @@ def partially_linear_dataset(
 ):
     assert not (treatment_is_binary and treatment_is_category)
     num_outcomes = 1
-    beta = float(beta)
-    # Making beta an array
-    if type(beta) not in [list, np.ndarray]:
-        beta = np.repeat(beta, num_treatments)
-
+    beta = np.array(beta, dtype=np.float64, ndmin=1)
+    if num_treatments is None:
+        num_treatments = beta.size
+    else:
+        beta = np.resize(beta, num_treatments)
     num_cont_common_causes = num_common_causes - num_discrete_common_causes
 
     if num_common_causes > 0:
-        range_c1 = 0.5 + max(abs(beta)) * 0.5
+        range_c1 = 0.5 + np.max(np.absolute(beta)) * 0.5
         means = np.random.uniform(-1, 1, num_common_causes)
         cov_mat = np.diag(np.ones(num_common_causes))
         W = np.random.multivariate_normal(means, cov_mat, num_samples)
