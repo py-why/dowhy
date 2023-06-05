@@ -749,15 +749,22 @@ been more likely to receive the new drug, and so on. The goal of causal inferenc
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <img alt="../_images/example_notebooks_tutorial-causalinference-machinelearning-using-dowhy-econml_8_0.png" src="../_images/example_notebooks_tutorial-causalinference-machinelearning-using-dowhy-econml_8_0.png" />
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_tutorial-causalinference-machinelearning-using-dowhy-econml_8_1.png" src="../_images/example_notebooks_tutorial-causalinference-machinelearning-using-dowhy-econml_8_1.png" />
+</div>
+</div>
 <p>In general, you can specify a causal graph that describes the mechanisms of the data-generating process for a given dataset. Each arrow in the graph denotes a causal mechanism: “A-&gt;B” implies that the variable A causes variable B.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
@@ -769,6 +776,13 @@ been more likely to receive the new drug, and so on. The goal of causal inferenc
     <span class="n">graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;gml_graph&quot;</span><span class="p">])</span>
 <span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">(</span><span class="n">layout</span><span class="o">=</span><span class="s2">&quot;dot&quot;</span><span class="p">)</span>
 </pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_tutorial-causalinference-machinelearning-using-dowhy-econml_10_0.png" src="../_images/example_notebooks_tutorial-causalinference-machinelearning-using-dowhy-econml_10_0.png" />
 </div>
 </div>
 <p><strong>II. Identification</strong></p>
@@ -808,9 +822,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W2,W1,W4,W3])
+─────(E[y|W2,W4,W0,W3,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,W4,W3,U) = P(y|v0,W0,W2,W1,W4,W3)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W4,W0,W3,W1,U) = P(y|v0,W2,W4,W0,W3,W1)
 
 ### Estimand : 2
 Estimand name: iv
@@ -857,16 +871,16 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W2,W1,W4,W3])
+─────(E[y|W2,W4,W0,W3,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,W4,W3,U) = P(y|v0,W0,W2,W1,W4,W3)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W4,W0,W3,W1,U) = P(y|v0,W2,W4,W0,W3,W1)
 
 ## Realized estimand
-b: y~v0+W0+W2+W1+W4+W3
+b: y~v0+W2+W4+W0+W3+W1
 Target units: ate
 
 ## Estimate
-Mean value: 9.959770573554536
+Mean value: 10.031723299156187
 
 </pre></div></div>
 </div>
@@ -904,17 +918,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W2,W1,W4,W3])
+─────(E[y|W2,W4,W0,W3,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,W4,W3,U) = P(y|v0,W0,W2,W1,W4,W3)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W4,W0,W3,W1,U) = P(y|v0,W2,W4,W0,W3,W1)
 
 ## Realized estimand
-b: y~v0+W0+W2+W1+W4+W3 |
+b: y~v0+W2+W4+W0+W3+W1 |
 Target units: ate
 
 ## Estimate
-Mean value: 9.976676841960405
-Effect estimates: [[9.97667684]]
+Mean value: 10.00751910035114
+Effect estimates: [[10.0075191]]
 
 </pre></div></div>
 </div>
@@ -938,9 +952,9 @@ estimate value of 0 when the action variable is replaced by a random variable, i
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:9.959770573554536
-New effect:7.289875289674897e-05
-p value:0.98
+Estimated effect:10.031723299156187
+New effect:0.022796780741413204
+p value:0.8
 
 </pre></div></div>
 </div>
@@ -992,11 +1006,11 @@ than learning a new toolkit. The power of EconML is that you can now implement t
 <div class="output_area docutils container">
 <div class="highlight"><pre>
    Treatment    Outcome        w0         s        w1
-0  22.046164  45.122085  4.123513  9.850178 -0.539073
-1  10.711246  20.586784  2.025735  4.405086  1.015751
-2   6.861468  12.903254  0.399037  9.097388  0.697861
-3  11.484284  24.437152 -2.642063  8.165305 -1.510749
-4  20.249880  40.349028  3.739917  3.509984  0.255782
+0  18.659790  28.281671  3.535067  3.681860  0.379127
+1  19.028736  21.577054 -3.629657  7.608558  0.046213
+2   6.851089  12.393939 -0.736827  8.806426  0.114123
+3  17.801417  20.868098 -3.376985  7.789313  0.997777
+4   6.298228  11.897714 -0.424977  8.890773  0.419645
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1008,7 +1022,7 @@ than learning a new toolkit. The power of EconML is that you can now implement t
 </div>
 <section id="Model-assumptions-about-the-data-generating-process-using-a-causal-graph">
 <h4>Model assumptions about the data-generating process using a causal graph<a class="headerlink" href="#Model-assumptions-about-the-data-generating-process-using-a-causal-graph" title="Permalink to this heading"></a></h4>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
@@ -1020,6 +1034,13 @@ than learning a new toolkit. The power of EconML is that you can now implement t
         <span class="n">instruments</span><span class="o">=</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;instrument_names&quot;</span><span class="p">])</span>
 <span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">(</span><span class="n">layout</span><span class="o">=</span><span class="s2">&quot;dot&quot;</span><span class="p">)</span>
 </pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_tutorial-causalinference-machinelearning-using-dowhy-econml_24_0.png" src="../_images/example_notebooks_tutorial-causalinference-machinelearning-using-dowhy-econml_24_0.png" />
 </div>
 </div>
 </section>
@@ -1100,9 +1121,9 @@ b: Outcome~Treatment+w0+w1
 Target units: ate
 
 ## Estimate
-Mean value: 1.9988742337189571
+Mean value: 0.9992129801592071
 
-Causal Estimate is 1.9988742337189571
+Causal Estimate is 0.9992129801592071
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1158,8 +1179,8 @@ b: Outcome~Treatment+w0+w1 |
 Target units: ate
 
 ## Estimate
-Mean value: 1.04996794102515
-Effect estimates: [[1.04996794]]
+Mean value: 0.2026112127941383
+Effect estimates: [[0.20261121]]
 
 </pre></div></div>
 </div>
@@ -1182,9 +1203,9 @@ Effect estimates: [[1.04996794]]
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a random common cause
-Estimated effect:1.04996794102515
-New effect:1.0411221918306375
-p value:0.86
+Estimated effect:0.2026112127941383
+New effect:0.19322319214924183
+p value:0.5
 
 </pre></div></div>
 </div>
@@ -1205,9 +1226,9 @@ p value:0.86
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:1.04996794102515
-New effect:1.1861421604549249e-06
-p value:0.4991641654810365
+Estimated effect:0.2026112127941383
+New effect:-3.250180401658169e-05
+p value:0.45466797753053123
 
 </pre></div></div>
 </div>
