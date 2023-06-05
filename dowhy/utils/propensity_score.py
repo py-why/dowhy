@@ -1,6 +1,7 @@
 import logging
 
 import numpy as np
+import pandas as pd
 from pandas import get_dummies
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
@@ -125,7 +126,7 @@ def binarize_discrete(data, covariates, variable_types):
                 covariates += list(dummies.columns)
                 for var_name in dummies.columns:
                     variable_types[var_name] = "b"
-                data[dummies.columns] = dummies
+                data = pd.concat((data, dummies), axis=1)
                 to_remove.append(variable)
     for variable in to_remove:
         covariates.remove(variable)
