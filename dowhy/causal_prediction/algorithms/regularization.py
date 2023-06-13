@@ -6,7 +6,7 @@ from torch.nn import functional as F
 from dowhy.causal_prediction.algorithms.utils import mmd_compute
 
 
-class Regularization:
+class Regularizer:
     """
     Implements methods for applying unconditional and conditional regularization.
     """

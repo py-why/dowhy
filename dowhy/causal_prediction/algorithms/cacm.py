@@ -3,7 +3,7 @@ from torch import nn
 from torch.nn import functional as F
 
 from dowhy.causal_prediction.algorithms.base_algorithm import PredictionAlgorithm
-from dowhy.causal_prediction.algorithms.regularization import Regularization
+from dowhy.causal_prediction.algorithms.regularization import Regularizer
 
 
 class CACM(PredictionAlgorithm):
@@ -61,7 +61,7 @@ class CACM(PredictionAlgorithm):
 
         super().__init__(model, optimizer, lr, weight_decay, betas, momentum)
 
-        self.CACMRegularization = Regularization(E_conditioned, ci_test, kernel_type, gamma)
+        self.CACMRegularizer = Regularizer(E_conditioned, ci_test, kernel_type, gamma)
 
         self.attr_types = attr_types
         self.E_eq_A = E_eq_A
@@ -108,25 +108,25 @@ class CACM(PredictionAlgorithm):
 
                 # Acause regularization
                 if attr_type == "causal":
-                    penalty_causal += self.CACMRegularization.conditional_reg(
+                    penalty_causal += self.CACMRegularizer.conditional_reg(
                         classifs, [a[:, attr_type_idx] for a in attribute_labels], [targets], nmb, E_eq_A_attr
                     )
 
                 # Aconf regularization
                 elif attr_type == "conf":
-                    penalty_conf += self.CACMRegularization.unconditional_reg(
+                    penalty_conf += self.CACMRegularizer.unconditional_reg(
                         classifs, [a[:, attr_type_idx] for a in attribute_labels], nmb, E_eq_A_attr
                     )
 
                 # Aind regularization
                 elif attr_type == "ind":
-                    penalty_ind += self.CACMRegularization.unconditional_reg(
+                    penalty_ind += self.CACMRegularizer.unconditional_reg(
                         classifs, [a[:, attr_type_idx] for a in attribute_labels], nmb, E_eq_A_attr
                     )
 
                 # Asel regularization
                 elif attr_type == "sel":
-                    penalty_sel += self.CACMRegularization.conditional_reg(
+                    penalty_sel += self.CACMRegularizer.conditional_reg(
                         classifs, [a[:, attr_type_idx] for a in attribute_labels], [targets], nmb, E_eq_A_attr
                     )
 
