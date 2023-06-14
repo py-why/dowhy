@@ -1,4 +1,5 @@
 import random
+import signal
 
 import numpy as np
 import pytest
@@ -19,7 +20,7 @@ def preserve_random_generator_state():
     random.setstate(random_state)
 
 
-def test_given_few_features_when_estimate_shapley_values_with_auto_approx_then_returns_correct_result():
+def test_given_few_features_when_estimate_shapley_values_with_auto_approx_then_returns_correct_linear_shapley_values():
     X, coefficients = _generate_data(4)
 
     def model(x):
@@ -34,7 +35,7 @@ def test_given_few_features_when_estimate_shapley_values_with_auto_approx_then_r
     assert coefficients * (X[0, :] - np.mean(X, axis=0)) == approx(shapley_values, abs=0.001)
 
 
-def test_given_many_features_when_estimate_shapley_values_with_auto_approx_then_returns_correct_result():
+def test_given_many_features_when_estimate_shapley_values_with_auto_approx_then_returns_correct_linear_shapley_values():
     X, coefficients = _generate_data(15)
 
     def model(x):
@@ -49,7 +50,7 @@ def test_given_many_features_when_estimate_shapley_values_with_auto_approx_then_
     assert coefficients * (X[0, :] - np.mean(X, axis=0)) == approx(shapley_values, abs=0.001)
 
 
-def test_estimate_shapley_values_symmetry_exact():
+def test_given_many_features_when_estimate_shapley_values_exact_then_returns_correct_linear_shapley_values():
     X, coefficients = _generate_data(15)
 
     def model(x):
@@ -64,7 +65,7 @@ def test_estimate_shapley_values_symmetry_exact():
     assert coefficients * (X[0, :] - np.mean(X, axis=0)) == approx(shapley_values, abs=0.001)
 
 
-def test_estimate_shapley_values_symmetry_exact_fast():
+def test_given_many_features_when_estimate_shapley_values_exact_fast_then_returns_correct_linear_shapley_values():
     X, coefficients = _generate_data(15)
 
     def model(x):
@@ -79,7 +80,7 @@ def test_estimate_shapley_values_symmetry_exact_fast():
     assert coefficients * (X[0, :] - np.mean(X, axis=0)) == approx(shapley_values, abs=0.001)
 
 
-def test_estimate_shapley_values_symmetry_approximation_via_subset():
+def test_given_many_features_when_estimate_shapley_values_with_subset_sampling_then_returns_correct_linear_shapley_values():
     X, coefficients = _generate_data(15)
 
     def model(x):
@@ -94,7 +95,7 @@ def test_estimate_shapley_values_symmetry_approximation_via_subset():
     assert coefficients * (X[0, :] - np.mean(X, axis=0)) == approx(shapley_values, abs=0.001)
 
 
-def test_evaluate_set_function_via_shapley_symmetry_approximation_via_permutation():
+def test_given_many_features_when_estimate_shapley_values_permutation_based_then_returns_correct_linear_shapley_values():
     X, coefficients = _generate_data(15)
 
     def model(x):
@@ -109,7 +110,7 @@ def test_evaluate_set_function_via_shapley_symmetry_approximation_via_permutatio
     assert coefficients * (X[0, :] - np.mean(X, axis=0)) == approx(shapley_values, abs=0.001)
 
 
-def test_estimate_shapley_values_symmetry_approximation_via_early_stopping():
+def test_given_many_features_when_estimate_shapley_values_with_early_stopping_then_returns_correct_linear_shapley_values():
     X, coefficients = _generate_data(15)
 
     def model(x):
@@ -124,7 +125,9 @@ def test_estimate_shapley_values_symmetry_approximation_via_early_stopping():
     assert coefficients * (X[0, :] - np.mean(X, axis=0)) == approx(shapley_values, abs=0.001)
 
 
-def test_estimate_shapley_values_symmetry_approximation_via_subset_with_random_seed(preserve_random_generator_state):
+def test_given_specific_random_seed_when_estimate_shapley_values_with_subset_sampling_then_returns_deterministic_result(
+    preserve_random_generator_state,
+):
     X, coefficients = _generate_data(15)
 
     def model(x):
@@ -155,7 +158,7 @@ def test_estimate_shapley_values_symmetry_approximation_via_subset_with_random_s
 
 
 @flaky(max_runs=2)
-def test_estimate_shapley_values_symmetry_approximation_via_permutation_with_random_seed(
+def test_given_specific_random_seed_when_estimate_shapley_values_permutation_based_then_returns_deterministic_result(
     preserve_random_generator_state,
 ):
     X, coefficients = _generate_data(15)
@@ -187,7 +190,7 @@ def test_estimate_shapley_values_symmetry_approximation_via_permutation_with_ran
     assert shapley_values_1 == approx(shapley_values_2, abs=0)
 
 
-def test_estimate_shapley_values_symmetry_approximation_via_early_stopping_with_random_seed(
+def test_given_specific_random_seed_when_estimate_shapley_values_with_early_stopping_then_returns_deterministic_result(
     preserve_random_generator_state,
 ):
     X, coefficients = _generate_data(15)
@@ -219,12 +222,35 @@ def test_estimate_shapley_values_symmetry_approximation_via_early_stopping_with_
     assert shapley_values_1 == approx(shapley_values_2, abs=0)
 
 
+@flaky(max_runs=2)
+def test_given_many_features_when_estimate_shapley_values_with_early_stopping_then_returns_before_reaching_max_number_permutations():
+    X, coefficients = _generate_data(3)
+
+    def model(x):
+        return np.max(x, axis=1)
+
+    def handler(a, b):
+        raise TimeoutError()
+
+    signal.signal(signal.SIGALRM, handler)
+    signal.alarm(10)
+
+    estimate_shapley_values(
+        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model, False),
+        X.shape[1],
+        ShapleyConfig(approximation_method=ShapleyApproximationMethods.EARLY_STOPPING, num_permutations=np.inf),
+    )
+
+
 def _generate_data(num_vars):
     return np.random.normal(0, 1, (1000, num_vars)), np.random.choice(20, num_vars) - 10
 
 
-def _set_function_for_aggregated_feature_attribution(subset, X, model):
+def _set_function_for_aggregated_feature_attribution(subset, X, model, evaluate_only_one_sample=True):
     tmp = permute_features(X, np.arange(0, X.shape[1])[subset == 0], False)
     tmp[:, subset == 1] = X[0, subset == 1]
 
-    return means_difference(model(tmp), X[0])
+    if evaluate_only_one_sample:
+        return means_difference(model(tmp), X[0])
+    else:
+        return np.array([means_difference(model(tmp), x) for x in X])

@@ -49,13 +49,19 @@ def test_given_random_seed_when_perform_conditional_kernel_based_test_then_retur
     y = np.exp(z + np.random.rand(1000, 1))
 
     assert kernel_based(
-        x, z, y, bootstrap_num_samples_per_run=5, bootstrap_num_runs=2, p_value_adjust_func=np.mean
-    ) != kernel_based(x, z, y, bootstrap_num_samples_per_run=5, bootstrap_num_runs=2, p_value_adjust_func=np.mean)
+        x, z, y, max_num_samples_run=5, bootstrap_num_runs=2, p_value_adjust_func=np.mean, use_bootstrap=True
+    ) != kernel_based(
+        x, z, y, max_num_samples_run=5, bootstrap_num_runs=2, p_value_adjust_func=np.mean, use_bootstrap=True
+    )
 
     np.random.seed(0)
-    result_1 = kernel_based(x, z, y, bootstrap_num_samples_per_run=5, bootstrap_num_runs=2, p_value_adjust_func=np.mean)
+    result_1 = kernel_based(
+        x, z, y, max_num_samples_run=5, bootstrap_num_runs=2, p_value_adjust_func=np.mean, use_bootstrap=True
+    )
     np.random.seed(0)
-    result_2 = kernel_based(x, z, y, bootstrap_num_samples_per_run=5, bootstrap_num_runs=2, p_value_adjust_func=np.mean)
+    result_2 = kernel_based(
+        x, z, y, max_num_samples_run=5, bootstrap_num_runs=2, p_value_adjust_func=np.mean, use_bootstrap=True
+    )
 
     assert result_1 == result_2
 
@@ -108,13 +114,19 @@ def test_given_random_seed_when_perform_pairwise_kernel_based_test_then_return_d
     y = x + np.random.randn(1000, 1)
 
     assert kernel_based(
-        x, y, bootstrap_num_samples_per_run=10, bootstrap_num_runs=2, p_value_adjust_func=np.mean
-    ) != kernel_based(x, y, bootstrap_num_samples_per_run=10, bootstrap_num_runs=2, p_value_adjust_func=np.mean)
+        x, y, max_num_samples_run=10, bootstrap_num_runs=2, p_value_adjust_func=np.mean, use_bootstrap=True
+    ) != kernel_based(
+        x, y, max_num_samples_run=10, bootstrap_num_runs=2, p_value_adjust_func=np.mean, use_bootstrap=True
+    )
 
     np.random.seed(0)
-    result_1 = kernel_based(x, y, bootstrap_num_samples_per_run=10, bootstrap_num_runs=2, p_value_adjust_func=np.mean)
+    result_1 = kernel_based(
+        x, y, max_num_samples_run=10, bootstrap_num_runs=2, p_value_adjust_func=np.mean, use_bootstrap=True
+    )
     np.random.seed(0)
-    result_2 = kernel_based(x, y, bootstrap_num_samples_per_run=10, bootstrap_num_runs=2, p_value_adjust_func=np.mean)
+    result_2 = kernel_based(
+        x, y, max_num_samples_run=10, bootstrap_num_runs=2, p_value_adjust_func=np.mean, use_bootstrap=True
+    )
 
     assert result_1 == result_2
 
@@ -177,6 +189,7 @@ def test_given_random_seed_when_perform_conditional_approx_kernel_based_test_the
         bootstrap_num_samples=5,
         bootstrap_num_runs=10,
         p_value_adjust_func=np.mean,
+        use_bootstrap=True,
     ) != approx_kernel_based(
         x,
         z,
@@ -187,6 +200,7 @@ def test_given_random_seed_when_perform_conditional_approx_kernel_based_test_the
         bootstrap_num_samples=5,
         bootstrap_num_runs=10,
         p_value_adjust_func=np.mean,
+        use_bootstrap=True,
     )
 
     np.random.seed(0)
@@ -200,6 +214,7 @@ def test_given_random_seed_when_perform_conditional_approx_kernel_based_test_the
         bootstrap_num_samples=5,
         bootstrap_num_runs=10,
         p_value_adjust_func=np.mean,
+        use_bootstrap=True,
     )
     np.random.seed(0)
     result_2 = approx_kernel_based(
@@ -212,6 +227,7 @@ def test_given_random_seed_when_perform_conditional_approx_kernel_based_test_the
         bootstrap_num_samples=5,
         bootstrap_num_runs=10,
         p_value_adjust_func=np.mean,
+        use_bootstrap=True,
     )
 
     assert result_1 == result_2
@@ -258,12 +274,12 @@ def test_given_categorical_dependent_data_when_perform_approx_kernel_based_test_
     assert approx_kernel_based(x, y) < 0.05
 
 
-@flaky(max_runs=2)
+@flaky(max_runs=3)
 def test_given_random_seed_when_perform_pairwise_approx_kernel_based_test_then_return_deterministic_result(
     _preserve_random_generator_state,
 ):
-    w = np.random.randn(1000, 1)
-    x = w + np.random.rand(1000, 1)
+    w = np.random.randn(100, 1)
+    x = w + np.random.rand(100, 1)
 
     assert approx_kernel_based(
         x,
@@ -273,6 +289,7 @@ def test_given_random_seed_when_perform_pairwise_approx_kernel_based_test_then_r
         bootstrap_num_samples=5,
         bootstrap_num_runs=10,
         p_value_adjust_func=np.mean,
+        use_bootstrap=True,
     ) != approx_kernel_based(
         x,
         w,
@@ -281,6 +298,7 @@ def test_given_random_seed_when_perform_pairwise_approx_kernel_based_test_then_r
         bootstrap_num_samples=5,
         bootstrap_num_runs=10,
         p_value_adjust_func=np.mean,
+        use_bootstrap=True,
     )
 
     np.random.seed(0)
@@ -292,6 +310,7 @@ def test_given_random_seed_when_perform_pairwise_approx_kernel_based_test_then_r
         bootstrap_num_samples=5,
         bootstrap_num_runs=10,
         p_value_adjust_func=np.mean,
+        use_bootstrap=True,
     )
     np.random.seed(0)
     result_2 = approx_kernel_based(
@@ -302,6 +321,7 @@ def test_given_random_seed_when_perform_pairwise_approx_kernel_based_test_then_r
         bootstrap_num_samples=5,
         bootstrap_num_runs=10,
         p_value_adjust_func=np.mean,
+        use_bootstrap=True,
     )
 
     assert result_1 == result_2
@@ -309,11 +329,11 @@ def test_given_random_seed_when_perform_pairwise_approx_kernel_based_test_then_r
 
 @flaky(max_runs=3)
 def test_given_weak_dependency_when_perform_kernel_based_test_then_returns_expected_result():
-    X = np.random.choice(2, (10000, 100))  # Require a lot of data here for the bootstraps.
+    X = np.random.choice(2, (2000, 100))
     Y = np.sum(X * np.random.uniform(-1, 5), axis=1)
 
     assert kernel_based(X[:, 0], Y) <= 0.05
-    assert kernel_based(np.random.choice(2, (10000, 1)), Y) > 0.05
+    assert kernel_based(np.random.choice(2, (2000, 1)), Y) > 0.05
 
 
 def test_given_constant_data_when_perform_kernel_based_test_then_returns_expected_result():
@@ -326,6 +346,31 @@ def test_given_constant_data_when_perform_approx_kernel_based_test_then_returns_
     assert approx_kernel_based(np.zeros(100), np.random.normal(0, 1, 100)) == 1.0
     assert approx_kernel_based(np.zeros(100), np.random.normal(0, 1, 100), np.random.normal(0, 1, 100)) == 1.0
     assert not np.isnan(approx_kernel_based(np.random.normal(0, 1, 100), np.random.normal(0, 1, 100), np.zeros(100)))
+
+
+def test_given_almost_constant_data_when_perform_kernel_based_test_then_does_not_return_nans():
+    almost_const = np.concatenate((np.ones(1), np.zeros(99)), axis=0)
+    assert not np.isnan(
+        kernel_based(almost_const, np.random.normal(0, 1, 100), bootstrap_num_runs=2, max_num_samples_run=10)
+    )
+    assert not np.isnan(
+        kernel_based(
+            almost_const,
+            np.random.normal(0, 1, 100),
+            np.random.normal(0, 1, 100),
+            bootstrap_num_runs=2,
+            max_num_samples_run=10,
+        )
+    )
+    assert not np.isnan(
+        kernel_based(
+            np.random.normal(0, 1, 100),
+            np.random.normal(0, 1, 100),
+            almost_const,
+            bootstrap_num_runs=2,
+            max_num_samples_run=10,
+        )
+    )
 
 
 def _generate_categorical_data():

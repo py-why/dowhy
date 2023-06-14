@@ -230,7 +230,7 @@ def distribution_change_of_graphs(
     validate_causal_dag(causal_model_old.graph)
     validate_causal_dag(causal_model_new.graph)
 
-    return __estimate_marginal_distribution_change(
+    return _estimate_marginal_distribution_change(
         ProbabilisticCausalModel(node_connected_subgraph_view(causal_model_old.graph, target_node)),
         ProbabilisticCausalModel(node_connected_subgraph_view(causal_model_new.graph, target_node)),
         target_node,
@@ -261,7 +261,7 @@ def _fit_accounting_for_mechanism_change(
         fdr_control_method,
     )
 
-    joint_data = old_data.append(new_data, ignore_index=True, sort=True)
+    joint_data = pd.concat([old_data, new_data], ignore_index=True, sort=True)
 
     for node in causal_model_new.graph.nodes:
         if mechanism_changed_for_node[node]:
@@ -274,7 +274,7 @@ def _fit_accounting_for_mechanism_change(
     return mechanism_changed_for_node
 
 
-def __estimate_marginal_distribution_change(
+def _estimate_marginal_distribution_change(
     causal_model_old: ProbabilisticCausalModel,
     causal_model_new: ProbabilisticCausalModel,
     target_node: Any,

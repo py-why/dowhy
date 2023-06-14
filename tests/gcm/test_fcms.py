@@ -47,13 +47,14 @@ def test_given_linear_data_when_fit_causal_graph_with_linear_anm_then_learns_cor
     assert scm.causal_mechanism("X1").prediction_model.sklearn_model.intercept_ == approx(2, abs=0.02)
 
 
+@flaky(max_runs=3)
 def test_given_linear_data_when_draw_samples_from_fitted_anm_then_generates_correct_marginal_distribution():
     scm = ProbabilisticCausalModel(nx.DiGraph([("X0", "X1")]))
     scm.set_causal_mechanism("X0", ScipyDistribution(stats.norm, loc=0, scale=1))
     scm.set_causal_mechanism("X1", AdditiveNoiseModel(prediction_model=create_linear_regressor()))
 
-    X0 = scm.causal_mechanism("X0").draw_samples(1000).squeeze()
-    test_data = pd.DataFrame({"X0": X0, "X1": X0 * 2 + 2 + np.random.normal(0, 0.1, 1000)})
+    X0 = scm.causal_mechanism("X0").draw_samples(10000).squeeze()
+    test_data = pd.DataFrame({"X0": X0, "X1": X0 * 2 + 2 + np.random.normal(0, 0.1, 10000)})
     fit(scm, test_data)
 
     generated_samples = scm.causal_mechanism("X1").draw_samples(np.array([1] * 1000))
@@ -64,7 +65,7 @@ def test_given_linear_data_when_draw_samples_from_fitted_anm_then_generates_corr
     assert np.mean(generated_samples) == approx(6, abs=0.05)
     assert np.std(generated_samples) == approx(0.1, abs=0.05)
     assert estimate_kl_divergence_continuous(
-        test_data["X1"].to_numpy(), draw_samples(scm, 1000)["X1"].to_numpy()
+        test_data["X1"].to_numpy(), draw_samples(scm, 10000)["X1"].to_numpy()
     ) == approx(0, abs=0.05)
 
 
@@ -85,6 +86,7 @@ def test_given_categorical_input_data_when_fit_causal_graph_with_linear_anm_then
     assert scm.causal_mechanism("X2").prediction_model.sklearn_model.intercept_ == approx(10 / 3, abs=0.02)
 
 
+@flaky(max_runs=3)
 def test_given_categorical_input_data_when_draw_from_fitted_causal_graph_with_linear_anm_then_generates_correct_marginal_distribution():
     scm = StructuralCausalModel(nx.DiGraph([("X0", "X2"), ("X1", "X2")]))
     scm.set_causal_mechanism("X0", ScipyDistribution(stats.norm, loc=0, scale=1))

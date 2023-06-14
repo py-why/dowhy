@@ -4,7 +4,7 @@ Functions in this module should be considered experimental, meaning there might 
 """
 import logging
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union, cast
 
 import numpy as np
 import pandas as pd
@@ -12,9 +12,9 @@ from joblib import Parallel, delayed
 from numpy.matlib import repmat
 
 import dowhy.gcm.auto as auto
-from dowhy.gcm._noise import compute_data_from_noise, noise_samples_of_ancestors
-from dowhy.gcm.cms import ProbabilisticCausalModel, StructuralCausalModel
-from dowhy.gcm.constant import EPS
+from dowhy.gcm import feature_relevance_sample
+from dowhy.gcm._noise import compute_data_from_noise, compute_noise_from_data, noise_samples_of_ancestors
+from dowhy.gcm.cms import InvertibleStructuralCausalModel, ProbabilisticCausalModel, StructuralCausalModel
 from dowhy.gcm.divergence import estimate_kl_divergence_of_probabilities
 from dowhy.gcm.fcms import ClassificationModel, ClassifierFCM, PredictionModel, ProbabilityEstimatorModel
 from dowhy.gcm.fitting_sampling import draw_samples
@@ -29,7 +29,7 @@ from dowhy.gcm.graph import (
 from dowhy.gcm.shapley import ShapleyConfig, estimate_shapley_values
 from dowhy.gcm.stats import marginal_expectation
 from dowhy.gcm.uncertainty import estimate_entropy_of_probabilities, estimate_variance
-from dowhy.gcm.util.general import is_categorical, set_random_seed, shape_into_2d
+from dowhy.gcm.util.general import has_categorical, is_categorical, means_difference, set_random_seed, shape_into_2d
 
 _logger = logging.getLogger(__name__)
 
@@ -38,10 +38,10 @@ def arrow_strength(
     causal_model: ProbabilisticCausalModel,
     target_node: Any,
     parent_samples: Optional[pd.DataFrame] = None,
-    num_samples_conditional: int = 1000,
+    num_samples_conditional: int = 2000,
     max_num_runs: int = 5000,
-    tolerance: float = 10**-4,
-    n_jobs: int = 1,
+    tolerance: float = 0.01,
+    n_jobs: int = -1,
     difference_estimation_func: Optional[Callable[[np.ndarray, np.ndarray], Union[np.ndarray, float]]] = None,
 ) -> Dict[Tuple[Any, Any], float]:
     """Computes the causal strength of each edge directed to the target node.
@@ -61,11 +61,15 @@ def arrow_strength(
                            based on the provided causal model. Providing observational data can help to mitigate
                            misspecifications in the graph, such as missing interactions between root nodes or
                            confounders.
-    :param num_samples_conditional: Sample size to use for estimating the distance between distributions.
+    :param num_samples_conditional: Sample size to use for estimating the distance between distributions. The more
+                                    more samples, the higher the accuracy.
     :param max_num_runs: The maximum number of times to resample and estimate the strength to report the average
                          strength.
-    :param tolerance: The difference in average strength between two successive runs to terminate early without
-                      running it max_num_runs times.
+    :param tolerance: If the percentage change in the estimated strength between two consecutive runs falls below the
+                      specified tolerance, the algorithm will terminate before reaching the maximum number of runs.
+                      A value of 0.01 would indicate a change of less than 1%. However, in order to minimize the impact
+                      of randomness, there must be at least three consecutive runs where the change is below the
+                      threshold.
     :param n_jobs: The number of jobs to run in parallel. Set it to -1 to use all processors.
     :param difference_estimation_func: Optional: How to measure the distance between two distributions. By default,
                                        the difference of the variance is estimated for a continuous target node
@@ -84,7 +88,7 @@ def arrow_strength(
     ordered_predecessors = get_ordered_predecessors(sub_causal_model.graph, target_node)
 
     if parent_samples is None:
-        parent_samples = draw_samples(sub_causal_model, num_samples_conditional * 10)[ordered_predecessors]
+        parent_samples = draw_samples(sub_causal_model, num_samples_conditional * 20)[ordered_predecessors]
 
     direct_influences = arrow_strength_of_model(
         sub_causal_model.causal_mechanism(target_node),
@@ -101,10 +105,10 @@ def arrow_strength(
 def arrow_strength_of_model(
     conditional_stochastic_model: ConditionalStochasticModel,
     input_samples: np.ndarray,
-    num_samples_from_conditional: int = 1000,
+    num_samples_from_conditional: int = 2000,
     max_num_runs: int = 5000,
-    tolerance: float = 10**-4,
-    n_jobs: int = 1,
+    tolerance: float = 0.01,
+    n_jobs: int = -1,
     difference_estimation_func: Optional[Callable[[np.ndarray, np.ndarray], Union[np.ndarray, float]]] = None,
     input_subsets: Optional[List[List[int]]] = None,
 ) -> np.ndarray:
@@ -167,6 +171,8 @@ def _estimate_direct_strength(
 ) -> float:
     distribution_samples = shape_into_2d(distribution_samples)
 
+    num_samples_conditional = min(num_samples_conditional, distribution_samples.shape[0])
+
     aggregated_conditional_difference_result = 0
     average_difference_result = 0
     converged_run = 0
@@ -196,9 +202,11 @@ def _estimate_direct_strength(
             break
         elif run > 0:
             if old_average_difference_result == 0:
-                old_average_difference_result = EPS
+                converging = average_difference_result == 0
+            else:
+                converging = abs(1 - average_difference_result / old_average_difference_result) < tolerance
 
-            if abs(1 - average_difference_result / old_average_difference_result) < tolerance:
+            if converging:
                 converged_run += 1
                 if converged_run >= 3:
                     break
@@ -214,9 +222,9 @@ def intrinsic_causal_influence(
     prediction_model: Union[PredictionModel, ClassificationModel, str] = "approx",
     attribution_func: Optional[Callable[[np.ndarray, np.ndarray], float]] = None,
     num_training_samples: int = 100000,
-    num_samples_randomization: int = 7500,
+    num_samples_randomization: int = 1000,
     num_samples_baseline: int = 1000,
-    max_batch_size: int = 100,
+    max_batch_size: int = 250,
     auto_assign_quality: auto.AssignmentQuality = auto.AssignmentQuality.GOOD,
     shapley_config: Optional[ShapleyConfig] = None,
 ) -> Dict[Any, float]:
@@ -273,39 +281,16 @@ def intrinsic_causal_influence(
 
     target_is_categorical = is_categorical(data_samples[target_node].to_numpy())
 
-    if prediction_model == "approx":
-        prediction_model = auto.select_model(noise_samples, target_samples, auto_assign_quality)
-        prediction_model.fit(noise_samples, target_samples)
-
-        if target_is_categorical:
-            prediction_method = prediction_model.predict_probabilities
-        else:
-            prediction_method = prediction_model.predict
-    elif prediction_model == "exact":
-
-        def exact_model(X: np.ndarray) -> np.ndarray:
-            return compute_data_from_noise(sub_causal_model, pd.DataFrame(X, columns=[x for x in node_names]))[
-                target_node
-            ].to_numpy()
-
-        if target_is_categorical:
-            list_of_classes = cast(
-                ClassifierFCM, sub_causal_model.causal_mechanism(target_node)
-            ).classifier_model.classes
-
-            def prediction_method(X):
-                return (shape_into_2d(exact_model(X)) == list_of_classes).astype(float)
-
-        else:
-            prediction_method = exact_model
-    elif isinstance(prediction_model, str):
-        raise ValueError(
-            "Invalid value for prediction_model: %s! This should either be an instance of a PredictionModel or"
-            "one of the two string options 'exact' or 'approx'." % prediction_model
-        )
-    else:
-        prediction_model.fit(noise_samples, target_samples)
-        prediction_method = prediction_model.predict
+    prediction_method = _get_icc_noise_function(
+        causal_model,
+        target_node,
+        prediction_model,
+        noise_samples,
+        node_names,
+        target_samples,
+        auto_assign_quality,
+        target_is_categorical,
+    )
 
     if attribution_func is None:
         if target_is_categorical:
@@ -333,6 +318,81 @@ def intrinsic_causal_influence(
     )
 
     return {node: iccs[i] for i, node in enumerate(node_names)}
+
+
+def intrinsic_causal_influence_sample(
+    causal_model: InvertibleStructuralCausalModel,
+    target_node: Any,
+    baseline_samples: pd.DataFrame,
+    noise_feature_samples: Optional[pd.DataFrame] = None,
+    subset_scoring_func: Optional[Callable[[np.ndarray, np.ndarray], Union[np.ndarray, float]]] = None,
+    num_noise_feature_samples: int = 5000,
+    max_batch_size: int = 100,
+    shapley_config: Optional[ShapleyConfig] = None,
+) -> List[Dict[Any, Any]]:
+    """Estimates the intrinsic causal impact of upstream nodes on a specified target_node, using the provided
+    baseline_samples as a reference. In this context, observed values are attributed to the noise factors present in
+    upstream nodes. Compared to intrinsic_causal_influence, this method quantifies the influences with respect to single
+    observations instead of the distribution. Note that the current implementation only supports non-categorical data,
+    since the noise terms need to be reconstructed.
+
+    **Research Paper**:
+    Janzing et al. *Quantifying causal contributions via structure preserving interventions*. arXiv:2007.00714, 2021.
+
+    :param causal_model: The fitted invertible structural causal model.
+    :param target_node: Node of interest.
+    :param baseline_samples: Samples for which the influence should be estimated.
+    :param noise_feature_samples: Optional noise samples of upstream nodes used as 'background' samples.. If None is
+                                  given, new noise samples are generated based on the graph. These samples are used for
+                                  randomizing features that are not in the subset.
+    :param subset_scoring_func: Set function for estimating the quantity of interest based. This function
+                                expects two inputs; the outcome of the model for some samples if certain features are permuted and the
+                                outcome of the model for the same samples when no features were permuted. By default,
+                                the difference between means of these samples are estimated.
+    :param num_noise_feature_samples: If no noise_feature_samples are given, noise samples are drawn from the graph.
+                                      This parameter indicates how many.
+    :param max_batch_size: Maximum batch size for estimating multiple predictions at once. This has a significant influence on the
+                          overall memory usage. If set to -1, all samples are used in one batch.
+    :param shapley_config: :class:`~dowhy.gcm.shapley.ShapleyConfig` for the Shapley estimator.
+    :return: A list of dictionaries indicating the intrinsic causal influence of a node on the target for a particular
+             sample. This is, each dictionary belongs to one baseline sample.
+    """
+    validate_node(causal_model.graph, target_node)
+    causal_model = InvertibleStructuralCausalModel(node_connected_subgraph_view(causal_model.graph, target_node))
+
+    feature_samples, tmp_noise_feature_samples = noise_samples_of_ancestors(
+        causal_model, target_node, num_noise_feature_samples
+    )
+
+    if has_categorical(feature_samples.to_numpy()):
+        raise ValueError(
+            "The current implementation requires all variables to be numeric, i.e., non-categorical! "
+            "There is at least one node in the graph that is categorical."
+        )
+
+    if noise_feature_samples is None:
+        noise_feature_samples = tmp_noise_feature_samples
+
+    if subset_scoring_func is None:
+        subset_scoring_func = means_difference
+
+    shapley_vales = feature_relevance_sample(
+        _get_icc_noise_function(
+            causal_model, target_node, "exact", noise_feature_samples, noise_feature_samples.columns, None, None, False
+        ),
+        feature_samples=noise_feature_samples.to_numpy(),
+        baseline_samples=compute_noise_from_data(causal_model, baseline_samples)[
+            noise_feature_samples.columns
+        ].to_numpy(),
+        subset_scoring_func=subset_scoring_func,
+        max_batch_size=max_batch_size,
+        shapley_config=shapley_config,
+    )
+
+    return [
+        {(predecessor, target_node): shapley_vales[i][q] for q, predecessor in enumerate(noise_feature_samples.columns)}
+        for i in range(shapley_vales.shape[0])
+    ]
 
 
 def _estimate_iccs(
@@ -369,3 +429,50 @@ def _estimate_iccs(
         return attribution_func(shape_into_2d(predictions), target_values)
 
     return estimate_shapley_values(icc_set_function, noise_samples.shape[1], shapley_config)
+
+
+def _get_icc_noise_function(
+    causal_model: InvertibleStructuralCausalModel,
+    target_node: Any,
+    prediction_model: Union[PredictionModel, ClassificationModel, str],
+    noise_samples: np.ndarray,
+    node_names: Iterator[Any],
+    target_samples: np.ndarray,
+    auto_assign_quality: auto.AssignmentQuality,
+    target_is_categorical: bool,
+) -> Callable[[np.ndarray], np.ndarray]:
+    if isinstance(prediction_model, str) and prediction_model not in ("approx", "exact"):
+        raise ValueError(
+            "Invalid value for prediction_model: %s! This should either be an instance of a PredictionModel or"
+            "one of the two string options 'exact' or 'approx'." % prediction_model
+        )
+
+    if not isinstance(prediction_model, str):
+        prediction_model.fit(noise_samples, target_samples)
+
+        return prediction_model.predict
+
+    if prediction_model == "approx":
+        prediction_model = auto.select_model(noise_samples, target_samples, auto_assign_quality)
+        prediction_model.fit(noise_samples, target_samples)
+
+        if target_is_categorical:
+            return prediction_model.predict_probabilities
+        else:
+            return prediction_model.predict
+    else:
+        # Exact model
+        def exact_model(X: np.ndarray) -> np.ndarray:
+            return compute_data_from_noise(causal_model, pd.DataFrame(X, columns=[x for x in node_names]))[
+                target_node
+            ].to_numpy()
+
+        if target_is_categorical:
+            list_of_classes = cast(ClassifierFCM, causal_model.causal_mechanism(target_node)).classifier_model.classes
+
+            def prediction_method(X):
+                return (shape_into_2d(exact_model(X)) == list_of_classes).astype(float)
+
+            return prediction_method
+        else:
+            return exact_model

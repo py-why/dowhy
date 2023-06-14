@@ -1,19 +1,10 @@
-import logging
-
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import scipy
-from econml.utilities import cross_product
-from sklearn.compose import ColumnTransformer, make_column_selector
-from sklearn.linear_model import Lasso, LinearRegression
 from sklearn.model_selection import KFold
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
 
 from dowhy.causal_refuters.partial_linear_sensitivity_analyzer import PartialLinearSensitivityAnalyzer
-from dowhy.causal_refuters.reisz import get_alpha_estimator
-from dowhy.utils.regression import generate_moment_function, get_generic_regressor, get_numeric_features
+from dowhy.causal_refuters.reisz import get_alpha_estimator, get_generic_regressor
+from dowhy.utils.regression import generate_moment_function, get_numeric_features
 
 
 class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):

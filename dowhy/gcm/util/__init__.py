@@ -1,1 +1,1 @@
-from .plotting import plot, plot_adjacency_matrix
+from .plotting import bar_plot, plot, plot_adjacency_matrix

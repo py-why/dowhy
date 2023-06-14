@@ -14,7 +14,7 @@ from dowhy.gcm import (
     confidence_intervals,
     fit,
 )
-from dowhy.gcm.feature import feature_relevance_distribution, feature_relevance_sample, parent_relevance
+from dowhy.gcm.feature_relevance import feature_relevance_distribution, feature_relevance_sample, parent_relevance
 from dowhy.gcm.ml import create_linear_regressor, create_logistic_regression_classifier
 from dowhy.gcm.shapley import ShapleyApproximationMethods, ShapleyConfig
 from dowhy.gcm.uncertainty import estimate_entropy_of_probabilities
@@ -82,38 +82,8 @@ def test_when_using_parent_relevance_with_categorical_data_then_returns_correct_
     assert noise == approx(0, abs=0.05)
 
 
-@flaky(max_runs=5)
-def test_when_using_parent_relevance_with_confidence_intervals_then_returns_reasonable_bounds():
-    causal_model = StructuralCausalModel(nx.DiGraph([("X1", "X2"), ("X0", "X2")]))
-    causal_model.set_causal_mechanism("X1", ScipyDistribution(stats.norm, loc=0, scale=1))
-    causal_model.set_causal_mechanism("X0", ScipyDistribution(stats.norm, loc=0, scale=1))
-    causal_model.set_causal_mechanism("X2", AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-
-    X0 = np.random.normal(0, 1, 1000)
-    X1 = np.random.normal(0, 1, 1000)
-
-    training_data = pd.DataFrame({"X0": X0, "X1": X1, "X2": 3 * X0 + X1})
-    fit(causal_model, training_data)
-
-    def estimation_func():
-        dict_result, noise = parent_relevance(causal_model, "X2")
-        dict_result[("noise", "X2")] = noise
-        return dict_result
-
-    median_relevance, cis = confidence_intervals(estimation_func, num_bootstrap_resamples=10)
-
-    # Contributions should add up to Var(X2)
-    assert median_relevance[("X0", "X2")] == approx(9, abs=1)
-    assert median_relevance[("X1", "X2")] == approx(1, abs=0.3)
-    assert median_relevance[("noise", "X2")] == approx(0, abs=0.5)
-
-    assert cis[("X0", "X2")] == approx(np.array([8.5, 9.5]), abs=1)
-    assert cis[("X1", "X2")] == approx(np.array([0.8, 1.2]), abs=0.4)
-    assert cis[("noise", "X2")] == approx(np.array([-0.2, 0.2]), abs=0.4)
-
-
-@flaky(max_runs=5)
-def test_feature_relevance_sample_mean_diff():
+@flaky(max_runs=3)
+def test_when_given_linear_data_when_estimate_feature_relevance_per_sample_with_mean_diff_then_returns_expected_values():
     num_vars = 15
     X = np.random.normal(0, 1, (1000, num_vars))
     coefficients = np.random.choice(20, num_vars) - 10
@@ -171,7 +141,7 @@ def test_given_baseline_values_when_estimating_feature_relevance_sample_with_mea
 
 
 @flaky(max_runs=5)
-def test_feature_relevance_sample_mean_diff_with_certain_batch_size():
+def test_given_specific_batch_size_when_estimate_feature_relevance_per_sample_then_returns_expected_results():
     X = np.random.normal(0, 1, (1000, 3))
     coefficients = np.random.choice(20, 3) - 10
 

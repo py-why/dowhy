@@ -6,6 +6,7 @@ import networkx as nx
 
 from dowhy.utils.api import parse_state
 from dowhy.utils.graph_operations import daggity_to_dot
+from dowhy.utils.plotting import plot
 
 
 class CausalGraph:
@@ -97,40 +98,8 @@ class CausalGraph:
         # Adding node attributes
         self._graph = self.add_node_attributes(observed_node_names)
 
-    def view_graph(self, layout="dot", size=(8, 6), file_name="causal_model"):
-        out_filename = "{}.png".format(file_name)
-        try:
-            import pygraphviz as pgv
-
-            agraph = nx.drawing.nx_agraph.to_agraph(self._graph)
-            agraph.graph_attr.update(size="{},{}!".format(size[0], size[0]))
-            agraph.draw(out_filename, format="png", prog=layout)
-        except:
-            self.logger.warning(
-                "Warning: Pygraphviz cannot be loaded. Check that graphviz and pygraphviz are installed."
-            )
-            self.logger.info("Using Matplotlib for plotting")
-            import matplotlib.pyplot as plt
-
-            plt.figure(figsize=size)
-            solid_edges = [(n1, n2) for n1, n2, e in self._graph.edges(data=True) if "style" not in e]
-            dashed_edges = [
-                (n1, n2) for n1, n2, e in self._graph.edges(data=True) if ("style" in e and e["style"] == "dashed")
-            ]
-            plt.clf()
-
-            pos = nx.layout.shell_layout(self._graph)
-            nx.draw_networkx_nodes(self._graph, pos, node_color="yellow", node_size=400)
-            nx.draw_networkx_edges(self._graph, pos, edgelist=solid_edges, arrowstyle="-|>", arrowsize=12)
-            nx.draw_networkx_edges(
-                self._graph, pos, edgelist=dashed_edges, arrowstyle="-|>", style="dashed", arrowsize=12
-            )
-
-            labels = nx.draw_networkx_labels(self._graph, pos)
-
-            plt.axis("off")
-            plt.savefig(out_filename)
-            plt.draw()
+    def view_graph(self, layout=None, size=None, file_name="causal_model"):
+        plot(self._graph, layout_prog=layout, figure_size=size, filename=file_name + ".png")
 
     def build_graph(self, common_cause_names, instrument_names, effect_modifier_names, mediator_names):
         """Creates nodes and edges based on variable names and their semantics.

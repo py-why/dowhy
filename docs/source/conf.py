@@ -13,16 +13,29 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-import sys
-
-sys.path.insert(0, os.path.abspath("../../"))
 
 # -- Project information -----------------------------------------------------
 
 project = "DoWhy"
 copyright = "2022, PyWhy contributors"
 author = "PyWhy community"
+version = os.environ.get("CURRENT_VERSION")
 
+# Version Information (for version-switcher)
+not_empty = lambda x: len(x) > 0
+to_tag_obj = lambda t: {"name": t, "url": f"/dowhy/{t}/index.html"}
+has_doc = lambda t: os.path.exists(f"../../dowhy-docs/{t}/index.html")
+
+git_tags = reversed(list(filter(not_empty, os.environ.get("TAGS").split(","))))
+doc_tags = list(filter(has_doc, git_tags))
+
+html_context = {
+    "current_version": {"name": os.environ.get("CURRENT_VERSION")},
+    "versions": {
+        "tags": list(map(to_tag_obj, doc_tags)),
+        "branches": [{"name": "main"}],
+    },
+}
 
 # -- General configuration ---------------------------------------------------
 
@@ -39,10 +52,14 @@ extensions = [
     "sphinx.ext.todo",
     "nbsphinx",
     "sphinx_rtd_theme",
-    "sphinx_multiversion",
     "sphinxcontrib.googleanalytics",
     "sphinx_copybutton",
+    "sphinx_design",
 ]
+
+# sphinx-panels shouldn't add bootstrap css since the pydata-sphinx-theme
+# already loads it
+panels_add_bootstrap_css = False
 
 googleanalytics_id = "G-B139P18WHM"
 copybutton_prompt_text = ">>> "
@@ -77,8 +94,6 @@ exclude_patterns = [
     ".DS_Store",
     ".ipynb_checkpoints",
     "example_notebooks/dowhy_ranking_methods.ipynb",
-    "example_notebooks/dowhy_optimize_backdoor_example.ipynb",  # need to check why str_to_dot fails here
-    "example_notebooks/dowhy_causal_discovery_example.ipynb",  # need to check why str_to_dot fails here
     "example_notebooks/dowhy_twins_example.ipynb",
 ]
 
@@ -120,6 +135,7 @@ html_static_path = ["_static"]
 # Output file base name for HTML help builder.
 htmlhelp_basename = "dowhydoc"
 
+html_logo = "_static/dowhy-logo-small.png"
 
 # -- Options for LaTeX output ------------------------------------------------
 
@@ -193,7 +209,3 @@ todo_include_todos = True
 
 # init docstrings should also be included in class
 autoclass_content = "both"
-
-smv_tag_whitelist = r"^v\d*\.(9|\d{2,})(\..*)?$"
-smv_branch_whitelist = "main"
-smv_released_pattern = r"refs/tags/v.*"

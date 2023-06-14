@@ -1,0 +1,31 @@
+name: Build & Deploy Docs (For Release)
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    container:
+      image: "ghcr.io/${{ github.repository_owner }}/dowhy-docs-generation:latest"
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Python Dependencies  
+        run: poetry install -E plotting -E pydot -E pygraphviz --with docs
+
+      - run: git config --global --add safe.directory /__w/dowhy/dowhy
+
+      - name: Build
+        run: ./docs/generate_docs.sh
+        env:
+          DOCS_VERSION: ${{ github.event.release.tag_name }}
+          
+      - name: Commit and push to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dowhy-docs

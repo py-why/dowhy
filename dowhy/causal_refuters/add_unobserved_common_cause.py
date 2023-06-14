@@ -11,17 +11,20 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from tqdm.auto import tqdm
 
-from dowhy.causal_estimator import CausalEstimate, CausalEstimator
+from dowhy.causal_estimator import CausalEstimate
+from dowhy.causal_estimators.econml import Econml
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 from dowhy.causal_estimators.regression_estimator import RegressionEstimator
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 from dowhy.causal_refuter import CausalRefutation, CausalRefuter, choose_variables
 from dowhy.causal_refuters.evalue_sensitivity_analyzer import EValueSensitivityAnalyzer
 from dowhy.causal_refuters.linear_sensitivity_analyzer import LinearSensitivityAnalyzer
-from dowhy.causal_refuters.non_parametric_sensitivity_analyzer import NonParametricSensitivityAnalyzer
-from dowhy.causal_refuters.partial_linear_sensitivity_analyzer import PartialLinearSensitivityAnalyzer
 
 logger = logging.getLogger(__name__)
+
+
+DEFAULT_CONVERGENCE_THRESHOLD = 0.1
+DEFAULT_C_STAR_MAX = 1000
 
 
 class AddUnobservedCommonCause(CausalRefuter):
@@ -182,6 +185,20 @@ class AddUnobservedCommonCause(CausalRefuter):
             )
             refute.add_refuter(self)
             return refute
+
+    def include_simulated_confounder(
+        self, convergence_threshold=DEFAULT_CONVERGENCE_THRESHOLD, c_star_max=DEFAULT_C_STAR_MAX
+    ):
+        return include_simulated_confounder(
+            self._data,
+            self._treatment_name,
+            self._outcome_name,
+            self.kappa_t,
+            self.kappa_y,
+            self._variables_of_interest,
+            convergence_threshold,
+            c_star_max,
+        )
 
 
 def _infer_default_kappa_t(
@@ -375,8 +392,9 @@ def include_simulated_confounder(
     outcome_name: str,
     kappa_t: float,
     kappa_y: float,
-    convergence_threshold: float = 0.1,
-    c_star_max: int = 1000,
+    variables_of_interest: List,
+    convergence_threshold: float = DEFAULT_CONVERGENCE_THRESHOLD,
+    c_star_max: int = DEFAULT_C_STAR_MAX,
 ):
     """
     This function simulates an unobserved confounder based on the data using the following steps:
@@ -412,7 +430,7 @@ def include_simulated_confounder(
 
     # Obtaining the list of observed variables
     required_variables = True
-    observed_variables = choose_variables(required_variables)
+    observed_variables = choose_variables(required_variables, variables_of_interest)
 
     observed_variables_with_treatment_and_outcome = observed_variables + treatment_name + outcome_name
 
@@ -617,7 +635,7 @@ def sensitivity_linear_partial_r2(
     if not (isinstance(estimate.estimator, LinearRegressionEstimator)):
         raise NotImplementedError("Currently only LinearRegressionEstimator is supported for Sensitivity Analysis")
 
-    if len(estimate.estimator._effect_modifier_names) > 0:
+    if estimate.estimator._effect_modifier_names is not None and len(estimate.estimator._effect_modifier_names) > 0:
         raise NotImplementedError("The current implementation does not support effect modifiers")
 
     if frac_strength_outcome == 1:
@@ -640,6 +658,7 @@ def sensitivity_linear_partial_r2(
     return analyzer
 
 
+# TODO (petergtz): This should introduce a Protocol defining the interface this returns instead of the concrete types
 def sensitivity_non_parametric_partial_r2(
     estimate: CausalEstimate,
     kappa_t: Optional[Union[float, np.ndarray]] = None,
@@ -653,7 +672,7 @@ def sensitivity_non_parametric_partial_r2(
     g_s_estimator_list: Optional[List] = None,
     g_s_estimator_param_list: Optional[List[Dict]] = None,
     plugin_reisz: bool = False,
-) -> Union[PartialLinearSensitivityAnalyzer, NonParametricSensitivityAnalyzer]:
+):  # -> Union[PartialLinearSensitivityAnalyzer, NonParametricSensitivityAnalyzer]
     """Add an unobserved confounder for refutation using Non-parametric partial R2 methond (Sensitivity Analysis for non-parametric models).
 
     :param estimate: CausalEstimate: Estimate to run the refutation
@@ -672,32 +691,37 @@ def sensitivity_non_parametric_partial_r2(
     """
 
     import dowhy.causal_estimators.econml
+    from dowhy.causal_refuters.non_parametric_sensitivity_analyzer import NonParametricSensitivityAnalyzer
+    from dowhy.causal_refuters.partial_linear_sensitivity_analyzer import PartialLinearSensitivityAnalyzer
 
     # If the estimator used is LinearDML, partially linear sensitivity analysis will be automatically chosen
-    if isinstance(estimate.estimator, dowhy.causal_estimators.econml.Econml):
-        if estimate.estimator._econml_methodname == "econml.dml.LinearDML":
-            analyzer = PartialLinearSensitivityAnalyzer(
-                estimator=estimate._estimator_object,
-                observed_common_causes=estimate.estimator._observed_common_causes,
-                treatment=estimate.estimator._treatment,
-                outcome=estimate.estimator._outcome,
-                alpha_s_estimator_param_list=alpha_s_estimator_param_list,
-                g_s_estimator_list=g_s_estimator_list,
-                g_s_estimator_param_list=g_s_estimator_param_list,
-                effect_strength_treatment=kappa_t,
-                effect_strength_outcome=kappa_y,
-                benchmark_common_causes=benchmark_common_causes,
-                frac_strength_treatment=frac_strength_treatment,
-                frac_strength_outcome=frac_strength_outcome,
-            )
-            analyzer.check_sensitivity(plot=plot_estimate)
-            return analyzer
+    if (
+        isinstance(estimate.estimator, dowhy.causal_estimators.econml.Econml)
+        and estimate.estimator.estimator.__class__.__name__ == "LinearDML"
+    ):
+
+        analyzer = PartialLinearSensitivityAnalyzer(
+            estimator=estimate._estimator_object,
+            observed_common_causes=estimate.estimator._observed_common_causes,
+            treatment=estimate._data[estimate._treatment_name],
+            outcome=estimate._data[estimate._outcome_name[0]],
+            alpha_s_estimator_param_list=alpha_s_estimator_param_list,
+            g_s_estimator_list=g_s_estimator_list,
+            g_s_estimator_param_list=g_s_estimator_param_list,
+            effect_strength_treatment=kappa_t,
+            effect_strength_outcome=kappa_y,
+            benchmark_common_causes=benchmark_common_causes,
+            frac_strength_treatment=frac_strength_treatment,
+            frac_strength_outcome=frac_strength_outcome,
+        )
+        analyzer.check_sensitivity(plot=plot_estimate)
+        return analyzer
 
     analyzer = NonParametricSensitivityAnalyzer(
         estimator=estimate.estimator,
         observed_common_causes=estimate.estimator._observed_common_causes,
-        treatment=estimate.estimator._treatment,
-        outcome=estimate.estimator._outcome,
+        treatment=estimate._data[estimate._treatment_name],
+        outcome=estimate._data[estimate._outcome_name[0]],
         alpha_s_estimator_list=alpha_s_estimator_list,
         alpha_s_estimator_param_list=alpha_s_estimator_param_list,
         g_s_estimator_list=g_s_estimator_list,
@@ -725,7 +749,7 @@ def sensitivity_e_value(
     if not isinstance(estimate.estimator, RegressionEstimator):
         raise NotImplementedError("E-Value sensitivity analysis is currently only implemented RegressionEstimator.")
 
-    if len(estimate.estimator._effect_modifier_names) > 0:
+    if estimate.estimator._effect_modifier_names is not None and len(estimate.estimator._effect_modifier_names) > 0:
         raise NotImplementedError("The current implementation does not support effect modifiers")
 
     analyzer = EValueSensitivityAnalyzer(
@@ -735,7 +759,7 @@ def sensitivity_e_value(
         treatment_name=treatment_name[0],
         outcome_name=outcome_name[0],
     )
-    analyzer.check_sensitivity(plot=plot_estimate)
+    analyzer.check_sensitivity(data, plot=plot_estimate)
     return analyzer
 
 
@@ -798,8 +822,18 @@ def sensitivity_simulation(
             outcome_name,
             kappa_y,
         )
-        new_estimator = CausalEstimator.get_estimator_object(new_data, target_estimand, estimate)
-        new_effect = new_estimator.estimate_effect()
+        new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
+        new_estimator.fit(
+            new_data,
+            estimate.estimator._effect_modifier_names,
+            **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+        )
+        new_effect = new_estimator.estimate_effect(
+            new_data,
+            control_value=estimate.control_value,
+            treatment_value=estimate.treatment_value,
+            target_units=estimate.estimator._target_units,
+        )
         refute = CausalRefutation(
             estimate.value, new_effect.value, refutation_type="Refute: Add an Unobserved Common Cause"
         )
@@ -836,8 +870,18 @@ def sensitivity_simulation(
                         outcome_name,
                         kappa_y[j],
                     )
-                    new_estimator = CausalEstimator.get_estimator_object(new_data, target_estimand, estimate)
-                    new_effect = new_estimator.estimate_effect()
+                    new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
+                    new_estimator.fit(
+                        new_data,
+                        estimate.estimator._effect_modifier_names,
+                        **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+                    )
+                    new_effect = new_estimator.estimate_effect(
+                        new_data,
+                        control_value=estimate.control_value,
+                        treatment_value=estimate.treatment_value,
+                        target_units=estimate.estimator._target_units,
+                    )
                     refute = CausalRefutation(
                         estimate.value,
                         new_effect.value,
@@ -851,7 +895,6 @@ def sensitivity_simulation(
             if plotmethod is None:
                 return refute
 
-            import matplotlib
             import matplotlib.pyplot as plt
 
             fig = plt.figure(figsize=(6, 5))
@@ -903,8 +946,18 @@ def sensitivity_simulation(
                     outcome_name,
                     kappa_y,
                 )
-                new_estimator = CausalEstimator.get_estimator_object(new_data, target_estimand, estimate)
-                new_effect = new_estimator.estimate_effect()
+                new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
+                new_estimator.fit(
+                    new_data,
+                    estimate.estimator._effect_modifier_names,
+                    **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+                )
+                new_effect = new_estimator.estimate_effect(
+                    new_data,
+                    control_value=estimate.control_value,
+                    treatment_value=estimate.treatment_value,
+                    target_units=estimate.estimator._target_units,
+                )
                 refute = CausalRefutation(
                     estimate.value, new_effect.value, refutation_type="Refute: Add an Unobserved Common Cause"
                 )
@@ -916,7 +969,6 @@ def sensitivity_simulation(
             if plotmethod is None:
                 return refute
 
-            import matplotlib
             import matplotlib.pyplot as plt
 
             fig = plt.figure(figsize=(6, 5))
@@ -952,8 +1004,18 @@ def sensitivity_simulation(
                     outcome_name,
                     kappa_y[i],
                 )
-                new_estimator = CausalEstimator.get_estimator_object(new_data, target_estimand, estimate)
-                new_effect = new_estimator.estimate_effect()
+                new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
+                new_estimator.fit(
+                    new_data,
+                    estimate.estimator._effect_modifier_names,
+                    **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+                )
+                new_effect = new_estimator.estimate_effect(
+                    new_data,
+                    control_value=estimate.control_value,
+                    treatment_value=estimate.treatment_value,
+                    target_units=estimate.estimator._target_units,
+                )
                 refute = CausalRefutation(
                     estimate.value, new_effect.value, refutation_type="Refute: Add an Unobserved Common Cause"
                 )
@@ -965,7 +1027,6 @@ def sensitivity_simulation(
             if plotmethod is None:
                 return refute
 
-            import matplotlib
             import matplotlib.pyplot as plt
 
             fig = plt.figure(figsize=(6, 5))

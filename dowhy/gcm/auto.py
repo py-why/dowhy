@@ -12,11 +12,11 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.model_selection import KFold, train_test_split
 from sklearn.preprocessing import MultiLabelBinarizer
 
+from dowhy.gcm import config
 from dowhy.gcm.cms import ProbabilisticCausalModel
 from dowhy.gcm.fcms import AdditiveNoiseModel, ClassificationModel, ClassifierFCM, PredictionModel
 from dowhy.gcm.graph import CAUSAL_MECHANISM, get_ordered_predecessors, is_root_node, validate_causal_model_assignment
 from dowhy.gcm.ml import (
-    create_elastic_net_regressor,
     create_hist_gradient_boost_classifier,
     create_hist_gradient_boost_regressor,
     create_lasso_regressor,
@@ -31,6 +31,7 @@ from dowhy.gcm.ml.classification import (
     create_extra_trees_classifier,
     create_gaussian_nb_classifier,
     create_knn_classifier,
+    create_polynom_logistic_regression_classifier,
     create_random_forest_classifier,
     create_support_vector_classifier,
 )
@@ -38,45 +39,50 @@ from dowhy.gcm.ml.regression import (
     create_ada_boost_regressor,
     create_extra_trees_regressor,
     create_knn_regressor,
-    create_product_regressor,
+    create_polynom_regressor,
 )
 from dowhy.gcm.stochastic_models import EmpiricalDistribution
 from dowhy.gcm.util.general import (
-    apply_one_hot_encoding,
-    fit_one_hot_encoders,
+    auto_apply_encoders,
+    auto_fit_encoders,
     is_categorical,
     set_random_seed,
     shape_into_2d,
 )
 
-_LIST_OF_POTENTIAL_CLASSIFIERS = [
+_LIST_OF_POTENTIAL_CLASSIFIERS_GOOD = [
     partial(create_logistic_regression_classifier, max_iter=1000),
-    create_random_forest_classifier,
     create_hist_gradient_boost_classifier,
+]
+_LIST_OF_POTENTIAL_REGRESSORS_GOOD = [
+    create_linear_regressor,
+    create_hist_gradient_boost_regressor,
+]
+
+_LIST_OF_POTENTIAL_CLASSIFIERS_BETTER = _LIST_OF_POTENTIAL_CLASSIFIERS_GOOD + [
+    create_random_forest_classifier,
     create_extra_trees_classifier,
     create_support_vector_classifier,
     create_knn_classifier,
     create_gaussian_nb_classifier,
     create_ada_boost_classifier,
 ]
-_LIST_OF_POTENTIAL_REGRESSORS = [
-    create_linear_regressor,
+_LIST_OF_POTENTIAL_REGRESSORS_BETTER = _LIST_OF_POTENTIAL_REGRESSORS_GOOD + [
     create_ridge_regressor,
+    create_polynom_regressor,
     partial(create_lasso_regressor, max_iter=5000),
-    partial(create_elastic_net_regressor, max_iter=5000),
     create_random_forest_regressor,
-    create_hist_gradient_boost_regressor,
     create_support_vector_regressor,
     create_extra_trees_regressor,
     create_knn_regressor,
     create_ada_boost_regressor,
-    create_product_regressor,
 ]
 
 
 class AssignmentQuality(Enum):
-    GOOD = (auto(),)
+    GOOD = auto()
     BETTER = auto()
+    BEST = auto()
 
 
 def assign_causal_mechanisms(
@@ -94,8 +100,8 @@ def assign_causal_mechanisms(
     :param based_on: Jointly sampled data corresponding to the nodes of the given graph.
     :param quality: AssignmentQuality for the automatic model selection and model accuracy. This changes the type of
     prediction model and time spent on the selection. Options are:
-        - AssignmentQuality.GOOD: Checks whether the data is linear. If the data is linear, an OLS model is
-            used, otherwise a gradient boost model.
+        - AssignmentQuality.GOOD: Compares a linear, polynomial and gradient boost model on small test-training split
+            of the data. The best performing model is then selected.
             Model selection speed: Fast
             Model training speed: Fast
             Model inference speed: Fast
@@ -103,12 +109,19 @@ def assign_causal_mechanisms(
         - AssignmentQuality.BETTER: Compares multiple model types and uses the one with the best performance
             averaged over multiple splits of the training data. By default, the model with the smallest root mean
             squared error is selected for regression problems and the model with the highest F1 score is selected for
-            classification problems. For a list of possible models, see _LIST_OF_POTENTIAL_REGRESSORS and
-            _LIST_OF_POTENTIAL_CLASSIFIERS, respectively.
+            classification problems. For a list of possible models, see _LIST_OF_POTENTIAL_REGRESSORS_BETTER and
+            _LIST_OF_POTENTIAL_CLASSIFIERS_BETTER, respectively.
             Model selection speed: Medium
             Model training speed: Fast
             Model inference speed: Fast
             Model accuracy: Good
+        - AssignmentQuality.BEST: Uses an AutoGluon (auto ML) model with default settings defined by the AutoGluon
+            wrapper. While the model selection itself is fast, the training and inference speed can be significantly
+            slower than in the other options. NOTE: This requires the optional autogluon.tabular dependency.
+            Model selection speed: Instant
+            Model training speed: Slow
+            Model inference speed: Slow-Medium
+            Model accuracy: Best
         :param override_models: If set to True, existing model assignments are replaced with automatically selected
         ones. If set to False, the assigned models are only validated with respect to the graph structure.
 
@@ -137,29 +150,39 @@ def assign_causal_mechanisms(
 def select_model(
     X: np.ndarray, Y: np.ndarray, model_selection_quality: AssignmentQuality
 ) -> Union[PredictionModel, ClassificationModel]:
-    target_is_categorical = is_categorical(Y)
-    if model_selection_quality == AssignmentQuality.GOOD:
-        use_linear_prediction_models = has_linear_relationship(X, Y)
+    if model_selection_quality == AssignmentQuality.BEST:
+        try:
+            from dowhy.gcm.ml.autogluon import AutoGluonClassifier, AutoGluonRegressor
 
-        if target_is_categorical:
-            if use_linear_prediction_models:
-                return create_logistic_regression_classifier(max_iter=1000)
+            if is_categorical(Y):
+                return AutoGluonClassifier()
             else:
-                return create_hist_gradient_boost_classifier()
-        else:
-            if use_linear_prediction_models:
-                return find_best_model(
-                    [create_linear_regressor, create_product_regressor], X, Y, model_selection_splits=2
-                )()
-            else:
-                return find_best_model(
-                    [create_hist_gradient_boost_regressor, create_product_regressor], X, Y, model_selection_splits=2
-                )()
+                return AutoGluonRegressor()
+        except ImportError:
+            raise RuntimeError(
+                "AutoGluon module not found! For the BEST auto assign quality, consider installing the "
+                "optional AutoGluon dependency."
+            )
+    elif model_selection_quality == AssignmentQuality.GOOD:
+        list_of_regressor = list(_LIST_OF_POTENTIAL_REGRESSORS_GOOD)
+        list_of_classifier = list(_LIST_OF_POTENTIAL_CLASSIFIERS_GOOD)
+        model_selection_splits = 2
     elif model_selection_quality == AssignmentQuality.BETTER:
-        if target_is_categorical:
-            return find_best_model(_LIST_OF_POTENTIAL_CLASSIFIERS, X, Y)()
-        else:
-            return find_best_model(_LIST_OF_POTENTIAL_REGRESSORS, X, Y)()
+        list_of_regressor = list(_LIST_OF_POTENTIAL_REGRESSORS_BETTER)
+        list_of_classifier = list(_LIST_OF_POTENTIAL_CLASSIFIERS_BETTER)
+        model_selection_splits = 5
+    else:
+        raise ValueError("Invalid model selection quality.")
+
+    if auto_apply_encoders(X, auto_fit_encoders(X)).shape[1] <= 5:
+        # Avoid too many features
+        list_of_regressor += [create_polynom_regressor]
+        list_of_classifier += [partial(create_polynom_logistic_regression_classifier, max_iter=1000)]
+
+    if is_categorical(Y):
+        return find_best_model(list_of_classifier, X, Y, model_selection_splits=model_selection_splits)()
+    else:
+        return find_best_model(list_of_regressor, X, Y, model_selection_splits=model_selection_splits)()
 
 
 def has_linear_relationship(X: np.ndarray, Y: np.ndarray, max_num_samples: int = 3000) -> bool:
@@ -187,9 +210,9 @@ def has_linear_relationship(X: np.ndarray, Y: np.ndarray, max_num_samples: int =
             X, Y, train_size=num_trainings_samples, test_size=num_test_samples
         )
 
-    one_hot_encoder = fit_one_hot_encoders(np.row_stack([x_train, x_test]))
-    x_train = apply_one_hot_encoding(x_train, one_hot_encoder)
-    x_test = apply_one_hot_encoding(x_test, one_hot_encoder)
+    encoders = auto_fit_encoders(x_train, y_train)
+    x_train = auto_apply_encoders(x_train, encoders)
+    x_test = auto_apply_encoders(x_test, encoders)
 
     if target_is_categorical:
         linear_mdl = LogisticRegression(max_iter=1000)
@@ -219,8 +242,10 @@ def find_best_model(
     metric: Optional[Callable[[np.ndarray, np.ndarray], float]] = None,
     max_samples_per_split: int = 10000,
     model_selection_splits: int = 5,
-    n_jobs: int = -1,
+    n_jobs: Optional[int] = None,
 ) -> Callable[[], PredictionModel]:
+    n_jobs = config.default_n_jobs if n_jobs is None else n_jobs
+
     X, Y = shape_into_2d(X, Y)
 
     is_classification_problem = isinstance(prediction_model_factories[0](), ClassificationModel)

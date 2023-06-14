@@ -1,7 +1,6 @@
 """Functions in this module should be considered experimental, meaning there might be breaking API changes in the
 future.
 """
-
 from typing import Callable, List, Optional, Union
 
 import numpy as np
@@ -13,16 +12,16 @@ from sklearn.preprocessing import scale
 import dowhy.gcm.config as config
 from dowhy.gcm.independence_test.kernel_operation import approximate_rbf_kernel_features
 from dowhy.gcm.stats import quantile_based_fwer
-from dowhy.gcm.util.general import apply_one_hot_encoding, fit_one_hot_encoders, set_random_seed, shape_into_2d
+from dowhy.gcm.util.general import auto_apply_encoders, auto_fit_encoders, set_random_seed, shape_into_2d
 
 
 def kernel_based(
     X: np.ndarray,
     Y: np.ndarray,
     Z: Optional[np.ndarray] = None,
-    use_bootstrap: bool = True,
+    use_bootstrap: bool = False,
     bootstrap_num_runs: int = 10,
-    bootstrap_num_samples_per_run: int = 2000,
+    max_num_samples_run: int = 2000,
     bootstrap_n_jobs: Optional[int] = None,
     p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float] = quantile_based_fwer,
     **kwargs,
@@ -54,8 +53,8 @@ def kernel_based(
     :param use_bootstrap: If True, the independence tests are performed on multiple subsets of the data and the final
                           p-value is constructed based on the provided p_value_adjust_func function.
     :param bootstrap_num_runs: Number of bootstrap runs (only relevant if use_bootstrap is True).
-    :param bootstrap_num_samples_per_run: Number of samples used in a bootstrap run (only relevant if use_bootstrap is
-                                          True).
+    :param max_num_samples_run: Maximum number of samples used in an evaluation. If use_bootstrap is True, then
+                                different samples but at most max_num_samples_run are used.
     :param bootstrap_n_jobs: Number of parallel jobs for the bootstrap runs.
     :param p_value_adjust_func: A callable that expects a numpy array of multiple p-values and returns one p-value. This
                                 is typically used a family wise error rate control method.
@@ -63,18 +62,8 @@ def kernel_based(
     """
     bootstrap_n_jobs = config.default_n_jobs if bootstrap_n_jobs is None else bootstrap_n_jobs
 
-    X = _remove_constant_columns(X)
-    Y = _remove_constant_columns(Y)
-
-    if X.shape[1] == 0 or Y.shape[1] == 0:
-        # Either X and/or Y is constant.
-        return 1.0
-
-    if Z is not None:
-        Z = _remove_constant_columns(Z)
-        if Z.shape[1] == 0:
-            # If Z is empty, we are in the pairwise setting.
-            Z = None
+    if not use_bootstrap:
+        bootstrap_num_runs = 1
 
     if "est_width" not in kwargs:
         kwargs["est_width"] = "median"
@@ -84,6 +73,19 @@ def kernel_based(
     ) -> float:
         set_random_seed(parallel_random_seed)
 
+        X = _remove_constant_columns(X)
+        Y = _remove_constant_columns(Y)
+
+        if X.shape[1] == 0 or Y.shape[1] == 0:
+            # Either X and/or Y is constant.
+            return 1.0
+
+        if Z is not None:
+            Z = _remove_constant_columns(Z)
+            if Z.shape[1] == 0:
+                # If Z is empty, we are in the pairwise setting.
+                Z = None
+
         if Z is None:
             X, Y = _convert_to_numeric(*shape_into_2d(X, Y))
             return KCI_UInd(**kwargs).compute_pvalue(X, Y)[0]
@@ -91,23 +93,20 @@ def kernel_based(
             X, Y, Z = _convert_to_numeric(*shape_into_2d(X, Y, Z))
             return KCI_CInd(**kwargs).compute_pvalue(X, Y, Z)[0]
 
-    if use_bootstrap and X.shape[0] > bootstrap_num_samples_per_run:
-        random_indices = [
-            np.random.choice(X.shape[0], min(X.shape[0], bootstrap_num_samples_per_run), replace=False)
-            for run in range(bootstrap_num_runs)
-        ]
+    random_indices = [
+        np.random.choice(X.shape[0], min(X.shape[0], max_num_samples_run), replace=False)
+        for run in range(bootstrap_num_runs)
+    ]
 
-        random_seeds = np.random.randint(np.iinfo(np.int32).max, size=len(random_indices))
-        p_values = Parallel(n_jobs=bootstrap_n_jobs)(
-            delayed(evaluate_kernel_test_on_samples)(
-                X[indices], Y[indices], Z[indices] if Z is not None else None, random_seed
-            )
-            for indices, random_seed in zip(random_indices, random_seeds)
+    random_seeds = np.random.randint(np.iinfo(np.int32).max, size=len(random_indices))
+    p_values = Parallel(n_jobs=bootstrap_n_jobs)(
+        delayed(evaluate_kernel_test_on_samples)(
+            X[indices], Y[indices], Z[indices] if Z is not None else None, random_seed
         )
+        for indices, random_seed in zip(random_indices, random_seeds)
+    )
 
-        return p_value_adjust_func(p_values)
-    else:
-        return evaluate_kernel_test_on_samples(X, Y, Z, np.random.randint(np.iinfo(np.int32).max, size=1)[0])
+    return p_value_adjust_func(p_values)
 
 
 def approx_kernel_based(
@@ -378,7 +377,7 @@ def _convert_to_numeric(*args) -> List[np.ndarray]:
             if isinstance(X[0, col], bool):
                 X[:, col] = X[:, col].astype(str)
 
-        result.append(apply_one_hot_encoding(X, fit_one_hot_encoders(X)))
+        result.append(auto_apply_encoders(X, auto_fit_encoders(X)))
 
     return result
 

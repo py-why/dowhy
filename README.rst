@@ -12,10 +12,15 @@
 .. |Downloads| image:: https://pepy.tech/badge/dowhy
 .. _Downloads: https://pepy.tech/project/dowhy
 
-DoWhy | An end-to-end library for causal inference
-===================================================
 
-  Introducing DoWhy and the 4 steps of causal inference | `Microsoft Research Blog <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Video Tutorial <https://note.microsoft.com/MSR-Webinar-DoWhy-Library-Registration-On-Demand.html>`_ | `Arxiv Paper <https://arxiv.org/abs/2011.04216>`_ | `Arxiv Paper (GCM-extension) <https://arxiv.org/abs/2206.06821>`_ | `Slides <https://www2.slideshare.net/AmitSharma315/dowhy-an-endtoend-library-for-causal-inference>`_
+.. image:: dowhy-logo-large.png
+  :width: 50%
+  :align: center
+
+\
+===============================
+
+  Introducing DoWhy and the 4 steps of causal inference | `Microsoft Research Blog <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Video Tutorial <https://www.youtube.com/watch?v=LALfQStONEc&t=114s>`_ | `Arxiv Paper <https://arxiv.org/abs/2011.04216>`_ | `Arxiv Paper (GCM-extension) <https://arxiv.org/abs/2206.06821>`_ | `Slides <https://www2.slideshare.net/AmitSharma315/dowhy-an-endtoend-library-for-causal-inference>`_
 
   Read the `docs <https://py-why.github.io/dowhy/>`_ | Try it online! |Binder|_
 
@@ -30,7 +35,7 @@ As computing systems are more frequently and more actively intervening in societ
 
 Much like machine learning libraries have done for prediction, **"DoWhy" is a Python library that aims to spark causal thinking and analysis**. DoWhy provides a principled four-step interface for causal inference that focuses on explicitly modeling causal assumptions and validating them as much as possible. The key feature of DoWhy is its state-of-the-art refutation API that can automatically test causal assumptions for any estimation method, thus making inference more robust and accessible to non-experts. DoWhy supports estimation of the average causal effect for backdoor, frontdoor, instrumental variable and other identification methods, and estimation of the conditional effect (CATE) through an integration with the EconML library.
 
-For a quick introduction to causal inference, check out `amit-sharma/causal-inference-tutorial <https://github.com/amit-sharma/causal-inference-tutorial/>`_. We also gave a more comprehensive tutorial at the ACM Knowledge Discovery and Data Mining (`KDD 2018 <http://www.kdd.org/kdd2018/>`_) conference: `causalinference.gitlab.io/kdd-tutorial <http://causalinference.gitlab.io/kdd-tutorial/>`_. For an introduction to the four steps of causal inference and its implications for machine learning, you can access this video tutorial from Microsoft Research: `DoWhy Webinar <https://note.microsoft.com/MSR-Webinar-DoWhy-Library-Registration-On-Demand.html>`_.
+For a quick introduction to causal inference, check out `amit-sharma/causal-inference-tutorial <https://github.com/amit-sharma/causal-inference-tutorial/>`_. We also gave a more comprehensive tutorial at the ACM Knowledge Discovery and Data Mining (`KDD 2018 <http://www.kdd.org/kdd2018/>`_) conference: `causalinference.gitlab.io/kdd-tutorial <http://causalinference.gitlab.io/kdd-tutorial/>`_. For an introduction to the four steps of causal inference and its implications for machine learning, you can access this video tutorial from Microsoft Research: `DoWhy Webinar <https://www.microsoft.com/en-us/research/video/foundations-of-causal-inference-and-its-impacts-on-machine-learning/>`_.
 
 Documentation for DoWhy is available at `py-why.github.io/dowhy <https://py-why.github.io/dowhy/>`_.
 

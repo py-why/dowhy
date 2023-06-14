@@ -20,7 +20,7 @@ from dowhy.gcm import (
 from dowhy.gcm.ml import create_linear_regressor, create_logistic_regression_classifier
 
 
-def __create_and_fit_simple_probabilistic_causal_model():
+def _create_and_fit_simple_probabilistic_causal_model():
     X0 = np.random.uniform(-1, 1, 10000)
     X1 = 2 * X0 + np.random.normal(0, 0.1, 10000)
     X2 = 0.5 * X0 + np.random.normal(0, 0.1, 10000)
@@ -40,8 +40,8 @@ def __create_and_fit_simple_probabilistic_causal_model():
 
 
 @flaky(max_runs=3)
-def test_interventional_samples_atomic():
-    causal_model, _ = __create_and_fit_simple_probabilistic_causal_model()
+def test_given_atomic_intervention_with_specific_input_when_draw_interventional_samples_then_return_correct_sample_values():
+    causal_model, _ = _create_and_fit_simple_probabilistic_causal_model()
 
     observed_data = pd.DataFrame({"X0": [0], "X1": [1], "X2": [2], "X3": [3]})
 
@@ -54,8 +54,8 @@ def test_interventional_samples_atomic():
 
 
 @flaky(max_runs=3)
-def test_interventional_samples_conditional():
-    causal_model, _ = __create_and_fit_simple_probabilistic_causal_model()
+def test_given_conditional_intervention_with_specific_input_when_draw_interventional_samples_then_return_correct_sample_values():
+    causal_model, _ = _create_and_fit_simple_probabilistic_causal_model()
 
     observed_data = pd.DataFrame({"X0": [0], "X1": [1], "X2": [2], "X3": [3]})
 
@@ -68,23 +68,23 @@ def test_interventional_samples_conditional():
 
 
 @flaky(max_runs=3)
-def test_interventional_samples_atomic_draw():
-    causal_model, _ = __create_and_fit_simple_probabilistic_causal_model()
+def test_given_atomic_intervention_without_specific_input_when_draw_interventional_samples_then_return_correct_sample_values():
+    causal_model, _ = _create_and_fit_simple_probabilistic_causal_model()
 
     samples = interventional_samples(causal_model, dict(X2=lambda x: np.array(10)), num_samples_to_draw=10)
     assert samples["X2"].to_numpy() == approx(10, abs=0)
 
 
 @flaky(max_runs=3)
-def test_interventional_samples_conditional_draw():
-    causal_model, training_data = __create_and_fit_simple_probabilistic_causal_model()
+def test_given_conditional_intervention_without_specific_input_when_draw_interventional_samples_then_return_correct_sample_values():
+    causal_model, training_data = _create_and_fit_simple_probabilistic_causal_model()
 
     samples = interventional_samples(causal_model, dict(X2=lambda x: x + 10), num_samples_to_draw=10)
     assert samples["X2"].to_numpy() == approx(np.mean(training_data["X2"].to_numpy()) + 10, abs=1)
 
 
 @flaky(max_runs=3)
-def test_interventional_samples_with_categorical_variables_draw():
+def test_given_categorical_variables_when_draw_interventional_samples_then_return_correct_sample_values():
     causal_model = ProbabilisticCausalModel(nx.DiGraph([("X0", "X2"), ("X1", "X2"), ("X2", "X3")]))
     causal_model.set_causal_mechanism("X0", EmpiricalDistribution())
     causal_model.set_causal_mechanism("X1", EmpiricalDistribution())
@@ -127,8 +127,8 @@ def test_interventional_samples_with_categorical_variables_draw():
 
 
 @flaky(max_runs=3)
-def test_interventional_samples_atomic_multiple_interventions():
-    causal_model, _ = __create_and_fit_simple_probabilistic_causal_model()
+def test_given_multiple_atomic_intervention_with_specific_input_when_draw_interventional_samples_then_return_correct_sample_values():
+    causal_model, _ = _create_and_fit_simple_probabilistic_causal_model()
 
     observed_data = pd.DataFrame({"X0": [0], "X1": [1], "X2": [2], "X3": [3]})
 
@@ -140,15 +140,15 @@ def test_interventional_samples_atomic_multiple_interventions():
     assert sample[3] == approx(5, abs=0.3)
 
 
-def test_interventional_samples_raise_error_all_parameter_none():
-    causal_model, _ = __create_and_fit_simple_probabilistic_causal_model()
+def test_when_draw_interventional_samples_without_observed_data_or_num_samples_parameter_then_raise_error():
+    causal_model, _ = _create_and_fit_simple_probabilistic_causal_model()
 
     with pytest.raises(ValueError):
         interventional_samples(causal_model, dict(X0=lambda x: 10))
 
 
-def test_interventional_samples_raise_error_both_parameter_given():
-    causal_model, _ = __create_and_fit_simple_probabilistic_causal_model()
+def test_when_draw_interventional_samples_with_observed_data_and_num_samples_parameter_then_raise_error():
+    causal_model, _ = _create_and_fit_simple_probabilistic_causal_model()
 
     observed_data = pd.DataFrame({"X0": [0], "X1": [1], "X2": [2], "X3": [3]})
 
@@ -158,8 +158,8 @@ def test_interventional_samples_raise_error_both_parameter_given():
         )
 
 
-def test_counterfactual_samples_with_observed_samples():
-    causal_model, _ = __create_and_fit_simple_probabilistic_causal_model()
+def test_given_observed_sample_when_estimate_counterfactual_then_returns_correct_sample_values():
+    causal_model, _ = _create_and_fit_simple_probabilistic_causal_model()
 
     observed_samples = pd.DataFrame({"X0": [1], "X1": [3], "X2": [3], "X3": [4]})
 
@@ -170,8 +170,8 @@ def test_counterfactual_samples_with_observed_samples():
     assert sample["X3"].to_numpy().squeeze() == approx(3.5, abs=0.05)
 
 
-def test_counterfactual_samples_with_noise_samples():
-    causal_model, _ = __create_and_fit_simple_probabilistic_causal_model()
+def test_given_noise_sample_when_estimate_counterfactual_then_returns_correct_sample_values():
+    causal_model, _ = _create_and_fit_simple_probabilistic_causal_model()
 
     noise_samples = pd.DataFrame({"X0": [1], "X1": [2], "X2": [3], "X3": [4]})
 
@@ -182,15 +182,15 @@ def test_counterfactual_samples_with_noise_samples():
     assert sample["X3"].to_numpy().squeeze() == approx(5, abs=0.05)
 
 
-def test_counterfactual_samples_raises_error_all_parameter_none():
-    causal_model, _ = __create_and_fit_simple_probabilistic_causal_model()
+def test_when_estimate_counterfactual_without_observed_or_noise_data_then_raise_error():
+    causal_model, _ = _create_and_fit_simple_probabilistic_causal_model()
 
     with pytest.raises(ValueError):
         counterfactual_samples(causal_model, dict(X0=lambda x: 10))
 
 
-def test_counterfactual_samples_raises_error_both_parameter_given():
-    causal_model, _ = __create_and_fit_simple_probabilistic_causal_model()
+def test_when_estimate_counterfactual_with_observed_and_noise_data_then_raise_error():
+    causal_model, _ = _create_and_fit_simple_probabilistic_causal_model()
 
     with pytest.raises(ValueError):
         counterfactual_samples(

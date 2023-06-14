@@ -15,7 +15,7 @@ from dowhy.gcm.util.general import geometric_median
 
 
 @flaky(max_runs=5)
-def test_estimate_geometric_median():
+def test_when_estimate_geometric_median_then_returns_correct_median_vector():
     a = np.random.normal(10, 1, 100)
     a = np.hstack([a, np.random.normal(10000, 1, 20)])
     b = np.random.normal(-5, 1, 100)
@@ -27,7 +27,7 @@ def test_estimate_geometric_median():
     assert gm[1] == approx(-5, abs=0.5)
 
 
-def test_quantile_based_fwer():
+def test_when_apply_quantile_based_fwer_control_then_returns_single_adjusted_pvalue():
     p_values = np.array([0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1])
     assert quantile_based_fwer(p_values, quantile=0.5) == 0.055 / 0.5
     assert quantile_based_fwer(p_values, quantile=0.25) == 0.0325 / 0.25
@@ -47,7 +47,7 @@ def test_given_p_values_with_nans_when_using_quantile_based_fwer_then_ignores_th
     assert quantile_based_fwer(p_values, quantile=0.5) == 0.055 / 0.5
 
 
-def test_quantile_based_fwer_scaling():
+def test_given_p_values_with_scaling_when_apply_quantile_based_fwer_control_then_returns_single_adjusted_pvalue():
     p_values = np.array([0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1])
     p_values_scaling = np.array([2, 2, 1, 2, 1, 3, 1, 2, 4, 1])
 
@@ -56,7 +56,7 @@ def test_quantile_based_fwer_scaling():
     assert quantile_based_fwer(p_values, p_values_scaling, quantile=0.75) == approx(0.193, abs=0.001)
 
 
-def test_quantile_based_fwer_raises_error():
+def test_given_invalid_inputs_when_apply_quantile_based_fwer_control_then_raises_error():
     with pytest.raises(ValueError):
         assert quantile_based_fwer(np.array([0.1, 0.5, 1]), quantile=0)
 
@@ -70,7 +70,7 @@ def test_quantile_based_fwer_raises_error():
         assert quantile_based_fwer(np.array([0.1, 0.5, 1]), quantile=-0.5)
 
 
-def test_marginal_expectation_returns_all_results():
+def test_when_evaluate_marginal_expectation_without_averaging_result_then_returned_results_have_correct_format():
     # Just checking formats, i.e. no need for correlation.
     X = np.random.normal(0, 1, (1000, 3))
     Y = np.random.normal(0, 1, (1000, 1))
@@ -84,7 +84,7 @@ def test_marginal_expectation_returns_all_results():
     assert results.shape[2] == 1
 
 
-def test_marginal_expectation_returns_reduced_results():
+def test_when_evaluate_marginal_expectation_with_averaging_result_then_returned_results_have_correct_format():
     # Just checking formats, i.e. no need for correlation.
     X = np.random.normal(0, 1, (1000, 3))
     Y = np.random.normal(0, 1, (1000, 1))
@@ -98,7 +98,7 @@ def test_marginal_expectation_returns_reduced_results():
 
 
 @flaky(max_runs=5)
-def test_marginal_expectation_independent_continuous_linear():
+def test_given_linear_data_when_evaluate_marginal_expectation_then_returns_correct_marginal_expectations():
     X = np.random.normal(0, 1, (1000, 3))
     Y = 3 * X[:, 0] + 2 * X[:, 1] - X[:, 2]
     Y = Y.reshape(-1)
@@ -187,7 +187,7 @@ def test_marginal_expectation_independent_continuous_linear():
 
 
 @flaky(max_runs=5)
-def test_marginal_expectation_independent_categorical_linear():
+def test_given_linear_categorical_data_when_evaluate_marginal_expectation_then_returns_correct_marginal_expectations():
     X = np.random.normal(0, 1, (1000, 3))
     Y = 3 * X[:, 0] + 2 * X[:, 1] - X[:, 2]
     Y = (Y <= 0).reshape(-1)
@@ -271,7 +271,7 @@ def test_marginal_expectation_independent_categorical_linear():
 
 
 @flaky(max_runs=5)
-def test_marginal_expectation_independent_continuous_nonlinear():
+def test_given_nonlinear_data_when_evaluate_marginal_expectation_then_returns_correct_marginal_expectations():
     X = np.random.normal(0, 1, (2000, 3))
     Y = (2 * X[:, 0] + X[:, 1]) ** 2 + X[:, 2]
     Y = Y.reshape(-1)
@@ -327,7 +327,7 @@ def test_marginal_expectation_independent_continuous_nonlinear():
 
 
 @flaky(max_runs=5)
-def test_marginal_expectation_independent_categorical_nonlinear():
+def test_given_nonlinear_categorical_data_when_evaluate_marginal_expectation_then_returns_correct_marginal_expectations():
     X = np.random.normal(0, 1, (1000, 3))
     Y = (2 * X[:, 0] + X[:, 1]) ** 2 + X[:, 2]
     Y = (Y <= np.mean(Y)).reshape(-1)
@@ -410,7 +410,7 @@ def test_marginal_expectation_independent_categorical_nonlinear():
     ) == approx(0.2, abs=1)
 
 
-def test_given_different_batch_sizes_when_estimating_marginal_expectation_then_returns_expected_result():
+def test_given_different_batch_sizes_when_estimating_marginal_expectation_then_returns_correct_marginal_expectations():
     X = np.random.normal(0, 1, (34, 3))
     feature_samples = np.random.normal(0, 1, (123, 3))
     expected_non_aggregated = np.array([repmat(X[i, :], feature_samples.shape[0], 1) for i in range(X.shape[0])])
@@ -448,8 +448,8 @@ def test_given_different_batch_sizes_when_estimating_marginal_expectation_then_r
     ) == approx(expected_non_aggregated)
 
 
-@flaky(max_runs=2)
-def test_given_linear_dependent_data_when_estimate_ftest_pvalue_then_returns_expected_result():
+@flaky(max_runs=3)
+def test_given_linear_dependent_data_when_estimate_ftest_pvalue_then_returns_smaller_05():
     X_training = np.random.normal(0, 1, 1000)
     Y_training = X_training + np.random.normal(0, 0.05, 1000)
 
@@ -458,14 +458,20 @@ def test_given_linear_dependent_data_when_estimate_ftest_pvalue_then_returns_exp
 
     assert estimate_ftest_pvalue(X_training, np.array([]), Y_training, X_test, np.array([]), Y_test) < 0.05
 
+
+@flaky(max_runs=3)
+def test_given_linear_independent_data_when_estimate_ftest_pvalue_then_returns_pvalue_greater_05():
+    X_training = np.random.normal(0, 1, 1000)
     Y_training = np.random.normal(0, 0.05, 1000)
+
+    X_test = np.random.normal(0, 1, 1000)
     Y_test = np.random.normal(0, 0.05, 1000)
 
     assert estimate_ftest_pvalue(X_training, np.array([]), Y_training, X_test, np.array([]), Y_test) >= 0.05
 
 
-@flaky(max_runs=2)
-def test_given_multivariate_dependent_data_when_estimate_ftest_pvalue_then_returns_expected_result():
+@flaky(max_runs=3)
+def test_given_multivariate_dependent_data_when_estimate_ftest_pvalue_then_returns_pvalue_smaller_05():
     X1_training = np.random.normal(0, 1, 1000)
     X2_training = np.random.normal(0, 1, 1000)
     Y_training = X1_training + X2_training + np.random.normal(0, 0.05, 1000)
@@ -486,7 +492,15 @@ def test_given_multivariate_dependent_data_when_estimate_ftest_pvalue_then_retur
         < 0.05
     )
 
+
+@flaky(max_runs=3)
+def test_given_multivariate_independent_data_when_estimate_ftest_pvalue_then_returns_pvalue_greater_05():
+    X1_training = np.random.normal(0, 1, 1000)
+    X2_training = np.random.normal(0, 1, 1000)
     Y_training = X1_training + np.random.normal(0, 0.05, 1000)
+
+    X1_test = np.random.normal(0, 1, 1000)
+    X2_test = np.random.normal(0, 1, 1000)
     Y_test = X1_test + np.random.normal(0, 0.05, 1000)
 
     assert (

@@ -303,6 +303,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert refute2.stats["robustness_value"] >= rvalue_threshold and refute2.stats["robustness_value"] <= 1
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
+    @pytest.mark.econml
     @pytest.mark.parametrize(
         ["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulation_method"],
         [
@@ -391,10 +392,11 @@ class TestAddUnobservedCommonCauseRefuter(object):
         # we patched figure plotting call to avoid drawing plots during tests
         assert mock_fig.call_count > 0
 
+    @pytest.mark.econml
     @pytest.mark.parametrize(
         ["estimator_method", "effect_fraction_on_outcome", "benchmark_common_causes", "simulation_method"],
         [
-            ("backdoor.econml.dml.LinearDML", 2, ["W3"], "non-parametric-partial-R2"),
+            ("backdoor.econml.dml.dml.LinearDML", 2, ["W3"], "non-parametric-partial-R2"),
         ],
     )
     @patch("matplotlib.pyplot.figure")

@@ -235,12 +235,12 @@ class ClassifierFCM(FunctionalCausalModel, ProbabilityEstimatorModel):
         :return: Class labels Y based on the inputs and noise.
         """
         noise_samples = shape_into_2d(noise_samples)
-        probabilities = self.estimate_probabilities(parent_samples)
+        indices = np.argmax(np.cumsum(self.estimate_probabilities(parent_samples), axis=1) >= noise_samples, axis=1)
 
-        probabilities = np.cumsum(probabilities, axis=1) - noise_samples
-        probabilities[probabilities < 0] = 1
-
-        return shape_into_2d(np.array(self.get_class_names(np.argmin(probabilities, axis=1))))
+        # Looks for the first index where the cumulative sum of the probabilities is larger than the threshold.
+        # Note that if there are multiple indices with the same maximum value (as in this case here), the argmax
+        # function returns the first index.
+        return shape_into_2d(np.array(self.get_class_names(indices)))
 
     def estimate_probabilities(self, parent_samples: np.ndarray) -> np.ndarray:
         """Returns the class probabilities for the given parent_samples.

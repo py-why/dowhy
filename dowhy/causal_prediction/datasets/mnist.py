@@ -202,7 +202,7 @@ class MNISTIndAttribute(MultipleDomainDataset):
         a = torch.unsqueeze(a, 1)
 
         return TensorDataset(x, y, a)
-
+    
     def torch_bernoulli_(self, p, size):
         return (torch.rand(size) < p).float()
 

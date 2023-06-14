@@ -4,11 +4,12 @@ Functions in this module should be considered experimental, meaning there might 
 """
 
 from functools import partial
-from typing import Any, Callable, Dict, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 import numpy as np
 import pandas as pd
 
+from dowhy.gcm import auto
 from dowhy.gcm.cms import InvertibleStructuralCausalModel, ProbabilisticCausalModel, StructuralCausalModel
 from dowhy.gcm.fitting_sampling import fit
 
@@ -17,7 +18,7 @@ from dowhy.gcm.fitting_sampling import fit
 # results.
 # Note that this function does not re-fit the causal model(s) and only executes the provided query as it is. In order
 # to re-refit the graphical causal model on random subsets of the data before executing the query, consider using the
-# bootstrap_training_and_sampling function.
+# fit_and_compute function.
 #
 # **Example usage:**
 #
@@ -32,9 +33,9 @@ from dowhy.gcm.fitting_sampling import fit
 # lambda : gcm.arrow_strength(causal_model, target_node='Y').
 #
 # In order to incorporate uncertainties coming from fitting the causal model(s), we can use
-# gcm.bootstrap_training_and_sampling instead:
+# gcm.fit_and_compute instead:
 # >>>  strength_medians, strength_intervals = gcm.confidence_intervals(
-# >>>        gcm.bootstrap_training_and_sampling(gcm.arrow_strength,
+# >>>        gcm.fit_and_compute(gcm.arrow_strength,
 # >>>                                            causal_model,
 # >>>                                            bootstrap_training_data=data,
 # >>>                                            target_node='Y'))
@@ -43,7 +44,7 @@ from dowhy.gcm.fitting_sampling import fit
 bootstrap_sampling = partial
 
 
-def bootstrap_training_and_sampling(
+def fit_and_compute(
     f: Callable[
         [Union[ProbabilisticCausalModel, StructuralCausalModel, InvertibleStructuralCausalModel], Any],
         Dict[Any, Union[np.ndarray, float]],
@@ -51,6 +52,7 @@ def bootstrap_training_and_sampling(
     causal_model: Union[ProbabilisticCausalModel, StructuralCausalModel, InvertibleStructuralCausalModel],
     bootstrap_training_data: pd.DataFrame,
     bootstrap_data_subset_size_fraction: float = 0.75,
+    auto_assign_quality: Optional[auto.AssignmentQuality] = None,
     *args,
     **kwargs,
 ):
@@ -60,10 +62,10 @@ def bootstrap_training_and_sampling(
     **Example usage:**
 
         >>> scores_median, scores_intervals = gcm.confidence_intervals(
-        >>>     gcm.bootstrap_training_and_sampling(gcm.arrow_strength,
-        >>>                                         causal_model,
-        >>>                                         bootstrap_training_data=data,
-        >>>                                         target_node='Y'))
+        >>>     gcm.fit_and_compute(gcm.arrow_strength,
+        >>>                         causal_model,
+        >>>                         bootstrap_training_data=data,
+        >>>                         target_node='Y'))
 
     :param f: The causal query to perform. A causal query is a function taking a graphical causal model as first
               parameter and an arbitrary number of remaining parameters. It must return a dictionary with
@@ -73,6 +75,9 @@ def bootstrap_training_and_sampling(
                                     in every iteration when calling fit.
     :param bootstrap_data_subset_size_fraction: The fraction defines the fractional size of the subset compared to
                                                 the total training data.
+    :param auto_assign_quality: If a quality is provided, then the existing causal mechanisms in the given causal_model
+                                are overridden by new automatically inferred mechanisms based on the provided
+                                AssignmentQuality. If None is given, the existing assigned mechanisms are used.
     :param args: Args passed through verbatim to the causal queries.
     :param kwargs: Keyword args passed through verbatim to the causal queries.
     :return: A tuple containing (1) the median of causal query results and (2) the confidence intervals.
@@ -87,6 +92,10 @@ def bootstrap_training_and_sampling(
                 replace=False,
             )
         ]
+
+        if auto_assign_quality is not None:
+            auto.assign_causal_mechanisms(causal_model_copy, sampled_data, auto_assign_quality, override_models=True)
+
         fit(causal_model_copy, sampled_data)
         return f(causal_model_copy, *args, **kwargs)
 

@@ -9,15 +9,15 @@ from dowhy.gcm import (
     EmpiricalDistribution,
     ProbabilisticCausalModel,
     bootstrap_sampling,
-    bootstrap_training_and_sampling,
     draw_samples,
+    fit_and_compute,
 )
 from dowhy.gcm.confidence_intervals import confidence_intervals
 from dowhy.gcm.ml import create_hist_gradient_boost_regressor
 
 
 @flaky(max_runs=2)
-def test_given_causal_graph_based_estimation_func_when_confidence_interval_then_can_use_bootstrap_training_and_sampling():
+def test_given_causal_graph_based_estimation_func_when_confidence_interval_then_can_use_fit_and_compute():
     def draw_single_sample(causal_graph, variable):
         return draw_samples(causal_graph, 1)[variable][0]
 
@@ -26,7 +26,7 @@ def test_given_causal_graph_based_estimation_func_when_confidence_interval_then_
     causal_model.set_causal_mechanism("Y", AdditiveNoiseModel(create_hist_gradient_boost_regressor()))
 
     median, interval = confidence_intervals(
-        bootstrap_training_and_sampling(
+        fit_and_compute(
             draw_single_sample,
             causal_model,
             bootstrap_training_data=pd.DataFrame(

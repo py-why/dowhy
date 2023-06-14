@@ -2,6 +2,8 @@
 
 """
 import logging
+import typing
+import warnings
 from itertools import combinations
 
 from sympy import init_printing
@@ -48,15 +50,12 @@ class CausalModel:
         At least one of graph, common_causes or instruments must be provided. If
         none of these variables are provided, then learn_graph() can be used later.
 
-        :param data: a pandas dataframe containing treatment, outcome and other
-        variables.
+        :param data: a pandas dataframe containing treatment, outcome and other variables.
         :param treatment: name of the treatment variable
         :param outcome: name of the outcome variable
-        :param graph: path to DOT file containing a DAG or a string containing
-        a DAG specification in DOT format
+        :param graph: path to DOT file containing a DAG or a string containing a DAG specification in DOT format
         :param common_causes: names of common causes of treatment and _outcome. Only used when graph is None.
-        :param instruments: names of instrumental variables for the effect of
-        treatment on outcome. Only used when graph is None.
+        :param instruments: names of instrumental variables for the effect of treatment on outcome. Only used when graph is None.
         :param effect_modifiers: names of variables that can modify the treatment effect. If not provided, then the causal graph is used to find the effect modifiers. Estimators will return multiple different estimates based on each value of effect_modifiers.
         :param estimand_type: the type of estimand requested (currently only "nonparametric-ate" is supported). In the future, may support other specific parametric forms of identification.
         :param proceed_when_unidentifiable: does the identification proceed by ignoring potential unobserved confounders. Binary flag.
@@ -119,6 +118,21 @@ class CausalModel:
 
         self._other_variables = kwargs
         self.summary()
+
+        # Emit a `UserWarning` if there are any unobserved graph variables and
+        # and log a message highlighting data variables that are not part of the graph.
+        graph_variable_names = set(self._graph.get_all_nodes(include_unobserved=True))
+        data_variable_names = set(self._data.columns)
+        _warn_if_unobserved_graph_variables(
+            graph_variable_names=graph_variable_names,
+            data_variable_names=data_variable_names,
+            logger=self.logger,
+        )
+        _warn_if_unused_data_variables(
+            graph_variable_names=graph_variable_names,
+            data_variable_names=data_variable_names,
+            logger=self.logger,
+        )
 
     def init_graph(self, graph, identify_vars):
         """
@@ -289,7 +303,7 @@ class CausalModel:
                     if method_params is None:
                         method_params = {}
                     # Define the third-party estimation method to be used
-                    method_params[third_party_estimator_package + "_methodname"] = estimator_name
+                    method_params[third_party_estimator_package + "_estimator"] = estimator_name
             else:  # For older dowhy methods
                 self.logger.info(estimator_name)
                 # Process the dowhy estimators
@@ -308,33 +322,24 @@ class CausalModel:
                 causal_estimator = self._estimator_cache[method_name]
             else:
                 causal_estimator = causal_estimator_class(
-                    self._data,
                     identified_estimand,
-                    self._treatment,
-                    self._outcome,  # names of treatment and outcome
-                    control_value=control_value,
-                    treatment_value=treatment_value,
                     test_significance=test_significance,
                     evaluate_effect_strength=evaluate_effect_strength,
                     confidence_intervals=confidence_intervals,
-                    target_units=target_units,
-                    effect_modifiers=effect_modifiers,
                     **method_params,
                     **extra_args,
                 )
+
                 self._estimator_cache[method_name] = causal_estimator
 
         return estimate_effect(
+            self._data,
             self._treatment,
             self._outcome,
-            identified_estimand,
             identifier_name,
             causal_estimator,
             control_value,
             treatment_value,
-            test_significance,
-            evaluate_effect_strength,
-            confidence_intervals,
             target_units,
             effect_modifiers,
             fit_estimator,
@@ -371,7 +376,7 @@ class CausalModel:
         # Check if estimator's target estimand is identified
         if identified_estimand.estimands[identifier_name] is None:
             self.logger.warning("No valid identified estimand for using instrumental variables method")
-            estimate = CausalEstimate(None, None, None, None, None)
+            estimate = CausalEstimate(None, None, None, None, None, None)
         else:
             if fit_estimator:
                 # Note that while the name of the variable is the same,
@@ -381,12 +386,13 @@ class CausalModel:
                 # estimator from this function to call estimate_effect
                 # with fit_estimator=False.
                 self.causal_estimator = causal_estimator_class(
-                    self._data,
                     identified_estimand,
+                    **method_params,
+                )
+                self.causal_estimator.fit(
+                    self._data,
                     self._treatment,
                     self._outcome,
-                    test_significance=False,
-                    **method_params,
                 )
             else:
                 # Estimator had been computed in a previous call
@@ -460,7 +466,7 @@ class CausalModel:
 
         for method in method_name_arr:
             interpreter = interpreters.get_class_object(method)
-            interpreter(self, **kwargs).interpret()
+            interpreter(self, **kwargs).interpret(self._data)
 
     def summary(self, print_to_stdout=False):
         """Print a text summary of the model.
@@ -531,3 +537,57 @@ class CausalModel:
         self.logger.info(refuter._refutation_passed)
 
         return res
+
+
+def _warn_if_unobserved_graph_variables(
+    graph_variable_names: typing.Set[str],
+    data_variable_names: typing.Set[str],
+    logger: logging.Logger,
+):
+    """Emits a warning if there are any graph variables that are not observed in the data."""
+    unobserved_graph_variable_names = graph_variable_names.difference(data_variable_names)
+
+    if unobserved_graph_variable_names:
+        observed_graph_variable_names = graph_variable_names.intersection(data_variable_names)
+
+        num_graph_variables = len(graph_variable_names)
+        num_unobserved_graph_variables = len(unobserved_graph_variable_names)
+        num_observed_graph_variables = len(observed_graph_variable_names)
+
+        warnings.warn(
+            f"{num_unobserved_graph_variables} variables are assumed "
+            "unobserved because they are not in the dataset. "
+            "Configure the logging level to `logging.WARNING` or higher for additional details."
+        )
+        logger.warn(
+            "The graph defines %d variables. %d were found in the dataset "
+            "and will be analyzed as observed variables. %d were not found "
+            "in the dataset and will be analyzed as unobserved variables. "
+            "The observed variables are: '%s'. "
+            "The unobserved variables are: '%s'. "
+            "If this matches your expectations for observations, please continue. "
+            "If you expected any of the unobserved variables to be in the "
+            "dataframe, please check for typos.",
+            num_graph_variables,
+            num_observed_graph_variables,
+            num_unobserved_graph_variables,
+            sorted(observed_graph_variable_names),
+            sorted(unobserved_graph_variable_names),
+        )
+
+
+def _warn_if_unused_data_variables(
+    data_variable_names: typing.Set[str],
+    graph_variable_names: typing.Set[str],
+    logger: logging.Logger,
+):
+    """Logs a warning message if there are any data variables that are not used in the graph."""
+    unused_data_variable_names = data_variable_names.difference(graph_variable_names)
+
+    if unused_data_variable_names:
+        logger.warn(
+            "There are an additional %d variables in the dataset that are "
+            "not in the graph. Variable names are: '%s'",
+            len(unused_data_variable_names),
+            sorted(unused_data_variable_names),
+        )

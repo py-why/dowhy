@@ -7,6 +7,8 @@ from typing import List
 import numpy as np
 import sklearn
 from packaging import version
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import PolynomialFeatures
 
 if version.parse(sklearn.__version__) < version.parse("1.0"):
     from sklearn.experimental import enable_hist_gradient_boosting  # noqa
@@ -25,12 +27,12 @@ from sklearn.svm import SVC
 
 from dowhy.gcm.fcms import ClassificationModel
 from dowhy.gcm.ml.regression import SklearnRegressionModel
-from dowhy.gcm.util.general import apply_one_hot_encoding, shape_into_2d
+from dowhy.gcm.util.general import auto_apply_encoders, shape_into_2d
 
 
 class SklearnClassificationModel(SklearnRegressionModel, ClassificationModel):
     def predict_probabilities(self, X: np.array) -> np.ndarray:
-        return shape_into_2d(self._sklearn_mdl.predict_proba(apply_one_hot_encoding(X, self._one_hot_encoders)))
+        return shape_into_2d(self._sklearn_mdl.predict_proba(auto_apply_encoders(X, self._encoders)))
 
     @property
     def classes(self) -> List[str]:
@@ -74,3 +76,13 @@ def create_knn_classifier(**kwargs) -> SklearnClassificationModel:
 
 def create_gaussian_nb_classifier(**kwargs) -> SklearnClassificationModel:
     return SklearnClassificationModel(GaussianNB(**kwargs))
+
+
+def create_polynom_logistic_regression_classifier(
+    degree: int = 3, **kwargs_logistic_regression
+) -> SklearnClassificationModel:
+    return SklearnClassificationModel(
+        make_pipeline(
+            PolynomialFeatures(degree=degree, include_bias=False), LogisticRegression(**kwargs_logistic_regression)
+        )
+    )
