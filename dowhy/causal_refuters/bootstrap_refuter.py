@@ -109,6 +109,7 @@ def _refute_once(
 
     if chosen_variables is not None:
         for variable in chosen_variables:
+
             if ("float" or "int") in new_data[variable].dtype.name:
                 scaling_factor = new_data[variable].std()
                 new_data[variable] += np.random.normal(loc=0.0, scale=noise * scaling_factor, size=sample_size)

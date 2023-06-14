@@ -150,6 +150,7 @@ def __adjacency_matrix_identify_effect(
     tsort_node_names: OrderedSet,
     node_names: OrderedSet = None,
 ):
+
     node2idx, idx2node = __idx_node_mapping(node_names)
 
     # Estimators list for returning after identification

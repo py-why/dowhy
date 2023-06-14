@@ -6,6 +6,7 @@ class GraphLearner:
     """
 
     def __init__(self, data, library_class, *args, **kwargs):
+
         self._data = data
         self._labels = list(self._data.columns)
         self._adjacency_matrix = None

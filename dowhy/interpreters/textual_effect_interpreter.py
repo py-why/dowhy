@@ -4,6 +4,7 @@ from dowhy.interpreters.textual_interpreter import TextualInterpreter
 
 
 class TextualEffectInterpreter(TextualInterpreter):
+
     SUPPORTED_ESTIMATORS = ["all"]
 
     def __init__(self, instance, **kwargs):

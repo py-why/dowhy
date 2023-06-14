@@ -843,6 +843,7 @@ def sensitivity_simulation(
         return refute
 
     else:  # Deal with multiple value inputs
+
         if isinstance(kappa_t, (list, np.ndarray)) and isinstance(
             kappa_y, (list, np.ndarray)
         ):  # Deal with range inputs

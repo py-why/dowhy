@@ -148,6 +148,7 @@ class Causalml(CausalEstimator):
         return self
 
     def _get_causalml_class_object(self, module_method_name, *args, **kwargs):
+
         try:
             (module_name, _, class_name) = module_method_name.rpartition(".")
             estimator_module = import_module(module_name)

@@ -26,6 +26,7 @@ class EstimandType(Enum):
 
 
 class BackdoorAdjustment(Enum):
+
     # Backdoor method names
     BACKDOOR_DEFAULT = "default"
     BACKDOOR_EXHAUSTIVE = "exhaustive-search"
