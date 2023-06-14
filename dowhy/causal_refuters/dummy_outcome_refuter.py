@@ -457,7 +457,6 @@ def refute_dummy_outcome(
         estimates = []
 
         if estimator_present == False:
-
             # Warn the user that the specified parameter is not applicable when no estimator is present in the transformation
             if test_fraction != DEFAULT_TEST_FRACTION:
                 logger.warning("'test_fraction' is not applicable as there is no base treatment value.")
@@ -505,7 +504,6 @@ def refute_dummy_outcome(
             estimates.append(new_effect.value)
 
         else:
-
             groups = preprocess_data_by_treatment(
                 data, treatment_name, unobserved_confounder_values, bucket_size_scale_factor, chosen_variables
             )
@@ -599,7 +597,6 @@ def refute_dummy_outcome(
     # distribution of the refuter.
 
     if estimator_present == False:
-
         dummy_estimate = CausalEstimate(
             data=None,
             treatment_name=estimate._treatment_name,

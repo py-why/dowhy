@@ -6,7 +6,6 @@ from dowhy.utils.dgp import DataGeneratingProcess
 
 
 class RandomNeuralNetwork(DataGeneratingProcess):
-
     TRAINING_SAMPLE_SIZE = 10
     RANDOM_STATE = 0
     DEFAULT_ARCH = (50, 50, 50)

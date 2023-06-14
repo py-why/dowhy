@@ -3,7 +3,6 @@ import pandas as pd
 
 
 class DataGeneratingProcess:
-
     DEFAULT_PERCENTILE = 0.9
 
     def __init__(self, **kwargs):

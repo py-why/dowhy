@@ -10,7 +10,6 @@ from dowhy.utils.api import parse_state
 
 
 class SignificanceTestType(Enum):
-
     AUTO = "auto"
     BOOTSTRAP = "bootstrap"
     NORMAL = "normal_test"
@@ -87,21 +86,18 @@ def choose_variables(required_variables: Union[bool, int, list], variables_of_in
     invert = None
 
     if required_variables is False:
-
         logger.info(
             "All variables required: Running bootstrap adding noise to confounders, instrumental variables and effect modifiers."
         )
         return None
 
     elif required_variables is True:
-
         logger.info(
             "All variables required: Running bootstrap adding noise to confounders, instrumental variables and effect modifiers."
         )
         return variables_of_interest
 
     elif type(required_variables) is int:
-
         if len(variables_of_interest) < required_variables:
             logger.error(
                 "Too many variables passed.\n The number of  variables is: {}.\n The number of variables passed: {}".format(
@@ -116,7 +112,6 @@ def choose_variables(required_variables: Union[bool, int, list], variables_of_in
             return random.sample(variables_of_interest, required_variables)
 
     elif type(required_variables) is list:
-
         # Check if all are select or deselect variables
         if all(variable[0] == "-" for variable in required_variables):
             invert = True

@@ -67,7 +67,6 @@ def anomaly_scores(
         leave=True,
         disable=not config.show_progress_bars,
     ):
-
         if is_root_node(causal_model.graph, node):
             anomaly_scorer = anomaly_scorer_factory()
             anomaly_scorer.fit(causal_model.causal_mechanism(node).draw_samples(num_samples_unconditional))

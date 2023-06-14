@@ -47,7 +47,6 @@ class EValueSensitivityAnalyzer:
         outcome_name: str,
         no_effect_baseline=None,
     ):
-
         self.estimate = estimate
         self.estimand = estimand
         self.data = data
@@ -253,7 +252,6 @@ class EValueSensitivityAnalyzer:
         observed_covariate_e_values = []
         backdoor_vars = self.estimand.get_backdoor_variables()
         for drop_var in backdoor_vars:
-
             # new estimator
             new_backdoor_vars = [var for var in backdoor_vars if var != drop_var]
             new_estimand = copy.deepcopy(self.estimand)
