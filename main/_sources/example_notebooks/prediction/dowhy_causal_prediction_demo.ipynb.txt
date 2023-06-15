@@ -7,9 +7,7 @@
    "source": [
     "# Demo for DoWhy Causal Prediction on MNIST\n",
     "\n",
-    "We're adding prediction functionality to DoWhy. The goal of this notebook is to demonstrate an example of causal prediction using *Causally Adaptive Constraint Minimization (CACM)* [1]. \n",
-    "\n",
-    "[1] Kaur, J.N., Kıcıman, E., & Sharma, A. (2022). Modeling the Data-Generating Process is Necessary for Out-of-Distribution Generalization. ArXiv, abs/2206.07837."
+    "The goal of this notebook is to demonstrate an example of causal prediction using *Causally Adaptive Constraint Minimization (CACM)* (https://arxiv.org/abs/2206.07837) [1]. "
    ]
   },
   {
@@ -20,9 +18,6 @@
     "## Multi-attribute distribution shift datasets \n",
     "\n",
     "Domain generalization literature has largely focused on datasets with a single kind of distribution shift over one attribute. Using MNIST as an example, domains are created either by adding new values of a spurious attribute like rotation (e.g., Rotated-MNIST dataset [2]) or domains exhibit different values of correlation between the class label and a spurious attribute like color (e.g., Colored-MNIST [3]). However, real-world data often has multiple distribution shifts over different attributes. For example, satellite imagery data demonstrates distribution shifts over time as well as the region captured.\n",
-    "\n",
-    "[2] Ghifary, M., Kleijn, W., Zhang, M., & Balduzzi, D. (2015). Domain Generalization for Object Recognition with Multi-task Autoencoders. 2015 IEEE International Conference on Computer Vision (ICCV), 2551-2559.<br>\n",
-    "[3] Arjovsky, M., Bottou, L., Gulrajani, I., & Lopez-Paz, D. (2019). Invariant Risk Minimization. ArXiv, abs/1907.02893.\n",
     "\n",
     "\n",
     "### Multi-attribute MNIST\n",
@@ -264,7 +259,9 @@
    "id": "adf11498",
    "metadata": {},
    "source": [
-    "### Initialize algorithm class: ERM"
+    "### Initialize algorithm class: ERM\n",
+    "\n",
+    "We have implemented Empirical Risk Minimization (ERM) in `dowhy.causal_prediction.algorithms` as a baseline."
    ]
   },
   {
@@ -340,9 +337,9 @@
    "id": "bb318eea",
    "metadata": {},
    "source": [
-    "## Prediction with CACM\n",
+    "## Prediction with *CACM*\n",
     "\n",
-    "We now train and evaluate the above dataset with CACM. We specify the type of shifts present using list `attr_types` provided as input to CACM. Further instructions regarding using CACM with multi-attribute shifts is provided in the next section."
+    "We now train and evaluate the above dataset with *CACM*. We specify the type of shifts present using list `attr_types` provided as input to *CACM*. Further instructions regarding using *CACM* with multi-attribute shifts is provided in the next section."
    ]
   },
   {
@@ -362,7 +359,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "# `attr_types` list contains type of attributes present (supports 'causal' and 'ind' currently)\n",
+    "# `attr_types` list contains type of attributes present (supports 'causal', 'conf', ind', and  'sel' currently)\n",
     "algorithm = CACM(model, lr=1e-3, gamma=1e-2, attr_types=['causal'], lambda_causal=100.)"
    ]
   },
@@ -404,7 +401,7 @@
    "source": [
     "### MNIST Independent and Causal+Independent datasets\n",
     "\n",
-    "We show how to perform the above evaluation for `MNISTIndAttribute` and`MNISTCausalIndAttribute` datasets. Additional `attr_types` should be provided to CACM algorithm for handling multiple shifts. We currently support `Causal` and `Independent` distribution shifts in the data."
+    "We show how to perform the above evaluation for `MNISTIndAttribute` and`MNISTCausalIndAttribute` datasets. Additional `attr_types` should be provided to *CACM* algorithm for handling multiple shifts. We currently support *Causal*, *Confounded*, *Independent*, and *Selected* distribution shifts in the data."
    ]
   },
   {
@@ -435,7 +432,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "algorithm = CACM(model, lr=1e-3, gamma=1e-2, attr_types=['ind'], lambda_ind=10.)"
+    "algorithm = CACM(model, lr=1e-3, gamma=1e-2, attr_types=['ind'], lambda_ind=10., E_eq_A=[0])"
    ]
   },
   {
@@ -466,8 +463,8 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "# `attr_types` can be provided in any order\n",
-    "algorithm = CACM(model, lr=1e-3, gamma=1e-2, attr_types=['ind', 'causal'], lambda_causal=100., lambda_ind=10.)"
+    "# `attr_types` should be ordered consistent with the attribute order in dataset class\n",
+    "algorithm = CACM(model, lr=1e-3, gamma=1e-2, attr_types=['causal', 'ind'], lambda_causal=100., lambda_ind=10., E_eq_A=[1])"
    ]
   },
   {
@@ -480,18 +477,24 @@
     "We provide our demo on MNIST using ERM and *CACM* algorithms. It is possible to extend the evaluation to new datasets and algorithms for evaluation.\n",
     "\n",
     "\n",
-    "New datasets can be added to `dowhy.causal_prediction.datasets` and imported here, as we did for MNIST. We provide description of the MNIST dataset (and variants) in `dowhy.causal_prediction.datasets.mnist` that will be helpful in creating new dataset classes. We currently support `Causal` and `Independent` distribution shifts in the data.\n",
+    "New datasets can be added to `dowhy.causal_prediction.datasets` and imported here, as we did for MNIST. We provide description of the MNIST dataset (and variants) in `dowhy.causal_prediction.datasets.mnist` that will be helpful in creating new dataset classes. We currently support *Causal*, *Confounded*, *Independent*, and *Selected* distribution shifts in the data. \n",
     "\n",
     "We have implemented ERM in `dowhy.causal_prediction.algorithms` as a baseline. Additional algorithms can be added by overriding the `training_step` function in base class `PredictionAlgorithm`."
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "6206a050",
+   "cell_type": "markdown",
+   "id": "3b9e1b05",
    "metadata": {},
-   "outputs": [],
-   "source": []
+   "source": [
+    "## References\n",
+    "\n",
+    "[1] Kaur, J.N., Kıcıman, E., & Sharma, A. (2022). Modeling the Data-Generating Process is Necessary for Out-of-Distribution Generalization. ArXiv, abs/2206.07837.\n",
+    "\n",
+    "[2] Ghifary, M., Kleijn, W., Zhang, M., & Balduzzi, D. (2015). Domain Generalization for Object Recognition with Multi-task Autoencoders. 2015 IEEE International Conference on Computer Vision (ICCV), 2551-2559.<br>\n",
+    "\n",
+    "[3] Arjovsky, M., Bottou, L., Gulrajani, I., & Lopez-Paz, D. (2019). Invariant Risk Minimization. ArXiv, abs/1907.02893.\n"
+   ]
   }
  ],
  "metadata": {
@@ -510,7 +513,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.7.11"
+   "version": "3.8.16"
   }
  },
  "nbformat": 4,
