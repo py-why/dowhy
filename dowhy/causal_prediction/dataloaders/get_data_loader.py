@@ -108,7 +108,6 @@ def get_loaders(
     holdout_fraction=0.2,
     trial_seed=0,
 ):
-
     """Return training, validation, and test dataloaders.
 
     :param dataset: dataset class containing list of environments
