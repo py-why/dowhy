@@ -383,11 +383,11 @@ node (it has no parents), <span class="math notranslate nohighlight">\(Y\)</span
 distinguishes between these two types of nodes.</p>
 <p>For root nodes such as <span class="math notranslate nohighlight">\(X\)</span>, the distribution <span class="math notranslate nohighlight">\(P_x\)</span> is modeled using a stochastic model.
 Non-root nodes such as <span class="math notranslate nohighlight">\(Y\)</span> are modelled using a <em>conditional</em> stochastic model. DoWhy’s gcm package
-defines corresponding interfaces for both, namely <a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.graph.StochasticModel" title="dowhy.gcm.graph.StochasticModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">StochasticModel</span></code></a> and
-<a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.graph.ConditionalStochasticModel" title="dowhy.gcm.graph.ConditionalStochasticModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalStochasticModel</span></code></a>.</p>
+defines corresponding interfaces for both, namely <a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.causal_mechanisms.StochasticModel" title="dowhy.gcm.causal_mechanisms.StochasticModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">StochasticModel</span></code></a> and
+<a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.causal_mechanisms.ConditionalStochasticModel" title="dowhy.gcm.causal_mechanisms.ConditionalStochasticModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalStochasticModel</span></code></a>.</p>
 <p>The gcm package also provides ready-to-use implementations, such as <code class="xref py py-class docutils literal notranslate"><span class="pre">ScipyDistribution</span></code> or <a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.stochastic_models.BayesianGaussianMixtureDistribution" title="dowhy.gcm.stochastic_models.BayesianGaussianMixtureDistribution"><code class="xref py py-class docutils literal notranslate"><span class="pre">BayesianGaussianMixtureDistribution</span></code></a> for
-<a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.graph.StochasticModel" title="dowhy.gcm.graph.StochasticModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">StochasticModel</span></code></a>, and <a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.fcms.AdditiveNoiseModel" title="dowhy.gcm.fcms.AdditiveNoiseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdditiveNoiseModel</span></code></a> for
-<a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.graph.ConditionalStochasticModel" title="dowhy.gcm.graph.ConditionalStochasticModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalStochasticModel</span></code></a>.</p>
+<a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.causal_mechanisms.StochasticModel" title="dowhy.gcm.causal_mechanisms.StochasticModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">StochasticModel</span></code></a>, and <a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.causal_mechanisms.AdditiveNoiseModel" title="dowhy.gcm.causal_mechanisms.AdditiveNoiseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdditiveNoiseModel</span></code></a> for
+<a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.causal_mechanisms.ConditionalStochasticModel" title="dowhy.gcm.causal_mechanisms.ConditionalStochasticModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalStochasticModel</span></code></a>.</p>
 <p>Knowing that, we can now start to manually assign causal models to nodes according to our needs.
 Say, we know from domain knowledge, that our root node X follows a normal distribution. In this
 case, we can explicitly assign this:</p>
@@ -400,7 +400,7 @@ case, we can explicitly assign this:</p>
 </pre></div>
 </div>
 <p>For the non-root node Y, let’s use an additive noise model (ANM), represented by the
-<a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.fcms.AdditiveNoiseModel" title="dowhy.gcm.fcms.AdditiveNoiseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdditiveNoiseModel</span></code></a> class. It has a
+<a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.causal_mechanisms.AdditiveNoiseModel" title="dowhy.gcm.causal_mechanisms.AdditiveNoiseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdditiveNoiseModel</span></code></a> class. It has a
 structural assignment of the form: <span class="math notranslate nohighlight">\(Y := f(X) + N\)</span>. Here, f is a deterministic prediction
 function, whereas N is a noise term. Let’s put all of this together:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span>
@@ -410,7 +410,7 @@ function, whereas N is a noise term. Let’s put all of this together:</p>
 </div>
 <p>The rather interesting part here is the <code class="docutils literal notranslate"><span class="pre">prediction_model</span></code>, which corresponds to our function
 <span class="math notranslate nohighlight">\(f\)</span> above. This prediction model must satisfy the contract defined by
-<a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.fcms.PredictionModel" title="dowhy.gcm.fcms.PredictionModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionModel</span></code></a>, i.e. it must implement the methods:</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionModel</span></code>, i.e. it must implement the methods:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
 <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span> <span class="o">...</span>
 </pre></div>
@@ -437,22 +437,20 @@ prepare the training data.</p>
 <p>In some scenarios the ground truth models might be known and should be used instead. Let’s
 assume, we know that our relationship are linear with coefficients <span class="math notranslate nohighlight">\(\alpha = 2\)</span> and
 <span class="math notranslate nohighlight">\(\beta = 3\)</span>. Let’s make use of this knowledge by creating a custom prediction model that
-implements the <a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.fcms.PredictionModel" title="dowhy.gcm.fcms.PredictionModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionModel</span></code></a> interface:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">MyCustomModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">PredictionModel</span><span class="p">):</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coefficient</span><span class="p">):</span>
-<span class="gp">&gt;&gt;&gt; </span>        <span class="bp">self</span><span class="o">.</span><span class="n">coefficient</span> <span class="o">=</span> <span class="n">coefficient</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
-<span class="gp">&gt;&gt;&gt; </span>        <span class="c1"># Nothing to fit here, since we know the ground truth.</span>
-<span class="gp">&gt;&gt;&gt; </span>        <span class="k">pass</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-<span class="gp">&gt;&gt;&gt; </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefficient</span> <span class="o">*</span> <span class="n">X</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="gp">&gt;&gt;&gt; </span>        <span class="k">return</span> <span class="n">MyCustomModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coefficient</span><span class="p">)</span>
-</pre></div>
-</div>
+implements the <code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionModel</span></code> interface:</p>
+<p>&gt;&gt;&gt;import dowhy.gcm.ml.prediction_model class MyCustomModel(gcm.ml.PredictionModel):
+&gt;&gt;&gt;     def __init__(self, coefficient):
+&gt;&gt;&gt;         self.coefficient = coefficient
+&gt;&gt;&gt;
+&gt;&gt;&gt;     def fit(self, X, Y):
+&gt;&gt;&gt;         # Nothing to fit here, since we know the ground truth.
+&gt;&gt;&gt;         pass
+&gt;&gt;&gt;
+&gt;&gt;&gt;     def predict(self, X):
+&gt;&gt;&gt;         return self.coefficient * X
+&gt;&gt;&gt;
+&gt;&gt;&gt;     def clone(self):
+&gt;&gt;&gt;         return MyCustomModel(self.coefficient)</p>
 <p>Now we can use this in our ANMs instead:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">MyCustomModel</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span>
 <span class="go">&gt;&gt;&gt;</span>
