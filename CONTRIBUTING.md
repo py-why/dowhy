@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-29-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-30-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Contributors ✨
@@ -50,6 +50,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="http://stjohngrimbly.com"><img src="https://avatars.githubusercontent.com/u/28342957?v=4?s=100" width="100px;" alt="St John Grimbly"/><br /><sub><b>St John Grimbly</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=sgrimbly" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://lukasheumos.com"><img src="https://avatars.githubusercontent.com/u/21954664?v=4?s=100" width="100px;" alt="Lukas Heumos"/><br /><sub><b>Lukas Heumos</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=Zethson" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
