@@ -443,7 +443,7 @@ class CausalGraph:
         Get adjacency matrix from the networkx graph
 
         """
-        return nx.convert_matrix.to_numpy_matrix(self._graph, *args, **kwargs)
+        return nx.convert_matrix.to_numpy_array(self._graph, *args, **kwargs)
 
     def check_valid_frontdoor_set(
         self, nodes1, nodes2, candidate_nodes, frontdoor_paths=None, new_graph=None, dseparation_algo="default"

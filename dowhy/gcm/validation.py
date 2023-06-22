@@ -4,7 +4,7 @@ Classes and functions in this module should be considered experimental, meaning 
 the future.
 """
 from enum import Enum, auto
-from typing import Any, Callable, Dict, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import networkx as nx
 import numpy as np
@@ -59,7 +59,7 @@ def refute_causal_structure(
         if parents and non_descendants:
             # test local Markov condition, null hypothesis: conditional independence
             lmc_p_value = conditional_independence_test(
-                data[node].values, data[non_descendants].values, data[parents].values
+                data[node].to_numpy(), data[non_descendants].to_numpy(), data[parents].to_numpy()
             )
             lmc_test_result = dict(p_value=lmc_p_value)
             all_p_values.append(lmc_p_value)
@@ -160,8 +160,8 @@ def refute_invertible_model(
         )
 
 
-def _get_non_descendants(causal_graph: DirectedGraph, node: Any, exclude_parents: bool = False) -> Set[Any]:
+def _get_non_descendants(causal_graph: DirectedGraph, node: Any, exclude_parents: bool = False) -> List[Any]:
     nodes_to_exclude = nx.descendants(causal_graph, node).union({node})
     if exclude_parents:
         nodes_to_exclude = nodes_to_exclude.union(causal_graph.predecessors(node))
-    return set(causal_graph.nodes).difference(nodes_to_exclude)
+    return list(set(causal_graph.nodes).difference(nodes_to_exclude))

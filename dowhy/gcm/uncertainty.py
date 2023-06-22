@@ -4,7 +4,7 @@ Functions in this module should be considered experimental, meaning there might 
 """
 
 import numpy as np
-from numpy.dual import det
+from numpy.linalg import det
 from scipy.special import digamma
 from scipy.stats import entropy
 from sklearn.neighbors import NearestNeighbors

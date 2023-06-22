@@ -101,7 +101,7 @@ class Backdoor:
 
         # Get adjacency list
         adjlist = adjacency_matrix_to_adjacency_list(
-            nx.to_numpy_matrix(undirected_graph), labels=list(undirected_graph.nodes)
+            nx.to_numpy_array(undirected_graph), labels=list(undirected_graph.nodes)
         )
         path_dict = {}
         backdoor_sets = []  # Put in backdoor sets format

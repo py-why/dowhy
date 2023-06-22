@@ -27,7 +27,7 @@ class CDT(GraphLearner):
         graph = self._method.predict(self._data)
 
         # Get adjacency matrix
-        self._adjacency_matrix = nx.to_numpy_matrix(graph)
+        self._adjacency_matrix = nx.to_numpy_array(graph)
         self._adjacency_matrix = np.asarray(self._adjacency_matrix)
 
         # If labels not provided
