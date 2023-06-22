@@ -143,11 +143,11 @@ def noise_samples_of_ancestors(
             continue
 
         if is_root_node(causal_model.graph, node):
-            noise = causal_model.causal_mechanism(node).draw_samples(num_samples)
+            noise = causal_model.causal_mechanism(node).draw_samples(num_samples).reshape(-1)
             drawn_noise_samples[node] = noise
             drawn_samples[node] = noise
         else:
-            noise = causal_model.causal_mechanism(node).draw_noise_samples(num_samples)
+            noise = causal_model.causal_mechanism(node).draw_noise_samples(num_samples).reshape(-1)
             drawn_noise_samples[node] = noise
             drawn_samples[node] = causal_model.causal_mechanism(node).evaluate(
                 _parent_samples_of(node, causal_model, drawn_samples), noise
