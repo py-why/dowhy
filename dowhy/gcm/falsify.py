@@ -4,6 +4,8 @@ Functions in this module should be considered experimental, meaning there might 
 """
 import warnings
 from dataclasses import dataclass, field
+from enum import Enum
+from functools import partial, update_wrapper
 from itertools import permutations
 from typing import Any, Callable, Dict, FrozenSet, List, Optional, Set, Tuple, Union
 
@@ -16,32 +18,32 @@ from joblib import Parallel, delayed
 from tqdm import tqdm
 
 import dowhy.gcm.config as config
+from dowhy.graph import DirectedGraph, get_ordered_predecessors
 from dowhy.gcm.independence_test import kernel_based
 from dowhy.gcm.util import plot
 from dowhy.gcm.util.general import set_random_seed
 from dowhy.gcm.validation import _get_non_descendants
-from dowhy.graph import DirectedGraph, get_ordered_predecessors
-
-COLORS = list(mcolors.TABLEAU_COLORS.values())
-
-# Constants for falsification of a given graph
-FALSIFY_N_VIOLATIONS = "n_violations"
-FALSIFY_N_TESTS = "n_tests"
-FALSIFY_P_VALUE = "p_value"
-FALSIFY_P_VALUES = "p_values"
-
-FALSIFY_GIVEN_VIOLATIONS = FALSIFY_N_VIOLATIONS + " g_given"
-FALSIFY_PERM_VIOLATIONS = FALSIFY_N_VIOLATIONS + " permutations"
-FALSIFY_LOCAL_VIOLATION_INSIGHT = "local violations"
 
 FALSIFY_METHODS = {
     "validate_lmc": "LMC",
     "validate_pd": "Faithfulness",
-    "validate_parental_dsep": "tPa",
-    "validate_causal_minimality": "Causal Minimality",
+    "validate_tpa": "tPa",
+    "validate_cm": "Causal Minimality",
 }
+VIOLATION_COLOR = "red"
+COLORS = list(mcolors.TABLEAU_COLORS.values())
 
-FALSIFY_VIOLATION_COLOR = "red"
+
+class FalsifyConst(Enum):
+    N_VIOLATIONS = 0
+    N_TESTS = 1
+    P_VALUE = 2
+    P_VALUES = 3
+    GIVEN_VIOLATIONS = 4
+    PERM_VIOLATIONS = 5
+    F_GIVEN_VIOLATIONS = 6
+    F_PERM_VIOLATIONS = 7
+    LOCAL_VIOLATION_INSIGHT = 8
 
 
 @dataclass
@@ -63,8 +65,7 @@ class _PValuesMemory:
     ):
         if not Z:
             Z = set()
-        if not self.get_p_value(X, Y, Z):
-            self.p_values[(_to_frozenset(X), _to_frozenset(Y), _to_frozenset(Z))] = p_value
+        self.p_values[(_to_frozenset(X), _to_frozenset(Y), _to_frozenset(Z))] = p_value
 
     def get_p_value(
         self, X: Union[Set, List, str], Y: Union[Set, List, str], Z: Optional[Union[Set, List, str]] = None
@@ -77,14 +78,6 @@ class _PValuesMemory:
         elif (_to_frozenset(Y), _to_frozenset(X), _to_frozenset(Z)) in self.p_values:
             return self.p_values[(_to_frozenset(Y), _to_frozenset(X), _to_frozenset(Z))]
         return
-
-    def clear_placeholders(self, placeholder_val=-1):
-        keys_to_rem = set()
-        for k, v in self.p_values.items():
-            if v == placeholder_val:
-                keys_to_rem.add(k)
-        for k in keys_to_rem:
-            del self.p_values[k]
 
     def __contains__(self, item: Tuple[Union[Set, List, str], ...]) -> bool:
         X, Y = (_to_frozenset(i) for i in item[:2])
@@ -104,7 +97,6 @@ def validate_lmc(
     significance_level: float = 0.05,
     include_unconditional: bool = True,
     n_jobs: Optional[int] = None,
-    **kwargs,
 ) -> Dict[str, Union[int, Dict[str, float]]]:
     """
     Validate the local markov condition for a given directed graph. Return number of violations and p values for each
@@ -126,7 +118,7 @@ def validate_lmc(
     if p_values_memory is None:
         p_values_memory = _PValuesMemory()
 
-    validation_summary = {FALSIFY_N_VIOLATIONS: 0, FALSIFY_N_TESTS: 0, FALSIFY_P_VALUES: dict()}
+    validation_summary = {FalsifyConst.N_VIOLATIONS: 0, FalsifyConst.N_TESTS: 0, FalsifyConst.P_VALUES: dict()}
 
     # Find out which tests to do
     triples = _get_parental_triples(causal_graph, include_unconditional)
@@ -152,22 +144,27 @@ def validate_lmc(
     )
 
     # Gather results
-    p_values_memory.clear_placeholders()  # Clear placeholders
     for i, (node, non_desc, parents) in enumerate(to_test):
         p_values_memory.add_p_value(p_values[i], node, non_desc, parents)
 
     # Summarize
     for node, non_desc, parents in triples:
-        validation_summary[FALSIFY_N_TESTS] += 1
         lmc_p_value = p_values_memory.get_p_value(node, non_desc, parents)
-        validation_summary[FALSIFY_P_VALUES][(node, non_desc)] = (lmc_p_value, lmc_p_value <= significance_level)
-        if lmc_p_value <= significance_level:
-            validation_summary[FALSIFY_N_VIOLATIONS] += 1
+        if lmc_p_value != -1:
+            validation_summary[FalsifyConst.N_TESTS] += 1
+            validation_summary[FalsifyConst.P_VALUES][(node, non_desc)] = (
+                lmc_p_value,
+                lmc_p_value <= significance_level,
+            )
+            if lmc_p_value <= significance_level:
+                validation_summary[FalsifyConst.N_VIOLATIONS] += 1
     return validation_summary
 
 
-def validate_parental_dsep(
-    causal_graph: DirectedGraph, causal_graph_reference: DirectedGraph, include_unconditional: bool = True, **kwargs
+def validate_tpa(
+    causal_graph: DirectedGraph,
+    causal_graph_reference: DirectedGraph,
+    include_unconditional: bool = True,
 ) -> Dict[str, int]:
     """
     Graphical criterion to evaluate which pairwise parental d-separations in `causal_graph` are violated, assuming
@@ -175,19 +172,20 @@ def validate_parental_dsep(
     equivalence class.
     Specifically we test:
         X _|_G' Y | Z and X _/|_G Y | Z for Y \in ND{X}^G', Z = PA{X}^G
+
     :param causal_graph: Causal graph for which to evaluate parental d-separations (G')
     :param causal_graph_reference: Causal graph where we test if d-separation holds (G)
     :param include_unconditional: Test also unconditional independencies of root nodes.
     :return: Validation summary with number of d-separations implied by `causal_graph` and number of times these are
         violated in the graph `causal_graph_reference`.
     """
-    validation_summary = {FALSIFY_N_VIOLATIONS: 0, FALSIFY_N_TESTS: 0}
+    validation_summary = {FalsifyConst.N_VIOLATIONS: 0, FalsifyConst.N_TESTS: 0}
 
     triples = _get_parental_triples(causal_graph, include_unconditional)
     for node, non_desc, parents in triples:
-        validation_summary[FALSIFY_N_TESTS] += 1
+        validation_summary[FalsifyConst.N_TESTS] += 1
         if not nx.d_separated(causal_graph_reference, {node}, {non_desc}, set(parents)):
-            validation_summary[FALSIFY_N_VIOLATIONS] += 1
+            validation_summary[FalsifyConst.N_VIOLATIONS] += 1
     return validation_summary
 
 
@@ -200,7 +198,6 @@ def validate_pd(
     significance_level: float = 0.05,
     adjacent_only: bool = False,
     n_jobs: Optional[int] = None,
-    **kwargs,
 ) -> Dict[str, Union[int, Dict[tuple, float]]]:
     """
     Validate pairwise dependencies (pd) for a given causal graph and data. Test for each node if it is statistically
@@ -234,7 +231,7 @@ def validate_pd(
     if n_pairs > len(pairs):
         raise ValueError(f"n_pairs ({n_pairs}) > number of pairs in the DAG ({len(pairs)})")
 
-    validation_summary = {FALSIFY_N_VIOLATIONS: 0, FALSIFY_N_TESTS: n_pairs, FALSIFY_P_VALUES: dict()}
+    validation_summary = {FalsifyConst.N_VIOLATIONS: 0, FalsifyConst.N_TESTS: n_pairs, FalsifyConst.P_VALUES: dict()}
     pair_idxs = np.random.choice(len(pairs), size=n_pairs, replace=False)
 
     # Find out which tests to do
@@ -261,7 +258,6 @@ def validate_pd(
     )
 
     # Gather results
-    p_values_memory.clear_placeholders()  # Clear placeholders
     for i, (ancestor, node) in enumerate(to_test):
         p_values_memory.add_p_value(p_values[i], ancestor, node)
 
@@ -269,14 +265,15 @@ def validate_pd(
     for pair_idx in pair_idxs:
         ancestor, node = pairs[pair_idx]
         p_value = p_values_memory.get_p_value(ancestor, node)
-        validation_summary[FALSIFY_P_VALUES][(node, ancestor)] = (p_value, p_value > significance_level)
-        if p_value > significance_level:
-            validation_summary[FALSIFY_N_VIOLATIONS] += 1
+        if p_value != -1:
+            validation_summary[FalsifyConst.P_VALUES][(node, ancestor)] = (p_value, p_value > significance_level)
+            if p_value > significance_level:
+                validation_summary[FalsifyConst.N_VIOLATIONS] += 1
 
     return validation_summary
 
 
-def validate_causal_minimality(
+def validate_cm(
     causal_graph: DirectedGraph,
     data: pd.DataFrame,
     p_values_memory: Optional[_PValuesMemory] = None,
@@ -284,11 +281,11 @@ def validate_causal_minimality(
     conditional_independence_test: Callable[[np.ndarray, np.ndarray, np.ndarray], float] = kernel_based,
     significance_level: float = 0.05,
     n_jobs: Optional[int] = None,
-    **kwargs,
 ) -> Dict[str, Union[int, Dict[tuple, float]]]:
     """
     Function to test causal minimality of a DAG (see [1], Proposition 6.36).
-    [1] J. Peters, D. Janzing, and B. Schölkopf, Elements of Causal Inference: Foundations and Learning Algorithms. Cambridge, MA, USA: MIT Press, 2017.
+    [1] J. Peters, D. Janzing, and B. Schölkopf, Elements of Causal Inference: Foundations and Learning Algorithms.
+    Cambridge, MA, USA: MIT Press, 2017.
 
     :param causal_graph: A directed acyclic graph (DAG).
     :param data: Observations of variables in the DAG.
@@ -304,7 +301,7 @@ def validate_causal_minimality(
     if p_values_memory is None:
         p_values_memory = _PValuesMemory()
 
-    validation_summary = {FALSIFY_N_VIOLATIONS: 0, FALSIFY_N_TESTS: 0, FALSIFY_P_VALUES: dict()}
+    validation_summary = {FalsifyConst.N_VIOLATIONS: 0, FalsifyConst.N_TESTS: 0, FalsifyConst.P_VALUES: dict()}
 
     # Find out which tests to do
     triples = []
@@ -335,67 +332,80 @@ def validate_causal_minimality(
     )
 
     # Gather results
-    p_values_memory.clear_placeholders()  # Clear placeholders
     for i, (node, p, other_parents) in enumerate(to_test):
         p_values_memory.add_p_value(p_values[i], node, p, other_parents)
 
     # Summarize
     for node, p, other_parents in triples:
-        validation_summary[FALSIFY_N_TESTS] += 1
         p_value = p_values_memory.get_p_value(node, p, other_parents)
-        validation_summary[FALSIFY_P_VALUES][(node, p, tuple(other_parents))] = (p_value, p_value > significance_level)
-        if p_value > significance_level:
-            validation_summary[FALSIFY_N_VIOLATIONS] += 1
+        if p_value != -1:
+            validation_summary[FalsifyConst.N_TESTS] += 1
+            validation_summary[FalsifyConst.P_VALUES][(node, p, tuple(other_parents))] = (
+                p_value,
+                p_value > significance_level,
+            )
+            if p_value > significance_level:
+                validation_summary[FalsifyConst.N_VIOLATIONS] += 1
 
     return validation_summary
 
 
 def validate_graph(
     causal_graph: DirectedGraph,
-    data: pd.DataFrame,
-    methods: Union[Callable, Tuple[Callable, ...], List[Callable]] = (validate_lmc, validate_pd),
-    independence_test: Callable[[np.ndarray, np.ndarray], float] = kernel_based,
-    conditional_independence_test: Callable[[np.ndarray, np.ndarray, np.ndarray], float] = kernel_based,
+    data: Optional[pd.DataFrame] = None,
+    methods: Optional[Union[Callable, Tuple[Callable, ...], List[Callable]]] = None,
+    independence_test: Optional[Callable[[np.ndarray, np.ndarray], float]] = kernel_based,
+    conditional_independence_test: Optional[Callable[[np.ndarray, np.ndarray, np.ndarray], float]] = kernel_based,
     significance_level: float = 0.05,
-    p_values_memory: Optional[_PValuesMemory] = None,
     n_jobs: Optional[int] = None,
-    **kwargs,
 ) -> Dict[str, Dict]:
     """
-    Generate baseline for node permutations.
+    Validate a given causal graph using observational data and some given methods. If methods are provided, they must
+    be wrapped in a wrapped_partial object, with their respective parameters. E.g., if one wants to test the local
+    Markov conditions and the pairwise dependencies (unconditional faithfulness), then call
+        validate_graph(G, methods=(
+            wrap_partial(validate_lmc, data=data, independence_test=..., conditional_independence_test=...),
+            wrap_partial(validate_pd, data=data, independence_test=...),
+            )
+        )
+    If called with methods=None, then we only test lmc and expect that the data is provided via data=data. Optionally,
+    one can provide additional arguments to this test via the respective keyword arguments.
+    WARNING: If methods are provided, the optional keywords arguments are ignored and overwritten by the ones set in
+            wrap_partial(validate_lmc, ...), or the default arguments by the respective method if not provided in
+            wrap_partial. E.g. `independence_test` should  be provided in wrap_partial(method, independence_test=...).
+
     :param causal_graph: A directed acyclic graph (DAG).
     :param data: Observations of variables in the DAG.
-    :param methods: Validation methods to perform. Supported are: validate_lmc, validate_ed.
-    :param independence_test: (Unconditional) independence test to use.
-    :param conditional_independence_test: Conditional independence test to use.
+    :param methods: Method functions wrapped in wrap_partial. E.g.
+                    wrap_partial(validate_lmc, data=data, independence_test=..., conditional_independence_test=...).
+                    If no methods are provided we run validate_lmc with optional keyword arguments provided to
+                    validate_graph.
+    :param independence_test: Test to use for unconditional independencies (only used if include_unconditional=True)
+    :param conditional_independence_test: Conditional independence test to use for checking local Markov condition.
     :param significance_level: Significance level for (conditional) independence tests.
-    :param p_values_memory: Optional _PValuesMemory object, where results of previously performed tests are stored.
     :param n_jobs: Number of jobs to use for parallel execution of (conditional) independence tests.
     :return: Validation summary as dict.
     """
-    n_jobs = config.default_n_jobs if n_jobs is None else n_jobs
+    if not methods:
+        assert data is not None, "If (partial) methods are not given, then must provide data!"
 
-    if p_values_memory is None:
-        p_values_memory = _PValuesMemory()
+        methods = (
+            wrap_partial(
+                validate_lmc,
+                data=data,
+                independence_test=independence_test,
+                conditional_independence_test=conditional_independence_test,
+                significance_level=significance_level,
+                n_jobs=n_jobs,
+            ),
+        )
+    elif not isinstance(methods, (tuple, list)):
+        methods = (methods,)
 
     validation_summary = dict()
 
-    if not isinstance(methods, (tuple, list)):
-        methods = (methods,)
-
     for m in methods:
-        # Call individual validation methods. Unused arguments are absorbed in their respective **kwargs.
-        m_summary = m(
-            causal_graph=causal_graph,
-            data=data,
-            p_values_memory=p_values_memory,
-            independence_test=independence_test,
-            conditional_independence_test=conditional_independence_test,
-            significance_level=significance_level,
-            n_jobs=n_jobs,
-            **kwargs,
-        )
-
+        m_summary = m(causal_graph=causal_graph)
         validation_summary[m.__name__] = m_summary
 
     return validation_summary
@@ -441,13 +451,13 @@ class EvaluationResult:
             self.falsified = None
             self.falsifiable = None
         elif (
-            self.summary["validate_lmc"][FALSIFY_P_VALUE]
+            self.summary["validate_lmc"][FalsifyConst.P_VALUE]
             > self.significance_level
-            > self.summary["validate_parental_dsep"][FALSIFY_P_VALUE]
+            > self.summary["validate_tpa"][FalsifyConst.P_VALUE]
         ):
             self.falsified = True
             self.falsifiable = True
-        elif self.significance_level < self.summary["validate_parental_dsep"][FALSIFY_P_VALUE]:
+        elif self.significance_level < self.summary["validate_tpa"][FalsifyConst.P_VALUE]:
             self.falsified = False
             self.falsifiable = False
         else:
@@ -459,12 +469,10 @@ class EvaluationResult:
         if self.can_evaluate:
             decision = " " if self.falsified else " do not "
             informative = " " if self.falsifiable else " not "
-            frac_MEC = (
-                f"{len(self.summary['MEC'])} / {len(self.summary['validate_parental_dsep'][FALSIFY_PERM_VIOLATIONS])}"
-            )
-            frac_VLMC = f"{self.summary['validate_lmc'][FALSIFY_GIVEN_VIOLATIONS]}/{self.summary['validate_lmc'][FALSIFY_N_TESTS]}"
-            p_LMC = self.summary["validate_lmc"][FALSIFY_P_VALUE]
-            p_dSep = self.summary["validate_parental_dsep"][FALSIFY_P_VALUE]
+            frac_MEC = f"{len(self.summary['MEC'])} / {len(self.summary['validate_tpa'][FalsifyConst.PERM_VIOLATIONS])}"
+            frac_VLMC = f"{self.summary['validate_lmc'][FalsifyConst.GIVEN_VIOLATIONS]}/{self.summary['validate_lmc'][FalsifyConst.N_TESTS]}"
+            p_LMC = self.summary["validate_lmc"][FalsifyConst.P_VALUE]
+            p_dSep = self.summary["validate_tpa"][FalsifyConst.P_VALUE]
             validation_repr = [
                 f"The given DAG is{informative}informative because {frac_MEC} of the permutations lie in the Markov",
                 f"equivalence class of the given DAG (p-value: {p_dSep:.2f}).",
@@ -480,25 +488,25 @@ class EvaluationResult:
         for m in self.suggestions:
             suggestion_repr[FALSIFY_METHODS[m]] = [
                 f"Remove edge {node[1]} --> {node[0]}"
-                for (node, r) in self.suggestions[m][FALSIFY_P_VALUES].items()
+                for (node, r) in self.suggestions[m][FalsifyConst.P_VALUES].items()
                 if r[1]
             ]
         return _generate_table(validation_repr, suggestion_repr)
 
     def _can_evaluate(self):
         can_evaluate = True
-        for m in (validate_lmc, validate_parental_dsep):
-            if m not in self.methods:
-                warnings.warn(f"Method {m.__name__} not in methods and thus graph cannot be evaluated!")
+        for m in (validate_lmc, validate_tpa):
+            if m.__name__ not in [n.__name__ for n in self.methods]:
                 can_evaluate = False
+
         return can_evaluate
 
 
 def falsify_graph(
     causal_graph: DirectedGraph,
-    data: pd.DataFrame,
-    methods: Union[Callable, Tuple[Callable, ...]] = (validate_lmc, validate_parental_dsep),
-    suggestion_methods: Union[Callable, Tuple[Callable, ...]] = (validate_causal_minimality),
+    data: Optional[pd.DataFrame] = None,
+    methods: Optional[Union[Callable, Tuple[Callable, ...]]] = None,
+    suggestion_methods: Optional[Union[Callable, Tuple[Callable, ...]]] = None,
     suggestions: bool = False,
     independence_test: Callable[[np.ndarray, np.ndarray], float] = kernel_based,
     conditional_independence_test: Callable[[np.ndarray, np.ndarray, np.ndarray], float] = kernel_based,
@@ -534,6 +542,13 @@ def falsify_graph(
     you should set `n_permutations` to some larger value (e.g. 100 or 1000). If `n_permutations=-1` we test on all
     n_nodes! permutations.
 
+    `methods` and `suggestion_methods` must be wrapped in wrap_partial(method, **kwargs) (c.f. `validate_graph`).
+
+    Related paper:
+    Eulig, E., Mastakouri, A. A., Blöbaum, P., Hardt, M., & Janzing, D. (2023).
+    Toward Falsifying Causal Graphs Using a Permutation-Based Test.
+    https://arxiv.org/abs/2305.09565
+
     :param causal_graph: A directed acyclic graph (DAG).
     :param data: Observations of variables in the DAG.
     :param methods: Validation methods to perform.
@@ -552,64 +567,91 @@ def falsify_graph(
     """
     n_jobs = config.default_n_jobs if n_jobs is None else n_jobs
     show_progress_bar = config.show_progress_bars if show_progress_bar is None else show_progress_bar
+    p_values_memory = _PValuesMemory()
 
     if n_permutations is None:
         n_permutations = int(1 / significance_level) if not plot_histogram else -1
 
     if not plot_kwargs:
         plot_kwargs = {}
-    if isinstance(methods, Callable):
+
+    # If no methods are provided, use default ones: validate_lmc, validate_tpa
+    if not methods:
+        assert data is not None, "If methods=None, must provide data instead!"
+        methods = (
+            wrap_partial(
+                validate_lmc,
+                data=data,
+                independence_test=independence_test,
+                conditional_independence_test=conditional_independence_test,
+                significance_level=significance_ci,
+                p_values_memory=p_values_memory,
+                n_jobs=n_jobs,
+            ),
+            wrap_partial(validate_tpa, causal_graph_reference=causal_graph),
+        )
+    elif isinstance(methods, Callable):
         methods = (methods,)
+
+    # If no suggestion methods are provided, but suggestions=True, use default ones: validate_cm
     if not suggestions:
         suggestion_methods = tuple()
-    elif isinstance(suggestion_methods, Callable):
+    elif suggestions and isinstance(suggestion_methods, Callable):
         suggestion_methods = (suggestion_methods,)
-
-    p_values_memory = _PValuesMemory()
+    elif suggestions:
+        assert data is not None, "If suggestions=True and suggestion_methods=None, must provide data instead!"
+        suggestion_methods = (
+            wrap_partial(
+                validate_cm,
+                data=data,
+                independence_test=independence_test,
+                conditional_independence_test=conditional_independence_test,
+                significance_level=significance_ci,
+                p_values_memory=p_values_memory,
+                n_jobs=n_jobs,
+            ),
+        )
 
     summary_given = validate_graph(
         causal_graph,
-        data=data,
-        p_values_memory=p_values_memory,
-        causal_graph_reference=causal_graph,
         methods=methods + suggestion_methods,
-        independence_test=independence_test,
-        conditional_independence_test=conditional_independence_test,
-        significance_level=significance_ci,
-        n_jobs=n_jobs,
     )
     summary_perm = _permutation_based(
         causal_graph,
-        data=data,
-        p_values_memory=p_values_memory,
+        methods=methods,
         exclude_original_order=False,
         n_permutations=n_permutations,
-        methods=methods,
-        independence_test=independence_test,
-        conditional_independence_test=conditional_independence_test,
-        significance_level=significance_ci,
         show_progress_bar=show_progress_bar,
-        n_jobs=n_jobs,
     )
 
     summary = {m.__name__: dict() for m in methods}
 
     for m, m_summary in summary.items():
-        m_summary[FALSIFY_PERM_VIOLATIONS] = [perm[FALSIFY_N_VIOLATIONS] for perm in summary_perm[m]]
-        m_summary[FALSIFY_GIVEN_VIOLATIONS] = summary_given[m][FALSIFY_N_VIOLATIONS]
-        m_summary[FALSIFY_N_TESTS] = summary_given[m][FALSIFY_N_TESTS]
-        m_summary[FALSIFY_P_VALUE] = sum(
-            [1 for perm in m_summary[FALSIFY_PERM_VIOLATIONS] if perm <= m_summary[FALSIFY_GIVEN_VIOLATIONS]]
-        ) / len(m_summary[FALSIFY_PERM_VIOLATIONS])
+        m_summary[FalsifyConst.PERM_VIOLATIONS] = [perm[FalsifyConst.N_VIOLATIONS] for perm in summary_perm[m]]
+        m_summary[FalsifyConst.GIVEN_VIOLATIONS] = summary_given[m][FalsifyConst.N_VIOLATIONS]
+        m_summary[FalsifyConst.N_TESTS] = summary_given[m][FalsifyConst.N_TESTS]
+        m_summary[FalsifyConst.F_PERM_VIOLATIONS] = [
+            perm[FalsifyConst.N_VIOLATIONS] / perm[FalsifyConst.N_TESTS] for perm in summary_perm[m]
+        ]
+        m_summary[FalsifyConst.F_GIVEN_VIOLATIONS] = (
+            m_summary[FalsifyConst.GIVEN_VIOLATIONS] / m_summary[FalsifyConst.N_TESTS]
+        )
+        m_summary[FalsifyConst.P_VALUE] = sum(
+            [
+                1
+                for perm in m_summary[FalsifyConst.F_PERM_VIOLATIONS]
+                if perm <= m_summary[FalsifyConst.F_GIVEN_VIOLATIONS]
+            ]
+        ) / len(m_summary[FalsifyConst.PERM_VIOLATIONS])
 
-        if m != "validate_parental_dsep":
+        if m != "validate_tpa":
             # Append list of violations (node, non_desc) to get local information
-            m_summary[FALSIFY_LOCAL_VIOLATION_INSIGHT] = summary_given[m][FALSIFY_P_VALUES]
+            m_summary[FalsifyConst.LOCAL_VIOLATION_INSIGHT] = summary_given[m][FalsifyConst.P_VALUES]
 
-    if "validate_parental_dsep" in summary:
+    if "validate_tpa" in summary:
         summary["MEC"] = [
             summary_perm["permuted_graphs"][i]
-            for i, v in enumerate(summary["validate_parental_dsep"][FALSIFY_PERM_VIOLATIONS])
+            for i, v in enumerate(summary["validate_tpa"][FalsifyConst.PERM_VIOLATIONS])
             if v == 0
         ]
 
@@ -634,7 +676,7 @@ def apply_suggestions(
 
     causal_graph = causal_graph.copy()
     for m in evaluation_result.suggestions:
-        for node, res in evaluation_result.suggestions[m][FALSIFY_P_VALUES].items():
+        for node, res in evaluation_result.suggestions[m][FalsifyConst.P_VALUES].items():
             edge = (node[1], node[0])
             if (res[1] and edges_to_keep is not None and edge not in edges_to_keep) or (
                 res[1] and edges_to_keep is None
@@ -643,9 +685,7 @@ def apply_suggestions(
     return causal_graph
 
 
-def plot_evaluation_results(
-    evaluation_result, figsize=(8, 3), bins=None, maxbins=10, title="", savepath="", display=True
-):
+def plot_evaluation_results(evaluation_result, figsize=(8, 3), bins=None, title="", savepath="", display=True):
     fig, ax = plt.subplots(figsize=figsize)
 
     # Plot histograms
@@ -655,19 +695,17 @@ def plot_evaluation_results(
 
     evaluation_summary = {k: v for k, v in evaluation_result.summary.items() if k != "MEC"}
     for i, (m, m_summary) in enumerate(evaluation_summary.items()):
-        data.append(m_summary[FALSIFY_PERM_VIOLATIONS])
+        data.append(m_summary[FalsifyConst.F_PERM_VIOLATIONS])
         labels.append(f"Violations of {FALSIFY_METHODS[m]} of permuted DAGs")
-        p_values += f"p-value {FALSIFY_METHODS[m]} = {m_summary[FALSIFY_P_VALUE]:.2f}\n"
-    if bins is None:
-        max_data = max(max(v) for v in data) + 0.5
-        bins = np.linspace(-0.5, max_data, min(maxbins, int(max_data + 1.5)))
+        p_values += f"p-value {FALSIFY_METHODS[m]} = {m_summary[FalsifyConst.P_VALUE]:.2f}\n"
+
     ax.hist(data, color=COLORS[: len(evaluation_summary)], bins=bins, alpha=0.5, label=labels, edgecolor="k")
 
     # Plot given violations
     for i, (m, m_summary) in enumerate(evaluation_summary.items()):
         ylim = ax.get_ylim()[1]
         ax.plot(
-            [m_summary[FALSIFY_GIVEN_VIOLATIONS]] * 2,
+            [m_summary[FalsifyConst.F_GIVEN_VIOLATIONS]] * 2,
             [0, ylim],
             "--",
             c=COLORS[i],
@@ -675,10 +713,8 @@ def plot_evaluation_results(
         )
         ax.set_ylim([0, ylim])
 
-    ax.set_xlabel("Violations")
+    ax.set_xlabel("Fraction of violations")
     ax.set_ylabel("# Permutations")
-    ax.xaxis.get_major_locator().set_params(integer=True)
-    ax.yaxis.get_major_locator().set_params(integer=True)
     plt.legend(loc="upper left", bbox_to_anchor=(1.05, 1), borderaxespad=0.0, title=p_values)
     if title:
         plt.title(title)
@@ -705,22 +741,22 @@ def plot_local_insights(
     """
     colors = {}
     if isinstance(evaluation_result, EvaluationResult) and method in evaluation_result.summary:
-        local_insight_dict = evaluation_result.summary[method][FALSIFY_LOCAL_VIOLATION_INSIGHT]
+        local_insight_dict = evaluation_result.summary[method][FalsifyConst.LOCAL_VIOLATION_INSIGHT]
     elif (
         isinstance(evaluation_result, EvaluationResult)
         and hasattr(evaluation_result, "suggestions")
         and method in evaluation_result.suggestions
     ):
-        local_insight_dict = evaluation_result.suggestions[method][FALSIFY_P_VALUES]
+        local_insight_dict = evaluation_result.suggestions[method][FalsifyConst.P_VALUES]
     elif isinstance(evaluation_result, Dict):
         if method not in evaluation_result:
             raise ValueError(f"Validation method {method} does not exist in given evaluation_result!")
-        if FALSIFY_P_VALUES not in evaluation_result[method]:
+        if FalsifyConst.P_VALUES not in evaluation_result[method]:
             raise ValueError(
-                f"Validation method {method} has no key {FALSIFY_P_VALUES} where information on local violations "
+                f"Validation method {method} has no key {FalsifyConst.P_VALUES} where information on local violations "
                 f"are stored!"
             )
-        local_insight_dict = evaluation_result[method][FALSIFY_P_VALUES]
+        local_insight_dict = evaluation_result[method][FalsifyConst.P_VALUES]
     else:
         raise ValueError(f"Cannot plot local violation insights from method {method} in evaluation_result!")
 
@@ -728,19 +764,19 @@ def plot_local_insights(
         if result[1]:
             if method == "validate_lmc":
                 # For LMC we highlight X for which X _|/|_ Y \in ND_X | Pa_X
-                colors[nodes[0]] = FALSIFY_VIOLATION_COLOR
+                colors[nodes[0]] = VIOLATION_COLOR
             elif method == "validate_pd":
                 # For PD we highlight the edge (if Y\in Anc_X -> X are adjacent)
-                colors[(nodes[1], nodes[0])] = FALSIFY_VIOLATION_COLOR
-            elif method == "validate_causal_minimality":
+                colors[(nodes[1], nodes[0])] = VIOLATION_COLOR
+            elif method == "validate_cm":
                 # For causal minimality we highlight the edge Y \in Pa_X -> X
-                colors[(nodes[1], nodes[0])] = FALSIFY_VIOLATION_COLOR
+                colors[(nodes[1], nodes[0])] = VIOLATION_COLOR
 
     plot(causal_graph, colors=colors)
 
 
 def _generate_table(
-    validation_repr, suggestion_repr, width=105, validation_name="Test Summary", suggestion_name="Suggestions"
+    validation_repr, suggestion_repr, width=105, validation_name="Falsificaton Summary", suggestion_name="Suggestions"
 ):
     # Create Validation header
     _repr = [
@@ -789,18 +825,32 @@ def _compute_p_value(
 ) -> float:
     """Perform (conditional) independence test and report p-value.
 
+    If any nodes needed for the test do not exist in the data, this test is skipped and a value of -1 is returned and a
+    warning is raised.
+
     :param data: Observations of variables in the DAG.
     :param X: Variable to test (conditional) independence with Y
     :param Y: Variable to test (conditional) independence with X
     :param Z: Set to condition independence test on. Can be empty (None, empty set, or empty list).
-    :param independence_test: independence test to use.
+    :param independence_test: Independence test to use.
     :param conditional_independence_test: Conditional independence test to use.
     :param seed: Random seed
     :return: p-value
     """
     set_random_seed(seed)
 
+    # Test if we have data for X and Y
+    for node in [X, Y]:
+        if not node in data.columns:
+            warnings.warn(f"WARN: Couldn't find data for node {node}. Skip this test.")
+            return -1
+
     if Z:
+        # Test if we have data for Z
+        for node in Z:
+            if not node in data.columns:
+                warnings.warn(f"WARN: Couldn't find data for node {node}. Skip this test.")
+                return -1
         p_value = conditional_independence_test(data[X].values, data[Y].values, data[Z].values)
     else:
         p_value = independence_test(data[X].values, data[Y].values)
@@ -825,30 +875,19 @@ def _get_parental_triples(causal_graph: DirectedGraph, include_unconditional: bo
 
 def _permutation_based(
     causal_graph: DirectedGraph,
-    data: pd.DataFrame,
-    p_values_memory: _PValuesMemory,
+    methods: Union[Callable, Tuple[Callable, ...], List[Callable]],
     exclude_original_order: bool,
     n_permutations: int,
-    methods: Union[Callable, Tuple[Callable, ...], List[Callable]],
-    independence_test: Callable[[np.ndarray, np.ndarray], float],
-    conditional_independence_test: Callable[[np.ndarray, np.ndarray, np.ndarray], float],
-    significance_level: float,
     show_progress_bar: bool,
-    **method_kwargs,
 ) -> Dict[str, List[Union[DirectedGraph, Dict]]]:
     """
     Generate baseline for node permutations.
 
     :param causal_graph: A directed acyclic graph (DAG).
-    :param data: Observations of variables in the DAG.
-    :param p_values_memory: _PValuesMemory object, where results of previously performed tests are stored.
+    :param methods: Validation methods to perform.
     :param exclude_original_order: Exclude the original ordering of the nodes (default=False)
     :param n_permutations: Number of permutations to perform. If -1 use all n_nodes! - int(exclude_orig) permutations
-    :param methods: Validation methods to perform. Supported are: validate_lmc, validate_ed.
-    :param independence_test: Independence test to use for checking edge dependencies.
-    :param conditional_independence_test: Conditional independence test to use for checking local Markov condition.
-    :param significance_level: Significance level for (conditional) independence tests.
-    :param disable_progress_bar: Disable the progress bar
+    :param show_progress_bar: Whether to show progress bar over tested permutations.
     :return: Dictionary containing summary of validation for each individual graph as well as the permuted graphs
     """
 
@@ -860,14 +899,7 @@ def _permutation_based(
     for permuted_graph in tqdm(perm_gen, desc="Test permutations of given graph", disable=not show_progress_bar):
         res = validate_graph(
             causal_graph=permuted_graph,
-            data=data,
-            p_values_memory=p_values_memory,
-            causal_graph_reference=causal_graph,
             methods=methods,
-            independence_test=independence_test,
-            conditional_independence_test=conditional_independence_test,
-            significance_level=significance_level,
-            **method_kwargs,
         )
         validation_summary["permuted_graphs"].append(permuted_graph)
         for m in methods:
@@ -941,3 +973,9 @@ def _to_frozenset(x: Union[Set, List, str]):
     if isinstance(x, str):
         return frozenset({x})
     return frozenset(x)
+
+
+def wrap_partial(f, *args, **kwargs):
+    partial_f = partial(f, *args, **kwargs)
+    update_wrapper(partial_f, f)
+    return partial_f
