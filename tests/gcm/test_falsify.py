@@ -7,14 +7,14 @@ from flaky import flaky
 
 from dowhy.datasets import generate_random_graph
 from dowhy.gcm.falsify import (
-    FALSIFY_N_TESTS,
-    FALSIFY_N_VIOLATIONS,
+    FalsifyConst,
     _PermuteNodes,
-    validate_causal_minimality,
+    validate_cm,
     validate_graph,
     validate_lmc,
-    validate_parental_dsep,
     validate_pd,
+    validate_tpa,
+    wrap_partial,
 )
 from dowhy.gcm.independence_test.generalised_cov_measure import generalised_cov_based
 from dowhy.gcm.independence_test.kernel import kernel_based
@@ -75,19 +75,21 @@ def test_given_correct_collider_when_validating_graph_then_report_no_violations(
     data = pd.DataFrame(data=dict(X=X, Y=Y, Z=Z))
     summary = validate_graph(
         true_dag,
-        data,
-        causal_graph_reference=true_dag,
-        methods=(validate_lmc, validate_pd, validate_parental_dsep),
-        independence_test=_gcm_linear,
-        conditional_independence_test=_gcm_linear,
+        methods=(
+            wrap_partial(
+                validate_lmc, data=data, independence_test=_gcm_linear, conditional_independence_test=_gcm_linear
+            ),
+            wrap_partial(validate_pd, data=data, independence_test=_gcm_linear),
+            wrap_partial(validate_tpa, causal_graph_reference=true_dag),
+        ),
     )
 
-    assert summary["validate_lmc"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_lmc"][FALSIFY_N_TESTS] == 2
-    assert summary["validate_pd"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_pd"][FALSIFY_N_TESTS] == 2
-    assert summary["validate_parental_dsep"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_parental_dsep"][FALSIFY_N_TESTS] == 2
+    assert summary["validate_lmc"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_lmc"][FalsifyConst.N_TESTS] == 2
+    assert summary["validate_pd"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_pd"][FalsifyConst.N_TESTS] == 2
+    assert summary["validate_tpa"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_tpa"][FalsifyConst.N_TESTS] == 2
 
 
 @flaky(max_runs=5)
@@ -101,19 +103,21 @@ def test_given_wrong_collider_when_validating_graph_then_report_violations():
     data = pd.DataFrame(data=dict(X=X, Y=Y, Z=Z))
     summary = validate_graph(
         dag,
-        data,
-        causal_graph_reference=true_dag,
-        methods=(validate_lmc, validate_pd, validate_parental_dsep),
-        independence_test=_gcm_linear,
-        conditional_independence_test=_gcm_linear,
+        methods=(
+            wrap_partial(
+                validate_lmc, data=data, independence_test=_gcm_linear, conditional_independence_test=_gcm_linear
+            ),
+            wrap_partial(validate_pd, data=data, independence_test=_gcm_linear),
+            wrap_partial(validate_tpa, causal_graph_reference=true_dag),
+        ),
     )
 
-    assert summary["validate_lmc"][FALSIFY_N_VIOLATIONS] == 2
-    assert summary["validate_lmc"][FALSIFY_N_TESTS] == 2
-    assert summary["validate_pd"][FALSIFY_N_VIOLATIONS] == 1
-    assert summary["validate_pd"][FALSIFY_N_TESTS] == 2
-    assert summary["validate_parental_dsep"][FALSIFY_N_VIOLATIONS] == 2
-    assert summary["validate_parental_dsep"][FALSIFY_N_TESTS] == 2
+    assert summary["validate_lmc"][FalsifyConst.N_VIOLATIONS] == 2
+    assert summary["validate_lmc"][FalsifyConst.N_TESTS] == 2
+    assert summary["validate_pd"][FalsifyConst.N_VIOLATIONS] == 1
+    assert summary["validate_pd"][FalsifyConst.N_TESTS] == 2
+    assert summary["validate_tpa"][FalsifyConst.N_VIOLATIONS] == 2
+    assert summary["validate_tpa"][FalsifyConst.N_TESTS] == 2
 
 
 @flaky(max_runs=5)
@@ -126,19 +130,21 @@ def test_given_correct_chain_when_validating_graph_then_report_no_violations():
     data = pd.DataFrame(data=dict(X=X, Y=Y, Z=Z))
     summary = validate_graph(
         true_dag,
-        data,
-        causal_graph_reference=true_dag,
-        methods=(validate_lmc, validate_pd, validate_parental_dsep),
-        independence_test=_gcm_linear,
-        conditional_independence_test=_gcm_linear,
+        methods=(
+            wrap_partial(
+                validate_lmc, data=data, independence_test=_gcm_linear, conditional_independence_test=_gcm_linear
+            ),
+            wrap_partial(validate_pd, data=data, independence_test=_gcm_linear),
+            wrap_partial(validate_tpa, causal_graph_reference=true_dag),
+        ),
     )
 
-    assert summary["validate_lmc"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_lmc"][FALSIFY_N_TESTS] == 1
-    assert summary["validate_pd"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_pd"][FALSIFY_N_TESTS] == 3
-    assert summary["validate_parental_dsep"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_parental_dsep"][FALSIFY_N_TESTS] == 1
+    assert summary["validate_lmc"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_lmc"][FalsifyConst.N_TESTS] == 1
+    assert summary["validate_pd"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_pd"][FalsifyConst.N_TESTS] == 3
+    assert summary["validate_tpa"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_tpa"][FalsifyConst.N_TESTS] == 1
 
 
 @flaky(max_runs=5)
@@ -152,19 +158,21 @@ def test_given_wrong_chain_when_validating_graph_then_report_violations():
     data = pd.DataFrame(data=dict(X=X, Y=Y, Z=Z))
     summary = validate_graph(
         dag,
-        data,
-        causal_graph_reference=true_dag,
-        methods=(validate_lmc, validate_pd, validate_parental_dsep),
-        independence_test=_gcm_linear,
-        conditional_independence_test=_gcm_linear,
+        methods=(
+            wrap_partial(
+                validate_lmc, data=data, independence_test=_gcm_linear, conditional_independence_test=_gcm_linear
+            ),
+            wrap_partial(validate_pd, data=data, independence_test=_gcm_linear),
+            wrap_partial(validate_tpa, causal_graph_reference=true_dag),
+        ),
     )
 
-    assert summary["validate_lmc"][FALSIFY_N_VIOLATIONS] == 1
-    assert summary["validate_lmc"][FALSIFY_N_TESTS] == 1
-    assert summary["validate_pd"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_pd"][FALSIFY_N_TESTS] == 3
-    assert summary["validate_parental_dsep"][FALSIFY_N_VIOLATIONS] == 1
-    assert summary["validate_parental_dsep"][FALSIFY_N_TESTS] == 1
+    assert summary["validate_lmc"][FalsifyConst.N_VIOLATIONS] == 1
+    assert summary["validate_lmc"][FalsifyConst.N_TESTS] == 1
+    assert summary["validate_pd"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_pd"][FalsifyConst.N_TESTS] == 3
+    assert summary["validate_tpa"][FalsifyConst.N_VIOLATIONS] == 1
+    assert summary["validate_tpa"][FalsifyConst.N_TESTS] == 1
 
 
 @flaky(max_runs=5)
@@ -174,18 +182,20 @@ def test_given_empty_DAG_and_data_when_validating_graph_then_report_no_violation
     data = pd.DataFrame()
     summary = validate_graph(
         dag,
-        data,
-        causal_graph_reference=dag,
-        methods=(validate_lmc, validate_pd, validate_parental_dsep),
-        independence_test=_gcm_linear,
-        conditional_independence_test=_gcm_linear,
+        methods=(
+            wrap_partial(
+                validate_lmc, data=data, independence_test=_gcm_linear, conditional_independence_test=_gcm_linear
+            ),
+            wrap_partial(validate_pd, data=data, independence_test=_gcm_linear),
+            wrap_partial(validate_tpa, causal_graph_reference=dag),
+        ),
     )
-    assert summary["validate_lmc"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_lmc"][FALSIFY_N_TESTS] == 0
-    assert summary["validate_pd"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_pd"][FALSIFY_N_TESTS] == 0
-    assert summary["validate_parental_dsep"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_parental_dsep"][FALSIFY_N_TESTS] == 0
+    assert summary["validate_lmc"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_lmc"][FalsifyConst.N_TESTS] == 0
+    assert summary["validate_pd"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_pd"][FalsifyConst.N_TESTS] == 0
+    assert summary["validate_tpa"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_tpa"][FalsifyConst.N_TESTS] == 0
 
 
 @flaky(max_runs=5)
@@ -199,19 +209,21 @@ def test_given_correct_full_DAG_when_validating_graph_then_report_no_violations(
     data = pd.DataFrame(data=dict(X0=X0, X1=X1, X2=X2, X3=X3))
     summary = validate_graph(
         dag,
-        data,
-        causal_graph_reference=dag,
-        methods=(validate_lmc, validate_pd, validate_parental_dsep),
-        independence_test=_gcm_linear,
-        conditional_independence_test=_gcm_linear,
+        methods=(
+            wrap_partial(
+                validate_lmc, data=data, independence_test=_gcm_linear, conditional_independence_test=_gcm_linear
+            ),
+            wrap_partial(validate_pd, data=data, independence_test=_gcm_linear),
+            wrap_partial(validate_tpa, causal_graph_reference=dag),
+        ),
     )
 
-    assert summary["validate_lmc"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_lmc"][FALSIFY_N_TESTS] == 0
-    assert summary["validate_pd"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_pd"][FALSIFY_N_TESTS] == 6
-    assert summary["validate_parental_dsep"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_parental_dsep"][FALSIFY_N_TESTS] == 0
+    assert summary["validate_lmc"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_lmc"][FalsifyConst.N_TESTS] == 0
+    assert summary["validate_pd"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_pd"][FalsifyConst.N_TESTS] == 6
+    assert summary["validate_tpa"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_tpa"][FalsifyConst.N_TESTS] == 0
 
 
 @flaky(max_runs=5)
@@ -222,19 +234,21 @@ def test_given_correct_single_node_when_validating_graph_then_report_no_violatio
     data = pd.DataFrame(data=dict(X=np.random.normal(size=500)))
     summary = validate_graph(
         dag,
-        data,
-        causal_graph_reference=dag,
-        methods=(validate_lmc, validate_pd, validate_parental_dsep),
-        independence_test=_gcm_linear,
-        conditional_independence_test=_gcm_linear,
+        methods=(
+            wrap_partial(
+                validate_lmc, data=data, independence_test=_gcm_linear, conditional_independence_test=_gcm_linear
+            ),
+            wrap_partial(validate_pd, data=data, independence_test=_gcm_linear),
+            wrap_partial(validate_tpa, causal_graph_reference=dag),
+        ),
     )
 
-    assert summary["validate_lmc"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_lmc"][FALSIFY_N_TESTS] == 0
-    assert summary["validate_pd"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_pd"][FALSIFY_N_TESTS] == 0
-    assert summary["validate_parental_dsep"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_parental_dsep"][FALSIFY_N_TESTS] == 0
+    assert summary["validate_lmc"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_lmc"][FalsifyConst.N_TESTS] == 0
+    assert summary["validate_pd"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_pd"][FalsifyConst.N_TESTS] == 0
+    assert summary["validate_tpa"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_tpa"][FalsifyConst.N_TESTS] == 0
 
 
 @flaky(max_runs=5)
@@ -246,19 +260,21 @@ def test_given_correct_single_edge_when_validating_graph_then_report_no_violatio
     data = pd.DataFrame(data=dict(X0=X0, X1=X1))
     summary = validate_graph(
         dag,
-        data,
-        causal_graph_reference=dag,
-        methods=(validate_lmc, validate_pd, validate_parental_dsep),
-        independence_test=_gcm_linear,
-        conditional_independence_test=_gcm_linear,
+        methods=(
+            wrap_partial(
+                validate_lmc, data=data, independence_test=_gcm_linear, conditional_independence_test=_gcm_linear
+            ),
+            wrap_partial(validate_pd, data=data, independence_test=_gcm_linear),
+            wrap_partial(validate_tpa, causal_graph_reference=dag),
+        ),
     )
 
-    assert summary["validate_lmc"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_lmc"][FALSIFY_N_TESTS] == 0
-    assert summary["validate_pd"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_pd"][FALSIFY_N_TESTS] == 1
-    assert summary["validate_parental_dsep"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_parental_dsep"][FALSIFY_N_TESTS] == 0
+    assert summary["validate_lmc"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_lmc"][FalsifyConst.N_TESTS] == 0
+    assert summary["validate_pd"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_pd"][FalsifyConst.N_TESTS] == 1
+    assert summary["validate_tpa"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_tpa"][FalsifyConst.N_TESTS] == 0
 
 
 @flaky(max_runs=5)
@@ -273,19 +289,21 @@ def test_given_wrong_single_edge_when_validating_graph_then_report_violations():
     data = pd.DataFrame(data=dict(X0=X0, X1=X1))
     summary = validate_graph(
         dag,
-        data,
-        causal_graph_reference=true_dag,
-        methods=(validate_lmc, validate_pd, validate_parental_dsep),
-        independence_test=_gcm_linear,
-        conditional_independence_test=_gcm_linear,
+        methods=(
+            wrap_partial(
+                validate_lmc, data=data, independence_test=_gcm_linear, conditional_independence_test=_gcm_linear
+            ),
+            wrap_partial(validate_pd, data=data, independence_test=_gcm_linear),
+            wrap_partial(validate_tpa, causal_graph_reference=true_dag),
+        ),
     )
 
-    assert summary["validate_lmc"][FALSIFY_N_VIOLATIONS] == 2
-    assert summary["validate_lmc"][FALSIFY_N_TESTS] == 2
-    assert summary["validate_pd"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_pd"][FALSIFY_N_TESTS] == 0
-    assert summary["validate_parental_dsep"][FALSIFY_N_VIOLATIONS] == 2
-    assert summary["validate_parental_dsep"][FALSIFY_N_TESTS] == 2
+    assert summary["validate_lmc"][FalsifyConst.N_VIOLATIONS] == 2
+    assert summary["validate_lmc"][FalsifyConst.N_TESTS] == 2
+    assert summary["validate_pd"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_pd"][FalsifyConst.N_TESTS] == 0
+    assert summary["validate_tpa"][FalsifyConst.N_VIOLATIONS] == 2
+    assert summary["validate_tpa"][FalsifyConst.N_TESTS] == 2
 
 
 @flaky(max_runs=5)
@@ -296,19 +314,21 @@ def test_given_correct_categorical_when_validating_graph_then_report_no_violatio
     data = pd.DataFrame(data=dict(X=X, Y=Y, Z=Z))
     summary = validate_graph(
         dag,
-        data,
-        causal_graph_reference=dag,
-        methods=(validate_lmc, validate_pd, validate_parental_dsep),
-        independence_test=kernel_based,
-        conditional_independence_test=kernel_based,
+        methods=(
+            wrap_partial(
+                validate_lmc, data=data, independence_test=kernel_based, conditional_independence_test=kernel_based
+            ),
+            wrap_partial(validate_pd, data=data, independence_test=kernel_based),
+            wrap_partial(validate_tpa, causal_graph_reference=dag),
+        ),
     )
 
-    assert summary["validate_lmc"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_lmc"][FALSIFY_N_TESTS] == 1
-    assert summary["validate_pd"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_pd"][FALSIFY_N_TESTS] == 3
-    assert summary["validate_parental_dsep"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_parental_dsep"][FALSIFY_N_TESTS] == 1
+    assert summary["validate_lmc"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_lmc"][FalsifyConst.N_TESTS] == 1
+    assert summary["validate_pd"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_pd"][FalsifyConst.N_TESTS] == 3
+    assert summary["validate_tpa"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_tpa"][FalsifyConst.N_TESTS] == 1
 
 
 @flaky(max_runs=5)
@@ -325,14 +345,13 @@ def test_given_non_minimal_DAG_when_validating_causal_minimality_then_report_vio
     data = pd.DataFrame(data=dict(X0=X0, X1=X1, X2=X2, Y=Y))
     summary = validate_graph(
         given_dag,
-        data,
-        methods=validate_causal_minimality,
-        independence_test=_gcm_linear,
-        conditional_independence_test=_gcm_linear,
+        methods=wrap_partial(
+            validate_cm, data=data, independence_test=_gcm_linear, conditional_independence_test=_gcm_linear
+        ),
     )
 
-    assert summary["validate_causal_minimality"][FALSIFY_N_VIOLATIONS] == 1
-    assert summary["validate_causal_minimality"][FALSIFY_N_TESTS] == 3
+    assert summary["validate_cm"][FalsifyConst.N_VIOLATIONS] == 1
+    assert summary["validate_cm"][FalsifyConst.N_TESTS] == 3
 
 
 @flaky(max_runs=5)
@@ -345,11 +364,10 @@ def test_given_minimal_DAG_when_validating_causal_minimality_then_report_no_viol
     data = pd.DataFrame(data=dict(X0=X0, X1=X1, X2=X2, Y=Y))
     summary = validate_graph(
         dag,
-        data,
-        methods=validate_causal_minimality,
-        independence_test=_gcm_linear,
-        conditional_independence_test=_gcm_linear,
+        methods=wrap_partial(
+            validate_cm, data=data, independence_test=_gcm_linear, conditional_independence_test=_gcm_linear
+        ),
     )
 
-    assert summary["validate_causal_minimality"][FALSIFY_N_VIOLATIONS] == 0
-    assert summary["validate_causal_minimality"][FALSIFY_N_TESTS] == 2
+    assert summary["validate_cm"][FalsifyConst.N_VIOLATIONS] == 0
+    assert summary["validate_cm"][FalsifyConst.N_TESTS] == 2
