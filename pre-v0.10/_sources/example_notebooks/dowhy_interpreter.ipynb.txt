@@ -1,0 +1,339 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# DoWhy: Interpreters for Causal Estimators\n",
+    "\n",
+    "This is a quick introduction to the use of interpreters in the DoWhy causal inference library.\n",
+    "We will load in a sample dataset, use different methods for estimating the causal effect of a (pre-specified)treatment variable on a (pre-specified) outcome variable and demonstrate how to interpret the obtained results.\n",
+    "\n",
+    "First, let us add the required path for Python to find the DoWhy code and load all required packages"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%load_ext autoreload\n",
+    "%autoreload 2"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import logging\n",
+    "\n",
+    "import dowhy\n",
+    "from dowhy import CausalModel\n",
+    "import dowhy.datasets "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now, let us load a dataset. For simplicity, we simulate a dataset with linear relationships between common causes and treatment, and common causes and outcome.\n",
+    "\n",
+    "Beta is the true causal effect."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data = dowhy.datasets.linear_dataset(beta=1,\n",
+    "        num_common_causes=5, \n",
+    "        num_instruments = 2,\n",
+    "        num_treatments=1,\n",
+    "        num_discrete_common_causes=1,\n",
+    "        num_samples=10000,\n",
+    "        treatment_is_binary=True,\n",
+    "        outcome_is_binary=False)\n",
+    "df = data[\"df\"]\n",
+    "print(df[df.v0==True].shape[0])\n",
+    "df"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Note that we are using a pandas dataframe to load the data."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Identifying the causal estimand"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We now input a causal graph in the GML graph format."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# With graph\n",
+    "model=CausalModel(\n",
+    "        data = df,\n",
+    "        treatment=data[\"treatment_name\"],\n",
+    "        outcome=data[\"outcome_name\"],\n",
+    "        graph=data[\"gml_graph\"],\n",
+    "        instruments=data[\"instrument_names\"]\n",
+    "        )"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model.view_model()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from IPython.display import Image, display\n",
+    "display(Image(filename=\"causal_model.png\"))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We get a causal graph. Now identification and estimation is done."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)\n",
+    "print(identified_estimand)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Method 1: Propensity Score Stratification\n",
+    "\n",
+    "We will be using propensity scores to stratify units in the data."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "causal_estimate_strat = model.estimate_effect(identified_estimand,\n",
+    "                                              method_name=\"backdoor.propensity_score_stratification\",\n",
+    "                                              target_units=\"att\")\n",
+    "print(causal_estimate_strat)\n",
+    "print(\"Causal Estimate is \" + str(causal_estimate_strat.value))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Textual Interpreter\n",
+    "\n",
+    "The textual Interpreter describes (in words) the effect of unit change in the treatment variable on the outcome variable."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Textual Interpreter\n",
+    "interpretation = causal_estimate_strat.interpret(method_name=\"textual_effect_interpreter\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Visual Interpreter\n",
+    "\n",
+    "The visual interpreter plots the change in the standardized mean difference (SMD) before and after Propensity Score based adjustment of the dataset. The formula for SMD is given below.\n",
+    "\n",
+    "\n",
+    "$SMD = \\frac{\\bar X_{1} - \\bar X_{2}}{\\sqrt{(S_{1}^{2} + S_{2}^{2})/2}}$\n",
+    "\n",
+    "Here, $\\bar X_{1}$ and $\\bar X_{2}$ are the sample mean for the treated and control groups.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Visual Interpreter\n",
+    "interpretation = causal_estimate_strat.interpret(method_name=\"propensity_balance_interpreter\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "This plot shows how the SMD decreases from the unadjusted to the stratified units. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Method 2: Propensity Score Matching\n",
+    "\n",
+    "We will be using propensity scores to match units in the data."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "causal_estimate_match = model.estimate_effect(identified_estimand,\n",
+    "                                              method_name=\"backdoor.propensity_score_matching\",\n",
+    "                                              target_units=\"atc\")\n",
+    "print(causal_estimate_match)\n",
+    "print(\"Causal Estimate is \" + str(causal_estimate_match.value))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Textual Interpreter\n",
+    "interpretation = causal_estimate_match.interpret(method_name=\"textual_effect_interpreter\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Cannot use propensity balance interpretor here since the interpreter method only supports propensity score stratification estimator."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Method 3: Weighting\n",
+    "\n",
+    "We will be using (inverse) propensity scores to assign weights to units in the data. DoWhy supports a few different weighting schemes:\n",
+    "1. Vanilla Inverse Propensity Score weighting (IPS) (weighting_scheme=\"ips_weight\")\n",
+    "2. Self-normalized IPS weighting (also known as the Hajek estimator) (weighting_scheme=\"ips_normalized_weight\")\n",
+    "3. Stabilized IPS weighting (weighting_scheme = \"ips_stabilized_weight\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "causal_estimate_ipw = model.estimate_effect(identified_estimand,\n",
+    "                                            method_name=\"backdoor.propensity_score_weighting\",\n",
+    "                                            target_units = \"ate\",\n",
+    "                                            method_params={\"weighting_scheme\":\"ips_weight\"})\n",
+    "print(causal_estimate_ipw)\n",
+    "print(\"Causal Estimate is \" + str(causal_estimate_ipw.value))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Textual Interpreter\n",
+    "interpretation = causal_estimate_ipw.interpret(method_name=\"textual_effect_interpreter\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "interpretation = causal_estimate_ipw.interpret(method_name=\"confounder_distribution_interpreter\", fig_size=(8,8), font_size=12, var_name='W4', var_type='discrete')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.5"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": false,
+   "sideBar": true,
+   "skip_h1_title": true,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
