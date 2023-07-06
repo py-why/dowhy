@@ -148,7 +148,7 @@ def arrow_strength_of_model(
 
         random_seeds = np.random.randint(np.iinfo(np.int32).max, size=len(input_subsets))
         results = Parallel(n_jobs=n_jobs)(
-            delayed(parallel_job)(subset, random_seed) for subset, random_seed in zip(input_subsets, random_seeds)
+            delayed(parallel_job)(subset, int(random_seed)) for subset, random_seed in zip(input_subsets, random_seeds)
         )
 
     if np.any(results == np.inf):

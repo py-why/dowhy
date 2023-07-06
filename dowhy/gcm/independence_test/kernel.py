@@ -101,7 +101,7 @@ def kernel_based(
     random_seeds = np.random.randint(np.iinfo(np.int32).max, size=len(random_indices))
     p_values = Parallel(n_jobs=bootstrap_n_jobs)(
         delayed(evaluate_kernel_test_on_samples)(
-            X[indices], Y[indices], Z[indices] if Z is not None else None, random_seed
+            X[indices], Y[indices], Z[indices] if Z is not None else None, int(random_seed)
         )
         for indices, random_seed in zip(random_indices, random_seeds)
     )
@@ -274,7 +274,7 @@ def _rit(
         )
 
     random_seeds = np.random.randint(np.iinfo(np.int32).max, size=num_runs)
-    p_values = Parallel(n_jobs=n_jobs)(delayed(evaluate_rit_on_samples)(random_seeds[i]) for i in range(num_runs))
+    p_values = Parallel(n_jobs=n_jobs)(delayed(evaluate_rit_on_samples)(int(random_seeds[i])) for i in range(num_runs))
 
     return p_value_adjust_func(p_values)
 
@@ -356,7 +356,7 @@ def _rcit(
         )
 
     random_seeds = np.random.randint(np.iinfo(np.int32).max, size=num_runs)
-    p_values = Parallel(n_jobs=n_jobs)(delayed(parallel_job)(random_seeds[i]) for i in range(num_runs))
+    p_values = Parallel(n_jobs=n_jobs)(delayed(parallel_job)(int(random_seeds[i])) for i in range(num_runs))
 
     return p_value_adjust_func(p_values)
 
