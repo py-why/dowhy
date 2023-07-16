@@ -121,7 +121,7 @@ def regression_based(
 
     random_seeds = np.random.randint(np.iinfo(np.int32).max, size=k_folds)
     p_values = Parallel(n_jobs=n_jobs)(
-        delayed(estimate_p_value)(training_indices, test_indices, random_seed)
+        delayed(estimate_p_value)(training_indices, test_indices, int(random_seed))
         for (training_indices, test_indices), random_seed in zip(
             KFold(n_splits=k_folds, shuffle=True).split(X), random_seeds
         )

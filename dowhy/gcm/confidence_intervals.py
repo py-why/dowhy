@@ -87,7 +87,7 @@ def confidence_intervals(
 
     random_seeds = np.random.randint(np.iinfo(np.int32).max, size=num_bootstrap_resamples)
     all_results = Parallel(n_jobs=n_jobs)(
-        delayed(estimation_func_with_random_seed)(random_seed)
+        delayed(estimation_func_with_random_seed)(int(random_seed))
         for i, random_seed in enumerate(
             tqdm(
                 random_seeds,

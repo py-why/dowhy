@@ -146,7 +146,7 @@ def validate_lmc(
             Z=parents,
             independence_test=independence_test,
             conditional_independence_test=conditional_independence_test,
-            seed=seed,
+            seed=int(seed),
         )
         for (node, non_desc, parents), seed in zip(to_test, random_seeds)
     )
@@ -255,7 +255,7 @@ def validate_pd(
             Z=None,
             independence_test=independence_test,
             conditional_independence_test=None,
-            seed=seed,
+            seed=int(seed),
         )
         for (ancestor, node), seed in zip(to_test, random_seeds)
     )
@@ -329,7 +329,7 @@ def validate_causal_minimality(
             Z=list(other_parents),
             independence_test=independence_test,
             conditional_independence_test=conditional_independence_test,
-            seed=seed,
+            seed=int(seed),
         )
         for (node, p, other_parents), seed in zip(to_test, random_seeds)
     )

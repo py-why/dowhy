@@ -225,7 +225,7 @@ def _approximate_shapley_values_via_least_squares_regression(
     with Parallel(n_jobs=n_jobs) as parallel:
         random_seeds = np.random.randint(np.iinfo(np.int32).max, size=len(all_subsets))
         set_function_results = parallel(
-            delayed(parallel_job)(subset, random_seed)
+            delayed(parallel_job)(subset, int(random_seed))
             for subset, random_seed in tqdm(
                 zip(all_subsets, random_seeds),
                 desc="Estimate shapley values as least squares solution",
@@ -262,7 +262,7 @@ def _approximate_shapley_values_via_permutation_sampling(
     num_permutations = min(total_num_permutations, num_permutations)
 
     if use_halton_sequence:
-        halton_generator = Halton(num_players, seed=np.random.randint(np.iinfo(np.int32).max))
+        halton_generator = Halton(num_players, seed=int(np.random.randint(np.iinfo(np.int32).max)))
 
     subsets_to_evaluate = set()
     all_permutations = []
@@ -324,7 +324,7 @@ def _approximate_shapley_values_via_early_stopping(
     convergence_tracker = None
 
     if use_halton_sequence:
-        halton_generator = Halton(num_players, seed=np.random.randint(np.iinfo(np.int32).max))
+        halton_generator = Halton(num_players, seed=int(np.random.randint(np.iinfo(np.int32).max)))
 
     if config.show_progress_bars:
         pbar = tqdm(total=1)
@@ -585,7 +585,7 @@ def _evaluate_set_function(
 
     random_seeds = np.random.randint(np.iinfo(np.int32).max, size=len(evaluation_subsets))
     subset_results = parallel_context(
-        delayed(parallel_job)(subset_to_evaluate, random_seed)
+        delayed(parallel_job)(subset_to_evaluate, int(random_seed))
         for subset_to_evaluate, random_seed in tqdm(
             zip(evaluation_subsets, random_seeds),
             desc="Evaluate set function",
