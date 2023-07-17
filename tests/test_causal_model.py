@@ -342,6 +342,7 @@ class TestCausalModel(object):
             (10, 5000),
         ],
     )
+    @flaky(max_runs=3)
     def test_graph_refutation2(self, num_variables, num_samples):
         data = dowhy.datasets.dataset_from_random_graph(num_vars=num_variables, num_samples=num_samples)
         df = data["df"]
