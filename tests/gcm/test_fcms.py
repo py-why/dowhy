@@ -20,6 +20,7 @@ from dowhy.gcm import (
     draw_samples,
     fit,
 )
+from dowhy.gcm.auto import assign_causal_mechanisms
 from dowhy.gcm.divergence import estimate_kl_divergence_continuous
 from dowhy.gcm.ml import (
     SklearnRegressionModel,
@@ -88,12 +89,10 @@ def test_given_categorical_input_data_when_fit_causal_graph_with_linear_anm_then
 
 @flaky(max_runs=3)
 def test_given_categorical_input_data_when_draw_from_fitted_causal_graph_with_linear_anm_then_generates_correct_marginal_distribution():
-    scm = StructuralCausalModel(nx.DiGraph([("X0", "X2"), ("X1", "X2")]))
-    scm.set_causal_mechanism("X0", ScipyDistribution(stats.norm, loc=0, scale=1))
-    scm.set_causal_mechanism("X1", EmpiricalDistribution())
-    scm.set_causal_mechanism("X2", AdditiveNoiseModel(prediction_model=create_linear_regressor()))
-
     training_data = _generate_data_with_categorical_input()
+    scm = StructuralCausalModel(nx.DiGraph([("X0", "X2"), ("X1", "X2")]))
+    assign_causal_mechanisms(scm, training_data)
+
     fit(scm, data=training_data)
 
     assert scm.causal_mechanism("X2").evaluate(np.array([[2, "1"]], dtype=object), np.array([0])) == approx(14)
