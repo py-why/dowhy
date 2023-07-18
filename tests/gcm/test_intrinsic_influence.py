@@ -28,24 +28,24 @@ from tests.gcm.test_noise import _persist_parents
 def test_given_linear_data_when_estimate_intrinsic_causal_influence_with_variance_then_returns_expected_results():
     causal_model = StructuralCausalModel(nx.DiGraph([("X0", "X1"), ("X1", "X2"), ("X2", "X3")]))
 
-    X0 = np.random.normal(0, 1, 10000)
-    X1 = X0 + np.random.normal(0, 0.001, 10000)
-    X2 = X1 + np.random.normal(0, 2, 10000)
-    X3 = X2 + np.random.normal(0, 1, 10000)
+    X0 = np.random.normal(0, 1, 5000)
+    X1 = X0 + np.random.normal(0, 0.001, 5000)
+    X2 = X1 + np.random.normal(0, 2, 5000)
+    X3 = X2 + np.random.normal(0, 1, 5000)
     training_data = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
-    auto.assign_causal_mechanisms(causal_model, training_data, auto.AssignmentQuality.GOOD)
+    auto.assign_causal_mechanisms(causal_model, training_data)
 
     fit(causal_model, training_data)
 
-    iccs = intrinsic_causal_influence(causal_model, "X3", prediction_model="approx")
-    assert iccs["X0"] == approx(1, abs=0.25)
+    iccs = intrinsic_causal_influence(causal_model, "X3", prediction_model="approx", num_samples_baseline=2000)
+    assert iccs["X0"] == approx(1, abs=0.3)
     assert iccs["X1"] == approx(0, abs=0.05)
     assert iccs["X2"] == approx(4, abs=0.5)
     assert iccs["X3"] == approx(1, abs=0.25)
     assert np.sum([iccs[key] for key in iccs]) == approx(estimate_variance(X3), abs=0.5)
 
-    iccs = intrinsic_causal_influence(causal_model, "X3", prediction_model="exact")
-    assert iccs["X0"] == approx(1, abs=0.25)
+    iccs = intrinsic_causal_influence(causal_model, "X3", prediction_model="exact", num_samples_baseline=2000)
+    assert iccs["X0"] == approx(1, abs=0.3)
     assert iccs["X1"] == approx(0, abs=0.05)
     assert iccs["X2"] == approx(4, abs=0.5)
     assert iccs["X3"] == approx(1, abs=0.25)

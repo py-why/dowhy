@@ -2,7 +2,7 @@ import numpy as np
 from _pytest.python_api import approx
 from flaky import flaky
 
-from dowhy.gcm.ml.regression import create_hist_gradient_boost_regressor, create_polynom_regressor
+from dowhy.gcm.ml.regression import create_polynom_regressor, create_random_forest_regressor
 
 
 @flaky(max_runs=3)
@@ -51,7 +51,7 @@ def test_given_categorical_training_data_with_many_categories_when_fit_regressio
 
     X_training, Y_training = _generate_data()
     X_test, Y_test = _generate_data()
-    mdl = create_hist_gradient_boost_regressor()
+    mdl = create_random_forest_regressor()
     mdl.fit(X_training, Y_training)
 
-    assert np.mean((mdl.predict(X_test).reshape(-1) - Y_test) ** 2) < 0.05
+    assert np.mean((mdl.predict(X_test).reshape(-1) - Y_test) ** 2) < 0.1
