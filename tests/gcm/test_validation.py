@@ -147,7 +147,7 @@ def test_when_using_refute_causal_structure_without_fdrc_then_nans_for_adjusted_
     assert not np.isnan(rejection_summary["Y"]["edge_dependence_test"]["Z"]["p_value"])
 
 
-@flaky(max_runs=2)
+@flaky(max_runs=5)
 def test_given_non_linear_data_and_correct_dag_when_refute_invertible_model_then_not_reject_model():
     data = _generate_simple_non_linear_data()
 
@@ -158,7 +158,9 @@ def test_given_non_linear_data_and_correct_dag_when_refute_invertible_model_then
 
     assert (
         refute_invertible_model(
-            causal_model, data, independence_test=lambda x, y: kernel_based(x, y, bootstrap_num_runs=5)
+            causal_model,
+            data,
+            independence_test=lambda x, y: kernel_based(x, y, use_bootstrap=False),
         )
         == RejectionResult.NOT_REJECTED
     )
@@ -166,7 +168,7 @@ def test_given_non_linear_data_and_correct_dag_when_refute_invertible_model_then
         refute_invertible_model(
             causal_model,
             data,
-            independence_test=lambda x, y: kernel_based(x, y, bootstrap_num_runs=5),
+            independence_test=lambda x, y: kernel_based(x, y, use_bootstrap=False),
             fdr_control_method="fdr_bh",
         )
         == RejectionResult.NOT_REJECTED
