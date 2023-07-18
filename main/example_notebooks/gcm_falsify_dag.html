@@ -689,17 +689,20 @@ div.rendered_html tbody tr:hover {
 </style>
 <section id="Falsification-of-User-Given-Directed-Acyclic-Graphs">
 <h1>Falsification of User-Given Directed Acyclic Graphs<a class="headerlink" href="#Falsification-of-User-Given-Directed-Acyclic-Graphs" title="Permalink to this heading"></a></h1>
-<p>This notebook demonstrates a tool on falsifying a user-given DAG using observational data. The main function is <code class="docutils literal notranslate"><span class="pre">falsify_graph()</span></code>, which takes as input a DAG and data and returns an evaluation result.</p>
-<p>Let’s start with importing the necessary libraries and functions for this demo:</p>
+<p>This notebook demonstrates a tool on falsifying a user-given DAG using observational data. The main function is <code class="docutils literal notranslate"><span class="pre">falsify_graph()</span></code>, which takes as input a DAG and data and returns an evaluation result. For more details about this method, please read the related paper:</p>
+<blockquote>
+<div><p>Eulig, E., Mastakouri, A. A., Blöbaum, P., Hardt, M., &amp; Janzing, D. (2023). Toward Falsifying Causal Graphs Using a Permutation-Based Test. <a class="reference external" href="https://arxiv.org/abs/2305.09565">https://arxiv.org/abs/2305.09565</a></p>
+</div></blockquote>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import the necessary libraries and functions for this demo</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostingRegressor</span>
-<span class="kn">from</span> <span class="nn">dowhy.gcm.falsify</span> <span class="kn">import</span> <span class="n">falsify_graph</span><span class="p">,</span> <span class="n">plot_local_insights</span><span class="p">,</span> <span class="n">validate_graph</span><span class="p">,</span> <span class="n">validate_causal_minimality</span><span class="p">,</span> <span class="n">apply_suggestions</span>
+<span class="kn">from</span> <span class="nn">dowhy.gcm.falsify</span> <span class="kn">import</span> <span class="n">FalsifyConst</span><span class="p">,</span> <span class="n">falsify_graph</span><span class="p">,</span> <span class="n">plot_local_insights</span><span class="p">,</span> <span class="n">run_validations</span><span class="p">,</span> <span class="n">apply_suggestions</span>
 <span class="kn">from</span> <span class="nn">dowhy.gcm.independence_test.generalised_cov_measure</span> <span class="kn">import</span> <span class="n">generalised_cov_based</span>
 <span class="kn">from</span> <span class="nn">dowhy.gcm.util</span> <span class="kn">import</span> <span class="n">plot</span>
 <span class="kn">from</span> <span class="nn">dowhy.gcm.util.general</span> <span class="kn">import</span> <span class="n">set_random_seed</span>
@@ -758,7 +761,7 @@ True DAG
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Test permutations of given graph: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 120/120 [00:24&lt;00:00,  4.87it/s]
+Test permutations of given graph: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 120/120 [00:33&lt;00:00,  3.57it/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -774,7 +777,7 @@ Test permutations of given graph: 100%|█████████████�
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 +-------------------------------------------------------------------------------------------------------+
-|                                             Test Summary                                              |
+|                                         Falsificaton Summary                                          |
 +-------------------------------------------------------------------------------------------------------+
 | The given DAG is informative because 2 / 120 of the permutations lie in the Markov                    |
 | equivalence class of the given DAG (p-value: 0.02).                                                   |
@@ -796,8 +799,7 @@ informative the given DAG is. Only if few permutations lie in the same MEC, the 
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">falsify_graph</span><span class="p">(</span><span class="n">g_true</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Graph is falsifiable: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">falsifiable</span><span class="si">}</span><span class="s2">, Graph is falsified: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">falsified</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Graph is falsifiable: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">falsifiable</span><span class="si">}</span><span class="s2">, Graph is falsified: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">falsified</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -845,7 +847,7 @@ Graph is falsifiable: True, Graph is falsified: False
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Test permutations of given graph: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 120/120 [00:28&lt;00:00,  4.20it/s]
+Test permutations of given graph: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 120/120 [00:35&lt;00:00,  3.42it/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -861,7 +863,7 @@ Test permutations of given graph: 100%|█████████████�
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 +-------------------------------------------------------------------------------------------------------+
-|                                             Test Summary                                              |
+|                                         Falsificaton Summary                                          |
 +-------------------------------------------------------------------------------------------------------+
 | The given DAG is informative because 1 / 120 of the permutations lie in the Markov                    |
 | equivalence class of the given DAG (p-value: 0.01).                                                   |
@@ -879,7 +881,7 @@ Test permutations of given graph: 100%|█████████████�
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot nodes for which violations of LMCs occured</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Violations of LMCs&#39;</span><span class="p">)</span>
-<span class="n">plot_local_insights</span><span class="p">(</span><span class="n">g_given</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;validate_lmc&#39;</span><span class="p">)</span>
+<span class="n">plot_local_insights</span><span class="p">(</span><span class="n">g_given</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">FalsifyConst</span><span class="o">.</span><span class="n">VALIDATE_LMC</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -965,7 +967,7 @@ Violations of LMCs
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Test permutations of given graph: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [03:25&lt;00:00,  2.05s/it]
+Test permutations of given graph: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [04:07&lt;00:00,  2.48s/it]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -981,7 +983,7 @@ Test permutations of given graph: 100%|█████████████�
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 +-------------------------------------------------------------------------------------------------------+
-|                                             Test Summary                                              |
+|                                         Falsificaton Summary                                          |
 +-------------------------------------------------------------------------------------------------------+
 | The given DAG is informative because 0 / 100 of the permutations lie in the Markov                    |
 | equivalence class of the given DAG (p-value: 0.00).                                                   |
@@ -1000,7 +1002,7 @@ Test permutations of given graph: 100%|█████████████�
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">falsify_graph</span><span class="p">(</span><span class="n">g_given</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span>  <span class="n">plot_histogram</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suggestions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">falsify_graph</span><span class="p">(</span><span class="n">g_given</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">plot_histogram</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suggestions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1010,7 +1012,7 @@ Test permutations of given graph: 100%|█████████████�
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Test permutations of given graph: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 120/120 [00:26&lt;00:00,  4.51it/s]
+Test permutations of given graph: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 120/120 [00:33&lt;00:00,  3.53it/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1026,7 +1028,7 @@ Test permutations of given graph: 100%|█████████████�
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 +-------------------------------------------------------------------------------------------------------+
-|                                             Test Summary                                              |
+|                                         Falsificaton Summary                                          |
 +-------------------------------------------------------------------------------------------------------+
 | The given DAG is informative because 1 / 120 of the permutations lie in the Markov                    |
 | equivalence class of the given DAG (p-value: 0.01).                                                   |
@@ -1046,7 +1048,7 @@ Test permutations of given graph: 100%|█████████████�
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot suggestions</span>
-<span class="n">plot_local_insights</span><span class="p">(</span><span class="n">g_given</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;validate_causal_minimality&#39;</span><span class="p">)</span>
+<span class="n">plot_local_insights</span><span class="p">(</span><span class="n">g_given</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">FalsifyConst</span><span class="o">.</span><span class="n">VALIDATE_CM</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
