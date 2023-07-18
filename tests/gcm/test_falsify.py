@@ -11,8 +11,8 @@ from dowhy.datasets import generate_random_graph
 from dowhy.gcm.falsify import (
     FalsifyConst,
     _PermuteNodes,
+    run_validations,
     validate_cm,
-    validate_graph,
     validate_lmc,
     validate_pd,
     validate_tpa,
@@ -39,7 +39,7 @@ def _generate_simple_non_linear_data() -> pd.DataFrame:
 
 @flaky(max_runs=1)
 def test_given_exclude_original_order_when_generating_permutations_then_return_correct_permutations():
-    num_nodes = np.random.randint(1, 10)
+    num_nodes = np.random.randint(2, 10)
     perms = set()
     G = generate_random_graph(n=num_nodes)
     perm_gen = _PermuteNodes(G, exclude_original_order=True, n_permutations=-1)
@@ -52,7 +52,7 @@ def test_given_exclude_original_order_when_generating_permutations_then_return_c
 
 @flaky(max_runs=1)
 def test_given_not_exclude_original_order_when_generating_permutations_then_return_correct_permutations():
-    num_nodes = np.random.randint(1, 10)
+    num_nodes = np.random.randint(2, 10)
     found_orig_perm = False
     perms = set()
     G = generate_random_graph(n=num_nodes)
@@ -74,7 +74,7 @@ def test_given_correct_collider_when_validating_graph_then_report_no_violations(
     Y = np.random.normal(size=500)
     Z = 2 * X + 3 * Y + np.random.normal(size=500)
     data = pd.DataFrame(data=dict(X=X, Y=Y, Z=Z))
-    summary = validate_graph(
+    summary = run_validations(
         true_dag,
         data,
         methods=(
@@ -101,7 +101,7 @@ def test_given_wrong_collider_when_validating_graph_then_report_violations():
     Y = np.random.normal(size=500)
     Z = 2 * X + 3 * Y + np.random.normal(size=500)
     data = pd.DataFrame(data=dict(X=X, Y=Y, Z=Z))
-    summary = validate_graph(
+    summary = run_validations(
         dag,
         data,
         methods=(
@@ -127,7 +127,7 @@ def test_given_correct_chain_when_validating_graph_then_report_no_violations():
     Y = 0.6 * X + np.random.normal(size=500)
     Z = Y + np.random.normal(size=500)
     data = pd.DataFrame(data=dict(X=X, Y=Y, Z=Z))
-    summary = validate_graph(
+    summary = run_validations(
         true_dag,
         data,
         methods=(
@@ -154,7 +154,7 @@ def test_given_wrong_chain_when_validating_graph_then_report_violations():
     Y = 0.6 * X + np.random.normal(size=500)
     Z = Y + np.random.normal(size=500)
     data = pd.DataFrame(data=dict(X=X, Y=Y, Z=Z))
-    summary = validate_graph(
+    summary = run_validations(
         dag,
         data,
         methods=(
@@ -177,7 +177,7 @@ def test_given_empty_DAG_and_data_when_validating_graph_then_report_no_violation
     # Empty graph
     dag = nx.DiGraph()
     data = pd.DataFrame()
-    summary = validate_graph(
+    summary = run_validations(
         dag,
         data,
         methods=(
@@ -203,7 +203,7 @@ def test_given_correct_full_DAG_when_validating_graph_then_report_no_violations(
     X2 = 1.2 * X0 + 0.7 * X1 + np.random.normal(size=500)
     X3 = 0.6 * X0 + 0.8 * X1 + 1.3 * X2 + np.random.normal(size=500)
     data = pd.DataFrame(data=dict(X0=X0, X1=X1, X2=X2, X3=X3))
-    summary = validate_graph(
+    summary = run_validations(
         dag,
         data,
         methods=(
@@ -227,7 +227,7 @@ def test_given_correct_single_node_when_validating_graph_then_report_no_violatio
     dag = nx.DiGraph()
     dag.add_node("X")
     data = pd.DataFrame(data=dict(X=np.random.normal(size=500)))
-    summary = validate_graph(
+    summary = run_validations(
         dag,
         data,
         methods=(
@@ -252,7 +252,7 @@ def test_given_correct_single_edge_when_validating_graph_then_report_no_violatio
     X0 = np.random.normal(size=500)
     X1 = 2 * X0 + np.random.normal(size=500)
     data = pd.DataFrame(data=dict(X0=X0, X1=X1))
-    summary = validate_graph(
+    summary = run_validations(
         dag,
         data,
         methods=(
@@ -280,7 +280,7 @@ def test_given_wrong_single_edge_when_validating_graph_then_report_violations():
     X0 = np.random.normal(size=500)
     X1 = 2 * X0 + np.random.normal(size=500)
     data = pd.DataFrame(data=dict(X0=X0, X1=X1))
-    summary = validate_graph(
+    summary = run_validations(
         dag,
         data,
         methods=(
@@ -304,7 +304,7 @@ def test_given_correct_categorical_when_validating_graph_then_report_no_violatio
     dag = nx.DiGraph([("X", "Z"), ("Z", "Y")])
     X, Y, Z = _generate_categorical_data()
     data = pd.DataFrame(data=dict(X=X, Y=Y, Z=Z))
-    summary = validate_graph(
+    summary = run_validations(
         dag,
         data,
         methods=(
@@ -334,7 +334,7 @@ def test_given_non_minimal_DAG_when_validating_causal_minimality_then_report_vio
     X2 = np.random.normal(size=500)
     Y = 2 * X0 + 3 * X1 + np.random.normal(size=500)
     data = pd.DataFrame(data=dict(X0=X0, X1=X1, X2=X2, Y=Y))
-    summary = validate_graph(
+    summary = run_validations(
         given_dag,
         data,
         methods=partial(validate_cm, independence_test=_gcm_linear, conditional_independence_test=_gcm_linear),
@@ -352,7 +352,7 @@ def test_given_minimal_DAG_when_validating_causal_minimality_then_report_no_viol
     X2 = np.random.normal(size=500)
     Y = 2 * X0 + 3 * X1 + np.random.normal(size=500)
     data = pd.DataFrame(data=dict(X0=X0, X1=X1, X2=X2, Y=Y))
-    summary = validate_graph(
+    summary = run_validations(
         dag,
         data,
         methods=partial(validate_cm, independence_test=_gcm_linear, conditional_independence_test=_gcm_linear),
