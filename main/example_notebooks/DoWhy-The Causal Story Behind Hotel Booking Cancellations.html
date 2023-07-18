@@ -1461,7 +1461,7 @@ definite conclusion at this stage. Thus assigning rooms different to what a cust
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 588.4961$</div></div>
+$\displaystyle 588.5284$</div></div>
 </div>
 <p>We now consider the scenario when there were no booking changes and recalculate the expected count.</p>
 <div class="nbinput docutils container">
@@ -1485,7 +1485,7 @@ $\displaystyle 588.4961$</div></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 572.7088$</div></div>
+$\displaystyle 572.7372$</div></div>
 </div>
 <p>In the 2nd case, we take the scenario when there were booking changes(&gt;0) and recalculate the expected count.</p>
 <div class="nbinput docutils container">
@@ -1509,7 +1509,7 @@ $\displaystyle 572.7088$</div></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 665.6306$</div></div>
+$\displaystyle 665.6064$</div></div>
 </div>
 <p>There is definitely some change happening when the number of booking changes are non-zero. So it gives us a hint that <em>Booking Changes</em> may be affecting room cancellation.</p>
 <p>But is <em>Booking Changes</em> the only confounding variable? What if there were some unobserved confounders, regarding which we have no information(feature) present in our dataset. Would we still be able to make the same claims as before?</p>
@@ -1638,17 +1638,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
             d
-──────────────────────────(E[is_canceled|guests,is_repeated_guest,days_in_wait
+──────────────────────────(E[is_canceled|lead_time,days_in_waiting_list,hotel,
 d[different_room_assigned]
 
 
-ing_list,lead_time,hotel,required_car_parking_spaces,total_of_special_requests
+guests,is_repeated_guest,booking_changes,total_of_special_requests,required_ca
 
 
 
-,booking_changes,total_stay])
+r_parking_spaces,total_stay])
 
-Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,guests,is_repeated_guest,days_in_waiting_list,lead_time,hotel,required_car_parking_spaces,total_of_special_requests,booking_changes,total_stay,U) = P(is_canceled|different_room_assigned,guests,is_repeated_guest,days_in_waiting_list,lead_time,hotel,required_car_parking_spaces,total_of_special_requests,booking_changes,total_stay)
+Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,lead_time,days_in_waiting_list,hotel,guests,is_repeated_guest,booking_changes,total_of_special_requests,required_car_parking_spaces,total_stay,U) = P(is_canceled|different_room_assigned,lead_time,days_in_waiting_list,hotel,guests,is_repeated_guest,booking_changes,total_of_special_requests,required_car_parking_spaces,total_stay)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1690,24 +1690,24 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
             d
-──────────────────────────(E[is_canceled|guests,is_repeated_guest,days_in_wait
+──────────────────────────(E[is_canceled|lead_time,days_in_waiting_list,hotel,
 d[different_room_assigned]
 
 
-ing_list,lead_time,hotel,required_car_parking_spaces,total_of_special_requests
+guests,is_repeated_guest,booking_changes,total_of_special_requests,required_ca
 
 
 
-,booking_changes,total_stay])
+r_parking_spaces,total_stay])
 
-Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,guests,is_repeated_guest,days_in_waiting_list,lead_time,hotel,required_car_parking_spaces,total_of_special_requests,booking_changes,total_stay,U) = P(is_canceled|different_room_assigned,guests,is_repeated_guest,days_in_waiting_list,lead_time,hotel,required_car_parking_spaces,total_of_special_requests,booking_changes,total_stay)
+Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,lead_time,days_in_waiting_list,hotel,guests,is_repeated_guest,booking_changes,total_of_special_requests,required_car_parking_spaces,total_stay,U) = P(is_canceled|different_room_assigned,lead_time,days_in_waiting_list,hotel,guests,is_repeated_guest,booking_changes,total_of_special_requests,required_car_parking_spaces,total_stay)
 
 ## Realized estimand
-b: is_canceled~different_room_assigned+guests+is_repeated_guest+days_in_waiting_list+lead_time+hotel+required_car_parking_spaces+total_of_special_requests+booking_changes+total_stay
+b: is_canceled~different_room_assigned+lead_time+days_in_waiting_list+hotel+guests+is_repeated_guest+booking_changes+total_of_special_requests+required_car_parking_spaces+total_stay
 Target units: ate
 
 ## Estimate
-Mean value: -0.26220205744044367
+Mean value: -0.2622482563077848
 
 </pre></div></div>
 </div>
@@ -1753,8 +1753,8 @@ Please also refer to the documentation for alternative solver options:
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a random common cause
-Estimated effect:-0.26220205744044367
-New effect:-0.2622020574404437
+Estimated effect:-0.2622482563077848
+New effect:-0.2622482563077848
 p value:1.0
 
 </pre></div></div>
@@ -1779,8 +1779,8 @@ p value:1.0
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:-0.26220205744044367
-New effect:0.05526503294820574
+Estimated effect:-0.2622482563077848
+New effect:0.055325723152001335
 p value:0.0
 
 </pre></div></div>
@@ -1805,9 +1805,9 @@ p value:0.0
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a subset of data
-Estimated effect:-0.26220205744044367
-New effect:-0.26218254524527324
-p value:1.0
+Estimated effect:-0.2622482563077848
+New effect:-0.262417360395827
+p value:0.96
 
 </pre></div></div>
 </div>
