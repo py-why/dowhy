@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
-import pygraphviz
 from matplotlib import image
 
 _logger = logging.getLogger(__name__)
@@ -172,7 +171,7 @@ def _calc_arrow_width(strength: float, max_strength: float):
     return 0.1 + 4.0 * float(abs(strength)) / float(max_strength)
 
 
-def _plot_as_pyplot_figure(pygraphviz_graph: pygraphviz.AGraph, figure_size: Optional[Tuple[int, int]] = None) -> None:
+def _plot_as_pyplot_figure(pygraphviz_graph: Any, figure_size: Optional[Tuple[int, int]] = None) -> None:
     with tempfile.TemporaryDirectory() as tmp_dir_name:
         pygraphviz_graph.draw(tmp_dir_name + os.sep + "Graph.png")
         img = image.imread(tmp_dir_name + os.sep + "Graph.png")
