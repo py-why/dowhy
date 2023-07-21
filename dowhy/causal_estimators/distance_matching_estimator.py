@@ -38,9 +38,19 @@ class DistanceMatchingEstimator(CausalEstimator):
         """
         :param identified_estimand: probability expression
             representing the target identified estimand to estimate.
-        :param test_significance: Binary flag or a string indicating whether to test significance and by which method. All estimators support test_significance="bootstrap" that estimates a p-value for the obtained estimate using the bootstrap method. Individual estimators can override this to support custom testing methods. The bootstrap method supports an optional parameter, num_null_simulations. If False, no testing is done. If True, significance of the estimate is tested using the custom method if available, otherwise by bootstrap.
+        :param test_significance: Binary flag or a string indicating whether to test significance and by which method.
+            All estimators support test_significance="bootstrap" that estimates a p-value for the obtained estimate using
+            the bootstrap method. Individual estimators can override this to support custom testing methods.
+            The bootstrap method supports an optional parameter, num_null_simulations. If False, no testing is done.
+            If True, significance of the estimate is tested using the custom method if available, otherwise by bootstrap.
         :param evaluate_effect_strength: (Experimental) whether to evaluate the strength of effect
-        :param confidence_intervals: Binary flag or a string indicating whether the confidence intervals should be computed and which method should be used. All methods support estimation of confidence intervals using the bootstrap method by using the parameter confidence_intervals="bootstrap". The bootstrap method takes in two arguments (num_simulations and sample_size_fraction) that can be optionally specified in the params dictionary. Estimators may also override this to implement their own confidence interval method. If this parameter is False, no confidence intervals are computed. If True, confidence intervals are computed by the estimator's specific method if available, otherwise through bootstrap
+        :param confidence_intervals: Binary flag or a string indicating whether the confidence intervals should be computed
+            and which method should be used. All methods support estimation of confidence intervals using the bootstrap
+            method by using the parameter confidence_intervals="bootstrap". The bootstrap method takes in two arguments
+            (num_simulations and sample_size_fraction) that can be optionally specified in the params dictionary.
+            Estimators may also override this to implement their own confidence interval method.
+            If this parameter is False, no confidence intervals are computed. If True, confidence intervals are computed by
+            the estimator's specific method if available, otherwise through bootstrap
         :param num_null_simulations: The number of simulations for testing the
             statistical significance of the estimator
         :param num_simulations: The number of simulations for finding the
@@ -119,8 +129,8 @@ class DistanceMatchingEstimator(CausalEstimator):
             error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
             raise Exception(error_msg)
         # Checking if the treatment is binary
-        if not pd.api.types.is_bool_dtype(data[self._target_estimand.treatment_variable[0]]):
-            error_msg = "Distance Matching method is applicable only for binary treatments"
+        if not data[self._target_estimand.treatment_variable[0]].isin([0, 1]).all():
+            error_msg = "Distance Matching method is applicable only for binary treatments."
             self.logger.error(error_msg)
             raise Exception(error_msg)
 
