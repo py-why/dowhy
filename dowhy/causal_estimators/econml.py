@@ -223,7 +223,7 @@ class Econml(CausalEstimator):
     ):
         """
         data: dataframe containing the data on which treatment effect is to be estimated.
-        treatment_value: value of the treatment variable for which the effect is to be estimated.
+        treatment_value: value of the treatment variable for which the effect is to be estimated. It can be (optionally) a sequence for different values of the treatment variable.
         control_value: value of the treatment variable that denotes its absence (usually 0)
         target_units: The units for which the treatment effect should be estimated.
                      It can be a DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
@@ -238,6 +238,7 @@ class Econml(CausalEstimator):
             X = self._effect_modifiers
 
         X_test = X
+        self.n_target_units = data.shape[0]
         if X is not None:
             if type(target_units) is pd.DataFrame:
                 X_test = target_units
@@ -245,7 +246,9 @@ class Econml(CausalEstimator):
                 filtered_rows = data.where(target_units)
                 boolean_criterion = np.array(filtered_rows.notnull().iloc[:, 0])
                 X_test = X[boolean_criterion]
+            self.n_target_units = X_test.shape[0]
         # Changing shape to a list for a singleton value
+        # Note that self._control_value is assumed to be a singleton value
         self._treatment_value = parse_state(self._treatment_value)
 
         est = self.effect(X_test)
@@ -312,8 +315,8 @@ class Econml(CausalEstimator):
             ests.append(
                 fun(
                     filtered_df,
-                    T0=self._control_value,
-                    T1=tv,
+                    T0=np.repeat([self._control_value], self.n_target_units, axis=0),
+                    T1=np.repeat([tv], self.n_target_units, axis=0),
                     *args,
                     **kwargs,
                 )
