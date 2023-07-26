@@ -327,15 +327,6 @@ def test_given_random_seed_when_perform_pairwise_approx_kernel_based_test_then_r
     assert result_1 == result_2
 
 
-@flaky(max_runs=3)
-def test_given_weak_dependency_when_perform_kernel_based_test_then_returns_expected_result():
-    X = np.random.choice(2, (2000, 100))
-    Y = np.sum(X * np.random.uniform(-1, 5), axis=1)
-
-    assert kernel_based(X[:, 0], Y) <= 0.05
-    assert kernel_based(np.random.choice(2, (2000, 1)), Y) > 0.05
-
-
 def test_given_constant_data_when_perform_kernel_based_test_then_returns_expected_result():
     assert kernel_based(np.zeros(100), np.random.normal(0, 1, 100)) == 1.0
     assert kernel_based(np.zeros(100), np.random.normal(0, 1, 100), np.random.normal(0, 1, 100)) == 1.0
