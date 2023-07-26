@@ -275,7 +275,7 @@ class CausalModel:
 
         """
 
-        if effect_modifiers is None or len(effect_modifiers) == 0:
+        if effect_modifiers is None:
             effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
 
         if method_name is None:

@@ -138,7 +138,7 @@ class CausalGraph:
 
         # Adding effect modifiers
         if effect_modifier_names is not None:
-            for node_name in effect_modifier_names:
+            for node_name in effect_modifier_names: 
                 if node_name not in common_cause_names:
                     for outcome in self.outcome_name:
                         self._graph.add_node(node_name, observed="yes")
@@ -147,6 +147,7 @@ class CausalGraph:
                         self._graph.add_edge(node_name, outcome)
                         # self._graph.add_edge(node_name, outcome, style = "dotted", headport="s", tailport="n")
                         # self._graph.add_edge(outcome, node_name, style = "dotted", headport="n", tailport="s") # TODO make the ports more general so that they apply not just to top-bottom node configurations
+                self._graph.nodes[node_name]["effectmodifier"] = True
         if mediator_names is not None:
             for node_name in mediator_names:
                 for treatment, outcome in itertools.product(self.treatment_name, self.outcome_name):
@@ -344,6 +345,7 @@ class CausalGraph:
         return list(causes_1.intersection(causes_2))
 
     def get_effect_modifiers(self, nodes1, nodes2):
+        # Return effect modifiers according to the graph
         modifiers = set()
         for node in nodes2:
             modifiers = modifiers.union(self.get_ancestors(node))
@@ -356,6 +358,9 @@ class CausalGraph:
                 all_directed_paths = nx.all_simple_paths(self._graph, node1, node2)
                 for path in all_directed_paths:
                     modifiers = modifiers.difference(path)
+        # Also add any effect modifiers that could not be auto-detected (e.g., they are also common causes)
+        marked_modifiers = [n for n,ndata in self._graph.nodes(data=True) if "effectmodifier" in ndata]
+        modifiers = modifiers.union(marked_modifiers)
         return list(modifiers)
 
     def get_parents(self, node_name):

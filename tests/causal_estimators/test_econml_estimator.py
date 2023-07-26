@@ -287,3 +287,119 @@ class TestEconMLEstimator:
                 },
             },
         )
+    
+    def test_empty_effect_modifier_nograph(self):
+        arr = np.random.normal(size=(500, 5))
+        df = pd.DataFrame(arr, columns=['Y', 'T', 'X', 'W0', 'W1'])
+        model = CausalModel(
+            data = df,
+            treatment = 'T',
+            outcome = 'Y',
+            effect_modifiers = ['X'],
+            common_causes = ['W0', 'W1'],
+            estimand_type="nonparametric-ate"
+        )
+
+        estimand = model.identify_effect()
+        est1 = model.estimate_effect(identified_estimand=estimand,
+                                     effect_modifiers=[],
+                                     method_name="backdoor.econml.dml.LinearDML",
+                                     method_params={"init_params": {"random_state":123},
+                                            "fit_params": {}})                       
+
+        assert est1.cate_estimates.shape == (1,1)
+
+        # A model where X is also a common cause
+        model = CausalModel(
+            data = df,
+            treatment = 'T',
+            outcome = 'Y',
+            effect_modifiers = ['X'],
+            common_causes = ['X', 'W0', 'W1'],
+            estimand_type="nonparametric-ate"
+        )
+
+        estimand = model.identify_effect()
+        est2 = model.estimate_effect(identified_estimand=estimand,
+                                     effect_modifiers=[],
+                                     method_name="backdoor.econml.dml.LinearDML",
+                                     method_params={"init_params": {"random_state":123},
+                                            "fit_params": {}})                       
+
+        assert est2.cate_estimates.shape == (1,1)
+
+    def test_effect_modifier_input(self):
+        arr = np.random.normal(size=(500, 5))
+        df = pd.DataFrame(arr, columns=['Y', 'T', 'X', 'W0', 'W1'])
+        model = CausalModel(
+            data = df,
+            treatment = 'T',
+            outcome = 'Y',
+            effect_modifiers = ['X'],
+            common_causes = ['X', 'W0', 'W1'],
+            estimand_type="nonparametric-ate"
+        )
+
+        estimand = model.identify_effect()
+        est1 = model.estimate_effect(identified_estimand=estimand,
+                                     method_name="backdoor.econml.dml.LinearDML",
+                                     method_params={"init_params": {"random_state":123},
+                                            "fit_params": {}})                       
+
+        # A model where X is also a common cause
+        model = CausalModel(
+            data = df,
+            treatment = 'T',
+            outcome = 'Y',
+            effect_modifiers = ['X'],
+            common_causes = ['X', 'W0', 'W1'],
+            estimand_type="nonparametric-ate"
+        )
+
+        estimand = model.identify_effect()
+        est2 = model.estimate_effect(identified_estimand=estimand,
+                                     effect_modifiers=['X'],
+                                     method_name="backdoor.econml.dml.LinearDML",
+                                     method_params={"init_params": {"random_state":123},
+                                            "fit_params": {}})                       
+
+        assert np.array_equal(est1.cate_estimates, est2.cate_estimates)
+
+    def test_effect_modifier_input2(self):
+        # The case where effect modifier is not a common cause
+        arr = np.random.normal(size=(500, 5))
+        df = pd.DataFrame(arr, columns=['Y', 'T', 'X', 'W0', 'W1'])
+        model = CausalModel(
+            data = df,
+            treatment = 'T',
+            outcome = 'Y',
+            effect_modifiers = ['X'],
+            common_causes = ['W0', 'W1'],
+            estimand_type="nonparametric-ate"
+        )
+
+        estimand = model.identify_effect()
+        est1 = model.estimate_effect(identified_estimand=estimand,
+                                     method_name="backdoor.econml.dml.LinearDML",
+                                     method_params={"init_params": {"random_state":123},
+                                            "fit_params": {}})                       
+
+        # A model where X is also a common cause
+        model = CausalModel(
+            data = df,
+            treatment = 'T',
+            outcome = 'Y',
+            effect_modifiers = ['X'],
+            common_causes = ['W0', 'W1'],
+            estimand_type="nonparametric-ate"
+        )
+
+        estimand = model.identify_effect()
+        est2 = model.estimate_effect(identified_estimand=estimand,
+                                     effect_modifiers=['X'],
+                                     method_name="backdoor.econml.dml.LinearDML",
+                                     method_params={"init_params": {"random_state":123},
+                                            "fit_params": {}})                       
+
+        assert np.array_equal(est1.cate_estimates, est2.cate_estimates)
+
