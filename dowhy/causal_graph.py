@@ -138,7 +138,7 @@ class CausalGraph:
 
         # Adding effect modifiers
         if effect_modifier_names is not None:
-            for node_name in effect_modifier_names: 
+            for node_name in effect_modifier_names:
                 if node_name not in common_cause_names:
                     for outcome in self.outcome_name:
                         self._graph.add_node(node_name, observed="yes")
@@ -359,7 +359,7 @@ class CausalGraph:
                 for path in all_directed_paths:
                     modifiers = modifiers.difference(path)
         # Also add any effect modifiers that could not be auto-detected (e.g., they are also common causes)
-        marked_modifiers = [n for n,ndata in self._graph.nodes(data=True) if "effectmodifier" in ndata]
+        marked_modifiers = [n for n, ndata in self._graph.nodes(data=True) if "effectmodifier" in ndata]
         modifiers = modifiers.union(marked_modifiers)
         return list(modifiers)
 
