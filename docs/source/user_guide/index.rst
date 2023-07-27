@@ -2,11 +2,12 @@ User Guide
 ==========
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
+   foreword
    intro
-   effect_inference/index
-   gcm_based_inference/index
+   modeling_causal_relations/index
+   modeling_gcm/index
+   causal_tasks/index
+   refuting_causal_estimates/index
    ../cite.rst
-
-

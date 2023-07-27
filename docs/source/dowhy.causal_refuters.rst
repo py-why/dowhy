@@ -1,6 +1,14 @@
 dowhy.causal\_refuters package
 ==============================
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   dowhy.causal_refuters.overrule
+
 Submodules
 ----------
 
@@ -12,14 +20,21 @@ dowhy.causal\_refuters.add\_unobserved\_common\_cause module
    :undoc-members:
    :show-inheritance:
 
-dowhy.causal\_refuters.assess_overlap module
------------------------------------------------------------
+dowhy.causal\_refuters.assess\_overlap module
+---------------------------------------------
 
 .. automodule:: dowhy.causal_refuters.assess_overlap
    :members:
    :undoc-members:
    :show-inheritance:
 
+dowhy.causal\_refuters.assess\_overlap\_overrule module
+-------------------------------------------------------
+
+.. automodule:: dowhy.causal_refuters.assess_overlap_overrule
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 dowhy.causal\_refuters.bootstrap\_refuter module
 ------------------------------------------------

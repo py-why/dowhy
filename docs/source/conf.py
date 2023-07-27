@@ -209,3 +209,6 @@ todo_include_todos = True
 
 # init docstrings should also be included in class
 autoclass_content = "both"
+
+# Only uncomment for faster testing/building docs without compiling notebooks
+# nbsphinx_execute = "never"

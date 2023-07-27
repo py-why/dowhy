@@ -20,6 +20,14 @@ dowhy.gcm.ml.classification module
    :undoc-members:
    :show-inheritance:
 
+dowhy.gcm.ml.prediction\_model module
+-------------------------------------
+
+.. automodule:: dowhy.gcm.ml.prediction_model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.gcm.ml.regression module
 ------------------------------
 
