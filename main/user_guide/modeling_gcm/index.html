@@ -1,0 +1,761 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Modeling Graphical Causal Models (GCMs) &#8212; DoWhy  documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Types of graphical causal models" href="graphical_causal_model_types.html" />
+    <link rel="prev" title="Graph refutations" href="../modeling_causal_relations/refuting_causal_graph/refute_causal_structure.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+    <img src="../../_static/dowhy-logo-small.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="../index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../example_notebooks/nb_index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../dowhy.html">
+  dowhy package
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../contributing.html">
+  Contributing
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../code_repo.html">
+  Release notes
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../cite.html">
+  Citing this package
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+      <div class="navbar-end-item">
+        <div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        main
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../foreword.html">
+   Foreword
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../intro.html">
+   Introduction to DoWhy
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../modeling_causal_relations/index.html">
+   Modeling Causal Relations
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../modeling_causal_relations/specifying_causal_graph.html">
+     Specifying a causal graph using domain knowledge
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../modeling_causal_relations/learning_causal_structure.html">
+     Learning causal structure from data
+    </a>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../modeling_causal_relations/refuting_causal_graph/index.html">
+     Refuting a Causal Graph
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+    <label for="toctree-checkbox-2">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../modeling_causal_relations/refuting_causal_graph/independence_tests.html">
+       Performing independence tests
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../modeling_causal_relations/refuting_causal_graph/refute_causal_structure.html">
+       Graph refutations
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 current active has-children">
+  <a class="current reference internal" href="#">
+   Modeling Graphical Causal Models (GCMs)
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+  <label for="toctree-checkbox-3">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="graphical_causal_model_types.html">
+     Types of graphical causal models
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="draw_samples.html">
+     Generate samples from a GCM
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="customizing_model_assignment.html">
+     Customizing Causal Mechanism Assignment
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="estimating_confidence_intervals.html">
+     Estimating Confidence Intervals
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../causal_tasks/index.html">
+   Performing Causal Tasks
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/>
+  <label for="toctree-checkbox-4">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../causal_tasks/estimating_causal_effects/index.html">
+     Estimating Causal Effects
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/>
+    <label for="toctree-checkbox-5">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/index.html">
+       Identifying causal effect
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/>
+      <label for="toctree-checkbox-6">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/backdoor.html">
+         Backdoor criterion
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/frontdoor.html">
+         Frontdoor criterion
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/instrumental_variable.html">
+         Natural experiments and instrumental variables
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/id_algorithm.html">
+         ID algorithm for discovering new identification strategies
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/index.html">
+       Estimating average causal effect using backdoor
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/>
+      <label for="toctree-checkbox-7">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/regression_based_methods.html">
+         Regression-based methods
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/distance_matching.html">
+         Distance-based matching
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/propensity_based_methods.html">
+         Propensity-based methods
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/do_sampler.html">
+         Do-sampler
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_natural_experiments/index.html">
+       Estimating average causal effect with natural experiments
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/estimating_causal_effects/conditional_effect_estimation/index.html">
+       Estimating conditional average causal effect
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_gcm.html">
+       Estimating average causal effect using GCM
+      </a>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../causal_tasks/estimating_causal_effects/direct_indirect_effects/index.html">
+       Estimating direct and indirect effects
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
+      <label for="toctree-checkbox-8">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/direct_indirect_effects/mediation_analysis.html">
+         Estimating natural direct and indirect effects
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/direct_indirect_effects/quantify_arrow_strength.html">
+         Direct Effect: Quantifying Arrow Strength
+        </a>
+       </li>
+      </ul>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/index.html">
+     Explaining Observed Effects and Root-Cause Analysis
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/>
+    <label for="toctree-checkbox-9">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/anomaly_attribution.html">
+       Anomaly Attribution
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/distribution_change.html">
+       Attributing Distributional Changes
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/icc.html">
+       Quantifying Intrinsic Causal Influence
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/unit_change.html">
+       Unit Change Attribution
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/feature_relevance.html">
+       Feature Relevance
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../causal_tasks/what_if/index.html">
+     Asking and Answering What-If Questions
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/>
+    <label for="toctree-checkbox-10">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/what_if/interventions.html">
+       Simulating the Impact of Interventions
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/what_if/counterfactuals.html">
+       Computing Counterfactuals
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../causal_tasks/causal_prediction/index.html">
+     Predicting outcome for out-of-distribution inputs
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../refuting_causal_estimates/index.html">
+   Refuting causal estimates
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/>
+  <label for="toctree-checkbox-11">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/index.html">
+     Refuting Effect Estimates
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" type="checkbox"/>
+    <label for="toctree-checkbox-12">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/placebo_treatment.html">
+       Placebo Treatment Refuter
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/dummy_outcome.html">
+       Dummy Outcome Refuter
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/random_common_cause.html">
+       Random Common Cause Refuter
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/data_subsample.html">
+       Data Subsample Refuter
+      </a>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/index.html">
+       Sensitivity Analysis
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" type="checkbox"/>
+      <label for="toctree-checkbox-13">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/simulation_based.html">
+         Simulation-based sensitivity analysis
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/linear_partialr2.html">
+         Partial-R2 based sensitivity analysis for linear estimators
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/nonlinear_reisz.html">
+         Reisz estimator-based sensitivity analysis for non-linear estimators
+        </a>
+       </li>
+      </ul>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../cite.html">
+   Citing this package
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#fitting-an-scm-to-the-data">
+   Fitting an SCM to the data
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#other-related-gcm-topics">
+   Other related GCM topics
+  </a>
+ </li>
+</ul>
+
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <section id="modeling-graphical-causal-models-gcms">
+<h1>Modeling Graphical Causal Models (GCMs)<a class="headerlink" href="#modeling-graphical-causal-models-gcms" title="Permalink to this heading"></a></h1>
+<p>To perform causal tasks based on graphical causal models, such as root cause analysis or quantifying the causal strength of edges, we also have to know the nature of underlying data-generating process of variables. A causal graph by itself, being a diagram, does not have any information about the data-generating process.</p>
+<p>All main features of the GCM-based inference in DoWhy are built around the concept of <strong>graphical causal models</strong>. A
+graphical causal model consists of a causal direct acyclic graph (DAG) of variables and a <strong>causal mechanism</strong> for
+each of the variables. A causal mechanism defines the conditional distribution of a variable given its parents in the
+graph, or, in case of root node variables, simply its distribution. This is, for non-root nodes, we model a node
+<span class="math notranslate nohighlight">\(X_i\)</span> as <span class="math notranslate nohighlight">\(X_i = f(PA_{X_i}, N_i)\)</span>, where <span class="math notranslate nohighlight">\(PA_{X_i}\)</span> are the parents of <span class="math notranslate nohighlight">\(X_i\)</span> and
+<span class="math notranslate nohighlight">\(N_i\)</span> is unobserved noise that is assumed to be independent of <span class="math notranslate nohighlight">\(PA_{X_i}\)</span> (causal sufficiency).</p>
+<p>The most general case of a GCM is a <strong>probabilistic causal model</strong> (PCM), where causal mechanisms are defined by
+<strong>conditional stochastic models</strong> and <strong>stochastic models</strong>. In the <code class="docutils literal notranslate"><span class="pre">dowhy.gcm</span></code> package, these are represented by
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ProbabilisticCausalModel</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalStochasticModel</span></code>, and <code class="xref py py-class docutils literal notranslate"><span class="pre">StochasticModel</span></code>.</p>
+<a class="reference internal image-reference" href="../../_images/pcm.png"><img alt="../../_images/pcm.png" class="align-center" src="../../_images/pcm.png" style="width: 80%;" /></a>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>In practical terms however, we often use invertible <strong>structural causal models</strong> (SCMs) to represent our GCMs,
+and the causal mechanisms are defined by <strong>functional causal models</strong> (FCMs) for non-root nodes and <strong>stochastic
+models</strong> for root nodes. An invertible SCM implements the same traits as a PCM, but on top of that, its FCMs allow us to
+reason <em>further</em> about its data generation process based on parents and noise, and hence, allow us e.g. to compute
+counterfactuals. See section <a class="reference internal" href="graphical_causal_model_types.html"><span class="doc">Types of graphical causal models</span></a> for more details about the type of graphs and their implications.</p>
+<a class="reference internal image-reference" href="../../_images/scm.png"><img alt="../../_images/scm.png" class="align-center" src="../../_images/scm.png" style="width: 80%;" /></a>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>To keep this introduction simple, we will stick with SCMs for now.</p>
+<p>As mentioned above, a causal mechanism describes how the values of a node are influenced by the values of its parent
+nodes. We will dive much deeper into the details of causal mechanisms and their meaning in section
+<a class="reference internal" href="customizing_model_assignment.html"><span class="doc">Customizing Causal Mechanism Assignment</span></a>. But for this introduction, we will treat them as an opaque thing that is needed
+to answer causal questions.</p>
+<p>To introduce this data-generating process, we use an SCM that’s built on top of our causal graph:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">gcm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>At this point we would normally load our dataset. For this introduction, we generate some synthetic data instead. The API takes data in form of Pandas DataFrames:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span><span class="o">,</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Y</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">X</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Z</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">Y</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="go">          X         Y          Z</span>
+<span class="go">0 -2.253500 -3.638579 -10.370047</span>
+<span class="go">1 -1.078337 -2.114581  -6.028030</span>
+<span class="go">2 -0.962719 -2.157896  -5.750563</span>
+<span class="go">3 -0.300316 -0.440721  -2.619954</span>
+<span class="go">4  0.127419  0.158185   1.555927</span>
+</pre></div>
+</div>
+<p>Note how the columns X, Y, Z correspond to our nodes X, Y, Z in the graph constructed above. We can also see how the
+values of X influence the values of Y and how the values of Y influence the values of Z in that data set.</p>
+<p>The causal model created above allows us now to assign causal mechanisms to each node in the form of functional causal
+models. Here, these mechanism can either be assigned manually if, for instance, prior knowledge about certain causal
+relationships are known or they can be assigned automatically using the <a class="reference internal" href="../../dowhy.gcm.html#module-dowhy.gcm.auto" title="dowhy.gcm.auto"><code class="xref py py-mod docutils literal notranslate"><span class="pre">auto</span></code></a> module. For the latter,
+we simply call:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">assign_causal_mechanisms</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In case we want to have more control over the assigned mechanisms, we can do this manually as well. For instance, we can
+can assign an empirical distribution to the root node X and linear additive noise models to nodes Y and Z:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">EmpiricalDistribution</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+</pre></div>
+</div>
+<p>Section <a class="reference internal" href="customizing_model_assignment.html"><span class="doc">Customizing Causal Mechanism Assignment</span></a> will go into more detail on how one can even define a
+completely customized
+model or add their own implementation.</p>
+<p>In the real world, the data comes as an opaque stream of values, where we typically don’t know how one
+variable influences another. The graphical causal models can help us to deconstruct these causal
+relationships again, even though we didn’t know them before.</p>
+<section id="fitting-an-scm-to-the-data">
+<h2>Fitting an SCM to the data<a class="headerlink" href="#fitting-an-scm-to-the-data" title="Permalink to this heading"></a></h2>
+<p>With the data at hand and the graph constructed earlier, we can now train the SCM using <code class="docutils literal notranslate"><span class="pre">fit</span></code>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Fitting means, we learn the generative models of the variables in the SCM according to the data.</p>
+<p>The causal model is now ready to be used for <a class="reference internal" href="../causal_tasks/index.html"><span class="doc">Performing Causal Tasks</span></a>.</p>
+</section>
+<section id="other-related-gcm-topics">
+<h2>Other related GCM topics<a class="headerlink" href="#other-related-gcm-topics" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../example_notebooks/gcm_basic_example.html"><span class="doc">A basic example</span></a></p></li>
+<li><p><a class="reference external" href="https://aws.amazon.com/blogs/opensource/root-cause-analysis-with-dowhy-an-open-source-python-library-for-causal-machine-learning/">A blog post illustrating the usage of DoWhy’s GCM features</a></p></li>
+</ul>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="graphical_causal_model_types.html">Types of graphical causal models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="draw_samples.html">Generate samples from a GCM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="customizing_model_assignment.html">Customizing Causal Mechanism Assignment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="estimating_confidence_intervals.html">Estimating Confidence Intervals</a></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="../modeling_causal_relations/refuting_causal_graph/refute_causal_structure.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Graph refutations</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="graphical_causal_model_types.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Types of graphical causal models</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, PyWhy contributors.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

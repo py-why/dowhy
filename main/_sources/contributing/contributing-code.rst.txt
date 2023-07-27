@@ -29,7 +29,7 @@ The following steps allow you to contribute code to DoWhy.
 
    .. note::
       Installing pygraphviz can cause problems on some platforms.
-      One way, that works for most Linux distributions is to
+      One way that works for most Linux distributions is to
       first install graphviz and then pygraphviz as shown below.
       Otherwise, please consult the documentation of `pygraphviz <https://pygraphviz.github.io/documentation/stable/install.html>`_.
 

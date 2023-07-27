@@ -64,7 +64,7 @@ simple 4-step recipe consisting of modeling a causal model, identification, esti
                                            method_name="random_common_cause")
 
 To understand what these four steps mean (and why we need four steps), the best place to learn more is the user
-guide's :doc:`../user_guide/effect_inference/index` chapter. Alternatively, you can dive into the code and explore
+guide's :doc:`../user_guide/causal_tasks/estimating_causal_effects/index` chapter. Alternatively, you can dive into the code and explore
 basic features in :doc:`../example_notebooks/dowhy_simple_example`.
 
 For estimation of conditional effects, you can also use methods from `EconML <https://github.com/microsoft/EconML>`_
@@ -102,8 +102,8 @@ answer these causal questions follows a simple 3-step recipe as follows:
     # "Which node is the root cause of the anomaly in Z?":
     anomaly_attribution = gcm.attribute_anomalies(causal_model, "Z", anomalous_record)
 
-Again, if this doesn't entirely make sense, yet, we recommend starting with
-:doc:`../user_guide/gcm_based_inference/index` in
+If you want to learn more about this, we recommend starting with
+:doc:`../user_guide/modeling_gcm/index` in
 the user guide or check out :doc:`../example_notebooks/gcm_basic_example`.
 
 
@@ -112,13 +112,14 @@ Further resources
 
 There's further resources available:
 
-- A `Tutorial on causal inference <https://github.com/amit-sharma/causal-inference-tutorial/>`_
+- An introductory `tutorial on causal inference <https://github.com/amit-sharma/causal-inference-tutorial/>`_
 - A comprehensive
-  `Tutorial on Causal Inference and Counterfactual Reasoning <https://causalinference.gitlab.io/kdd-tutorial/>`_ at the
+  `tutorial on Causal Inference and Counterfactual Reasoning <https://causalinference.gitlab.io/kdd-tutorial/>`_ at the
   `ACM Knowledge Discovery and Data Mining 2018 conference <http://www.kdd.org/kdd2018/>`_
 - A video introduction to the four steps of causal inference and its implications for machine learning from
   Microsoft Research:
   `Foundations of causal inference and its impacts on machine learning <https://note.microsoft.com/MSR-Webinar-DoWhy-Library-Registration-On-Demand.html>`_
 - The PDF book `Elements of Causal Inference <https://mitp-content-server.mit.edu/books/content/sectbyfn?collid=books_pres_0&id=11283&fn=11283.pdf>`_
+- Draft chapters of an upcoming book: `Causal reasoning: Fundamentals and machine learning applications <https://causalinference.gitlab.io/book/>`_
 
 

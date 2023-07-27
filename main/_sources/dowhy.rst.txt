@@ -1,4 +1,4 @@
-API reference
+dowhy package
 =============
 
 Subpackages
@@ -10,6 +10,7 @@ Subpackages
    dowhy.api
    dowhy.causal_estimators
    dowhy.causal_identifier
+   dowhy.causal_prediction
    dowhy.causal_refuters
    dowhy.data_transformers
    dowhy.do_samplers
@@ -73,6 +74,14 @@ dowhy.do\_sampler module
 ------------------------
 
 .. automodule:: dowhy.do_sampler
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.graph module
+------------------
+
+.. automodule:: dowhy.graph
    :members:
    :undoc-members:
    :show-inheritance:

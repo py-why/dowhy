@@ -46,8 +46,16 @@ dowhy.gcm.auto module
    :undoc-members:
    :show-inheritance:
 
-dowhy.gcm.causal_models module
---------------------
+dowhy.gcm.causal\_mechanisms module
+-----------------------------------
+
+.. automodule:: dowhy.gcm.causal_mechanisms
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.gcm.causal\_models module
+-------------------------------
 
 .. automodule:: dowhy.gcm.causal_models
    :members:
@@ -118,10 +126,10 @@ dowhy.gcm.divergence module
    :undoc-members:
    :show-inheritance:
 
-dowhy.gcm.causal_mechanisms module
----------------------
+dowhy.gcm.falsify module
+------------------------
 
-.. automodule:: dowhy.gcm.causal_mechanisms
+.. automodule:: dowhy.gcm.falsify
    :members:
    :undoc-members:
    :show-inheritance:
@@ -134,18 +142,18 @@ dowhy.gcm.feature module
    :undoc-members:
    :show-inheritance:
 
-dowhy.gcm.fitting\_sampling module
-----------------------------------
+dowhy.gcm.feature\_relevance module
+-----------------------------------
 
-.. automodule:: dowhy.gcm.fitting_sampling
+.. automodule:: dowhy.gcm.feature_relevance
    :members:
    :undoc-members:
    :show-inheritance:
 
-dowhy.graph module
-----------------------
+dowhy.gcm.fitting\_sampling module
+----------------------------------
 
-.. automodule:: dowhy.graph
+.. automodule:: dowhy.gcm.fitting_sampling
    :members:
    :undoc-members:
    :show-inheritance:

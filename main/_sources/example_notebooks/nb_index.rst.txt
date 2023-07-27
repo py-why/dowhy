@@ -19,6 +19,12 @@ Introductory examples
         | **Level:** Beginner
         | **Task:** Effect estimation
 
+    .. card:: :doc:`dowhy_confounder_example`
+
+        +++
+        | **Level:** Beginner
+        | **Task:** Effect estimation
+
     .. card:: :doc:`dowhy-conditional-treatment-effects`
 
         +++
@@ -34,7 +40,18 @@ Introductory examples
         +++
         | **Level:** Beginner
         | **Task:** Intervention via GCM
+    
+    .. card:: :doc:`tutorial-causalinference-machinelearning-using-dowhy-econml`
 
+        +++
+        | **Level:** Beginner
+        | **Task:** All
+
+    .. card:: :doc:`dowhy_functional_api`
+
+        +++
+        | **Level:** Beginner
+        | **Task:** All
 
 Real world-inspired examples
 ----------------------------
@@ -89,7 +106,7 @@ Real world-inspired examples
         | **Level:** Advanced
         | **Task:** Falsifying User-Given DAGs
 
-Examples on benchmarks datasets
+Examples on benchmark datasets
 -------------------------------
 
 .. card-carousel:: 3
@@ -118,12 +135,71 @@ Examples on benchmarks datasets
         | **Level:** Advanced
         | **Task:** GCM inference
 
+    .. card:: :doc:`prediction/dowhy_causal_prediction_demo`
+
+        +++
+        | **Level:** Advanced
+        | **Task:** Prediction
+
     .. card:: :doc:`lalonde_pandas_api`
 
         +++
         | **Level:** Advanced
         | **Task:** Do Sampler
 
+
+Modeling and refuting causal assumptions
+----------------------------------------
+
+.. card-carousel:: 3
+
+    .. card:: :doc:`load_graph_example`
+
+        +++
+        | **Level:** Beginner
+        | **Task:** All
+
+    .. card:: :doc:`dowhy_causal_discovery_example`
+
+        +++
+        | **Level:** Beginner
+        | **Task:** All
+
+    .. card:: :doc:`gcm_falsify_dag`
+
+        +++
+        | **Level:** Advanced
+        | **Task:** All
+
+    .. card:: :doc:`sensitivity_analysis_testing`
+
+        +++
+        | **Level:** Beginner
+        | **Task:** Effect inference
+
+    .. card:: :doc:`sensitivity_analysis_nonparametric_estimators`
+
+        +++
+        | **Level:** Advanced
+        | **Task:** Effect inference
+
+    .. card:: :doc:`dowhy_refuter_notebook`
+
+        +++
+        | **Level:** Beginner
+        | **Task:** Effect inference
+
+    .. card:: :doc:`dowhy_refuter_assess_overlap`
+
+        +++
+        | **Level:** Advanced
+        | **Task:** Effect inference
+
+    .. card:: :doc:`dowhy_demo_dummy_outcome_refuter`
+
+        +++
+        | **Level:** Advanced
+        | **Task:** Effect inference
 
 Miscellaneous
 -------------
@@ -136,17 +212,12 @@ Miscellaneous
         | **Level:** Beginner
         | **Task:** GCM inference
 
-    .. card:: :doc:`load_graph_example`
+
+    .. card:: :doc:`dowhy_estimation_methods`
 
         +++
         | **Level:** Beginner
         | **Task:** Effect inference
-
-    .. card:: :doc:`gcm_draw_samples`
-
-        +++
-        | **Level:** Beginner
-        | **Task:** GCM inference
 
     .. card:: :doc:`dowhy-simple-iv-example`
 
@@ -154,19 +225,31 @@ Miscellaneous
         | **Level:** Beginner
         | **Task:** Effect inference
 
-    .. card:: :doc:`graph_conditional_independence_refuter`
+    .. card:: :doc:`dowhy_interpreter`
 
         +++
         | **Level:** Beginner
         | **Task:** Effect inference
-
-    .. card:: :doc:`dowhy_demo_dummy_outcome_refuter`
+        
+    .. card:: :doc:`dowhy_mediation_analysis`
 
         +++
-        | **Level:** Beginner
+        | **Level:** Advanced
         | **Task:** Effect inference
-
+        
     .. card:: :doc:`dowhy_multiple_treatments`
+
+        +++
+        | **Level:** Advanced
+        | **Task:** Effect inference
+
+    .. card:: :doc:`dowhy_efficient_backdoor_example`
+
+        +++
+        | **Level:** Advanced
+        | **Task:** Effect inference
+
+    .. card:: :doc:`identifying_effects_using_id_algorithm`
 
         +++
         | **Level:** Advanced
@@ -179,12 +262,11 @@ Miscellaneous
    :hidden:
 
    dowhy_simple_example
-   gcm_basic_example
-   dowhy_confounder_example
-   dowhy_estimation_methods
-   dowhy_interpreter
-   dowhy_causal_discovery_example
+   dowhy_confounder_example   
    dowhy-conditional-treatment-effects
+   gcm_basic_example
+   tutorial-causalinference-machinelearning-using-dowhy-econml
+   dowhy_functional_api
    dowhy_mediation_analysis
    dowhy_refuter_notebook
    dowhy_causal_api
@@ -212,19 +294,36 @@ Miscellaneous
    dowhy_lalonde_example
    dowhy_refutation_testing
    gcm_401k_analysis
+   prediction/dowhy_causal_prediction_demo
    lalonde_pandas_api
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Modeling and refuting causal assumptions
+   :hidden:
+
+   load_graph_example
+   dowhy_causal_discovery_example
+   gcm_falsify_dag
+   sensitivity_analysis_testing
+   sensitivity_analysis_nonparametric_estimators
+   dowhy_refuter_notebook
+   dowhy_refuter_assess_overlap
+   dowhy_ranking_methods
+   dowhy_demo_dummy_outcome_refuter
+   
 .. toctree::
    :maxdepth: 1
    :caption: Miscellaneous
    :hidden:
 
-   load_graph_example
    gcm_draw_samples
+   dowhy_estimation_methods
    dowhy-simple-iv-example
-   graph_conditional_independence_refuter
-   dowhy_demo_dummy_outcome_refuter
+   dowhy_interpreter
+   dowhy_mediation_analysis
    dowhy_multiple_treatments
-   identifying_effects_using_id_algorithm.ipynb
+   dowhy_efficient_backdoor_example
+   identifying_effects_using_id_algorithm
 
 
