@@ -44,10 +44,34 @@ dowhy.utils.graph\_operations module
    :undoc-members:
    :show-inheritance:
 
+dowhy.utils.graphviz\_plotting module
+-------------------------------------
+
+.. automodule:: dowhy.utils.graphviz_plotting
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.utils.networkx\_plotting module
+-------------------------------------
+
+.. automodule:: dowhy.utils.networkx_plotting
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.utils.ordered\_set module
 -------------------------------
 
 .. automodule:: dowhy.utils.ordered_set
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.utils.plotting module
+---------------------------
+
+.. automodule:: dowhy.utils.plotting
    :members:
    :undoc-members:
    :show-inheritance:

@@ -12,6 +12,7 @@ DoWhy documentation
     dowhy
     Contributing <contributing>
     code_repo
+    cite
 
 **Date**: |today| **Version**: |version|
 
@@ -19,7 +20,7 @@ DoWhy documentation
 **Related resources**:
 `Source Repository <https://github.com/py-why/dowhy>`__ |
 `Issues & Ideas <https://github.com/py-why/dowhy/issues>`__ |
-`Join the Community (Discord) <https://discord.gg/cSBGb3vsZb>`__
+`Join the Community (Discord) <https://discord.gg/cSBGb3vsZb>`__ |
 `PyWhy Organization <https://www.pywhy.org>`__ |
 `DoWhy on PyPI <https://pypi.org/project/dowhy>`__ |
 

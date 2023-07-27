@@ -497,44 +497,26 @@ As a practical example, `this notebook <https://github.com/microsoft/dowhy/blob/
 
 Citing this package
 ====================
-If you find DoWhy useful for your research work, please cite us as follows:
+If you find DoWhy useful for your work, please cite the following two references:
 
-Amit Sharma, Emre Kiciman, et al. DoWhy: A Python package for causal inference. 2019. https://github.com/microsoft/dowhy
+- Amit Sharma, Emre Kiciman. DoWhy: An End-to-End Library for Causal Inference. 2020. https://arxiv.org/abs/2011.04216
+- Patrick Blöbaum, Peter Götz, Kailash Budhathoki, Atalanti A. Mastakouri, Dominik Janzing. DoWhy-GCM: An extension of DoWhy for causal inference in graphical causal models. 2022. https://arxiv.org/abs/2206.06821
 
 Bibtex::
 
-  @misc{dowhy,
-  author={Sharma, Amit and Kiciman, Emre and others},
-  title={Do{W}hy: {A Python package for causal inference}},
-  howpublished={https://github.com/microsoft/dowhy},
-  year={2019}
+  @article{dowhy,
+    title={DoWhy: An End-to-End Library for Causal Inference},
+    author={Sharma, Amit and Kiciman, Emre},
+    journal={arXiv preprint arXiv:2011.04216},
+    year={2020}
   }
 
-Alternatively, you can cite our Arxiv paper on DoWhy.
-
-Amit Sharma, Emre Kiciman. DoWhy: An End-to-End Library for Causal Inference. 2020. https://arxiv.org/abs/2011.04216
-
-Bibtex::
-
-  @article{dowhypaper,
-  title={DoWhy: An End-to-End Library for Causal Inference},
-  author={Sharma, Amit and Kiciman, Emre},
-  journal={arXiv preprint arXiv:2011.04216},
-  year={2020}
-  }
-
-And if you find the gcm package useful for your work, please also cite us as:
-
-Patrick Blöbaum, Peter Götz, Kailash Budhathoki, Atalanti A. Mastakouri, Dominik Janzing. DoWhy-GCM: An extension of DoWhy for causal inference in graphical causal models. 2022. https://arxiv.org/abs/2206.06821
-
-Bibtex::
-
-    @article{dowhy_gcm,
+  @article{dowhy_gcm,
       author = {Bl{\"o}baum, Patrick and G{\"o}tz, Peter and Budhathoki, Kailash and Mastakouri, Atalanti A. and Janzing, Dominik},
       title = {DoWhy-GCM: An extension of DoWhy for causal inference in graphical causal models},
       journal={arXiv preprint arXiv:2206.06821},
       year={2022}
-    }
+  }
 
 Roadmap
 =======
