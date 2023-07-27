@@ -55,8 +55,7 @@ class Econml(CausalEstimator):
         """
         :param identified_estimand: probability expression
             representing the target identified estimand to estimate.
-        :param econml_methodname: Fully qualified name of econml estimator
-            class. For example, 'econml.dml.DML'
+        :param econml_estimator: Instance of an econml estimator class.
         :param test_significance: Binary flag or a string indicating whether to test significance and by which method. All estimators support test_significance="bootstrap" that estimates a p-value for the obtained estimate using the bootstrap method. Individual estimators can override this to support custom testing methods. The bootstrap method supports an optional parameter, num_null_simulations. If False, no testing is done. If True, significance of the estimate is tested using the custom method if available, otherwise by bootstrap.
         :param evaluate_effect_strength: (Experimental) whether to evaluate the strength of effect
         :param confidence_intervals: Binary flag or a string indicating whether the confidence intervals should be computed and which method should be used. All methods support estimation of confidence intervals using the bootstrap method by using the parameter confidence_intervals="bootstrap". The bootstrap method takes in two arguments (num_simulations and sample_size_fraction) that can be optionally specified in the params dictionary. Estimators may also override this to implement their own confidence interval method. If this parameter is False, no confidence intervals are computed. If True, confidence intervals are computed by the estimator's specific method if available, otherwise through bootstrap
@@ -122,7 +121,6 @@ class Econml(CausalEstimator):
                     methods support this currently.
         """
         self._set_effect_modifiers(data, effect_modifier_names)
-
         # Save parameters for later refutter fitting
         self._econml_fit_params = kwargs
 
@@ -186,7 +184,6 @@ class Econml(CausalEstimator):
         if self.estimating_instrument_names:
             Z = self._estimating_instruments
         named_data_args = {"Y": Y, "T": T, "X": X, "W": W, "Z": Z}
-
         # Calling the econml estimator's fit method
         estimator_argspec = inspect.getfullargspec(inspect.unwrap(self.estimator.fit))
         # As of v0.9, econml has some kewyord only arguments
@@ -223,7 +220,7 @@ class Econml(CausalEstimator):
     ):
         """
         data: dataframe containing the data on which treatment effect is to be estimated.
-        treatment_value: value of the treatment variable for which the effect is to be estimated.
+        treatment_value: value of the treatment variable for which the effect is to be estimated. It can be (optionally) a sequence for different values of the treatment variable.
         control_value: value of the treatment variable that denotes its absence (usually 0)
         target_units: The units for which the treatment effect should be estimated.
                      It can be a DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
@@ -246,6 +243,7 @@ class Econml(CausalEstimator):
                 boolean_criterion = np.array(filtered_rows.notnull().iloc[:, 0])
                 X_test = X[boolean_criterion]
         # Changing shape to a list for a singleton value
+        # Note that self._control_value is assumed to be a singleton value
         self._treatment_value = parse_state(self._treatment_value)
 
         est = self.effect(X_test)
