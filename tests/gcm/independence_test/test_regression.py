@@ -20,9 +20,9 @@ def preserve_random_generator_state():
 
 @flaky(max_runs=5)
 def test_given_independent_variables_when_perform_regression_based_conditional_independence_test_then_p_value_is_greater_than_05():
-    z = np.random.randn(1000, 1)
-    x = np.exp(z + np.random.rand(1000, 1))
-    y = np.exp(z + np.random.rand(1000, 1))
+    z = np.random.randn(5000, 1)
+    x = np.exp(z + np.random.rand(5000, 1))
+    y = np.exp(z + np.random.rand(5000, 1))
 
     assert regression_based(x, y, z) > 0.05
 
