@@ -522,7 +522,7 @@ def _create_subsets_and_weights_exact(num_players: int, high_weight: float) -> T
                 scipy.special.binom(num_players, subset_size) * subset_size * (num_players - subset_size)
             )
 
-    return np.array(all_subsets, dtype=np.int32), weights.astype(np.float)
+    return np.array(all_subsets, dtype=np.int32), weights.astype(float)
 
 
 def _create_subsets_and_weights_approximation(
@@ -562,7 +562,7 @@ def _create_subsets_and_weights_approximation(
 
     weights = np.array([weights[tuple(x)] for x in all_subsets])
 
-    return np.array(all_subsets, dtype=np.int32), weights.astype(np.float)
+    return np.array(all_subsets, dtype=np.int32), weights.astype(float)
 
 
 def _convert_list_of_indices_to_binary_vector_as_tuple(list_of_indices: List[int], num_players: int) -> Tuple[int]:
