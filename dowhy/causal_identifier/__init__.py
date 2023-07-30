@@ -2,6 +2,9 @@ from dowhy.causal_identifier.auto_identifier import (
     AutoIdentifier,
     BackdoorAdjustment,
     EstimandType,
+    construct_backdoor_estimand,
+    construct_frontdoor_estimand,
+    construct_iv_estimand,
     identify_effect_auto,
 )
 from dowhy.causal_identifier.id_identifier import IDIdentifier, identify_effect_id
@@ -17,4 +20,7 @@ __all__ = [
     "IdentifiedEstimand",
     "IDIdentifier",
     "identify_effect",
+    "construct_backdoor_estimand",
+    "construct_frontdoor_estimand",
+    "construct_iv_estimand",
 ]
