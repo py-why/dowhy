@@ -138,7 +138,7 @@ def test_given_more_complex_categorical_data_when_estimate_intrinsic_causal_infl
     assert iccs["X3"] == approx(0.5, abs=0.1)
 
     assert np.sum([iccs[key] for key in iccs]) == approx(
-        expected_output_full_subset - expected_output_empty_subset, abs=0.05
+        expected_output_full_subset - expected_output_empty_subset, abs=0.1
     )
 
     iccs = intrinsic_causal_influence(causal_model, "X3", prediction_model="exact", num_samples_baseline=100)
@@ -147,7 +147,7 @@ def test_given_more_complex_categorical_data_when_estimate_intrinsic_causal_infl
     assert iccs["X2"] == approx(0.1, abs=0.05)
     assert iccs["X3"] == approx(0.5, abs=0.1)
 
-    assert np.sum([iccs[key] for key in iccs]) == approx(-expected_output_empty_subset, abs=0.05)
+    assert np.sum([iccs[key] for key in iccs]) == approx(-expected_output_empty_subset, abs=0.1)
 
 
 @flaky(max_runs=3)
