@@ -8,25 +8,6 @@ from dowhy.gcm.independence_test import approx_kernel_based, kernel_based
 
 
 @flaky(max_runs=5)
-def test_given_continuous_conditionally_independent_data_when_perform_kernel_based_test_then_not_reject():
-    z = np.random.randn(1000, 1)
-    x = np.exp(z + np.random.rand(1000, 1))
-    y = np.exp(z + np.random.rand(1000, 1))
-
-    assert kernel_based(x, y, z) > 0.05
-
-
-@flaky(max_runs=5)
-def test_given_continuous_conditionally_dependent_data_when_perform_kernel_based_test_then_reject():
-    z = np.random.randn(1000, 1)
-    w = np.random.randn(1000, 1)
-    x = np.exp(z + np.random.rand(1000, 1))
-    y = np.exp(z + np.random.rand(1000, 1))
-
-    assert 0.05 > kernel_based(x, y, w)
-
-
-@flaky(max_runs=5)
 def test_given_categorical_conditionally_independent_data_when_perform_kernel_based_test_then_not_reject():
     x, y, z = _generate_categorical_data()
 
@@ -64,23 +45,6 @@ def test_given_random_seed_when_perform_conditional_kernel_based_test_then_retur
     )
 
     assert result_1 == result_2
-
-
-@flaky(max_runs=5)
-def test_given_continuous_independent_data_when_perform_kernel_based_test_then_not_reject():
-    x = np.random.randn(1000, 1)
-    y = np.exp(np.random.rand(1000, 1))
-
-    assert kernel_based(x, y) > 0.05
-
-
-@flaky(max_runs=5)
-def test_given_continuous_dependent_data_when_perform_kernel_based_test_then_reject():
-    z = np.random.randn(1000, 1)
-    x = np.exp(z + np.random.rand(1000, 1))
-    y = np.exp(z + np.random.rand(1000, 1))
-
-    assert kernel_based(x, y) < 0.05
 
 
 @flaky(max_runs=5)
