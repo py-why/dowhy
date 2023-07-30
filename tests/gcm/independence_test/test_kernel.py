@@ -328,8 +328,8 @@ def test_given_almost_constant_data_when_perform_kernel_based_test_then_does_not
     )
 
 
-def _generate_categorical_data():
-    x = np.random.normal(0, 1, 1000)
+def _generate_categorical_data(num_samples=1000):
+    x = np.random.normal(0, 1, num_samples)
     z = []
     for v in x:
         if v > 0:
