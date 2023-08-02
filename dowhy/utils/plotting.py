@@ -78,7 +78,7 @@ def plot(
                 **kwargs,
             )
 
-    except ImportError:
+    except (ImportError, ModuleNotFoundError):
         from dowhy.utils.networkx_plotting import plot_causal_graph_networkx
 
         _logger.info(
