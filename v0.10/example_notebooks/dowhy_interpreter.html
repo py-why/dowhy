@@ -1,0 +1,1373 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>DoWhy: Interpreters for Causal Estimators &#8212; DoWhy  documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Estimating effect of multiple treatments" href="dowhy_multiple_treatments.html" />
+    <link rel="prev" title="Simple example on using Instrumental Variables method for estimation" href="dowhy-simple-iv-example.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="Logo image">
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../user_guide/index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="nb_index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../dowhy.html">
+  dowhy package
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../contributing.html">
+  Contributing
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../code_repo.html">
+  Release notes
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../cite.html">
+  Citing this package
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+      <div class="navbar-end-item">
+        <div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.10
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Introductory examples
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_simple_example.html">
+   Basic Example for Calculating the Causal Effect
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_confounder_example.html">
+   Confounding Example: Finding causal effects from observed data
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy-conditional-treatment-effects.html">
+   Conditional Average Treatment Effects (CATE) with DoWhy and EconML
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_basic_example.html">
+   Basic Example for Graphical Causal Model-Based Intervention
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">
+   Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_functional_api.html">
+   Functional API Preview
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_mediation_analysis.html">
+   Mediation analysis with DoWhy: Direct and Indirect Effects
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refuter_notebook.html">
+   Iterating over multiple refutation tests
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_api.html">
+   Demo for the DoWhy causal API
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="do_sampler_demo.html">
+   Do-sampler Introduction
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Real world-inspired examples
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">
+   Exploring Causes of Hotel Booking Cancellations
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_example_effect_of_memberrewards_program.html">
+   Estimating the Effect of a Member Rewards Program
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_rca_microservice_architecture.html">
+   Finding the Root Cause of Elevated Latencies in a Microservice Architecture
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_401k_analysis.html">
+   Impact of 401(k) eligibility on net financial assets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_supply_chain_dist_change.html">
+   Finding Root Causes of Changes in a Supply Chain
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_counterfactual_medical_dry_eyes.html">
+   Counterfactual Analysis in a Medical Case
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_falsify_dag.html">
+   Falsification of User-Given Directed Acyclic Graphs
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Examples on benchmarks datasets
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_ihdp_data_example.html">
+   DoWhy example on ihdp (Infant Health and Development Program) dataset
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_lalonde_example.html">
+   DoWhy example on the Lalonde dataset
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refutation_testing.html">
+   Applying refutation tests to the Lalonde and IHDP datasets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_401k_analysis.html">
+   Impact of 401(k) eligibility on net financial assets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="prediction/dowhy_causal_prediction_demo.html">
+   Demo for DoWhy Causal Prediction on MNIST
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="lalonde_pandas_api.html">
+   Lalonde Pandas API Example
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Modeling and refuting causal assumptions
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="load_graph_example.html">
+   Different ways to load an input graph
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_discovery_example.html">
+   Causal Discovery example
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_falsify_dag.html">
+   Falsification of User-Given Directed Acyclic Graphs
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="sensitivity_analysis_testing.html">
+   Sensitivity Analysis for Regression Models
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="sensitivity_analysis_nonparametric_estimators.html">
+   Sensitivity analysis for non-parametric causal estimators
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refuter_notebook.html">
+   Iterating over multiple refutation tests
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refuter_assess_overlap.html">
+   Assessing Support and Overlap with OverRule
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">
+   A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Miscellaneous
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_draw_samples.html">
+   Basic Example for generating samples from a GCM
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_estimation_methods.html">
+   DoWhy: Different estimation methods for causal inference
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy-simple-iv-example.html">
+   Simple example on using Instrumental Variables method for estimation
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   DoWhy: Interpreters for Causal Estimators
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_mediation_analysis.html">
+   Mediation analysis with DoWhy: Direct and Indirect Effects
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_multiple_treatments.html">
+   Estimating effect of multiple treatments
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_efficient_backdoor_example.html">
+   Finding optimal adjustment sets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="identifying_effects_using_id_algorithm.html">
+   Identifying Effect using ID Algorithm
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Identifying-the-causal-estimand">
+   Identifying the causal estimand
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Method-1:-Propensity-Score-Stratification">
+   Method 1: Propensity Score Stratification
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Textual-Interpreter">
+     Textual Interpreter
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Visual-Interpreter">
+     Visual Interpreter
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Method-2:-Propensity-Score-Matching">
+   Method 2: Propensity Score Matching
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Method-3:-Weighting">
+   Method 3: Weighting
+  </a>
+ </li>
+</ul>
+
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars and line breaks on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+    white-space: pre;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.jp-RenderedHTMLCommon thead,
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+.jp-RenderedHTMLCommon th,
+div.rendered_html th {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+.jp-RenderedHTMLCommon tbody tr:hover,
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<section id="DoWhy:-Interpreters-for-Causal-Estimators">
+<h1>DoWhy: Interpreters for Causal Estimators<a class="headerlink" href="#DoWhy:-Interpreters-for-Causal-Estimators" title="Permalink to this heading"></a></h1>
+<p>This is a quick introduction to the use of interpreters in the DoWhy causal inference library. We will load in a sample dataset, use different methods for estimating the causal effect of a (pre-specified)treatment variable on a (pre-specified) outcome variable and demonstrate how to interpret the obtained results.</p>
+<p>First, let us add the required path for Python to find the DoWhy code and load all required packages</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">dowhy</span>
+<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+</pre></div>
+</div>
+</div>
+<p>Now, let us load a dataset. For simplicity, we simulate a dataset with linear relationships between common causes and treatment, and common causes and outcome.</p>
+<p>Beta is the true causal effect.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">linear_dataset</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">num_common_causes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">num_instruments</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">num_treatments</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">num_discrete_common_causes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">num_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+        <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">outcome_is_binary</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">v0</span><span class="o">==</span><span class="kc">True</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+8801
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Z0</th>
+      <th>Z1</th>
+      <th>W0</th>
+      <th>W1</th>
+      <th>W2</th>
+      <th>W3</th>
+      <th>W4</th>
+      <th>v0</th>
+      <th>y</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.0</td>
+      <td>0.945484</td>
+      <td>-0.846404</td>
+      <td>1.687682</td>
+      <td>1.372595</td>
+      <td>2.066467</td>
+      <td>3</td>
+      <td>True</td>
+      <td>4.807020</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.0</td>
+      <td>0.285024</td>
+      <td>2.181347</td>
+      <td>0.730911</td>
+      <td>-1.630005</td>
+      <td>-0.569017</td>
+      <td>1</td>
+      <td>True</td>
+      <td>1.899897</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.0</td>
+      <td>0.716943</td>
+      <td>0.547869</td>
+      <td>-0.749444</td>
+      <td>-0.516151</td>
+      <td>-1.063301</td>
+      <td>1</td>
+      <td>False</td>
+      <td>0.463035</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.0</td>
+      <td>0.600360</td>
+      <td>-0.175572</td>
+      <td>0.354550</td>
+      <td>-1.930832</td>
+      <td>1.817925</td>
+      <td>0</td>
+      <td>True</td>
+      <td>-0.812048</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1.0</td>
+      <td>0.936065</td>
+      <td>0.769882</td>
+      <td>1.194213</td>
+      <td>-3.142256</td>
+      <td>0.844774</td>
+      <td>1</td>
+      <td>True</td>
+      <td>-0.399757</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>9995</th>
+      <td>1.0</td>
+      <td>0.264277</td>
+      <td>-0.095283</td>
+      <td>-1.088539</td>
+      <td>1.154168</td>
+      <td>-0.351554</td>
+      <td>0</td>
+      <td>True</td>
+      <td>1.831354</td>
+    </tr>
+    <tr>
+      <th>9996</th>
+      <td>0.0</td>
+      <td>0.336606</td>
+      <td>0.231678</td>
+      <td>-0.278482</td>
+      <td>-1.885620</td>
+      <td>0.649003</td>
+      <td>0</td>
+      <td>True</td>
+      <td>-0.702596</td>
+    </tr>
+    <tr>
+      <th>9997</th>
+      <td>1.0</td>
+      <td>0.866952</td>
+      <td>1.833354</td>
+      <td>1.776723</td>
+      <td>0.343887</td>
+      <td>2.735118</td>
+      <td>1</td>
+      <td>True</td>
+      <td>4.102961</td>
+    </tr>
+    <tr>
+      <th>9998</th>
+      <td>0.0</td>
+      <td>0.698455</td>
+      <td>0.581259</td>
+      <td>0.779934</td>
+      <td>-1.744603</td>
+      <td>1.255944</td>
+      <td>2</td>
+      <td>True</td>
+      <td>1.623534</td>
+    </tr>
+    <tr>
+      <th>9999</th>
+      <td>0.0</td>
+      <td>0.025473</td>
+      <td>1.555790</td>
+      <td>-0.082426</td>
+      <td>-0.270412</td>
+      <td>1.798241</td>
+      <td>3</td>
+      <td>True</td>
+      <td>4.510379</td>
+    </tr>
+  </tbody>
+</table>
+<p>10000 rows × 9 columns</p>
+</div></div>
+</div>
+<p>Note that we are using a pandas dataframe to load the data.</p>
+<section id="Identifying-the-causal-estimand">
+<h2>Identifying the causal estimand<a class="headerlink" href="#Identifying-the-causal-estimand" title="Permalink to this heading"></a></h2>
+<p>We now input a causal graph in the GML graph format.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># With graph</span>
+<span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
+        <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
+        <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
+        <span class="n">graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;gml_graph&quot;</span><span class="p">],</span>
+        <span class="n">instruments</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;instrument_names&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_dowhy_interpreter_9_0.png" src="../_images/example_notebooks_dowhy_interpreter_9_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_dowhy_interpreter_10_0.png" src="../_images/example_notebooks_dowhy_interpreter_10_0.png" />
+</div>
+</div>
+<p>We get a causal graph. Now identification and estimation is done.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Estimand type: EstimandType.NONPARAMETRIC_ATE
+
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(E[y|W3,W1,W2,W4,W0])
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W1,W2,W4,W0,U) = P(y|v0,W3,W1,W2,W4,W0)
+
+### Estimand : 2
+Estimand name: iv
+Estimand expression:
+ ⎡                              -1⎤
+ ⎢    d        ⎛    d          ⎞  ⎥
+E⎢─────────(y)⋅⎜─────────([v₀])⎟  ⎥
+ ⎣d[Z₀  Z₁]    ⎝d[Z₀  Z₁]      ⎠  ⎦
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
+Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
+
+### Estimand : 3
+Estimand name: frontdoor
+No such variable(s) found!
+
+</pre></div></div>
+</div>
+</section>
+<section id="Method-1:-Propensity-Score-Stratification">
+<h2>Method 1: Propensity Score Stratification<a class="headerlink" href="#Method-1:-Propensity-Score-Stratification" title="Permalink to this heading"></a></h2>
+<p>We will be using propensity scores to stratify units in the data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">causal_estimate_strat</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+                                              <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_stratification&quot;</span><span class="p">,</span>
+                                              <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;att&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_strat</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">causal_estimate_strat</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Identified estimand
+Estimand type: EstimandType.NONPARAMETRIC_ATE
+
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(E[y|W3,W1,W2,W4,W0])
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W1,W2,W4,W0,U) = P(y|v0,W3,W1,W2,W4,W0)
+
+## Realized estimand
+b: y~v0+W3+W1+W2+W4+W0
+Target units: att
+
+## Estimate
+Mean value: 1.003524527208708
+
+Causal Estimate is 1.003524527208708
+</pre></div></div>
+</div>
+<section id="Textual-Interpreter">
+<h3>Textual Interpreter<a class="headerlink" href="#Textual-Interpreter" title="Permalink to this heading"></a></h3>
+<p>The textual Interpreter describes (in words) the effect of unit change in the treatment variable on the outcome variable.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Textual Interpreter</span>
+<span class="n">interpretation</span> <span class="o">=</span> <span class="n">causal_estimate_strat</span><span class="o">.</span><span class="n">interpret</span><span class="p">(</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;textual_effect_interpreter&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.003524527208708 in the expected value of the outcome [[&#39;y&#39;]], over the data distribution/population represented by the dataset.
+</pre></div></div>
+</div>
+</section>
+<section id="Visual-Interpreter">
+<h3>Visual Interpreter<a class="headerlink" href="#Visual-Interpreter" title="Permalink to this heading"></a></h3>
+<p>The visual interpreter plots the change in the standardized mean difference (SMD) before and after Propensity Score based adjustment of the dataset. The formula for SMD is given below.</p>
+<p><span class="math notranslate nohighlight">\(SMD = \frac{\bar X_{1} - \bar X_{2}}{\sqrt{(S_{1}^{2} + S_{2}^{2})/2}}\)</span></p>
+<p>Here, <span class="math notranslate nohighlight">\(\bar X_{1}\)</span> and <span class="math notranslate nohighlight">\(\bar X_{2}\)</span> are the sample mean for the treated and control groups.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Visual Interpreter</span>
+<span class="n">interpretation</span> <span class="o">=</span> <span class="n">causal_estimate_strat</span><span class="o">.</span><span class="n">interpret</span><span class="p">(</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;propensity_balance_interpreter&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_dowhy_interpreter_18_0.png" src="../_images/example_notebooks_dowhy_interpreter_18_0.png" />
+</div>
+</div>
+<p>This plot shows how the SMD decreases from the unadjusted to the stratified units.</p>
+</section>
+</section>
+<section id="Method-2:-Propensity-Score-Matching">
+<h2>Method 2: Propensity Score Matching<a class="headerlink" href="#Method-2:-Propensity-Score-Matching" title="Permalink to this heading"></a></h2>
+<p>We will be using propensity scores to match units in the data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">causal_estimate_match</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+                                              <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_matching&quot;</span><span class="p">,</span>
+                                              <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;atc&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_match</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">causal_estimate_match</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Identified estimand
+Estimand type: EstimandType.NONPARAMETRIC_ATE
+
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(E[y|W3,W1,W2,W4,W0])
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W1,W2,W4,W0,U) = P(y|v0,W3,W1,W2,W4,W0)
+
+## Realized estimand
+b: y~v0+W3+W1+W2+W4+W0
+Target units: atc
+
+## Estimate
+Mean value: 0.9966335833141122
+
+Causal Estimate is 0.9966335833141122
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Textual Interpreter</span>
+<span class="n">interpretation</span> <span class="o">=</span> <span class="n">causal_estimate_match</span><span class="o">.</span><span class="n">interpret</span><span class="p">(</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;textual_effect_interpreter&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 0.9966335833141122 in the expected value of the outcome [[&#39;y&#39;]], over the data distribution/population represented by the dataset.
+</pre></div></div>
+</div>
+<p>Cannot use propensity balance interpretor here since the interpreter method only supports propensity score stratification estimator.</p>
+</section>
+<section id="Method-3:-Weighting">
+<h2>Method 3: Weighting<a class="headerlink" href="#Method-3:-Weighting" title="Permalink to this heading"></a></h2>
+<p>We will be using (inverse) propensity scores to assign weights to units in the data. DoWhy supports a few different weighting schemes: 1. Vanilla Inverse Propensity Score weighting (IPS) (weighting_scheme=“ips_weight”) 2. Self-normalized IPS weighting (also known as the Hajek estimator) (weighting_scheme=“ips_normalized_weight”) 3. Stabilized IPS weighting (weighting_scheme = “ips_stabilized_weight”)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">causal_estimate_ipw</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+                                            <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.propensity_score_weighting&quot;</span><span class="p">,</span>
+                                            <span class="n">target_units</span> <span class="o">=</span> <span class="s2">&quot;ate&quot;</span><span class="p">,</span>
+                                            <span class="n">method_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;weighting_scheme&quot;</span><span class="p">:</span><span class="s2">&quot;ips_weight&quot;</span><span class="p">})</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">causal_estimate_ipw</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">causal_estimate_ipw</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Identified estimand
+Estimand type: EstimandType.NONPARAMETRIC_ATE
+
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(E[y|W3,W1,W2,W4,W0])
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W1,W2,W4,W0,U) = P(y|v0,W3,W1,W2,W4,W0)
+
+## Realized estimand
+b: y~v0+W3+W1+W2+W4+W0
+Target units: ate
+
+## Estimate
+Mean value: 1.307525832111242
+
+Causal Estimate is 1.307525832111242
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Textual Interpreter</span>
+<span class="n">interpretation</span> <span class="o">=</span> <span class="n">causal_estimate_ipw</span><span class="o">.</span><span class="n">interpret</span><span class="p">(</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;textual_effect_interpreter&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.307525832111242 in the expected value of the outcome [[&#39;y&#39;]], over the data distribution/population represented by the dataset.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">interpretation</span> <span class="o">=</span> <span class="n">causal_estimate_ipw</span><span class="o">.</span><span class="n">interpret</span><span class="p">(</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;confounder_distribution_interpreter&quot;</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">),</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">var_name</span><span class="o">=</span><span class="s1">&#39;W4&#39;</span><span class="p">,</span> <span class="n">var_type</span><span class="o">=</span><span class="s1">&#39;discrete&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_dowhy_interpreter_27_0.png" src="../_images/example_notebooks_dowhy_interpreter_27_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="dowhy-simple-iv-example.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Simple example on using Instrumental Variables method for estimation</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="dowhy_multiple_treatments.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Estimating effect of multiple treatments</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, PyWhy contributors.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

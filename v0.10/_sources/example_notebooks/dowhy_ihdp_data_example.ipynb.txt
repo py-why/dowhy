@@ -1,0 +1,279 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# DoWhy example on ihdp (Infant Health and Development Program) dataset"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# importing required libraries\n",
+    "import dowhy\n",
+    "from dowhy import CausalModel\n",
+    "import pandas as pd\n",
+    "import numpy as np"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Loading Data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data= pd.read_csv(\"https://raw.githubusercontent.com/AMLab-Amsterdam/CEVAE/master/datasets/IHDP/csv/ihdp_npci_1.csv\", header = None)\n",
+    "col =  [\"treatment\", \"y_factual\", \"y_cfactual\", \"mu0\", \"mu1\" ,]\n",
+    "for i in range(1,26):\n",
+    "    col.append(\"x\"+str(i))\n",
+    "data.columns = col\n",
+    "data = data.astype({\"treatment\":'bool'}, copy=False)\n",
+    "data.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 1.Model"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Create a causal model from the data and given common causes.\n",
+    "model=CausalModel(\n",
+    "        data = data,\n",
+    "        treatment='treatment',\n",
+    "        outcome='y_factual',\n",
+    "        common_causes=[\"x\"+str(i) for  i in range(1,26)]\n",
+    "        )\n",
+    "model.view_model()\n",
+    "from IPython.display import Image, display\n",
+    "display(Image(filename=\"causal_model.png\"))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 2.Identify"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Identify the causal effect\n",
+    "identified_estimand = model.identify_effect(proceed_when_unidentifiable=True, method_name=\"maximal-adjustment\")\n",
+    "print(identified_estimand)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 3. Estimate (using different methods)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### 3.1 Using Linear Regression"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Estimate the causal effect and compare it with Average Treatment Effect\n",
+    "estimate = model.estimate_effect(identified_estimand,\n",
+    "        method_name=\"backdoor.linear_regression\", test_significance=True\n",
+    ")\n",
+    "\n",
+    "print(estimate)\n",
+    "\n",
+    "print(\"Causal Estimate is \" + str(estimate.value))\n",
+    "data_1 = data[data[\"treatment\"]==1]\n",
+    "data_0 = data[data[\"treatment\"]==0]\n",
+    "\n",
+    "print(\"ATE\", np.mean(data_1[\"y_factual\"])- np.mean(data_0[\"y_factual\"]))\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### 3.2 Using Propensity Score Matching"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "estimate = model.estimate_effect(identified_estimand,\n",
+    "        method_name=\"backdoor.propensity_score_matching\"\n",
+    ")\n",
+    "\n",
+    "print(\"Causal Estimate is \" + str(estimate.value))\n",
+    "\n",
+    "print(\"ATE\", np.mean(data_1[\"y_factual\"])- np.mean(data_0[\"y_factual\"]))\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### 3.3 Using Propensity Score Stratification"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "estimate = model.estimate_effect(identified_estimand,\n",
+    "        method_name=\"backdoor.propensity_score_stratification\", method_params={'num_strata':50, 'clipping_threshold':5}\n",
+    ")\n",
+    "\n",
+    "print(\"Causal Estimate is \" + str(estimate.value))\n",
+    "print(\"ATE\", np.mean(data_1[\"y_factual\"])- np.mean(data_0[\"y_factual\"]))\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### 3.4 Using Propensity Score Weighting"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "estimate = model.estimate_effect(identified_estimand,\n",
+    "        method_name=\"backdoor.propensity_score_weighting\"\n",
+    ")\n",
+    "\n",
+    "print(\"Causal Estimate is \" + str(estimate.value))\n",
+    "\n",
+    "print(\"ATE\", np.mean(data_1[\"y_factual\"])- np.mean(data_0[\"y_factual\"]))\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 4. Refute\n",
+    "##### Refute the obtained estimate using multiple robustness checks.\n",
+    "##### 4.1 Adding a random common cause"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "refute_results=model.refute_estimate(identified_estimand, estimate,\n",
+    "        method_name=\"random_common_cause\")\n",
+    "print(refute_results)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "##### 4.2 Using a placebo treatment"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "res_placebo=model.refute_estimate(identified_estimand, estimate,\n",
+    "        method_name=\"placebo_treatment_refuter\", placebo_type=\"permute\")\n",
+    "print(res_placebo)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### 4.3 Data Subset Refuter"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "res_subset=model.refute_estimate(identified_estimand, estimate,\n",
+    "        method_name=\"data_subset_refuter\", subset_fraction=0.9)\n",
+    "print(res_subset)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.5"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": false,
+   "sideBar": true,
+   "skip_h1_title": true,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

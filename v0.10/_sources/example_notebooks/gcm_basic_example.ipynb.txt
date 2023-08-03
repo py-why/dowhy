@@ -1,0 +1,237 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "b72f7198",
+   "metadata": {},
+   "source": [
+    "# Basic Example for Graphical Causal Model-Based Intervention"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8fe6b612",
+   "metadata": {},
+   "source": [
+    "## Step 1: Modeling cause-effect relationships as a structural causal model (SCM)\n",
+    "\n",
+    "The first step is to model the cause-effect relationships between variables relevant to our use case. We do that in form of a causal graph. A causal graph is a directed acyclic graph (DAG) where an edge X→Y implies that X causes Y. Statistically, a causal graph encodes the conditional independence relations between variables. Using the [NetworkX](https://networkx.org/) library, we can create causal graphs. In the snippet below, we create a chain X→Y→Z:\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f22337ab",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import networkx as nx\n",
+    "causal_graph = nx.DiGraph([('X', 'Y'), ('Y', 'Z')])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1a0bb234",
+   "metadata": {},
+   "source": [
+    "To answer causal questions using causal graphs, we also have to know the nature of underlying data-generating process of variables. A causal graph by itself, being a diagram, does not have any information about the data-generating process. To introduce this data-generating process, we use an SCM that’s built on top of our causal graph:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0367caeb",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from dowhy import gcm\n",
+    "causal_model = gcm.StructuralCausalModel(causal_graph)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "source": [
+    "At this point we would normally load our dataset. For this introduction, we generate\n",
+    "some synthetic data instead. The API takes data in form of Pandas DataFrames:"
+   ],
+   "metadata": {
+    "collapsed": false,
+    "pycharm": {
+     "name": "#%% md\n"
+    }
+   }
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "outputs": [],
+   "source": [
+    "import numpy as np, pandas as pd\n",
+    "\n",
+    "X = np.random.normal(loc=0, scale=1, size=1000)\n",
+    "Y = 2 * X + np.random.normal(loc=0, scale=1, size=1000)\n",
+    "Z = 3 * Y + np.random.normal(loc=0, scale=1, size=1000)\n",
+    "data = pd.DataFrame(data=dict(X=X, Y=Y, Z=Z))\n",
+    "data.head()"
+   ],
+   "metadata": {
+    "collapsed": false,
+    "pycharm": {
+     "name": "#%%\n"
+    }
+   }
+  },
+  {
+   "cell_type": "markdown",
+   "source": [
+    "Note how the columns X, Y, Z correspond to our nodes X, Y, Z in the graph constructed above. We can also see how the\n",
+    "values of X influence the values of Y and how the values of Y influence the values of Z in that data set.\n",
+    "\n",
+    "The causal model created above allows us now to assign causal mechanisms to each node in the form of functional causal\n",
+    "models. Here, these mechanism can either be assigned manually if, for instance, prior knowledge about certain causal\n",
+    "relationships are known or they can be assigned automatically using the `auto` module. For the latter,\n",
+    "we simply call:"
+   ],
+   "metadata": {
+    "collapsed": false,
+    "pycharm": {
+     "name": "#%% md\n"
+    }
+   }
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "outputs": [],
+   "source": [
+    "gcm.auto.assign_causal_mechanisms(causal_model, data)"
+   ],
+   "metadata": {
+    "collapsed": false,
+    "pycharm": {
+     "name": "#%%\n"
+    }
+   }
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0ccbc2ad",
+   "metadata": {},
+   "source": [
+    "In case we want to have more control over the assigned mechanisms, we can do this manually as well. For instance, we can\n",
+    "can assign an empirical distribution to the root node X and linear additive noise models to nodes Y and Z:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "outputs": [],
+   "source": [
+    "causal_model.set_causal_mechanism('X', gcm.EmpiricalDistribution())\n",
+    "causal_model.set_causal_mechanism('Y', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))\n",
+    "causal_model.set_causal_mechanism('Z', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))"
+   ],
+   "metadata": {
+    "collapsed": false,
+    "pycharm": {
+     "name": "#%%\n"
+    }
+   }
+  },
+  {
+   "cell_type": "markdown",
+   "id": "684d6391",
+   "metadata": {},
+   "source": [
+    "In the real world, the data comes as an opaque stream of values, where we typically don't know how one\n",
+    "variable influences another. The graphical causal models can help us to deconstruct these causal\n",
+    "relationships again, even though we didn't know them before.\n",
+    "\n",
+    "## Step 2: Fitting the SCM to the data\n",
+    "\n",
+    "With the data at hand and the graph constructed earlier, we can now train the SCM using `fit`:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "fe5f99f0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "gcm.fit(causal_model, data)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "13043ca5",
+   "metadata": {},
+   "source": [
+    "Fitting means, we learn the generative models of the variables in the SCM according to the data."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fc324e13",
+   "metadata": {},
+   "source": [
+    "## Step 3: Answering a causal query based on the SCM\n",
+    "\n",
+    "The last step, answering a causal question, is our actual goal. E.g. we could ask the question:\n",
+    "\n",
+    "> What will happen to the variable Z if I intervene on Y?\n",
+    "\n",
+    "This can be done via the `interventional_samples` function. Here’s how:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "52452496",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "samples = gcm.interventional_samples(causal_model,\n",
+    "                                     {'Y': lambda y: 2.34 },\n",
+    "                                     num_samples_to_draw=1000)\n",
+    "samples.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "source": [
+    "This intervention says: \"I'll ignore any causal effects of X on Y, and set every value of Y\n",
+    "to 2.34.\" So the distribution of X will remain unchanged, whereas values of Y will be at a fixed\n",
+    "value and Z will respond according to its causal model."
+   ],
+   "metadata": {
+    "collapsed": false,
+    "pycharm": {
+     "name": "#%% md\n"
+    }
+   }
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.12"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

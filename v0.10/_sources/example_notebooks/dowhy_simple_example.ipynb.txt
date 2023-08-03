@@ -1,0 +1,502 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Basic Example for Calculating the Causal Effect\n",
+    "This is a quick introduction to the DoWhy causal inference library.\n",
+    "We will load in a sample dataset and estimate the causal effect of a (pre-specified) treatment variable on a (pre-specified) outcome variable.\n",
+    "\n",
+    "First, let us load all required packages."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "\n",
+    "from dowhy import CausalModel\n",
+    "import dowhy.datasets "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now, let us load a dataset. For simplicity, we simulate a dataset with linear relationships between common causes and treatment, and common causes and outcome. \n",
+    "\n",
+    "Beta is the true causal effect. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data = dowhy.datasets.linear_dataset(beta=10,\n",
+    "        num_common_causes=5,\n",
+    "        num_instruments = 2,\n",
+    "        num_effect_modifiers=1,\n",
+    "        num_samples=5000, \n",
+    "        treatment_is_binary=True,\n",
+    "        stddev_treatment_noise=10,\n",
+    "        num_discrete_common_causes=1)\n",
+    "df = data[\"df\"]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Note that we are using a pandas dataframe to load the data. At present, DoWhy only supports pandas dataframe as input."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Interface 1 (recommended): Input causal graph"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We now input a causal graph in the GML graph format (recommended). You can also use the DOT format.\n",
+    "\n",
+    "To create the causal graph for your dataset, you can use a tool like [DAGitty](http://dagitty.net/dags.html#) that provides a GUI to construct the graph. You can export the graph string that it generates. The graph string is very close to the DOT format: just rename `dag` to `digraph`, remove newlines and add a semicolon after every line, to convert it to the DOT format and input to DoWhy. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# With graph\n",
+    "model=CausalModel(\n",
+    "        data = df,\n",
+    "        treatment=data[\"treatment_name\"],\n",
+    "        outcome=data[\"outcome_name\"],\n",
+    "        graph=data[\"gml_graph\"]\n",
+    "        )"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model.view_model()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "from IPython.display import Image, display\n",
+    "display(Image(filename=\"causal_model.png\"))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The above causal graph shows the assumptions encoded in the causal model. We can now use this graph to first identify \n",
+    "the causal effect (go from a causal estimand to a probability expression), and then estimate the causal effect."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### DoWhy philosophy: Keep identification and estimation separate\n",
+    "\n",
+    "Identification can be achieved without access to the data, acccesing only the graph. This results in an expression to be computed. This expression can then be evaluated using the available data in the estimation step.\n",
+    "It is important to understand that these are orthogonal steps.\n",
+    "\n",
+    "#### Identification"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)\n",
+    "print(identified_estimand)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Note the parameter flag *proceed\\_when\\_unidentifiable*. It needs to be set to *True* to convey the assumption that we are ignoring any unobserved confounding. The default behavior is to prompt the user to double-check that the unobserved confounders can be ignored. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### Estimation"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "causal_estimate = model.estimate_effect(identified_estimand,\n",
+    "        method_name=\"backdoor.propensity_score_stratification\")\n",
+    "print(causal_estimate)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "You can input additional parameters to the estimate_effect method. For instance, to estimate the effect on any subset of the units, you can specify the \"target_units\" parameter which can be a string (\"ate\", \"att\", or \"atc\"), lambda function that filters rows of the data frame, or a new dataframe on which to compute the effect. You can also specify \"effect modifiers\" to estimate heterogeneous effects across these variables. See `help(CausalModel.estimate_effect)`. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Causal effect on the control group (ATC)\n",
+    "causal_estimate_att = model.estimate_effect(identified_estimand,\n",
+    "        method_name=\"backdoor.propensity_score_stratification\",\n",
+    "        target_units = \"atc\")\n",
+    "print(causal_estimate_att)\n",
+    "print(\"Causal Estimate is \" + str(causal_estimate_att.value))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Interface 2: Specify common causes and instruments"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "# Without graph                                       \n",
+    "model= CausalModel(                             \n",
+    "        data=df,                                      \n",
+    "        treatment=data[\"treatment_name\"],             \n",
+    "        outcome=data[\"outcome_name\"],                 \n",
+    "        common_causes=data[\"common_causes_names\"],\n",
+    "        effect_modifiers=data[\"effect_modifier_names\"])                         "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model.view_model()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from IPython.display import Image, display\n",
+    "display(Image(filename=\"causal_model.png\"))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We get the same causal graph. Now identification and estimation is done as before.\n",
+    "\n",
+    "#### Identification"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)                         "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### Estimation"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "estimate = model.estimate_effect(identified_estimand,\n",
+    "                                 method_name=\"backdoor.propensity_score_stratification\")         \n",
+    "print(estimate)\n",
+    "print(\"Causal Estimate is \" + str(estimate.value))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Refuting the estimate\n",
+    "\n",
+    "Let us now look at ways of refuting the estimate obtained. Refutation methods provide tests that every correct estimator should pass. So if an estimator fails the refutation test (p-value is <0.05), then it means that there is some problem with the estimator. \n",
+    "\n",
+    "Note that we cannot verify that the estimate is correct, but we can reject it if it violates certain expected behavior (this is analogous to scientific theories that can be falsified but not proven true). The below refutation tests are based on either \n",
+    " 1) **Invariant transformations**: changes in the data that should not change the estimate. Any estimator whose result varies significantly between the original data and the modified data fails the test; \n",
+    " \n",
+    " a) Random Common Cause\n",
+    " \n",
+    " b) Data Subset\n",
+    " \n",
+    " \n",
+    " 2) **Nullifying transformations**: after the data change, the causal true estimate is zero. Any estimator whose result varies significantly from zero on the new data fails the test.\n",
+    " \n",
+    " a) Placebo Treatment"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Adding a random common cause variable"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "res_random=model.refute_estimate(identified_estimand, estimate, method_name=\"random_common_cause\", show_progress_bar=True)\n",
+    "print(res_random)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Replacing treatment with a random (placebo) variable"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "res_placebo=model.refute_estimate(identified_estimand, estimate,\n",
+    "        method_name=\"placebo_treatment_refuter\", show_progress_bar=True, placebo_type=\"permute\")\n",
+    "print(res_placebo)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Removing a random subset of the data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "res_subset=model.refute_estimate(identified_estimand, estimate,\n",
+    "        method_name=\"data_subset_refuter\", show_progress_bar=True, subset_fraction=0.9)\n",
+    "print(res_subset)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "As you can see, the propensity score stratification estimator is reasonably robust to refutations.\n",
+    "\n",
+    "**Reproducability**: For reproducibility, you can add a parameter \"random_seed\" to any refutation method, as shown below.\n",
+    "\n",
+    "**Parallelization**: You can also use built-in parallelization to speed up the refutation process. Simply set `n_jobs` to a value greater than 1 to spread the workload to multiple CPUs, or set `n_jobs=-1` to use all CPUs. Currently, this is available only for `random_common_cause`, `placebo_treatment_refuter`, and `data_subset_refuter`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "res_subset=model.refute_estimate(identified_estimand, estimate,\n",
+    "        method_name=\"data_subset_refuter\", show_progress_bar=True, subset_fraction=0.9, random_seed = 1, n_jobs=-1, verbose=10)\n",
+    "print(res_subset)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Adding an unobserved common cause variable\n",
+    "\n",
+    "This  refutation does not return a p-value. Instead, it provides a _sensitivity_ test on how quickly the estimate changes if the identifying assumptions (used in `identify_effect`) are not valid. Specifically, it checks sensitivity to violation of the  backdoor assumption: that all common causes are observed. \n",
+    "\n",
+    "To do so, it creates a new dataset with an additional common cause between treatment and outcome. To capture the effect of the common cause, the method takes as input the strength of common cause's effect on treatment and outcome. Based on these inputs on the common cause's effects, it changes the treatment and outcome values and then reruns the estimator. The hope is that the new estimate does not change drastically with a small effect of the unobserved common cause, indicating a robustness to any unobserved confounding.\n",
+    "\n",
+    "Another equivalent way of interpreting this procedure is to assume that there was already unobserved confounding present in the input data. The change in treatment and outcome values _removes_ the effect of whatever unobserved common cause was present in the original data. Then rerunning the estimator on this modified data provides the correct identified estimate and we hope that the difference between the new estimate and the original estimate is not too high, for some bounded value of the unobserved common cause's effect.\n",
+    "\n",
+    "**Importance of domain knowledge**: This test requires _domain knowledge_ to set plausible input values of the effect of unobserved confounding. We first show the result for a single value of confounder's effect on treatment and outcome."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "res_unobserved=model.refute_estimate(identified_estimand, estimate, method_name=\"add_unobserved_common_cause\",\n",
+    "                                     confounders_effect_on_treatment=\"binary_flip\", confounders_effect_on_outcome=\"linear\",\n",
+    "                                    effect_strength_on_treatment=0.01, effect_strength_on_outcome=0.02)\n",
+    "print(res_unobserved)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "It is often more useful to inspect the trend as the effect of unobserved confounding is increased. For that, we can provide an array of hypothesized confounders' effects. The output is the *(min, max)* range of the estimated effects under different unobserved confounding."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "res_unobserved_range=model.refute_estimate(identified_estimand, estimate, method_name=\"add_unobserved_common_cause\",\n",
+    "                                     confounders_effect_on_treatment=\"binary_flip\", confounders_effect_on_outcome=\"linear\",\n",
+    "                                    effect_strength_on_treatment=np.array([0.001, 0.005, 0.01, 0.02]), effect_strength_on_outcome=0.01)\n",
+    "print(res_unobserved_range)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The above plot shows how the estimate decreases as the hypothesized confounding on treatment increases. By domain knowledge, we may know the maximum plausible confounding effect on treatment. Since we see that the effect does not go beyond zero, we can safely conclude that the causal effect of treatment `v0` is positive.\n",
+    "\n",
+    "We can also vary the confounding effect on both treatment and outcome. We obtain a heatmap."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "res_unobserved_range=model.refute_estimate(identified_estimand, estimate, method_name=\"add_unobserved_common_cause\",\n",
+    "                                           confounders_effect_on_treatment=\"binary_flip\", confounders_effect_on_outcome=\"linear\",\n",
+    "                                           effect_strength_on_treatment=[0.001, 0.005, 0.01, 0.02], \n",
+    "                                           effect_strength_on_outcome=[0.001, 0.005, 0.01,0.02])\n",
+    "print(res_unobserved_range)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "**Automatically inferring effect strength parameters.** Finally, DoWhy supports automatic selection of the effect strength parameters. This is based on an assumption that the effect of the unobserved confounder on treatment or outcome cannot be stronger than that of any observed confounder. That is, we have collected data at least for the most relevant confounder. If that is the case, then we can bound the range of `effect_strength_on_treatment` and `effect_strength_on_outcome` by the effect strength of observed confounders. There is an additional optional parameter signifying whether the effect strength of unobserved confounder should be as high as the highest observed, or a fraction of it. You can set it using the optional `effect_fraction_on_treatment` and `effect_fraction_on_outcome` parameters. By default, these two parameters are 1."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "res_unobserved_auto = model.refute_estimate(identified_estimand, estimate, method_name=\"add_unobserved_common_cause\",\n",
+    "                                           confounders_effect_on_treatment=\"binary_flip\", confounders_effect_on_outcome=\"linear\")\n",
+    "print(res_unobserved_auto)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "**Conclusion**: Assuming that the unobserved confounder does not affect the treatment or outcome more strongly than any observed confounder, the causal effect can be concluded to be positive."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.13"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": false,
+   "sideBar": true,
+   "skip_h1_title": true,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

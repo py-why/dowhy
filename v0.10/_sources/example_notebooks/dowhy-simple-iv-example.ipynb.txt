@@ -1,0 +1,220 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Simple example on using Instrumental Variables method for estimation"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%load_ext autoreload\n",
+    "%autoreload 2"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import patsy as ps\n",
+    "\n",
+    "from statsmodels.sandbox.regression.gmm import IV2SLS\n",
+    "import os, sys\n",
+    "from dowhy import CausalModel"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Loading the dataset\n",
+    "\n",
+    "We create a fictitious dataset with the goal of estimating the impact of education on future earnings of an individual. The `ability`  of the individual is a confounder and being given an `education_voucher` is the instrument."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "n_points = 1000\n",
+    "education_abilty = 1\n",
+    "education_voucher = 2\n",
+    "income_abilty = 2\n",
+    "income_education = 4\n",
+    "\n",
+    "\n",
+    "# confounder\n",
+    "ability = np.random.normal(0, 3, size=n_points)\n",
+    "\n",
+    "# instrument\n",
+    "voucher = np.random.normal(2, 1, size=n_points) \n",
+    "\n",
+    "# treatment\n",
+    "education = np.random.normal(5, 1, size=n_points) + education_abilty * ability +\\\n",
+    "            education_voucher * voucher\n",
+    "\n",
+    "# outcome\n",
+    "income = np.random.normal(10, 3, size=n_points) +\\\n",
+    "         income_abilty * ability + income_education * education\n",
+    "\n",
+    "# build dataset (exclude confounder `ability` which we assume to be unobserved)\n",
+    "data = np.stack([education, income, voucher]).T\n",
+    "df = pd.DataFrame(data, columns = ['education', 'income', 'voucher'])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Using DoWhy to estimate the causal effect of education on future income\n",
+    "\n",
+    "We follow the four steps: \n",
+    "1) model the problem using causal graph, \n",
+    "\n",
+    "2) identify if the causal effect can be estimated from the observed variables, \n",
+    "\n",
+    "3) estimate the effect, and \n",
+    "\n",
+    "4) check the robustness of the estimate. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Step 1: Model\n",
+    "model=CausalModel(\n",
+    "        data = df,\n",
+    "        treatment='education',\n",
+    "        outcome='income',\n",
+    "        common_causes=['U'],\n",
+    "        instruments=['voucher']\n",
+    "        )\n",
+    "model.view_model()\n",
+    "from IPython.display import Image, display\n",
+    "display(Image(filename=\"causal_model.png\"))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Step 2: Identify\n",
+    "identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)\n",
+    "print(identified_estimand)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Step 3: Estimate\n",
+    "#Choose the second estimand: using IV\n",
+    "estimate = model.estimate_effect(identified_estimand,\n",
+    "        method_name=\"iv.instrumental_variable\", test_significance=True)\n",
+    "\n",
+    "print(estimate)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We have an estimate, indicating that increasing `education` by one unit increases `income` by 4 points.  \n",
+    "\n",
+    "Next we check the robustness of the estimate using a Placebo refutation test. In this test, the treatment is replaced by an independent random variable (while preserving the correlation with the instrument), so that the true causal effect should be zero. We check if our estimator also provides the correct answer of zero. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Step 4: Refute\n",
+    "ref = model.refute_estimate(identified_estimand, estimate, method_name=\"placebo_treatment_refuter\", placebo_type=\"permute\") # only permute placebo_type works with IV estimate\n",
+    "print(ref)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The refutation gives confidence that the estimate is not capturing any noise in the data.\n",
+    "\n",
+    "Since this is simulated data, we also know the true causal effect is `4` (see the `income_education` parameter of the data-generating process above)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Finally, we show the same estimation by another method to verify the result from DoWhy."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "income_vec, endog = ps.dmatrices(\"income ~ education\", data=df)\n",
+    "exog = ps.dmatrix(\"voucher\", data=df)\n",
+    "\n",
+    "m = IV2SLS(income_vec, endog, exog).fit()\n",
+    "m.summary()"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.5"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": false,
+   "sideBar": true,
+   "skip_h1_title": true,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
