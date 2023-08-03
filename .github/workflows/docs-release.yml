@@ -3,6 +3,17 @@ name: Build & Deploy Docs (For Release)
 on:
   release:
     types: [created]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag'
+        required: true
+        type: string
+
+env:
+  # Pull the tag either from the release event if this workflow was triggered by a release
+  # or from the input if this workflow was triggered manually
+  release_tag: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.release_tag }}
 
 jobs:
   docs:
@@ -22,7 +33,7 @@ jobs:
       - name: Build
         run: ./docs/generate_docs.sh
         env:
-          DOCS_VERSION: ${{ github.event.release.tag_name }}
+          DOCS_VERSION: ${{ env.release_tag }}
           
       - name: Commit and push to gh-pages branch
         uses: peaceiris/actions-gh-pages@v3
