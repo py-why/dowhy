@@ -494,9 +494,11 @@ class CausalEstimator:
             for i in range(num_null_simulations):
                 new_outcome = np.random.permutation(data[self._target_estimand.outcome_variable])
                 new_data = data.assign(dummy_outcome=new_outcome)
+                new_estimand = copy.deepcopy(self._target_estimand)
+                new_estimand.outcome_variable = ["dummy_outcome"]
                 # self._outcome = self._data["dummy_outcome"]
                 new_estimator = self.get_new_estimator_object(
-                    self._target_estimand,
+                    new_estimand,
                     test_significance=False,
                     evaluate_effect_strength=False,
                     confidence_intervals=False,
