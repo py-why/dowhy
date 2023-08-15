@@ -930,7 +930,7 @@ def sales_dataset(
     original_product_price: int = 1000,
     product_production_cost: int = 500,
     based_ad_spending: int = 1000,
-    change_of_price: float = 0.0,
+    change_of_price: float = 1.0,
     change_of_demand: float = 1.25,
     page_visitor_factor: float = 1.0,
 ) -> pd.DataFrame:
@@ -946,9 +946,10 @@ def sales_dataset(
     :param original_product_price: The initial price of the product. Default is 1000.
     :param product_production_cost: Cost of producing one unit of the product. Default is 500.
     :param based_ad_spending: Base spending on ad campaigns. Default is 1000.
-    :param change_of_price: Proportion of price change, represented as a float.
-                            For example, a value of 0.1 means a 10% increase. Default is 0.0.
-    :param change_of_demand: Factor by which the demand changes with a change in price. Default is 1.25.
+    :param change_of_price: Factor by which the price changes. For example, a value of 0.9 means a 10% decrease. Default is 1.0.
+    :param change_of_demand: Factor by which the demand changes with a change in price. See
+                             https://en.wikipedia.org/wiki/Price_elasticity_of_demand for more information.
+                             This influences the number of sold units. Default is 1.25.
     :param page_visitor_factor: A factor to adjust the number of page visits. Default is 1.0.
 
     :return: A dataframe containing columns related to sales data. The columns of the dataset are:
@@ -973,7 +974,7 @@ def sales_dataset(
 
     days = pd.date_range(start=start_date, end=end_date, inclusive="both", freq=frequency)
     shopping_events = days[np.random.choice(days.shape[0], size=num_shopping_events, replace=False)]
-    base_price = original_product_price * (1 - change_of_price)
+    base_price = original_product_price * change_of_price
 
     df = pd.DataFrame({date_col: days})
 
