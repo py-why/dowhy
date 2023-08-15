@@ -9,18 +9,11 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import scipy.stats as ss
-from numpy.random import choice, random
+from numpy.random import choice
+from scipy.stats import bernoulli, halfnorm, poisson, uniform
 from sklearn.neural_network import MLPRegressor
 
-from dowhy.utils.graph_operations import (
-    add_edge,
-    convert_to_undirected_graph,
-    del_edge,
-    find_predecessor,
-    get_random_node_pair,
-    get_simple_ordered_tree,
-    is_connected,
-)
+from dowhy.utils.graph_operations import add_edge, del_edge, get_random_node_pair, get_simple_ordered_tree
 
 
 def sigmoid(x):
@@ -927,3 +920,107 @@ def psid_dataset() -> pd.DataFrame:
     psid["u74"] = np.where(psid["re74"] == 0, 1.0, 0.0)
     psid["u75"] = np.where(psid["re75"] == 0, 1.0, 0.0)
     return psid
+
+
+def sales_dataset(
+    start_date: str = "2021-01-01",
+    end_date: str = "2021-12-31",
+    frequency: str = "d",
+    num_shopping_events: int = 15,
+    original_product_price: int = 1000,
+    product_production_cost: int = 500,
+    based_ad_spending: int = 1000,
+    change_of_price: float = 0.0,
+    change_of_demand: float = 1.25,
+    page_visitor_factor: float = 1.0,
+) -> pd.DataFrame:
+    """
+    Create a sales dataset based on a single product item with daily data.
+
+    This closely follows the blog post: https://aws.amazon.com/blogs/opensource/root-cause-analysis-with-dowhy-an-open-source-python-library-for-causal-machine-learning/
+
+    :param start_date: The starting date for the dataset, formatted as "YYYY-MM-DD". Default is "2021-01-01".
+    :param end_date: The ending date for the dataset, formatted as "YYYY-MM-DD". Default is "2021-12-31".
+    :param frequency: Frequency for the date range. Default is "d" (daily).
+    :param num_shopping_events: Number of special shopping events. Default is 15.
+    :param original_product_price: The initial price of the product. Default is 1000.
+    :param product_production_cost: Cost of producing one unit of the product. Default is 500.
+    :param based_ad_spending: Base spending on ad campaigns. Default is 1000.
+    :param change_of_price: Proportion of price change, represented as a float.
+                            For example, a value of 0.1 means a 10% increase. Default is 0.0.
+    :param change_of_demand: Factor by which the demand changes with a change in price. Default is 1.25.
+    :param page_visitor_factor: A factor to adjust the number of page visits. Default is 1.0.
+
+    :return: A dataframe containing columns related to sales data. The columns of the dataset are:
+       - Shopping Event?: A binary value indicating whether a special shopping event took place.
+       - Ad Spend: Spending on ad campaigns.
+       - Page Views: Number of visits on the product detail page.
+       - Unit Price: Price of the device, which could vary due to temporary discounts.
+       - Sold Units: Number of sold units.
+       - Revenue: Daily revenue.
+       - Operational Cost: Daily operational expenses.
+       - Profit: Daily profit.
+    """
+    shopping_event_col = "Shopping Event?"
+    ad_spend_col = "Ad Spend"
+    page_visit_col = "Page Views"
+    price_col = "Unit Price"
+    units_sold_col = "Sold Units"
+    revenue_col = "Revenue"
+    profit_col = "Profit"
+    date_col = "Date"
+    operation_col = "Operational Cost"
+
+    days = pd.date_range(start=start_date, end=end_date, inclusive="both", freq=frequency)
+    shopping_events = days[np.random.choice(days.shape[0], size=num_shopping_events, replace=False)]
+    base_price = original_product_price * (1 - change_of_price)
+
+    df = pd.DataFrame({date_col: days})
+
+    df[shopping_event_col] = df[date_col].isin(shopping_events)
+
+    df[ad_spend_col] = (
+        based_ad_spending
+        + df[shopping_event_col] * uniform.rvs(loc=1000, scale=1000, size=df.shape[0])
+        + (1 - df[shopping_event_col]) * uniform.rvs(loc=100, scale=400, size=df.shape[0])
+    )
+
+    df[page_visit_col] = (
+        poisson.rvs(mu=10000 * page_visitor_factor, size=df.shape[0])
+        + uniform.rvs(loc=5000 * page_visitor_factor, scale=5000, size=df.shape[0]) * df[shopping_event_col]
+        + halfnorm.rvs(loc=0.5 * page_visitor_factor, scale=0.01, size=df.shape[0]) * df[ad_spend_col]
+        + halfnorm.rvs(loc=1000 * page_visitor_factor, scale=100, size=df.shape[0])
+    )
+    df[page_visit_col] = df[page_visit_col].astype(int)
+
+    df[price_col] = (
+        base_price
+        + uniform.rvs(loc=-200, scale=200, size=df.shape[0]) * df[shopping_event_col]
+        + bernoulli.rvs(p=0.02, size=df.shape[0]) * uniform.rvs(loc=-20, scale=20, size=df.shape[0])
+    )
+
+    price_changes = 1 - df[price_col] / original_product_price
+    demand_changes = price_changes * change_of_demand * (1 + price_changes)
+    demand_changes[price_changes == 0] = 1
+    price_changes[price_changes == 0] = 1
+
+    df[units_sold_col] = [
+        poisson.rvs(
+            mu=demand_changes.iloc[i] / price_changes.iloc[i] * 0.2 * df[page_visit_col].iloc[i]
+            + uniform.rvs(loc=100, scale=1000) * df[shopping_event_col].iloc[i]
+        )
+        for i in range(df.shape[0])
+    ]
+    df[units_sold_col] = df[units_sold_col].astype(int)
+
+    df[revenue_col] = df[price_col] * df[units_sold_col]
+
+    df[operation_col] = (
+        df[ad_spend_col]
+        + product_production_cost * df[units_sold_col]
+        + halfnorm.rvs(loc=500000, scale=10, size=df.shape[0])
+    )
+
+    df[profit_col] = df[revenue_col] - df[operation_col]
+
+    return df
