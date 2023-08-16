@@ -133,10 +133,10 @@ def assign_causal_mechanisms(
         if not override_models and CAUSAL_MECHANISM in causal_model.graph.nodes[node]:
             validate_causal_model_assignment(causal_model.graph, node)
             continue
-        set_causal_mechanism_for_node(causal_model, node, based_on, quality)
+        assign_causal_mechanism_node(causal_model, node, based_on, quality)
 
 
-def set_causal_mechanism_for_node(
+def assign_causal_mechanism_node(
     causal_model: ProbabilisticCausalModel, node: str, based_on: pd.DataFrame, quality: Optional[AssignmentQuality]
 ):
     if quality is None:

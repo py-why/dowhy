@@ -4,7 +4,7 @@ Functions in this module should be considered experimental, meaning there might 
 """
 
 import logging
-from typing import Any, Callable, Dict, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import networkx as nx
 import numpy as np
@@ -13,7 +13,7 @@ from numpy.matlib import repmat
 from statsmodels.stats.multitest import multipletests
 from tqdm import tqdm
 
-from dowhy.gcm.auto import AssignmentQuality, assign_causal_mechanisms, set_causal_mechanism_for_node
+from dowhy.gcm.auto import AssignmentQuality, assign_causal_mechanism_node, assign_causal_mechanisms
 from dowhy.gcm.causal_mechanisms import ConditionalStochasticModel
 from dowhy.gcm.causal_models import (
     PARENTS_DURING_FIT,
@@ -88,34 +88,12 @@ def mechanism_change_test(
         return conditional_independence_test(joint_target_samples, data_set_indices, joint_parent_data)
 
 
-def remove_invariant_nodes(
-    invariant_nodes: list,
-    causal_model: ProbabilisticCausalModel,
-    old_data: pd.DataFrame,
-    auto_assignment_quality: Optional[AssignmentQuality],
-):
-    for invar_node in invariant_nodes:
-        if invar_node in list(causal_model.graph.nodes):
-            # Get parent and child nodes
-            parents = get_ordered_predecessors(causal_model.graph, invar_node)
-            children = list(causal_model.graph.successors(invar_node))
-            # Remove the middle node
-            causal_model.graph.remove_node(invar_node)
-            # Connect parent and child nodes
-            for parent in parents:
-                for child in children:
-                    causal_model.graph.add_edge(parent, child)
-            # Update the causal mechanism for the child nodes
-            for child in children:
-                set_causal_mechanism_for_node(causal_model, child, old_data, quality=auto_assignment_quality)
-
-
 def distribution_change(
     causal_model: ProbabilisticCausalModel,
     old_data: pd.DataFrame,
     new_data: pd.DataFrame,
     target_node: Any,
-    invariant_nodes: list = None,
+    invariant_nodes: List[Any] = None,
     num_samples: int = 2000,
     difference_estimation_func: Callable[[np.ndarray, np.ndarray], float] = auto_estimate_kl_divergence,
     independence_test: Callable[[np.ndarray, np.ndarray], float] = kernel_based,
@@ -142,7 +120,8 @@ def distribution_change(
     :param old_data: Joint samples from the 'old' distribution.
     :param new_data: Joint samples from the 'new' distribution.
     :param target_node: Target node of interest for attributing the marginal distribution change.
-    :param invariant_nodes: List of Nodes that remains constant regardless of changes in the datasets being analyzed.
+    :param invariant_nodes: List of nodes where the mechanism is kept constant regardless of changes in the
+                            datasets being analyzed.
     :param num_samples: Number of samples used for estimating Shapley values. This can have a significant influence
                         on runtime and accuracy.
     :param difference_estimation_func: Function for quantifying the distribution change. This function should expect
@@ -180,8 +159,8 @@ def distribution_change(
         clone_causal_models(causal_model.graph, causal_model_old.graph)
     else:
         assign_causal_mechanisms(causal_model_old, old_data, override_models=True, quality=auto_assignment_quality)
-    if invariant_nodes:
-        remove_invariant_nodes(invariant_nodes, causal_model_old, old_data, auto_assignment_quality)
+    if invariant_nodes is not None:
+        _remove_invariant_nodes(invariant_nodes, causal_model_old, old_data, auto_assignment_quality)
 
     causal_graph_new = graph_factory(causal_graph_old)
     causal_model_new = ProbabilisticCausalModel(causal_graph_new)
@@ -262,6 +241,28 @@ def distribution_change_of_graphs(
         shapley_config,
         graph_factory,
     )
+
+
+def _remove_invariant_nodes(
+    invariant_nodes: List[Any],
+    causal_model: ProbabilisticCausalModel,
+    old_data: pd.DataFrame,
+    auto_assignment_quality: Optional[AssignmentQuality],
+) -> None:
+    for invar_node in invariant_nodes:
+        if invar_node in list(causal_model.graph.nodes):
+            # Get parent and child nodes
+            parents = get_ordered_predecessors(causal_model.graph, invar_node)
+            children = list(causal_model.graph.successors(invar_node))
+            # Remove the middle node
+            causal_model.graph.remove_node(invar_node)
+            # Connect parent and child nodes
+            for parent in parents:
+                for child in children:
+                    causal_model.graph.add_edge(parent, child)
+            # Update the causal mechanism for the child nodes
+            for child in children:
+                assign_causal_mechanism_node(causal_model, child, old_data, quality=auto_assignment_quality)
 
 
 def _fit_accounting_for_mechanism_change(
