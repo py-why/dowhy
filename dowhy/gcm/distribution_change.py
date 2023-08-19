@@ -152,6 +152,8 @@ def distribution_change(
              returned: a dictionary indicating whether each node's mechanism changed, the causal DAG whose causal models
              learned from old data, and the causal DAG whose causal models are learned from new data.
     """
+    if invariant_nodes is None:
+        invariant_nodes = []
     causal_graph_old = graph_factory(node_connected_subgraph_view(causal_model.graph, target_node))
     causal_model_old = ProbabilisticCausalModel(causal_graph_old)
 
@@ -159,8 +161,8 @@ def distribution_change(
         clone_causal_models(causal_model.graph, causal_model_old.graph)
     else:
         assign_causal_mechanisms(causal_model_old, old_data, override_models=True, quality=auto_assignment_quality)
-    if invariant_nodes is not None:
-        _remove_invariant_nodes(invariant_nodes, causal_model_old, old_data, auto_assignment_quality)
+    invariant_nodes = list(set(invariant_nodes).intersection(set(causal_graph_old.nodes)))
+    _remove_invariant_nodes(invariant_nodes, causal_model_old, old_data, auto_assignment_quality)
 
     causal_graph_new = graph_factory(causal_graph_old)
     causal_model_new = ProbabilisticCausalModel(causal_graph_new)
@@ -178,6 +180,7 @@ def distribution_change(
         conditional_independence_test,
         mechanism_change_test_significance_level,
         mechanism_change_test_fdr_control_method,
+        invariant_nodes,
     )
 
     attributions = distribution_change_of_graphs(
@@ -189,6 +192,9 @@ def distribution_change(
         shapley_config,
         graph_factory,
     )
+    # set attributions to zero for left out invariant nodes
+    for node in invariant_nodes:
+        attributions[node] = 0
     if return_additional_info:
         return attributions, mechanism_changes, causal_model_old, causal_model_new
     else:
@@ -254,6 +260,10 @@ def _remove_invariant_nodes(
             # Get parent and child nodes
             parents = get_ordered_predecessors(causal_model.graph, invar_node)
             children = list(causal_model.graph.successors(invar_node))
+            # Don't remove node if node has more than 1 children nodes as it can introduce
+            # hidden confounders.
+            if len(children) > 1:
+                continue
             # Remove the middle node
             causal_model.graph.remove_node(invar_node)
             # Connect parent and child nodes
@@ -274,6 +284,7 @@ def _fit_accounting_for_mechanism_change(
     conditional_independence_test: Callable[[np.ndarray, np.ndarray, np.ndarray], float],
     significance_level: float,
     fdr_control_method: Optional[str],
+    invariant_nodes: List[Any],
 ) -> Dict[Any, bool]:
     mechanism_changed_for_node = _check_significant_mechanism_change(
         causal_model_old.graph,
@@ -288,6 +299,8 @@ def _fit_accounting_for_mechanism_change(
     joint_data = pd.concat([old_data, new_data], ignore_index=True, sort=True)
 
     for node in causal_model_new.graph.nodes:
+        if node in invariant_nodes:
+            mechanism_changed_for_node[node] = False
         if mechanism_changed_for_node[node]:
             fit_causal_model_of_target(causal_model_old, node, old_data)
             fit_causal_model_of_target(causal_model_new, node, new_data)
