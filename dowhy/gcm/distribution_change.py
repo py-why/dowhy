@@ -256,23 +256,22 @@ def _remove_invariant_nodes(
     auto_assignment_quality: Optional[AssignmentQuality],
 ) -> None:
     for invar_node in invariant_nodes:
-        if invar_node in list(causal_model.graph.nodes):
-            # Get parent and child nodes
-            parents = get_ordered_predecessors(causal_model.graph, invar_node)
-            children = list(causal_model.graph.successors(invar_node))
-            # Don't remove node if node has more than 1 children nodes as it can introduce
-            # hidden confounders.
-            if len(children) > 1:
-                continue
-            # Remove the middle node
-            causal_model.graph.remove_node(invar_node)
-            # Connect parent and child nodes
-            for parent in parents:
-                for child in children:
-                    causal_model.graph.add_edge(parent, child)
-            # Update the causal mechanism for the child nodes
+        # Get parent and child nodes
+        parents = get_ordered_predecessors(causal_model.graph, invar_node)
+        children = list(causal_model.graph.successors(invar_node))
+        # Don't remove node if node has more than 1 children nodes as it can introduce
+        # hidden confounders.
+        if len(children) > 1:
+            continue
+        # Remove the middle node
+        causal_model.graph.remove_node(invar_node)
+        # Connect parent and child nodes
+        for parent in parents:
             for child in children:
-                assign_causal_mechanism_node(causal_model, child, old_data, quality=auto_assignment_quality)
+                causal_model.graph.add_edge(parent, child)
+        # Update the causal mechanism for the child nodes
+        for child in children:
+            assign_causal_mechanism_node(causal_model, child, old_data, quality=auto_assignment_quality)
 
 
 def _fit_accounting_for_mechanism_change(
