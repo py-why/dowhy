@@ -255,6 +255,8 @@ def _remove_invariant_nodes(
     old_data: pd.DataFrame,
     auto_assignment_quality: Optional[AssignmentQuality],
 ) -> None:
+    if auto_assignment_quality is None:
+        auto_assignment_quality = AssignmentQuality.GOOD
     for invar_node in invariant_nodes:
         # Get parent and child nodes
         parents = get_ordered_predecessors(causal_model.graph, invar_node)

@@ -137,10 +137,11 @@ def assign_causal_mechanisms(
 
 
 def assign_causal_mechanism_node(
-    causal_model: ProbabilisticCausalModel, node: str, based_on: pd.DataFrame, quality: Optional[AssignmentQuality]
+    causal_model: ProbabilisticCausalModel,
+    node: str,
+    based_on: pd.DataFrame,
+    quality: AssignmentQuality = AssignmentQuality.GOOD,
 ) -> None:
-    if quality is None:
-        quality = AssignmentQuality.GOOD
     if is_root_node(causal_model.graph, node):
         causal_model.set_causal_mechanism(node, EmpiricalDistribution())
     else:
