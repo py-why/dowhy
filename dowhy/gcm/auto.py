@@ -133,20 +133,28 @@ def assign_causal_mechanisms(
         if not override_models and CAUSAL_MECHANISM in causal_model.graph.nodes[node]:
             validate_causal_model_assignment(causal_model.graph, node)
             continue
+        assign_causal_mechanism_node(causal_model, node, based_on, quality)
 
-        if is_root_node(causal_model.graph, node):
-            causal_model.set_causal_mechanism(node, EmpiricalDistribution())
+
+def assign_causal_mechanism_node(
+    causal_model: ProbabilisticCausalModel,
+    node: str,
+    based_on: pd.DataFrame,
+    quality: AssignmentQuality = AssignmentQuality.GOOD,
+) -> None:
+    if is_root_node(causal_model.graph, node):
+        causal_model.set_causal_mechanism(node, EmpiricalDistribution())
+    else:
+        prediction_model = select_model(
+            based_on[get_ordered_predecessors(causal_model.graph, node)].to_numpy(),
+            based_on[node].to_numpy(),
+            quality,
+        )
+
+        if isinstance(prediction_model, ClassificationModel):
+            causal_model.set_causal_mechanism(node, ClassifierFCM(prediction_model))
         else:
-            prediction_model = select_model(
-                based_on[get_ordered_predecessors(causal_model.graph, node)].to_numpy(),
-                based_on[node].to_numpy(),
-                quality,
-            )
-
-            if isinstance(prediction_model, ClassificationModel):
-                causal_model.set_causal_mechanism(node, ClassifierFCM(prediction_model))
-            else:
-                causal_model.set_causal_mechanism(node, AdditiveNoiseModel(prediction_model))
+            causal_model.set_causal_mechanism(node, AdditiveNoiseModel(prediction_model))
 
 
 def select_model(
