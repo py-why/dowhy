@@ -23,10 +23,14 @@ def compute_data_from_noise(causal_model: StructuralCausalModel, noise_data: pd.
 
     for node in sorted_nodes:
         if is_root_node(causal_model.graph, node):
-            data[node] = noise_data[node].to_numpy()
+            data[node] = noise_data[node].to_numpy().squeeze()
         else:
-            data[node] = causal_model.causal_mechanism(node).evaluate(
-                data[get_ordered_predecessors(causal_model.graph, node)].to_numpy(), noise_data[node].to_numpy()
+            data[node] = (
+                causal_model.causal_mechanism(node)
+                .evaluate(
+                    data[get_ordered_predecessors(causal_model.graph, node)].to_numpy(), noise_data[node].to_numpy()
+                )
+                .squeeze()
             )
 
     return data
@@ -40,10 +44,12 @@ def compute_noise_from_data(causal_model: InvertibleStructuralCausalModel, obser
 
     for node in sorted_noise:
         if is_root_node(causal_model.graph, node):
-            noise[node] = observed_data[node].to_numpy()
+            noise[node] = observed_data[node].to_numpy().squeeze()
         else:
-            noise[node] = causal_model.causal_mechanism(node).estimate_noise(
-                observed_data[node].to_numpy(), _parent_samples_of(node, causal_model, observed_data)
+            noise[node] = (
+                causal_model.causal_mechanism(node)
+                .estimate_noise(observed_data[node].to_numpy(), _parent_samples_of(node, causal_model, observed_data))
+                .squeeze()
             )
 
     return noise
@@ -144,13 +150,15 @@ def noise_samples_of_ancestors(
 
         if is_root_node(causal_model.graph, node):
             noise = causal_model.causal_mechanism(node).draw_samples(num_samples).reshape(-1)
-            drawn_noise_samples[node] = noise
-            drawn_samples[node] = noise
+            drawn_noise_samples[node] = noise.squeeze()
+            drawn_samples[node] = noise.squeeze()
         else:
             noise = causal_model.causal_mechanism(node).draw_noise_samples(num_samples).reshape(-1)
-            drawn_noise_samples[node] = noise
-            drawn_samples[node] = causal_model.causal_mechanism(node).evaluate(
-                _parent_samples_of(node, causal_model, drawn_samples), noise
+            drawn_noise_samples[node] = noise.squeeze()
+            drawn_samples[node] = (
+                causal_model.causal_mechanism(node)
+                .evaluate(_parent_samples_of(node, causal_model, drawn_samples), noise)
+                .squeeze()
             )
 
         if node == target_node:

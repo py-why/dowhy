@@ -223,6 +223,20 @@ def test_given_nodes_names_are_ints_when_calling_noise_dependent_function_then_d
     noise_dependent_function(np.array([[1]]))
 
 
+def test_given_dataframe_with_object_dtype_using_pandas_v2_when_compute_data_from_noise_then_does_not_raise_error():
+    X0 = np.random.choice(2, 10)
+    X1 = X0 + np.random.normal(0, 1, 10)
+
+    data = pd.DataFrame({"X0": X0, "X1": X1}, dtype=object)
+
+    causal_model = InvertibleStructuralCausalModel(nx.DiGraph([("X0", "X1")]))
+    assign_causal_mechanisms(causal_model, data)
+    fit(causal_model, data)
+
+    # This caused an error before with pandas > 2.0
+    compute_noise_from_data(causal_model, data.iloc[0:1])
+
+
 def _persist_parents(graph: DirectedGraph):
     for node in graph.nodes:
         graph.nodes[node][PARENTS_DURING_FIT] = get_ordered_predecessors(graph, node)

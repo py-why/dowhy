@@ -92,11 +92,11 @@ def draw_samples(causal_model: ProbabilisticCausalModel, num_samples: int) -> pd
         causal_mechanism = causal_model.causal_mechanism(node)
 
         if is_root_node(causal_model.graph, node):
-            drawn_samples[node] = causal_mechanism.draw_samples(num_samples).reshape(-1)
+            drawn_samples[node] = causal_mechanism.draw_samples(num_samples).squeeze()
         else:
             drawn_samples[node] = causal_mechanism.draw_samples(
                 _parent_samples_of(node, causal_model, drawn_samples)
-            ).reshape(-1)
+            ).squeeze()
 
     return drawn_samples
 
