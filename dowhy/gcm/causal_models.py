@@ -3,7 +3,7 @@
 Classes in this module should be considered experimental, meaning there might be breaking API changes in the future.
 """
 
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, List, Optional, Union
 
 import networkx as nx
 
@@ -157,7 +157,13 @@ def validate_node_has_causal_model(causal_graph: HasNodes, node: Any) -> None:
         raise ValueError("Node %s has no assigned causal mechanism!" % node)
 
 
-def clone_causal_models(source: HasNodes, destination: HasNodes):
+def clone_causal_models(source: HasNodes, destination: HasNodes, ignore_nodes: Optional[List[Any]] = None):
+    if ignore_nodes is None:
+        ignore_nodes = []
+
     for node in destination.nodes:
+        if node in ignore_nodes:
+            continue
+
         if CAUSAL_MECHANISM in source.nodes[node]:
             destination.nodes[node][CAUSAL_MECHANISM] = source.nodes[node][CAUSAL_MECHANISM].clone()

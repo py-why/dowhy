@@ -94,6 +94,7 @@ def distribution_change(
     new_data: pd.DataFrame,
     target_node: Any,
     invariant_nodes: List[Any] = None,
+    remove_invariant_nodes_from_graph: bool = True,
     num_samples: int = 2000,
     difference_estimation_func: Callable[[np.ndarray, np.ndarray], float] = auto_estimate_kl_divergence,
     independence_test: Callable[[np.ndarray, np.ndarray], float] = kernel_based,
@@ -122,6 +123,11 @@ def distribution_change(
     :param target_node: Target node of interest for attributing the marginal distribution change.
     :param invariant_nodes: List of nodes where the mechanism is kept constant regardless of changes in the
                             datasets being analyzed.
+    :param remove_invariant_nodes_from_graph: If possible, remove nodes from the graph whose mechanism has not changed.
+                                              This will lead to a more efficient, reduced graph structure for
+                                              estimation. However, it might not be possible to remove all invariant
+                                              nodes, as this approach only works under certain conditions. Set this to
+                                              false if the original graph structure should be retained.
     :param num_samples: Number of samples used for estimating Shapley values. This can have a significant influence
                         on runtime and accuracy.
     :param difference_estimation_func: Function for quantifying the distribution change. This function should expect
@@ -154,28 +160,20 @@ def distribution_change(
     """
     if invariant_nodes is None:
         invariant_nodes = []
-    causal_graph_old = graph_factory(node_connected_subgraph_view(causal_model.graph, target_node))
-    causal_model_old = ProbabilisticCausalModel(causal_graph_old)
 
-    if auto_assignment_quality is None:
-        clone_causal_models(causal_model.graph, causal_model_old.graph)
-    else:
-        assign_causal_mechanisms(causal_model_old, old_data, override_models=True, quality=auto_assignment_quality)
-    invariant_nodes = list(set(invariant_nodes).intersection(set(causal_graph_old.nodes)))
-    _remove_invariant_nodes(invariant_nodes, causal_model_old, old_data, auto_assignment_quality)
+    # Create copy of graph
+    causal_model_old = ProbabilisticCausalModel(
+        graph_factory(node_connected_subgraph_view(causal_model.graph, target_node))
+    )
 
-    causal_graph_new = graph_factory(causal_graph_old)
-    causal_model_new = ProbabilisticCausalModel(causal_graph_new)
-    if auto_assignment_quality is None:
-        clone_causal_models(causal_graph_old, causal_model_new.graph)
-    else:
-        assign_causal_mechanisms(causal_model_new, new_data, override_models=True, quality=auto_assignment_quality)
+    # Ignore nodes that are marked as invariant. Making sure that we only use valid nodes.
+    invariant_nodes = list(set(invariant_nodes).intersection(set(causal_model_old.graph.nodes)))
 
-    mechanism_changes = _fit_accounting_for_mechanism_change(
-        causal_model_old,
-        causal_model_new,
-        old_data[list(causal_graph_old.nodes)],
-        new_data[list(causal_graph_new.nodes)],
+    # Check which of the mechanisms changed, but ignoring the invariant nodes
+    mechanism_changed_for_node = _check_significant_mechanism_change(
+        causal_model_old.graph,
+        old_data,
+        new_data,
         independence_test,
         conditional_independence_test,
         mechanism_change_test_significance_level,
@@ -183,6 +181,40 @@ def distribution_change(
         invariant_nodes,
     )
 
+    # Update invariant nodes based on the test outputs
+    invariant_nodes = [n for n in mechanism_changed_for_node if not mechanism_changed_for_node[n]]
+
+    if remove_invariant_nodes_from_graph:
+        # Remove invariant nodes from the graph, if possible
+        modified_nodes = _remove_invariant_nodes(
+            [n for n in invariant_nodes if n != target_node], causal_model_old, old_data, auto_assignment_quality
+        )
+    else:
+        modified_nodes = []
+
+    # Create the new graph, which is fitted on the new data set
+    causal_model_new = ProbabilisticCausalModel(graph_factory(causal_model_old.graph))
+
+    # Either used assigned mechanisms or auto-assign them
+    if auto_assignment_quality is None:
+        # Ignore nodes where we modified in the input parents, since the pre-defined mechanism are not valid anymore
+        clone_causal_models(causal_model.graph, causal_model_old.graph, ignore_nodes=modified_nodes)
+        clone_causal_models(causal_model_old.graph, causal_model_new.graph)
+    else:
+        assign_causal_mechanisms(causal_model_old, old_data, override_models=True, quality=auto_assignment_quality)
+        assign_causal_mechanisms(causal_model_new, new_data, override_models=True, quality=auto_assignment_quality)
+
+    # Fit the underlying mechanisms depending. The used training data will depend on whether the mechanism has changed
+    # or not.
+    _fit_accounting_for_mechanism_change(
+        causal_model_old,
+        causal_model_new,
+        old_data[list(causal_model_old.graph.nodes)],
+        new_data[list(causal_model_new.graph.nodes)],
+        mechanism_changed_for_node,
+    )
+
+    # Estimate attributions
     attributions = distribution_change_of_graphs(
         causal_model_old,
         causal_model_new,
@@ -192,11 +224,14 @@ def distribution_change(
         shapley_config,
         graph_factory,
     )
-    # set attributions to zero for left out invariant nodes
+
+    # Set attributions to zero for left out invariant nodes
     for node in invariant_nodes:
-        attributions[node] = 0
+        if node not in causal_model_old.graph.nodes:
+            attributions[node] = 0
+
     if return_additional_info:
-        return attributions, mechanism_changes, causal_model_old, causal_model_new
+        return attributions, mechanism_changed_for_node, causal_model_old, causal_model_new
     else:
         return attributions
 
@@ -254,26 +289,36 @@ def _remove_invariant_nodes(
     causal_model: ProbabilisticCausalModel,
     old_data: pd.DataFrame,
     auto_assignment_quality: Optional[AssignmentQuality],
-) -> None:
+) -> List[Any]:
+    modified_nodes = set()
+
     if auto_assignment_quality is None:
         auto_assignment_quality = AssignmentQuality.GOOD
+
     for invar_node in invariant_nodes:
         # Get parent and child nodes
         parents = get_ordered_predecessors(causal_model.graph, invar_node)
         children = list(causal_model.graph.successors(invar_node))
+
         # Don't remove node if node has more than 1 children nodes as it can introduce
         # hidden confounders.
         if len(children) > 1:
             continue
-        # Remove the middle node
+
+        # Remove node
         causal_model.graph.remove_node(invar_node)
+
         # Connect parent and child nodes
         for parent in parents:
             for child in children:
                 causal_model.graph.add_edge(parent, child)
+
         # Update the causal mechanism for the child nodes
         for child in children:
             assign_causal_mechanism_node(causal_model, child, old_data, quality=auto_assignment_quality)
+            modified_nodes.add(child)
+
+    return list(modified_nodes)
 
 
 def _fit_accounting_for_mechanism_change(
@@ -281,35 +326,17 @@ def _fit_accounting_for_mechanism_change(
     causal_model_new: ProbabilisticCausalModel,
     old_data: pd.DataFrame,
     new_data: pd.DataFrame,
-    independence_test: Callable[[np.ndarray, np.ndarray], float],
-    conditional_independence_test: Callable[[np.ndarray, np.ndarray, np.ndarray], float],
-    significance_level: float,
-    fdr_control_method: Optional[str],
-    invariant_nodes: List[Any],
-) -> Dict[Any, bool]:
-    mechanism_changed_for_node = _check_significant_mechanism_change(
-        causal_model_old.graph,
-        old_data,
-        new_data,
-        independence_test,
-        conditional_independence_test,
-        significance_level,
-        fdr_control_method,
-    )
-
+    mechanism_changed_for_node: Dict[Any, bool],
+) -> None:
     joint_data = pd.concat([old_data, new_data], ignore_index=True, sort=True)
 
     for node in causal_model_new.graph.nodes:
-        if node in invariant_nodes:
-            mechanism_changed_for_node[node] = False
         if mechanism_changed_for_node[node]:
             fit_causal_model_of_target(causal_model_old, node, old_data)
             fit_causal_model_of_target(causal_model_new, node, new_data)
         else:
             fit_causal_model_of_target(causal_model_old, node, joint_data)
             fit_causal_model_of_target(causal_model_new, node, joint_data)
-
-    return mechanism_changed_for_node
 
 
 def _estimate_marginal_distribution_change(
@@ -407,6 +434,7 @@ def estimate_distribution_change_scores(
         conditional_independence_test,
         mechanism_change_test_significance_level,
         mechanism_change_test_fdr_control_method,
+        [],
     )
 
     results = {}
@@ -442,9 +470,14 @@ def _check_significant_mechanism_change(
     conditional_independence_test: Callable[[np.ndarray, np.ndarray, np.ndarray], float],
     significance_level: float,
     fdr_control_method: Optional[str],
+    invariant_nodes: List[Any],
 ) -> Dict[Any, bool]:
     all_p_values = []
+    tmp_nodes = []
     for node in graph.nodes:
+        if node in invariant_nodes:
+            continue
+
         if is_root_node(graph, node):
             parents_org_data = None
             parents_new_data = None
@@ -462,13 +495,17 @@ def _check_significant_mechanism_change(
                 conditional_independence_test=conditional_independence_test,
             )
         )
+        tmp_nodes.append(node)
 
     if fdr_control_method is None:
         successes = np.array(all_p_values) <= significance_level
     else:
         successes = multipletests(all_p_values, significance_level, method=fdr_control_method)[0]
 
-    return dict(zip(graph.nodes, successes))
+    result = dict(zip(tmp_nodes, successes))
+    result.update({n: False for n in invariant_nodes})
+
+    return result
 
 
 def _estimate_distribution_change_score(

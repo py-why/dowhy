@@ -54,8 +54,8 @@ def test_given_two_graphs_fitted_on_data_sets_with_different_mechanisms_when_eva
     assert results["X0"] == approx(0, abs=0.1)
 
 
-@flaky(max_runs=5)
-def test_given_list_of_invariant_nodes_to_remove_return_expected_results():
+@flaky(max_runs=3)
+def test_given_list_of_invariant_nodes_to_remove_when_estimate_distribution_change_then_returns_expected_results():
     original_observations, outlier_observations = _generate_data()
 
     causal_model = ProbabilisticCausalModel(nx.DiGraph([("X0", "X1"), ("X0", "X2"), ("X2", "X3")]))
@@ -74,6 +74,55 @@ def test_given_list_of_invariant_nodes_to_remove_return_expected_results():
     assert results["X0"] == approx(0)
 
 
+@flaky(max_runs=3)
+def test_given_list_of_invariant_nodes_which_can_be_partially_removed_when_estimate_distribution_change_then_returns_expected_results():
+    X0 = np.random.uniform(-1, 1, 200)
+    X1 = 2 * X0 + np.random.normal(0, 0.1, 200)
+    X2 = 0.5 * X1 + np.random.normal(0, 0.1, 200)
+    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 200)
+    original_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
+
+    X0 = np.random.uniform(-1, 1, 200)
+    X1 = 0.5 * X0 + np.random.normal(0, 0.1, 200)
+    X2 = 0.5 * X1 + np.random.normal(0, 0.1, 200)
+    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 200)
+    outlier_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
+
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([("X0", "X1"), ("X1", "X2"), ("X2", "X3")]))
+    _assign_causal_mechanisms(causal_model)
+
+    results = distribution_change(
+        causal_model,
+        original_observations,
+        outlier_observations,
+        "X3",
+        shapley_config=ShapleyConfig(n_jobs=1),
+        invariant_nodes=["X0", "X2"],
+    )
+
+    assert results["X0"] == approx(0)
+    assert results["X1"] > 0.5
+    assert results["X2"] == approx(0)
+    assert results["X3"] == approx(0, abs=0.1)
+
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([("X0", "X1"), ("X1", "X2"), ("X2", "X3")]))
+
+    results = distribution_change(
+        causal_model,
+        original_observations,
+        outlier_observations,
+        "X3",
+        auto_assignment_quality=AssignmentQuality.GOOD,
+        shapley_config=ShapleyConfig(n_jobs=1),
+        invariant_nodes=["X0", "X2"],
+    )
+
+    assert results["X0"] == approx(0)
+    assert results["X1"] > 0.5
+    assert results["X2"] == approx(0)
+    assert results["X3"] == approx(0, abs=0.1)
+
+
 @flaky(max_runs=5)
 def test_when_using_distribution_change_without_fdrc_then_returns_valid_results():
     original_observations, outlier_observations = _generate_data()
@@ -89,7 +138,7 @@ def test_when_using_distribution_change_without_fdrc_then_returns_valid_results(
     assert "X1" not in results
 
 
-@flaky(max_runs=5)
+@flaky(max_runs=3)
 def test_when_using_distribution_change_with_return_additional_info_then_returns_additional_info():
     original_observations, outlier_observations = _generate_data()
 
@@ -115,7 +164,7 @@ def test_when_using_distribution_change_with_return_additional_info_then_returns
     assert "X1" not in causal_model_old.graph.nodes
     assert "X1" not in causal_model_new.graph.nodes
 
-    for node in causal_model.graph.nodes:
+    for node in causal_model_old.graph.nodes:
         if node == "X1":
             continue
         assert type(causal_model_old.causal_mechanism(node)) == type(causal_model_new.causal_mechanism(node))
@@ -152,29 +201,6 @@ def test_given_non_linear_data_when_using_distribution_change_with_mean_differen
     assert "X1" not in attributions
 
 
-def _assign_causal_mechanisms(causal_model):
-    causal_model.set_causal_mechanism("X0", EmpiricalDistribution())
-    causal_model.set_causal_mechanism("X1", AdditiveNoiseModel(create_linear_regressor()))
-    causal_model.set_causal_mechanism("X2", AdditiveNoiseModel(create_linear_regressor()))
-    causal_model.set_causal_mechanism("X3", AdditiveNoiseModel(create_linear_regressor()))
-
-
-def _generate_data():
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X2 = 0.5 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 0.5 * X2 + np.random.normal(0, 0.1, 1000)
-    original_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
-
-    X0 = np.random.uniform(-1, 1, 1000)
-    X1 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X2 = 2 * X0 + np.random.normal(0, 0.1, 1000)
-    X3 = 3 * X2 + np.random.normal(0, 0.1, 1000)
-    outlier_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
-
-    return original_observations, outlier_observations
-
-
 @flaky(max_runs=3)
 def test_given_data_where_mechanism_changed_when_apply_mechanism_change_test_then_returns_correct_p_values():
     X0_org = np.random.uniform(-1, 1, 500)
@@ -206,3 +232,61 @@ def test_given_data_where_noise_changed_when_apply_mechanism_change_test_then_re
 
     assert mechanism_change_test(X1_org, X1_new, X0_org, X0_new) <= 0.05
     assert mechanism_change_test(X1_org, X1_org, X0_org, X0_org) > 0.05
+
+
+def test_when_using_distribution_change_with_return_additional_info_and_setting_node_removal_to_false_then_returns_additional_info():
+    original_observations, outlier_observations = _generate_data(10)
+
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([("X0", "X1"), ("X0", "X2"), ("X2", "X3")]))
+    _assign_causal_mechanisms(causal_model)
+
+    _, _, causal_model_old, causal_model_new = distribution_change(
+        causal_model,
+        original_observations,
+        outlier_observations,
+        "X3",
+        invariant_nodes=["X2"],
+        remove_invariant_nodes_from_graph=False,
+        mechanism_change_test_fdr_control_method=None,
+        return_additional_info=True,
+    )
+
+    assert len(causal_model_old.graph.nodes) == len(causal_model_old.graph.nodes) == 3
+
+    _, _, causal_model_old, causal_model_new = distribution_change(
+        causal_model,
+        original_observations,
+        outlier_observations,
+        "X3",
+        invariant_nodes=["X2"],
+        remove_invariant_nodes_from_graph=True,
+        mechanism_change_test_fdr_control_method=None,
+        return_additional_info=True,
+    )
+
+    assert (
+        len(causal_model_old.graph.nodes) == len(causal_model_new.graph.nodes) and len(causal_model_old.graph.nodes) < 3
+    )
+
+
+def _assign_causal_mechanisms(causal_model):
+    causal_model.set_causal_mechanism("X0", EmpiricalDistribution())
+    causal_model.set_causal_mechanism("X1", AdditiveNoiseModel(create_linear_regressor()))
+    causal_model.set_causal_mechanism("X2", AdditiveNoiseModel(create_linear_regressor()))
+    causal_model.set_causal_mechanism("X3", AdditiveNoiseModel(create_linear_regressor()))
+
+
+def _generate_data(num_samples=1000):
+    X0 = np.random.uniform(-1, 1, num_samples)
+    X1 = 2 * X0 + np.random.normal(0, 0.1, num_samples)
+    X2 = 0.5 * X0 + np.random.normal(0, 0.1, num_samples)
+    X3 = 0.5 * X2 + np.random.normal(0, 0.1, num_samples)
+    original_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
+
+    X0 = np.random.uniform(-1, 1, num_samples)
+    X1 = 2 * X0 + np.random.normal(0, 0.1, num_samples)
+    X2 = 2 * X0 + np.random.normal(0, 0.1, num_samples)
+    X3 = 3 * X2 + np.random.normal(0, 0.1, num_samples)
+    outlier_observations = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
+
+    return original_observations, outlier_observations
