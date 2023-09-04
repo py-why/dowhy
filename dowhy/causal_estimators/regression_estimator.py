@@ -181,7 +181,17 @@ class RegressionEstimator(CausalEstimator):
         features = sm.add_constant(features, has_constant="add")  # to add an intercept term
         return features
 
-    def _do(self, data_df: pd.DataFrame, treatment_val):
+    def interventional_outcomes(self, data_df: pd.DataFrame, treatment_val):
+        """
+        Applies an intervention treatment_val to all rows in data_df, then uses self.model
+        to predict outcomes. If data_df is None, will use self._data instead.
+        If no model exists, one will be created. The outcomes of all samples are returned,
+        allowing analysis of individual predictions in counterfactual treatment scenarios.
+        :param data_df: data frame containing the data
+        :param treatment_val: value for the treatment variable
+        :returns: A list of outcome predictions.
+        """
+
         if data_df is None:
             data_df = self._data
         if not self.model:
@@ -210,4 +220,8 @@ class RegressionEstimator(CausalEstimator):
 
         new_features = self._build_features(data_df, treatment_values=interventional_treatment_2d)
         interventional_outcomes = self.predict_fn(data_df, self.model, new_features)
+        return interventional_outcomes
+
+    def _do(self, data_df: pd.DataFrame, treatment_val):
+        interventional_outcomes = self.interventional_outcomes(data_df, treatment_val)
         return interventional_outcomes.mean()
