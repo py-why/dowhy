@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-32-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-33-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Contributors ✨
@@ -53,6 +53,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://lukasheumos.com"><img src="https://avatars.githubusercontent.com/u/21954664?v=4?s=100" width="100px;" alt="Lukas Heumos"/><br /><sub><b>Lukas Heumos</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=Zethson" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="http://www.logstotal.com"><img src="https://avatars.githubusercontent.com/u/315964?v=4?s=100" width="100px;" alt="Dr. Di Prodi"/><br /><sub><b>Dr. Di Prodi</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=robomotic" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://bhatt-priyadutt.github.io/priyadutt-portfolio/"><img src="https://avatars.githubusercontent.com/u/68959880?v=4?s=100" width="100px;" alt="Priyadutt"/><br /><sub><b>Priyadutt</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=bhatt-priyadutt" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/drawlinson"><img src="https://avatars.githubusercontent.com/u/1892448?v=4?s=100" width="100px;" alt="drawlinson"/><br /><sub><b>drawlinson</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=drawlinson" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
