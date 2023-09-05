@@ -1,0 +1,338 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# DoWhy: Different estimation methods for causal inference\n",
+    "This is a quick introduction to the DoWhy causal inference library.\n",
+    "We will load in a sample dataset and use different methods for estimating the causal effect of a (pre-specified)treatment variable on a (pre-specified) outcome variable.\n",
+    "\n",
+    "We will see that not all estimators return the correct effect for this dataset.\n",
+    "\n",
+    "First, let us add the required path for Python to find the DoWhy code and load all required packages"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%load_ext autoreload\n",
+    "%autoreload 2"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import logging\n",
+    "\n",
+    "import dowhy\n",
+    "from dowhy import CausalModel\n",
+    "import dowhy.datasets "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now, let us load a dataset. For simplicity, we simulate a dataset with linear relationships between common causes and treatment, and common causes and outcome. \n",
+    "\n",
+    "Beta is the true causal effect. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data = dowhy.datasets.linear_dataset(beta=10,\n",
+    "        num_common_causes=5, \n",
+    "        num_instruments = 2,\n",
+    "        num_treatments=1,\n",
+    "        num_samples=10000,\n",
+    "        treatment_is_binary=True,\n",
+    "        outcome_is_binary=False,\n",
+    "        stddev_treatment_noise=10)\n",
+    "df = data[\"df\"]\n",
+    "df"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Note that we are using a pandas dataframe to load the data."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Identifying the causal estimand"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We now input a causal graph in the DOT graph format."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# With graph\n",
+    "model=CausalModel(\n",
+    "        data = df,\n",
+    "        treatment=data[\"treatment_name\"],\n",
+    "        outcome=data[\"outcome_name\"],\n",
+    "        graph=data[\"gml_graph\"],\n",
+    "        instruments=data[\"instrument_names\"]\n",
+    "        )"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model.view_model()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from IPython.display import Image, display\n",
+    "display(Image(filename=\"causal_model.png\"))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We get a causal graph. Now identification and estimation is done. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)\n",
+    "print(identified_estimand)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Method 1: Regression\n",
+    "\n",
+    "Use linear regression."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "causal_estimate_reg = model.estimate_effect(identified_estimand,\n",
+    "        method_name=\"backdoor.linear_regression\",\n",
+    "        test_significance=True)\n",
+    "print(causal_estimate_reg)\n",
+    "print(\"Causal Estimate is \" + str(causal_estimate_reg.value))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Method 2: Distance Matching\n",
+    "\n",
+    "Define a distance metric and then use the metric to match closest points between treatment and control."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "causal_estimate_dmatch = model.estimate_effect(identified_estimand,\n",
+    "                                              method_name=\"backdoor.distance_matching\",\n",
+    "                                              target_units=\"att\",\n",
+    "                                              method_params={'distance_metric':\"minkowski\", 'p':2})\n",
+    "print(causal_estimate_dmatch)\n",
+    "print(\"Causal Estimate is \" + str(causal_estimate_dmatch.value))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Method 3: Propensity Score Stratification\n",
+    "\n",
+    "We will be using propensity scores to stratify units in the data."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "causal_estimate_strat = model.estimate_effect(identified_estimand,\n",
+    "                                              method_name=\"backdoor.propensity_score_stratification\",\n",
+    "                                              target_units=\"att\")\n",
+    "print(causal_estimate_strat)\n",
+    "print(\"Causal Estimate is \" + str(causal_estimate_strat.value))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Method 4: Propensity Score Matching\n",
+    "\n",
+    "We will be using propensity scores to match units in the data."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "causal_estimate_match = model.estimate_effect(identified_estimand,\n",
+    "                                              method_name=\"backdoor.propensity_score_matching\",\n",
+    "                                              target_units=\"atc\")\n",
+    "print(causal_estimate_match)\n",
+    "print(\"Causal Estimate is \" + str(causal_estimate_match.value))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Method 5: Weighting\n",
+    "\n",
+    "We will be using (inverse) propensity scores to assign weights to units in the data. DoWhy supports a few different weighting schemes:\n",
+    "1. Vanilla Inverse Propensity Score weighting (IPS) (weighting_scheme=\"ips_weight\")\n",
+    "2. Self-normalized IPS weighting (also known as the Hajek estimator) (weighting_scheme=\"ips_normalized_weight\")\n",
+    "3. Stabilized IPS weighting (weighting_scheme = \"ips_stabilized_weight\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "causal_estimate_ipw = model.estimate_effect(identified_estimand,\n",
+    "                                            method_name=\"backdoor.propensity_score_weighting\",\n",
+    "                                            target_units = \"ate\",\n",
+    "                                            method_params={\"weighting_scheme\":\"ips_weight\"})\n",
+    "print(causal_estimate_ipw)\n",
+    "print(\"Causal Estimate is \" + str(causal_estimate_ipw.value))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Method 6: Instrumental Variable\n",
+    "\n",
+    "We will be using the Wald estimator for the provided instrumental variable."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "causal_estimate_iv = model.estimate_effect(identified_estimand,\n",
+    "        method_name=\"iv.instrumental_variable\", method_params = {'iv_instrument_name': 'Z0'})\n",
+    "print(causal_estimate_iv)\n",
+    "print(\"Causal Estimate is \" + str(causal_estimate_iv.value))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Method 7: Regression Discontinuity\n",
+    "\n",
+    "We will be internally converting this to an equivalent instrumental variables problem."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "causal_estimate_regdist = model.estimate_effect(identified_estimand,\n",
+    "        method_name=\"iv.regression_discontinuity\", \n",
+    "        method_params={'rd_variable_name':'Z1',\n",
+    "                       'rd_threshold_value':0.5,\n",
+    "                       'rd_bandwidth': 0.15})\n",
+    "print(causal_estimate_regdist)\n",
+    "print(\"Causal Estimate is \" + str(causal_estimate_regdist.value))"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.5"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": false,
+   "sideBar": true,
+   "skip_h1_title": true,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

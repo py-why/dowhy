@@ -1,0 +1,762 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Direct Effect: Quantifying Arrow Strength &#8212; DoWhy  documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/clipboard.min.js"></script>
+    <script src="../../../../_static/copybutton.js"></script>
+    <script src="../../../../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Explaining Observed Effects and Root-Cause Analysis" href="../../root_causing_and_explaining/index.html" />
+    <link rel="prev" title="Estimating natural direct and indirect effects" href="mediation_analysis.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+    <img src="../../../../_static/dowhy-logo-small.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../../../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="../../../index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../example_notebooks/nb_index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../dowhy.html">
+  dowhy package
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../contributing.html">
+  Contributing
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../code_repo.html">
+  Release notes
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../cite.html">
+  Citing this package
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+      <div class="navbar-end-item">
+        <div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.10.1
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../foreword.html">
+   Foreword
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../intro.html">
+   Introduction to DoWhy
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../../../modeling_causal_relations/index.html">
+   Modeling Causal Relations
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../../../modeling_causal_relations/specifying_causal_graph.html">
+     Specifying a causal graph using domain knowledge
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../../../modeling_causal_relations/learning_causal_structure.html">
+     Learning causal structure from data
+    </a>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../../modeling_causal_relations/refuting_causal_graph/index.html">
+     Refuting a Causal Graph
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+    <label for="toctree-checkbox-2">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../modeling_causal_relations/refuting_causal_graph/independence_tests.html">
+       Performing independence tests
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../modeling_causal_relations/refuting_causal_graph/refute_causal_structure.html">
+       Graph refutations
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../../../modeling_gcm/index.html">
+   Modeling Graphical Causal Models (GCMs)
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+  <label for="toctree-checkbox-3">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../../../modeling_gcm/graphical_causal_model_types.html">
+     Types of graphical causal models
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../../../modeling_gcm/draw_samples.html">
+     Generate samples from a GCM
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../../../modeling_gcm/customizing_model_assignment.html">
+     Customizing Causal Mechanism Assignment
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../../../modeling_gcm/estimating_confidence_intervals.html">
+     Estimating Confidence Intervals
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 current active has-children">
+  <a class="reference internal" href="../../index.html">
+   Performing Causal Tasks
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/>
+  <label for="toctree-checkbox-4">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul class="current">
+   <li class="toctree-l2 current active has-children">
+    <a class="reference internal" href="../index.html">
+     Estimating Causal Effects
+    </a>
+    <input checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/>
+    <label for="toctree-checkbox-5">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul class="current">
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../identifying_causal_effect/index.html">
+       Identifying causal effect
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/>
+      <label for="toctree-checkbox-6">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../identifying_causal_effect/backdoor.html">
+         Backdoor criterion
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../identifying_causal_effect/frontdoor.html">
+         Frontdoor criterion
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../identifying_causal_effect/instrumental_variable.html">
+         Natural experiments and instrumental variables
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../identifying_causal_effect/id_algorithm.html">
+         ID algorithm for discovering new identification strategies
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../effect_estimation_with_backdoor/index.html">
+       Estimating average causal effect using backdoor
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/>
+      <label for="toctree-checkbox-7">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../effect_estimation_with_backdoor/regression_based_methods.html">
+         Regression-based methods
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../effect_estimation_with_backdoor/distance_matching.html">
+         Distance-based matching
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../effect_estimation_with_backdoor/propensity_based_methods.html">
+         Propensity-based methods
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../effect_estimation_with_backdoor/do_sampler.html">
+         Do-sampler
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../effect_estimation_with_natural_experiments/index.html">
+       Estimating average causal effect with natural experiments
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../conditional_effect_estimation/index.html">
+       Estimating conditional average causal effect
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../effect_estimation_with_gcm.html">
+       Estimating average causal effect using GCM
+      </a>
+     </li>
+     <li class="toctree-l3 current active has-children">
+      <a class="reference internal" href="index.html">
+       Estimating direct and indirect effects
+      </a>
+      <input checked="" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
+      <label for="toctree-checkbox-8">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul class="current">
+       <li class="toctree-l4">
+        <a class="reference internal" href="mediation_analysis.html">
+         Estimating natural direct and indirect effects
+        </a>
+       </li>
+       <li class="toctree-l4 current active">
+        <a class="current reference internal" href="#">
+         Direct Effect: Quantifying Arrow Strength
+        </a>
+       </li>
+      </ul>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../root_causing_and_explaining/index.html">
+     Explaining Observed Effects and Root-Cause Analysis
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/>
+    <label for="toctree-checkbox-9">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../root_causing_and_explaining/anomaly_attribution.html">
+       Anomaly Attribution
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../root_causing_and_explaining/distribution_change.html">
+       Attributing Distributional Changes
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../root_causing_and_explaining/icc.html">
+       Quantifying Intrinsic Causal Influence
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../root_causing_and_explaining/unit_change.html">
+       Unit Change Attribution
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../root_causing_and_explaining/feature_relevance.html">
+       Feature Relevance
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../what_if/index.html">
+     Asking and Answering What-If Questions
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/>
+    <label for="toctree-checkbox-10">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../what_if/interventions.html">
+       Simulating the Impact of Interventions
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../what_if/counterfactuals.html">
+       Computing Counterfactuals
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../../causal_prediction/index.html">
+     Predicting outcome for out-of-distribution inputs
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../../../refuting_causal_estimates/index.html">
+   Refuting causal estimates
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/>
+  <label for="toctree-checkbox-11">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../../refuting_causal_estimates/refuting_effect_estimates/index.html">
+     Refuting Effect Estimates
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" type="checkbox"/>
+    <label for="toctree-checkbox-12">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../refuting_causal_estimates/refuting_effect_estimates/placebo_treatment.html">
+       Placebo Treatment Refuter
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../refuting_causal_estimates/refuting_effect_estimates/dummy_outcome.html">
+       Dummy Outcome Refuter
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../refuting_causal_estimates/refuting_effect_estimates/random_common_cause.html">
+       Random Common Cause Refuter
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../refuting_causal_estimates/refuting_effect_estimates/data_subsample.html">
+       Data Subsample Refuter
+      </a>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/index.html">
+       Sensitivity Analysis
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" type="checkbox"/>
+      <label for="toctree-checkbox-13">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/simulation_based.html">
+         Simulation-based sensitivity analysis
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/linear_partialr2.html">
+         Partial-R2 based sensitivity analysis for linear estimators
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/nonlinear_reisz.html">
+         Reisz estimator-based sensitivity analysis for non-linear estimators
+        </a>
+       </li>
+      </ul>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../../cite.html">
+   Citing this package
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#how-to-use-it">
+   How to use it
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#understanding-the-method">
+   Understanding the method
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#customize-the-distance-measure">
+   Customize the distance measure
+  </a>
+ </li>
+</ul>
+
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <section id="direct-effect-quantifying-arrow-strength">
+<h1>Direct Effect: Quantifying Arrow Strength<a class="headerlink" href="#direct-effect-quantifying-arrow-strength" title="Permalink to this heading"></a></h1>
+<p>By quantifying the strength of an arrow, we answer the question:</p>
+<blockquote>
+<div><p><strong>How strong is the causal influence from a cause to its direct effect?</strong></p>
+</div></blockquote>
+<p>While there are different definitions for measuring causal influences in the literature, DoWhy offers an
+implementation for measuring the <em>direct</em> influence of a parent node on a child, where influences through paths over
+other nodes are ignored. This method is based on the paper:</p>
+<blockquote>
+<div><p>Dominik Janzing, David Balduzzi, Moritz Grosse-Wentrup, Bernhard Schölkopf. <a class="reference external" href="https://www.jstor.org/stable/23566552">Quantifying causal influences</a>
+The Annals of Statistics, Vol. 41, No. 5, 2324-2358, 2013.</p>
+</div></blockquote>
+<section id="how-to-use-it">
+<h2>How to use it<a class="headerlink" href="#how-to-use-it" title="Permalink to this heading"></a></h2>
+<p>To see how to use the method, let us generate some data.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span><span class="o">,</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span><span class="o">,</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">gcm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># to reproduce these results</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">Z</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Y</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">X</span> <span class="o">+</span> <span class="mi">4</span><span class="o">*</span><span class="n">Z</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Next, we will model cause-effect relationships as a probabilistic causal model and fit it to the data.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">ProbabilisticCausalModel</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">)]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">EmpiricalDistribution</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Finally, we can estimate the strength of incoming arrows to a node of interest (e.g., <span class="math notranslate nohighlight">\(Y\)</span>).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">strength</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">arrow_strength</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">strength</span>
+<span class="go">    {(&#39;X&#39;, &#39;Y&#39;): 41.321925893102716,</span>
+<span class="go">     (&#39;Z&#39;, &#39;Y&#39;): 14.736197949517237}</span>
+</pre></div>
+</div>
+<p><strong>Interpreting the results:</strong>
+By default, the measurement unit of the scalar values for arrow strengths is variance for a
+continuous real-valued target, and the number of bits for a categorical target (i.e., KL divergence).
+Above, we observe that the direct influence from <span class="math notranslate nohighlight">\(X\)</span> to <span class="math notranslate nohighlight">\(Y\)</span> (~41.32) is stronger (by ~2.7 times)
+than the direct influence from <span class="math notranslate nohighlight">\(Z\)</span> to <span class="math notranslate nohighlight">\(Y\)</span> (~14.73). Roughly speaking, “removing” the arrow
+from <span class="math notranslate nohighlight">\(X\)</span> to <span class="math notranslate nohighlight">\(Y\)</span> increases the variance of <span class="math notranslate nohighlight">\(Y\)</span> by ~41.32 units,
+whereas removing <span class="math notranslate nohighlight">\(Z \to Y\)</span> increases the variance of <span class="math notranslate nohighlight">\(Y\)</span> by ~14.73 units.</p>
+<p>In the next section, we explain what “removing” an edge implies.
+In particular, we briefly explain the science behind our method for quantifying the strength of an arrow.</p>
+</section>
+<section id="understanding-the-method">
+<h2>Understanding the method<a class="headerlink" href="#understanding-the-method" title="Permalink to this heading"></a></h2>
+<p>We will use the causal graph below to illustrate the key idea behind the method.</p>
+<img alt="../../../../_images/arrow_strength_example.png" class="align-center" src="../../../../_images/arrow_strength_example.png" />
+<p>Here, we want to measure the strength of the arrow from node <span class="math notranslate nohighlight">\(Z\)</span> to node <span class="math notranslate nohighlight">\(Y\)</span>, while disregarding any indirect effects
+via <span class="math notranslate nohighlight">\(X\)</span>. To achieve this, first recall that we can obtain the joint distribution of variables <span class="math notranslate nohighlight">\(P\)</span> from their causal graph via a product of
+conditional distributions of each variable given its parents.</p>
+<p>We then create a new joint distribution <span class="math notranslate nohighlight">\(P_{Z \to Y}\)</span> by cutting the edge from <span class="math notranslate nohighlight">\(Z\)</span> to <span class="math notranslate nohighlight">\(Y\)</span> and
+using an i.i.d. copy of <span class="math notranslate nohighlight">\(Z\)</span> (denoted as <span class="math notranslate nohighlight">\(Z'\)</span> in the figure) instead as input to <span class="math notranslate nohighlight">\(Y\)</span>. The distribution of <span class="math notranslate nohighlight">\(Z'\)</span> can be practically
+simulated by randomly shuffling the observed values of <span class="math notranslate nohighlight">\(Z\)</span>. The strength of the arrow from <span class="math notranslate nohighlight">\(Z\)</span> to <span class="math notranslate nohighlight">\(Y\)</span>,
+represented as <span class="math notranslate nohighlight">\(C_{Z \to Y}\)</span>, is then calculated as the distance between the post-cutting distribution:math:<cite>P_{Z to Y}</cite> and the
+original joint distribution <span class="math notranslate nohighlight">\(P\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[C_{Z \to Y} := D(P\; || P_{Z \to Y})\]</div>
+<p>The distance metric <span class="math notranslate nohighlight">\(D\)</span> utilized to calculate the arrow strength can be any suitable measure, such as the difference of variances or KL divergence.
+By default, the library uses a specific measure depending on the data type, but this can be fully customized to the use case.</p>
+<p>Note that when cutting the edge, only the causal mechanism of the target variable changes between the original and
+post-cutting joint distribution. As a result, any change in the marginal distribution of the target is due to the change
+in the causal mechanism of the target. This allows us to also quantify the arrow strength in terms of the change in
+the property (e.g., variance) of the marginal distribution of the target when we remove an edge.</p>
+</section>
+<section id="customize-the-distance-measure">
+<h2>Customize the distance measure<a class="headerlink" href="#customize-the-distance-measure" title="Permalink to this heading"></a></h2>
+<p>By default, <cite>arrow_strength</cite> uses the difference of variances for measuring the arrow strength for a continuous real-valued target and employs
+KL divergence for measuring the arrow strength for a categorical target. But, we can also plug in our own choice of measure, using the
+<code class="docutils literal notranslate"><span class="pre">difference_estimation_func</span></code> parameter. For instance, to measure the arrow strength in terms of the change in the mean, we could
+define:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">mean_diff</span><span class="p">(</span><span class="n">Y_old</span><span class="p">,</span> <span class="n">Y_new</span><span class="p">):</span> <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Y_new</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Y_old</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and then estimate the arrow strength:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">arrow_strength</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">difference_estimation_func</span><span class="o">=</span><span class="n">mean_diff</span><span class="p">)</span>
+<span class="go">    {(&#39;X&#39;, &#39;Y&#39;): 0.11898914602350251,</span>
+<span class="go">     (&#39;Z&#39;, &#39;Y&#39;): 0.07811542095834415}</span>
+</pre></div>
+</div>
+<p>These small results here are expected; in our example, the mean value of <span class="math notranslate nohighlight">\(Y\)</span> remains <span class="math notranslate nohighlight">\(0\)</span> regardless of whether we remove an incoming arrow.
+As such, the strength of incoming arrows to <span class="math notranslate nohighlight">\(Y\)</span> with respect to their influence on the mean should be negligible.</p>
+<p>In summary, arrow strength can be measured in different units (e.g., mean, variance, bits). Therefore, we advise users
+to pick a meaningful unit—based on data and interpretation—to apply this method in practice.</p>
+</section>
+</section>
+
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="mediation_analysis.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Estimating natural direct and indirect effects</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="../../root_causing_and_explaining/index.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Explaining Observed Effects and Root-Cause Analysis</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, PyWhy contributors.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

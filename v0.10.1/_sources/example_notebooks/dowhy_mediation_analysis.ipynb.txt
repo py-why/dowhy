@@ -1,0 +1,230 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Mediation analysis with DoWhy: Direct and Indirect Effects"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "    \n",
+    "from dowhy import CausalModel\n",
+    "import dowhy.datasets\n",
+    "\n",
+    "# Warnings and logging\n",
+    "import warnings\n",
+    "warnings.filterwarnings('ignore')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Creating a dataset"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Creating a dataset with a single confounder and a single mediator (num_frontdoor_variables)\n",
+    "data = dowhy.datasets.linear_dataset(10, num_common_causes=1, num_samples=10000,\n",
+    "                                     num_instruments=0, num_effect_modifiers=0,\n",
+    "                                     num_treatments=1,\n",
+    "                                     num_frontdoor_variables=1,\n",
+    "                                     treatment_is_binary=False,\n",
+    "                                    outcome_is_binary=False)\n",
+    "df = data['df']\n",
+    "print(df.head())"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Step 1: Modeling the causal mechanism\n",
+    "We create a dataset following a causal graph based on the frontdoor criterion. That is, there is no direct effect of the treatment on outcome; all effect is mediated through the frontdoor variable FD0."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model = CausalModel(df,\n",
+    "                    data[\"treatment_name\"],data[\"outcome_name\"],\n",
+    "                    data[\"gml_graph\"],\n",
+    "                   missing_nodes_as_confounders=True)\n",
+    "\n",
+    "model.view_model()\n",
+    "from IPython.display import Image, display\n",
+    "display(Image(filename=\"causal_model.png\"))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Step 2: Identifying the natural direct and indirect effects\n",
+    "We use the `estimand_type` argument to specify that the target estimand should be for a **natural direct effect** or the **natural indirect effect**. For definitions, see [Interpretation and Identification of Causal Mediation](https://ftp.cs.ucla.edu/pub/stat_ser/r389-imai-etal-commentary-r421-reprint.pdf) by Judea Pearl.\n",
+    "\n",
+    "**Natural direct effect**: Effect due to the path v0->y\n",
+    "\n",
+    "**Natural indirect effect**: Effect due to the path v0->FD0->y (mediated by FD0)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Natural direct effect (nde)\n",
+    "identified_estimand_nde = model.identify_effect(estimand_type=\"nonparametric-nde\", \n",
+    "                                            proceed_when_unidentifiable=True)\n",
+    "print(identified_estimand_nde)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Natural indirect effect (nie)\n",
+    "identified_estimand_nie = model.identify_effect(estimand_type=\"nonparametric-nie\", \n",
+    "                                            proceed_when_unidentifiable=True)\n",
+    "print(identified_estimand_nie)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Step 3: Estimation of the effect\n",
+    "Currently only two stage linear regression is supported for estimation. We plan to add a non-parametric Monte Carlo method soon as described in [Imai, Keele and Yamamoto (2010)](https://projecteuclid.org/euclid.ss/1280841733).\n",
+    "\n",
+    "#### Natural Indirect Effect\n",
+    "The estimator converts the mediation effect estimation to a series of backdoor effect estimations. \n",
+    "1. The first-stage model estimates the effect from treatment (v0) to the mediator (FD0).\n",
+    "2. The second-stage model estimates the effect from mediator (FD0) to the outcome (Y)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import dowhy.causal_estimators.linear_regression_estimator\n",
+    "causal_estimate_nie = model.estimate_effect(identified_estimand_nie,\n",
+    "                                        method_name=\"mediation.two_stage_regression\",\n",
+    "                                       confidence_intervals=False,\n",
+    "                                       test_significance=False,\n",
+    "                                        method_params = {\n",
+    "                                            'first_stage_model': dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator,\n",
+    "                                            'second_stage_model': dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator\n",
+    "                                        }\n",
+    "                                       )\n",
+    "print(causal_estimate_nie)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Note that the value equals the true value of the natural indirect effect (up to random noise). "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(causal_estimate_nie.value, data[\"ate\"])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The parameter is called `ate` because in the simulated dataset, the direct effect is set to be zero. \n",
+    "\n",
+    "#### Natural Direct Effect\n",
+    "Now let us check whether the direct effect estimator returns the (correct) estimate of zero."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "causal_estimate_nde = model.estimate_effect(identified_estimand_nde,\n",
+    "                                        method_name=\"mediation.two_stage_regression\",\n",
+    "                                       confidence_intervals=False,\n",
+    "                                       test_significance=False,\n",
+    "                                        method_params = {\n",
+    "                                            'first_stage_model': dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator,\n",
+    "                                            'second_stage_model': dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator\n",
+    "                                        }\n",
+    "                                       )\n",
+    "print(causal_estimate_nde)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Step 4: Refutations\n",
+    "TODO"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.5"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": false,
+   "sideBar": true,
+   "skip_h1_title": true,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

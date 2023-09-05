@@ -1,0 +1,140 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Example to demonstrate optimized backdoor variable search for Causal Identification\n",
+    "\n",
+    "This notebook compares the performance between causal identification using vanilla backdoor search and the optimized backdoor search and demonstrates the performance gains obtained by using the latter."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import time\n",
+    "import random\n",
+    "from networkx.linalg.graphmatrix import adjacency_matrix\n",
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import networkx as nx\n",
+    "\n",
+    "import dowhy\n",
+    "from dowhy import CausalModel\n",
+    "from dowhy.utils import graph_operations\n",
+    "import dowhy.datasets\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Create Random Graph \n",
+    "In this section, we create a random graph with the designated number of nodes (10 in this case)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "n = 10\n",
+    "p = 0.5\n",
+    "\n",
+    "G = nx.generators.random_graphs.fast_gnp_random_graph(n, p, directed=True)\n",
+    "graph = nx.DiGraph([(u,v) for (u,v) in G.edges() if u<v])\n",
+    "nodes = []\n",
+    "for i in graph.nodes:\n",
+    "    nodes.append(str(i))\n",
+    "adjacency_matrix = np.asarray(nx.to_numpy_array(graph))\n",
+    "graph_dot = graph_operations.adjacency_matrix_to_graph(adjacency_matrix, nodes)\n",
+    "graph_dot = graph_operations.str_to_dot(graph_dot.source)\n",
+    "print(\"Graph Generated.\")\n",
+    "\n",
+    "df = pd.DataFrame(columns=nodes)\n",
+    "print(\"Dataframe Generated.\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Testing optimized backdoor search\n",
+    "\n",
+    "In this section, we compare the runtimes for causal identification using vanilla backdoor search and the optimized backdoor search."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "start = time.time()\n",
+    "\n",
+    "# I. Create a causal model from the data and given graph.\n",
+    "model = CausalModel(data=df,treatment=str(random.randint(0,n-1)),outcome=str(random.randint(0,n-1)),graph=graph_dot)\n",
+    "time1 = time.time()\n",
+    "print(\"Time taken for initializing model =\", time1-start)\n",
+    "\n",
+    "# II. Identify causal effect and return target estimands\n",
+    "identified_estimand = model.identify_effect()\n",
+    "time2 = time.time()\n",
+    "print(\"Time taken for vanilla identification =\", time2-time1)\n",
+    "\n",
+    "# III. Identify causal effect using the optimized backdoor implementation\n",
+    "identified_estimand = model.identify_effect(optimize_backdoor=True)\n",
+    "end = time.time()\n",
+    "print(\"Time taken for optimized backdoor identification =\", end-time2)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "It can be observed that the optimized backdoor search makes causal identification faster as compared to the vanilla implementation."
+   ]
+  }
+ ],
+ "metadata": {
+  "interpreter": {
+   "hash": "31f2aee4e71d21fbe5cf8b01ff0e069b9275f58929596ceb00d14d90e3e16cd6"
+  },
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.12"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": false,
+   "sideBar": true,
+   "skip_h1_title": true,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
