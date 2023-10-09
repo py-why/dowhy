@@ -434,7 +434,7 @@ class CausalModel:
         res = refuter.refute_estimate(show_progress_bar)
         return res
 
-    def view_model(self, layout="dot", size=(8, 6), file_name="causal_model"):
+    def view_model(self, layout=None, size=(8, 6), file_name="causal_model"):
         """View the causal DAG.
 
         :param layout: string specifying the layout of the graph.
