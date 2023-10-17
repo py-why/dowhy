@@ -2,6 +2,7 @@ import numpy as np
 from flaky import flaky
 
 from dowhy.gcm.ml import create_hist_gradient_boost_classifier, create_polynom_logistic_regression_classifier
+from dowhy.gcm.ml.classification import create_support_vector_classifier
 
 
 @flaky(max_runs=3)
@@ -58,3 +59,9 @@ def test_given_categorical_training_data_with_many_categories_when_fit_classific
     mdl.fit(X_training, Y_training)
 
     assert np.sum(mdl.predict(X_test).reshape(-1) == Y_test) > 950
+
+
+def test_given_svc_model_then_supports_predict_probabilities():
+    mdl = create_support_vector_classifier()
+    mdl.fit(np.random.normal(0, 1, 100), np.random.choice(2, 100).astype(str))
+    mdl.predict_probabilities(np.random.normal(0, 1, 10))
