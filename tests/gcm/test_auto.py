@@ -313,3 +313,121 @@ def test_given_data_with_rare_categorical_features_when_calling_has_linear_relat
     Y = np.append(np.array(["Class1"] * 10), np.array(["Class2"] * 10))
 
     assert has_linear_relationship(X, Y)
+
+
+@flaky(max_runs=2)
+def test_given_continuous_data_when_print_auto_summary_then_returns_expected_formats():
+    X, Y = _generate_non_linear_regression_data()
+
+    causal_model = ProbabilisticCausalModel(
+        nx.DiGraph([("X0", "Y"), ("X1", "Y"), ("X2", "Y"), ("X3", "Y"), ("X4", "Y")])
+    )
+    data = {"X" + str(i): X[:, i] for i in range(X.shape[1])}
+    data.update({"Y": Y})
+
+    summary_result = assign_causal_mechanisms(causal_model, pd.DataFrame(data))
+    summary_string = str(summary_result)
+
+    assert "X0" in summary_result._nodes
+    assert "X1" in summary_result._nodes
+    assert "X2" in summary_result._nodes
+    assert "X3" in summary_result._nodes
+    assert "X4" in summary_result._nodes
+    assert "Y" in summary_result._nodes
+
+    assert len(summary_result._nodes["X0"]["model_performances"]) == 0
+    assert len(summary_result._nodes["X1"]["model_performances"]) == 0
+    assert len(summary_result._nodes["X2"]["model_performances"]) == 0
+    assert len(summary_result._nodes["X3"]["model_performances"]) == 0
+    assert len(summary_result._nodes["X4"]["model_performances"]) == 0
+    assert len(summary_result._nodes["Y"]["model_performances"]) > 0
+
+    expected_summary = """Analyzed 6 nodes.
+--- Node: X0
+Node X0 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+--- Node: X1
+Node X1 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+--- Node: X2
+Node X2 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+--- Node: X3
+Node X3 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+--- Node: X4
+Node X4 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+--- Node: Y
+Node Y is a non-root node. Assigning 'AdditiveNoiseModel using HistGradientBoostingRegressor' to the node.
+This represents the causal relationship as Y := f(X0,X1,X2,X3,X4) + N.
+For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
+*
+Based on the type of causal mechanism, the model with the lowest metric value represents the best choice."""
+
+    assert (
+        summary_string.split(
+            "For the model selection, the following models were evaluated on the mean squared error (MSE) metric:"
+        )[0]
+        == expected_summary.split(
+            "For the model selection, the following models were evaluated on the mean squared error (MSE) metric:"
+        )[0]
+    )
+    assert (
+        "Based on the type of causal mechanism, the model with the lowest metric value represents the best choice."
+        in summary_string
+    )
+
+
+@flaky(max_runs=2)
+def test_given_categorical_data_when_print_auto_summary_then_returns_expected_formats():
+    X, Y = _generate_linear_classification_data()
+
+    causal_model = ProbabilisticCausalModel(
+        nx.DiGraph([("X0", "Y"), ("X1", "Y"), ("X2", "Y"), ("X3", "Y"), ("X4", "Y")])
+    )
+    data = {"X" + str(i): X[:, i] for i in range(X.shape[1])}
+    data.update({"Y": Y})
+
+    summary_result = assign_causal_mechanisms(causal_model, pd.DataFrame(data))
+    summary_string = str(summary_result)
+
+    assert "X0" in summary_result._nodes
+    assert "X1" in summary_result._nodes
+    assert "X2" in summary_result._nodes
+    assert "X3" in summary_result._nodes
+    assert "X4" in summary_result._nodes
+    assert "Y" in summary_result._nodes
+
+    assert len(summary_result._nodes["X0"]["model_performances"]) == 0
+    assert len(summary_result._nodes["X1"]["model_performances"]) == 0
+    assert len(summary_result._nodes["X2"]["model_performances"]) == 0
+    assert len(summary_result._nodes["X3"]["model_performances"]) == 0
+    assert len(summary_result._nodes["X4"]["model_performances"]) == 0
+    assert len(summary_result._nodes["Y"]["model_performances"]) > 0
+
+    expected_summary = """Analyzed 6 nodes.
+--- Node: X0
+Node X0 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+--- Node: X1
+Node X1 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+--- Node: X2
+Node X2 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+--- Node: X3
+Node X3 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+--- Node: X4
+Node X4 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+--- Node: Y
+Node Y is a non-root node. Assigning 'Classifier FCM based on LogisticRegression(max_iter=10000)' to the node.
+This represents the causal relationship as Y := f(X0,X1,X2,X3,X4,N).
+For the model selection, the following models were evaluated on the (negative) F1 metric:
+*
+Based on the type of causal mechanism, the model with the lowest metric value represents the best choice."""
+
+    assert (
+        summary_string.split(
+            "For the model selection, the following models were evaluated on the (negative) F1 metric:"
+        )[0]
+        == expected_summary.split(
+            "For the model selection, the following models were evaluated on the (negative) F1 metric:"
+        )[0]
+    )
+    assert (
+        "Based on the type of causal mechanism, the model with the lowest metric value represents the best choice."
+        in summary_string
+    )

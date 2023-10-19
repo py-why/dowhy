@@ -57,6 +57,9 @@ class SklearnRegressionModel(PredictionModel):
         """
         return SklearnRegressionModel(sklearn_mdl=sklearn.clone(self._sklearn_mdl))
 
+    def __str__(self):
+        return str(self._sklearn_mdl)
+
 
 def create_linear_regressor_with_given_parameters(
     coefficients: np.ndarray, intercept: float = 0, **kwargs

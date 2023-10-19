@@ -176,6 +176,9 @@ class ScipyDistribution(StochasticModel):
 
         return parameters_dictionary
 
+    def __str__(self) -> str:
+        return str(self._distribution.name) + " distribution"
+
 
 class EmpiricalDistribution(StochasticModel):
     """An implementation of a stochastic model that uniformly samples from data samples. By randomly returning a sample
@@ -201,6 +204,9 @@ class EmpiricalDistribution(StochasticModel):
 
     def clone(self):
         return EmpiricalDistribution()
+
+    def __str__(self):
+        return "Empirical Distribution"
 
 
 class BayesianGaussianMixtureDistribution(StochasticModel):
@@ -247,7 +253,7 @@ class BayesianGaussianMixtureDistribution(StochasticModel):
         return shape_into_2d(self._gmm_model.sample(num_samples)[0])
 
     def __str__(self) -> str:
-        return "Approximated data distribution"
+        return "Gaussian Mixture Distribution"
 
     def clone(self):
         return BayesianGaussianMixtureDistribution()

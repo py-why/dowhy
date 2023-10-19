@@ -10,7 +10,7 @@ from typing import List, Optional
 import numpy as np
 
 from dowhy.gcm.ml import ClassificationModel, PredictionModel
-from dowhy.gcm.ml.regression import InvertibleFunction
+from dowhy.gcm.ml.regression import InvertibleFunction, SklearnRegressionModel
 from dowhy.gcm.util.general import is_categorical, shape_into_2d
 
 
@@ -155,9 +155,14 @@ class PostNonlinearModel(InvertibleFunctionalCausalModel):
         return self._invertible_function.evaluate(predictions + noise_samples)
 
     def __str__(self) -> str:
+        if isinstance(self._prediction_model, SklearnRegressionModel):
+            prediction_model_string = self._prediction_model.sklearn_model.__class__.__name__
+        else:
+            prediction_model_string = self._prediction_model.__class__.__name__
+
         return "%s with %s and an %s" % (
             self.__class__.__name__,
-            self._prediction_model.__class__.__name__,
+            prediction_model_string,
             self._invertible_function.__class__.__name__,
         )
 
@@ -206,6 +211,14 @@ class AdditiveNoiseModel(PostNonlinearModel):
 
     def clone(self):
         return AdditiveNoiseModel(prediction_model=self.prediction_model.clone(), noise_model=self.noise_model.clone())
+
+    def __str__(self) -> str:
+        if isinstance(self._prediction_model, SklearnRegressionModel):
+            prediction_model_string = self._prediction_model.sklearn_model.__class__.__name__
+        else:
+            prediction_model_string = self._prediction_model.__class__.__name__
+
+        return "AdditiveNoiseModel using %s" % prediction_model_string
 
 
 class ProbabilityEstimatorModel(ABC):
@@ -291,3 +304,6 @@ class ClassifierFCM(FunctionalCausalModel, ProbabilityEstimatorModel):
     @property
     def classifier_model(self) -> ClassificationModel:
         return self._classifier_model
+
+    def __repr__(self):
+        return "Classifier FCM based on %s" % self.classifier_model
