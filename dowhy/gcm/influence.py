@@ -478,7 +478,7 @@ def _get_icc_noise_function(
         return prediction_model.predict
 
     if prediction_model == "approx":
-        prediction_model = auto.select_model(noise_samples, target_samples, auto_assign_quality)
+        prediction_model = auto.select_model(noise_samples, target_samples, auto_assign_quality)[0]
         prediction_model.fit(noise_samples, target_samples)
 
         if target_is_categorical:
