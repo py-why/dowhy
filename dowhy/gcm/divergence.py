@@ -1,28 +1,39 @@
 """Functions in this module should be considered experimental, meaning there might be breaking API changes in the
 future.
 """
+from functools import partial
+from typing import Callable, Union
 
 import numpy as np
 from scipy.stats import entropy
+from sklearn.model_selection import KFold
 from sklearn.neighbors import NearestNeighbors
 
+from dowhy.gcm.auto import AssignmentQuality, select_model
 from dowhy.gcm.constant import EPS
-from dowhy.gcm.util.general import is_categorical, setdiff2d, shape_into_2d
+from dowhy.gcm.ml.classification import ClassificationModel, create_logistic_regression_classifier
+from dowhy.gcm.util.general import has_categorical, is_categorical, setdiff2d, shape_into_2d
 
 
 def auto_estimate_kl_divergence(X: np.ndarray, Y: np.ndarray) -> float:
     if is_categorical(X):
         return estimate_kl_divergence_categorical(X, Y)
-    elif is_probability_matrix(X):
+    elif not has_categorical(X) and is_probability_matrix(X):
         return estimate_kl_divergence_of_probabilities(X, Y)
     else:
-        return estimate_kl_divergence_continuous(X, Y)
+        if X.ndim == 2 and X.shape[1] > 1:
+            return estimate_kl_divergence_continuous_clf(X, Y)
+        else:
+            return estimate_kl_divergence_continuous_knn(X, Y)
 
 
-def estimate_kl_divergence_continuous(
+def estimate_kl_divergence_continuous_knn(
     X: np.ndarray, Y: np.ndarray, k: int = 1, remove_common_elements: bool = True
 ) -> float:
     """Estimates KL-Divergence using k-nearest neighbours (Wang et al., 2009).
+
+    While, in theory, this handles multidimensional inputs, consider using estimate_kl_divergence_continuous_clf
+    for data with more than one dimension.
 
     Q. Wang, S. R. Kulkarni, and S. Verdú,
     "Divergence estimation for multidimensional densities via k-nearest-neighbor distances",
@@ -82,6 +93,75 @@ def estimate_kl_divergence_continuous(
     return result
 
 
+def estimate_kl_divergence_continuous_clf(
+    samples_P: np.ndarray,
+    samples_Q: np.ndarray,
+    n_splits: int = 5,
+    classifier_model: Union[AssignmentQuality, Callable[[], ClassificationModel]] = partial(
+        create_logistic_regression_classifier, max_iter=10000
+    ),
+    epsilon: float = EPS,
+) -> float:
+    """Estimates KL-Divergence based on probabilities given by classifier. This is:
+
+        D_f(P || Q) = \int f(p(x)/q(x)) q(x) dx ~= -1/N \sum_x log(p(Y = 1 | x) / (1 - p(Y = 1 | x)))
+
+    Here, the KL divergence can be approximated using the log ratios of probabilities to predict whether a sample
+    comes from distribution P or Q.
+
+    :param samples_P: Samples drawn from P. Can have a different number of samples than Q.
+    :param samples_Q: Samples drawn from Q. Can have a different number of samples than P.
+    :param n_splits: Number of splits of the training and test data. The classifier is trained on the training
+                     data and evaluated on the test data to obtain the probabilities.
+    :param classifier_model: Used to estimate the probabilities for the log ratio. This can either be a
+                             ClassificationModel or an AssignmentQuality. In the latter, a model is automatically
+                             selected based on the best performance on a training set.
+    :param epsilon: If the probability is either 1 or 0, this value will be used for clipping, i.e., 0 becomes epsilon
+                    and 1 becomes 1- epsilon.
+    :return: Estimated value of the KL divergence D(P||Q).
+    """
+    samples_P, samples_Q = shape_into_2d(samples_P, samples_Q)
+
+    if samples_P.shape[1] != samples_Q.shape[1]:
+        raise ValueError("X and Y need to have the same number of features!")
+
+    all_probs = []
+
+    splits_p = list(KFold(n_splits=n_splits, shuffle=True).split(samples_P))
+    splits_q = list(KFold(n_splits=n_splits, shuffle=True).split(samples_Q))
+
+    if isinstance(classifier_model, AssignmentQuality):
+        classifier_model = select_model(
+            np.vstack([samples_P, samples_Q]),
+            np.concatenate([np.zeros(samples_P.shape[0]), np.ones(samples_Q.shape[0])]).astype(str),
+            classifier_model,
+        )[0]
+    else:
+        classifier_model = classifier_model()
+
+    for k in range(n_splits):
+        # Balance the classes
+        num_samples = min(len(splits_p[k][0]), len(splits_q[k][0]))
+
+        classifier_model.fit(
+            np.vstack([samples_P[splits_p[k][0][:num_samples]], samples_Q[splits_q[k][0][:num_samples]]]),
+            np.concatenate([np.zeros(num_samples), np.ones(num_samples)]).astype(str),
+        )
+
+        probs_P = classifier_model.predict_probabilities(samples_P[splits_p[k][1]])[:, 1]
+        probs_P[probs_P == 0] = epsilon
+        probs_P[probs_P == 1] = 1 - epsilon
+        all_probs.append(probs_P)
+
+    all_probs = np.concatenate(all_probs)
+    kl_divergence = -np.mean(np.log(all_probs / (1 - all_probs)))
+
+    if kl_divergence < 0:
+        kl_divergence = 0
+
+    return kl_divergence
+
+
 def estimate_kl_divergence_categorical(X: np.ndarray, Y: np.ndarray) -> float:
     X, Y = shape_into_2d(X, Y)
 
@@ -116,5 +196,7 @@ def estimate_kl_divergence_of_probabilities(X: np.ndarray, Y: np.ndarray) -> flo
 def is_probability_matrix(X: np.ndarray) -> bool:
     if X.ndim == 1:
         return np.all(np.isclose(np.sum(abs(X.astype(np.float64)), axis=0), 1))
+    elif X.shape[1] == 1:
+        return False
     else:
         return np.all(np.isclose(np.sum(abs(X.astype(np.float64)), axis=1), 1))

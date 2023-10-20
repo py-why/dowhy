@@ -14,7 +14,6 @@ from sklearn.metrics import silhouette_score
 from sklearn.mixture import BayesianGaussianMixture
 
 from dowhy.gcm.causal_mechanisms import StochasticModel
-from dowhy.gcm.divergence import estimate_kl_divergence_continuous
 from dowhy.gcm.util.general import shape_into_2d
 
 _CONTINUOUS_DISTRIBUTIONS = [
@@ -127,7 +126,9 @@ class ScipyDistribution(StochasticModel):
                 generated_samples = distribution.rvs(size=distribution_samples.shape[0], loc=loc, scale=scale, *arg)
 
                 # Check the KL divergence between the distribution of the given and fitted distribution.
-                divergence = estimate_kl_divergence_continuous(distribution_samples, generated_samples)
+                from dowhy.gcm.divergence import estimate_kl_divergence_continuous_knn
+
+                divergence = estimate_kl_divergence_continuous_knn(distribution_samples, generated_samples)
                 if divergence < divergence_threshold:
                     currently_best_distribution = distribution
                     currently_best_parameters = params
