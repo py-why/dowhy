@@ -21,7 +21,7 @@ from dowhy.gcm import (
     fit,
 )
 from dowhy.gcm.auto import assign_causal_mechanisms
-from dowhy.gcm.divergence import estimate_kl_divergence_continuous
+from dowhy.gcm.divergence import estimate_kl_divergence_continuous_clf
 from dowhy.gcm.ml import (
     SklearnRegressionModel,
     create_linear_regressor,
@@ -65,7 +65,7 @@ def test_given_linear_data_when_draw_samples_from_fitted_anm_then_generates_corr
     generated_samples = scm.causal_mechanism("X1").draw_samples(np.array([2] * 1000))
     assert np.mean(generated_samples) == approx(6, abs=0.05)
     assert np.std(generated_samples) == approx(0.1, abs=0.05)
-    assert estimate_kl_divergence_continuous(
+    assert estimate_kl_divergence_continuous_clf(
         test_data["X1"].to_numpy(), draw_samples(scm, 10000)["X1"].to_numpy()
     ) == approx(0, abs=0.05)
 
@@ -102,7 +102,7 @@ def test_given_categorical_input_data_when_draw_from_fitted_causal_graph_with_li
         test_data[:, 2].astype(float).reshape(-1, 1)
     )
 
-    assert estimate_kl_divergence_continuous(test_data[:, 2], draw_samples(scm, 1000)["X2"].to_numpy()) == approx(
+    assert estimate_kl_divergence_continuous_clf(test_data[:, 2], draw_samples(scm, 1000)["X2"].to_numpy()) == approx(
         0, abs=0.05
     )
 
