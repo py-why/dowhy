@@ -72,7 +72,7 @@ _LIST_OF_POTENTIAL_CLASSIFIERS_BETTER = _LIST_OF_POTENTIAL_CLASSIFIERS_GOOD + [
 ]
 _LIST_OF_POTENTIAL_REGRESSORS_BETTER = _LIST_OF_POTENTIAL_REGRESSORS_GOOD + [
     create_ridge_regressor,
-    partial(create_lasso_regressor, max_iter=5000),
+    partial(create_lasso_regressor, max_iter=10000),
     create_random_forest_regressor,
     create_support_vector_regressor,
     create_extra_trees_regressor,
@@ -111,7 +111,7 @@ class AutoAssignmentSummary:
         summary_strings.append("Analyzed %d nodes." % len(list(self._nodes)))
 
         for node in self._nodes:
-            summary_strings.append("--- Node: %s" % node)
+            summary_strings.append("\n--- Node: %s" % node)
             summary_strings.extend(self._nodes[node]["messages"])
 
             if len(self._nodes[node]["model_performances"]) > 0:

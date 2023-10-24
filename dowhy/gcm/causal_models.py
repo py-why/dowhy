@@ -141,8 +141,8 @@ def validate_local_structure(causal_graph: DirectedGraph, node: Any) -> None:
         PARENTS_DURING_FIT
     ] != get_ordered_predecessors(causal_graph, node):
         raise RuntimeError(
-            "The causal mechanism of node %s is not fitted to the graphical structure! Fit all"
-            "causal models in the graph first. If the mechanism is already fitted based on the causal"
+            "The causal mechanism of node %s is not fitted to the graphical structure! Fit all "
+            "causal models in the graph first. If the mechanism is already fitted based on the causal "
             "parents, consider to update the persisted parents for that node manually." % node
         )
 

@@ -344,16 +344,22 @@ def test_given_continuous_data_when_print_auto_summary_then_returns_expected_for
     assert len(summary_result._nodes["Y"]["model_performances"]) > 0
 
     expected_summary = """Analyzed 6 nodes.
+
 --- Node: X0
 Node X0 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
 --- Node: X1
 Node X1 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
 --- Node: X2
 Node X2 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
 --- Node: X3
 Node X3 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
 --- Node: X4
 Node X4 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
 --- Node: Y
 Node Y is a non-root node. Assigning 'AdditiveNoiseModel using HistGradientBoostingRegressor' to the node.
 This represents the causal relationship as Y := f(X0,X1,X2,X3,X4) + N.
@@ -403,16 +409,22 @@ def test_given_categorical_data_when_print_auto_summary_then_returns_expected_fo
     assert len(summary_result._nodes["Y"]["model_performances"]) > 0
 
     expected_summary = """Analyzed 6 nodes.
+
 --- Node: X0
 Node X0 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
 --- Node: X1
 Node X1 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
 --- Node: X2
 Node X2 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
 --- Node: X3
 Node X3 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
 --- Node: X4
 Node X4 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
 --- Node: Y
 Node Y is a non-root node. Assigning 'Classifier FCM based on LogisticRegression(max_iter=10000)' to the node.
 This represents the causal relationship as Y := f(X0,X1,X2,X3,X4,N).
