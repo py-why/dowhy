@@ -27,6 +27,7 @@ from .independence_test import (
 )
 from .influence import arrow_strength, intrinsic_causal_influence
 from .ml import ClassificationModel, PredictionModel
+from .model_evaluation import evaluate_causal_model
 from .stochastic_models import BayesianGaussianMixtureDistribution, EmpiricalDistribution, ScipyDistribution
 from .unit_change import unit_change
 from .validation import RejectionResult, refute_causal_structure, refute_invertible_model

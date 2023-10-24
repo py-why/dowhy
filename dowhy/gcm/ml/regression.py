@@ -74,7 +74,7 @@ class LinearRegressionWithFixedParameter(PredictionModel):
 
 
 def create_linear_regressor_with_given_parameters(
-    coefficients: np.ndarray, intercept: float = 0, **kwargs
+    coefficients: np.ndarray, intercept: float = 0
 ) -> LinearRegressionWithFixedParameter:
     return LinearRegressionWithFixedParameter(np.array(coefficients), intercept)
 

@@ -19,7 +19,6 @@ import dowhy.gcm.config as config
 from dowhy.gcm.independence_test import kernel_based
 from dowhy.gcm.util import plot
 from dowhy.gcm.util.general import set_random_seed
-from dowhy.gcm.validation import _get_non_descendants
 from dowhy.graph import DirectedGraph, get_ordered_predecessors
 
 VIOLATION_COLOR = "red"
@@ -970,3 +969,10 @@ def _to_frozenset(x: Union[Set, List, str]):
     if isinstance(x, str):
         return frozenset({x})
     return frozenset(x)
+
+
+def _get_non_descendants(causal_graph: DirectedGraph, node: Any, exclude_parents: bool = False) -> List[Any]:
+    nodes_to_exclude = nx.descendants(causal_graph, node).union({node})
+    if exclude_parents:
+        nodes_to_exclude = nodes_to_exclude.union(causal_graph.predecessors(node))
+    return list(set(causal_graph.nodes).difference(nodes_to_exclude))

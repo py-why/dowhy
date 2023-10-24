@@ -21,7 +21,11 @@ def auto_estimate_kl_divergence(X: np.ndarray, Y: np.ndarray) -> float:
         if X.ndim == 2 and X.shape[1] > 1:
             return estimate_kl_divergence_continuous_clf(X, Y)
         else:
-            return estimate_kl_divergence_continuous_knn(X, Y)
+            try:
+                return estimate_kl_divergence_continuous_knn(X, Y)
+            except _KNNTooFewSamples:
+                # If there are too many common elements, this error can happen.
+                return estimate_kl_divergence_continuous_clf(X, Y)
 
 
 def estimate_kl_divergence_continuous_knn(
@@ -59,6 +63,11 @@ def estimate_kl_divergence_continuous_knn(
     # a division by zero.
     if remove_common_elements:
         X = setdiff2d(X, Y, assume_unique=True)
+        if X.shape[0] < k + 1:
+            raise _KNNTooFewSamples(
+                "After removing common elements, there are too few samples left! "
+                "Got %d samples with k=%d." % (X.shape[0], k)
+            )
 
     n, m = X.shape[0], Y.shape[0]
     if n == 0:
@@ -197,3 +206,9 @@ def is_probability_matrix(X: np.ndarray) -> bool:
         return False
     else:
         return np.all(np.isclose(np.sum(abs(X.astype(np.float64)), axis=1), 1))
+
+
+class _KNNTooFewSamples(Exception):
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
